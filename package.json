@@ -1,0 +1,12 @@
+{
+    "name": "filepond",
+    "version": "0.1.0",
+    "description": "FilePond, Where files go to stretch their bits.",
+    "homepage": "https://pqina.nl/filepond",
+    "main": "filepond.js",
+    "scripts": {},
+    "author": {
+        "name": "PQINA",
+        "url": "https://pqina.nl"
+    }
+}
