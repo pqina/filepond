@@ -11,7 +11,7 @@ Working towards version v1.0.0
 
 ## License terms
 
-FilePond is licensed under the [GPL v3 license](http://www.gnu.org/licenses/old-licenses/gpl-3.0.html). 
+FilePond is licensed under [GPL v3](https://opensource.org/licenses/GPL-3.0). 
 
 
 ### What does this mean?
