@@ -23,6 +23,6 @@ FilePond is licensed under [GPL v3](https://opensource.org/licenses/GPL-3.0).
 - If you do not want to share sources then you need to obtain a commercial license
 
 
-### Commercial license and Support
+### Commercial license
 
 The Commercial License is not yet available, it'll be there soon as we approach version 1.0, subscribe for updates at https://pqina.nl/filepond
