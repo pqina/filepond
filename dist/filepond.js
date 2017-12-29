@@ -366,11 +366,16 @@
     };
   };
 
-  var getViewRect = function getViewRect(elementRect, childViews, offset) {
+  var getViewRect = function getViewRect(
+    elementRect,
+    childViews,
+    offset,
+    scale
+  ) {
     var left = offset[0] || elementRect.left;
     var top = offset[1] || elementRect.top;
     var right = left + elementRect.width;
-    var bottom = top + elementRect.height;
+    var bottom = top + elementRect.height * (scale[1] || 1);
 
     var rect = {
       // the rectangle of the element itself
@@ -396,6 +401,9 @@
 
     // expand rect to fit all child rectangles
     childViews
+      .filter(function(childView) {
+        return !childView.isRectIgnored();
+      })
       .map(function(childView) {
         return childView.rect;
       })
@@ -918,9 +926,12 @@
     var getOffset = function getOffset() {
       return [viewProps['translateX'] || 0, viewProps['translateY'] || 0];
     };
+    var getScale = function getScale() {
+      return [viewProps['scaleX'] || 0, viewProps['scaleY'] || 0];
+    };
     var getRect = function getRect() {
       return view.rect
-        ? getViewRect(view.rect, view.childViews, getOffset())
+        ? getViewRect(view.rect, view.childViews, getOffset(), getScale())
         : null;
     };
     viewInternalAPI.rect = { get: getRect };
@@ -1125,6 +1136,8 @@
         _ref$didCreateView = _ref.didCreateView,
         didCreateView =
           _ref$didCreateView === undefined ? function() {} : _ref$didCreateView,
+        _ref$ignoreRect = _ref.ignoreRect,
+        ignoreRect = _ref$ignoreRect === undefined ? false : _ref$ignoreRect,
         _ref$mixins = _ref.mixins,
         mixins = _ref$mixins === undefined ? [] : _ref$mixins;
 
@@ -1190,7 +1203,7 @@
             };
           };
           var getRect = function getRect() {
-            return getViewRect(rect, childViews, [0, 0]);
+            return getViewRect(rect, childViews, [0, 0], [1, 1]);
           };
           var getStyle = function getStyle() {
             return style;
@@ -1325,6 +1338,9 @@
             },
             rect: {
               get: getRect
+            },
+            isRectIgnored: function isRectIgnored() {
+              return ignoreRect;
             },
             _read: _read,
             _write: _write,
@@ -2030,10 +2046,12 @@
     return filters.push({ key: key, cb: cb });
   };
 
+  var extendDefaultOptions = function extendDefaultOptions(additionalOptions) {
+    return Object.assign(options, additionalOptions);
+  };
+
   var getOptions = function getOptions() {
-    var optionsCopy = _extends({}, options);
-    applyFilters('SET_DEFAULT_OPTIONS', optionsCopy);
-    return optionsCopy;
+    return _extends({}, options);
   };
 
   var formatType = function formatType(newValue, defaultValue, type) {
@@ -2043,12 +2061,9 @@
     return newValue;
   };
 
-  /**
-   * For overwriting default options
-   */
   var setOptions$1 = function setOptions(opts) {
     forin(opts, function(key, value) {
-      // key does not exist
+      // key does not exist, so this option cannot be set
       if (!options[key]) {
         return;
       }
@@ -4101,6 +4116,7 @@ function signature:
   var progressIndicator = createView({
     tag: 'div',
     name: 'progress-indicator',
+    ignoreRect: true,
     create: create$7,
     write: write$4,
     mixins: {
@@ -4123,8 +4139,7 @@ function signature:
       props = _ref.props;
 
     root.element.title = props.label;
-    root.element.innerHTML = props.icon;
-
+    root.element.innerHTML = props.icon || '';
     props.disabled = false;
   };
 
@@ -4146,6 +4161,7 @@ function signature:
     attributes: {
       type: 'button'
     },
+    ignoreRect: true,
     name: 'file-action-button',
     mixins: {
       apis: ['label'],
@@ -4260,6 +4276,7 @@ function signature:
 
   var fileInfo = createView({
     name: 'file-info',
+    ignoreRect: true,
     write: createRoute({
       DID_LOAD_ITEM: updateFile,
       DID_UPDATE_ITEM_META: updateFile,
@@ -4358,6 +4375,7 @@ function signature:
 
   var fileStatus = createView({
     name: 'file-status',
+    ignoreRect: true,
     write: createRoute({
       DID_LOAD_ITEM: didLoadItem$1,
       DID_ABORT_ITEM_PROCESSING: didAbortItemProcessing,
@@ -5143,6 +5161,8 @@ function signature:
     }
   });
 
+  var PANEL_SPRING_PROPS = { type: 'spring', damping: 0.6, mass: 7 };
+
   var create$11 = function create(_ref) {
     var root = _ref.root;
 
@@ -5158,7 +5178,7 @@ function signature:
         },
         mixins: {
           animations: {
-            scaleY: 'spring'
+            scaleY: PANEL_SPRING_PROPS
           },
           styles: ['translateY', 'scaleY']
         }
@@ -5170,7 +5190,7 @@ function signature:
         },
         mixins: {
           animations: {
-            translateY: 'spring'
+            translateY: PANEL_SPRING_PROPS
           },
           styles: ['translateY']
         }
@@ -5363,6 +5383,7 @@ function signature:
   var browser = createView({
     tag: 'input',
     name: 'browser',
+    ignoreRect: true,
     attributes: {
       type: 'file'
     },
@@ -5447,6 +5468,7 @@ function signature:
 
   var blob = createView({
     name: 'drip-blob',
+    ignoreRect: true,
     mixins: {
       styles: ['translateX', 'translateY', 'scaleX', 'scaleY', 'opacity'],
       animations: {
@@ -5534,6 +5556,7 @@ function signature:
   });
 
   var drip = createView({
+    ignoreRect: true,
     name: 'drip',
     write: write$7
   });
@@ -5824,6 +5847,13 @@ function signature:
 
   var initialTarget = null;
 
+  var setDropEffect = function setDropEffect(dataTransfer, effect) {
+    // is in try catch as IE11 will throw error if not
+    try {
+      dataTransfer.dropEffect = effect;
+    } catch (e) {}
+  };
+
   var dragenter = function dragenter(root, clients) {
     return function(e) {
       e.preventDefault();
@@ -5860,14 +5890,14 @@ function signature:
 
           // by default we can drop
 
-          dataTransfer.dropEffect = 'copy';
+          setDropEffect(dataTransfer, 'copy');
 
           // allow transfer of these items
           var allowsTransfer = allowdrop(items);
 
           // only used when can be dropped on page
           if (!allowsTransfer) {
-            dataTransfer.dropEffect = 'none';
+            setDropEffect(dataTransfer, 'none');
             return;
           }
 
@@ -5885,7 +5915,7 @@ function signature:
 
             // needs to allow transfer
             if (filterElement && !allowsTransfer) {
-              dataTransfer.dropEffect = 'none';
+              setDropEffect(dataTransfer, 'none');
               return;
             }
 
@@ -5894,7 +5924,7 @@ function signature:
           } else {
             // should be over an element to drop
             if (filterElement) {
-              dataTransfer.dropEffect = 'none';
+              setDropEffect(dataTransfer, 'none');
             }
 
             // might have just left this client?
@@ -6260,6 +6290,7 @@ function signature:
 
   var assistant = createView({
     create: create$14,
+    ignoreRect: true,
     write: createRoute({
       DID_LOAD_ITEM: itemAdded,
       DID_REMOVE_ITEM: itemRemoved,
@@ -7248,8 +7279,8 @@ function signature:
       capture: 'captureMethod',
 
       // group under single property
-      '^api': {
-        group: 'api',
+      '^server': {
+        group: 'server',
         mapping: {
           '^process': {
             group: 'process'
@@ -7262,6 +7293,9 @@ function signature:
           },
           '^restore': {
             group: 'restore'
+          },
+          '^load': {
+            group: 'load'
           }
         }
       },
@@ -7415,7 +7449,7 @@ function signature:
   // utilities exposed to plugins
   // pass utils to plugin
   var createAppPlugin = function createAppPlugin(plugin) {
-    return plugin({
+    var pluginOutline = plugin({
       addFilter: addFilter,
       utils: {
         Type: Type,
@@ -7436,6 +7470,9 @@ function signature:
         panel: panel
       }
     });
+
+    // add plugin options to default options
+    extendDefaultOptions(pluginOutline.options);
   };
 
   /**

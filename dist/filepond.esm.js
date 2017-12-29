@@ -159,11 +159,11 @@ const removeChildView = (parent, childViews) => view => {
   return view;
 };
 
-const getViewRect = (elementRect, childViews, offset) => {
+const getViewRect = (elementRect, childViews, offset, scale) => {
   const left = offset[0] || elementRect.left;
   const top = offset[1] || elementRect.top;
   const right = left + elementRect.width;
-  const bottom = top + elementRect.height;
+  const bottom = top + elementRect.height * (scale[1] || 1);
 
   const rect = {
     // the rectangle of the element itself
@@ -188,10 +188,13 @@ const getViewRect = (elementRect, childViews, offset) => {
   };
 
   // expand rect to fit all child rectangles
-  childViews.map(childView => childView.rect).forEach(childViewRect => {
-    expandRect(rect.inner, babelHelpers.extends({}, childViewRect.inner));
-    expandRect(rect.outer, babelHelpers.extends({}, childViewRect.outer));
-  });
+  childViews
+    .filter(childView => !childView.isRectIgnored())
+    .map(childView => childView.rect)
+    .forEach(childViewRect => {
+      expandRect(rect.inner, babelHelpers.extends({}, childViewRect.inner));
+      expandRect(rect.outer, babelHelpers.extends({}, childViewRect.outer));
+    });
 
   // calculate inner width and height
   calculateRectSize(rect.inner);
@@ -641,11 +644,15 @@ const styles = ({
   addGetSet(mixinConfig, [viewInternalAPI, viewExternalAPI], viewProps);
 
   // override rect on internal and external rect getter so it takes in account transforms
-  const getOffset = () => {
-    return [viewProps['translateX'] || 0, viewProps['translateY'] || 0];
-  };
+  const getOffset = () => [
+    viewProps['translateX'] || 0,
+    viewProps['translateY'] || 0
+  ];
+  const getScale = () => [viewProps['scaleX'] || 0, viewProps['scaleY'] || 0];
   const getRect = () =>
-    view.rect ? getViewRect(view.rect, view.childViews, getOffset()) : null;
+    view.rect
+      ? getViewRect(view.rect, view.childViews, getOffset(), getScale())
+      : null;
   viewInternalAPI.rect = { get: getRect };
   viewExternalAPI.rect = { get: getRect };
 
@@ -816,6 +823,9 @@ const createView =
     filterFrameActionsForChild = (child, actions) => actions,
     didCreateView = () => {},
 
+    // rect related
+    ignoreRect = false,
+
     // mixins
     mixins = []
   } = {}) =>
@@ -867,7 +877,7 @@ const createView =
         const getChildViews = () => [...childViews];
         const getReference = () => ref;
         const createChildView = store => (view, props) => view(store, props);
-        const getRect = () => getViewRect(rect, childViews, [0, 0]);
+        const getRect = () => getViewRect(rect, childViews, [0, 0], [1, 1]);
         const getStyle = () => style;
 
         /**
@@ -978,6 +988,7 @@ const createView =
           rect: {
             get: getRect
           },
+          isRectIgnored: () => ignoreRect,
           _read,
           _write,
           _destroy
@@ -1549,11 +1560,10 @@ const applyFilters = (key, value, utils) =>
 // adds a new filter to the list
 const addFilter = (key, cb) => filters.push({ key, cb });
 
-const getOptions = () => {
-  const optionsCopy = babelHelpers.extends({}, options);
-  applyFilters('SET_DEFAULT_OPTIONS', optionsCopy);
-  return optionsCopy;
-};
+const extendDefaultOptions = additionalOptions =>
+  Object.assign(options, additionalOptions);
+
+const getOptions = () => babelHelpers.extends({}, options);
 
 const formatType = (newValue, defaultValue, type) => {
   if (type === Type.SERVER_API && newValue) {
@@ -1562,12 +1572,9 @@ const formatType = (newValue, defaultValue, type) => {
   return newValue;
 };
 
-/**
- * For overwriting default options
- */
 const setOptions$1 = opts => {
   forin(opts, (key, value) => {
-    // key does not exist
+    // key does not exist, so this option cannot be set
     if (!options[key]) {
       return;
     }
@@ -3389,6 +3396,7 @@ const write$4 = ({ root, props, timestamp }) => {
 const progressIndicator = createView({
   tag: 'div',
   name: 'progress-indicator',
+  ignoreRect: true,
   create: create$7,
   write: write$4,
   mixins: {
@@ -3408,8 +3416,7 @@ const progressIndicator = createView({
 
 const create$8 = ({ root, props }) => {
   root.element.title = props.label;
-  root.element.innerHTML = props.icon;
-
+  root.element.innerHTML = props.icon || '';
   props.disabled = false;
 };
 
@@ -3428,6 +3435,7 @@ const fileActionButton = createView({
   attributes: {
     type: 'button'
   },
+  ignoreRect: true,
   name: 'file-action-button',
   mixins: {
     apis: ['label'],
@@ -3524,6 +3532,7 @@ const updateFileSizeOnError = ({ root, props }) => {
 
 const fileInfo = createView({
   name: 'file-info',
+  ignoreRect: true,
   write: createRoute({
     DID_LOAD_ITEM: updateFile,
     DID_UPDATE_ITEM_META: updateFile,
@@ -3601,6 +3610,7 @@ const didThrowError = ({ root, action }) => {
 
 const fileStatus = createView({
   name: 'file-status',
+  ignoreRect: true,
   write: createRoute({
     DID_LOAD_ITEM: didLoadItem$1,
     DID_ABORT_ITEM_PROCESSING: didAbortItemProcessing,
@@ -4293,6 +4303,8 @@ const listScroller = createView({
   }
 });
 
+const PANEL_SPRING_PROPS = { type: 'spring', damping: 0.6, mass: 7 };
+
 const create$11 = ({ root }) => {
   [
     {
@@ -4306,7 +4318,7 @@ const create$11 = ({ root }) => {
       },
       mixins: {
         animations: {
-          scaleY: 'spring'
+          scaleY: PANEL_SPRING_PROPS
         },
         styles: ['translateY', 'scaleY']
       }
@@ -4318,7 +4330,7 @@ const create$11 = ({ root }) => {
       },
       mixins: {
         animations: {
-          translateY: 'spring'
+          translateY: PANEL_SPRING_PROPS
         },
         styles: ['translateY']
       }
@@ -4484,6 +4496,7 @@ const updateRequiredStatus = ({ root, props }) => {
 const browser = createView({
   tag: 'input',
   name: 'browser',
+  ignoreRect: true,
   attributes: {
     type: 'file'
   },
@@ -4561,6 +4574,7 @@ const dropLabel = createView({
 
 const blob = createView({
   name: 'drip-blob',
+  ignoreRect: true,
   mixins: {
     styles: ['translateX', 'translateY', 'scaleX', 'scaleY', 'opacity'],
     animations: {
@@ -4635,6 +4649,7 @@ const route$4 = createRoute({
 });
 
 const drip = createView({
+  ignoreRect: true,
   name: 'drip',
   write: write$7
 });
@@ -4892,6 +4907,13 @@ const isEventTarget = (e, target) => {
 
 let initialTarget = null;
 
+const setDropEffect = (dataTransfer, effect) => {
+  // is in try catch as IE11 will throw error if not
+  try {
+    dataTransfer.dropEffect = effect;
+  } catch (e) {}
+};
+
 const dragenter = (root, clients) => e => {
   e.preventDefault();
 
@@ -4925,14 +4947,14 @@ const dragover = (root, clients) => e => {
       } = client;
 
       // by default we can drop
-      dataTransfer.dropEffect = 'copy';
+      setDropEffect(dataTransfer, 'copy');
 
       // allow transfer of these items
       const allowsTransfer = allowdrop(items);
 
       // only used when can be dropped on page
       if (!allowsTransfer) {
-        dataTransfer.dropEffect = 'none';
+        setDropEffect(dataTransfer, 'none');
         return;
       }
 
@@ -4950,7 +4972,7 @@ const dragover = (root, clients) => e => {
 
         // needs to allow transfer
         if (filterElement && !allowsTransfer) {
-          dataTransfer.dropEffect = 'none';
+          setDropEffect(dataTransfer, 'none');
           return;
         }
 
@@ -4959,7 +4981,7 @@ const dragover = (root, clients) => e => {
       } else {
         // should be over an element to drop
         if (filterElement) {
-          dataTransfer.dropEffect = 'none';
+          setDropEffect(dataTransfer, 'none');
         }
 
         // might have just left this client?
@@ -5276,6 +5298,7 @@ const itemError = ({ root, action }) => {
 
 const assistant = createView({
   create: create$14,
+  ignoreRect: true,
   write: createRoute({
     DID_LOAD_ITEM: itemAdded,
     DID_REMOVE_ITEM: itemRemoved,
@@ -5314,6 +5337,11 @@ const create$1 = ({ root, props }) => {
   root.ref.assistant = root.appendChildView(
     root.createChildView(assistant, babelHelpers.extends({}, props))
   );
+
+  // Measure (used to test if fixed height was set)
+  root.ref.measure = createElement$1('div');
+  root.ref.measure.style.height = '100%';
+  root.element.appendChild(root.ref.measure);
 };
 
 const write = ({ root, props, actions }) => {
@@ -5402,7 +5430,7 @@ const write = ({ root, props, actions }) => {
     childrenUsedForVisualHeightCalculation
   );
   const bottomPadding = totalItems > 0 ? root.rect.element.paddingTop * 0.5 : 0;
-  console.log('is fixed', boxBounding.fixedHeight);
+
   // fix height
   if (boxBounding.fixedHeight) {
     // link panel height to box bounding
@@ -5464,7 +5492,7 @@ const calculateRootBoundingBoxHeight = (root, props) => {
     return props.boxBounding;
   }
 
-  const height = parseInt(root.style.height, 10) || null;
+  const height = root.ref.measureHeight || null;
   const cappedHeight = parseInt(root.style.maxHeight, 10) || null;
   const fixedHeight = height === 0 ? null : height;
 
@@ -5473,6 +5501,11 @@ const calculateRootBoundingBoxHeight = (root, props) => {
     fixedHeight
   };
 
+  // destroy measure element
+  root.element.removeChild(root.ref.measure);
+  root.ref.measure = null;
+
+  // done!
   return props.boxBounding;
 };
 
@@ -5633,6 +5666,11 @@ const route = createRoute({
 
 const root = createView({
   name: 'root',
+  read: ({ root }) => {
+    if (root.ref.measure) {
+      root.ref.measureHeight = root.ref.measure.offsetHeight;
+    }
+  },
   create: create$1,
   write,
   destroy: ({ root }) => {
@@ -6143,8 +6181,8 @@ const createAppAtElement = (element, options = {}) => {
     capture: 'captureMethod',
 
     // group under single property
-    '^api': {
-      group: 'api',
+    '^server': {
+      group: 'server',
       mapping: {
         '^process': {
           group: 'process'
@@ -6157,6 +6195,9 @@ const createAppAtElement = (element, options = {}) => {
         },
         '^restore': {
           group: 'restore'
+        },
+        '^load': {
+          group: 'load'
         }
       }
     },
@@ -6291,8 +6332,8 @@ const copyFile = file => renameFile(file, file.name);
 
 // utilities exposed to plugins
 // pass utils to plugin
-const createAppPlugin = plugin =>
-  plugin({
+const createAppPlugin = plugin => {
+  const pluginOutline = plugin({
     addFilter,
     utils: {
       Type,
@@ -6313,6 +6354,10 @@ const createAppPlugin = plugin =>
       panel
     }
   });
+
+  // add plugin options to default options
+  extendDefaultOptions(pluginOutline.options);
+};
 
 /**
  * Plugin internal state (over all instances)
