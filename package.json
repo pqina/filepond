@@ -1,25 +1,25 @@
 {
-  "name": "filepond",
-  "version": "1.0.0",
-  "description": "FilePond, Where files go to stretch their bits.",
-  "homepage": "https://pqina.nl/filepond",
-  "main": "dist/filepond.js",
-  "browser": "dist/filepond.js",
-  "module": "dist/filepond.esm.js",
-  "keywords": [
-    "javascript",
-    "file",
-    "upload",
-    "drag",
-    "drop",
-    "browse",
-    "paste",
-    "image",
-    "preview"
-  ],
-  "license": "GPL-3.0",
-  "author": {
-    "name": "PQINA",
-    "url": "https://pqina.nl"
-  }
+    "name": "filepond",
+    "version": "1.0.1",
+    "description": "FilePond, Where files go to stretch their bits.",
+    "homepage": "https://pqina.nl/filepond",
+    "main": "dist/filepond.js",
+    "browser": "dist/filepond.js",
+    "module": "dist/filepond.esm.js",
+    "keywords": [
+        "javascript",
+        "file",
+        "upload",
+        "drag",
+        "drop",
+        "browse",
+        "paste",
+        "image",
+        "preview"
+    ],
+    "license": "GPL-3.0",
+    "author": {
+        "name": "PQINA",
+        "url": "https://pqina.nl"
+    }
 }

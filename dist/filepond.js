@@ -5009,13 +5009,6 @@ function signature:
       .forEach(function(child, childIndex) {
         var rect = child.rect;
 
-        // show child if it's not marked for removal
-        if (!child.markedForRemoval) {
-          child.scaleX = 1;
-          child.scaleY = 1;
-          child.opacity = 1;
-        }
-
         // set this child offset
         child.translateX = 0;
         child.translateY =
@@ -5023,6 +5016,13 @@ function signature:
           (props.dragIndex > -1
             ? dragTranslation(childIndex, props.dragIndex, 10)
             : 0);
+
+        // show child if it's not marked for removal
+        if (!child.markedForRemoval) {
+          child.scaleX = 1;
+          child.scaleY = 1;
+          child.opacity = 1;
+        }
 
         // calculate next child offset (reduce height by y scale for views that are being removed)
         offset += rect.outer.height;
