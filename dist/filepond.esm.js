@@ -1,5 +1,5 @@
 /*
- * FilePond 1.0.0
+ * FilePond 1.0.1
  * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
  * You need to obtain a Commercial License to use FilePond in a non-GPL project.
  * Please visit https://pqina.nl/filepond for details.
@@ -4170,13 +4170,6 @@ const write$2 = ({ root, props, actions }) => {
     .forEach((child, childIndex) => {
       const rect = child.rect;
 
-      // show child if it's not marked for removal
-      if (!child.markedForRemoval) {
-        child.scaleX = 1;
-        child.scaleY = 1;
-        child.opacity = 1;
-      }
-
       // set this child offset
       child.translateX = 0;
       child.translateY =
@@ -4184,6 +4177,13 @@ const write$2 = ({ root, props, actions }) => {
         (props.dragIndex > -1
           ? dragTranslation(childIndex, props.dragIndex, 10)
           : 0);
+
+      // show child if it's not marked for removal
+      if (!child.markedForRemoval) {
+        child.scaleX = 1;
+        child.scaleY = 1;
+        child.opacity = 1;
+      }
 
       // calculate next child offset (reduce height by y scale for views that are being removed)
       offset += rect.outer.height;
