@@ -2,7 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/filepond.svg)](https://badge.fury.io/js/filepond)
 
-A FilePond demo can be found at https://pqina.nl/filepond
+FilePond demo can be found at https://pqina.nl/filepond
 
 ## License terms
 
