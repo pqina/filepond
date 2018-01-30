@@ -1,5 +1,5 @@
 /*
- * FilePond 1.0.1
+ * FilePond 1.0.2
  * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
  * You need to obtain a Commercial License to use FilePond in a non-GPL project.
  * Please visit https://pqina.nl/filepond for details.
@@ -258,9 +258,53 @@
   margin-right: 2.25em;
 }
 
+.filepond--file[data-file-state='processing-complete'] {
+  background-color: #369763;
+}
+
+.filepond--file[data-file-state='processing-complete']
+  .filepond--action-revert-item-processing
+  svg {
+  -webkit-animation: fall 0.5s 0.125s linear both;
+  animation: fall 0.5s 0.125s linear both;
+}
+
+.filepond--file[data-file-state*='invalid'],
+.filepond--file[data-file-state*='error'] {
+  -webkit-animation: shake 0.65s linear both;
+  animation: shake 0.65s linear both;
+  background-color: #c44e47;
+}
+
+.filepond--file[data-file-state*='busy'] .filepond--progress-indicator svg {
+  -webkit-animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite;
+}
+
 /**
  * States
  */
+@-webkit-keyframes spin {
+  0% {
+    -webkit-transform: rotateZ(0deg);
+    transform: rotateZ(0deg);
+  }
+  100% {
+    -webkit-transform: rotateZ(360deg);
+    transform: rotateZ(360deg);
+  }
+}
+@keyframes spin {
+  0% {
+    -webkit-transform: rotateZ(0deg);
+    transform: rotateZ(0deg);
+  }
+  100% {
+    -webkit-transform: rotateZ(360deg);
+    transform: rotateZ(360deg);
+  }
+}
+
 @-webkit-keyframes shake {
   10%,
   90% {
@@ -284,6 +328,7 @@
     transform: translateX(0.25em);
   }
 }
+
 @keyframes shake {
   10%,
   90% {
@@ -352,24 +397,6 @@
     -webkit-animation-timing-function: ease-out;
     animation-timing-function: ease-out;
   }
-}
-
-.filepond--file[data-file-state='processing-complete'] {
-  background-color: #369763;
-}
-
-.filepond--file[data-file-state='processing-complete']
-  .filepond--action-revert-item-processing
-  svg {
-  -webkit-animation: fall 0.5s 0.125s linear both;
-  animation: fall 0.5s 0.125s linear both;
-}
-
-.filepond--file[data-file-state*='invalid'],
-.filepond--file[data-file-state*='error'] {
-  -webkit-animation: shake 0.65s linear both;
-  animation: shake 0.65s linear both;
-  background-color: #c44e47;
 }
 
 .filepond--hopper[data-hopper-state='drag-over'] > * {

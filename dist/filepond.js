@@ -1,5 +1,5 @@
 /*
- * FilePond 1.0.1
+ * FilePond 1.0.2
  * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
  * You need to obtain a Commercial License to use FilePond in a non-GPL project.
  * Please visit https://pqina.nl/filepond for details.
@@ -185,6 +185,7 @@
 
     // contains all actions for next frame, is clear when actions are requested
     var actionQueue = [];
+    var dispatchQueue = [];
 
     // returns a duplicate of the current state
     var getState = function getState() {
@@ -202,8 +203,34 @@
       return queue;
     };
 
+    // processes actions that might block the main UI thread
+    var processDispatchQueue = function processDispatchQueue() {
+      // create copy of actions queue
+      var queue = [].concat(dispatchQueue);
+
+      // clear actions queue (we don't want no double actions)
+      dispatchQueue.length = 0;
+
+      // now dispatch these actions
+      queue.forEach(function(_ref) {
+        var type = _ref.type,
+          data = _ref.data;
+
+        dispatch(type, data);
+      });
+    };
+
     // adds a new action, calls its handler and
-    var dispatch = function dispatch(type, data) {
+    var dispatch = function dispatch(type, data, isBlocking) {
+      // is blocking action
+      if (isBlocking) {
+        dispatchQueue.push({
+          type: type,
+          data: data
+        });
+        return;
+      }
+
       // if this action has a handler, handle the action
       if (actionHandlers[type]) {
         actionHandlers[type](data);
@@ -237,6 +264,7 @@
     var api = {
       getState: getState,
       processActionQueue: processActionQueue,
+      processDispatchQueue: processDispatchQueue,
       dispatch: dispatch,
       query: query
     };
@@ -546,7 +574,7 @@
         target = value;
 
         // already at target
-        if (position === target) {
+        if (position === target || typeof target === 'undefined') {
           // now resting as target is current position, stop moving
           resting = true;
           velocity = 0;
@@ -651,12 +679,12 @@
               return;
             }
 
-            // want to tween to a zero value and have a current value
-            if (value === 0) {
+            // want to tween to a smaller value and have a current value
+            if (value < target) {
               target = 1;
               reverse = true;
             } else {
-              // not tweening to zero value
+              // not tweening to a smaller value
               reverse = false;
               target = value;
             }
@@ -814,13 +842,12 @@
 
     // expose internal write api
     return {
-      isIdle: function isIdle() {
-        return activeAnimators === 0;
-      },
       write: function write(ts) {
         animations.forEach(function(animation) {
           animation.interpolate(ts);
         });
+        // if animators are active, we're busy
+        return activeAnimators === 0;
       },
       destroy: function destroy() {}
     };
@@ -871,7 +898,10 @@
     };
 
     return {
-      write: function write() {},
+      write: function write() {
+        // not busy
+        return true;
+      },
       destroy: function destroy() {
         events.forEach(function(event) {
           remove(event.type, event.fn);
@@ -961,6 +991,9 @@
           Object,
           [currentProps].concat(toConsumableArray(viewProps))
         );
+
+        // no longer busy
+        return true;
       },
       destroy: function destroy() {}
     };
@@ -1141,259 +1174,285 @@
         _ref$mixins = _ref.mixins,
         mixins = _ref$mixins === undefined ? [] : _ref$mixins;
 
-      return (
-        // default options for view instances
-        function(
-          // each view requires reference to store
-          store
-        ) // method definition
-        {
-          var props =
+      return function(
+        // each view requires reference to store
+        store
+      ) {
+        var props =
+          arguments.length > 1 && arguments[1] !== undefined
+            ? arguments[1]
+            : {};
+
+        // root element should not be changed
+        var element = createElement(tag, 'filepond--' + name, attributes);
+
+        // style reference should also not be changed
+        var style = window.getComputedStyle(element, null);
+
+        // element rectangle
+        var rect = updateRect();
+
+        // pretty self explanatory
+        var childViews = [];
+
+        // loaded mixins
+        var activeMixins = [];
+
+        // references to created children
+        var ref = {};
+
+        // state used for each instance
+        var state = {};
+
+        // list of writers that will be called to update this view
+        var writers = [
+          write // default writer
+        ];
+
+        var readers = [
+          read // default reader
+        ];
+
+        var destroyers = [
+          destroy // default destroy
+        ];
+
+        // core view methods
+        var getElement = function getElement() {
+          return element;
+        };
+        var getChildViews = function getChildViews() {
+          return [].concat(childViews);
+        };
+        var getReference = function getReference() {
+          return ref;
+        };
+        var createChildView = function createChildView(store) {
+          return function(view, props) {
+            return view(store, props);
+          };
+        };
+        var getRect = function getRect() {
+          return getViewRect(rect, childViews, [0, 0], [1, 1]);
+        };
+        var getStyle = function getStyle() {
+          return style;
+        };
+
+        /**
+         * Read data from DOM
+         * @private
+         */
+        var _read = function _read() {
+          // read child views
+          childViews.forEach(function(child) {
+            return child._read();
+          });
+
+          // update my rectangle
+          updateRect(rect, element, style);
+
+          // writers
+          readers.forEach(function(reader) {
+            return reader({ root: internalAPI, props: props, rect: rect });
+          });
+        };
+
+        /**
+         * Write data to DOM
+         * @private
+         */
+        var _write = function _write(ts) {
+          var frameActions =
             arguments.length > 1 && arguments[1] !== undefined
               ? arguments[1]
-              : {};
+              : [];
 
-          // root element should not be changed
-          var element = createElement(tag, 'filepond--' + name, attributes);
+          // if no actions, we assume that the view is resting
+          var resting = frameActions.length === 0;
 
-          // style reference should also not be changed
-          var style = window.getComputedStyle(element, null);
-
-          // element rectangle
-          var rect = updateRect();
-
-          // pretty self explanatory
-          var childViews = [];
-
-          // loaded mixins
-          var activeMixins = [];
-
-          // references to created children
-          var ref = {};
-
-          // state used for each instance
-          var state = {};
-
-          // list of writers that will be called to update this view
-          var writers = [
-            write // default writer
-          ];
-
-          var readers = [
-            read // default reader
-          ];
-
-          var destroyers = [
-            destroy // default destroy
-          ];
-
-          // core view methods
-          var getElement = function getElement() {
-            return element;
-          };
-          var getChildViews = function getChildViews() {
-            return [].concat(childViews);
-          };
-          var getReference = function getReference() {
-            return ref;
-          };
-          var createChildView = function createChildView(store) {
-            return function(view, props) {
-              return view(store, props);
-            };
-          };
-          var getRect = function getRect() {
-            return getViewRect(rect, childViews, [0, 0], [1, 1]);
-          };
-          var getStyle = function getStyle() {
-            return style;
-          };
-
-          /**
-           * Read data from DOM
-           * @private
-           */
-          var _read = function _read() {
-            // read child views
-            childViews.forEach(function(child) {
-              return child._read();
+          // writers
+          writers.forEach(function(writer) {
+            var writerResting = writer({
+              props: props,
+              root: internalAPI,
+              actions: frameActions,
+              timestamp: ts
             });
+            if (writerResting === false) {
+              resting = false;
+            }
+          });
 
-            // update my rectangle
-            updateRect(rect, element, style);
+          // run mixins
+          activeMixins.forEach(function(mixin) {
+            // if one of the mixins is still busy after write operation, we are not resting
+            var mixinResting = mixin.write(ts);
+            if (mixinResting === false) {
+              resting = false;
+            }
+          });
 
-            // writers
-            readers.forEach(function(reader) {
-              return reader({ root: internalAPI, rect: rect });
-            });
-          };
-
-          /**
-           * Write data to DOM
-           * @private
-           */
-          var _write = function _write(ts) {
-            var frameActions =
-              arguments.length > 1 && arguments[1] !== undefined
-                ? arguments[1]
-                : [];
-
-            // run mixins
-            activeMixins.forEach(function(mixin) {
-              mixin.write(ts);
-            });
-
-            // writers
-            writers.forEach(function(writer) {
-              return writer({
-                props: props,
-                root: internalAPI,
-                actions: frameActions,
-                timestamp: ts
-              });
-            });
-
-            // updates child views
-            childViews.forEach(function(child) {
-              return child._write(
+          // updates child views that are currently attached to the DOM
+          childViews
+            .filter(function(child) {
+              return !!child.element.parentNode;
+            })
+            .forEach(function(child) {
+              // if a child view is not resting, we are not resting
+              var childResting = child._write(
                 ts,
                 filterFrameActionsForChild(child, frameActions)
               );
-            });
-
-            // append new elements to DOM
-            childViews
-              .filter(function(child) {
-                return !child.element.parentNode;
-              })
-              .forEach(function(child, index) {
-                // append to DOM
-                internalAPI.appendChild(child.element, index);
-              });
-          };
-
-          var _destroy = function _destroy() {
-            activeMixins.forEach(function(mixin) {
-              return mixin.destroy();
-            });
-            destroyers.forEach(function(destroyer) {
-              return destroyer({ root: internalAPI });
-            });
-            childViews.forEach(function(child) {
-              return child._destroy();
-            });
-          };
-
-          // sharedAPI
-          var sharedAPIDefinition = {
-            element: {
-              get: getElement
-            },
-            style: {
-              get: getStyle
-            },
-            childViews: {
-              get: getChildViews
-            }
-          };
-
-          // private API definition
-          var internalAPIDefinition = _extends({}, sharedAPIDefinition, {
-            rect: {
-              get: getRect
-            },
-
-            // access to custom children references
-            ref: {
-              get: getReference
-            },
-
-            // dom modifiers
-            is: function is(needle) {
-              return name === needle;
-            },
-            appendChild: appendChild(element),
-            createChildView: createChildView(store),
-            appendChildView: appendChildView(element, childViews),
-            removeChildView: removeChildView(element, childViews),
-            registerWriter: function registerWriter(writer) {
-              return writers.push(writer);
-            },
-            registerReader: function registerReader(reader) {
-              return readers.push(reader);
-            },
-
-            // access to data store
-            dispatch: store.dispatch,
-            query: store.query
-          });
-
-          // public view API methods
-          var externalAPIDefinition = {
-            element: {
-              get: getElement
-            },
-            childViews: {
-              get: getChildViews
-            },
-            rect: {
-              get: getRect
-            },
-            isRectIgnored: function isRectIgnored() {
-              return ignoreRect;
-            },
-            _read: _read,
-            _write: _write,
-            _destroy: _destroy
-          };
-
-          // mixin API methods
-          var mixinAPIDefinition = _extends({}, sharedAPIDefinition, {
-            rect: {
-              get: function get$$1() {
-                return rect;
+              if (!childResting) {
+                resting = false;
               }
-            }
-          });
-
-          // add mixin functionality
-          forin(mixins, function(name, config) {
-            var mixinAPI = Mixins[name]({
-              mixinConfig: config,
-              viewProps: props,
-              viewState: state,
-              viewInternalAPI: internalAPIDefinition,
-              viewExternalAPI: externalAPIDefinition,
-              view: createObject(mixinAPIDefinition)
             });
 
-            if (mixinAPI) {
-              activeMixins.push(mixinAPI);
+          // append new elements to DOM and update those
+          childViews
+            .filter(function(child) {
+              return !child.element.parentNode;
+            })
+            .forEach(function(child, index) {
+              // append to DOM
+              internalAPI.appendChild(child.element, index);
+
+              // call read (need to know the size of these elements)
+              child._read();
+
+              // re-call write
+              child._write(ts, frameActions);
+
+              // we just added somthing to the dom, no rest
+              resting = false;
+            });
+
+          // let parent know if we are resting
+          return resting;
+        };
+
+        var _destroy = function _destroy() {
+          activeMixins.forEach(function(mixin) {
+            return mixin.destroy();
+          });
+          destroyers.forEach(function(destroyer) {
+            return destroyer({ root: internalAPI });
+          });
+          childViews.forEach(function(child) {
+            return child._destroy();
+          });
+        };
+
+        // sharedAPI
+        var sharedAPIDefinition = {
+          element: {
+            get: getElement
+          },
+          style: {
+            get: getStyle
+          },
+          childViews: {
+            get: getChildViews
+          }
+        };
+
+        // private API definition
+        var internalAPIDefinition = _extends({}, sharedAPIDefinition, {
+          rect: {
+            get: getRect
+          },
+
+          // access to custom children references
+          ref: {
+            get: getReference
+          },
+
+          // dom modifiers
+          is: function is(needle) {
+            return name === needle;
+          },
+          appendChild: appendChild(element),
+          createChildView: createChildView(store),
+          appendChildView: appendChildView(element, childViews),
+          removeChildView: removeChildView(element, childViews),
+          registerWriter: function registerWriter(writer) {
+            return writers.push(writer);
+          },
+          registerReader: function registerReader(reader) {
+            return readers.push(reader);
+          },
+
+          // access to data store
+          dispatch: store.dispatch,
+          query: store.query
+        });
+
+        // public view API methods
+        var externalAPIDefinition = {
+          element: {
+            get: getElement
+          },
+          childViews: {
+            get: getChildViews
+          },
+          rect: {
+            get: getRect
+          },
+          isRectIgnored: function isRectIgnored() {
+            return ignoreRect;
+          },
+          _read: _read,
+          _write: _write,
+          _destroy: _destroy
+        };
+
+        // mixin API methods
+        var mixinAPIDefinition = _extends({}, sharedAPIDefinition, {
+          rect: {
+            get: function get$$1() {
+              return rect;
             }
+          }
+        });
+
+        // add mixin functionality
+        forin(mixins, function(name, config) {
+          var mixinAPI = Mixins[name]({
+            mixinConfig: config,
+            viewProps: props,
+            viewState: state,
+            viewInternalAPI: internalAPIDefinition,
+            viewExternalAPI: externalAPIDefinition,
+            view: createObject(mixinAPIDefinition)
           });
 
-          // construct private api
-          var internalAPI = createObject(internalAPIDefinition);
+          if (mixinAPI) {
+            activeMixins.push(mixinAPI);
+          }
+        });
 
-          // create the view
-          create({
-            root: internalAPI,
-            props: props
-          });
+        // construct private api
+        var internalAPI = createObject(internalAPIDefinition);
 
-          // append created child views to root node
-          var childCount = element.children.length; // need to know the current child count so appending happens in correct order
-          childViews.forEach(function(child, index) {
-            internalAPI.appendChild(child.element, childCount + index);
-          });
+        // create the view
+        create({
+          root: internalAPI,
+          props: props
+        });
 
-          // call did create
-          didCreateView(internalAPI);
+        // append created child views to root node
+        var childCount = element.children.length; // need to know the current child count so appending happens in correct order
+        childViews.forEach(function(child, index) {
+          internalAPI.appendChild(child.element, childCount + index);
+        });
 
-          // expose public api
-          return createObject(externalAPIDefinition, props);
-        }
-      );
+        // call did create
+        didCreateView(internalAPI);
+
+        // expose public api
+        return createObject(externalAPIDefinition, props);
+      };
     };
 
   var createPainter = function createPainter(update) {
@@ -1637,7 +1696,7 @@
     var api = {};
 
     api.url = isString(outline) ? outline : outline.url || '';
-    api.timeout = outline.timeout || 7000;
+    api.timeout = outline.timeout ? parseInt(outline.timeout, 10) : 7000;
 
     forin(methods, function(key) {
       api[key] = createAction(key, outline[key], methods[key], api.timeout);
@@ -2206,16 +2265,13 @@
     oninit: [null, Type.FUNCTION],
     onwarning: [null, Type.FUNCTION],
     onerror: [null, Type.FUNCTION],
-
     onaddfilestart: [null, Type.FUNCTION],
     onaddfileprogress: [null, Type.FUNCTION],
     onaddfile: [null, Type.FUNCTION],
-
     onprocessfilestart: [null, Type.FUNCTION],
     onprocessfileprogress: [null, Type.FUNCTION],
     onprocessfileabort: [null, Type.FUNCTION],
     onprocessfilerevert: [null, Type.FUNCTION],
-
     onremovefile: [null, Type.FUNCTION],
 
     // custom initial files array
@@ -2909,7 +2965,7 @@
 
   /*
 function signature:
-  (file, load, error, progress, abort) => {
+  (data, load, error, progress, abort) => {
     return {
     abort:() => {}
   }
@@ -2923,7 +2979,17 @@ function signature:
 
     // custom handler (should also handle file, load, error, progress and abort)
     if (typeof action === 'function') {
-      return action;
+      return function() {
+        for (
+          var _len = arguments.length, params = Array(_len), _key = 0;
+          _key < _len;
+          _key++
+        ) {
+          params[_key] = arguments[_key];
+        }
+
+        return action.apply(undefined, [name].concat(params));
+      };
     }
 
     // no action supplied
@@ -2932,18 +2998,23 @@ function signature:
     }
 
     // internal handler
-    return function(file, load, error, progress, abort) {
+    return function(file, metadata, load, error, progress, abort) {
       // no file received
       if (!file) {
         return;
       }
 
       // create formdata object
-      var fd = new FormData();
-      fd.append(name, file, file.name);
+      var formData = new FormData();
+      formData.append(name, file, file.name);
+
+      // add metadata uder same name
+      if (isObject(metadata)) {
+        formData.append(name, JSON.stringify(metadata));
+      }
 
       // send request object
-      var request = sendRequest(fd, apiUrl + action.url, action);
+      var request = sendRequest(formData, apiUrl + action.url, action);
       request.onload = load;
       request.onerror = error;
       request.onprogress = progress;
@@ -3050,8 +3121,15 @@ function signature:
       response: null
     };
 
-    var process = function process(publicFile) {
+    var process = function process(file, metadata) {
       var progressFn = function progressFn() {
+        // we've not yet started the real download, stop here
+        // the request might not go through, server trouble, stuff like that
+        if (state.duration === 0) {
+          return;
+        }
+
+        // as we're now processing, fire the progress event
         api.fire('progress', api.getProgress());
       };
 
@@ -3072,6 +3150,7 @@ function signature:
         function(progress) {
           state.perceivedProgress = progress;
           state.perceivedDuration = Date.now() - state.timestamp;
+
           progressFn();
 
           // if fake progress is done, and a response has been received,
@@ -3079,18 +3158,19 @@ function signature:
           if (progress === 1 && state.response && !state.complete) {
             completeFn();
           }
-
-          // random delay as in a list of files you start noticing
-          // files uploading at the exact same speed
         },
+        // random delay as in a list of files you start noticing
+        // files uploading at the exact same speed
         getRandomNumber(750, 1500)
       );
 
       // remember request so we can abort it later
       state.request = processFn(
-        // wrap file in public wrapper as this is also sent to
-        // custom user process function
-        publicFile,
+        // the file to process
+        file,
+
+        // the metadata to send along
+        metadata,
 
         // callbacks (load, error, progress, abort)
         // load expects the body to be a server id if
@@ -3135,7 +3215,7 @@ function signature:
           );
         },
 
-        //
+        // actual processing progress
         function(computable, current, total) {
           // update actual duration
           state.duration = Date.now() - state.timestamp;
@@ -3274,6 +3354,11 @@ function signature:
       activeProcessor: null
     };
 
+    /**
+     * Externally added item metadata
+     */
+    var metadata = {};
+
     // item data
     var setStatus = function setStatus(status) {
       return (state.status = status);
@@ -3288,13 +3373,6 @@ function signature:
     };
     var getFileSize = function getFileSize() {
       return state.file.size;
-    };
-    var getFileURL = function getFileURL() {
-      var url = URL.createObjectURL(state.file);
-      setTimeout(function() {
-        URL.revokeObjectURL(url);
-      }, 0);
-      return url;
     };
     var getFile = function getFile() {
       return state.file;
@@ -3361,6 +3439,15 @@ function signature:
           api.fire('load');
         };
 
+        var error = function error(result) {
+          // set original file
+          state.file = file;
+          api.fire('load-meta');
+
+          setStatus(ItemStatus.LOAD_ERROR);
+          api.fire('load-file-error', result);
+        };
+
         // if we already have a server file reference, we don't need to call the onload method
         if (state.serverFileReference) {
           success(file);
@@ -3368,32 +3455,25 @@ function signature:
         }
 
         // no server id, let's give this file the full treatment
-        onload(file, success, function(error) {
-          // set original file
-          state.file = file;
-          api.fire('load-meta');
-
-          setStatus(ItemStatus.LOAD_ERROR);
-          api.fire('load-file-error', error);
-        });
+        onload(file, success, error);
       });
 
       // set loader source data
       loader.setSource(source);
 
-      // load the source data
-      loader.load();
-
       // set as active loader
       state.activeLoader = loader;
+
+      // load the source data
+      loader.load();
     };
 
     // file processor
-    var process = function process(processor) {
+    var process = function process(processor, onprocess) {
       // if no file loaded we'll wait for the load event
       if (!(state.file instanceof Blob)) {
         api.on('load', function() {
-          process(processor);
+          process(processor, onprocess);
         });
         return;
       }
@@ -3436,8 +3516,16 @@ function signature:
         api.fire('process-progress', progress);
       });
 
+      // when successfully transformed
+      var success = function success(file) {
+        processor.process(file, _extends({}, metadata));
+      };
+
+      // something went wrong during transform phase
+      var error = function error(result) {};
+
       // start processing the file
-      processor.process(state.file);
+      onprocess(state.file, success, error);
 
       // set as active processor
       state.activeProcessor = processor;
@@ -3519,8 +3607,14 @@ function signature:
         fileExtension: { get: getFileExtension },
         fileType: { get: getFileType },
         fileSize: { get: getFileSize },
-        fileURL: { get: getFileURL },
         file: { get: getFile },
+
+        getMetadata: function getMetadata(name) {
+          return name ? metadata[name] : _extends({}, metadata);
+        },
+        setMetadata: function setMetadata(name, value) {
+          return (metadata[name] = value);
+        },
 
         abortLoad: abortLoad,
         retryLoad: retryLoad,
@@ -3607,6 +3701,7 @@ function signature:
     );
   };
 
+  // returns item based on state
   var getItemByQueryFromState = function getItemByQueryFromState(
     state,
     itemHandler
@@ -3779,7 +3874,7 @@ function signature:
         });
 
         item.on('load-file-error', function(error) {
-          dispatch('DID_THROW_ITEM_INVALID', { id: id, status: error });
+          dispatch('DID_THROW_ITEM_INVALID', _extends({}, error, { id: id }));
         });
 
         item.on('load-abort', function() {
@@ -3787,35 +3882,40 @@ function signature:
         });
 
         item.on('load', function() {
-          // let interface know the item has loaded
-          dispatch('DID_LOAD_ITEM', {
-            id: id,
-            serverFileReference: isServerFile ? source : null
-          });
+          // item loaded, allow filters to alter it
+          applyFilterChain('DID_LOAD_ITEM', item, { query: query }).then(
+            function() {
+              // let interface know the item has loaded
+              dispatch('DID_LOAD_ITEM', {
+                id: id,
+                serverFileReference: isServerFile ? source : null
+              });
 
-          // item has been successfully loaded and added to the
-          // list of items so can now be safely returned for use
-          success(createItemAPI(item));
+              // item has been successfully loaded and added to the
+              // list of items so can now be safely returned for use
+              success(createItemAPI(item));
 
-          // if this is a local server file we need to show a different state
-          if (isLocalServerFile) {
-            dispatch('DID_LOAD_LOCAL_ITEM', { id: id });
-            return;
-          }
+              // if this is a local server file we need to show a different state
+              if (isLocalServerFile) {
+                dispatch('DID_LOAD_LOCAL_ITEM', { id: id });
+                return;
+              }
 
-          // if is a temp server file we prevent async upload call here (as the file is already on the server)
-          if (isLimboServerFile) {
-            dispatch('DID_COMPLETE_ITEM_PROCESSING', {
-              id: id,
-              serverFileReference: source
-            });
-            return;
-          }
+              // if is a temp server file we prevent async upload call here (as the file is already on the server)
+              if (isLimboServerFile) {
+                dispatch('DID_COMPLETE_ITEM_PROCESSING', {
+                  id: id,
+                  serverFileReference: source
+                });
+                return;
+              }
 
-          // id we are allowed to upload the file immidiately, lets do it
-          if (query('IS_ASYNC') && state.options.instantUpload) {
-            dispatch('PROCESS_ITEM', { query: id });
-          }
+              // id we are allowed to upload the file immidiately, lets do it
+              if (query('IS_ASYNC') && state.options.instantUpload) {
+                dispatch('REQUEST_ITEM_PROCESSING', { query: id });
+              }
+            }
+          );
         });
 
         item.on('process-start', function() {
@@ -3840,8 +3940,13 @@ function signature:
         });
 
         item.on('process-abort', function(serverFileReference) {
-          // we stopped processing
-          dispatch('DID_ABORT_ITEM_PROCESSING', { id: id });
+          // if we're instant uploading, the item is removed
+          if (state.options.instantUpload) {
+            dispatch('REMOVE_ITEM', { query: id });
+          } else {
+            // we stopped processing
+            dispatch('DID_ABORT_ITEM_PROCESSING', { id: id });
+          }
 
           // we'll revert any processed items
           dispatch('REVERT_ITEM_PROCESSING', { query: id });
@@ -3861,6 +3966,13 @@ function signature:
           } else {
             dispatch('DID_REVERT_ITEM_PROCESSING', { id: id });
           }
+        });
+
+        // let view know the item has been inserted
+        dispatch('DID_ADD_ITEM', {
+          id: id,
+          index: index,
+          interactionMethod: interactionMethod
         });
 
         // start loading the source
@@ -3893,18 +4005,19 @@ function signature:
               .catch(error);
           }
         );
-
-        // let view know the item has been inserted
-        dispatch('DID_ADD_ITEM', {
-          id: id,
-          index: index,
-          interactionMethod: interactionMethod
-        });
       },
 
       RETRY_ITEM_LOAD: getItemByQueryFromState(state, function(item) {
         // try loading the source one more time
         item.retryLoad();
+      }),
+
+      REQUEST_ITEM_PROCESSING: getItemByQueryFromState(state, function(item) {
+        var id = item.id;
+
+        dispatch('DID_REQUEST_ITEM_PROCESSING', { id: id });
+
+        dispatch('PROCESS_ITEM', { query: item }, true);
       }),
 
       PROCESS_ITEM: getItemByQueryFromState(state, function(
@@ -3930,12 +4043,22 @@ function signature:
               state.options.server.process,
               state.options.name
             )
-          )
+          ),
+          // called when the file is about to be processed so it can be piped through the transform filters
+          function(file, success, error) {
+            // allow plugins to alter the file data
+            applyFilterChain('PREPARE_OUTPUT', file, {
+              query: query,
+              item: item
+            })
+              .then(success)
+              .catch(error);
+          }
         );
       }),
 
       RETRY_ITEM_PROCESSING: getItemByQueryFromState(state, function(item) {
-        dispatch('PROCESS_ITEM', { query: item });
+        dispatch('REQUEST_ITEM_PROCESSING', { query: item });
       }),
 
       REMOVE_ITEM: getItemByQueryFromState(state, function(item, success) {
@@ -4022,17 +4145,23 @@ function signature:
     radius,
     angleInDegrees
   ) {
-    var angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+    var angleInRadians = (angleInDegrees % 360 - 90) * Math.PI / 180.0;
     return {
       x: centerX + radius * Math.cos(angleInRadians),
       y: centerY + radius * Math.sin(angleInRadians)
     };
   };
 
-  var describeArc = function describeArc(x, y, radius, startAngle, endAngle) {
+  var describeArc = function describeArc(
+    x,
+    y,
+    radius,
+    startAngle,
+    endAngle,
+    arcSweep
+  ) {
     var start = polarToCartesian(x, y, radius, endAngle);
     var end = polarToCartesian(x, y, radius, startAngle);
-    var arcSweep = endAngle - startAngle <= 180 ? '0' : '1';
     return [
       'M',
       start.x,
@@ -4048,8 +4177,22 @@ function signature:
     ].join(' ');
   };
 
-  var percentageArc = function percentageArc(x, y, radius, offset, amount) {
-    return describeArc(x, y, radius, offset * 360, amount * 360);
+  var percentageArc = function percentageArc(x, y, radius, from, to) {
+    var arcSweep = 1;
+    if (to > from && to - from <= 0.5) {
+      arcSweep = 0;
+    }
+    if (from > to && from - to >= 0.5) {
+      arcSweep = 0;
+    }
+    return describeArc(
+      x,
+      y,
+      radius,
+      Math.min(0.9999, from) * 360,
+      Math.min(0.9999, to) * 360,
+      arcSweep
+    );
   };
 
   var create$7 = function create(_ref) {
@@ -4058,7 +4201,6 @@ function signature:
 
     // start at 0
     props.progress = 0;
-    props.offset = null;
     props.opacity = 0;
 
     // svg
@@ -4069,13 +4211,14 @@ function signature:
     });
     svg.appendChild(root.ref.path);
 
+    root.ref.svg = svg;
+
     root.appendChild(svg);
   };
 
   var write$4 = function write(_ref2) {
     var root = _ref2.root,
-      props = _ref2.props,
-      timestamp = _ref2.timestamp;
+      props = _ref2.props;
 
     if (props.opacity === 0) {
       return;
@@ -4087,23 +4230,29 @@ function signature:
     // calculate size of ring
     var size = root.rect.element.width * 0.5;
 
-    if (!props.offset) {
-      props.offset = timestamp;
+    // spin mode?
+    var spinning = props.progress === null;
+
+    // ring state
+    var ringFrom = 0;
+    var ringTo = 0;
+
+    // now in busy mode
+    if (spinning) {
+      ringFrom = 0;
+      ringTo = 0.5;
+    } else {
+      ringFrom = 0;
+      ringTo = props.progress;
     }
-    var duration = timestamp - props.offset;
 
-    // spin mode!
-    var offset = props.progress === null ? duration * 0.001 : 0;
-
-    // get path
+    // get arc path
     var coordinates = percentageArc(
       size,
       size,
       size - ringStrokeWidth,
-      offset,
-      props.progress === null
-        ? offset + 0.5
-        : Math.min(0.999999, props.progress)
+      ringFrom,
+      ringTo
     );
 
     // update progress bar
@@ -4121,7 +4270,7 @@ function signature:
     write: write$4,
     mixins: {
       apis: ['progress'],
-      styles: ['opacity', 'rotateZ'],
+      styles: ['opacity'],
       animations: {
         opacity: { type: 'tween', duration: 500 },
         progress: {
@@ -4344,30 +4493,37 @@ function signature:
     text(root.ref.sub, root.query('GET_LABEL_TAP_TO_CANCEL'));
   };
 
-  var didAbortItemProcessing = function didAbortItemProcessing(_ref4) {
+  var didRequestItemProcessing = function didRequestItemProcessing(_ref4) {
     var root = _ref4.root;
+
+    text(root.ref.main, root.query('GET_LABEL_FILE_PROCESSING'));
+    text(root.ref.sub, root.query('GET_LABEL_TAP_TO_CANCEL'));
+  };
+
+  var didAbortItemProcessing = function didAbortItemProcessing(_ref5) {
+    var root = _ref5.root;
 
     text(root.ref.main, root.query('GET_LABEL_FILE_PROCESSING_ABORTED'));
     text(root.ref.sub, root.query('GET_LABEL_TAP_TO_RETRY'));
   };
 
-  var didCompleteItemProcessing$1 = function didCompleteItemProcessing(_ref5) {
-    var root = _ref5.root;
+  var didCompleteItemProcessing$1 = function didCompleteItemProcessing(_ref6) {
+    var root = _ref6.root;
 
     text(root.ref.main, root.query('GET_LABEL_FILE_PROCESSING_COMPLETE'));
     text(root.ref.sub, root.query('GET_LABEL_TAP_TO_UNDO'));
   };
 
-  var didLoadItem$1 = function didLoadItem(_ref6) {
-    var root = _ref6.root;
+  var didLoadItem$1 = function didLoadItem(_ref7) {
+    var root = _ref7.root;
 
     text(root.ref.main, '');
     text(root.ref.sub, '');
   };
 
-  var didThrowError = function didThrowError(_ref7) {
-    var root = _ref7.root,
-      action = _ref7.action;
+  var didThrowError = function didThrowError(_ref8) {
+    var root = _ref8.root,
+      action = _ref8.action;
 
     text(root.ref.main, action.status.main);
     text(root.ref.sub, action.status.sub);
@@ -4378,6 +4534,7 @@ function signature:
     ignoreRect: true,
     write: createRoute({
       DID_LOAD_ITEM: didLoadItem$1,
+      DID_REQUEST_ITEM_PROCESSING: didRequestItemProcessing,
       DID_ABORT_ITEM_PROCESSING: didAbortItemProcessing,
       DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing$1,
       DID_UPDATE_ITEM_PROCESS_PROGRESS: didSetItemProcessProgress,
@@ -4420,7 +4577,7 @@ function signature:
     },
     ProcessItem: {
       label: 'GET_LABEL_BUTTON_PROCESS_ITEM',
-      action: 'PROCESS_ITEM',
+      action: 'REQUEST_ITEM_PROCESSING',
       icon: 'GET_ICON_PROCESS',
       className: 'filepond--action-process-item'
     },
@@ -4454,9 +4611,6 @@ function signature:
   var create$6 = function create(_ref) {
     var root = _ref.root,
       props = _ref.props;
-
-    // list of all buttons
-    root.ref.controls = [];
 
     // create file info view
     root.ref.info = root.appendChildView(
@@ -4497,11 +4651,8 @@ function signature:
         root.dispatch(definition.action, { query: props.id });
       });
 
-      // add to reference
+      // set reference
       root.ref['button' + key] = buttonView;
-
-      // add to buttons list
-      root.ref.controls.push(buttonView);
     });
 
     // add progress indicators
@@ -4518,15 +4669,6 @@ function signature:
     root.ref.processProgressIndicator.element.classList.add(
       'filepond--process-indicator'
     );
-
-    // add progress indicators to control list
-    root.ref.controls.push(
-      root.ref.loadProgressIndicator,
-      root.ref.processProgressIndicator
-    );
-
-    // add file status and info views
-    root.ref.controls.push(root.ref.info, root.ref.status);
   };
 
   var calculateFileInfoOffset = function calculateFileInfoOffset(root) {
@@ -4536,145 +4678,114 @@ function signature:
     );
   };
 
-  var idleState = [
-    { opacity: 0 }, // button abort load
-    { opacity: 0 }, // button retry load
-    { opacity: 1 }, // button remove item
-    { opacity: 1 }, // button process item
-    { opacity: 0 }, // button abort processing
-    { opacity: 0 }, // button retry processing
-    { opacity: 0 }, // button revert processing
-    { opacity: 0 }, // indicator loading
-    { opacity: 0 }, // indicator processing
-    { translateX: calculateFileInfoOffset }, // file info
-    {
-      translateX: calculateFileInfoOffset,
-      opacity: 0 // file status
+  var DefaultStyle = {
+    buttonAbortItemLoad: { opacity: 0 },
+    buttonRetryItemLoad: { opacity: 0 },
+    buttonRemoveItem: { opacity: 0 },
+    buttonProcessItem: { opacity: 0 },
+    buttonAbortItemProcessing: { opacity: 0 },
+    buttonRetryItemProcessing: { opacity: 0 },
+    buttonRevertItemProcessing: { opacity: 0 },
+    loadProgressIndicator: { opacity: 0 },
+    processProgressIndicator: { opacity: 0 },
+    info: { translateX: 0, opacity: 0 },
+    status: { translateX: 0, opacity: 0 }
+  };
+
+  var IdleStyle = {
+    buttonRemoveItem: { opacity: 1 },
+    buttonProcessItem: { opacity: 1 },
+    info: { translateX: calculateFileInfoOffset },
+    status: { translateX: calculateFileInfoOffset }
+  };
+
+  var ProcessingStyle = {
+    buttonAbortItemProcessing: { opacity: 1 },
+    processProgressIndicator: { opacity: 1 },
+    status: { opacity: 1 }
+  };
+
+  var StateMap = {
+    DID_THROW_ITEM_INVALID: {
+      style: {
+        buttonRemoveItem: { opacity: 1 },
+        info: { translateX: calculateFileInfoOffset },
+        status: { translateX: calculateFileInfoOffset, opacity: 1 }
+      },
+      state: 'load-invalid'
+    },
+
+    DID_START_ITEM_LOAD: {
+      style: {
+        buttonAbortItemLoad: { opacity: 1 },
+        loadProgressIndicator: { opacity: 1 },
+        status: { opacity: 1 }
+      }
+    },
+
+    DID_THROW_ITEM_LOAD_ERROR: {
+      style: {
+        buttonRetryItemLoad: { opacity: 1 },
+        buttonRemoveItem: { opacity: 1 },
+        info: { translateX: calculateFileInfoOffset },
+        status: { opacity: 1 }
+      },
+      state: 'load-error'
+    },
+
+    DID_LOAD_ITEM: {
+      style: IdleStyle
+    },
+
+    DID_LOAD_LOCAL_ITEM: {
+      style: {
+        buttonRemoveItem: { opacity: 1 },
+        info: { translateX: calculateFileInfoOffset },
+        status: { translateX: calculateFileInfoOffset }
+      }
+    },
+
+    DID_START_ITEM_PROCESSING: {
+      style: ProcessingStyle,
+      state: 'busy'
+    },
+
+    DID_REQUEST_ITEM_PROCESSING: {
+      style: ProcessingStyle,
+      state: 'busy'
+    },
+
+    DID_UPDATE_ITEM_PROCESS_PROGRESS: {
+      style: ProcessingStyle,
+      state: 'processing'
+    },
+
+    DID_COMPLETE_ITEM_PROCESSING: {
+      style: {
+        buttonRevertItemProcessing: { opacity: 1 },
+        info: { opacity: 1 },
+        status: { opacity: 1 }
+      },
+      file: 'processing-complete'
+    },
+
+    DID_THROW_ITEM_PROCESSING_ERROR: {
+      style: {
+        buttonRemoveItem: { opacity: 1 },
+        buttonRetryItemProcessing: { opacity: 1 },
+        status: { opacity: 1 },
+        info: { translateX: calculateFileInfoOffset }
+      },
+      state: 'processing-error'
+    },
+
+    DID_ABORT_ITEM_PROCESSING: {
+      style: IdleStyle
+    },
+
+    DID_REVERT_ITEM_PROCESSING: {
+      style: IdleStyle
     }
-  ];
-
-  var actionStates = {
-    DID_THROW_ITEM_INVALID: [
-      { opacity: 0 }, // button abort load
-      { opacity: 0 }, // button retry load
-      { opacity: 1 }, // button remove item
-      { opacity: 0 }, // button process item
-      { opacity: 0 }, // button abort processing
-      { opacity: 0 }, // button retry processing
-      { opacity: 0 }, // button revert processing
-      { opacity: 0 }, // indicator loading
-      { opacity: 0 }, // indicator processing
-      { translateX: calculateFileInfoOffset }, // file info
-      {
-        translateX: calculateFileInfoOffset,
-        opacity: 1 // file status
-      }
-    ],
-    DID_START_ITEM_LOAD: [
-      { opacity: 1 }, // button abort load
-      { opacity: 0 }, // button retry load
-      { opacity: 0 }, // button remove item
-      { opacity: 0 }, // button process item
-      { opacity: 0 }, // button abort processing
-      { opacity: 0 }, // button retry processing
-      { opacity: 0 }, // button revert processing
-      { opacity: 1 }, // indicator loading
-      { opacity: 0 }, // indicator processing
-      { translateX: 0 }, // file info
-      {
-        translateX: 0,
-        opacity: 1 // file status
-      }
-    ],
-    DID_THROW_ITEM_LOAD_ERROR: [
-      { opacity: 0 }, // button abort load
-      { opacity: 1 }, // button retry load
-      { opacity: 1 }, // button remove item
-      { opacity: 0 }, // button process item
-      { opacity: 0 }, // button abort processing
-      { opacity: 0 }, // button retry processing
-      { opacity: 0 }, // button revert processing
-      { opacity: 0 }, // indicator loading
-      { opacity: 0 }, // indicator processing
-      { translateX: calculateFileInfoOffset }, // file info
-      {
-        translateX: 0,
-        opacity: 1 // file status
-      }
-    ],
-
-    DID_LOAD_ITEM: idleState,
-
-    DID_LOAD_LOCAL_ITEM: [
-      { opacity: 0 }, // button abort load
-      { opacity: 0 }, // button retry load
-      { opacity: 1 }, // button remove item
-      { opacity: 0 }, // button process item
-      { opacity: 0 }, // button abort processing
-      { opacity: 0 }, // button retry processing
-      { opacity: 0 }, // button revert processing
-      { opacity: 0 }, // indicator loading
-      { opacity: 0 }, // indicator processing
-      { translateX: calculateFileInfoOffset, opacity: 0 }, // file info
-      {
-        translateX: calculateFileInfoOffset,
-        opacity: 0 // file status
-      }
-    ],
-
-    DID_START_ITEM_PROCESSING: [
-      { opacity: 0 }, // button abort load
-      { opacity: 0 }, // button retry load
-      { opacity: 0 }, // button remove item
-      { opacity: 0 }, // button process item
-      { opacity: 1 }, // button abort processing
-      { opacity: 0 }, // button retry processing
-      { opacity: 0 }, // button revert processing
-      { opacity: 0 }, // indicator loading
-      { opacity: 1 }, // indicator processing
-      { translateX: 0 }, // file info
-      {
-        translateX: 0,
-        opacity: 1 // file status
-      }
-    ],
-
-    DID_ABORT_ITEM_PROCESSING: idleState,
-
-    DID_THROW_ITEM_PROCESSING_ERROR: [
-      { opacity: 0 }, // button abort load
-      { opacity: 0 }, // button retry load
-      { opacity: 1 }, // button remove item
-      { opacity: 0 }, // button process item
-      { opacity: 0 }, // button abort processing
-      { opacity: 1 }, // button retry processing
-      { opacity: 0 }, // button revert processing
-      { opacity: 0 }, // indicator loading
-      { opacity: 0 }, // indicator processing
-      { translateX: calculateFileInfoOffset }, // file info
-      {
-        translateX: 0,
-        opacity: 1 // file status
-      }
-    ],
-    DID_COMPLETE_ITEM_PROCESSING: [
-      { opacity: 0 }, // button abort load
-      { opacity: 0 }, // button retry load
-      { opacity: 0 }, // button remove item
-      { opacity: 0 }, // button process item
-      { opacity: 0 }, // button abort processing
-      { opacity: 0 }, // button retry processing
-      { opacity: 1 }, // button revert processing
-      { opacity: 0 }, // indicator loading
-      { opacity: 0 }, // indicator processing
-      { translateX: 0 }, // file info
-      {
-        translateX: 0,
-        opacity: 1 // file status
-      }
-    ],
-
-    DID_REVERT_ITEM_PROCESSING: idleState
   };
 
   var write$3 = function write(_ref2) {
@@ -4688,38 +4799,42 @@ function signature:
     // select last state change action
     var action = []
       .concat(toConsumableArray(actions))
+      .filter(function(action) {
+        return /^DID_/.test(action.type);
+      })
       .reverse()
       .find(function(action) {
-        return actionStates[action.type];
+        return StateMap[action.type];
       });
+
+    // no need to set same state twice
+    if (!action || (action && action.type === props.currentState)) {
+      return;
+    }
 
     // set current state
-    props.currentState =
-      actionStates[(action || {}).type] || props.currentState;
+    props.currentState = action.type;
+    var currentState = StateMap[props.currentState];
 
     // set state
-    if (action) {
-      if (action.type === 'DID_COMPLETE_ITEM_PROCESSING') {
-        root.element.dataset.fileState = 'processing-complete';
-      } else if (action.type === 'DID_THROW_ITEM_INVALID') {
-        root.element.dataset.fileState = 'load-invalid';
-      } else if (action.type === 'DID_THROW_ITEM_LOAD_ERROR') {
-        root.element.dataset.fileState = 'load-error';
-      } else if (action.type === 'DID_THROW_ITEM_PROCESSING_ERROR') {
-        root.element.dataset.fileState = 'processing-error';
-      } else {
-        root.element.dataset.fileState = '';
-      }
-    }
+    root.element.dataset.fileState = currentState.state || '';
 
-    // get state
-    if (props.currentState) {
-      root.ref.controls.forEach(function(view, index) {
-        forin(props.currentState[index], function(key, value) {
-          view[key] = typeof value === 'function' ? value(root) : value;
-        });
+    // get new styles
+    var newStyles = currentState.style;
+
+    forin(DefaultStyle, function(name, defaultStyles) {
+      // get reference to control
+      var control = root.ref[name];
+
+      // loop over all styles for this control
+      forin(defaultStyles, function(key, defaultValue) {
+        var value =
+          newStyles[name] && typeof newStyles[name][key] !== 'undefined'
+            ? newStyles[name][key]
+            : defaultValue;
+        control[key] = typeof value === 'function' ? value(root) : value;
       });
-    }
+    });
   };
 
   var route$3 = createRoute({
@@ -4739,19 +4854,24 @@ function signature:
 
       root.ref.buttonAbortItemLoad.label = action.value;
     },
-    DID_UPDATE_ITEM_LOAD_PROGRESS: function DID_UPDATE_ITEM_LOAD_PROGRESS(
-      _ref5
-    ) {
-      var root = _ref5.root,
-        action = _ref5.action;
+    DID_REQUEST_ITEM_PROCESSING: function DID_REQUEST_ITEM_PROCESSING(_ref5) {
+      var root = _ref5.root;
 
-      root.ref.loadProgressIndicator.progress = action.progress;
+      root.ref.processProgressIndicator.progress = null;
     },
-    DID_UPDATE_ITEM_PROCESS_PROGRESS: function DID_UPDATE_ITEM_PROCESS_PROGRESS(
+    DID_UPDATE_ITEM_LOAD_PROGRESS: function DID_UPDATE_ITEM_LOAD_PROGRESS(
       _ref6
     ) {
       var root = _ref6.root,
         action = _ref6.action;
+
+      root.ref.loadProgressIndicator.progress = action.progress;
+    },
+    DID_UPDATE_ITEM_PROCESS_PROGRESS: function DID_UPDATE_ITEM_PROCESS_PROGRESS(
+      _ref7
+    ) {
+      var root = _ref7.root,
+        action = _ref7.action;
 
       root.ref.processProgressIndicator.progress = action.progress;
     }
@@ -4786,7 +4906,7 @@ function signature:
     var dataContainer = createElement$1('input');
     dataContainer.type = 'hidden';
     dataContainer.name = root.query('GET_NAME');
-    root.ref.dataContainer = dataContainer;
+    root.ref.data = dataContainer;
     root.appendChild(dataContainer);
   };
 
@@ -4798,7 +4918,7 @@ function signature:
       action = _ref2.action,
       props = _ref2.props;
 
-    root.ref.dataContainer.value = action.serverFileReference;
+    root.ref.data.value = action.serverFileReference;
 
     // updates the legend of the fieldset so screenreaders can better group buttons
     text(
@@ -4810,20 +4930,20 @@ function signature:
   var didRemoveItem = function didRemoveItem(_ref3) {
     var root = _ref3.root;
 
-    root.ref.dataContainer.removeAttribute('value');
+    root.ref.data.removeAttribute('value');
   };
 
   var didCompleteItemProcessing = function didCompleteItemProcessing(_ref4) {
     var root = _ref4.root,
       action = _ref4.action;
 
-    root.ref.dataContainer.value = action.serverFileReference;
+    root.ref.data.value = action.serverFileReference;
   };
 
   var didRevertItemProcessing = function didRevertItemProcessing(_ref5) {
     var root = _ref5.root;
 
-    root.ref.dataContainer.removeAttribute('value');
+    root.ref.data.removeAttribute('value');
   };
 
   var fileWrapper = createView({
@@ -4834,6 +4954,9 @@ function signature:
       DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing,
       DID_REVERT_ITEM_PROCESSING: didRevertItemProcessing
     }),
+    didCreateView: function didCreateView(root) {
+      applyFilters('CREATE_VIEW', _extends({}, root, { view: root }));
+    },
     tag: 'fieldset',
     name: 'file-wrapper'
   });
@@ -4909,20 +5032,21 @@ function signature:
       animation.translateY = null;
     }
 
-    var listItem = root.createChildView(
-      // view type
-      item,
+    root.appendChildView(
+      root.createChildView(
+        // view type
+        item,
 
-      // props
-      _extends(
-        {
-          id: id
-        },
-        animation
-      )
+        // props
+        _extends(
+          {
+            id: id
+          },
+          animation
+        )
+      ),
+      index
     );
-
-    root.appendChildView(listItem, index);
   };
 
   /**
@@ -5001,32 +5125,31 @@ function signature:
     // route actions
     route$2({ root: root, props: props, actions: actions });
 
+    var resting = true;
+
     // update item positions
     var offset = 0;
-    root.childViews
+    root.childViews.forEach(function(child, childIndex) {
+      var childRect = child.rect;
 
-      // let's go!
-      .forEach(function(child, childIndex) {
-        var rect = child.rect;
+      // set this child offset
+      child.translateX = 0;
+      child.translateY =
+        offset +
+        (props.dragIndex > -1
+          ? dragTranslation(childIndex, props.dragIndex, 10)
+          : 0);
 
-        // set this child offset
-        child.translateX = 0;
-        child.translateY =
-          offset +
-          (props.dragIndex > -1
-            ? dragTranslation(childIndex, props.dragIndex, 10)
-            : 0);
+      // show child if it's not marked for removal
+      if (!child.markedForRemoval) {
+        child.scaleX = 1;
+        child.scaleY = 1;
+        child.opacity = 1;
+      }
 
-        // show child if it's not marked for removal
-        if (!child.markedForRemoval) {
-          child.scaleX = 1;
-          child.scaleY = 1;
-          child.opacity = 1;
-        }
-
-        // calculate next child offset (reduce height by y scale for views that are being removed)
-        offset += rect.outer.height;
-      });
+      // calculate next child offset (reduce height by y scale for views that are being removed)
+      offset += childRect.outer.height;
+    });
 
     // remove marked views
     root.childViews
@@ -5035,11 +5158,14 @@ function signature:
       })
       .forEach(function(view) {
         root.removeChildView(view);
+        resting = false;
       });
+
+    return resting;
   };
 
   /**
-   * Filters SET_ITEM actions that are meant specifically for a certain child of the list
+   * Filters actions that are meant specifically for a certain child of the list
    * @param child
    * @param actions
    */
@@ -5837,8 +5963,8 @@ function signature:
 
     // get element at position
     var elementAtPosition = root.elementFromPoint(
-      e.pageX - window.scrollX,
-      e.pageY - window.scrollY
+      e.pageX - window.pageXOffset,
+      e.pageY - window.pageYOffset
     );
 
     // test if target is the element or if one of its children is
@@ -6740,6 +6866,7 @@ function signature:
     //
     // PRIVATE API -------------------------------------------------------------------------------------
     //
+    var resting = false;
     var readWriteApi = {
       // necessary for update loop
 
@@ -6748,6 +6875,12 @@ function signature:
        * @private
        */
       _read: function _read() {
+        // if resting, no need to read as numbers will still all be correct
+        if (resting) {
+          return;
+        }
+
+        // read view data
         view._read();
       },
 
@@ -6756,11 +6889,26 @@ function signature:
        * @private
        */
       _write: function _write(ts) {
+        // get all actions from store
         var actions$$1 = store.processActionQueue().filter(function(action) {
           return !/^SET_/.test(action.type);
         });
+
+        // if was idling and no actions stop here
+        if (resting && !actions$$1.length) {
+          return;
+        }
+
+        // some actions might trigger events
         routeActionsToEvents(actions$$1);
-        view._write(ts, actions$$1);
+
+        // update the view
+        resting = view._write(ts, actions$$1);
+
+        // now idling
+        if (resting) {
+          store.processDispatchQueue();
+        }
       }
     };
 
@@ -7275,8 +7423,8 @@ function signature:
     // how attributes of the input element are mapped to the options for the plugin
     var attributeMapping = {
       // translate to other name
-      multiple: 'allowMultiple',
-      capture: 'captureMethod',
+      '^multiple$': 'allowMultiple',
+      '^capture$': 'captureMethod',
 
       // group under single property
       '^server': {
@@ -7301,9 +7449,9 @@ function signature:
       },
 
       // don't include in object
-      id: false,
-      type: false,
-      files: false
+      '^id$': false,
+      '^type$': false,
+      '^files$': false
     };
 
     // add additional option translators
@@ -7409,22 +7557,29 @@ function signature:
     });
     var workerURL = URL.createObjectURL(workerBlob);
     var worker = new Worker(workerURL);
-    URL.revokeObjectURL(workerURL);
 
     return {
-      post: function post(message, cb) {
-        var messageId = getUniqueId();
+      transfer: function transfer(message, cb) {},
+      post: function post(message, cb, transferList) {
+        var id = getUniqueId();
 
         worker.onmessage = function(e) {
-          if (e.data.id === messageId) {
+          if (e.data.id === id) {
             cb(e.data.message);
           }
         };
 
-        worker.postMessage({
-          id: messageId,
-          message: message
-        });
+        worker.postMessage(
+          {
+            id: id,
+            message: message
+          },
+          transferList
+        );
+      },
+      terminate: function terminate() {
+        worker.terminate();
+        URL.revokeObjectURL(workerURL);
       }
     };
   };
@@ -7453,18 +7608,22 @@ function signature:
       addFilter: addFilter,
       utils: {
         Type: Type,
+        forin: forin,
         isString: isString,
         toNaturalFileSize: toNaturalFileSize,
         replaceInString: replaceInString,
         getExtensionFromFilename: getExtensionFromFilename,
+        getFilenameWithoutExtension: getFilenameWithoutExtension,
         guesstimateMimeType: guesstimateMimeType,
+        getFileFromBlob: getFileFromBlob,
         getFilenameFromURL: getFilenameFromURL,
         createRoute: createRoute,
         createWorker: createWorker,
         createView: createView,
         loadImage: loadImage,
         copyFile: copyFile,
-        renameFile: renameFile
+        renameFile: renameFile,
+        applyFilterChain: applyFilterChain
       },
       views: {
         panel: panel
@@ -7617,6 +7776,9 @@ function signature:
   var hasVisibility = function hasVisibility() {
     return 'visibilityState' in document;
   };
+  var hasTiming = function hasTiming() {
+    return 'performance' in window;
+  }; // iOS 8.x
 
   var supported = function supported() {
     return !(
@@ -7624,7 +7786,8 @@ function signature:
       !hasVisibility() ||
       !hasPromises() ||
       !hasBlobSlice() ||
-      !hasCreateObjectURL()
+      !hasCreateObjectURL() ||
+      !hasTiming()
     );
   };
 

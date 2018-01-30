@@ -1,5 +1,5 @@
 /*
- * FilePond 1.0.1
+ * FilePond 1.0.2
  * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
  * You need to obtain a Commercial License to use FilePond in a non-GPL project.
  * Please visit https://pqina.nl/filepond for details.
@@ -12,6 +12,7 @@ const createStore = (initialState, queries = [], actions = []) => {
 
   // contains all actions for next frame, is clear when actions are requested
   const actionQueue = [];
+  const dispatchQueue = [];
 
   // returns a duplicate of the current state
   const getState = () => babelHelpers.extends({}, state);
@@ -27,8 +28,31 @@ const createStore = (initialState, queries = [], actions = []) => {
     return queue;
   };
 
+  // processes actions that might block the main UI thread
+  const processDispatchQueue = () => {
+    // create copy of actions queue
+    const queue = [...dispatchQueue];
+
+    // clear actions queue (we don't want no double actions)
+    dispatchQueue.length = 0;
+
+    // now dispatch these actions
+    queue.forEach(({ type, data }) => {
+      dispatch(type, data);
+    });
+  };
+
   // adds a new action, calls its handler and
-  const dispatch = (type, data) => {
+  const dispatch = (type, data, isBlocking) => {
+    // is blocking action
+    if (isBlocking) {
+      dispatchQueue.push({
+        type,
+        data
+      });
+      return;
+    }
+
     // if this action has a handler, handle the action
     if (actionHandlers[type]) {
       actionHandlers[type](data);
@@ -47,6 +71,7 @@ const createStore = (initialState, queries = [], actions = []) => {
   const api = {
     getState,
     processActionQueue,
+    processDispatchQueue,
     dispatch,
     query
   };
@@ -315,7 +340,7 @@ const spring =
         target = value;
 
         // already at target
-        if (position === target) {
+        if (position === target || typeof target === 'undefined') {
           // now resting as target is current position, stop moving
           resting = true;
           velocity = 0;
@@ -402,12 +427,12 @@ const tween =
               return;
             }
 
-            // want to tween to a zero value and have a current value
-            if (value === 0) {
+            // want to tween to a smaller value and have a current value
+            if (value < target) {
               target = 1;
               reverse = true;
             } else {
-              // not tweening to zero value
+              // not tweening to a smaller value
               reverse = false;
               target = value;
             }
@@ -545,13 +570,12 @@ const animations = ({
 
   // expose internal write api
   return {
-    isIdle: () => {
-      return activeAnimators === 0;
-    },
     write: ts => {
       animations.forEach(animation => {
         animation.interpolate(ts);
       });
+      // if animators are active, we're busy
+      return activeAnimators === 0;
     },
     destroy: () => {}
   };
@@ -596,7 +620,10 @@ const listeners = ({
   };
 
   return {
-    write: () => {},
+    write: () => {
+      // not busy
+      return true;
+    },
     destroy: () => {
       events.forEach(event => {
         remove(event.type, event.fn);
@@ -677,6 +704,9 @@ const styles = ({
 
       // store new transforms
       Object.assign(currentProps, ...viewProps);
+
+      // no longer busy
+      return true;
     },
     destroy: () => {}
   };
@@ -828,220 +858,241 @@ const createView =
 
     // mixins
     mixins = []
-  } = {}) =>
-    // default options for view instances
-    (
-      // each view requires reference to store
-      store,
-      // specific properties for this view
-      props = {}
-    ) =>
-      // method definition
-      {
-        // root element should not be changed
-        const element = createElement(tag, `filepond--${name}`, attributes);
+  } = {}) => (
+    // each view requires reference to store
+    store,
+    // specific properties for this view
+    props = {}
+  ) => {
+    // root element should not be changed
+    const element = createElement(tag, `filepond--${name}`, attributes);
 
-        // style reference should also not be changed
-        const style = window.getComputedStyle(element, null);
+    // style reference should also not be changed
+    const style = window.getComputedStyle(element, null);
 
-        // element rectangle
-        const rect = updateRect();
+    // element rectangle
+    const rect = updateRect();
 
-        // pretty self explanatory
-        const childViews = [];
+    // pretty self explanatory
+    const childViews = [];
 
-        // loaded mixins
-        const activeMixins = [];
+    // loaded mixins
+    const activeMixins = [];
 
-        // references to created children
-        const ref = {};
+    // references to created children
+    const ref = {};
 
-        // state used for each instance
-        const state = {};
+    // state used for each instance
+    const state = {};
 
-        // list of writers that will be called to update this view
-        const writers = [
-          write // default writer
-        ];
+    // list of writers that will be called to update this view
+    const writers = [
+      write // default writer
+    ];
 
-        const readers = [
-          read // default reader
-        ];
+    const readers = [
+      read // default reader
+    ];
 
-        const destroyers = [
-          destroy // default destroy
-        ];
+    const destroyers = [
+      destroy // default destroy
+    ];
 
-        // core view methods
-        const getElement = () => element;
-        const getChildViews = () => [...childViews];
-        const getReference = () => ref;
-        const createChildView = store => (view, props) => view(store, props);
-        const getRect = () => getViewRect(rect, childViews, [0, 0], [1, 1]);
-        const getStyle = () => style;
+    // core view methods
+    const getElement = () => element;
+    const getChildViews = () => [...childViews];
+    const getReference = () => ref;
+    const createChildView = store => (view, props) => view(store, props);
+    const getRect = () => getViewRect(rect, childViews, [0, 0], [1, 1]);
+    const getStyle = () => style;
 
-        /**
-         * Read data from DOM
-         * @private
-         */
-        const _read = () => {
-          // read child views
-          childViews.forEach(child => child._read());
+    /**
+     * Read data from DOM
+     * @private
+     */
+    const _read = () => {
+      // read child views
+      childViews.forEach(child => child._read());
 
-          // update my rectangle
-          updateRect(rect, element, style);
+      // update my rectangle
+      updateRect(rect, element, style);
 
-          // writers
-          readers.forEach(reader => reader({ root: internalAPI, rect }));
-        };
+      // writers
+      readers.forEach(reader => reader({ root: internalAPI, props, rect }));
+    };
 
-        /**
-         * Write data to DOM
-         * @private
-         */
-        const _write = (ts, frameActions = []) => {
-          // run mixins
-          activeMixins.forEach(mixin => {
-            mixin.write(ts);
-          });
+    /**
+     * Write data to DOM
+     * @private
+     */
+    const _write = (ts, frameActions = []) => {
+      // if no actions, we assume that the view is resting
+      let resting = frameActions.length === 0;
 
-          // writers
-          writers.forEach(writer =>
-            writer({
-              props,
-              root: internalAPI,
-              actions: frameActions,
-              timestamp: ts
-            })
-          );
-
-          // updates child views
-          childViews.forEach(child =>
-            child._write(ts, filterFrameActionsForChild(child, frameActions))
-          );
-
-          // append new elements to DOM
-          childViews
-            .filter(child => !child.element.parentNode)
-            .forEach((child, index) => {
-              // append to DOM
-              internalAPI.appendChild(child.element, index);
-            });
-        };
-
-        const _destroy = () => {
-          activeMixins.forEach(mixin => mixin.destroy());
-          destroyers.forEach(destroyer => destroyer({ root: internalAPI }));
-          childViews.forEach(child => child._destroy());
-        };
-
-        // sharedAPI
-        const sharedAPIDefinition = {
-          element: {
-            get: getElement
-          },
-          style: {
-            get: getStyle
-          },
-          childViews: {
-            get: getChildViews
-          }
-        };
-
-        // private API definition
-        const internalAPIDefinition = babelHelpers.extends(
-          {},
-          sharedAPIDefinition,
-          {
-            rect: {
-              get: getRect
-            },
-
-            // access to custom children references
-            ref: {
-              get: getReference
-            },
-
-            // dom modifiers
-            is: needle => name === needle,
-            appendChild: appendChild(element),
-            createChildView: createChildView(store),
-            appendChildView: appendChildView(element, childViews),
-            removeChildView: removeChildView(element, childViews),
-            registerWriter: writer => writers.push(writer),
-            registerReader: reader => readers.push(reader),
-
-            // access to data store
-            dispatch: store.dispatch,
-            query: store.query
-          }
-        );
-
-        // public view API methods
-        const externalAPIDefinition = {
-          element: {
-            get: getElement
-          },
-          childViews: {
-            get: getChildViews
-          },
-          rect: {
-            get: getRect
-          },
-          isRectIgnored: () => ignoreRect,
-          _read,
-          _write,
-          _destroy
-        };
-
-        // mixin API methods
-        const mixinAPIDefinition = babelHelpers.extends(
-          {},
-          sharedAPIDefinition,
-          {
-            rect: {
-              get: () => rect
-            }
-          }
-        );
-
-        // add mixin functionality
-        forin(mixins, (name, config) => {
-          const mixinAPI = Mixins[name]({
-            mixinConfig: config,
-            viewProps: props,
-            viewState: state,
-            viewInternalAPI: internalAPIDefinition,
-            viewExternalAPI: externalAPIDefinition,
-            view: createObject(mixinAPIDefinition)
-          });
-
-          if (mixinAPI) {
-            activeMixins.push(mixinAPI);
-          }
-        });
-
-        // construct private api
-        const internalAPI = createObject(internalAPIDefinition);
-
-        // create the view
-        create({
+      // writers
+      writers.forEach(writer => {
+        const writerResting = writer({
+          props,
           root: internalAPI,
-          props
+          actions: frameActions,
+          timestamp: ts
+        });
+        if (writerResting === false) {
+          resting = false;
+        }
+      });
+
+      // run mixins
+      activeMixins.forEach(mixin => {
+        // if one of the mixins is still busy after write operation, we are not resting
+        const mixinResting = mixin.write(ts);
+        if (mixinResting === false) {
+          resting = false;
+        }
+      });
+
+      // updates child views that are currently attached to the DOM
+      childViews.filter(child => !!child.element.parentNode).forEach(child => {
+        // if a child view is not resting, we are not resting
+        const childResting = child._write(
+          ts,
+          filterFrameActionsForChild(child, frameActions)
+        );
+        if (!childResting) {
+          resting = false;
+        }
+      });
+
+      // append new elements to DOM and update those
+      childViews
+        .filter(child => !child.element.parentNode)
+        .forEach((child, index) => {
+          // append to DOM
+          internalAPI.appendChild(child.element, index);
+
+          // call read (need to know the size of these elements)
+          child._read();
+
+          // re-call write
+          child._write(ts, frameActions);
+
+          // we just added somthing to the dom, no rest
+          resting = false;
         });
 
-        // append created child views to root node
-        const childCount = element.children.length; // need to know the current child count so appending happens in correct order
-        childViews.forEach((child, index) => {
-          internalAPI.appendChild(child.element, childCount + index);
-        });
+      // let parent know if we are resting
+      return resting;
+    };
 
-        // call did create
-        didCreateView(internalAPI);
+    const _destroy = () => {
+      activeMixins.forEach(mixin => mixin.destroy());
+      destroyers.forEach(destroyer => destroyer({ root: internalAPI }));
+      childViews.forEach(child => child._destroy());
+    };
 
-        // expose public api
-        return createObject(externalAPIDefinition, props);
-      };
+    // sharedAPI
+    const sharedAPIDefinition = {
+      element: {
+        get: getElement
+      },
+      style: {
+        get: getStyle
+      },
+      childViews: {
+        get: getChildViews
+      }
+    };
+
+    // private API definition
+    const internalAPIDefinition = babelHelpers.extends(
+      {},
+      sharedAPIDefinition,
+      {
+        rect: {
+          get: getRect
+        },
+
+        // access to custom children references
+        ref: {
+          get: getReference
+        },
+
+        // dom modifiers
+        is: needle => name === needle,
+        appendChild: appendChild(element),
+        createChildView: createChildView(store),
+        appendChildView: appendChildView(element, childViews),
+        removeChildView: removeChildView(element, childViews),
+        registerWriter: writer => writers.push(writer),
+        registerReader: reader => readers.push(reader),
+
+        // access to data store
+        dispatch: store.dispatch,
+        query: store.query
+      }
+    );
+
+    // public view API methods
+    const externalAPIDefinition = {
+      element: {
+        get: getElement
+      },
+      childViews: {
+        get: getChildViews
+      },
+      rect: {
+        get: getRect
+      },
+      isRectIgnored: () => ignoreRect,
+      _read,
+      _write,
+      _destroy
+    };
+
+    // mixin API methods
+    const mixinAPIDefinition = babelHelpers.extends({}, sharedAPIDefinition, {
+      rect: {
+        get: () => rect
+      }
+    });
+
+    // add mixin functionality
+    forin(mixins, (name, config) => {
+      const mixinAPI = Mixins[name]({
+        mixinConfig: config,
+        viewProps: props,
+        viewState: state,
+        viewInternalAPI: internalAPIDefinition,
+        viewExternalAPI: externalAPIDefinition,
+        view: createObject(mixinAPIDefinition)
+      });
+
+      if (mixinAPI) {
+        activeMixins.push(mixinAPI);
+      }
+    });
+
+    // construct private api
+    const internalAPI = createObject(internalAPIDefinition);
+
+    // create the view
+    create({
+      root: internalAPI,
+      props
+    });
+
+    // append created child views to root node
+    const childCount = element.children.length; // need to know the current child count so appending happens in correct order
+    childViews.forEach((child, index) => {
+      internalAPI.appendChild(child.element, childCount + index);
+    });
+
+    // call did create
+    didCreateView(internalAPI);
+
+    // expose public api
+    return createObject(externalAPIDefinition, props);
+  };
 
 const createPainter = (update, fps = 60) => {
   const interval = 1000 / fps;
@@ -1232,7 +1283,7 @@ const createServerAPI = outline => {
   const api = {};
 
   api.url = isString(outline) ? outline : outline.url || '';
-  api.timeout = outline.timeout || 7000;
+  api.timeout = outline.timeout ? parseInt(outline.timeout, 10) : 7000;
 
   forin(methods, key => {
     api[key] = createAction(key, outline[key], methods[key], api.timeout);
@@ -1717,16 +1768,13 @@ const options = {
   oninit: [null, Type.FUNCTION],
   onwarning: [null, Type.FUNCTION],
   onerror: [null, Type.FUNCTION],
-
   onaddfilestart: [null, Type.FUNCTION],
   onaddfileprogress: [null, Type.FUNCTION],
   onaddfile: [null, Type.FUNCTION],
-
   onprocessfilestart: [null, Type.FUNCTION],
   onprocessfileprogress: [null, Type.FUNCTION],
   onprocessfileabort: [null, Type.FUNCTION],
   onprocessfilerevert: [null, Type.FUNCTION],
-
   onremovefile: [null, Type.FUNCTION],
 
   // custom initial files array
@@ -2320,7 +2368,7 @@ const createFetchFunction = (apiUrl = '', action) => {
 
 /*
 function signature:
-  (file, load, error, progress, abort) => {
+  (data, load, error, progress, abort) => {
     return {
     abort:() => {}
   }
@@ -2329,7 +2377,7 @@ function signature:
 const createProcessorFunction = (apiUrl = '', action, name) => {
   // custom handler (should also handle file, load, error, progress and abort)
   if (typeof action === 'function') {
-    return action;
+    return (...params) => action(name, ...params);
   }
 
   // no action supplied
@@ -2338,18 +2386,23 @@ const createProcessorFunction = (apiUrl = '', action, name) => {
   }
 
   // internal handler
-  return (file, load, error, progress, abort) => {
+  return (file, metadata, load, error, progress, abort) => {
     // no file received
     if (!file) {
       return;
     }
 
     // create formdata object
-    var fd = new FormData();
-    fd.append(name, file, file.name);
+    var formData = new FormData();
+    formData.append(name, file, file.name);
+
+    // add metadata uder same name
+    if (isObject(metadata)) {
+      formData.append(name, JSON.stringify(metadata));
+    }
 
     // send request object
-    const request = sendRequest(fd, apiUrl + action.url, action);
+    const request = sendRequest(formData, apiUrl + action.url, action);
     request.onload = load;
     request.onerror = error;
     request.onprogress = progress;
@@ -2441,8 +2494,15 @@ const createFileProcessor = processFn => {
     response: null
   };
 
-  const process = publicFile => {
+  const process = (file, metadata) => {
     const progressFn = () => {
+      // we've not yet started the real download, stop here
+      // the request might not go through, server trouble, stuff like that
+      if (state.duration === 0) {
+        return;
+      }
+
+      // as we're now processing, fire the progress event
       api.fire('progress', api.getProgress());
     };
 
@@ -2463,6 +2523,7 @@ const createFileProcessor = processFn => {
       progress => {
         state.perceivedProgress = progress;
         state.perceivedDuration = Date.now() - state.timestamp;
+
         progressFn();
 
         // if fake progress is done, and a response has been received,
@@ -2470,18 +2531,19 @@ const createFileProcessor = processFn => {
         if (progress === 1 && state.response && !state.complete) {
           completeFn();
         }
-
-        // random delay as in a list of files you start noticing
-        // files uploading at the exact same speed
       },
+      // random delay as in a list of files you start noticing
+      // files uploading at the exact same speed
       getRandomNumber(750, 1500)
     );
 
     // remember request so we can abort it later
     state.request = processFn(
-      // wrap file in public wrapper as this is also sent to
-      // custom user process function
-      publicFile,
+      // the file to process
+      file,
+
+      // the metadata to send along
+      metadata,
 
       // callbacks (load, error, progress, abort)
       // load expects the body to be a server id if
@@ -2526,7 +2588,7 @@ const createFileProcessor = processFn => {
         );
       },
 
-      //
+      // actual processing progress
       (computable, current, total) => {
         // update actual duration
         state.duration = Date.now() - state.timestamp;
@@ -2656,6 +2718,11 @@ const createItem = (serverFileReference = null) => {
     activeProcessor: null
   };
 
+  /**
+   * Externally added item metadata
+   */
+  const metadata = {};
+
   // item data
   const setStatus = status => (state.status = status);
 
@@ -2663,13 +2730,6 @@ const createItem = (serverFileReference = null) => {
   const getFileExtension = () => getExtensionFromFilename(state.file.name);
   const getFileType = () => state.file.type;
   const getFileSize = () => state.file.size;
-  const getFileURL = () => {
-    const url = URL.createObjectURL(state.file);
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-    }, 0);
-    return url;
-  };
   const getFile = () => state.file;
 
   // loads files
@@ -2733,6 +2793,15 @@ const createItem = (serverFileReference = null) => {
         api.fire('load');
       };
 
+      const error = result => {
+        // set original file
+        state.file = file;
+        api.fire('load-meta');
+
+        setStatus(ItemStatus.LOAD_ERROR);
+        api.fire('load-file-error', result);
+      };
+
       // if we already have a server file reference, we don't need to call the onload method
       if (state.serverFileReference) {
         success(file);
@@ -2740,32 +2809,25 @@ const createItem = (serverFileReference = null) => {
       }
 
       // no server id, let's give this file the full treatment
-      onload(file, success, error => {
-        // set original file
-        state.file = file;
-        api.fire('load-meta');
-
-        setStatus(ItemStatus.LOAD_ERROR);
-        api.fire('load-file-error', error);
-      });
+      onload(file, success, error);
     });
 
     // set loader source data
     loader.setSource(source);
 
-    // load the source data
-    loader.load();
-
     // set as active loader
     state.activeLoader = loader;
+
+    // load the source data
+    loader.load();
   };
 
   // file processor
-  const process = processor => {
+  const process = (processor, onprocess) => {
     // if no file loaded we'll wait for the load event
     if (!(state.file instanceof Blob)) {
       api.on('load', () => {
-        process(processor);
+        process(processor, onprocess);
       });
       return;
     }
@@ -2808,8 +2870,16 @@ const createItem = (serverFileReference = null) => {
       api.fire('process-progress', progress);
     });
 
+    // when successfully transformed
+    const success = file => {
+      processor.process(file, babelHelpers.extends({}, metadata));
+    };
+
+    // something went wrong during transform phase
+    const error = result => {};
+
     // start processing the file
-    processor.process(state.file);
+    onprocess(state.file, success, error);
 
     // set as active processor
     state.activeProcessor = processor;
@@ -2873,8 +2943,11 @@ const createItem = (serverFileReference = null) => {
       fileExtension: { get: getFileExtension },
       fileType: { get: getFileType },
       fileSize: { get: getFileSize },
-      fileURL: { get: getFileURL },
       file: { get: getFile },
+
+      getMetadata: name =>
+        name ? metadata[name] : babelHelpers.extends({}, metadata),
+      setMetadata: (name, value) => (metadata[name] = value),
 
       abortLoad,
       retryLoad,
@@ -2949,6 +3022,7 @@ const isExternalURL = url =>
   (url.indexOf(':') > -1 || url.indexOf('//') > -1) &&
   getDomainFromURL(location.href) !== getDomainFromURL(url);
 
+// returns item based on state
 const getItemByQueryFromState = (state, itemHandler) => ({
   query,
   success = () => {},
@@ -3100,7 +3174,10 @@ const actions = (dispatch, query, state) => ({
     });
 
     item.on('load-file-error', error => {
-      dispatch('DID_THROW_ITEM_INVALID', { id, status: error });
+      dispatch(
+        'DID_THROW_ITEM_INVALID',
+        babelHelpers.extends({}, error, { id })
+      );
     });
 
     item.on('load-abort', () => {
@@ -3108,35 +3185,38 @@ const actions = (dispatch, query, state) => ({
     });
 
     item.on('load', () => {
-      // let interface know the item has loaded
-      dispatch('DID_LOAD_ITEM', {
-        id,
-        serverFileReference: isServerFile ? source : null
-      });
-
-      // item has been successfully loaded and added to the
-      // list of items so can now be safely returned for use
-      success(createItemAPI(item));
-
-      // if this is a local server file we need to show a different state
-      if (isLocalServerFile) {
-        dispatch('DID_LOAD_LOCAL_ITEM', { id });
-        return;
-      }
-
-      // if is a temp server file we prevent async upload call here (as the file is already on the server)
-      if (isLimboServerFile) {
-        dispatch('DID_COMPLETE_ITEM_PROCESSING', {
+      // item loaded, allow filters to alter it
+      applyFilterChain('DID_LOAD_ITEM', item, { query }).then(() => {
+        // let interface know the item has loaded
+        dispatch('DID_LOAD_ITEM', {
           id,
-          serverFileReference: source
+          serverFileReference: isServerFile ? source : null
         });
-        return;
-      }
 
-      // id we are allowed to upload the file immidiately, lets do it
-      if (query('IS_ASYNC') && state.options.instantUpload) {
-        dispatch('PROCESS_ITEM', { query: id });
-      }
+        // item has been successfully loaded and added to the
+        // list of items so can now be safely returned for use
+        success(createItemAPI(item));
+
+        // if this is a local server file we need to show a different state
+        if (isLocalServerFile) {
+          dispatch('DID_LOAD_LOCAL_ITEM', { id });
+          return;
+        }
+
+        // if is a temp server file we prevent async upload call here (as the file is already on the server)
+        if (isLimboServerFile) {
+          dispatch('DID_COMPLETE_ITEM_PROCESSING', {
+            id,
+            serverFileReference: source
+          });
+          return;
+        }
+
+        // id we are allowed to upload the file immidiately, lets do it
+        if (query('IS_ASYNC') && state.options.instantUpload) {
+          dispatch('REQUEST_ITEM_PROCESSING', { query: id });
+        }
+      });
     });
 
     item.on('process-start', () => {
@@ -3158,8 +3238,13 @@ const actions = (dispatch, query, state) => ({
     });
 
     item.on('process-abort', serverFileReference => {
-      // we stopped processing
-      dispatch('DID_ABORT_ITEM_PROCESSING', { id });
+      // if we're instant uploading, the item is removed
+      if (state.options.instantUpload) {
+        dispatch('REMOVE_ITEM', { query: id });
+      } else {
+        // we stopped processing
+        dispatch('DID_ABORT_ITEM_PROCESSING', { id });
+      }
 
       // we'll revert any processed items
       dispatch('REVERT_ITEM_PROCESSING', { query: id });
@@ -3180,6 +3265,9 @@ const actions = (dispatch, query, state) => ({
         dispatch('DID_REVERT_ITEM_PROCESSING', { id });
       }
     });
+
+    // let view know the item has been inserted
+    dispatch('DID_ADD_ITEM', { id, index, interactionMethod });
 
     // start loading the source
     const { url, load, restore, fetch } = state.options.server || {};
@@ -3205,14 +3293,19 @@ const actions = (dispatch, query, state) => ({
           .catch(error);
       }
     );
-
-    // let view know the item has been inserted
-    dispatch('DID_ADD_ITEM', { id, index, interactionMethod });
   },
 
   RETRY_ITEM_LOAD: getItemByQueryFromState(state, item => {
     // try loading the source one more time
     item.retryLoad();
+  }),
+
+  REQUEST_ITEM_PROCESSING: getItemByQueryFromState(state, item => {
+    const id = item.id;
+
+    dispatch('DID_REQUEST_ITEM_PROCESSING', { id });
+
+    dispatch('PROCESS_ITEM', { query: item }, true);
   }),
 
   PROCESS_ITEM: getItemByQueryFromState(state, (item, success, failure) => {
@@ -3234,12 +3327,22 @@ const actions = (dispatch, query, state) => ({
           state.options.server.process,
           state.options.name
         )
-      )
+      ),
+      // called when the file is about to be processed so it can be piped through the transform filters
+      (file, success, error) => {
+        // allow plugins to alter the file data
+        applyFilterChain('PREPARE_OUTPUT', file, {
+          query,
+          item
+        })
+          .then(success)
+          .catch(error);
+      }
     );
   }),
 
   RETRY_ITEM_PROCESSING: getItemByQueryFromState(state, item => {
-    dispatch('PROCESS_ITEM', { query: item });
+    dispatch('REQUEST_ITEM_PROCESSING', { query: item });
   }),
 
   REMOVE_ITEM: getItemByQueryFromState(state, (item, success) => {
@@ -3312,17 +3415,16 @@ const text = (node, value) => {
 };
 
 const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
-  const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+  const angleInRadians = (angleInDegrees % 360 - 90) * Math.PI / 180.0;
   return {
     x: centerX + radius * Math.cos(angleInRadians),
     y: centerY + radius * Math.sin(angleInRadians)
   };
 };
 
-const describeArc = (x, y, radius, startAngle, endAngle) => {
+const describeArc = (x, y, radius, startAngle, endAngle, arcSweep) => {
   const start = polarToCartesian(x, y, radius, endAngle);
   const end = polarToCartesian(x, y, radius, startAngle);
-  const arcSweep = endAngle - startAngle <= 180 ? '0' : '1';
   return [
     'M',
     start.x,
@@ -3338,13 +3440,27 @@ const describeArc = (x, y, radius, startAngle, endAngle) => {
   ].join(' ');
 };
 
-const percentageArc = (x, y, radius, offset, amount) =>
-  describeArc(x, y, radius, offset * 360, amount * 360);
+const percentageArc = (x, y, radius, from, to) => {
+  let arcSweep = 1;
+  if (to > from && to - from <= 0.5) {
+    arcSweep = 0;
+  }
+  if (from > to && from - to >= 0.5) {
+    arcSweep = 0;
+  }
+  return describeArc(
+    x,
+    y,
+    radius,
+    Math.min(0.9999, from) * 360,
+    Math.min(0.9999, to) * 360,
+    arcSweep
+  );
+};
 
 const create$7 = ({ root, props }) => {
   // start at 0
   props.progress = 0;
-  props.offset = null;
   props.opacity = 0;
 
   // svg
@@ -3355,10 +3471,12 @@ const create$7 = ({ root, props }) => {
   });
   svg.appendChild(root.ref.path);
 
+  root.ref.svg = svg;
+
   root.appendChild(svg);
 };
 
-const write$4 = ({ root, props, timestamp }) => {
+const write$4 = ({ root, props }) => {
   if (props.opacity === 0) {
     return;
   }
@@ -3369,21 +3487,29 @@ const write$4 = ({ root, props, timestamp }) => {
   // calculate size of ring
   const size = root.rect.element.width * 0.5;
 
-  if (!props.offset) {
-    props.offset = timestamp;
+  // spin mode?
+  const spinning = props.progress === null;
+
+  // ring state
+  let ringFrom = 0;
+  let ringTo = 0;
+
+  // now in busy mode
+  if (spinning) {
+    ringFrom = 0;
+    ringTo = 0.5;
+  } else {
+    ringFrom = 0;
+    ringTo = props.progress;
   }
-  const duration = timestamp - props.offset;
 
-  // spin mode!
-  const offset = props.progress === null ? duration * 0.001 : 0;
-
-  // get path
+  // get arc path
   const coordinates = percentageArc(
     size,
     size,
     size - ringStrokeWidth,
-    offset,
-    props.progress === null ? offset + 0.5 : Math.min(0.999999, props.progress)
+    ringFrom,
+    ringTo
   );
 
   // update progress bar
@@ -3401,7 +3527,7 @@ const progressIndicator = createView({
   write: write$4,
   mixins: {
     apis: ['progress'],
-    styles: ['opacity', 'rotateZ'],
+    styles: ['opacity'],
     animations: {
       opacity: { type: 'tween', duration: 500 },
       progress: {
@@ -3588,6 +3714,11 @@ const didSetItemProcessProgress = ({ root, action }) => {
   text(root.ref.sub, root.query('GET_LABEL_TAP_TO_CANCEL'));
 };
 
+const didRequestItemProcessing = ({ root }) => {
+  text(root.ref.main, root.query('GET_LABEL_FILE_PROCESSING'));
+  text(root.ref.sub, root.query('GET_LABEL_TAP_TO_CANCEL'));
+};
+
 const didAbortItemProcessing = ({ root }) => {
   text(root.ref.main, root.query('GET_LABEL_FILE_PROCESSING_ABORTED'));
   text(root.ref.sub, root.query('GET_LABEL_TAP_TO_RETRY'));
@@ -3613,6 +3744,7 @@ const fileStatus = createView({
   ignoreRect: true,
   write: createRoute({
     DID_LOAD_ITEM: didLoadItem$1,
+    DID_REQUEST_ITEM_PROCESSING: didRequestItemProcessing,
     DID_ABORT_ITEM_PROCESSING: didAbortItemProcessing,
     DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing$1,
     DID_UPDATE_ITEM_PROCESS_PROGRESS: didSetItemProcessProgress,
@@ -3655,7 +3787,7 @@ const Buttons = {
   },
   ProcessItem: {
     label: 'GET_LABEL_BUTTON_PROCESS_ITEM',
-    action: 'PROCESS_ITEM',
+    action: 'REQUEST_ITEM_PROCESSING',
     icon: 'GET_ICON_PROCESS',
     className: 'filepond--action-process-item'
   },
@@ -3687,9 +3819,6 @@ forin(Buttons, key => {
  * Creates the file view
  */
 const create$6 = ({ root, props }) => {
-  // list of all buttons
-  root.ref.controls = [];
-
   // create file info view
   root.ref.info = root.appendChildView(
     root.createChildView(fileInfo, { id: props.id })
@@ -3727,11 +3856,8 @@ const create$6 = ({ root, props }) => {
       root.dispatch(definition.action, { query: props.id });
     });
 
-    // add to reference
+    // set reference
     root.ref[`button${key}`] = buttonView;
-
-    // add to buttons list
-    root.ref.controls.push(buttonView);
   });
 
   // add progress indicators
@@ -3748,160 +3874,120 @@ const create$6 = ({ root, props }) => {
   root.ref.processProgressIndicator.element.classList.add(
     'filepond--process-indicator'
   );
-
-  // add progress indicators to control list
-  root.ref.controls.push(
-    root.ref.loadProgressIndicator,
-    root.ref.processProgressIndicator
-  );
-
-  // add file status and info views
-  root.ref.controls.push(root.ref.info, root.ref.status);
 };
 
 const calculateFileInfoOffset = root =>
   root.ref.buttonRemoveItem.rect.element.width +
   root.ref.buttonRemoveItem.rect.element.left;
 
-const idleState = [
-  { opacity: 0 }, // button abort load
-  { opacity: 0 }, // button retry load
-  { opacity: 1 }, // button remove item
-  { opacity: 1 }, // button process item
-  { opacity: 0 }, // button abort processing
-  { opacity: 0 }, // button retry processing
-  { opacity: 0 }, // button revert processing
-  { opacity: 0 }, // indicator loading
-  { opacity: 0 }, // indicator processing
-  { translateX: calculateFileInfoOffset }, // file info
-  {
-    translateX: calculateFileInfoOffset,
-    opacity: 0 // file status
+const DefaultStyle = {
+  buttonAbortItemLoad: { opacity: 0 },
+  buttonRetryItemLoad: { opacity: 0 },
+  buttonRemoveItem: { opacity: 0 },
+  buttonProcessItem: { opacity: 0 },
+  buttonAbortItemProcessing: { opacity: 0 },
+  buttonRetryItemProcessing: { opacity: 0 },
+  buttonRevertItemProcessing: { opacity: 0 },
+  loadProgressIndicator: { opacity: 0 },
+  processProgressIndicator: { opacity: 0 },
+  info: { translateX: 0, opacity: 0 },
+  status: { translateX: 0, opacity: 0 }
+};
+
+const IdleStyle = {
+  buttonRemoveItem: { opacity: 1 },
+  buttonProcessItem: { opacity: 1 },
+  info: { translateX: calculateFileInfoOffset },
+  status: { translateX: calculateFileInfoOffset }
+};
+
+const ProcessingStyle = {
+  buttonAbortItemProcessing: { opacity: 1 },
+  processProgressIndicator: { opacity: 1 },
+  status: { opacity: 1 }
+};
+
+const StateMap = {
+  DID_THROW_ITEM_INVALID: {
+    style: {
+      buttonRemoveItem: { opacity: 1 },
+      info: { translateX: calculateFileInfoOffset },
+      status: { translateX: calculateFileInfoOffset, opacity: 1 }
+    },
+    state: 'load-invalid'
+  },
+
+  DID_START_ITEM_LOAD: {
+    style: {
+      buttonAbortItemLoad: { opacity: 1 },
+      loadProgressIndicator: { opacity: 1 },
+      status: { opacity: 1 }
+    }
+  },
+
+  DID_THROW_ITEM_LOAD_ERROR: {
+    style: {
+      buttonRetryItemLoad: { opacity: 1 },
+      buttonRemoveItem: { opacity: 1 },
+      info: { translateX: calculateFileInfoOffset },
+      status: { opacity: 1 }
+    },
+    state: 'load-error'
+  },
+
+  DID_LOAD_ITEM: {
+    style: IdleStyle
+  },
+
+  DID_LOAD_LOCAL_ITEM: {
+    style: {
+      buttonRemoveItem: { opacity: 1 },
+      info: { translateX: calculateFileInfoOffset },
+      status: { translateX: calculateFileInfoOffset }
+    }
+  },
+
+  DID_START_ITEM_PROCESSING: {
+    style: ProcessingStyle,
+    state: 'busy'
+  },
+
+  DID_REQUEST_ITEM_PROCESSING: {
+    style: ProcessingStyle,
+    state: 'busy'
+  },
+
+  DID_UPDATE_ITEM_PROCESS_PROGRESS: {
+    style: ProcessingStyle,
+    state: 'processing'
+  },
+
+  DID_COMPLETE_ITEM_PROCESSING: {
+    style: {
+      buttonRevertItemProcessing: { opacity: 1 },
+      info: { opacity: 1 },
+      status: { opacity: 1 }
+    },
+    file: 'processing-complete'
+  },
+
+  DID_THROW_ITEM_PROCESSING_ERROR: {
+    style: {
+      buttonRemoveItem: { opacity: 1 },
+      buttonRetryItemProcessing: { opacity: 1 },
+      status: { opacity: 1 },
+      info: { translateX: calculateFileInfoOffset }
+    },
+    state: 'processing-error'
+  },
+
+  DID_ABORT_ITEM_PROCESSING: {
+    style: IdleStyle
+  },
+
+  DID_REVERT_ITEM_PROCESSING: {
+    style: IdleStyle
   }
-];
-
-const actionStates = {
-  DID_THROW_ITEM_INVALID: [
-    { opacity: 0 }, // button abort load
-    { opacity: 0 }, // button retry load
-    { opacity: 1 }, // button remove item
-    { opacity: 0 }, // button process item
-    { opacity: 0 }, // button abort processing
-    { opacity: 0 }, // button retry processing
-    { opacity: 0 }, // button revert processing
-    { opacity: 0 }, // indicator loading
-    { opacity: 0 }, // indicator processing
-    { translateX: calculateFileInfoOffset }, // file info
-    {
-      translateX: calculateFileInfoOffset,
-      opacity: 1 // file status
-    }
-  ],
-  DID_START_ITEM_LOAD: [
-    { opacity: 1 }, // button abort load
-    { opacity: 0 }, // button retry load
-    { opacity: 0 }, // button remove item
-    { opacity: 0 }, // button process item
-    { opacity: 0 }, // button abort processing
-    { opacity: 0 }, // button retry processing
-    { opacity: 0 }, // button revert processing
-    { opacity: 1 }, // indicator loading
-    { opacity: 0 }, // indicator processing
-    { translateX: 0 }, // file info
-    {
-      translateX: 0,
-      opacity: 1 // file status
-    }
-  ],
-  DID_THROW_ITEM_LOAD_ERROR: [
-    { opacity: 0 }, // button abort load
-    { opacity: 1 }, // button retry load
-    { opacity: 1 }, // button remove item
-    { opacity: 0 }, // button process item
-    { opacity: 0 }, // button abort processing
-    { opacity: 0 }, // button retry processing
-    { opacity: 0 }, // button revert processing
-    { opacity: 0 }, // indicator loading
-    { opacity: 0 }, // indicator processing
-    { translateX: calculateFileInfoOffset }, // file info
-    {
-      translateX: 0,
-      opacity: 1 // file status
-    }
-  ],
-
-  DID_LOAD_ITEM: idleState,
-
-  DID_LOAD_LOCAL_ITEM: [
-    { opacity: 0 }, // button abort load
-    { opacity: 0 }, // button retry load
-    { opacity: 1 }, // button remove item
-    { opacity: 0 }, // button process item
-    { opacity: 0 }, // button abort processing
-    { opacity: 0 }, // button retry processing
-    { opacity: 0 }, // button revert processing
-    { opacity: 0 }, // indicator loading
-    { opacity: 0 }, // indicator processing
-    { translateX: calculateFileInfoOffset, opacity: 0 }, // file info
-    {
-      translateX: calculateFileInfoOffset,
-      opacity: 0 // file status
-    }
-  ],
-
-  DID_START_ITEM_PROCESSING: [
-    { opacity: 0 }, // button abort load
-    { opacity: 0 }, // button retry load
-    { opacity: 0 }, // button remove item
-    { opacity: 0 }, // button process item
-    { opacity: 1 }, // button abort processing
-    { opacity: 0 }, // button retry processing
-    { opacity: 0 }, // button revert processing
-    { opacity: 0 }, // indicator loading
-    { opacity: 1 }, // indicator processing
-    { translateX: 0 }, // file info
-    {
-      translateX: 0,
-      opacity: 1 // file status
-    }
-  ],
-
-  DID_ABORT_ITEM_PROCESSING: idleState,
-
-  DID_THROW_ITEM_PROCESSING_ERROR: [
-    { opacity: 0 }, // button abort load
-    { opacity: 0 }, // button retry load
-    { opacity: 1 }, // button remove item
-    { opacity: 0 }, // button process item
-    { opacity: 0 }, // button abort processing
-    { opacity: 1 }, // button retry processing
-    { opacity: 0 }, // button revert processing
-    { opacity: 0 }, // indicator loading
-    { opacity: 0 }, // indicator processing
-    { translateX: calculateFileInfoOffset }, // file info
-    {
-      translateX: 0,
-      opacity: 1 // file status
-    }
-  ],
-  DID_COMPLETE_ITEM_PROCESSING: [
-    { opacity: 0 }, // button abort load
-    { opacity: 0 }, // button retry load
-    { opacity: 0 }, // button remove item
-    { opacity: 0 }, // button process item
-    { opacity: 0 }, // button abort processing
-    { opacity: 0 }, // button retry processing
-    { opacity: 1 }, // button revert processing
-    { opacity: 0 }, // indicator loading
-    { opacity: 0 }, // indicator processing
-    { translateX: 0 }, // file info
-    {
-      translateX: 0,
-      opacity: 1 // file status
-    }
-  ],
-
-  DID_REVERT_ITEM_PROCESSING: idleState
 };
 
 const write$3 = ({ root, actions, props }) => {
@@ -3909,34 +3995,39 @@ const write$3 = ({ root, actions, props }) => {
   route$3({ root, actions, props });
 
   // select last state change action
-  let action = [...actions].reverse().find(action => actionStates[action.type]);
+  let action = [...actions]
+    .filter(action => /^DID_/.test(action.type))
+    .reverse()
+    .find(action => StateMap[action.type]);
+
+  // no need to set same state twice
+  if (!action || (action && action.type === props.currentState)) {
+    return;
+  }
 
   // set current state
-  props.currentState = actionStates[(action || {}).type] || props.currentState;
+  props.currentState = action.type;
+  const currentState = StateMap[props.currentState];
 
   // set state
-  if (action) {
-    if (action.type === 'DID_COMPLETE_ITEM_PROCESSING') {
-      root.element.dataset.fileState = 'processing-complete';
-    } else if (action.type === 'DID_THROW_ITEM_INVALID') {
-      root.element.dataset.fileState = 'load-invalid';
-    } else if (action.type === 'DID_THROW_ITEM_LOAD_ERROR') {
-      root.element.dataset.fileState = 'load-error';
-    } else if (action.type === 'DID_THROW_ITEM_PROCESSING_ERROR') {
-      root.element.dataset.fileState = 'processing-error';
-    } else {
-      root.element.dataset.fileState = '';
-    }
-  }
+  root.element.dataset.fileState = currentState.state || '';
 
-  // get state
-  if (props.currentState) {
-    root.ref.controls.forEach((view, index) => {
-      forin(props.currentState[index], (key, value) => {
-        view[key] = typeof value === 'function' ? value(root) : value;
-      });
+  // get new styles
+  const newStyles = currentState.style;
+
+  forin(DefaultStyle, (name, defaultStyles) => {
+    // get reference to control
+    const control = root.ref[name];
+
+    // loop over all styles for this control
+    forin(defaultStyles, (key, defaultValue) => {
+      const value =
+        newStyles[name] && typeof newStyles[name][key] !== 'undefined'
+          ? newStyles[name][key]
+          : defaultValue;
+      control[key] = typeof value === 'function' ? value(root) : value;
     });
-  }
+  });
 };
 
 const route$3 = createRoute({
@@ -3945,6 +4036,9 @@ const route$3 = createRoute({
   },
   DID_SET_LABEL_BUTTON_ABORT_ITEM_LOAD: ({ root, action }) => {
     root.ref.buttonAbortItemLoad.label = action.value;
+  },
+  DID_REQUEST_ITEM_PROCESSING: ({ root, action }) => {
+    root.ref.processProgressIndicator.progress = null;
   },
   DID_UPDATE_ITEM_LOAD_PROGRESS: ({ root, action }) => {
     root.ref.loadProgressIndicator.progress = action.progress;
@@ -3980,7 +4074,7 @@ const create$5 = ({ root, props }) => {
   const dataContainer = createElement$1('input');
   dataContainer.type = 'hidden';
   dataContainer.name = root.query('GET_NAME');
-  root.ref.dataContainer = dataContainer;
+  root.ref.data = dataContainer;
   root.appendChild(dataContainer);
 };
 
@@ -3988,7 +4082,7 @@ const create$5 = ({ root, props }) => {
  * Data storage
  */
 const didLoadItem = ({ root, action, props }) => {
-  root.ref.dataContainer.value = action.serverFileReference;
+  root.ref.data.value = action.serverFileReference;
 
   // updates the legend of the fieldset so screenreaders can better group buttons
   text(
@@ -3998,15 +4092,15 @@ const didLoadItem = ({ root, action, props }) => {
 };
 
 const didRemoveItem = ({ root, action }) => {
-  root.ref.dataContainer.removeAttribute('value');
+  root.ref.data.removeAttribute('value');
 };
 
 const didCompleteItemProcessing = ({ root, action }) => {
-  root.ref.dataContainer.value = action.serverFileReference;
+  root.ref.data.value = action.serverFileReference;
 };
 
 const didRevertItemProcessing = ({ root, action }) => {
-  root.ref.dataContainer.removeAttribute('value');
+  root.ref.data.removeAttribute('value');
 };
 
 const fileWrapper = createView({
@@ -4017,6 +4111,9 @@ const fileWrapper = createView({
     DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing,
     DID_REVERT_ITEM_PROCESSING: didRevertItemProcessing
   }),
+  didCreateView: root => {
+    applyFilters('CREATE_VIEW', babelHelpers.extends({}, root, { view: root }));
+  },
   tag: 'fieldset',
   name: 'file-wrapper'
 });
@@ -4083,20 +4180,21 @@ const addItemView = ({ root, action }) => {
     animation.translateY = null;
   }
 
-  const listItem = root.createChildView(
-    // view type
-    item,
+  root.appendChildView(
+    root.createChildView(
+      // view type
+      item,
 
-    // props
-    babelHelpers.extends(
-      {
-        id
-      },
-      animation
-    )
+      // props
+      babelHelpers.extends(
+        {
+          id
+        },
+        animation
+      )
+    ),
+    index
   );
-
-  root.appendChildView(listItem, index);
 };
 
 /**
@@ -4162,43 +4260,45 @@ const write$2 = ({ root, props, actions }) => {
   // route actions
   route$2({ root, props, actions });
 
+  let resting = true;
+
   // update item positions
   let offset = 0;
-  root.childViews
+  root.childViews.forEach((child, childIndex) => {
+    const childRect = child.rect;
 
-    // let's go!
-    .forEach((child, childIndex) => {
-      const rect = child.rect;
+    // set this child offset
+    child.translateX = 0;
+    child.translateY =
+      offset +
+      (props.dragIndex > -1
+        ? dragTranslation(childIndex, props.dragIndex, 10)
+        : 0);
 
-      // set this child offset
-      child.translateX = 0;
-      child.translateY =
-        offset +
-        (props.dragIndex > -1
-          ? dragTranslation(childIndex, props.dragIndex, 10)
-          : 0);
+    // show child if it's not marked for removal
+    if (!child.markedForRemoval) {
+      child.scaleX = 1;
+      child.scaleY = 1;
+      child.opacity = 1;
+    }
 
-      // show child if it's not marked for removal
-      if (!child.markedForRemoval) {
-        child.scaleX = 1;
-        child.scaleY = 1;
-        child.opacity = 1;
-      }
-
-      // calculate next child offset (reduce height by y scale for views that are being removed)
-      offset += rect.outer.height;
-    });
+    // calculate next child offset (reduce height by y scale for views that are being removed)
+    offset += childRect.outer.height;
+  });
 
   // remove marked views
   root.childViews
     .filter(view => view.markedForRemoval && view.opacity === 0)
     .forEach(view => {
       root.removeChildView(view);
+      resting = false;
     });
+
+  return resting;
 };
 
 /**
- * Filters SET_ITEM actions that are meant specifically for a certain child of the list
+ * Filters actions that are meant specifically for a certain child of the list
  * @param child
  * @param actions
  */
@@ -4897,8 +4997,8 @@ const isEventTarget = (e, target) => {
 
   // get element at position
   const elementAtPosition = root.elementFromPoint(
-    e.pageX - window.scrollX,
-    e.pageY - window.scrollY
+    e.pageX - window.pageXOffset,
+    e.pageY - window.pageYOffset
   );
 
   // test if target is the element or if one of its children is
@@ -5717,6 +5817,7 @@ const createApp$1 = () => {
   //
   // PRIVATE API -------------------------------------------------------------------------------------
   //
+  let resting = false;
   const readWriteApi = {
     // necessary for update loop
 
@@ -5725,6 +5826,12 @@ const createApp$1 = () => {
      * @private
      */
     _read: () => {
+      // if resting, no need to read as numbers will still all be correct
+      if (resting) {
+        return;
+      }
+
+      // read view data
       view._read();
     },
 
@@ -5733,11 +5840,26 @@ const createApp$1 = () => {
      * @private
      */
     _write: ts => {
+      // get all actions from store
       const actions$$1 = store
         .processActionQueue()
         .filter(action => !/^SET_/.test(action.type));
+
+      // if was idling and no actions stop here
+      if (resting && !actions$$1.length) {
+        return;
+      }
+
+      // some actions might trigger events
       routeActionsToEvents(actions$$1);
-      view._write(ts, actions$$1);
+
+      // update the view
+      resting = view._write(ts, actions$$1);
+
+      // now idling
+      if (resting) {
+        store.processDispatchQueue();
+      }
     }
   };
 
@@ -6177,8 +6299,8 @@ const createAppAtElement = (element, options = {}) => {
   // how attributes of the input element are mapped to the options for the plugin
   const attributeMapping = {
     // translate to other name
-    multiple: 'allowMultiple',
-    capture: 'captureMethod',
+    '^multiple$': 'allowMultiple',
+    '^capture$': 'captureMethod',
 
     // group under single property
     '^server': {
@@ -6203,9 +6325,9 @@ const createAppAtElement = (element, options = {}) => {
     },
 
     // don't include in object
-    id: false,
-    type: false,
-    files: false
+    '^id$': false,
+    '^type$': false,
+    '^files$': false
   };
 
   // add additional option translators
@@ -6296,22 +6418,29 @@ const createWorker = fn => {
   });
   const workerURL = URL.createObjectURL(workerBlob);
   const worker = new Worker(workerURL);
-  URL.revokeObjectURL(workerURL);
 
   return {
-    post: (message, cb) => {
-      const messageId = getUniqueId();
+    transfer: (message, cb) => {},
+    post: (message, cb, transferList) => {
+      const id = getUniqueId();
 
       worker.onmessage = e => {
-        if (e.data.id === messageId) {
+        if (e.data.id === id) {
           cb(e.data.message);
         }
       };
 
-      worker.postMessage({
-        id: messageId,
-        message: message
-      });
+      worker.postMessage(
+        {
+          id,
+          message
+        },
+        transferList
+      );
+    },
+    terminate: () => {
+      worker.terminate();
+      URL.revokeObjectURL(workerURL);
     }
   };
 };
@@ -6337,18 +6466,22 @@ const createAppPlugin = plugin => {
     addFilter,
     utils: {
       Type,
+      forin,
       isString,
       toNaturalFileSize,
       replaceInString,
       getExtensionFromFilename,
+      getFilenameWithoutExtension,
       guesstimateMimeType,
+      getFileFromBlob,
       getFilenameFromURL,
       createRoute,
       createWorker,
       createView,
       loadImage,
       copyFile,
-      renameFile
+      renameFile,
+      applyFilterChain
     },
     views: {
       panel
@@ -6471,6 +6604,7 @@ const hasBlobSlice = () => 'slice' in Blob.prototype;
 const hasCreateObjectURL = () =>
   'URL' in window && 'createObjectURL' in window.URL;
 const hasVisibility = () => 'visibilityState' in document;
+const hasTiming = () => 'performance' in window; // iOS 8.x
 
 const supported = () =>
   !(
@@ -6478,7 +6612,8 @@ const supported = () =>
     !hasVisibility() ||
     !hasPromises() ||
     !hasBlobSlice() ||
-    !hasCreateObjectURL()
+    !hasCreateObjectURL() ||
+    !hasTiming()
   );
 
 // adds a plugin extension
