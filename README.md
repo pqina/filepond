@@ -2,7 +2,7 @@
 
 [![npm version](https://badge.fury.io/js/filepond.svg)](https://badge.fury.io/js/filepond)
 
-FilePond demo can be found at https://pqina.nl/filepond
+The FilePond product site can be found at https://pqina.nl/filepond
 
 ## License terms
 
@@ -19,4 +19,4 @@ GitHub automatically adds a quick overview header to the [repository LICENSE](ht
 
 ### Commercial use
 
-Interested in using FilePond for a commercial project without the GPLv3 requirements, view the options on the [license page](https://pqina.nl/filepond/store.html).
+Interested in using FilePond for a commercial project without the GPLv3 requirements, view the license options on the [pricing page](https://pqina.nl/filepond/store.html).
