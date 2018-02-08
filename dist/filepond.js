@@ -1,5 +1,5 @@
 /*
- * FilePond 1.0.2
+ * FilePond 1.0.3
  * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
  * You need to obtain a Commercial License to use FilePond in a non-GPL project.
  * Please visit https://pqina.nl/filepond for details.
@@ -4766,7 +4766,7 @@ function signature:
         info: { opacity: 1 },
         status: { opacity: 1 }
       },
-      file: 'processing-complete'
+      state: 'processing-complete'
     },
 
     DID_THROW_ITEM_PROCESSING_ERROR: {
