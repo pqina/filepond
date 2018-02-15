@@ -1,8 +1,17 @@
-# FilePond
 
 [![npm version](https://badge.fury.io/js/filepond.svg)](https://badge.fury.io/js/filepond)
 
-The FilePond product site can be found at https://pqina.nl/filepond
+# <img src="https://github.com/pqina/filepond-github-assets/blob/master/logo.svg" height="44" alt="FilePond"/>
+
+**A JavaScript file upload plugin that's easy to setup and a joy to use.**
+
+Beautiful animations, fast uploads with client-side image optimization, and a great, accessible, user experience.
+
+Learn more about FilePond at https://pqina.nl/filepond
+
+
+<img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif" width="440" height="420" alt=""/>
+
 
 ## License terms
 
