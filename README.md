@@ -28,4 +28,4 @@ GitHub automatically adds a quick overview header to the [repository LICENSE](ht
 
 ### Commercial use
 
-Interested in using FilePond for a commercial project without the GPLv3 requirements, view the license options on the [pricing page](https://pqina.nl/filepond/store.html).
+Interested in using FilePond for a commercial project without the GPLv3 requirements, view the license options on the [pricing page](https://pqina.nl/filepond/pricing.html).
