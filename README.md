@@ -10,7 +10,7 @@ Beautiful animations, fast uploads with client-side image optimization, and a gr
 Learn more about FilePond at https://pqina.nl/filepond
 
 
-<img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif" width="440" height="420" alt=""/>
+<img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif" width="370" height="400" alt=""/>
 
 
 ## License terms
