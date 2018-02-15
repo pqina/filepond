@@ -1,5 +1,5 @@
 /*
- * FilePond 1.0.3
+ * FilePond 1.0.4
  * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
  * You need to obtain a Commercial License to use FilePond in a non-GPL project.
  * Please visit https://pqina.nl/filepond for details.
@@ -1322,7 +1322,7 @@
               child._read();
 
               // re-call write
-              child._write(ts, frameActions);
+              child._write(ts, filterFrameActionsForChild(child, frameActions));
 
               // we just added somthing to the dom, no rest
               resting = false;
@@ -2135,6 +2135,9 @@
     // input field name to use
     name: ['filepond', Type.STRING],
 
+    // classname to put on wrapper
+    className: [null, Type.STRING],
+
     // is the field required
     required: [false, Type.BOOLEAN],
 
@@ -2202,9 +2205,6 @@
     }
     */
     server: [null, Type.SERVER_API],
-
-    // Regex to identify server temp files
-    // serverFileReferenceFormat: [/^[0-9a-fA-F]{32}$/, Type.REGEX],
 
     // Labels and status messages
     labelDecimalSeparator: [getDecimalSeparator(), Type.STRING], // Default is locale separator
@@ -4200,6 +4200,7 @@ function signature:
       props = _ref.props;
 
     // start at 0
+    props.spin = false;
     props.progress = 0;
     props.opacity = 0;
 
@@ -4216,7 +4217,7 @@ function signature:
     root.appendChild(svg);
   };
 
-  var write$4 = function write(_ref2) {
+  var write$5 = function write(_ref2) {
     var root = _ref2.root,
       props = _ref2.props;
 
@@ -4230,15 +4231,12 @@ function signature:
     // calculate size of ring
     var size = root.rect.element.width * 0.5;
 
-    // spin mode?
-    var spinning = props.progress === null;
-
     // ring state
     var ringFrom = 0;
     var ringTo = 0;
 
     // now in busy mode
-    if (spinning) {
+    if (props.spin) {
       ringFrom = 0;
       ringTo = 0.5;
     } else {
@@ -4259,7 +4257,11 @@ function signature:
     attr(root.ref.path, 'd', coordinates);
 
     // hide while contains 0 value
-    attr(root.ref.path, 'stroke-opacity', props.progress === 0 ? 0 : 1);
+    attr(
+      root.ref.path,
+      'stroke-opacity',
+      props.spin || props.progress > 0 ? 1 : 0
+    );
   };
 
   var progressIndicator = createView({
@@ -4267,9 +4269,9 @@ function signature:
     name: 'progress-indicator',
     ignoreRect: true,
     create: create$7,
-    write: write$4,
+    write: write$5,
     mixins: {
-      apis: ['progress'],
+      apis: ['progress', 'spin'],
       styles: ['opacity'],
       animations: {
         opacity: { type: 'tween', duration: 500 },
@@ -4292,7 +4294,7 @@ function signature:
     props.disabled = false;
   };
 
-  var write$5 = function write(_ref2) {
+  var write$6 = function write(_ref2) {
     var root = _ref2.root,
       props = _ref2.props;
 
@@ -4325,7 +4327,7 @@ function signature:
       listeners: true
     },
     create: create$8,
-    write: write$5
+    write: write$6
   });
 
   var toNaturalFileSize = function toNaturalFileSize(bytes) {
@@ -4514,14 +4516,14 @@ function signature:
     text(root.ref.sub, root.query('GET_LABEL_TAP_TO_UNDO'));
   };
 
-  var didLoadItem$1 = function didLoadItem(_ref7) {
+  var clear = function clear(_ref7) {
     var root = _ref7.root;
 
     text(root.ref.main, '');
     text(root.ref.sub, '');
   };
 
-  var didThrowError = function didThrowError(_ref8) {
+  var error = function error(_ref8) {
     var root = _ref8.root,
       action = _ref8.action;
 
@@ -4533,15 +4535,16 @@ function signature:
     name: 'file-status',
     ignoreRect: true,
     write: createRoute({
-      DID_LOAD_ITEM: didLoadItem$1,
+      DID_LOAD_ITEM: clear,
+      DID_REVERT_ITEM_PROCESSING: clear,
       DID_REQUEST_ITEM_PROCESSING: didRequestItemProcessing,
       DID_ABORT_ITEM_PROCESSING: didAbortItemProcessing,
       DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing$1,
       DID_UPDATE_ITEM_PROCESS_PROGRESS: didSetItemProcessProgress,
       DID_UPDATE_ITEM_LOAD_PROGRESS: didSetItemLoadProgress,
-      DID_THROW_ITEM_LOAD_ERROR: didThrowError,
-      DID_THROW_ITEM_INVALID: didThrowError,
-      DID_THROW_ITEM_PROCESSING_ERROR: didThrowError
+      DID_THROW_ITEM_LOAD_ERROR: error,
+      DID_THROW_ITEM_INVALID: error,
+      DID_THROW_ITEM_PROCESSING_ERROR: error
     }),
     create: create$10,
     mixins: {
@@ -4612,16 +4615,6 @@ function signature:
     var root = _ref.root,
       props = _ref.props;
 
-    // create file info view
-    root.ref.info = root.appendChildView(
-      root.createChildView(fileInfo, { id: props.id })
-    );
-
-    // create file status view
-    root.ref.status = root.appendChildView(
-      root.createChildView(fileStatus, { id: props.id })
-    );
-
     // enabled buttons array
     var enabledButtons = root.query('IS_ASYNC')
       ? ButtonKeys.concat()
@@ -4654,6 +4647,16 @@ function signature:
       // set reference
       root.ref['button' + key] = buttonView;
     });
+
+    // create file info view
+    root.ref.info = root.appendChildView(
+      root.createChildView(fileInfo, { id: props.id })
+    );
+
+    // create file status view
+    root.ref.status = root.appendChildView(
+      root.createChildView(fileStatus, { id: props.id })
+    );
 
     // add progress indicators
     root.ref.loadProgressIndicator = root.appendChildView(
@@ -4705,90 +4708,53 @@ function signature:
     status: { opacity: 1 }
   };
 
-  var StateMap = {
+  var StyleMap = {
     DID_THROW_ITEM_INVALID: {
-      style: {
-        buttonRemoveItem: { opacity: 1 },
-        info: { translateX: calculateFileInfoOffset },
-        status: { translateX: calculateFileInfoOffset, opacity: 1 }
-      },
-      state: 'load-invalid'
+      buttonRemoveItem: { opacity: 1 },
+      info: { translateX: calculateFileInfoOffset },
+      status: { translateX: calculateFileInfoOffset, opacity: 1 }
     },
-
     DID_START_ITEM_LOAD: {
-      style: {
-        buttonAbortItemLoad: { opacity: 1 },
-        loadProgressIndicator: { opacity: 1 },
-        status: { opacity: 1 }
-      }
+      buttonAbortItemLoad: { opacity: 1 },
+      loadProgressIndicator: { opacity: 1 },
+      status: { opacity: 1 }
     },
-
     DID_THROW_ITEM_LOAD_ERROR: {
-      style: {
-        buttonRetryItemLoad: { opacity: 1 },
-        buttonRemoveItem: { opacity: 1 },
-        info: { translateX: calculateFileInfoOffset },
-        status: { opacity: 1 }
-      },
-      state: 'load-error'
+      buttonRetryItemLoad: { opacity: 1 },
+      buttonRemoveItem: { opacity: 1 },
+      info: { translateX: calculateFileInfoOffset },
+      status: { opacity: 1 }
     },
-
-    DID_LOAD_ITEM: {
-      style: IdleStyle
-    },
-
+    DID_LOAD_ITEM: IdleStyle,
     DID_LOAD_LOCAL_ITEM: {
-      style: {
-        buttonRemoveItem: { opacity: 1 },
-        info: { translateX: calculateFileInfoOffset },
-        status: { translateX: calculateFileInfoOffset }
-      }
+      buttonRemoveItem: { opacity: 1 },
+      info: { translateX: calculateFileInfoOffset },
+      status: { translateX: calculateFileInfoOffset }
     },
-
-    DID_START_ITEM_PROCESSING: {
-      style: ProcessingStyle,
-      state: 'busy'
-    },
-
-    DID_REQUEST_ITEM_PROCESSING: {
-      style: ProcessingStyle,
-      state: 'busy'
-    },
-
-    DID_UPDATE_ITEM_PROCESS_PROGRESS: {
-      style: ProcessingStyle,
-      state: 'processing'
-    },
-
+    DID_START_ITEM_PROCESSING: ProcessingStyle,
+    DID_REQUEST_ITEM_PROCESSING: ProcessingStyle,
+    DID_UPDATE_ITEM_PROCESS_PROGRESS: ProcessingStyle,
     DID_COMPLETE_ITEM_PROCESSING: {
-      style: {
-        buttonRevertItemProcessing: { opacity: 1 },
-        info: { opacity: 1 },
-        status: { opacity: 1 }
-      },
-      state: 'processing-complete'
+      buttonRevertItemProcessing: { opacity: 1 },
+      info: { opacity: 1 },
+      status: { opacity: 1 }
     },
-
     DID_THROW_ITEM_PROCESSING_ERROR: {
-      style: {
-        buttonRemoveItem: { opacity: 1 },
-        buttonRetryItemProcessing: { opacity: 1 },
-        status: { opacity: 1 },
-        info: { translateX: calculateFileInfoOffset }
-      },
-      state: 'processing-error'
+      buttonRemoveItem: { opacity: 1 },
+      buttonRetryItemProcessing: { opacity: 1 },
+      status: { opacity: 1 },
+      info: { translateX: calculateFileInfoOffset }
     },
-
     DID_ABORT_ITEM_PROCESSING: {
-      style: IdleStyle
+      buttonRemoveItem: { opacity: 1 },
+      buttonProcessItem: { opacity: 1 },
+      info: { translateX: calculateFileInfoOffset },
+      status: { opacity: 1 }
     },
-
-    DID_REVERT_ITEM_PROCESSING: {
-      style: IdleStyle
-    }
+    DID_REVERT_ITEM_PROCESSING: IdleStyle
   };
 
-  var write$3 = function write(_ref2) {
+  var write$4 = function write(_ref2) {
     var root = _ref2.root,
       actions = _ref2.actions,
       props = _ref2.props;
@@ -4804,23 +4770,17 @@ function signature:
       })
       .reverse()
       .find(function(action) {
-        return StateMap[action.type];
+        return StyleMap[action.type];
       });
 
     // no need to set same state twice
-    if (!action || (action && action.type === props.currentState)) {
+    if (!action || (action && action.type === props.currentStyle)) {
       return;
     }
 
     // set current state
-    props.currentState = action.type;
-    var currentState = StateMap[props.currentState];
-
-    // set state
-    root.element.dataset.fileState = currentState.state || '';
-
-    // get new styles
-    var newStyles = currentState.style;
+    props.currentStyle = action.type;
+    var newStyles = StyleMap[props.currentStyle];
 
     forin(DefaultStyle, function(name, defaultStyles) {
       // get reference to control
@@ -4857,7 +4817,8 @@ function signature:
     DID_REQUEST_ITEM_PROCESSING: function DID_REQUEST_ITEM_PROCESSING(_ref5) {
       var root = _ref5.root;
 
-      root.ref.processProgressIndicator.progress = null;
+      root.ref.processProgressIndicator.progress = 0;
+      root.ref.processProgressIndicator.spin = true;
     },
     DID_UPDATE_ITEM_LOAD_PROGRESS: function DID_UPDATE_ITEM_LOAD_PROGRESS(
       _ref6
@@ -4865,6 +4826,7 @@ function signature:
       var root = _ref6.root,
         action = _ref6.action;
 
+      root.ref.loadProgressIndicator.spin = false;
       root.ref.loadProgressIndicator.progress = action.progress;
     },
     DID_UPDATE_ITEM_PROCESS_PROGRESS: function DID_UPDATE_ITEM_PROCESS_PROGRESS(
@@ -4873,13 +4835,14 @@ function signature:
       var root = _ref7.root,
         action = _ref7.action;
 
+      root.ref.processProgressIndicator.spin = false;
       root.ref.processProgressIndicator.progress = action.progress;
     }
   });
 
   var file = createView({
     create: create$6,
-    write: write$3,
+    write: write$4,
     didCreateView: function didCreateView(root) {
       applyFilters('CREATE_VIEW', _extends({}, root, { view: root }));
     },
@@ -4961,6 +4924,98 @@ function signature:
     name: 'file-wrapper'
   });
 
+  var PANEL_SPRING_PROPS = { type: 'spring', damping: 0.6, mass: 7 };
+
+  var create$11 = function create(_ref) {
+    var root = _ref.root;
+
+    [
+      {
+        name: 'top'
+      },
+      {
+        name: 'center',
+        props: {
+          translateY: null,
+          scaleY: null
+        },
+        mixins: {
+          animations: {
+            scaleY: PANEL_SPRING_PROPS
+          },
+          styles: ['translateY', 'scaleY']
+        }
+      },
+      {
+        name: 'bottom',
+        props: {
+          translateY: null
+        },
+        mixins: {
+          animations: {
+            translateY: PANEL_SPRING_PROPS
+          },
+          styles: ['translateY']
+        }
+      }
+    ].forEach(function(section) {
+      createSection(root, section);
+    });
+  };
+
+  var createSection = function createSection(root, section) {
+    var viewConstructor = createView({
+      name: 'panel-' + section.name,
+      mixins: section.mixins
+    });
+
+    var view = root.createChildView(viewConstructor, section.props);
+
+    root.ref[section.name] = root.appendChildView(view);
+  };
+
+  var write$7 = function write(_ref2) {
+    var root = _ref2.root,
+      props = _ref2.props;
+
+    if (!props.height) {
+      return;
+    }
+
+    // can it scale?
+    root.element.dataset.scalable = isBoolean(props.scalable)
+      ? props.scalable
+      : true;
+
+    // get child rects
+    var topRect = root.ref.top.rect.element;
+    var bottomRect = root.ref.bottom.rect.element;
+
+    // make sure height never is smaller than bottom and top seciton heights combined (will probably never happen, but who knows)
+    var height = Math.max(topRect.height + bottomRect.height, props.height);
+
+    // offset center part
+    root.ref.center.translateY = topRect.height;
+
+    // scale center part
+    // use math ceil to prevent transparent lines because of rounding errors
+    root.ref.center.scaleY =
+      (height - topRect.height - bottomRect.height) / 100;
+
+    // offset bottom part
+    root.ref.bottom.translateY = height - bottomRect.height;
+  };
+
+  var panel = createView({
+    name: 'panel',
+    write: write$7,
+    create: create$11,
+    ignoreRect: true,
+    mixins: {
+      apis: ['height', 'scalable']
+    }
+  });
+
   /**
    * Creates the file view
    */
@@ -4969,21 +5024,82 @@ function signature:
       props = _ref.props;
 
     // file view
-    root.ref.fileWrapper = root.appendChildView(
+    root.ref.controls = root.appendChildView(
       root.createChildView(fileWrapper, { id: props.id })
     );
+
+    // file panel
+    root.ref.panel = root.appendChildView(root.createChildView(panel));
+    root.ref.panel.element.classList.add('filepond--item-panel');
+
+    // default start height
+    root.ref.panel.height = 0;
 
     // by default not marked for removal
     props.markedForRemoval = false;
   };
 
+  var StateMap = {
+    DID_THROW_ITEM_INVALID: 'load-invalid',
+    DID_THROW_ITEM_LOAD_ERROR: 'load-error',
+    DID_START_ITEM_PROCESSING: 'busy',
+    DID_REQUEST_ITEM_PROCESSING: 'busy',
+    DID_UPDATE_ITEM_PROCESS_PROGRESS: 'processing',
+    DID_COMPLETE_ITEM_PROCESSING: 'processing-complete',
+    DID_THROW_ITEM_PROCESSING_ERROR: 'processing-error',
+    DID_ABORT_ITEM_PROCESSING: 'cancelled',
+    DID_REVERT_ITEM_PROCESSING: 'idle'
+  };
+
+  var write$3 = function write(_ref2) {
+    var root = _ref2.root,
+      actions = _ref2.actions,
+      props = _ref2.props;
+
+    // update panel height
+    root.ref.panel.height = root.ref.controls.rect.inner.height;
+
+    // set panel height
+    root.height = root.ref.controls.rect.inner.height;
+
+    // select last state change action
+    var action = []
+      .concat(toConsumableArray(actions))
+      .filter(function(action) {
+        return /^DID_/.test(action.type);
+      })
+      .reverse()
+      .find(function(action) {
+        return StateMap[action.type];
+      });
+
+    // no need to set same state twice
+    if (!action || (action && action.type === props.currentState)) {
+      return;
+    }
+
+    // set current state
+    props.currentState = action.type;
+
+    // set state
+    root.element.dataset.filepondItemState = StateMap[props.currentState] || '';
+  };
+
   var item = createView({
     create: create$4,
+    write: write$3,
     tag: 'li',
     name: 'item',
     mixins: {
       apis: ['id', 'markedForRemoval'],
-      styles: ['translateX', 'translateY', 'scaleX', 'scaleY', 'opacity'],
+      styles: [
+        'translateX',
+        'translateY',
+        'scaleX',
+        'scaleY',
+        'opacity',
+        'height'
+      ],
       animations: {
         scaleX: 'spring',
         scaleY: 'spring',
@@ -5287,89 +5403,6 @@ function signature:
     }
   });
 
-  var PANEL_SPRING_PROPS = { type: 'spring', damping: 0.6, mass: 7 };
-
-  var create$11 = function create(_ref) {
-    var root = _ref.root;
-
-    [
-      {
-        name: 'top'
-      },
-      {
-        name: 'center',
-        props: {
-          translateY: null,
-          scaleY: null
-        },
-        mixins: {
-          animations: {
-            scaleY: PANEL_SPRING_PROPS
-          },
-          styles: ['translateY', 'scaleY']
-        }
-      },
-      {
-        name: 'bottom',
-        props: {
-          translateY: null
-        },
-        mixins: {
-          animations: {
-            translateY: PANEL_SPRING_PROPS
-          },
-          styles: ['translateY']
-        }
-      }
-    ].forEach(function(section) {
-      createSection(root, section);
-    });
-  };
-
-  var createSection = function createSection(root, section) {
-    var viewConstructor = createView({
-      name: 'panel-' + section.name,
-      mixins: section.mixins
-    });
-
-    var view = root.createChildView(viewConstructor, section.props);
-
-    root.ref[section.name] = root.appendChildView(view);
-  };
-
-  var write$6 = function write(_ref2) {
-    var root = _ref2.root,
-      props = _ref2.props;
-
-    if (!props.height) {
-      return;
-    }
-
-    var topRect = root.ref.top.rect.element;
-    var bottomRect = root.ref.bottom.rect.element;
-    var height = Math.max(topRect.height + bottomRect.height, props.height);
-
-    // offset center part
-    root.ref.center.translateY = topRect.height;
-
-    // scale center part
-    // use math ceil to prevent transparent lines because of rounding errors
-    root.ref.center.scaleY =
-      (height - topRect.height - bottomRect.height) / 100;
-
-    // offset bottom part
-    root.ref.bottom.translateY = height - bottomRect.height;
-  };
-
-  var panel = createView({
-    name: 'panel',
-    write: write$6,
-    create: create$11,
-    mixins: {
-      apis: ['height']
-    }
-  });
-
   var attrToggle = function attrToggle(element, name, state) {
     var enabledValue =
       arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '';
@@ -5660,7 +5693,7 @@ function signature:
     root.ref.blob.opacity = 0;
   };
 
-  var write$7 = function write(_ref5) {
+  var write$8 = function write(_ref5) {
     var root = _ref5.root,
       props = _ref5.props,
       actions = _ref5.actions;
@@ -5684,7 +5717,7 @@ function signature:
   var drip = createView({
     ignoreRect: true,
     name: 'drip',
-    write: write$7
+    write: write$8
   });
 
   var getRootNode = function getRootNode(element) {
@@ -6005,7 +6038,10 @@ function signature:
       e.preventDefault();
 
       var dataTransfer = e.dataTransfer;
+
       requestDataTransferItems(dataTransfer).then(function(items) {
+        var overDropTarget = false;
+
         clients.some(function(client) {
           var filterElement = client.filterElement,
             element = client.element,
@@ -6029,6 +6065,8 @@ function signature:
 
           // targetting this client
           if (isEventTarget(e, element)) {
+            overDropTarget = true;
+
             // had no previous state, means we are entering this client
             if (client.state === null) {
               client.state = 'enter';
@@ -6049,7 +6087,7 @@ function signature:
             ondrag(eventPosition(e));
           } else {
             // should be over an element to drop
-            if (filterElement) {
+            if (filterElement && !overDropTarget) {
               setDropEffect(dataTransfer, 'none');
             }
 
@@ -6313,7 +6351,7 @@ function signature:
     root.element.textContent = message;
   };
 
-  var clear = function clear(root) {
+  var clear$1 = function clear(root) {
     root.element.textContent = '';
   };
 
@@ -6335,7 +6373,7 @@ function signature:
     // clear group after set amount of time so the status is not read twice
     clearTimeout(notificationClearTimeout);
     notificationClearTimeout = setTimeout(function() {
-      clear(root);
+      clear$1(root);
     }, 1500);
   };
 
@@ -6436,6 +6474,14 @@ function signature:
   var create$1 = function create(_ref) {
     var root = _ref.root,
       props = _ref.props;
+
+    // Add className
+    var className = root.query('GET_CLASS_NAME');
+    if (className) {
+      className.split(' ').forEach(function(name) {
+        root.element.classList.add(name);
+      });
+    }
 
     // Field label
     root.ref.label = root.appendChildView(
@@ -6556,16 +6602,26 @@ function signature:
     );
     var bottomPadding = totalItems > 0 ? root.rect.element.paddingTop * 0.5 : 0;
 
-    // fix height
     if (boxBounding.fixedHeight) {
+      // fixed height
+
+      // fixed height panel
+      panel$$1.scalable = false;
+
       // link panel height to box bounding
       panel$$1.height = boxBounding.fixedHeight + root.rect.element.paddingTop;
 
       // set overflow
       list.overflow =
-        childrenBoundingHeight > panel$$1.height ? panel$$1.height : null;
+        childrenBoundingHeight > panel$$1.height && isMultiItem
+          ? panel$$1.height
+          : null;
     } else if (boxBounding.cappedHeight) {
-      // max height
+      // max-height
+
+      // not a fixed height panel
+      panel$$1.scalable = true;
+
       // limit children bounding height to the set capped height
       var cappedChildrenBoundingHeight = Math.min(
         boxBounding.cappedHeight,
@@ -6583,11 +6639,20 @@ function signature:
 
       // if can overflow, test if is currently overflowing
       list.overflow =
-        childrenBoundingHeight > panel$$1.height ? panel$$1.height : null;
+        childrenBoundingHeight > panel$$1.height && isMultiItem
+          ? panel$$1.height
+          : null;
     } else {
       // flexible height
+
+      // not a fixed height panel
+      panel$$1.scalable = true;
+
       // set to new bounding
-      root.height = childrenBoundingHeight + bottomPadding;
+      root.height =
+        childrenBoundingHeight + bottomPadding + root.rect.element.paddingTop;
+
+      //console.log(childrenBoundingHeight, bottomPadding, root.rect.element);
 
       // set height to new visual height
       panel$$1.height = visualHeight + bottomPadding;
@@ -6839,6 +6904,9 @@ function signature:
   // view
   // creates the app
   var createApp$1 = function createApp() {
+    var initialOptions =
+      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
     // let element
     var originalElement = null;
 
@@ -6856,6 +6924,9 @@ function signature:
       // action handlers
       [actions, createOptionActions(defaultOptions)]
     );
+
+    // set initial options
+    store.dispatch('SET_OPTIONS', { options: initialOptions });
 
     // render initial view
     var view = root(store, { id: getUniqueId() });
@@ -6890,9 +6961,13 @@ function signature:
        */
       _write: function _write(ts) {
         // get all actions from store
-        var actions$$1 = store.processActionQueue().filter(function(action) {
-          return !/^SET_/.test(action.type);
-        });
+        var actions$$1 = store
+          .processActionQueue()
+
+          // filter out set actions (will trigger DID_SET)
+          .filter(function(action) {
+            return !/^SET_/.test(action.type);
+          });
 
         // if was idling and no actions stop here
         if (resting && !actions$$1.length) {
@@ -7314,9 +7389,6 @@ function signature:
     var customOptions =
       arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-    // create app instance
-    var app = createApp$1();
-
     // default options
     var defaultOptions = {};
     forin(getOptions(), function(key, value) {
@@ -7324,7 +7396,7 @@ function signature:
     });
 
     // set app options
-    app.setOptions(_extends({}, defaultOptions, customOptions));
+    var app = createApp$1(_extends({}, defaultOptions, customOptions));
 
     // return the plugin instance
     return app;
@@ -7423,6 +7495,7 @@ function signature:
     // how attributes of the input element are mapped to the options for the plugin
     var attributeMapping = {
       // translate to other name
+      '^class$': 'className',
       '^multiple$': 'allowMultiple',
       '^capture$': 'captureMethod',
 
@@ -7489,6 +7562,13 @@ function signature:
 
     // build plugin
     var app = createAppObject(mergedOptions);
+
+    // add already selected files
+    if (element.files) {
+      [].concat(toConsumableArray(element.files)).forEach(function(file) {
+        app.addFile(file);
+      });
+    }
 
     // replace the target element
     app.replaceElement(element);
@@ -7624,9 +7704,6 @@ function signature:
         copyFile: copyFile,
         renameFile: renameFile,
         applyFilterChain: applyFilterChain
-      },
-      views: {
-        panel: panel
       }
     });
 
@@ -7719,8 +7796,6 @@ function signature:
 
   // parses the given context for plugins (does not include the context element itself)
   var parse = function parse(context) {
-    var _state$apps;
-
     // get all possible hooks
     var matchedHooks = [].concat(
       toConsumableArray(context.querySelectorAll('.' + name))
@@ -7734,16 +7809,8 @@ function signature:
     });
 
     // create new instance for each hook
-    var apps = newHooks.map(function(hook) {
+    return newHooks.map(function(hook) {
       return create(hook);
-    });
-
-    // add to apps list
-    (_state$apps = state.apps).push.apply(_state$apps, toConsumableArray(apps));
-
-    // return
-    return apps.map(function(app) {
-      return createAppAPI(app);
     });
   };
 

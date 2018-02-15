@@ -1,5 +1,5 @@
 /*
- * FilePond 1.0.3
+ * FilePond 1.0.4
  * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
  * You need to obtain a Commercial License to use FilePond in a non-GPL project.
  * Please visit https://pqina.nl/filepond for details.
@@ -26,53 +26,6 @@
   width: calc(100% - 2em);
   opacity: 0;
   font-size: 0;
-}
-
-.filepond--file-action-button {
-  position: absolute;
-  font-size: 1em;
-  width: 1.625em;
-  height: 1.625em;
-  cursor: auto;
-  font-family: inherit;
-  line-height: inherit;
-  margin: 0;
-  padding: 0;
-  border: none;
-  color: #fff;
-  outline: none;
-  border-radius: 50%;
-  background-color: rgba(0, 0, 0, 0.5);
-  background-image: none;
-  will-change: transform, opacity;
-}
-.filepond--file-action-button svg {
-  width: 100%;
-  height: 100%;
-}
-.filepond--file-action-button::after {
-  position: absolute;
-  background: transparent;
-  top: -0.125em;
-  left: -0.125em;
-  right: -0.125em;
-  bottom: -0.125em;
-  border-radius: 50%;
-  border: 0.125em solid #f8f8f8;
-  opacity: 0;
-  -webkit-transform: scale(0.9);
-  transform: scale(0.9);
-  transition: opacity 0.25s, -webkit-transform 0.25s ease-out;
-  transition: opacity 0.25s, transform 0.25s ease-out;
-  transition: opacity 0.25s, transform 0.25s ease-out,
-    -webkit-transform 0.25s ease-out;
-  content: '';
-}
-.filepond--file-action-button:hover::after,
-.filepond--file-action-button:focus::after {
-  opacity: 1;
-  -webkit-transform: scale(1);
-  transform: scale(1);
 }
 
 .filepond--drip {
@@ -121,6 +74,7 @@
   font-size: 0.875em;
   font-weight: normal;
   text-align: center;
+  line-height: 1.5;
 }
 
 .filepond--label-action {
@@ -130,6 +84,34 @@
   -webkit-text-decoration-color: #a7a4a4;
   text-decoration-color: #a7a4a4;
   cursor: pointer;
+}
+
+.filepond--file-action-button {
+  font-size: 1em;
+  width: 1.625em;
+  height: 1.625em;
+  cursor: auto;
+  font-family: inherit;
+  line-height: inherit;
+  margin: 0;
+  padding: 0;
+  border: none;
+  color: #fff;
+  outline: none;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
+  background-image: none;
+  will-change: transform, opacity;
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  transition: box-shadow 0.25s ease-in;
+}
+.filepond--file-action-button svg {
+  width: 100%;
+  height: 100%;
+}
+.filepond--file-action-button:hover,
+.filepond--file-action-button:focus {
+  box-shadow: 0 0 0 0.125em rgba(255, 255, 255, 0.9);
 }
 
 .filepond--file-info {
@@ -210,6 +192,7 @@
   margin: 0;
   padding: 0;
   min-width: 0;
+  height: 100%;
 }
 .filepond--file-wrapper > legend {
   position: absolute;
@@ -228,16 +211,17 @@
   position: static;
   display: -ms-flexbox;
   display: flex;
+  height: 100%;
   padding: 0.5625em 0.5625em;
   color: #fff;
   border-radius: 0.5em;
-  background-color: #64605e;
-  transition: background-color 0.5s;
-  box-shadow: 0 0.125em 0.125em -0.125em rgba(0, 0, 0, 0.5);
 }
 .filepond--file .filepond--file-status {
   margin-left: auto;
   margin-right: 2.25em;
+}
+.filepond--file .filepond--file-action-button {
+  position: absolute;
 }
 .filepond--file .filepond--progress-indicator {
   position: absolute;
@@ -251,32 +235,29 @@
   .filepond--file-action-button:not(.filepond--action-remove-item) {
   right: 0.5625em;
 }
-.filepond--file
-  .filepond--file-action-button:not([disabled])
-  ~ .filepond--file-action-button:not([disabled])
-  ~ .filepond--file-info {
+
+[data-filepond-item-state='cancelled'] .filepond--file-info,
+[data-filepond-item-state*='invalid'] .filepond--file-info,
+[data-filepond-item-state*='error'] .filepond--file-info {
   margin-right: 2.25em;
 }
 
-.filepond--file[data-file-state='processing-complete'] {
-  background-color: #369763;
-}
-
-.filepond--file[data-file-state='processing-complete']
+[data-filepond-item-state='processing-complete']
   .filepond--action-revert-item-processing
   svg {
   -webkit-animation: fall 0.5s 0.125s linear both;
   animation: fall 0.5s 0.125s linear both;
 }
 
-.filepond--file[data-file-state*='invalid'],
-.filepond--file[data-file-state*='error'] {
+[data-filepond-item-state*='invalid'] .filepond--item-panel,
+[data-filepond-item-state*='invalid'] .filepond--file-wrapper,
+[data-filepond-item-state*='error'] .filepond--item-panel,
+[data-filepond-item-state*='error'] .filepond--file-wrapper {
   -webkit-animation: shake 0.65s linear both;
   animation: shake 0.65s linear both;
-  background-color: #c44e47;
 }
 
-.filepond--file[data-file-state*='busy'] .filepond--progress-indicator svg {
+[data-filepond-item-state*='busy'] .filepond--progress-indicator svg {
   -webkit-animation: spin 1s linear infinite;
   animation: spin 1s linear infinite;
 }
@@ -428,6 +409,37 @@
   margin: 0 0 0.5em 0;
   will-change: transform, opacity;
 }
+.filepond--item .filepond--item-panel {
+  z-index: 1;
+}
+.filepond--item .filepond--file-wrapper {
+  position: relative;
+  z-index: 2;
+}
+
+.filepond--item-panel {
+  background-color: #64605e;
+}
+
+[data-filepond-item-state='processing-complete'] .filepond--item-panel {
+  background-color: #369763;
+}
+
+[data-filepond-item-state*='invalid'] .filepond--item-panel,
+[data-filepond-item-state*='error'] .filepond--item-panel {
+  background-color: #c44e47;
+}
+
+.filepond--item-panel {
+  border-radius: 0.5em;
+}
+.filepond--item-panel,
+.filepond--item-panel > div {
+  transition: background-color 0.25s;
+}
+.filepond--item-panel .filepond--panel-bottom {
+  box-shadow: 0 0.125em 0.125em -0.125em rgba(0, 0, 0, 0.25);
+}
 
 .filepond--list-scroller {
   position: absolute;
@@ -490,8 +502,18 @@
   right: 0;
   margin: 0;
   pointer-events: none;
+}
+
+.filepond--panel[data-scalable='true'] {
   -webkit-transform-style: preserve-3d;
   transform-style: preserve-3d;
+}
+
+.filepond--panel[data-scalable='false'] {
+  bottom: 0;
+}
+.filepond--panel[data-scalable='false'] > div {
+  display: none;
 }
 
 .filepond--panel-top,
@@ -519,7 +541,7 @@
 .filepond--panel-top::after {
   content: '';
   position: absolute;
-  height: 1px;
+  height: 2px;
   left: 0;
   right: 0;
   bottom: -1px;
@@ -544,7 +566,7 @@
 .filepond--panel-bottom::before {
   content: '';
   position: absolute;
-  height: 1px;
+  height: 2px;
   left: 0;
   right: 0;
   top: -1px;
@@ -559,19 +581,20 @@
   position: static;
   width: 1.25em;
   height: 1.25em;
+  color: #fff;
   margin: 0;
   pointer-events: none;
   will-change: transform, opacity;
 }
 
 .filepond--progress-indicator svg {
-  width: inherit;
-  height: inherit;
+  width: 100%;
+  height: 100%;
 }
 
 .filepond--progress-indicator path {
   fill: none;
-  stroke: #fff;
+  stroke: currentColor;
 }
 
 .filepond--list-scroller {
@@ -600,7 +623,7 @@
 
 .filepond--root {
   /* layout*/
-  box-sizing: content-box;
+  box-sizing: border-box;
   position: relative;
   margin-bottom: 1em;
   padding-top: 1em;
@@ -611,6 +634,8 @@
   /* up uses default system font family */
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica,
     Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  /* will increase font weight a bit on Safari */
+  font-weight: 450;
   text-align: left;
   text-rendering: optimizeLegibility;
   direction: ltr;
@@ -620,8 +645,4 @@
   font-size: inherit;
   box-sizing: inherit;
   line-height: inherit;
-}
-
-.filepond--root + input {
-  display: none;
 }

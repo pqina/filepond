@@ -1,5 +1,5 @@
 /*
- * FilePond 1.0.3
+ * FilePond 1.0.4
  * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
  * You need to obtain a Commercial License to use FilePond in a non-GPL project.
  * Please visit https://pqina.nl/filepond for details.
@@ -974,7 +974,7 @@ const createView =
           child._read();
 
           // re-call write
-          child._write(ts, frameActions);
+          child._write(ts, filterFrameActionsForChild(child, frameActions));
 
           // we just added somthing to the dom, no rest
           resting = false;
@@ -1638,6 +1638,9 @@ const options = {
   // input field name to use
   name: ['filepond', Type.STRING],
 
+  // classname to put on wrapper
+  className: [null, Type.STRING],
+
   // is the field required
   required: [false, Type.BOOLEAN],
 
@@ -1705,9 +1708,6 @@ const options = {
     }
     */
   server: [null, Type.SERVER_API],
-
-  // Regex to identify server temp files
-  // serverFileReferenceFormat: [/^[0-9a-fA-F]{32}$/, Type.REGEX],
 
   // Labels and status messages
   labelDecimalSeparator: [getDecimalSeparator(), Type.STRING], // Default is locale separator
@@ -3460,6 +3460,7 @@ const percentageArc = (x, y, radius, from, to) => {
 
 const create$7 = ({ root, props }) => {
   // start at 0
+  props.spin = false;
   props.progress = 0;
   props.opacity = 0;
 
@@ -3476,7 +3477,7 @@ const create$7 = ({ root, props }) => {
   root.appendChild(svg);
 };
 
-const write$4 = ({ root, props }) => {
+const write$5 = ({ root, props }) => {
   if (props.opacity === 0) {
     return;
   }
@@ -3487,15 +3488,12 @@ const write$4 = ({ root, props }) => {
   // calculate size of ring
   const size = root.rect.element.width * 0.5;
 
-  // spin mode?
-  const spinning = props.progress === null;
-
   // ring state
   let ringFrom = 0;
   let ringTo = 0;
 
   // now in busy mode
-  if (spinning) {
+  if (props.spin) {
     ringFrom = 0;
     ringTo = 0.5;
   } else {
@@ -3516,7 +3514,11 @@ const write$4 = ({ root, props }) => {
   attr(root.ref.path, 'd', coordinates);
 
   // hide while contains 0 value
-  attr(root.ref.path, 'stroke-opacity', props.progress === 0 ? 0 : 1);
+  attr(
+    root.ref.path,
+    'stroke-opacity',
+    props.spin || props.progress > 0 ? 1 : 0
+  );
 };
 
 const progressIndicator = createView({
@@ -3524,9 +3526,9 @@ const progressIndicator = createView({
   name: 'progress-indicator',
   ignoreRect: true,
   create: create$7,
-  write: write$4,
+  write: write$5,
   mixins: {
-    apis: ['progress'],
+    apis: ['progress', 'spin'],
     styles: ['opacity'],
     animations: {
       opacity: { type: 'tween', duration: 500 },
@@ -3546,7 +3548,7 @@ const create$8 = ({ root, props }) => {
   props.disabled = false;
 };
 
-const write$5 = ({ root, props }) => {
+const write$6 = ({ root, props }) => {
   if (props.opacity === 0 && !props.disabled) {
     props.disabled = true;
     attr(root.element, 'disabled', 'disabled');
@@ -3576,7 +3578,7 @@ const fileActionButton = createView({
     listeners: true
   },
   create: create$8,
-  write: write$5
+  write: write$6
 });
 
 const toNaturalFileSize = (bytes, decimalSeparator = '.') => {
@@ -3729,12 +3731,12 @@ const didCompleteItemProcessing$1 = ({ root }) => {
   text(root.ref.sub, root.query('GET_LABEL_TAP_TO_UNDO'));
 };
 
-const didLoadItem$1 = ({ root }) => {
+const clear = ({ root }) => {
   text(root.ref.main, '');
   text(root.ref.sub, '');
 };
 
-const didThrowError = ({ root, action }) => {
+const error = ({ root, action }) => {
   text(root.ref.main, action.status.main);
   text(root.ref.sub, action.status.sub);
 };
@@ -3743,15 +3745,16 @@ const fileStatus = createView({
   name: 'file-status',
   ignoreRect: true,
   write: createRoute({
-    DID_LOAD_ITEM: didLoadItem$1,
+    DID_LOAD_ITEM: clear,
+    DID_REVERT_ITEM_PROCESSING: clear,
     DID_REQUEST_ITEM_PROCESSING: didRequestItemProcessing,
     DID_ABORT_ITEM_PROCESSING: didAbortItemProcessing,
     DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing$1,
     DID_UPDATE_ITEM_PROCESS_PROGRESS: didSetItemProcessProgress,
     DID_UPDATE_ITEM_LOAD_PROGRESS: didSetItemLoadProgress,
-    DID_THROW_ITEM_LOAD_ERROR: didThrowError,
-    DID_THROW_ITEM_INVALID: didThrowError,
-    DID_THROW_ITEM_PROCESSING_ERROR: didThrowError
+    DID_THROW_ITEM_LOAD_ERROR: error,
+    DID_THROW_ITEM_INVALID: error,
+    DID_THROW_ITEM_PROCESSING_ERROR: error
   }),
   create: create$10,
   mixins: {
@@ -3819,16 +3822,6 @@ forin(Buttons, key => {
  * Creates the file view
  */
 const create$6 = ({ root, props }) => {
-  // create file info view
-  root.ref.info = root.appendChildView(
-    root.createChildView(fileInfo, { id: props.id })
-  );
-
-  // create file status view
-  root.ref.status = root.appendChildView(
-    root.createChildView(fileStatus, { id: props.id })
-  );
-
   // enabled buttons array
   const enabledButtons = root.query('IS_ASYNC')
     ? ButtonKeys.concat()
@@ -3859,6 +3852,16 @@ const create$6 = ({ root, props }) => {
     // set reference
     root.ref[`button${key}`] = buttonView;
   });
+
+  // create file info view
+  root.ref.info = root.appendChildView(
+    root.createChildView(fileInfo, { id: props.id })
+  );
+
+  // create file status view
+  root.ref.status = root.appendChildView(
+    root.createChildView(fileStatus, { id: props.id })
+  );
 
   // add progress indicators
   root.ref.loadProgressIndicator = root.appendChildView(
@@ -3907,90 +3910,53 @@ const ProcessingStyle = {
   status: { opacity: 1 }
 };
 
-const StateMap = {
+const StyleMap = {
   DID_THROW_ITEM_INVALID: {
-    style: {
-      buttonRemoveItem: { opacity: 1 },
-      info: { translateX: calculateFileInfoOffset },
-      status: { translateX: calculateFileInfoOffset, opacity: 1 }
-    },
-    state: 'load-invalid'
+    buttonRemoveItem: { opacity: 1 },
+    info: { translateX: calculateFileInfoOffset },
+    status: { translateX: calculateFileInfoOffset, opacity: 1 }
   },
-
   DID_START_ITEM_LOAD: {
-    style: {
-      buttonAbortItemLoad: { opacity: 1 },
-      loadProgressIndicator: { opacity: 1 },
-      status: { opacity: 1 }
-    }
+    buttonAbortItemLoad: { opacity: 1 },
+    loadProgressIndicator: { opacity: 1 },
+    status: { opacity: 1 }
   },
-
   DID_THROW_ITEM_LOAD_ERROR: {
-    style: {
-      buttonRetryItemLoad: { opacity: 1 },
-      buttonRemoveItem: { opacity: 1 },
-      info: { translateX: calculateFileInfoOffset },
-      status: { opacity: 1 }
-    },
-    state: 'load-error'
+    buttonRetryItemLoad: { opacity: 1 },
+    buttonRemoveItem: { opacity: 1 },
+    info: { translateX: calculateFileInfoOffset },
+    status: { opacity: 1 }
   },
-
-  DID_LOAD_ITEM: {
-    style: IdleStyle
-  },
-
+  DID_LOAD_ITEM: IdleStyle,
   DID_LOAD_LOCAL_ITEM: {
-    style: {
-      buttonRemoveItem: { opacity: 1 },
-      info: { translateX: calculateFileInfoOffset },
-      status: { translateX: calculateFileInfoOffset }
-    }
+    buttonRemoveItem: { opacity: 1 },
+    info: { translateX: calculateFileInfoOffset },
+    status: { translateX: calculateFileInfoOffset }
   },
-
-  DID_START_ITEM_PROCESSING: {
-    style: ProcessingStyle,
-    state: 'busy'
-  },
-
-  DID_REQUEST_ITEM_PROCESSING: {
-    style: ProcessingStyle,
-    state: 'busy'
-  },
-
-  DID_UPDATE_ITEM_PROCESS_PROGRESS: {
-    style: ProcessingStyle,
-    state: 'processing'
-  },
-
+  DID_START_ITEM_PROCESSING: ProcessingStyle,
+  DID_REQUEST_ITEM_PROCESSING: ProcessingStyle,
+  DID_UPDATE_ITEM_PROCESS_PROGRESS: ProcessingStyle,
   DID_COMPLETE_ITEM_PROCESSING: {
-    style: {
-      buttonRevertItemProcessing: { opacity: 1 },
-      info: { opacity: 1 },
-      status: { opacity: 1 }
-    },
-    state: 'processing-complete'
+    buttonRevertItemProcessing: { opacity: 1 },
+    info: { opacity: 1 },
+    status: { opacity: 1 }
   },
-
   DID_THROW_ITEM_PROCESSING_ERROR: {
-    style: {
-      buttonRemoveItem: { opacity: 1 },
-      buttonRetryItemProcessing: { opacity: 1 },
-      status: { opacity: 1 },
-      info: { translateX: calculateFileInfoOffset }
-    },
-    state: 'processing-error'
+    buttonRemoveItem: { opacity: 1 },
+    buttonRetryItemProcessing: { opacity: 1 },
+    status: { opacity: 1 },
+    info: { translateX: calculateFileInfoOffset }
   },
-
   DID_ABORT_ITEM_PROCESSING: {
-    style: IdleStyle
+    buttonRemoveItem: { opacity: 1 },
+    buttonProcessItem: { opacity: 1 },
+    info: { translateX: calculateFileInfoOffset },
+    status: { opacity: 1 }
   },
-
-  DID_REVERT_ITEM_PROCESSING: {
-    style: IdleStyle
-  }
+  DID_REVERT_ITEM_PROCESSING: IdleStyle
 };
 
-const write$3 = ({ root, actions, props }) => {
+const write$4 = ({ root, actions, props }) => {
   // route actions
   route$3({ root, actions, props });
 
@@ -3998,22 +3964,16 @@ const write$3 = ({ root, actions, props }) => {
   let action = [...actions]
     .filter(action => /^DID_/.test(action.type))
     .reverse()
-    .find(action => StateMap[action.type]);
+    .find(action => StyleMap[action.type]);
 
   // no need to set same state twice
-  if (!action || (action && action.type === props.currentState)) {
+  if (!action || (action && action.type === props.currentStyle)) {
     return;
   }
 
   // set current state
-  props.currentState = action.type;
-  const currentState = StateMap[props.currentState];
-
-  // set state
-  root.element.dataset.fileState = currentState.state || '';
-
-  // get new styles
-  const newStyles = currentState.style;
+  props.currentStyle = action.type;
+  const newStyles = StyleMap[props.currentStyle];
 
   forin(DefaultStyle, (name, defaultStyles) => {
     // get reference to control
@@ -4038,19 +3998,22 @@ const route$3 = createRoute({
     root.ref.buttonAbortItemLoad.label = action.value;
   },
   DID_REQUEST_ITEM_PROCESSING: ({ root, action }) => {
-    root.ref.processProgressIndicator.progress = null;
+    root.ref.processProgressIndicator.progress = 0;
+    root.ref.processProgressIndicator.spin = true;
   },
   DID_UPDATE_ITEM_LOAD_PROGRESS: ({ root, action }) => {
+    root.ref.loadProgressIndicator.spin = false;
     root.ref.loadProgressIndicator.progress = action.progress;
   },
   DID_UPDATE_ITEM_PROCESS_PROGRESS: ({ root, action }) => {
+    root.ref.processProgressIndicator.spin = false;
     root.ref.processProgressIndicator.progress = action.progress;
   }
 });
 
 const file = createView({
   create: create$6,
-  write: write$3,
+  write: write$4,
   didCreateView: root => {
     applyFilters('CREATE_VIEW', babelHelpers.extends({}, root, { view: root }));
   },
@@ -4118,26 +4081,164 @@ const fileWrapper = createView({
   name: 'file-wrapper'
 });
 
+const PANEL_SPRING_PROPS = { type: 'spring', damping: 0.6, mass: 7 };
+
+const create$11 = ({ root }) => {
+  [
+    {
+      name: 'top'
+    },
+    {
+      name: 'center',
+      props: {
+        translateY: null,
+        scaleY: null
+      },
+      mixins: {
+        animations: {
+          scaleY: PANEL_SPRING_PROPS
+        },
+        styles: ['translateY', 'scaleY']
+      }
+    },
+    {
+      name: 'bottom',
+      props: {
+        translateY: null
+      },
+      mixins: {
+        animations: {
+          translateY: PANEL_SPRING_PROPS
+        },
+        styles: ['translateY']
+      }
+    }
+  ].forEach(section => {
+    createSection(root, section);
+  });
+};
+
+const createSection = (root, section) => {
+  const viewConstructor = createView({
+    name: `panel-${section.name}`,
+    mixins: section.mixins
+  });
+
+  const view = root.createChildView(viewConstructor, section.props);
+
+  root.ref[section.name] = root.appendChildView(view);
+};
+
+const write$7 = ({ root, props }) => {
+  if (!props.height) {
+    return;
+  }
+
+  // can it scale?
+  root.element.dataset.scalable = isBoolean(props.scalable)
+    ? props.scalable
+    : true;
+
+  // get child rects
+  const topRect = root.ref.top.rect.element;
+  const bottomRect = root.ref.bottom.rect.element;
+
+  // make sure height never is smaller than bottom and top seciton heights combined (will probably never happen, but who knows)
+  const height = Math.max(topRect.height + bottomRect.height, props.height);
+
+  // offset center part
+  root.ref.center.translateY = topRect.height;
+
+  // scale center part
+  // use math ceil to prevent transparent lines because of rounding errors
+  root.ref.center.scaleY = (height - topRect.height - bottomRect.height) / 100;
+
+  // offset bottom part
+  root.ref.bottom.translateY = height - bottomRect.height;
+};
+
+const panel = createView({
+  name: 'panel',
+  write: write$7,
+  create: create$11,
+  ignoreRect: true,
+  mixins: {
+    apis: ['height', 'scalable']
+  }
+});
+
 /**
  * Creates the file view
  */
 const create$4 = ({ root, props }) => {
   // file view
-  root.ref.fileWrapper = root.appendChildView(
+  root.ref.controls = root.appendChildView(
     root.createChildView(fileWrapper, { id: props.id })
   );
+
+  // file panel
+  root.ref.panel = root.appendChildView(root.createChildView(panel));
+  root.ref.panel.element.classList.add('filepond--item-panel');
+
+  // default start height
+  root.ref.panel.height = 0;
 
   // by default not marked for removal
   props.markedForRemoval = false;
 };
 
+const StateMap = {
+  DID_THROW_ITEM_INVALID: 'load-invalid',
+  DID_THROW_ITEM_LOAD_ERROR: 'load-error',
+  DID_START_ITEM_PROCESSING: 'busy',
+  DID_REQUEST_ITEM_PROCESSING: 'busy',
+  DID_UPDATE_ITEM_PROCESS_PROGRESS: 'processing',
+  DID_COMPLETE_ITEM_PROCESSING: 'processing-complete',
+  DID_THROW_ITEM_PROCESSING_ERROR: 'processing-error',
+  DID_ABORT_ITEM_PROCESSING: 'cancelled',
+  DID_REVERT_ITEM_PROCESSING: 'idle'
+};
+
+const write$3 = ({ root, actions, props }) => {
+  // update panel height
+  root.ref.panel.height = root.ref.controls.rect.inner.height;
+
+  // set panel height
+  root.height = root.ref.controls.rect.inner.height;
+
+  // select last state change action
+  let action = [...actions]
+    .filter(action => /^DID_/.test(action.type))
+    .reverse()
+    .find(action => StateMap[action.type]);
+
+  // no need to set same state twice
+  if (!action || (action && action.type === props.currentState)) {
+    return;
+  }
+
+  // set current state
+  props.currentState = action.type;
+
+  // set state
+  root.element.dataset.filepondItemState = StateMap[props.currentState] || '';
+};
+
 const item = createView({
   create: create$4,
+  write: write$3,
   tag: 'li',
   name: 'item',
   mixins: {
     apis: ['id', 'markedForRemoval'],
-    styles: ['translateX', 'translateY', 'scaleX', 'scaleY', 'opacity'],
+    styles: [
+      'translateX',
+      'translateY',
+      'scaleX',
+      'scaleY',
+      'opacity',
+      'height'
+    ],
     animations: {
       scaleX: 'spring',
       scaleY: 'spring',
@@ -4403,83 +4504,6 @@ const listScroller = createView({
   }
 });
 
-const PANEL_SPRING_PROPS = { type: 'spring', damping: 0.6, mass: 7 };
-
-const create$11 = ({ root }) => {
-  [
-    {
-      name: 'top'
-    },
-    {
-      name: 'center',
-      props: {
-        translateY: null,
-        scaleY: null
-      },
-      mixins: {
-        animations: {
-          scaleY: PANEL_SPRING_PROPS
-        },
-        styles: ['translateY', 'scaleY']
-      }
-    },
-    {
-      name: 'bottom',
-      props: {
-        translateY: null
-      },
-      mixins: {
-        animations: {
-          translateY: PANEL_SPRING_PROPS
-        },
-        styles: ['translateY']
-      }
-    }
-  ].forEach(section => {
-    createSection(root, section);
-  });
-};
-
-const createSection = (root, section) => {
-  const viewConstructor = createView({
-    name: `panel-${section.name}`,
-    mixins: section.mixins
-  });
-
-  const view = root.createChildView(viewConstructor, section.props);
-
-  root.ref[section.name] = root.appendChildView(view);
-};
-
-const write$6 = ({ root, props }) => {
-  if (!props.height) {
-    return;
-  }
-
-  const topRect = root.ref.top.rect.element;
-  const bottomRect = root.ref.bottom.rect.element;
-  const height = Math.max(topRect.height + bottomRect.height, props.height);
-
-  // offset center part
-  root.ref.center.translateY = topRect.height;
-
-  // scale center part
-  // use math ceil to prevent transparent lines because of rounding errors
-  root.ref.center.scaleY = (height - topRect.height - bottomRect.height) / 100;
-
-  // offset bottom part
-  root.ref.bottom.translateY = height - bottomRect.height;
-};
-
-const panel = createView({
-  name: 'panel',
-  write: write$6,
-  create: create$11,
-  mixins: {
-    apis: ['height']
-  }
-});
-
 const attrToggle = (element, name, state, enabledValue = '') => {
   if (state) {
     attr(element, name, enabledValue);
@@ -4731,7 +4755,7 @@ const explodeBlob = ({ root }) => {
   root.ref.blob.opacity = 0;
 };
 
-const write$7 = ({ root, props, actions }) => {
+const write$8 = ({ root, props, actions }) => {
   route$4({ root, props, actions });
 
   const { blob: blob$$1 } = root.ref;
@@ -4751,7 +4775,7 @@ const route$4 = createRoute({
 const drip = createView({
   ignoreRect: true,
   name: 'drip',
-  write: write$7
+  write: write$8
 });
 
 const getRootNode = element =>
@@ -5035,7 +5059,10 @@ const dragover = (root, clients) => e => {
   e.preventDefault();
 
   const dataTransfer = e.dataTransfer;
+
   requestDataTransferItems(dataTransfer).then(items => {
+    let overDropTarget = false;
+
     clients.some(client => {
       const {
         filterElement,
@@ -5060,6 +5087,8 @@ const dragover = (root, clients) => e => {
 
       // targetting this client
       if (isEventTarget(e, element)) {
+        overDropTarget = true;
+
         // had no previous state, means we are entering this client
         if (client.state === null) {
           client.state = 'enter';
@@ -5080,7 +5109,7 @@ const dragover = (root, clients) => e => {
         ondrag(eventPosition(e));
       } else {
         // should be over an element to drop
-        if (filterElement) {
+        if (filterElement && !overDropTarget) {
           setDropEffect(dataTransfer, 'none');
         }
 
@@ -5315,7 +5344,7 @@ const assist = (root, message) => {
   root.element.textContent = message;
 };
 
-const clear = root => {
+const clear$1 = root => {
   root.element.textContent = '';
 };
 
@@ -5333,7 +5362,7 @@ const listModified = (root, filename, label) => {
   // clear group after set amount of time so the status is not read twice
   clearTimeout(notificationClearTimeout);
   notificationClearTimeout = setTimeout(() => {
-    clear(root);
+    clear$1(root);
   }, 1500);
 };
 
@@ -5416,6 +5445,14 @@ const assistant = createView({
 });
 
 const create$1 = ({ root, props }) => {
+  // Add className
+  const className = root.query('GET_CLASS_NAME');
+  if (className) {
+    className.split(' ').forEach(name => {
+      root.element.classList.add(name);
+    });
+  }
+
   // Field label
   root.ref.label = root.appendChildView(
     root.createChildView(
@@ -5531,16 +5568,26 @@ const write = ({ root, props, actions }) => {
   );
   const bottomPadding = totalItems > 0 ? root.rect.element.paddingTop * 0.5 : 0;
 
-  // fix height
   if (boxBounding.fixedHeight) {
+    // fixed height
+
+    // fixed height panel
+    panel$$1.scalable = false;
+
     // link panel height to box bounding
     panel$$1.height = boxBounding.fixedHeight + root.rect.element.paddingTop;
 
     // set overflow
     list.overflow =
-      childrenBoundingHeight > panel$$1.height ? panel$$1.height : null;
+      childrenBoundingHeight > panel$$1.height && isMultiItem
+        ? panel$$1.height
+        : null;
   } else if (boxBounding.cappedHeight) {
-    // max height
+    // max-height
+
+    // not a fixed height panel
+    panel$$1.scalable = true;
+
     // limit children bounding height to the set capped height
     const cappedChildrenBoundingHeight = Math.min(
       boxBounding.cappedHeight,
@@ -5558,11 +5605,20 @@ const write = ({ root, props, actions }) => {
 
     // if can overflow, test if is currently overflowing
     list.overflow =
-      childrenBoundingHeight > panel$$1.height ? panel$$1.height : null;
+      childrenBoundingHeight > panel$$1.height && isMultiItem
+        ? panel$$1.height
+        : null;
   } else {
     // flexible height
+
+    // not a fixed height panel
+    panel$$1.scalable = true;
+
     // set to new bounding
-    root.height = childrenBoundingHeight + bottomPadding;
+    root.height =
+      childrenBoundingHeight + bottomPadding + root.rect.element.paddingTop;
+
+    //console.log(childrenBoundingHeight, bottomPadding, root.rect.element);
 
     // set height to new visual height
     panel$$1.height = visualHeight + bottomPadding;
@@ -5789,7 +5845,7 @@ const root = createView({
 // defaults
 // view
 // creates the app
-const createApp$1 = () => {
+const createApp$1 = (initialOptions = {}) => {
   // let element
   let originalElement = null;
 
@@ -5807,6 +5863,9 @@ const createApp$1 = () => {
     // action handlers
     [actions, createOptionActions(defaultOptions)]
   );
+
+  // set initial options
+  store.dispatch('SET_OPTIONS', { options: initialOptions });
 
   // render initial view
   const view = root(store, { id: getUniqueId() });
@@ -5843,6 +5902,8 @@ const createApp$1 = () => {
       // get all actions from store
       const actions$$1 = store
         .processActionQueue()
+
+        // filter out set actions (will trigger DID_SET)
         .filter(action => !/^SET_/.test(action.type));
 
       // if was idling and no actions stop here
@@ -6205,9 +6266,6 @@ const createApp$1 = () => {
 };
 
 const createAppObject = (customOptions = {}) => {
-  // create app instance
-  const app = createApp$1();
-
   // default options
   const defaultOptions = {};
   forin(getOptions(), (key, value) => {
@@ -6215,7 +6273,9 @@ const createAppObject = (customOptions = {}) => {
   });
 
   // set app options
-  app.setOptions(babelHelpers.extends({}, defaultOptions, customOptions));
+  const app = createApp$1(
+    babelHelpers.extends({}, defaultOptions, customOptions)
+  );
 
   // return the plugin instance
   return app;
@@ -6299,6 +6359,7 @@ const createAppAtElement = (element, options = {}) => {
   // how attributes of the input element are mapped to the options for the plugin
   const attributeMapping = {
     // translate to other name
+    '^class$': 'className',
     '^multiple$': 'allowMultiple',
     '^capture$': 'captureMethod',
 
@@ -6359,6 +6420,13 @@ const createAppAtElement = (element, options = {}) => {
 
   // build plugin
   const app = createAppObject(mergedOptions);
+
+  // add already selected files
+  if (element.files) {
+    [...element.files].forEach(file => {
+      app.addFile(file);
+    });
+  }
 
   // replace the target element
   app.replaceElement(element);
@@ -6482,9 +6550,6 @@ const createAppPlugin = plugin => {
       copyFile,
       renameFile,
       applyFilterChain
-    },
-    views: {
-      panel
     }
   });
 
@@ -6578,13 +6643,7 @@ const parse = context => {
   );
 
   // create new instance for each hook
-  const apps = newHooks.map(hook => create(hook));
-
-  // add to apps list
-  state.apps.push(...apps);
-
-  // return
-  return apps.map(app => createAppAPI(app));
+  return newHooks.map(hook => create(hook));
 };
 
 // returns an app based on the given element hook
