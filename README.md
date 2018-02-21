@@ -62,4 +62,4 @@ If the GPLv3 license does not match your use case, the [Commercial license](http
 
 ### Commercial use
 
-Interested in using FilePond for a project without the GPLv3 requirements, view the license options on the [pricing page](https://pqina.nl/filepond/pricing.html#commercial-license).
+Interested in using FilePond for a project without being restricted by the GPLv3 requirements, view the license options on the [pricing page](https://pqina.nl/filepond/pricing.html#commercial-license).
