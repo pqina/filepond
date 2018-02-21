@@ -48,17 +48,18 @@ Read more in the [FilePond documentation](https://pqina.nl/filepond/docs/pattern
 
 ## License terms
 
-FilePond is licensed under [GPLv3](https://opensource.org/licenses/GPL-3.0).
+The free version of FilePond is licensed under [GPLv3](https://opensource.org/licenses/GPL-3.0).
 
 ### What does this mean?
 
-* You **may** modify provided code in any way which doesn't conflict with above statement
 * You **may** use this lib for any private projects which you do not plan to share or sell
-* You **may** use this lib for public projects, BUT in such case you MUST share the full client source code of your project if asked. If you do not want to share your projects source code then you need to obtain a commercial license
+* You **may** use this lib for public projects as long as those projects are licensed under GPLv3 as well.
 * You **may not** remove the license and PQINA attribution from source files
 
-GitHub automatically adds a quick overview header to the [repository LICENSE](https://github.com/pqina/filepond/blob/master/LICENSE) which might be helpful as well.
+For more information read the [repository license details](https://github.com/pqina/filepond/blob/master/LICENSE).
+
+If the GPLv3 license does not match your use case, the [Commercial license](https://pqina.nl/filepond/pricing.html#commercial-license) might be more suitable.
 
 ### Commercial use
 
-Interested in using FilePond for a commercial project without the GPLv3 requirements, view the license options on the [pricing page](https://pqina.nl/filepond/pricing.html).
+Interested in using FilePond for a project without the GPLv3 requirements, view the license options on the [pricing page](https://pqina.nl/filepond/pricing.html#commercial-license).
