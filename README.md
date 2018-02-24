@@ -58,7 +58,7 @@ The free version of FilePond is licensed under [GPLv3](https://opensource.org/li
 
 For more information read the [repository license details](https://github.com/pqina/filepond/blob/master/LICENSE).
 
-If the GPLv3 license does not match your use case, the [Commercial license](https://pqina.nl/filepond/pricing.html#commercial-license) might be more suitable.
+If the GPLv3 license does not match your use case, the [commercial license](https://pqina.nl/filepond/pricing.html#commercial-license) might be more suitable.
 
 ### Commercial use
 
