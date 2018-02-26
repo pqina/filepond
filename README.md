@@ -39,7 +39,7 @@ Now you can turn an `<input type="file">` into a FilePond.
 <input type="file" class="filepond'>
 
 <script>
-const pond = FilePond.parse(document.body);
+FilePond.parse(document.body);
 </script>
 ```
 
