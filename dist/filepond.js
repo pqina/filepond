@@ -1,5 +1,5 @@
 /*
- * FilePond 1.0.4
+ * FilePond 1.0.5
  * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
  * You need to obtain a Commercial License to use FilePond in a non-GPL project.
  * Please visit https://pqina.nl/filepond for details.
@@ -2735,8 +2735,14 @@
           // update duration
           state.duration = Date.now() - state.timestamp;
 
+          // if we can't compute progress, we're not going to fire progress events
+          if (!computable) {
+            state.progress = null;
+            return;
+          }
+
           // update progress percentage
-          state.progress = computable ? current / total : null;
+          state.progress = current / total;
 
           // expose
           api.fire('progress', state.progress);
@@ -2793,6 +2799,7 @@
     var timeoutId = null;
     var timedOut = false;
     var aborted = false;
+    var headersReceived = false;
 
     // set default options
     options = _extends(
@@ -2846,6 +2853,12 @@
 
       // timeout no longer needed as connection is setup
       clearTimeout(timeoutId);
+
+      if (headersReceived) {
+        return;
+      }
+
+      headersReceived = true;
 
       // we've probably received some useful data in response headers
       api.onheaders(
@@ -3125,7 +3138,8 @@ function signature:
       var progressFn = function progressFn() {
         // we've not yet started the real download, stop here
         // the request might not go through, server trouble, stuff like that
-        if (state.duration === 0) {
+        // if state.progress is null, the server does not allow computing progress
+        if (state.duration === 0 || state.progress === null) {
           return;
         }
 
@@ -3192,7 +3206,10 @@ function signature:
           state.duration = Date.now() - state.timestamp;
 
           // if we are done
-          if (state.perceivedProgress === state.progress) {
+          if (
+            state.perceivedProgress === state.progress ||
+            state.progress === null
+          ) {
             completeFn();
           }
         },
@@ -3386,9 +3403,6 @@ function signature:
       // starts loading
       loader.on('init', function() {
         api.fire('load-init');
-
-        // start endless loading indicator
-        api.fire('load-progress', null);
       });
 
       // we'eve received a size indication, let's update the stub
@@ -4817,23 +4831,29 @@ function signature:
     DID_REQUEST_ITEM_PROCESSING: function DID_REQUEST_ITEM_PROCESSING(_ref5) {
       var root = _ref5.root;
 
-      root.ref.processProgressIndicator.progress = 0;
       root.ref.processProgressIndicator.spin = true;
+      root.ref.processProgressIndicator.progress = 0;
+    },
+    DID_START_ITEM_LOAD: function DID_START_ITEM_LOAD(_ref6) {
+      var root = _ref6.root;
+
+      root.ref.loadProgressIndicator.spin = true;
+      root.ref.loadProgressIndicator.progress = 0;
     },
     DID_UPDATE_ITEM_LOAD_PROGRESS: function DID_UPDATE_ITEM_LOAD_PROGRESS(
-      _ref6
+      _ref7
     ) {
-      var root = _ref6.root,
-        action = _ref6.action;
+      var root = _ref7.root,
+        action = _ref7.action;
 
       root.ref.loadProgressIndicator.spin = false;
       root.ref.loadProgressIndicator.progress = action.progress;
     },
     DID_UPDATE_ITEM_PROCESS_PROGRESS: function DID_UPDATE_ITEM_PROCESS_PROGRESS(
-      _ref7
+      _ref8
     ) {
-      var root = _ref7.root,
-        action = _ref7.action;
+      var root = _ref8.root,
+        action = _ref8.action;
 
       root.ref.processProgressIndicator.spin = false;
       root.ref.processProgressIndicator.progress = action.progress;
@@ -5040,6 +5060,8 @@ function signature:
   };
 
   var StateMap = {
+    DID_START_ITEM_LOAD: 'busy',
+    DID_UPDATE_ITEM_LOAD_PROGRESS: 'loading',
     DID_THROW_ITEM_INVALID: 'load-invalid',
     DID_THROW_ITEM_LOAD_ERROR: 'load-error',
     DID_START_ITEM_PROCESSING: 'busy',

@@ -1,5 +1,5 @@
 /*
- * FilePond 1.0.4
+ * FilePond 1.0.5
  * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
  * You need to obtain a Commercial License to use FilePond in a non-GPL project.
  * Please visit https://pqina.nl/filepond for details.
@@ -2147,8 +2147,14 @@ const createFileLoader = fetchFn => {
         // update duration
         state.duration = Date.now() - state.timestamp;
 
+        // if we can't compute progress, we're not going to fire progress events
+        if (!computable) {
+          state.progress = null;
+          return;
+        }
+
         // update progress percentage
-        state.progress = computable ? current / total : null;
+        state.progress = current / total;
 
         // expose
         api.fire('progress', state.progress);
@@ -2203,6 +2209,7 @@ const sendRequest = (data, url, options) => {
   let timeoutId = null;
   let timedOut = false;
   let aborted = false;
+  let headersReceived = false;
 
   // set default options
   options = babelHelpers.extends(
@@ -2253,6 +2260,12 @@ const sendRequest = (data, url, options) => {
 
     // timeout no longer needed as connection is setup
     clearTimeout(timeoutId);
+
+    if (headersReceived) {
+      return;
+    }
+
+    headersReceived = true;
 
     // we've probably received some useful data in response headers
     api.onheaders(
@@ -2498,7 +2511,8 @@ const createFileProcessor = processFn => {
     const progressFn = () => {
       // we've not yet started the real download, stop here
       // the request might not go through, server trouble, stuff like that
-      if (state.duration === 0) {
+      // if state.progress is null, the server does not allow computing progress
+      if (state.duration === 0 || state.progress === null) {
         return;
       }
 
@@ -2565,7 +2579,10 @@ const createFileProcessor = processFn => {
         state.duration = Date.now() - state.timestamp;
 
         // if we are done
-        if (state.perceivedProgress === state.progress) {
+        if (
+          state.perceivedProgress === state.progress ||
+          state.progress === null
+        ) {
           completeFn();
         }
       },
@@ -2740,9 +2757,6 @@ const createItem = (serverFileReference = null) => {
     // starts loading
     loader.on('init', () => {
       api.fire('load-init');
-
-      // start endless loading indicator
-      api.fire('load-progress', null);
     });
 
     // we'eve received a size indication, let's update the stub
@@ -3998,8 +4012,12 @@ const route$3 = createRoute({
     root.ref.buttonAbortItemLoad.label = action.value;
   },
   DID_REQUEST_ITEM_PROCESSING: ({ root, action }) => {
-    root.ref.processProgressIndicator.progress = 0;
     root.ref.processProgressIndicator.spin = true;
+    root.ref.processProgressIndicator.progress = 0;
+  },
+  DID_START_ITEM_LOAD: ({ root, action }) => {
+    root.ref.loadProgressIndicator.spin = true;
+    root.ref.loadProgressIndicator.progress = 0;
   },
   DID_UPDATE_ITEM_LOAD_PROGRESS: ({ root, action }) => {
     root.ref.loadProgressIndicator.spin = false;
@@ -4188,6 +4206,8 @@ const create$4 = ({ root, props }) => {
 };
 
 const StateMap = {
+  DID_START_ITEM_LOAD: 'busy',
+  DID_UPDATE_ITEM_LOAD_PROGRESS: 'loading',
   DID_THROW_ITEM_INVALID: 'load-invalid',
   DID_THROW_ITEM_LOAD_ERROR: 'load-error',
   DID_START_ITEM_PROCESSING: 'busy',
