@@ -1,5 +1,5 @@
 /*
- * FilePond 1.0.5
+ * FilePond 1.0.6
  * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
  * You need to obtain a Commercial License to use FilePond in a non-GPL project.
  * Please visit https://pqina.nl/filepond for details.
@@ -4947,7 +4947,8 @@ function signature:
   var PANEL_SPRING_PROPS = { type: 'spring', damping: 0.6, mass: 7 };
 
   var create$11 = function create(_ref) {
-    var root = _ref.root;
+    var root = _ref.root,
+      props = _ref.props;
 
     [
       {
@@ -4979,13 +4980,15 @@ function signature:
         }
       }
     ].forEach(function(section) {
-      createSection(root, section);
+      createSection(root, section, props.name);
     });
+
+    root.element.classList.add('filepond--' + props.name);
   };
 
-  var createSection = function createSection(root, section) {
+  var createSection = function createSection(root, section, className) {
     var viewConstructor = createView({
-      name: 'panel-' + section.name,
+      name: 'panel-' + section.name + ' filepond--' + className,
       mixins: section.mixins
     });
 
@@ -5049,8 +5052,9 @@ function signature:
     );
 
     // file panel
-    root.ref.panel = root.appendChildView(root.createChildView(panel));
-    root.ref.panel.element.classList.add('filepond--item-panel');
+    root.ref.panel = root.appendChildView(
+      root.createChildView(panel, { name: 'item-panel' })
+    );
 
     // default start height
     root.ref.panel.height = 0;
@@ -6516,8 +6520,9 @@ function signature:
     );
 
     // Background panel
-    root.ref.panel = root.appendChildView(root.createChildView(panel));
-    root.ref.panel.element.classList.add('filepond--panel-root');
+    root.ref.panel = root.appendChildView(
+      root.createChildView(panel, { name: 'panel-root' })
+    );
 
     // Assistant notifies assistive tech when content changes
     root.ref.assistant = root.appendChildView(
@@ -6952,9 +6957,6 @@ function signature:
 
     // render initial view
     var view = root(store, { id: getUniqueId() });
-
-    // add filepond plugin class
-    view.element.classList.add('filepond--plugin');
 
     //
     // PRIVATE API -------------------------------------------------------------------------------------
