@@ -1,5 +1,5 @@
 /*
- * FilePond 1.0.6
+ * FilePond 1.0.7
  * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
  * You need to obtain a Commercial License to use FilePond in a non-GPL project.
  * Please visit https://pqina.nl/filepond for details.
@@ -5499,7 +5499,8 @@ const create$1 = ({ root, props }) => {
     root.createChildView(assistant, babelHelpers.extends({}, props))
   );
 
-  // Measure (used to test if fixed height was set)
+  // Measure (tests if fixed height was set)
+  // DOCTYPE needs to be set for this to work
   root.ref.measure = createElement$1('div');
   root.ref.measure.style.height = '100%';
   root.element.appendChild(root.ref.measure);
@@ -5641,8 +5642,6 @@ const write = ({ root, props, actions }) => {
     // set to new bounding
     root.height =
       childrenBoundingHeight + bottomPadding + root.rect.element.paddingTop;
-
-    //console.log(childrenBoundingHeight, bottomPadding, root.rect.element);
 
     // set height to new visual height
     panel$$1.height = visualHeight + bottomPadding;
