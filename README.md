@@ -52,9 +52,9 @@ The free version of FilePond is licensed under [GPLv3](https://opensource.org/li
 
 ### What does this mean?
 
-* You **may** use this lib for any private projects which you do not plan to share or sell
+* You **may** use this lib for private use without the license.
 * You **may** use this lib for public projects as long as those projects are licensed under GPLv3 as well.
-* You **may not** remove the license and PQINA attribution from source files
+* You **may not** remove the license and PQINA attribution from source files.
 
 For more information read the [repository license details](https://github.com/pqina/filepond/blob/master/LICENSE).
 
