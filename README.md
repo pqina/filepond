@@ -1,6 +1,6 @@
 # <img src="https://github.com/pqina/filepond-github-assets/blob/master/logo.svg" height="44" alt="FilePond"/>
 
-**A JavaScript file upload plugin that's easy to setup and a joy to use.**
+**A Flexible and Fun JavaScript File Upload Plugin**
 
 Beautiful animations, fast uploads with client-side image optimization, and a great, accessible, user experience.
 
