@@ -23,7 +23,7 @@ Then import in your project:
 import * as FilePond from 'filepond';
 ```
 
-Or get from a CDN
+Or get it from a CDN
 
 ```html
 <!-- add to document <head> -->
@@ -43,23 +43,17 @@ FilePond.parse(document.body);
 </script>
 ```
 
-Read more in the [FilePond documentation](https://pqina.nl/filepond/docs/patterns/getting-started/)
+[Getting started with FilePond](https://pqina.nl/filepond/docs/patterns/getting-started/)
 
 
-## License terms
+## License
 
-The free version of FilePond is licensed under [GPLv3](https://opensource.org/licenses/GPL-3.0).
+### Commercial license
 
-### What does this mean?
+If you want to use FilePond on commercial sites, themes, projects, and applications, the Commercial license is what you need. With the commercial license, your source code is kept proprietary. View the license options on the [pricing page](https://pqina.nl/filepond/pricing.html#commercial-license).
 
-* You **may** use this lib for private use without the requirements imposed by the license.
-* You **may** use this lib for public projects as long as those projects are licensed under GPLv3 as well.
-* You **may not** remove the license and PQINA attribution from source files.
+### Open source license
 
-For more information read the [repository license details](https://github.com/pqina/filepond/blob/master/LICENSE).
+If you're working on an open source project under a license compatible with [GPLv3](https://opensource.org/licenses/GPL-3.0), you may use FilePond under the terms of the GPLv3.
 
-If the GPLv3 license does not match your use case, the [commercial license](https://pqina.nl/filepond/pricing.html#commercial-license) might be more suitable.
-
-### Commercial use
-
-Interested in using FilePond for a project without being restricted by the GPLv3 requirements, view the license options on the [pricing page](https://pqina.nl/filepond/pricing.html#commercial-license).
+For more information you can [read the full license here](https://pqina.nl/filepond/license).
