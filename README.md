@@ -20,7 +20,7 @@ npm install filepond
 Then import in your project:
 
 ```js
-import { FilePond } from 'filepond';
+import * as FilePond from 'filepond';
 ```
 
 Or get from a CDN
