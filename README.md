@@ -36,7 +36,7 @@ Or get from a CDN
 Now you can turn an `<input type="file">` into a FilePond.
 
 ```html
-<input type="file" class="filepond'>
+<input type="file" class="filepond">
 
 <script>
 FilePond.parse(document.body);
