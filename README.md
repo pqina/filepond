@@ -4,15 +4,26 @@
 
 Beautiful animations, fast uploads with client-side image optimization, and a great, accessible, user experience.
 
-[Learn more about FilePond](https://pqina.nl/filepond)
-
-
 <img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif" width="370" height="400" alt=""/>
+
+### Core Features
+
+- Accepts directories, files, blobs, local URLs, remote URLs and Data URIs.
+- Drop files, browse on filesystem, copy past files, or add files using the API.
+- Async uploading with AJAX or encode files as base64 data and send along form post.
+- Accessible, tested with AT software like VoiceOver and JAWS, navigable by Keyboard.
+- Image optimization, automatic image resizing, cropping, and correcting of EXIF orientation on the client saves bandwidth.
+- Responsive, automatically scales to available space, is function on both mobile and desktop.
+
+[Learn more about FilePond](https://pqina.nl/filepond)
 
 
 ## Quick Start
 
-Install from NPM [![npm version](https://badge.fury.io/js/filepond.svg)](https://badge.fury.io/js/filepond)
+Install from NPM
+
+[![npm version](https://badge.fury.io/js/filepond.svg)](https://badge.fury.io/js/filepond)
+
 ```bash
 npm install filepond
 ```
@@ -21,26 +32,44 @@ Then import in your project:
 
 ```js
 import * as FilePond from 'filepond';
+
+// Create a multi file upload component
+const pond = FilePond.create({
+    multiple:true,
+    name:'filepond'
+});
+
+// Add it to the DOM
+document.body.appendChild(pond.element);
 ```
 
 Or get it from a CDN
 
 ```html
-<!-- add to document <head> -->
-<link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+<!DOCTYPE html>
+<html>
+<head>
+  <title>FilePond from CDN</title>
+  
+  <!-- Filepond stylesheet -->
+  <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+  
+</head>
+<body>
+  
+  <!-- We'll transform this input into a pond -->
+  <input type="file" class="filepond">
+  
+  <!-- Load FilePond library -->
+  <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
 
-<!-- add before </body> -->
-<script src="https://unpkg.com/filepond/dist/filepond.js"></script>
-```
-
-Now you can turn an `<input type="file">` into a FilePond.
-
-```html
-<input type="file" class="filepond">
-
-<script>
-FilePond.parse(document.body);
-</script>
+  <!-- Turn all file input elements into ponds -->
+  <script>
+  FilePond.parse(document.body);
+  </script>
+  
+</body>
+</html>
 ```
 
 [Getting started with FilePond](https://pqina.nl/filepond/docs/patterns/getting-started/)
