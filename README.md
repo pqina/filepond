@@ -1,19 +1,34 @@
 # <img src="https://github.com/pqina/filepond-github-assets/blob/master/logo.svg" height="44" alt="FilePond"/>
 
-**A Flexible and Fun JavaScript File Upload Plugin**
+A (21 KB gzipped) JavaScript library that can **upload anything** you throw at it, **optimizes images** for faster uploads, and offers a great, **accessible**, silky **smooth user experience**.
 
-Beautiful animations, fast uploads with client-side image optimization, and a great, accessible, user experience.
+
 
 <img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif" width="370" height="400" alt=""/>
 
 ### Core Features
 
-- Accepts directories, files, blobs, local URLs, remote URLs and Data URIs.
-- Drop files, browse on filesystem, copy past files, or add files using the API.
-- Async uploading with AJAX or encode files as base64 data and send along form post.
-- Accessible, tested with AT software like VoiceOver and JAWS, navigable by Keyboard.
-- Image optimization, automatic image resizing, cropping, and correcting of EXIF orientation on the client saves bandwidth.
-- Responsive, automatically scales to available space, is function on both mobile and desktop.
+- Accepts **directories**, **files**, blobs, local URLs, **remote URLs** and Data URIs.
+- **Drop files**, browse on filesystem, **copy and paste files**, or add files using the API.
+- **Async uploading** with AJAX or encode files as base64 data and send along form post.
+- **Accessible**, tested with AT software like VoiceOver and JAWS, **navigable by Keyboard**.
+- **Image optimization**, automatic image resizing, **cropping**, and **correcting of EXIF orientation** on the client saves bandwidth.
+- **Responsive**, automatically scales to available space, is function on both **mobile and desktop**.
+
+### Plugins
+
+- [File encode](https://github.com/pqina/filepond-plugin-file-encode)
+- [File size validation](https://github.com/pqina/filepond-plugin-file-validate-size)
+- [File type validation](https://github.com/pqina/filepond-plugin-file-validate-type)
+- [Image preview](https://github.com/pqina/filepond-plugin-image-preview)
+- [Image crop](https://github.com/pqina/filepond-plugin-image-crop)
+- [Image resize](https://github.com/pqina/filepond-plugin-image-resize)
+- [Image transform](https://github.com/pqina/filepond-plugin-image-transform)
+- [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
+
+### Boilerplates
+
+- [PHP](https://github.com/pqina/filepond-boilerplate-php)
 
 [Learn more about FilePond](https://pqina.nl/filepond)
 
