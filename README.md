@@ -15,6 +15,8 @@ A (21 KB gzipped) JavaScript library that can **upload anything** you throw at i
 - **Image optimization**, automatic image resizing, **cropping**, and **correcting of EXIF orientation** on the client saves bandwidth.
 - **Responsive**, automatically scales to available space, is function on both **mobile and desktop**.
 
+[Learn more about FilePond](https://pqina.nl/filepond)
+
 ### Plugins
 
 - [File encode](https://github.com/pqina/filepond-plugin-file-encode)
@@ -34,12 +36,11 @@ A (21 KB gzipped) JavaScript library that can **upload anything** you throw at i
 
 - [PHP](https://github.com/pqina/filepond-boilerplate-php)
 
-[Learn more about FilePond](https://pqina.nl/filepond)
 
 
 ## Quick Start
 
-Install from NPM
+Install using npm:
 
 [![npm version](https://badge.fury.io/js/filepond.svg)](https://badge.fury.io/js/filepond)
 
@@ -62,7 +63,7 @@ const pond = FilePond.create({
 document.body.appendChild(pond.element);
 ```
 
-Or get it from a CDN
+Or get it from a CDN:
 
 ```html
 <!DOCTYPE html>
