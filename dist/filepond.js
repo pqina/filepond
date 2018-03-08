@@ -1,5 +1,5 @@
 /*
- * FilePond 1.0.7
+ * FilePond 1.0.8
  * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
  * You need to obtain a Commercial License to use FilePond in a non-GPL project.
  * Please visit https://pqina.nl/filepond for details.
@@ -2763,7 +2763,7 @@
 
     var api = _extends({}, on(), {
       setSource: function setSource(source) {
-        state.source = source;
+        return (state.source = source);
       },
       getProgress: getProgress, // file load progress
       abort: abort, // abort file load
@@ -3355,6 +3355,9 @@ function signature:
      * Internal item state
      */
     var state = {
+      // original source
+      source: null,
+
       // file model reference
       file: null,
 
@@ -3397,6 +3400,9 @@ function signature:
 
     // loads files
     var load = function load(source, loader, onload) {
+      // remember the original item source
+      state.source = source;
+
       // set a stub file object while loading the actual data
       state.file = createFileStub(source);
 
@@ -3622,6 +3628,11 @@ function signature:
         fileType: { get: getFileType },
         fileSize: { get: getFileSize },
         file: { get: getFile },
+        source: {
+          get: function get$$1() {
+            return state.source;
+          }
+        },
 
         getMetadata: function getMetadata(name) {
           return name ? metadata[name] : _extends({}, metadata);
@@ -3759,19 +3770,47 @@ function signature:
         var _ref2$value = _ref2.value,
           value = _ref2$value === undefined ? [] : _ref2$value;
 
-        // remove existing files
+        // map values to file objects
+        var files = value.map(function(file) {
+          return {
+            source: file.source ? file.source : file,
+            options: file.options
+          };
+        });
+
+        // loop over files, if file is in list, leave it be, if not, remove
+
+        // test if items should be moved
         [].concat(toConsumableArray(state.items)).forEach(function(item) {
-          dispatch('REMOVE_ITEM', { query: item });
+          // if item not is in new value, remove
+          if (
+            !files.find(function(file) {
+              return file.source === item.source;
+            })
+          ) {
+            dispatch('REMOVE_ITEM', { query: item });
+          }
         });
 
         // add new files
-        value.forEach(function(file, index) {
-          dispatch('ADD_ITEM', {
-            source: file.source ? file.source : file,
-            options: file.options,
-            interactionMethod: InteractionMethod.NONE,
-            index: index
-          });
+        files.forEach(function(file, index) {
+          // if file is already in list
+          if (
+            [].concat(toConsumableArray(state.items)).find(function(item) {
+              return item.source === file.source;
+            })
+          ) {
+            return;
+          }
+
+          // not in list, add
+          dispatch(
+            'ADD_ITEM',
+            _extends({}, file, {
+              interactionMethod: InteractionMethod.NONE,
+              index: index
+            })
+          );
         });
       },
 
@@ -5159,6 +5198,10 @@ function signature:
       opacity: 0
     };
 
+    if (interactionMethod === InteractionMethod.NONE) {
+      animation.translateY = null;
+    }
+
     if (interactionMethod === InteractionMethod.DROP) {
       animation.scaleX = 0.8;
       animation.scaleY = 0.8;
@@ -5271,27 +5314,31 @@ function signature:
 
     // update item positions
     var offset = 0;
-    root.childViews.forEach(function(child, childIndex) {
-      var childRect = child.rect;
+    root.childViews
+      .filter(function(child) {
+        return child.rect.outer.height;
+      })
+      .forEach(function(child, childIndex) {
+        var childRect = child.rect;
 
-      // set this child offset
-      child.translateX = 0;
-      child.translateY =
-        offset +
-        (props.dragIndex > -1
-          ? dragTranslation(childIndex, props.dragIndex, 10)
-          : 0);
+        // set this child offset
+        child.translateX = 0;
+        child.translateY =
+          offset +
+          (props.dragIndex > -1
+            ? dragTranslation(childIndex, props.dragIndex, 10)
+            : 0);
 
-      // show child if it's not marked for removal
-      if (!child.markedForRemoval) {
-        child.scaleX = 1;
-        child.scaleY = 1;
-        child.opacity = 1;
-      }
+        // show child if it's not marked for removal
+        if (!child.markedForRemoval) {
+          child.scaleX = 1;
+          child.scaleY = 1;
+          child.opacity = 1;
+        }
 
-      // calculate next child offset (reduce height by y scale for views that are being removed)
-      offset += childRect.outer.height;
-    });
+        // calculate next child offset (reduce height by y scale for views that are being removed)
+        offset += childRect.outer.height;
+      });
 
     // remove marked views
     root.childViews
@@ -7034,9 +7081,8 @@ function signature:
         if (data.source) {
           event.file = data.source;
         } else if (data.item || data.id) {
-          event.file = createItemAPI(
-            data.item ? data.item : store.query('GET_ITEM', data.id)
-          );
+          var item = data.item ? data.item : store.query('GET_ITEM', data.id);
+          event.file = item ? createItemAPI(item) : null;
         }
 
         // if this is a progress event add the progress amount
@@ -7047,6 +7093,7 @@ function signature:
         return event;
       };
     };
+
     var eventRoutes = {
       DID_DESTROY: createEvent('destroy'),
 
@@ -7705,8 +7752,20 @@ function signature:
   };
 
   // utilities exposed to plugins
+  // already registered plugins (can't register twice)
+  var registeredPlugins = [];
+
   // pass utils to plugin
   var createAppPlugin = function createAppPlugin(plugin) {
+    // already registered
+    if (registeredPlugins.includes(plugin)) {
+      return;
+    }
+
+    // remember this plugin
+    registeredPlugins.push(plugin);
+
+    // setup!
     var pluginOutline = plugin({
       addFilter: addFilter,
       utils: {

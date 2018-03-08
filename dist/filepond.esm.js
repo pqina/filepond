@@ -1,5 +1,5 @@
 /*
- * FilePond 1.0.7
+ * FilePond 1.0.8
  * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
  * You need to obtain a Commercial License to use FilePond in a non-GPL project.
  * Please visit https://pqina.nl/filepond for details.
@@ -2174,9 +2174,7 @@ const createFileLoader = fetchFn => {
   };
 
   const api = babelHelpers.extends({}, on(), {
-    setSource: source => {
-      state.source = source;
-    },
+    setSource: source => (state.source = source),
     getProgress, // file load progress
     abort, // abort file load
     load // start load
@@ -2719,6 +2717,9 @@ const createItem = (serverFileReference = null) => {
    * Internal item state
    */
   const state = {
+    // original source
+    source: null,
+
     // file model reference
     file: null,
 
@@ -2751,6 +2752,9 @@ const createItem = (serverFileReference = null) => {
 
   // loads files
   const load = (source, loader, onload) => {
+    // remember the original item source
+    state.source = source;
+
     // set a stub file object while loading the actual data
     state.file = createFileStub(source);
 
@@ -2958,6 +2962,7 @@ const createItem = (serverFileReference = null) => {
       fileType: { get: getFileType },
       fileSize: { get: getFileSize },
       file: { get: getFile },
+      source: { get: () => state.source },
 
       getMetadata: name =>
         name ? metadata[name] : babelHelpers.extends({}, metadata),
@@ -3065,19 +3070,37 @@ const actions = (dispatch, query, state) => ({
    * Sets initial files
    */
   DID_SET_FILES: ({ value = [] }) => {
-    // remove existing files
+    // map values to file objects
+    const files = value.map(file => ({
+      source: file.source ? file.source : file,
+      options: file.options
+    }));
+
+    // loop over files, if file is in list, leave it be, if not, remove
+
+    // test if items should be moved
     [...state.items].forEach(item => {
-      dispatch('REMOVE_ITEM', { query: item });
+      // if item not is in new value, remove
+      if (!files.find(file => file.source === item.source)) {
+        dispatch('REMOVE_ITEM', { query: item });
+      }
     });
 
     // add new files
-    value.forEach((file, index) => {
-      dispatch('ADD_ITEM', {
-        source: file.source ? file.source : file,
-        options: file.options,
-        interactionMethod: InteractionMethod.NONE,
-        index
-      });
+    files.forEach((file, index) => {
+      // if file is already in list
+      if ([...state.items].find(item => item.source === file.source)) {
+        return;
+      }
+
+      // not in list, add
+      dispatch(
+        'ADD_ITEM',
+        babelHelpers.extends({}, file, {
+          interactionMethod: InteractionMethod.NONE,
+          index
+        })
+      );
     });
   },
 
@@ -4289,6 +4312,10 @@ const addItemView = ({ root, action }) => {
     opacity: 0
   };
 
+  if (interactionMethod === InteractionMethod.NONE) {
+    animation.translateY = null;
+  }
+
   if (interactionMethod === InteractionMethod.DROP) {
     animation.scaleX = 0.8;
     animation.scaleY = 0.8;
@@ -4388,27 +4415,29 @@ const write$2 = ({ root, props, actions }) => {
 
   // update item positions
   let offset = 0;
-  root.childViews.forEach((child, childIndex) => {
-    const childRect = child.rect;
+  root.childViews
+    .filter(child => child.rect.outer.height)
+    .forEach((child, childIndex) => {
+      const childRect = child.rect;
 
-    // set this child offset
-    child.translateX = 0;
-    child.translateY =
-      offset +
-      (props.dragIndex > -1
-        ? dragTranslation(childIndex, props.dragIndex, 10)
-        : 0);
+      // set this child offset
+      child.translateX = 0;
+      child.translateY =
+        offset +
+        (props.dragIndex > -1
+          ? dragTranslation(childIndex, props.dragIndex, 10)
+          : 0);
 
-    // show child if it's not marked for removal
-    if (!child.markedForRemoval) {
-      child.scaleX = 1;
-      child.scaleY = 1;
-      child.opacity = 1;
-    }
+      // show child if it's not marked for removal
+      if (!child.markedForRemoval) {
+        child.scaleX = 1;
+        child.scaleY = 1;
+        child.opacity = 1;
+      }
 
-    // calculate next child offset (reduce height by y scale for views that are being removed)
-    offset += childRect.outer.height;
-  });
+      // calculate next child offset (reduce height by y scale for views that are being removed)
+      offset += childRect.outer.height;
+    });
 
   // remove marked views
   root.childViews
@@ -5967,9 +5996,8 @@ const createApp$1 = (initialOptions = {}) => {
     if (data.source) {
       event.file = data.source;
     } else if (data.item || data.id) {
-      event.file = createItemAPI(
-        data.item ? data.item : store.query('GET_ITEM', data.id)
-      );
+      const item = data.item ? data.item : store.query('GET_ITEM', data.id);
+      event.file = item ? createItemAPI(item) : null;
     }
 
     // if this is a progress event add the progress amount
@@ -5979,6 +6007,7 @@ const createApp$1 = (initialOptions = {}) => {
 
     return event;
   };
+
   const eventRoutes = {
     DID_DESTROY: createEvent('destroy'),
 
@@ -6548,8 +6577,20 @@ const loadImage = (url, cb) =>
 const copyFile = file => renameFile(file, file.name);
 
 // utilities exposed to plugins
+// already registered plugins (can't register twice)
+const registeredPlugins = [];
+
 // pass utils to plugin
 const createAppPlugin = plugin => {
+  // already registered
+  if (registeredPlugins.includes(plugin)) {
+    return;
+  }
+
+  // remember this plugin
+  registeredPlugins.push(plugin);
+
+  // setup!
   const pluginOutline = plugin({
     addFilter,
     utils: {
