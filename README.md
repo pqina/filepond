@@ -2,8 +2,6 @@
 
 A (21 KB gzipped) JavaScript library that can **upload anything** you throw at it, **optimizes images** for faster uploads, and offers a great, **accessible**, silky **smooth user experience**.
 
-
-
 <img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif" width="370" height="400" alt=""/>
 
 ### Core Features
