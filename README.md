@@ -28,8 +28,8 @@ A (21 KB gzipped) JavaScript library that can **upload anything** you throw at i
 
 ### Frameworks & Libraries
 
-- [jQuery Wrapper](https://github.com/pqina/jquery-filepond)
-- [React Component](https://github.com/pqina/react-filepond)
+- [jQuery adapter](https://github.com/pqina/jquery-filepond)
+- [React component](https://github.com/pqina/react-filepond)
 
 ### Boilerplates
 
