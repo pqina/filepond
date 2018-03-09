@@ -26,8 +26,9 @@ A (21 KB gzipped) JavaScript library that can **upload anything** you throw at i
 - [Image transform](https://github.com/pqina/filepond-plugin-image-transform)
 - [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
 
-### Frameworks
+### Frameworks / Libraries
 
+- [jQuery Wrapper](https://github.com/pqina/jquery-filepond)
 - [React Component](https://github.com/pqina/react-filepond)
 
 ### Boilerplates
