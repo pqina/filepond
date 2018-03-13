@@ -1,6 +1,12 @@
 # <img src="https://github.com/pqina/filepond-github-assets/blob/master/logo.svg" height="44" alt="FilePond"/>
 
-A (21 KB gzipped) JavaScript library that can **upload anything** you throw at it, **optimizes images** for faster uploads, and offers a great, **accessible**, silky **smooth user experience**.
+A JavaScript library that can **upload anything** you throw at it, **optimizes images** for faster uploads, and offers a great, **accessible**, silky **smooth user experience**.
+
+[![MIT license](https://img.shields.io/pypi/l/ansicolortags.svg)](https://github.com/pqina/filepond/blob/master/LICENSE)
+[![npm version](https://badge.fury.io/js/filepond.svg)](https://www.npmjs.com/package/filepond) 
+[![Donate with PayPal](https://img.shields.io/badge/donate-PayPal.me-pink.svg)](https://www.paypal.me/rikschennink/10)
+
+21KB gzipped. Also available as [React Component](https://github.com/pqina/react-filepond) or [jQuery Adapter](https://github.com/pqina/jquery-filepond).
 
 <img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif" width="370" height="400" alt=""/>
 
@@ -40,8 +46,6 @@ A (21 KB gzipped) JavaScript library that can **upload anything** you throw at i
 ## Quick Start
 
 Install using npm:
-
-[![npm version](https://badge.fury.io/js/filepond.svg)](https://badge.fury.io/js/filepond)
 
 ```bash
 npm install filepond
