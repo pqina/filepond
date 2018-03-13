@@ -92,16 +92,3 @@ Or get it from a CDN:
 ```
 
 [Getting started with FilePond](https://pqina.nl/filepond/docs/patterns/getting-started/)
-
-
-## License
-
-### Commercial license
-
-If you want to use FilePond on commercial sites, themes, projects, and applications, the Commercial license is what you need. With the commercial license, your source code is kept proprietary. View the license options on the [pricing page](https://pqina.nl/filepond/pricing.html#commercial-license).
-
-### Open source license
-
-If you're working on an open source project under a license compatible with [GPLv3](https://opensource.org/licenses/GPL-3.0), you may use FilePond under the terms of the GPLv3.
-
-For more information you can [read the full license here](https://pqina.nl/filepond/license).
