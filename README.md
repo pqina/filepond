@@ -6,7 +6,7 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 [![npm version](https://badge.fury.io/js/filepond.svg)](https://www.npmjs.com/package/filepond) 
 [![Donate with PayPal](https://img.shields.io/badge/donate-PayPal.me-pink.svg)](https://www.paypal.me/rikschennink/10)
 
-21KB gzipped. Also available as [React Component](https://github.com/pqina/react-filepond) or [jQuery Adapter](https://github.com/pqina/jquery-filepond).
+21KB gzipped. Also available as a [React Component](https://github.com/pqina/react-filepond) or [jQuery Adapter](https://github.com/pqina/jquery-filepond)
 
 <img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif" width="370" height="400" alt=""/>
 
