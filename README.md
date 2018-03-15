@@ -1,47 +1,49 @@
 # <img src="https://github.com/pqina/filepond-github-assets/blob/master/logo.svg" height="44" alt="FilePond"/>
 
-A (21 KB gzipped) JavaScript library that can **upload anything** you throw at it, **optimizes images** for faster uploads, and offers a great, **accessible**, silky **smooth user experience**.
+A JavaScript library that can upload anything you throw at it, optimizes images for faster uploads, and offers a great, accessible, silky smooth user experience.
+
+[![MIT license](https://img.shields.io/pypi/l/ansicolortags.svg)](https://github.com/pqina/filepond/blob/master/LICENSE)
+[![npm version](https://badge.fury.io/js/filepond.svg)](https://www.npmjs.com/package/filepond)
+[![Donate with PayPal](https://img.shields.io/badge/donate-PayPal.me-pink.svg)](https://www.paypal.me/rikschennink/10)
+
+21KB gzipped. Also available as a [React Component](https://github.com/pqina/react-filepond) or [jQuery Adapter](https://github.com/pqina/jquery-filepond)
 
 <img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif" width="370" height="400" alt=""/>
 
 ### Core Features
 
-- Accepts **directories**, **files**, blobs, local URLs, **remote URLs** and Data URIs.
-- **Drop files**, browse on filesystem, **copy and paste files**, or add files using the API.
-- **Async uploading** with AJAX or encode files as base64 data and send along form post.
-- **Accessible**, tested with AT software like VoiceOver and JAWS, **navigable by Keyboard**.
-- **Image optimization**, automatic image resizing, **cropping**, and **correcting of EXIF orientation** on the client saves bandwidth.
-- **Responsive**, automatically scales to available space, is function on both **mobile and desktop**.
+*   Accepts **directories**, **files**, blobs, local URLs, **remote URLs** and Data URIs.
+*   **Drop files**, browse on filesystem, **copy and paste files**, or add files using the API.
+*   **Async uploading** with AJAX or encode files as base64 data and send along form post.
+*   **Accessible**, tested with AT software like VoiceOver and JAWS, **navigable by Keyboard**.
+*   **Image optimization**, automatic image resizing, **cropping**, and **correcting of EXIF orientation** on the client saves bandwidth.
+*   **Responsive**, automatically scales to available space, is function on both **mobile and desktop**.
 
 [Learn more about FilePond](https://pqina.nl/filepond)
 
 ### Plugins
 
-- [File encode](https://github.com/pqina/filepond-plugin-file-encode)
-- [File size validation](https://github.com/pqina/filepond-plugin-file-validate-size)
-- [File type validation](https://github.com/pqina/filepond-plugin-file-validate-type)
-- [Image preview](https://github.com/pqina/filepond-plugin-image-preview)
-- [Image crop](https://github.com/pqina/filepond-plugin-image-crop)
-- [Image resize](https://github.com/pqina/filepond-plugin-image-resize)
-- [Image transform](https://github.com/pqina/filepond-plugin-image-transform)
-- [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
+*   [File encode](https://github.com/pqina/filepond-plugin-file-encode)
+*   [File size validation](https://github.com/pqina/filepond-plugin-file-validate-size)
+*   [File type validation](https://github.com/pqina/filepond-plugin-file-validate-type)
+*   [Image preview](https://github.com/pqina/filepond-plugin-image-preview)
+*   [Image crop](https://github.com/pqina/filepond-plugin-image-crop)
+*   [Image resize](https://github.com/pqina/filepond-plugin-image-resize)
+*   [Image transform](https://github.com/pqina/filepond-plugin-image-transform)
+*   [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
 
 ### Frameworks & Libraries
 
-- [jQuery adapter](https://github.com/pqina/jquery-filepond)
-- [React component](https://github.com/pqina/react-filepond)
+*   [jQuery adapter](https://github.com/pqina/jquery-filepond)
+*   [React component](https://github.com/pqina/react-filepond)
 
 ### Boilerplates
 
-- [PHP](https://github.com/pqina/filepond-boilerplate-php)
-
-
+*   [PHP](https://github.com/pqina/filepond-boilerplate-php)
 
 ## Quick Start
 
 Install using npm:
-
-[![npm version](https://badge.fury.io/js/filepond.svg)](https://badge.fury.io/js/filepond)
 
 ```bash
 npm install filepond
@@ -54,8 +56,8 @@ import * as FilePond from 'filepond';
 
 // Create a multi file upload component
 const pond = FilePond.create({
-    multiple:true,
-    name:'filepond'
+    multiple: true,
+    name: 'filepond'
 });
 
 // Add it to the DOM
@@ -69,16 +71,16 @@ Or get it from a CDN:
 <html>
 <head>
   <title>FilePond from CDN</title>
-  
+
   <!-- Filepond stylesheet -->
   <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
-  
+
 </head>
 <body>
-  
+
   <!-- We'll transform this input into a pond -->
   <input type="file" class="filepond">
-  
+
   <!-- Load FilePond library -->
   <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
 
@@ -86,13 +88,12 @@ Or get it from a CDN:
   <script>
   FilePond.parse(document.body);
   </script>
-  
+
 </body>
 </html>
 ```
 
 [Getting started with FilePond](https://pqina.nl/filepond/docs/patterns/getting-started/)
-
 
 ## License
 
@@ -100,7 +101,7 @@ Or get it from a CDN:
 
 MIT License
 
-Copyright (c) 2018 PQINA | Rik Schennik <rik@pqina.nl>
+Copyright (c) 2018 PQINA | Rik Schennik <mailto:rik@pqina.nl>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
