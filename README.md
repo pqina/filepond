@@ -2,8 +2,6 @@
 
 A (21 KB gzipped) JavaScript library that can **upload anything** you throw at it, **optimizes images** for faster uploads, and offers a great, **accessible**, silky **smooth user experience**.
 
-
-
 <img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif" width="370" height="400" alt=""/>
 
 ### Core Features
@@ -14,6 +12,8 @@ A (21 KB gzipped) JavaScript library that can **upload anything** you throw at i
 - **Accessible**, tested with AT software like VoiceOver and JAWS, **navigable by Keyboard**.
 - **Image optimization**, automatic image resizing, **cropping**, and **correcting of EXIF orientation** on the client saves bandwidth.
 - **Responsive**, automatically scales to available space, is function on both **mobile and desktop**.
+
+[Learn more about FilePond](https://pqina.nl/filepond)
 
 ### Plugins
 
@@ -26,16 +26,20 @@ A (21 KB gzipped) JavaScript library that can **upload anything** you throw at i
 - [Image transform](https://github.com/pqina/filepond-plugin-image-transform)
 - [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
 
+### Frameworks & Libraries
+
+- [jQuery adapter](https://github.com/pqina/jquery-filepond)
+- [React component](https://github.com/pqina/react-filepond)
+
 ### Boilerplates
 
 - [PHP](https://github.com/pqina/filepond-boilerplate-php)
 
-[Learn more about FilePond](https://pqina.nl/filepond)
 
 
 ## Quick Start
 
-Install from NPM
+Install using npm:
 
 [![npm version](https://badge.fury.io/js/filepond.svg)](https://badge.fury.io/js/filepond)
 
@@ -58,7 +62,7 @@ const pond = FilePond.create({
 document.body.appendChild(pond.element);
 ```
 
-Or get it from a CDN
+Or get it from a CDN:
 
 ```html
 <!DOCTYPE html>
@@ -92,12 +96,26 @@ Or get it from a CDN
 
 ## License
 
-### Commercial license
+**Don't remove or change any disclaimers from the source files.**
 
-If you want to use FilePond on commercial sites, themes, projects, and applications, the Commercial license is what you need. With the commercial license, your source code is kept proprietary. View the license options on the [pricing page](https://pqina.nl/filepond/pricing.html#commercial-license).
+MIT License
 
-### Open source license
+Copyright (c) 2018 PQINA | Rik Schennik <rik@pqina.nl>
 
-If you're working on an open source project under a license compatible with [GPLv3](https://opensource.org/licenses/GPL-3.0), you may use FilePond under the terms of the GPLv3.
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-For more information you can [read the full license here](https://pqina.nl/filepond/license).
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

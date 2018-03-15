@@ -1,7 +1,6 @@
 /*
- * FilePond 1.0.8
- * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
- * You need to obtain a Commercial License to use FilePond in a non-GPL project.
+ * FilePond 1.2.0
+ * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
 .filepond--assistant {
@@ -249,9 +248,9 @@
   animation: fall 0.5s 0.125s linear both;
 }
 
-[data-filepond-item-state*='invalid'] .filepond--item-panel,
+[data-filepond-item-state*='invalid'] .filepond--panel,
 [data-filepond-item-state*='invalid'] .filepond--file-wrapper,
-[data-filepond-item-state*='error'] .filepond--item-panel,
+[data-filepond-item-state*='error'] .filepond--panel,
 [data-filepond-item-state*='error'] .filepond--file-wrapper {
   -webkit-animation: shake 0.65s linear both;
   animation: shake 0.65s linear both;

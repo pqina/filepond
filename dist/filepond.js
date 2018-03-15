@@ -1,7 +1,6 @@
 /*
- * FilePond 1.0.8
- * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
- * You need to obtain a Commercial License to use FilePond in a non-GPL project.
+ * FilePond 1.2.0
+ * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
 (function(global, factory) {
@@ -3744,7 +3743,10 @@ function signature:
 
       var item = getItemByQuery(state.items, query);
       if (!item) {
-        failure(createResponse('error', 0, 'Item not found'));
+        failure({
+          error: createResponse('error', 0, 'Item not found'),
+          file: null
+        });
         return;
       }
       itemHandler(item, success, failure);
@@ -3832,7 +3834,10 @@ function signature:
 
         // if no source supplied
         if (isEmpty(source)) {
-          failure(createResponse('error', 0, 'No source'));
+          failure({
+            error: createResponse('error', 0, 'No source'),
+            file: null
+          });
           return;
         }
 
@@ -3859,7 +3864,7 @@ function signature:
               error: error
             });
 
-            failure(error);
+            failure({ error: error, file: null });
             return;
           }
 
@@ -3911,7 +3916,7 @@ function signature:
             });
 
             // reject the file so can be dealt with through API
-            failure(error);
+            failure({ error: error, file: createItemAPI(item) });
             return;
           }
 
@@ -3941,6 +3946,7 @@ function signature:
               // let interface know the item has loaded
               dispatch('DID_LOAD_ITEM', {
                 id: id,
+                error: null,
                 serverFileReference: isServerFile ? source : null
               });
 
@@ -3958,6 +3964,7 @@ function signature:
               if (isLimboServerFile) {
                 dispatch('DID_COMPLETE_ITEM_PROCESSING', {
                   id: id,
+                  error: null,
                   serverFileReference: source
                 });
                 return;
@@ -3985,6 +3992,7 @@ function signature:
         item.on('process-error', function(error) {
           dispatch('DID_THROW_ITEM_PROCESSING_ERROR', {
             id: id,
+            error: error,
             status: {
               main: state.options.labelFileProcessingError,
               sub: state.options.labelTapToRetry
@@ -4008,6 +4016,7 @@ function signature:
         item.on('process-complete', function(serverFileReference) {
           dispatch('DID_COMPLETE_ITEM_PROCESSING', {
             id: id,
+            error: null,
             serverFileReference: serverFileReference
           });
         });
@@ -4080,12 +4089,12 @@ function signature:
       ) {
         // we done function
         item.onOnce('process-complete', function() {
-          success(item);
+          success(createItemAPI(item));
         });
 
         // we error function
         item.onOnce('process-error', function(error) {
-          failure(error);
+          failure({ error: error, file: createItemAPI(item) });
         });
 
         // start file processing
@@ -7062,7 +7071,7 @@ function signature:
     //
     var createEvent = function createEvent(name) {
       return function(data) {
-        // set default event
+        // create default event
         var event = {
           type: name
         };
@@ -7072,9 +7081,13 @@ function signature:
           return event;
         }
 
-        // if error message
-        if (data.error) {
-          event.status = _extends({}, data.error);
+        // copy relevant props
+        if (data.hasOwnProperty('error')) {
+          event.error = data.error ? _extends({}, data.error) : null;
+        }
+
+        if (data.status) {
+          event.status = _extends({}, data.status);
         }
 
         // only source is available, else add item if possible
@@ -7105,8 +7118,9 @@ function signature:
       DID_UPDATE_ITEM_LOAD_PROGRESS: createEvent('addfileprogress'),
       DID_LOAD_ITEM: createEvent('addfile'),
 
-      DID_THROW_ITEM_INVALID: createEvent('error'),
-      DID_THROW_ITEM_LOAD_ERROR: createEvent('error'),
+      DID_THROW_ITEM_INVALID: [createEvent('error'), createEvent('addfile')],
+
+      DID_THROW_ITEM_LOAD_ERROR: [createEvent('error'), createEvent('addfile')],
 
       DID_START_ITEM_PROCESSING: createEvent('processfilestart'),
       DID_UPDATE_ITEM_PROCESS_PROGRESS: createEvent('processfileprogress'),
@@ -7114,42 +7128,59 @@ function signature:
       DID_COMPLETE_ITEM_PROCESSING: createEvent('processfile'),
       DID_REVERT_ITEM_PROCESSING: createEvent('processfilerevert'),
 
-      DID_THROW_ITEM_PROCESSING_ERROR: createEvent('error'),
+      DID_THROW_ITEM_PROCESSING_ERROR: [
+        createEvent('error'),
+        createEvent('processfile')
+      ],
 
       SPLICE_ITEM: createEvent('removefile')
     };
 
     var exposeEvent = function exposeEvent(event) {
+      // create event object to be dispatched
       var detail = _extends({ pond: exports }, event);
       delete detail.type;
       view.element.dispatchEvent(
         new CustomEvent('FilePond:' + event.type, {
+          // event info
           detail: detail,
+
+          // event behaviour
           bubbles: true,
           cancelable: true,
           composed: true // triggers listeners outside of shadow root
         })
       );
 
-      // event object to params
-      var params = Object.keys(event)
+      // event object to params used for `on()` event handlers and callbacks `oninit()`
+      var params = [];
+
+      // if is possible error event, make it the first param
+      if (event.hasOwnProperty('error')) {
+        params.push(event.error);
+      }
+      // file is always section
+      if (event.hasOwnProperty('file')) {
+        params.push(event.file);
+      }
+
+      // append otherp props
+      var filtered = ['type', 'error', 'file'];
+      Object.keys(event)
         .filter(function(key) {
-          return key !== 'type';
+          return !filtered.includes(key);
         })
-        .map(function(key) {
-          return event[key];
+        .forEach(function(key) {
+          return params.push(event[key]);
         });
 
       // on(type, () => { })
-      exports.fire.apply(
-        exports,
-        [event.type].concat(toConsumableArray(params))
-      );
+      exports.fire.apply(exports, [event.type].concat(params));
 
       // oninit = () => {}
       var handler = store.query('GET_ON' + event.type.toUpperCase());
       if (handler) {
-        handler.apply(undefined, toConsumableArray(params));
+        handler.apply(undefined, params);
       }
     };
 
@@ -7162,8 +7193,10 @@ function signature:
         if (!eventRoutes[action.type]) {
           return;
         }
-        var event = eventRoutes[action.type](action.data);
-        exposeEvent(event);
+        var routes = eventRoutes[action.type];
+        (Array.isArray(routes) ? routes : [routes]).forEach(function(route) {
+          exposeEvent(route(action.data));
+        });
       });
     };
 

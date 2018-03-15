@@ -1,7 +1,6 @@
 /*
- * FilePond 1.0.8
- * Licensed under GPL, https://opensource.org/licenses/GPL-3.0
- * You need to obtain a Commercial License to use FilePond in a non-GPL project.
+ * FilePond 1.2.0
+ * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
 const isNode = value => value instanceof HTMLElement;
@@ -3049,7 +3048,10 @@ const getItemByQueryFromState = (state, itemHandler) => ({
 } = {}) => {
   const item = getItemByQuery(state.items, query);
   if (!item) {
-    failure(createResponse('error', 0, 'Item not found'));
+    failure({
+      error: createResponse('error', 0, 'Item not found'),
+      file: null
+    });
     return;
   }
   itemHandler(item, success, failure);
@@ -3119,7 +3121,10 @@ const actions = (dispatch, query, state) => ({
   }) => {
     // if no source supplied
     if (isEmpty(source)) {
-      failure(createResponse('error', 0, 'No source'));
+      failure({
+        error: createResponse('error', 0, 'No source'),
+        file: null
+      });
       return;
     }
 
@@ -3146,7 +3151,7 @@ const actions = (dispatch, query, state) => ({
           error
         });
 
-        failure(error);
+        failure({ error, file: null });
         return;
       }
 
@@ -3195,7 +3200,7 @@ const actions = (dispatch, query, state) => ({
         });
 
         // reject the file so can be dealt with through API
-        failure(error);
+        failure({ error, file: createItemAPI(item) });
         return;
       }
 
@@ -3227,6 +3232,7 @@ const actions = (dispatch, query, state) => ({
         // let interface know the item has loaded
         dispatch('DID_LOAD_ITEM', {
           id,
+          error: null,
           serverFileReference: isServerFile ? source : null
         });
 
@@ -3244,6 +3250,7 @@ const actions = (dispatch, query, state) => ({
         if (isLimboServerFile) {
           dispatch('DID_COMPLETE_ITEM_PROCESSING', {
             id,
+            error: null,
             serverFileReference: source
           });
           return;
@@ -3267,6 +3274,7 @@ const actions = (dispatch, query, state) => ({
     item.on('process-error', error => {
       dispatch('DID_THROW_ITEM_PROCESSING_ERROR', {
         id,
+        error,
         status: {
           main: state.options.labelFileProcessingError,
           sub: state.options.labelTapToRetry
@@ -3290,6 +3298,7 @@ const actions = (dispatch, query, state) => ({
     item.on('process-complete', serverFileReference => {
       dispatch('DID_COMPLETE_ITEM_PROCESSING', {
         id,
+        error: null,
         serverFileReference
       });
     });
@@ -3348,12 +3357,12 @@ const actions = (dispatch, query, state) => ({
   PROCESS_ITEM: getItemByQueryFromState(state, (item, success, failure) => {
     // we done function
     item.onOnce('process-complete', () => {
-      success(item);
+      success(createItemAPI(item));
     });
 
     // we error function
     item.onOnce('process-error', error => {
-      failure(error);
+      failure({ error, file: createItemAPI(item) });
     });
 
     // start file processing
@@ -5977,7 +5986,7 @@ const createApp$1 = (initialOptions = {}) => {
   // EXPOSE EVENTS -------------------------------------------------------------------------------------
   //
   const createEvent = name => data => {
-    // set default event
+    // create default event
     const event = {
       type: name
     };
@@ -5987,9 +5996,13 @@ const createApp$1 = (initialOptions = {}) => {
       return event;
     }
 
-    // if error message
-    if (data.error) {
-      event.status = babelHelpers.extends({}, data.error);
+    // copy relevant props
+    if (data.hasOwnProperty('error')) {
+      event.error = data.error ? babelHelpers.extends({}, data.error) : null;
+    }
+
+    if (data.status) {
+      event.status = babelHelpers.extends({}, data.status);
     }
 
     // only source is available, else add item if possible
@@ -6019,8 +6032,9 @@ const createApp$1 = (initialOptions = {}) => {
     DID_UPDATE_ITEM_LOAD_PROGRESS: createEvent('addfileprogress'),
     DID_LOAD_ITEM: createEvent('addfile'),
 
-    DID_THROW_ITEM_INVALID: createEvent('error'),
-    DID_THROW_ITEM_LOAD_ERROR: createEvent('error'),
+    DID_THROW_ITEM_INVALID: [createEvent('error'), createEvent('addfile')],
+
+    DID_THROW_ITEM_LOAD_ERROR: [createEvent('error'), createEvent('addfile')],
 
     DID_START_ITEM_PROCESSING: createEvent('processfilestart'),
     DID_UPDATE_ITEM_PROCESS_PROGRESS: createEvent('processfileprogress'),
@@ -6028,27 +6042,47 @@ const createApp$1 = (initialOptions = {}) => {
     DID_COMPLETE_ITEM_PROCESSING: createEvent('processfile'),
     DID_REVERT_ITEM_PROCESSING: createEvent('processfilerevert'),
 
-    DID_THROW_ITEM_PROCESSING_ERROR: createEvent('error'),
+    DID_THROW_ITEM_PROCESSING_ERROR: [
+      createEvent('error'),
+      createEvent('processfile')
+    ],
 
     SPLICE_ITEM: createEvent('removefile')
   };
 
   const exposeEvent = event => {
+    // create event object to be dispatched
     const detail = babelHelpers.extends({ pond: exports }, event);
     delete detail.type;
     view.element.dispatchEvent(
       new CustomEvent(`FilePond:${event.type}`, {
+        // event info
         detail,
+
+        // event behaviour
         bubbles: true,
         cancelable: true,
         composed: true // triggers listeners outside of shadow root
       })
     );
 
-    // event object to params
-    const params = Object.keys(event)
-      .filter(key => key !== 'type')
-      .map(key => event[key]);
+    // event object to params used for `on()` event handlers and callbacks `oninit()`
+    const params = [];
+
+    // if is possible error event, make it the first param
+    if (event.hasOwnProperty('error')) {
+      params.push(event.error);
+    }
+    // file is always section
+    if (event.hasOwnProperty('file')) {
+      params.push(event.file);
+    }
+
+    // append otherp props
+    const filtered = ['type', 'error', 'file'];
+    Object.keys(event)
+      .filter(key => !filtered.includes(key))
+      .forEach(key => params.push(event[key]));
 
     // on(type, () => { })
     exports.fire(event.type, ...params);
@@ -6069,8 +6103,10 @@ const createApp$1 = (initialOptions = {}) => {
       if (!eventRoutes[action.type]) {
         return;
       }
-      const event = eventRoutes[action.type](action.data);
-      exposeEvent(event);
+      const routes = eventRoutes[action.type];
+      (Array.isArray(routes) ? routes : [routes]).forEach(route => {
+        exposeEvent(route(action.data));
+      });
     });
   };
 
