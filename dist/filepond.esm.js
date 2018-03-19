@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.2
+ * FilePond 1.2.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -6703,12 +6703,19 @@ if (document) {
   }
 }
 
+// updates the OptionTypes object based on the current options
+const updateOptionTypes = () =>
+  forin(getOptions$1(), (key, value) => {
+    OptionTypes[key] = value[1];
+  });
+
 /**
  * Public Plugin methods
  */
 const FileStatus = babelHelpers.extends({}, ItemStatus);
 
-const DefaultOptions = getOptions$1();
+const OptionTypes = {};
+updateOptionTypes();
 
 // create method, creates apps and adds them to the app array
 const create = (...args) => {
@@ -6779,7 +6786,13 @@ const supported = () =>
   );
 
 // adds a plugin extension
-const registerPlugin = (...plugins) => plugins.forEach(createAppPlugin);
+const registerPlugin = (...plugins) => {
+  // register plugins
+  plugins.forEach(createAppPlugin);
+
+  // update OptionTypes, each plugin might have extended the default options
+  updateOptionTypes();
+};
 
 const getOptions$$1 = () => {
   const opts = {};
@@ -6806,7 +6819,7 @@ const setOptions$$1 = opts => {
 
 export {
   FileStatus,
-  DefaultOptions,
+  OptionTypes,
   create,
   destroy,
   parse,

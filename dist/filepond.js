@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.2
+ * FilePond 1.2.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -7877,12 +7877,20 @@ function signature:
     }
   }
 
+  // updates the OptionTypes object based on the current options
+  var updateOptionTypes = function updateOptionTypes() {
+    return forin(getOptions$1(), function(key, value) {
+      OptionTypes[key] = value[1];
+    });
+  };
+
   /**
    * Public Plugin methods
    */
   var FileStatus = _extends({}, ItemStatus);
 
-  var DefaultOptions = getOptions$1();
+  var OptionTypes = {};
+  updateOptionTypes();
 
   // create method, creates apps and adds them to the app array
   var create = function create() {
@@ -7985,7 +7993,11 @@ function signature:
       plugins[_key] = arguments[_key];
     }
 
-    return plugins.forEach(createAppPlugin);
+    // register plugins
+    plugins.forEach(createAppPlugin);
+
+    // update OptionTypes, each plugin might have extended the default options
+    updateOptionTypes();
   };
 
   var getOptions$$1 = function getOptions$$1() {
@@ -8012,7 +8024,7 @@ function signature:
   };
 
   exports.FileStatus = FileStatus;
-  exports.DefaultOptions = DefaultOptions;
+  exports.OptionTypes = OptionTypes;
   exports.create = create;
   exports.destroy = destroy;
   exports.parse = parse;
