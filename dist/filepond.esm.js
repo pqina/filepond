@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.1
+ * FilePond 1.2.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1611,9 +1611,9 @@ const applyFilters = (key, value, utils) =>
 const addFilter = (key, cb) => filters.push({ key, cb });
 
 const extendDefaultOptions = additionalOptions =>
-  Object.assign(options, additionalOptions);
+  Object.assign(defaultOptions, additionalOptions);
 
-const getOptions = () => babelHelpers.extends({}, options);
+const getOptions$1 = () => babelHelpers.extends({}, defaultOptions);
 
 const formatType = (newValue, defaultValue, type) => {
   if (type === Type.SERVER_API && newValue) {
@@ -1625,15 +1625,19 @@ const formatType = (newValue, defaultValue, type) => {
 const setOptions$1 = opts => {
   forin(opts, (key, value) => {
     // key does not exist, so this option cannot be set
-    if (!options[key]) {
+    if (!defaultOptions[key]) {
       return;
     }
-    options[key][0] = formatType(value, options[key][0], options[key][1]);
+    defaultOptions[key][0] = formatType(
+      value,
+      defaultOptions[key][0],
+      defaultOptions[key][1]
+    );
   });
 };
 
 // default options on app
-const options = {
+const defaultOptions = {
   // input field name to use
   name: ['filepond', Type.STRING],
 
@@ -5911,18 +5915,18 @@ const createApp$1 = (initialOptions = {}) => {
   let originalElement = null;
 
   // get default options
-  const defaultOptions = getOptions();
+  const defaultOptions$$1 = getOptions$1();
 
   // create the data store, this will contain all our app info
   const store = createStore(
     // initial state (should be serializable)
-    createInitialState(defaultOptions),
+    createInitialState(defaultOptions$$1),
 
     // queries
-    [queries, createOptionQueries(defaultOptions)],
+    [queries, createOptionQueries(defaultOptions$$1)],
 
     // action handlers
-    [actions, createOptionActions(defaultOptions)]
+    [actions, createOptionActions(defaultOptions$$1)]
   );
 
   // set initial options
@@ -6196,7 +6200,7 @@ const createApp$1 = (initialOptions = {}) => {
     {},
     on(),
     readWriteApi,
-    createOptionAPI(store, defaultOptions),
+    createOptionAPI(store, defaultOptions$$1),
     {
       /**
        * Override options defined in options object
@@ -6352,14 +6356,14 @@ const createApp$1 = (initialOptions = {}) => {
 
 const createAppObject = (customOptions = {}) => {
   // default options
-  const defaultOptions = {};
-  forin(getOptions(), (key, value) => {
-    defaultOptions[key] = value[0];
+  const defaultOptions$$1 = {};
+  forin(getOptions$1(), (key, value) => {
+    defaultOptions$$1[key] = value[0];
   });
 
   // set app options
   const app = createApp$1(
-    babelHelpers.extends({}, defaultOptions, customOptions)
+    babelHelpers.extends({}, defaultOptions$$1, customOptions)
   );
 
   // return the plugin instance
@@ -6704,6 +6708,8 @@ if (document) {
  */
 const FileStatus = babelHelpers.extends({}, ItemStatus);
 
+const DefaultOptions = getOptions$1();
+
 // create method, creates apps and adds them to the app array
 const create = (...args) => {
   const app = createApp(...args);
@@ -6775,6 +6781,14 @@ const supported = () =>
 // adds a plugin extension
 const registerPlugin = (...plugins) => plugins.forEach(createAppPlugin);
 
+const getOptions$$1 = () => {
+  const opts = {};
+  forin(getOptions$1(), (key, value) => {
+    opts[key] = value[0];
+  });
+  return opts;
+};
+
 const setOptions$$1 = opts => {
   if (isObject(opts)) {
     // update existing plugins
@@ -6787,16 +6801,18 @@ const setOptions$$1 = opts => {
   }
 
   // return new options
-  return getOptions();
+  return getOptions$$1();
 };
 
 export {
   FileStatus,
+  DefaultOptions,
   create,
   destroy,
   parse,
   find,
   supported,
   registerPlugin,
+  getOptions$$1 as getOptions,
   setOptions$$1 as setOptions
 };

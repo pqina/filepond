@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.1
+ * FilePond 1.2.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2105,11 +2105,11 @@
   };
 
   var extendDefaultOptions = function extendDefaultOptions(additionalOptions) {
-    return Object.assign(options, additionalOptions);
+    return Object.assign(defaultOptions, additionalOptions);
   };
 
-  var getOptions = function getOptions() {
-    return _extends({}, options);
+  var getOptions$1 = function getOptions() {
+    return _extends({}, defaultOptions);
   };
 
   var formatType = function formatType(newValue, defaultValue, type) {
@@ -2122,15 +2122,19 @@
   var setOptions$1 = function setOptions(opts) {
     forin(opts, function(key, value) {
       // key does not exist, so this option cannot be set
-      if (!options[key]) {
+      if (!defaultOptions[key]) {
         return;
       }
-      options[key][0] = formatType(value, options[key][0], options[key][1]);
+      defaultOptions[key][0] = formatType(
+        value,
+        defaultOptions[key][0],
+        defaultOptions[key][1]
+      );
     });
   };
 
   // default options on app
-  var options = {
+  var defaultOptions = {
     // input field name to use
     name: ['filepond', Type.STRING],
 
@@ -6993,18 +6997,18 @@ function signature:
     var originalElement = null;
 
     // get default options
-    var defaultOptions = getOptions();
+    var defaultOptions$$1 = getOptions$1();
 
     // create the data store, this will contain all our app info
     var store = createStore(
       // initial state (should be serializable)
-      createInitialState(defaultOptions),
+      createInitialState(defaultOptions$$1),
 
       // queries
-      [queries, createOptionQueries(defaultOptions)],
+      [queries, createOptionQueries(defaultOptions$$1)],
 
       // action handlers
-      [actions, createOptionActions(defaultOptions)]
+      [actions, createOptionActions(defaultOptions$$1)]
     );
 
     // set initial options
@@ -7325,7 +7329,7 @@ function signature:
       {},
       on(),
       readWriteApi,
-      createOptionAPI(store, defaultOptions),
+      createOptionAPI(store, defaultOptions$$1),
       {
         /**
          * Override options defined in options object
@@ -7493,13 +7497,13 @@ function signature:
       arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     // default options
-    var defaultOptions = {};
-    forin(getOptions(), function(key, value) {
-      defaultOptions[key] = value[0];
+    var defaultOptions$$1 = {};
+    forin(getOptions$1(), function(key, value) {
+      defaultOptions$$1[key] = value[0];
     });
 
     // set app options
-    var app = createApp$1(_extends({}, defaultOptions, customOptions));
+    var app = createApp$1(_extends({}, defaultOptions$$1, customOptions));
 
     // return the plugin instance
     return app;
@@ -7878,6 +7882,8 @@ function signature:
    */
   var FileStatus = _extends({}, ItemStatus);
 
+  var DefaultOptions = getOptions$1();
+
   // create method, creates apps and adds them to the app array
   var create = function create() {
     var app = createApp.apply(undefined, arguments);
@@ -7982,6 +7988,14 @@ function signature:
     return plugins.forEach(createAppPlugin);
   };
 
+  var getOptions$$1 = function getOptions$$1() {
+    var opts = {};
+    forin(getOptions$1(), function(key, value) {
+      opts[key] = value[0];
+    });
+    return opts;
+  };
+
   var setOptions$$1 = function setOptions$$1(opts) {
     if (isObject(opts)) {
       // update existing plugins
@@ -7994,16 +8008,18 @@ function signature:
     }
 
     // return new options
-    return getOptions();
+    return getOptions$$1();
   };
 
   exports.FileStatus = FileStatus;
+  exports.DefaultOptions = DefaultOptions;
   exports.create = create;
   exports.destroy = destroy;
   exports.parse = parse;
   exports.find = find;
   exports.supported = supported;
   exports.registerPlugin = registerPlugin;
+  exports.getOptions = getOptions$$1;
   exports.setOptions = setOptions$$1;
 
   Object.defineProperty(exports, '__esModule', { value: true });
