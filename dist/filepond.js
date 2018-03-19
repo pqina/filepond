@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.0
+ * FilePond 1.2.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -7892,11 +7892,7 @@ function signature:
     var indexToRemove = state.apps.findIndex(function(app) {
       return app.isAttachedTo(hook);
     });
-    if (
-      function(indexToRemove) {
-        return 0;
-      }
-    ) {
+    if (indexToRemove >= 0) {
       // remove from apps
       var app = state.apps.splice(indexToRemove, 1)[0];
 

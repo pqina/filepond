@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.0
+ * FilePond 1.2.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -6716,7 +6716,7 @@ const create = (...args) => {
 const destroy = hook => {
   // returns true if the app was destroyed successfully
   const indexToRemove = state.apps.findIndex(app => app.isAttachedTo(hook));
-  if (indexToRemove => 0) {
+  if (indexToRemove >= 0) {
     // remove from apps
     const app = state.apps.splice(indexToRemove, 1)[0];
 
