@@ -98,11 +98,11 @@ Or get it from a CDN:
 
 ## License
 
-**Don't remove or change any disclaimers from the source files.**
+**Please don't remove or change the disclaimers in the source files**
 
 MIT License
 
-Copyright (c) 2018 PQINA | Rik Schennik <mailto:rik@pqina.nl>
+Copyright (c) 2018 PQINA | [Rik Schennik](mailto:rik@pqina.nl)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
