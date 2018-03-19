@@ -98,7 +98,7 @@ Or get it from a CDN:
 
 ## License
 
-**Don't remove or change any disclaimers from the source files.**
+**Please don't remove or change the disclaimers in the source files**
 
 MIT License
 
