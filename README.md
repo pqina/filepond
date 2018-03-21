@@ -2,7 +2,7 @@
 
 A JavaScript library that can upload anything you throw at it, optimizes images for faster uploads, and offers a great, accessible, silky smooth user experience.
 
-[![MIT license](https://img.shields.io/pypi/l/ansicolortags.svg)](https://github.com/pqina/filepond/blob/master/LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/pqina/filepond/blob/master/LICENSE)
 [![npm version](https://badge.fury.io/js/filepond.svg)](https://www.npmjs.com/package/filepond)
 [![Donate with PayPal](https://img.shields.io/badge/donate-PayPal.me-pink.svg)](https://www.paypal.me/rikschennink/10)
 [![Backlog on WIP.chat](https://img.shields.io/badge/backlog-wip.chat-yellow.svg)](https://wip.chat/products/191/pending)
