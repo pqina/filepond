@@ -14,11 +14,11 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 ### Core Features
 
 *   Accepts **directories**, **files**, blobs, local URLs, **remote URLs** and Data URIs.
-*   **Drop files**, browse on filesystem, **copy and paste files**, or add files using the API.
-*   **Async uploading** with AJAX or encode files as base64 data and send along form post.
+*   **Drop files**, select on filesystem, **copy and paste files**, or add files using the API.
+*   **Async uploading** with AJAX, or encode files as base64 data and send along form post.
 *   **Accessible**, tested with AT software like VoiceOver and JAWS, **navigable by Keyboard**.
-*   **Image optimization**, automatic image resizing, **cropping**, and **correcting of EXIF orientation** on the client saves bandwidth.
-*   **Responsive**, automatically scales to available space, is function on both **mobile and desktop**.
+*   **Image optimization**, automatic image resizing, **cropping**, and **fixes EXIF orientation**.
+*   **Responsive**, automatically scales to available space, is functional on both **mobile and desktop devices**.
 
 [Learn more about FilePond](https://pqina.nl/filepond)
 
