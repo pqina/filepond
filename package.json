@@ -1,6 +1,6 @@
 {
     "name": "filepond",
-    "version": "1.2.4",
+    "version": "1.2.5",
     "description": "FilePond, Where files go to stretch their bits.",
     "homepage": "https://pqina.nl/filepond",
     "main": "dist/filepond.js",

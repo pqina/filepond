@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.4
+ * FilePond 1.2.5
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1134,6 +1134,8 @@
 
     rect.scrollTop = element.scrollTop;
 
+    rect.hidden = element.offsetParent === null;
+
     return rect;
   };
 
@@ -1190,6 +1192,7 @@
 
         // element rectangle
         var rect = updateRect();
+        var frameRect = null;
 
         // pretty self explanatory
         var childViews = [];
@@ -1232,7 +1235,11 @@
           };
         };
         var getRect = function getRect() {
-          return getViewRect(rect, childViews, [0, 0], [1, 1]);
+          if (frameRect) {
+            return frameRect;
+          }
+          frameRect = getViewRect(rect, childViews, [0, 0], [1, 1]);
+          return frameRect;
         };
         var getStyle = function getStyle() {
           return style;
@@ -1243,6 +1250,8 @@
          * @private
          */
         var _read = function _read() {
+          frameRect = null;
+
           // read child views
           childViews.forEach(function(child) {
             return child._read();
@@ -2135,6 +2144,9 @@
 
   // default options on app
   var defaultOptions = {
+    // the id to add to the root element
+    id: [null, Type.STRING],
+
     // input field name to use
     name: ['filepond', Type.STRING],
 
@@ -6561,6 +6573,12 @@ function signature:
     var root = _ref.root,
       props = _ref.props;
 
+    // Add id
+    var id = root.query('GET_ID');
+    if (id) {
+      root.element.id = id;
+    }
+
     // Add className
     var className = root.query('GET_CLASS_NAME');
     if (className) {
@@ -7021,6 +7039,7 @@ function signature:
     // PRIVATE API -------------------------------------------------------------------------------------
     //
     var resting = false;
+    var hidden = false;
     var readWriteApi = {
       // necessary for update loop
 
@@ -7036,6 +7055,9 @@ function signature:
 
         // read view data
         view._read();
+
+        // if root is hidden
+        hidden = view.rect.element.hidden;
       },
 
       /**
@@ -7043,6 +7065,11 @@ function signature:
        * @private
        */
       _write: function _write(ts) {
+        // don't do anything while hidden
+        if (hidden) {
+          return;
+        }
+
         // get all actions from store
         var actions$$1 = store
           .processActionQueue()
@@ -7629,7 +7656,6 @@ function signature:
       },
 
       // don't include in object
-      '^id$': false,
       '^type$': false,
       '^files$': false
     };

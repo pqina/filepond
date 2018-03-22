@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.4
+ * FilePond 1.2.5
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -831,6 +831,8 @@ const updateRect = (rect = {}, element = {}, style = {}) => {
 
   rect.scrollTop = element.scrollTop;
 
+  rect.hidden = element.offsetParent === null;
+
   return rect;
 };
 
@@ -871,6 +873,7 @@ const createView =
 
     // element rectangle
     const rect = updateRect();
+    let frameRect = null;
 
     // pretty self explanatory
     const childViews = [];
@@ -902,7 +905,13 @@ const createView =
     const getChildViews = () => [...childViews];
     const getReference = () => ref;
     const createChildView = store => (view, props) => view(store, props);
-    const getRect = () => getViewRect(rect, childViews, [0, 0], [1, 1]);
+    const getRect = () => {
+      if (frameRect) {
+        return frameRect;
+      }
+      frameRect = getViewRect(rect, childViews, [0, 0], [1, 1]);
+      return frameRect;
+    };
     const getStyle = () => style;
 
     /**
@@ -910,6 +919,8 @@ const createView =
      * @private
      */
     const _read = () => {
+      frameRect = null;
+
       // read child views
       childViews.forEach(child => child._read());
 
@@ -1634,6 +1645,9 @@ const setOptions$1 = opts => {
 
 // default options on app
 const defaultOptions = {
+  // the id to add to the root element
+  id: [null, Type.STRING],
+
   // input field name to use
   name: ['filepond', Type.STRING],
 
@@ -5506,6 +5520,12 @@ const assistant = createView({
 });
 
 const create$1 = ({ root, props }) => {
+  // Add id
+  const id = root.query('GET_ID');
+  if (id) {
+    root.element.id = id;
+  }
+
   // Add className
   const className = root.query('GET_CLASS_NAME');
   if (className) {
@@ -5935,6 +5955,7 @@ const createApp$1 = (initialOptions = {}) => {
   // PRIVATE API -------------------------------------------------------------------------------------
   //
   let resting = false;
+  let hidden = false;
   const readWriteApi = {
     // necessary for update loop
 
@@ -5950,6 +5971,9 @@ const createApp$1 = (initialOptions = {}) => {
 
       // read view data
       view._read();
+
+      // if root is hidden
+      hidden = view.rect.element.hidden;
     },
 
     /**
@@ -5957,6 +5981,11 @@ const createApp$1 = (initialOptions = {}) => {
      * @private
      */
     _write: ts => {
+      // don't do anything while hidden
+      if (hidden) {
+        return;
+      }
+
       // get all actions from store
       const actions$$1 = store
         .processActionQueue()
@@ -6471,7 +6500,6 @@ const createAppAtElement = (element, options = {}) => {
     },
 
     // don't include in object
-    '^id$': false,
     '^type$': false,
     '^files$': false
   };
