@@ -9,7 +9,7 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 
 21KB gzipped. Also available as a [React Component](https://github.com/pqina/react-filepond) or [jQuery Adapter](https://github.com/pqina/jquery-filepond)
 
-<img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif" width="370" alt=""/>
+<img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif?raw=true" width="370" alt=""/>
 
 ### Core Features
 
