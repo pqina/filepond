@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.3
+ * FilePond 1.2.4
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1159,50 +1159,6 @@ const insertAfter = (newNode, referenceNode) => {
 
 const isArray = value => Array.isArray(value);
 
-const isInt = value =>
-  isNumber(value) && isFinite(value) && Math.floor(value) === value;
-
-const isNull = value => value === null;
-
-const isObject = value => typeof value === 'object' && value !== null;
-
-const isString = value => typeof value === 'string';
-
-const isAPI = value => {
-  return (
-    isObject(value) &&
-    isString(value.url) &&
-    isObject(value.process) &&
-    isObject(value.revert) &&
-    isObject(value.restore) &&
-    isObject(value.fetch)
-  );
-};
-
-const getType = value => {
-  if (isArray(value)) {
-    return 'array';
-  }
-
-  if (isNull(value)) {
-    return 'null';
-  }
-
-  if (isInt(value)) {
-    return 'int';
-  }
-
-  if (/^[0-9]+ ?(?:GB|MB|KB)$/gi.test(value)) {
-    return 'bytes';
-  }
-
-  if (isAPI(value)) {
-    return 'api';
-  }
-
-  return typeof value;
-};
-
 const trim = str => str.trim();
 
 const toString = value => '' + value;
@@ -1224,6 +1180,8 @@ const isBoolean = value => typeof value === 'boolean';
 
 const toBoolean = value => (isBoolean(value) ? value : value === 'true');
 
+const isString = value => typeof value === 'string';
+
 const toNumber = value =>
   isNumber(value)
     ? value
@@ -1232,6 +1190,9 @@ const toNumber = value =>
 const toInt = value => parseInt(toNumber(value), 10);
 
 const toFloat = value => parseFloat(toNumber(value));
+
+const isInt = value =>
+  isNumber(value) && isFinite(value) && Math.floor(value) === value;
 
 const toBytes = value => {
   // is in bytes
@@ -1337,6 +1298,45 @@ const createAction = (name, outline, method, timeout) => {
 
 const toServerAPI = value => createServerAPI(value);
 
+const isNull = value => value === null;
+
+const isObject = value => typeof value === 'object' && value !== null;
+
+const isAPI = value => {
+  return (
+    isObject(value) &&
+    isString(value.url) &&
+    isObject(value.process) &&
+    isObject(value.revert) &&
+    isObject(value.restore) &&
+    isObject(value.fetch)
+  );
+};
+
+const getType = value => {
+  if (isArray(value)) {
+    return 'array';
+  }
+
+  if (isNull(value)) {
+    return 'null';
+  }
+
+  if (isInt(value)) {
+    return 'int';
+  }
+
+  if (/^[0-9]+ ?(?:GB|MB|KB)$/gi.test(value)) {
+    return 'bytes';
+  }
+
+  if (isAPI(value)) {
+    return 'api';
+  }
+
+  return typeof value;
+};
+
 const conversionTable = {
   array: toArray,
   boolean: toBoolean,
@@ -1350,39 +1350,42 @@ const conversionTable = {
 
 const convertTo = (value, type) => conversionTable[type](value);
 
+const getValueByType = (newValue, defaultValue, valueType) => {
+  // can always assign default value
+  if (newValue === defaultValue) {
+    return newValue;
+  }
+
+  // get the type of the new value
+  let newValueType = getType(newValue);
+
+  // is valid type?
+  if (newValueType !== valueType) {
+    // is string input, let's attempt to convert
+    const convertedValue = convertTo(newValue, valueType);
+
+    // what is the type now
+    newValueType = getType(convertedValue);
+
+    // no valid conversions found
+    if (convertedValue === null) {
+      throw `Trying to assign value with incorrect type to "${option}", allowed type: "${valueType}"`;
+    } else {
+      newValue = convertedValue;
+    }
+  }
+
+  // assign new value
+  return newValue;
+};
+
 const createOption = (option, defaultValue, valueType) => {
   let currentValue = defaultValue;
 
   return {
     get: () => currentValue,
     set: newValue => {
-      // can always assign default value
-      if (newValue === defaultValue) {
-        currentValue = newValue;
-        return;
-      }
-
-      // get the type of the new value
-      let newValueType = getType(newValue);
-
-      // is valid type?
-      if (newValueType !== valueType) {
-        // is string input, let's attempt to convert
-        const convertedValue = convertTo(newValue, valueType);
-
-        // what is the type now
-        newValueType = getType(convertedValue);
-
-        // no valid conversions found
-        if (convertedValue === null) {
-          throw `Trying to assign value with incorrect type to "${option}", allowed type: "${valueType}"`;
-        } else {
-          newValue = convertedValue;
-        }
-      }
-
-      // assign new value
-      currentValue = newValue;
+      currentValue = getValueByType(newValue, defaultValue, valueType);
     }
   };
 };
@@ -1615,20 +1618,13 @@ const extendDefaultOptions = additionalOptions =>
 
 const getOptions$1 = () => babelHelpers.extends({}, defaultOptions);
 
-const formatType = (newValue, defaultValue, type) => {
-  if (type === Type.SERVER_API && newValue) {
-    return createServerAPI(newValue);
-  }
-  return newValue;
-};
-
 const setOptions$1 = opts => {
   forin(opts, (key, value) => {
     // key does not exist, so this option cannot be set
     if (!defaultOptions[key]) {
       return;
     }
-    defaultOptions[key][0] = formatType(
+    defaultOptions[key][0] = getValueByType(
       value,
       defaultOptions[key][0],
       defaultOptions[key][1]

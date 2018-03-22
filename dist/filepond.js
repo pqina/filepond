@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.3
+ * FilePond 1.2.4
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1544,60 +1544,6 @@
     return Array.isArray(value);
   };
 
-  var isInt = function isInt(value) {
-    return isNumber(value) && isFinite(value) && Math.floor(value) === value;
-  };
-
-  var isNull = function isNull(value) {
-    return value === null;
-  };
-
-  var isObject = function isObject(value) {
-    return (
-      (typeof value === 'undefined' ? 'undefined' : _typeof(value)) ===
-        'object' && value !== null
-    );
-  };
-
-  var isString = function isString(value) {
-    return typeof value === 'string';
-  };
-
-  var isAPI = function isAPI(value) {
-    return (
-      isObject(value) &&
-      isString(value.url) &&
-      isObject(value.process) &&
-      isObject(value.revert) &&
-      isObject(value.restore) &&
-      isObject(value.fetch)
-    );
-  };
-
-  var getType = function getType(value) {
-    if (isArray(value)) {
-      return 'array';
-    }
-
-    if (isNull(value)) {
-      return 'null';
-    }
-
-    if (isInt(value)) {
-      return 'int';
-    }
-
-    if (/^[0-9]+ ?(?:GB|MB|KB)$/gi.test(value)) {
-      return 'bytes';
-    }
-
-    if (isAPI(value)) {
-      return 'api';
-    }
-
-    return typeof value === 'undefined' ? 'undefined' : _typeof(value);
-  };
-
   var trim = function trim(str) {
     return str.trim();
   };
@@ -1632,6 +1578,10 @@
     return isBoolean(value) ? value : value === 'true';
   };
 
+  var isString = function isString(value) {
+    return typeof value === 'string';
+  };
+
   var toNumber = function toNumber(value) {
     return isNumber(value)
       ? value
@@ -1644,6 +1594,10 @@
 
   var toFloat = function toFloat(value) {
     return parseFloat(toNumber(value));
+  };
+
+  var isInt = function isInt(value) {
+    return isNumber(value) && isFinite(value) && Math.floor(value) === value;
   };
 
   var toBytes = function toBytes(value) {
@@ -1752,6 +1706,52 @@
     return createServerAPI(value);
   };
 
+  var isNull = function isNull(value) {
+    return value === null;
+  };
+
+  var isObject = function isObject(value) {
+    return (
+      (typeof value === 'undefined' ? 'undefined' : _typeof(value)) ===
+        'object' && value !== null
+    );
+  };
+
+  var isAPI = function isAPI(value) {
+    return (
+      isObject(value) &&
+      isString(value.url) &&
+      isObject(value.process) &&
+      isObject(value.revert) &&
+      isObject(value.restore) &&
+      isObject(value.fetch)
+    );
+  };
+
+  var getType = function getType(value) {
+    if (isArray(value)) {
+      return 'array';
+    }
+
+    if (isNull(value)) {
+      return 'null';
+    }
+
+    if (isInt(value)) {
+      return 'int';
+    }
+
+    if (/^[0-9]+ ?(?:GB|MB|KB)$/gi.test(value)) {
+      return 'bytes';
+    }
+
+    if (isAPI(value)) {
+      return 'api';
+    }
+
+    return typeof value === 'undefined' ? 'undefined' : _typeof(value);
+  };
+
   var conversionTable = {
     array: toArray$1,
     boolean: toBoolean,
@@ -1771,6 +1771,43 @@
     return conversionTable[type](value);
   };
 
+  var getValueByType = function getValueByType(
+    newValue,
+    defaultValue,
+    valueType
+  ) {
+    // can always assign default value
+    if (newValue === defaultValue) {
+      return newValue;
+    }
+
+    // get the type of the new value
+    var newValueType = getType(newValue);
+
+    // is valid type?
+    if (newValueType !== valueType) {
+      // is string input, let's attempt to convert
+      var convertedValue = convertTo(newValue, valueType);
+
+      // what is the type now
+      newValueType = getType(convertedValue);
+
+      // no valid conversions found
+      if (convertedValue === null) {
+        throw 'Trying to assign value with incorrect type to "' +
+          option +
+          '", allowed type: "' +
+          valueType +
+          '"';
+      } else {
+        newValue = convertedValue;
+      }
+    }
+
+    // assign new value
+    return newValue;
+  };
+
   var createOption = function createOption(option, defaultValue, valueType) {
     var currentValue = defaultValue;
 
@@ -1779,37 +1816,7 @@
         return currentValue;
       },
       set: function set(newValue) {
-        // can always assign default value
-        if (newValue === defaultValue) {
-          currentValue = newValue;
-          return;
-        }
-
-        // get the type of the new value
-        var newValueType = getType(newValue);
-
-        // is valid type?
-        if (newValueType !== valueType) {
-          // is string input, let's attempt to convert
-          var convertedValue = convertTo(newValue, valueType);
-
-          // what is the type now
-          newValueType = getType(convertedValue);
-
-          // no valid conversions found
-          if (convertedValue === null) {
-            throw 'Trying to assign value with incorrect type to "' +
-              option +
-              '", allowed type: "' +
-              valueType +
-              '"';
-          } else {
-            newValue = convertedValue;
-          }
-        }
-
-        // assign new value
-        currentValue = newValue;
+        currentValue = getValueByType(newValue, defaultValue, valueType);
       }
     };
   };
@@ -2112,20 +2119,13 @@
     return _extends({}, defaultOptions);
   };
 
-  var formatType = function formatType(newValue, defaultValue, type) {
-    if (type === Type.SERVER_API && newValue) {
-      return createServerAPI(newValue);
-    }
-    return newValue;
-  };
-
   var setOptions$1 = function setOptions(opts) {
     forin(opts, function(key, value) {
       // key does not exist, so this option cannot be set
       if (!defaultOptions[key]) {
         return;
       }
-      defaultOptions[key][0] = formatType(
+      defaultOptions[key][0] = getValueByType(
         value,
         defaultOptions[key][0],
         defaultOptions[key][1]
