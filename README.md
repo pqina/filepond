@@ -7,7 +7,7 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 [![Donate with PayPal](https://img.shields.io/badge/donate-PayPal.me-pink.svg)](https://www.paypal.me/rikschennink/10)
 [![Backlog on WIP.chat](https://img.shields.io/badge/backlog-wip.chat-yellow.svg)](https://wip.chat/products/191/pending)
 
-21KB gzipped. Also available as a [React Component](https://github.com/pqina/react-filepond) or [jQuery Adapter](https://github.com/pqina/jquery-filepond)
+21KB gzipped. Also available as an adapter for [React](https://github.com/pqina/react-filepond), [Vue](https://github.com/pqina/vue-filepond), and [jQuery](https://github.com/pqina/jquery-filepond)
 
 <img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif?raw=true" width="370" alt=""/>
 
@@ -33,10 +33,11 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 *   [Image transform](https://github.com/pqina/filepond-plugin-image-transform)
 *   [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
 
-### Frameworks & Libraries
+### Adapters
 
-*   [jQuery adapter](https://github.com/pqina/jquery-filepond)
-*   [React component](https://github.com/pqina/react-filepond)
+*   [React](https://github.com/pqina/react-filepond)
+*   [Vue](https://github.com/pqina/vue-filepond)
+*   [jQuery](https://github.com/pqina/jquery-filepond)
 
 ### Boilerplates
 
