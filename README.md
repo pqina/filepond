@@ -4,21 +4,21 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/pqina/filepond/blob/master/LICENSE)
 [![npm version](https://badge.fury.io/js/filepond.svg)](https://www.npmjs.com/package/filepond)
-[![Donate with PayPal](https://img.shields.io/badge/donate-PayPal.me-pink.svg)](https://www.paypal.me/rikschennink/10)
 [![Backlog on WIP.chat](https://img.shields.io/badge/backlog-wip.chat-yellow.svg)](https://wip.chat/products/191/pending)
+[![Donate with PayPal](https://img.shields.io/badge/donate-PayPal.me-pink.svg)](https://www.paypal.me/rikschennink/10)
 
-21KB gzipped. Also available as a [React Component](https://github.com/pqina/react-filepond) or [jQuery Adapter](https://github.com/pqina/jquery-filepond)
+21 KB gzipped. FilePond adapters are available for **[React](https://github.com/pqina/react-filepond)**, **[Vue](https://github.com/pqina/vue-filepond)**, and **[jQuery](https://github.com/pqina/jquery-filepond)**
 
 <img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif?raw=true" width="370" alt=""/>
 
 ### Core Features
 
 *   Accepts **directories**, **files**, blobs, local URLs, **remote URLs** and Data URIs.
-*   **Drop files**, browse on filesystem, **copy and paste files**, or add files using the API.
-*   **Async uploading** with AJAX or encode files as base64 data and send along form post.
+*   **Drop files**, select on filesystem, **copy and paste files**, or add files using the API.
+*   **Async uploading** with AJAX, or encode files as base64 data and send along form post.
 *   **Accessible**, tested with AT software like VoiceOver and JAWS, **navigable by Keyboard**.
-*   **Image optimization**, automatic image resizing, **cropping**, and **correcting of EXIF orientation** on the client saves bandwidth.
-*   **Responsive**, automatically scales to available space, is function on both **mobile and desktop**.
+*   **Image optimization**, automatic image resizing, **cropping**, and **fixes EXIF orientation**.
+*   **Responsive**, automatically scales to available space, is functional on both **mobile and desktop devices**.
 
 [Learn more about FilePond](https://pqina.nl/filepond)
 
@@ -33,10 +33,11 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 *   [Image transform](https://github.com/pqina/filepond-plugin-image-transform)
 *   [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
 
-### Frameworks & Libraries
+### Adapters
 
-*   [jQuery adapter](https://github.com/pqina/jquery-filepond)
-*   [React component](https://github.com/pqina/react-filepond)
+*   [React](https://github.com/pqina/react-filepond)
+*   [Vue](https://github.com/pqina/vue-filepond)
+*   [jQuery](https://github.com/pqina/jquery-filepond)
 
 ### Boilerplates
 
