@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.5
+ * FilePond 1.2.6
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2244,10 +2244,10 @@
     labelFileProcessingError: ['Error during upload', Type.STRING],
     // labelFileProcessingPaused: ['Upload paused', Type.STRING],
 
-    // labelTapToPause: ['tap to pause', Type.STRING],
     labelTapToCancel: ['tap to cancel', Type.STRING],
     labelTapToRetry: ['tap to retry', Type.STRING],
     labelTapToUndo: ['tap to undo', Type.STRING],
+    // labelTapToPause: ['tap to pause', Type.STRING],
     // labelTapToResume: ['tap to resume', Type.STRING],
 
     labelButtonRemoveItem: ['Remove', Type.STRING],
@@ -2287,6 +2287,7 @@
     onprocessfileprogress: [null, Type.FUNCTION],
     onprocessfileabort: [null, Type.FUNCTION],
     onprocessfilerevert: [null, Type.FUNCTION],
+    onprocessfile: [null, Type.FUNCTION],
     onremovefile: [null, Type.FUNCTION],
 
     // custom initial files array
