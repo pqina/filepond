@@ -2511,7 +2511,7 @@ const createFileProcessor = processFn => {
     complete: false,
     perceivedProgress: 0,
     perceivedPerformanceUpdater: null,
-    progress: 0,
+    progress: null,
     timestamp: null,
     perceivedDuration: 0,
     duration: 0,
@@ -2590,11 +2590,13 @@ const createFileProcessor = processFn => {
         // update duration
         state.duration = Date.now() - state.timestamp;
 
-        // if we are done
-        if (
-          state.perceivedProgress === state.progress ||
-          state.progress === null
-        ) {
+        // force progress to 1 as we're now done
+        state.progress = 1;
+
+        // we are really done
+        // if perceived progress is 1 ( wait for perceived progress to complete )
+        // or if server does not support progress ( null )
+        if (state.perceivedProgress === 1) {
           completeFn();
         }
       },
