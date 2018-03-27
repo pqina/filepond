@@ -7,7 +7,7 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 [![Backlog on WIP.chat](https://img.shields.io/badge/backlog-wip.chat-yellow.svg)](https://wip.chat/products/191/pending)
 [![Donate with PayPal](https://img.shields.io/badge/donate-PayPal.me-pink.svg)](https://www.paypal.me/rikschennink/10)
 
-21 KB gzipped. FilePond adapters are available for **[React](https://github.com/pqina/react-filepond)**, **[Vue](https://github.com/pqina/vue-filepond)**, and **[jQuery](https://github.com/pqina/jquery-filepond)**
+21 KB gzipped. FilePond adapters are available for **[React](https://github.com/pqina/react-filepond)**, **[Vue](https://github.com/pqina/vue-filepond)**, **[Angular](https://github.com/pqina/angular-filepond)** and **[jQuery](https://github.com/pqina/jquery-filepond)**
 
 <img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif?raw=true" width="370" alt=""/>
 
@@ -37,6 +37,7 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 
 *   [React](https://github.com/pqina/react-filepond)
 *   [Vue](https://github.com/pqina/vue-filepond)
+*   [Angular](https://github.com/pqina/angular-filepond)
 *   [jQuery](https://github.com/pqina/jquery-filepond)
 
 ### Boilerplates
