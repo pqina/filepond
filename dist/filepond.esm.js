@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.7
+ * FilePond 1.2.8
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -6696,11 +6696,16 @@ const state = {
 // plugin name
 const name = 'filepond';
 
+// is in browser
+const hasNavigator = typeof navigator !== 'undefined';
+
 // app painter, cannot be paused or stopped at the moment
-const painter = createPainter(createUpdater(state.apps, '_read', '_write'), 60);
+const painter =
+  hasNavigator &&
+  createPainter(createUpdater(state.apps, '_read', '_write'), 60);
 
 // fire load event
-if (document) {
+if (hasNavigator) {
   // fire loaded event so we know when FilePond is available
   const dispatch = () => {
     // let others know we have area ready
@@ -6802,8 +6807,11 @@ const hasCreateObjectURL = () =>
 const hasVisibility = () => 'visibilityState' in document;
 const hasTiming = () => 'performance' in window; // iOS 8.x
 
-const supported = () =>
-  !(
+const supported = () => {
+  if (!hasNavigator) {
+    return false;
+  }
+  return !(
     isOperaMini() ||
     !hasVisibility() ||
     !hasPromises() ||
@@ -6811,6 +6819,7 @@ const supported = () =>
     !hasCreateObjectURL() ||
     !hasTiming()
   );
+};
 
 // adds a plugin extension
 const registerPlugin = (...plugins) => {

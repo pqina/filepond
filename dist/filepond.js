@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.7
+ * FilePond 1.2.8
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -7870,11 +7870,16 @@ function signature:
   // plugin name
   var name = 'filepond';
 
+  // is in browser
+  var hasNavigator = typeof navigator !== 'undefined';
+
   // app painter, cannot be paused or stopped at the moment
-  var painter = createPainter(createUpdater(state.apps, '_read', '_write'), 60);
+  var painter =
+    hasNavigator &&
+    createPainter(createUpdater(state.apps, '_read', '_write'), 60);
 
   // fire load event
-  if (document) {
+  if (hasNavigator) {
     // fire loaded event so we know when FilePond is available
     var dispatch = function dispatch() {
       // let others know we have area ready
@@ -8002,6 +8007,9 @@ function signature:
   }; // iOS 8.x
 
   var supported = function supported() {
+    if (!hasNavigator) {
+      return false;
+    }
     return !(
       isOperaMini() ||
       !hasVisibility() ||
