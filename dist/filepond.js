@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.9
+ * FilePond 1.2.10
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -7353,9 +7353,24 @@ function signature:
       }
 
       var queries$$1 = Array.isArray(args[0]) ? args[0] : args;
-      return queries$$1.map(function(query) {
-        return removeFile(query);
-      });
+      var files = getFiles();
+
+      if (!queries$$1.length) {
+        return Promise.all(files.map(removeFile));
+      }
+
+      // when removing by index the indexes shift after each file removal so we need to convert indexes to ids
+      var mappedQueries = queries$$1
+        .map(function(query) {
+          return isNumber(query)
+            ? files[query] ? files[query].id : null
+            : query;
+        })
+        .filter(function(query) {
+          return query;
+        });
+
+      return mappedQueries.map(removeFile);
     };
 
     var exports = _extends(

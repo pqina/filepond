@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.9
+ * FilePond 1.2.10
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -6224,7 +6224,21 @@ const createApp$1 = (initialOptions = {}) => {
 
   const removeFiles = (...args) => {
     const queries$$1 = Array.isArray(args[0]) ? args[0] : args;
-    return queries$$1.map(query => removeFile(query));
+    const files = getFiles();
+
+    if (!queries$$1.length) {
+      return Promise.all(files.map(removeFile));
+    }
+
+    // when removing by index the indexes shift after each file removal so we need to convert indexes to ids
+    const mappedQueries = queries$$1
+      .map(
+        query =>
+          isNumber(query) ? (files[query] ? files[query].id : null) : query
+      )
+      .filter(query => query);
+
+    return mappedQueries.map(removeFile);
   };
 
   const exports = babelHelpers.extends(
