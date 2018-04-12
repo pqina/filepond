@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.10
+ * FilePond 1.2.11
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -3959,40 +3959,47 @@ function signature:
         });
 
         item.on('load', function() {
-          // item loaded, allow filters to alter it
+          // item loaded, allow plugins to
+          // - read data (quickly)
+          // - add metadata
           applyFilterChain('DID_LOAD_ITEM', item, { query: query }).then(
             function() {
-              // let interface know the item has loaded
-              dispatch('DID_LOAD_ITEM', {
-                id: id,
-                error: null,
-                serverFileReference: isServerFile ? source : null
-              });
+              // let plugins decide if the output data should be prepared at this point
+              // means we'll do this and wait for idle state
+              applyFilterChain('SHOULD_PREPARE_OUTPUT', false, {
+                item: item,
+                query: query
+              }).then(function(shouldPrepareOutput) {
+                var data = {
+                  isServerFile: isServerFile,
+                  source: source,
+                  isLocalServerFile: isLocalServerFile,
+                  isLimboServerFile: isLimboServerFile,
+                  success: success
 
-              // item has been successfully loaded and added to the
-              // list of items so can now be safely returned for use
-              success(createItemAPI(item));
+                  // exit
+                };
+                if (shouldPrepareOutput) {
+                  // wait for idle state and then run PREPARE_OUTPUT
+                  dispatch(
+                    'REQUEST_PREPARE_LOAD_ITEM',
+                    {
+                      query: id,
+                      item: item,
+                      data: data
+                    },
+                    true
+                  );
 
-              // if this is a local server file we need to show a different state
-              if (isLocalServerFile) {
-                dispatch('DID_LOAD_LOCAL_ITEM', { id: id });
-                return;
-              }
+                  return;
+                }
 
-              // if is a temp server file we prevent async upload call here (as the file is already on the server)
-              if (isLimboServerFile) {
-                dispatch('DID_COMPLETE_ITEM_PROCESSING', {
-                  id: id,
-                  error: null,
-                  serverFileReference: source
+                dispatch('COMPLETE_LOAD_ITEM', {
+                  query: id,
+                  item: item,
+                  data: data
                 });
-                return;
-              }
-
-              // id we are allowed to upload the file immidiately, lets do it
-              if (query('IS_ASYNC') && state.options.instantUpload) {
-                dispatch('REQUEST_ITEM_PROCESSING', { query: id });
-              }
+              });
             }
           );
         });
@@ -4088,6 +4095,70 @@ function signature:
         );
       },
 
+      REQUEST_PREPARE_LOAD_ITEM: function REQUEST_PREPARE_LOAD_ITEM(_ref5) {
+        var item = _ref5.item,
+          data = _ref5.data;
+
+        // allow plugins to alter the file data
+        applyFilterChain('PREPARE_OUTPUT', item.file, {
+          query: query,
+          item: item
+        }).then(function(result) {
+          applyFilterChain('COMPLETE_PREPARE_OUTPUT', result, {
+            query: query,
+            item: item
+          }).then(function(result) {
+            dispatch('COMPLETE_LOAD_ITEM', {
+              item: item,
+              data: data
+            });
+          });
+        });
+      },
+
+      COMPLETE_LOAD_ITEM: function COMPLETE_LOAD_ITEM(_ref6) {
+        var item = _ref6.item,
+          data = _ref6.data;
+        var success = data.success,
+          isServerFile = data.isServerFile,
+          source = data.source,
+          isLocalServerFile = data.isLocalServerFile,
+          isLimboServerFile = data.isLimboServerFile;
+
+        // let interface know the item has loaded
+
+        dispatch('DID_LOAD_ITEM', {
+          id: item.id,
+          error: null,
+          serverFileReference: isServerFile ? source : null
+        });
+
+        // item has been successfully loaded and added to the
+        // list of items so can now be safely returned for use
+        success(createItemAPI(item));
+
+        // if this is a local server file we need to show a different state
+        if (isLocalServerFile) {
+          dispatch('DID_LOAD_LOCAL_ITEM', { id: item.id });
+          return;
+        }
+
+        // if is a temp server file we prevent async upload call here (as the file is already on the server)
+        if (isLimboServerFile) {
+          dispatch('DID_COMPLETE_ITEM_PROCESSING', {
+            id: item.id,
+            error: null,
+            serverFileReference: source
+          });
+          return;
+        }
+
+        // id we are allowed to upload the file immidiately, lets do it
+        if (query('IS_ASYNC') && state.options.instantUpload) {
+          dispatch('REQUEST_ITEM_PROCESSING', { query: item.id });
+        }
+      },
+
       RETRY_ITEM_LOAD: getItemByQueryFromState(state, function(item) {
         // try loading the source one more time
         item.retryLoad();
@@ -4159,8 +4230,8 @@ function signature:
       }),
 
       // private action for timing the removal of an item from the items list
-      SPLICE_ITEM: function SPLICE_ITEM(_ref5) {
-        var id = _ref5.id;
+      SPLICE_ITEM: function SPLICE_ITEM(_ref7) {
+        var id = _ref7.id;
         return removeItem(state.items, getItemById(state.items, id));
       },
 
@@ -4190,8 +4261,8 @@ function signature:
         );
       }),
 
-      SET_OPTIONS: function SET_OPTIONS(_ref6) {
-        var options = _ref6.options;
+      SET_OPTIONS: function SET_OPTIONS(_ref8) {
+        var options = _ref8.options;
 
         forin(options, function(key, value) {
           dispatch('SET_' + fromCamels(key, '_').toUpperCase(), {

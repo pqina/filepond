@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.10
+ * FilePond 1.2.11
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -3244,39 +3244,45 @@ const actions = (dispatch, query, state) => ({
     });
 
     item.on('load', () => {
-      // item loaded, allow filters to alter it
+      // item loaded, allow plugins to
+      // - read data (quickly)
+      // - add metadata
       applyFilterChain('DID_LOAD_ITEM', item, { query }).then(() => {
-        // let interface know the item has loaded
-        dispatch('DID_LOAD_ITEM', {
-          id,
-          error: null,
-          serverFileReference: isServerFile ? source : null
-        });
+        // let plugins decide if the output data should be prepared at this point
+        // means we'll do this and wait for idle state
+        applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query }).then(
+          shouldPrepareOutput => {
+            const data = {
+              isServerFile,
+              source,
+              isLocalServerFile,
+              isLimboServerFile,
+              success
 
-        // item has been successfully loaded and added to the
-        // list of items so can now be safely returned for use
-        success(createItemAPI(item));
+              // exit
+            };
+            if (shouldPrepareOutput) {
+              // wait for idle state and then run PREPARE_OUTPUT
+              dispatch(
+                'REQUEST_PREPARE_LOAD_ITEM',
+                {
+                  query: id,
+                  item,
+                  data
+                },
+                true
+              );
 
-        // if this is a local server file we need to show a different state
-        if (isLocalServerFile) {
-          dispatch('DID_LOAD_LOCAL_ITEM', { id });
-          return;
-        }
+              return;
+            }
 
-        // if is a temp server file we prevent async upload call here (as the file is already on the server)
-        if (isLimboServerFile) {
-          dispatch('DID_COMPLETE_ITEM_PROCESSING', {
-            id,
-            error: null,
-            serverFileReference: source
-          });
-          return;
-        }
-
-        // id we are allowed to upload the file immidiately, lets do it
-        if (query('IS_ASYNC') && state.options.instantUpload) {
-          dispatch('REQUEST_ITEM_PROCESSING', { query: id });
-        }
+            dispatch('COMPLETE_LOAD_ITEM', {
+              query: id,
+              item,
+              data
+            });
+          }
+        );
       });
     });
 
@@ -3356,6 +3362,65 @@ const actions = (dispatch, query, state) => ({
           .catch(error);
       }
     );
+  },
+
+  REQUEST_PREPARE_LOAD_ITEM: ({ item, data }) => {
+    // allow plugins to alter the file data
+    applyFilterChain('PREPARE_OUTPUT', item.file, { query, item }).then(
+      result => {
+        applyFilterChain('COMPLETE_PREPARE_OUTPUT', result, {
+          query,
+          item
+        }).then(result => {
+          dispatch('COMPLETE_LOAD_ITEM', {
+            item,
+            data
+          });
+        });
+      }
+    );
+  },
+
+  COMPLETE_LOAD_ITEM: ({ item, data }) => {
+    const {
+      success,
+      isServerFile,
+      source,
+      isLocalServerFile,
+      isLimboServerFile
+    } = data;
+
+    // let interface know the item has loaded
+    dispatch('DID_LOAD_ITEM', {
+      id: item.id,
+      error: null,
+      serverFileReference: isServerFile ? source : null
+    });
+
+    // item has been successfully loaded and added to the
+    // list of items so can now be safely returned for use
+    success(createItemAPI(item));
+
+    // if this is a local server file we need to show a different state
+    if (isLocalServerFile) {
+      dispatch('DID_LOAD_LOCAL_ITEM', { id: item.id });
+      return;
+    }
+
+    // if is a temp server file we prevent async upload call here (as the file is already on the server)
+    if (isLimboServerFile) {
+      dispatch('DID_COMPLETE_ITEM_PROCESSING', {
+        id: item.id,
+        error: null,
+        serverFileReference: source
+      });
+      return;
+    }
+
+    // id we are allowed to upload the file immidiately, lets do it
+    if (query('IS_ASYNC') && state.options.instantUpload) {
+      dispatch('REQUEST_ITEM_PROCESSING', { query: item.id });
+    }
   },
 
   RETRY_ITEM_LOAD: getItemByQueryFromState(state, item => {
