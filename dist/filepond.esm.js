@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.11
+ * FilePond 1.3.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1680,6 +1680,7 @@ const defaultOptions = {
   // Drag 'n Drop related
   dropOnPage: [false, Type.BOOLEAN], // Allow dropping of files anywhere on page (prevents browser from opening file if dropped outside of Up)
   dropOnElement: [true, Type.BOOLEAN], // Drop needs to happen on element (set to false to also load drops outside of Up)
+  dropValidation: [false, Type.BOOLEAN], // Enable or disable validating files on drop
   ignoredFiles: [['.ds_store', 'thumbs.db', 'desktop.ini'], Type.ARRAY],
   // catchDirectories: [true, Type.BOOLEAN],					// Allow dropping directories in modern browsers
 
@@ -5835,6 +5836,7 @@ const toggleAllowDrop = ({ root, props, action }) => {
         const allowReplace = root.query('GET_ALLOW_REPLACE');
         const allowMultiple = root.query('GET_ALLOW_MULTIPLE');
         const totalItems = root.query('GET_TOTAL_ITEMS');
+        const dropValidation = root.query('GET_DROP_VALIDATION');
         let maxItems = root.query('GET_MAX_TOTAL_ITEMS');
 
         // total amount of items being dragged
@@ -5855,11 +5857,13 @@ const toggleAllowDrop = ({ root, props, action }) => {
         }
 
         // all items should be validated by all filters as valid
-        return items.every(item =>
-          applyFilters('ALLOW_HOPPER_ITEM', item, {
-            query: root.query
-          }).every(result => result === true)
-        );
+        return dropValidation
+          ? items.every(item =>
+              applyFilters('ALLOW_HOPPER_ITEM', item, {
+                query: root.query
+              }).every(result => result === true)
+            )
+          : true;
       },
       {
         catchesDropsOnPage: root.query('GET_DROP_ON_PAGE'),

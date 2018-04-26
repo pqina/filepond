@@ -1,5 +1,5 @@
 /*
- * FilePond 1.2.11
+ * FilePond 1.3.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2179,6 +2179,7 @@
     // Drag 'n Drop related
     dropOnPage: [false, Type.BOOLEAN], // Allow dropping of files anywhere on page (prevents browser from opening file if dropped outside of Up)
     dropOnElement: [true, Type.BOOLEAN], // Drop needs to happen on element (set to false to also load drops outside of Up)
+    dropValidation: [false, Type.BOOLEAN], // Enable or disable validating files on drop
     ignoredFiles: [['.ds_store', 'thumbs.db', 'desktop.ini'], Type.ARRAY],
     // catchDirectories: [true, Type.BOOLEAN],					// Allow dropping directories in modern browsers
 
@@ -6909,6 +6910,7 @@ function signature:
           var allowReplace = root.query('GET_ALLOW_REPLACE');
           var allowMultiple = root.query('GET_ALLOW_MULTIPLE');
           var totalItems = root.query('GET_TOTAL_ITEMS');
+          var dropValidation = root.query('GET_DROP_VALIDATION');
           var maxItems = root.query('GET_MAX_TOTAL_ITEMS');
 
           // total amount of items being dragged
@@ -6929,13 +6931,15 @@ function signature:
           }
 
           // all items should be validated by all filters as valid
-          return items.every(function(item) {
-            return applyFilters('ALLOW_HOPPER_ITEM', item, {
-              query: root.query
-            }).every(function(result) {
-              return result === true;
-            });
-          });
+          return dropValidation
+            ? items.every(function(item) {
+                return applyFilters('ALLOW_HOPPER_ITEM', item, {
+                  query: root.query
+                }).every(function(result) {
+                  return result === true;
+                });
+              })
+            : true;
         },
         {
           catchesDropsOnPage: root.query('GET_DROP_ON_PAGE'),
