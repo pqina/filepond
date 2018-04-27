@@ -1,5 +1,5 @@
 /*
- * FilePond 1.3.0
+ * FilePond 1.4.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -146,6 +146,7 @@
 .filepond--file-info .filepond--file-info-sub {
   font-size: 0.625em;
   opacity: 0.5;
+  transition: opacity 0.25s ease-in-out;
 }
 .filepond--file-info .filepond--file-info-sub:empty {
   display: none;
@@ -184,6 +185,7 @@
 .filepond--file-status .filepond--file-status-sub {
   font-size: 0.625em;
   opacity: 0.5;
+  transition: opacity 0.25s ease-in-out;
 }
 
 .filepond--file-wrapper {
@@ -211,6 +213,8 @@
   display: -ms-flexbox;
   display: flex;
   height: 100%;
+  -ms-flex-align: start;
+  align-items: flex-start;
   padding: 0.5625em 0.5625em;
   color: #fff;
   border-radius: 0.5em;
@@ -219,6 +223,15 @@
   margin-left: auto;
   margin-right: 2.25em;
 }
+.filepond--file .filepond--processing-complete-indicator {
+  pointer-events: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  z-index: 2;
+}
+.filepond--file .filepond--processing-complete-indicator,
 .filepond--file .filepond--file-action-button {
   position: absolute;
 }
@@ -230,6 +243,7 @@
 .filepond--file .filepond--action-remove-item {
   left: 0.5625em;
 }
+.filepond--file .filepond--processing-complete-indicator,
 .filepond--file
   .filepond--file-action-button:not(.filepond--action-remove-item) {
   right: 0.5625em;
@@ -246,6 +260,22 @@
   svg {
   -webkit-animation: fall 0.5s 0.125s linear both;
   animation: fall 0.5s 0.125s linear both;
+}
+
+[data-filepond-item-state='processing-complete'] .filepond--file-info-sub,
+[data-filepond-item-state='processing-complete'] .filepond--file-status-sub {
+  opacity: 0;
+}
+
+[data-filepond-item-state='processing-complete']
+  .filepond--action-revert-item-processing
+  ~ .filepond--file-info
+  .filepond--file-info-sub,
+[data-filepond-item-state='processing-complete']
+  .filepond--action-revert-item-processing
+  ~ .filepond--file-status
+  .filepond--file-status-sub {
+  opacity: 0.5;
 }
 
 [data-filepond-item-state*='invalid'] .filepond--panel,

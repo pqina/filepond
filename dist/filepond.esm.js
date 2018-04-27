@@ -1,5 +1,5 @@
 /*
- * FilePond 1.3.0
+ * FilePond 1.4.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1669,6 +1669,7 @@ const defaultOptions = {
   allowPaste: [true, Type.BOOLEAN], // Allow pasting files
   allowMultiple: [false, Type.BOOLEAN], // Allow multiple files (disabled by default, as multiple attribute is also required on input to allow multiple)
   allowReplace: [true, Type.BOOLEAN], // Allow dropping a file on other file to replace it (only works when multiple is set to false)
+  allowRevert: [true, Type.BOOLEAN], // Allows user to revert file upload
   // TODO: allowDrag: [true, Type.BOOLEAN],					// Allow dragging files
   // TODO: allowSwipe: [true, Type.BOOLEAN],					// Allow swipe to remove files
   // TODO: allowRemoveAll: [true, Type.BOOLEAN],				// Allow removing all items at once
@@ -1775,6 +1776,10 @@ const defaultOptions = {
   ],
   iconUndo: [
     '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M9.185 10.81l.02-.038A4.997 4.997 0 0 1 13.683 8a5 5 0 0 1 5 5 5 5 0 0 1-5 5 1 1 0 0 0 0 2A7 7 0 1 0 7.496 9.722l-.21-.842a.999.999 0 1 0-1.94.484l.806 3.23c.133.535.675.86 1.21.73l3.233-.803a.997.997 0 0 0 .73-1.21.997.997 0 0 0-1.21-.73l-.928.23-.002-.001z" fill="currentColor" fill-rule="nonzero"/></svg>',
+    Type.STRING
+  ],
+  iconDone: [
+    '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M18.293 9.293a1 1 0 0 1 1.414 1.414l-7.002 7a1 1 0 0 1-1.414 0l-3.998-4a1 1 0 1 1 1.414-1.414L12 15.586l6.294-6.293z" fill="currentColor" fill-rule="nonzero"/></svg>',
     Type.STRING
   ],
 
@@ -2139,7 +2144,15 @@ const createFileLoader = fetchFn => {
         // done!
         state.complete = true;
 
-        api.fire('load', response instanceof File ? response : response.body);
+        // turn blob response into a file
+        if (response instanceof Blob) {
+          response = getFileFromBlob(
+            response,
+            getFilenameFromURL(url) || getDateString()
+          );
+        }
+
+        api.fire('load', response instanceof Blob ? response : response.body);
       },
       error => {
         api.fire(
@@ -3341,6 +3354,7 @@ const actions = (dispatch, query, state) => ({
 
     // start loading the source
     const { url, load, restore, fetch } = state.options.server || {};
+
     item.load(
       source,
 
@@ -3798,9 +3812,10 @@ const fileInfo = createView({
   }),
   create: create$9,
   mixins: {
-    styles: ['translateX'],
+    styles: ['translateX', 'translateY'],
     animations: {
-      translateX: 'spring'
+      translateX: 'spring',
+      translateY: 'spring'
     }
   }
 });
@@ -3858,6 +3873,9 @@ const didAbortItemProcessing = ({ root }) => {
 const didCompleteItemProcessing$1 = ({ root }) => {
   text(root.ref.main, root.query('GET_LABEL_FILE_PROCESSING_COMPLETE'));
   text(root.ref.sub, root.query('GET_LABEL_TAP_TO_UNDO'));
+
+  //const allowRevert = root.query('GET_ALLOW_REVERT');
+  //text(root.ref.sub, allowRevert ? root.query('GET_LABEL_TAP_TO_UNDO') : '');
 };
 
 const clear = ({ root }) => {
@@ -3887,10 +3905,11 @@ const fileStatus = createView({
   }),
   create: create$10,
   mixins: {
-    styles: ['translateX', 'opacity'],
+    styles: ['translateX', 'translateY', 'opacity'],
     animations: {
       opacity: { type: 'tween', duration: 250 },
-      translateX: 'spring'
+      translateX: 'spring',
+      translateY: 'spring'
     }
   }
 });
@@ -3899,7 +3918,6 @@ const fileStatus = createView({
  * Button definitions for the file view
  */
 const Buttons = {
-  // always available
   AbortItemLoad: {
     label: 'GET_LABEL_BUTTON_ABORT_ITEM_LOAD',
     action: 'ABORT_ITEM_LOAD',
@@ -3942,75 +3960,21 @@ const Buttons = {
   }
 };
 
+// make a list of buttons, we can then remove buttons from this list if they're disabled
 const ButtonKeys = [];
 forin(Buttons, key => {
   ButtonKeys.push(key);
 });
 
-/**
- * Creates the file view
- */
-const create$6 = ({ root, props }) => {
-  // enabled buttons array
-  const enabledButtons = root.query('IS_ASYNC')
-    ? ButtonKeys.concat()
-    : ButtonKeys.filter(key => !/Process/.test(key));
-
-  // create the button views
-  forin(Buttons, (key, definition) => {
-    // create button
-    const buttonView = root.createChildView(fileActionButton, {
-      label: root.query(definition.label),
-      icon: root.query(definition.icon),
-      opacity: 0
-    });
-
-    // should be appended?
-    if (enabledButtons.includes(key)) {
-      root.appendChildView(buttonView);
-    }
-
-    // add class
-    buttonView.element.classList.add(definition.className);
-
-    // handle interactions
-    buttonView.on('click', () => {
-      root.dispatch(definition.action, { query: props.id });
-    });
-
-    // set reference
-    root.ref[`button${key}`] = buttonView;
-  });
-
-  // create file info view
-  root.ref.info = root.appendChildView(
-    root.createChildView(fileInfo, { id: props.id })
-  );
-
-  // create file status view
-  root.ref.status = root.appendChildView(
-    root.createChildView(fileStatus, { id: props.id })
-  );
-
-  // add progress indicators
-  root.ref.loadProgressIndicator = root.appendChildView(
-    root.createChildView(progressIndicator, { opacity: 0 })
-  );
-  root.ref.loadProgressIndicator.element.classList.add(
-    'filepond--load-indicator'
-  );
-
-  root.ref.processProgressIndicator = root.appendChildView(
-    root.createChildView(progressIndicator, { opacity: 0 })
-  );
-  root.ref.processProgressIndicator.element.classList.add(
-    'filepond--process-indicator'
-  );
-};
-
 const calculateFileInfoOffset = root =>
   root.ref.buttonRemoveItem.rect.element.width +
   root.ref.buttonRemoveItem.rect.element.left;
+
+// Force on full pixels so text stays crips
+const calculateFileVerticalCenterOffset = root =>
+  Math.floor(root.ref.buttonRemoveItem.rect.element.height / 4);
+const calculateFileHorizontalCenterOffset = root =>
+  Math.floor(root.ref.buttonRemoveItem.rect.element.left / 2);
 
 const DefaultStyle = {
   buttonAbortItemLoad: { opacity: 0 },
@@ -4022,8 +3986,9 @@ const DefaultStyle = {
   buttonRevertItemProcessing: { opacity: 0 },
   loadProgressIndicator: { opacity: 0 },
   processProgressIndicator: { opacity: 0 },
-  info: { translateX: 0, opacity: 0 },
-  status: { translateX: 0, opacity: 0 }
+  processingCompleteIndicator: { opacity: 0, scaleX: 0.75, scaleY: 0.75 },
+  info: { translateX: 0, translateY: 0, opacity: 0 },
+  status: { translateX: 0, translateY: 0, opacity: 0 }
 };
 
 const IdleStyle = {
@@ -4083,6 +4048,103 @@ const StyleMap = {
     status: { opacity: 1 }
   },
   DID_REVERT_ITEM_PROCESSING: IdleStyle
+};
+
+// complete indicator view
+const processingCompleteIndicatorView = createView({
+  create: ({ root }) => {
+    root.element.innerHTML = root.query('GET_ICON_DONE');
+  },
+  name: 'processing-complete-indicator',
+  ignoreRect: true,
+  mixins: {
+    styles: ['scaleX', 'scaleY', 'opacity'],
+    animations: {
+      scaleX: 'spring',
+      scaleY: 'spring',
+      opacity: { type: 'tween', duration: 250 }
+    }
+  }
+});
+
+/**
+ * Creates the file view
+ */
+const create$6 = ({ root, props }) => {
+  // allow reverting upload
+  const allowRevert = root.query('GET_ALLOW_REVERT');
+
+  // enabled buttons array
+  const enabledButtons = root.query('IS_ASYNC')
+    ? ButtonKeys.concat()
+    : ButtonKeys.filter(key => !/Process/.test(key));
+
+  // remove last button (revert) if not allowed
+  if (!allowRevert) {
+    enabledButtons.splice(-1, 1);
+    const map = StyleMap['DID_COMPLETE_ITEM_PROCESSING'];
+    map.info.translateX = calculateFileHorizontalCenterOffset;
+    map.info.translateY = calculateFileVerticalCenterOffset;
+    map.status.translateY = calculateFileVerticalCenterOffset;
+    map.processingCompleteIndicator = { opacity: 1, scaleX: 1, scaleY: 1 };
+  }
+
+  // create the button views
+  forin(Buttons, (key, definition) => {
+    // create button
+    const buttonView = root.createChildView(fileActionButton, {
+      label: root.query(definition.label),
+      icon: root.query(definition.icon),
+      opacity: 0
+    });
+
+    // should be appended?
+    if (enabledButtons.includes(key)) {
+      root.appendChildView(buttonView);
+    }
+
+    // add class
+    buttonView.element.classList.add(definition.className);
+
+    // handle interactions
+    buttonView.on('click', () => {
+      root.dispatch(definition.action, { query: props.id });
+    });
+
+    // set reference
+    root.ref[`button${key}`] = buttonView;
+  });
+
+  // create file info view
+  root.ref.info = root.appendChildView(
+    root.createChildView(fileInfo, { id: props.id })
+  );
+
+  // create file status view
+  root.ref.status = root.appendChildView(
+    root.createChildView(fileStatus, { id: props.id })
+  );
+
+  // checkmark
+  root.ref.processingCompleteIndicator = root.appendChildView(
+    root.createChildView(processingCompleteIndicatorView)
+  );
+
+  // add progress indicators
+  root.ref.loadProgressIndicator = root.appendChildView(
+    root.createChildView(progressIndicator, { opacity: 0 })
+  );
+  root.ref.loadProgressIndicator.element.classList.add(
+    'filepond--load-indicator'
+  );
+
+  root.ref.processProgressIndicator = root.appendChildView(
+    root.createChildView(progressIndicator, { opacity: 0 })
+  );
+
+  root.ref.processProgressIndicator.element.classList.add(
+    'filepond--process-indicator'
+  );
 };
 
 const write$4 = ({ root, actions, props }) => {

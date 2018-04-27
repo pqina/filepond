@@ -1,5 +1,5 @@
 /*
- * FilePond 1.3.0
+ * FilePond 1.4.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2168,6 +2168,7 @@
     allowPaste: [true, Type.BOOLEAN], // Allow pasting files
     allowMultiple: [false, Type.BOOLEAN], // Allow multiple files (disabled by default, as multiple attribute is also required on input to allow multiple)
     allowReplace: [true, Type.BOOLEAN], // Allow dropping a file on other file to replace it (only works when multiple is set to false)
+    allowRevert: [true, Type.BOOLEAN], // Allows user to revert file upload
     // TODO: allowDrag: [true, Type.BOOLEAN],					// Allow dragging files
     // TODO: allowSwipe: [true, Type.BOOLEAN],					// Allow swipe to remove files
     // TODO: allowRemoveAll: [true, Type.BOOLEAN],				// Allow removing all items at once
@@ -2274,6 +2275,10 @@
     ],
     iconUndo: [
       '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M9.185 10.81l.02-.038A4.997 4.997 0 0 1 13.683 8a5 5 0 0 1 5 5 5 5 0 0 1-5 5 1 1 0 0 0 0 2A7 7 0 1 0 7.496 9.722l-.21-.842a.999.999 0 1 0-1.94.484l.806 3.23c.133.535.675.86 1.21.73l3.233-.803a.997.997 0 0 0 .73-1.21.997.997 0 0 0-1.21-.73l-.928.23-.002-.001z" fill="currentColor" fill-rule="nonzero"/></svg>',
+      Type.STRING
+    ],
+    iconDone: [
+      '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M18.293 9.293a1 1 0 0 1 1.414 1.414l-7.002 7a1 1 0 0 1-1.414 0l-3.998-4a1 1 0 1 1 1.414-1.414L12 15.586l6.294-6.293z" fill="currentColor" fill-rule="nonzero"/></svg>',
       Type.STRING
     ],
 
@@ -2729,7 +2734,15 @@
           // done!
           state.complete = true;
 
-          api.fire('load', response instanceof File ? response : response.body);
+          // turn blob response into a file
+          if (response instanceof Blob) {
+            response = getFileFromBlob(
+              response,
+              getFilenameFromURL(url) || getDateString()
+            );
+          }
+
+          api.fire('load', response instanceof Blob ? response : response.body);
         },
         function(error) {
           api.fire(
@@ -4589,9 +4602,10 @@ function signature:
     }),
     create: create$9,
     mixins: {
-      styles: ['translateX'],
+      styles: ['translateX', 'translateY'],
       animations: {
-        translateX: 'spring'
+        translateX: 'spring',
+        translateY: 'spring'
       }
     }
   });
@@ -4667,6 +4681,9 @@ function signature:
 
     text(root.ref.main, root.query('GET_LABEL_FILE_PROCESSING_COMPLETE'));
     text(root.ref.sub, root.query('GET_LABEL_TAP_TO_UNDO'));
+
+    //const allowRevert = root.query('GET_ALLOW_REVERT');
+    //text(root.ref.sub, allowRevert ? root.query('GET_LABEL_TAP_TO_UNDO') : '');
   };
 
   var clear = function clear(_ref7) {
@@ -4701,10 +4718,11 @@ function signature:
     }),
     create: create$10,
     mixins: {
-      styles: ['translateX', 'opacity'],
+      styles: ['translateX', 'translateY', 'opacity'],
       animations: {
         opacity: { type: 'tween', duration: 250 },
-        translateX: 'spring'
+        translateX: 'spring',
+        translateY: 'spring'
       }
     }
   });
@@ -4713,7 +4731,6 @@ function signature:
    * Button definitions for the file view
    */
   var Buttons = {
-    // always available
     AbortItemLoad: {
       label: 'GET_LABEL_BUTTON_ABORT_ITEM_LOAD',
       action: 'ABORT_ITEM_LOAD',
@@ -4756,82 +4773,29 @@ function signature:
     }
   };
 
+  // make a list of buttons, we can then remove buttons from this list if they're disabled
   var ButtonKeys = [];
   forin(Buttons, function(key) {
     ButtonKeys.push(key);
   });
-
-  /**
-   * Creates the file view
-   */
-  var create$6 = function create(_ref) {
-    var root = _ref.root,
-      props = _ref.props;
-
-    // enabled buttons array
-    var enabledButtons = root.query('IS_ASYNC')
-      ? ButtonKeys.concat()
-      : ButtonKeys.filter(function(key) {
-          return !/Process/.test(key);
-        });
-
-    // create the button views
-    forin(Buttons, function(key, definition) {
-      // create button
-      var buttonView = root.createChildView(fileActionButton, {
-        label: root.query(definition.label),
-        icon: root.query(definition.icon),
-        opacity: 0
-      });
-
-      // should be appended?
-      if (enabledButtons.includes(key)) {
-        root.appendChildView(buttonView);
-      }
-
-      // add class
-      buttonView.element.classList.add(definition.className);
-
-      // handle interactions
-      buttonView.on('click', function() {
-        root.dispatch(definition.action, { query: props.id });
-      });
-
-      // set reference
-      root.ref['button' + key] = buttonView;
-    });
-
-    // create file info view
-    root.ref.info = root.appendChildView(
-      root.createChildView(fileInfo, { id: props.id })
-    );
-
-    // create file status view
-    root.ref.status = root.appendChildView(
-      root.createChildView(fileStatus, { id: props.id })
-    );
-
-    // add progress indicators
-    root.ref.loadProgressIndicator = root.appendChildView(
-      root.createChildView(progressIndicator, { opacity: 0 })
-    );
-    root.ref.loadProgressIndicator.element.classList.add(
-      'filepond--load-indicator'
-    );
-
-    root.ref.processProgressIndicator = root.appendChildView(
-      root.createChildView(progressIndicator, { opacity: 0 })
-    );
-    root.ref.processProgressIndicator.element.classList.add(
-      'filepond--process-indicator'
-    );
-  };
 
   var calculateFileInfoOffset = function calculateFileInfoOffset(root) {
     return (
       root.ref.buttonRemoveItem.rect.element.width +
       root.ref.buttonRemoveItem.rect.element.left
     );
+  };
+
+  // Force on full pixels so text stays crips
+  var calculateFileVerticalCenterOffset = function calculateFileVerticalCenterOffset(
+    root
+  ) {
+    return Math.floor(root.ref.buttonRemoveItem.rect.element.height / 4);
+  };
+  var calculateFileHorizontalCenterOffset = function calculateFileHorizontalCenterOffset(
+    root
+  ) {
+    return Math.floor(root.ref.buttonRemoveItem.rect.element.left / 2);
   };
 
   var DefaultStyle = {
@@ -4844,8 +4808,9 @@ function signature:
     buttonRevertItemProcessing: { opacity: 0 },
     loadProgressIndicator: { opacity: 0 },
     processProgressIndicator: { opacity: 0 },
-    info: { translateX: 0, opacity: 0 },
-    status: { translateX: 0, opacity: 0 }
+    processingCompleteIndicator: { opacity: 0, scaleX: 0.75, scaleY: 0.75 },
+    info: { translateX: 0, translateY: 0, opacity: 0 },
+    status: { translateX: 0, translateY: 0, opacity: 0 }
   };
 
   var IdleStyle = {
@@ -4907,10 +4872,114 @@ function signature:
     DID_REVERT_ITEM_PROCESSING: IdleStyle
   };
 
-  var write$4 = function write(_ref2) {
+  // complete indicator view
+  var processingCompleteIndicatorView = createView({
+    create: function create(_ref) {
+      var root = _ref.root;
+
+      root.element.innerHTML = root.query('GET_ICON_DONE');
+    },
+    name: 'processing-complete-indicator',
+    ignoreRect: true,
+    mixins: {
+      styles: ['scaleX', 'scaleY', 'opacity'],
+      animations: {
+        scaleX: 'spring',
+        scaleY: 'spring',
+        opacity: { type: 'tween', duration: 250 }
+      }
+    }
+  });
+
+  /**
+   * Creates the file view
+   */
+  var create$6 = function create(_ref2) {
     var root = _ref2.root,
-      actions = _ref2.actions,
       props = _ref2.props;
+
+    // allow reverting upload
+    var allowRevert = root.query('GET_ALLOW_REVERT');
+
+    // enabled buttons array
+    var enabledButtons = root.query('IS_ASYNC')
+      ? ButtonKeys.concat()
+      : ButtonKeys.filter(function(key) {
+          return !/Process/.test(key);
+        });
+
+    // remove last button (revert) if not allowed
+    if (!allowRevert) {
+      enabledButtons.splice(-1, 1);
+      var map = StyleMap['DID_COMPLETE_ITEM_PROCESSING'];
+      map.info.translateX = calculateFileHorizontalCenterOffset;
+      map.info.translateY = calculateFileVerticalCenterOffset;
+      map.status.translateY = calculateFileVerticalCenterOffset;
+      map.processingCompleteIndicator = { opacity: 1, scaleX: 1, scaleY: 1 };
+    }
+
+    // create the button views
+    forin(Buttons, function(key, definition) {
+      // create button
+      var buttonView = root.createChildView(fileActionButton, {
+        label: root.query(definition.label),
+        icon: root.query(definition.icon),
+        opacity: 0
+      });
+
+      // should be appended?
+      if (enabledButtons.includes(key)) {
+        root.appendChildView(buttonView);
+      }
+
+      // add class
+      buttonView.element.classList.add(definition.className);
+
+      // handle interactions
+      buttonView.on('click', function() {
+        root.dispatch(definition.action, { query: props.id });
+      });
+
+      // set reference
+      root.ref['button' + key] = buttonView;
+    });
+
+    // create file info view
+    root.ref.info = root.appendChildView(
+      root.createChildView(fileInfo, { id: props.id })
+    );
+
+    // create file status view
+    root.ref.status = root.appendChildView(
+      root.createChildView(fileStatus, { id: props.id })
+    );
+
+    // checkmark
+    root.ref.processingCompleteIndicator = root.appendChildView(
+      root.createChildView(processingCompleteIndicatorView)
+    );
+
+    // add progress indicators
+    root.ref.loadProgressIndicator = root.appendChildView(
+      root.createChildView(progressIndicator, { opacity: 0 })
+    );
+    root.ref.loadProgressIndicator.element.classList.add(
+      'filepond--load-indicator'
+    );
+
+    root.ref.processProgressIndicator = root.appendChildView(
+      root.createChildView(progressIndicator, { opacity: 0 })
+    );
+
+    root.ref.processProgressIndicator.element.classList.add(
+      'filepond--process-indicator'
+    );
+  };
+
+  var write$4 = function write(_ref3) {
+    var root = _ref3.root,
+      actions = _ref3.actions,
+      props = _ref3.props;
 
     // route actions
     route$3({ root: root, actions: actions, props: props });
@@ -4952,47 +5021,47 @@ function signature:
 
   var route$3 = createRoute({
     DID_SET_LABEL_BUTTON_ABORT_ITEM_PROCESSING: function DID_SET_LABEL_BUTTON_ABORT_ITEM_PROCESSING(
-      _ref3
-    ) {
-      var root = _ref3.root,
-        action = _ref3.action;
-
-      root.ref.buttonAbortItemProcessing.label = action.value;
-    },
-    DID_SET_LABEL_BUTTON_ABORT_ITEM_LOAD: function DID_SET_LABEL_BUTTON_ABORT_ITEM_LOAD(
       _ref4
     ) {
       var root = _ref4.root,
         action = _ref4.action;
 
+      root.ref.buttonAbortItemProcessing.label = action.value;
+    },
+    DID_SET_LABEL_BUTTON_ABORT_ITEM_LOAD: function DID_SET_LABEL_BUTTON_ABORT_ITEM_LOAD(
+      _ref5
+    ) {
+      var root = _ref5.root,
+        action = _ref5.action;
+
       root.ref.buttonAbortItemLoad.label = action.value;
     },
-    DID_REQUEST_ITEM_PROCESSING: function DID_REQUEST_ITEM_PROCESSING(_ref5) {
-      var root = _ref5.root;
+    DID_REQUEST_ITEM_PROCESSING: function DID_REQUEST_ITEM_PROCESSING(_ref6) {
+      var root = _ref6.root;
 
       root.ref.processProgressIndicator.spin = true;
       root.ref.processProgressIndicator.progress = 0;
     },
-    DID_START_ITEM_LOAD: function DID_START_ITEM_LOAD(_ref6) {
-      var root = _ref6.root;
+    DID_START_ITEM_LOAD: function DID_START_ITEM_LOAD(_ref7) {
+      var root = _ref7.root;
 
       root.ref.loadProgressIndicator.spin = true;
       root.ref.loadProgressIndicator.progress = 0;
     },
     DID_UPDATE_ITEM_LOAD_PROGRESS: function DID_UPDATE_ITEM_LOAD_PROGRESS(
-      _ref7
+      _ref8
     ) {
-      var root = _ref7.root,
-        action = _ref7.action;
+      var root = _ref8.root,
+        action = _ref8.action;
 
       root.ref.loadProgressIndicator.spin = false;
       root.ref.loadProgressIndicator.progress = action.progress;
     },
     DID_UPDATE_ITEM_PROCESS_PROGRESS: function DID_UPDATE_ITEM_PROCESS_PROGRESS(
-      _ref8
+      _ref9
     ) {
-      var root = _ref8.root,
-        action = _ref8.action;
+      var root = _ref9.root,
+        action = _ref9.action;
 
       root.ref.processProgressIndicator.spin = false;
       root.ref.processProgressIndicator.progress = action.progress;
