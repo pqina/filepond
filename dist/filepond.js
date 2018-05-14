@@ -1,5 +1,5 @@
 /*
- * FilePond 1.4.0
+ * FilePond 1.4.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -792,9 +792,6 @@
     // list of all active animations
     var animations = [];
 
-    // active animation counter
-    var activeAnimators = 0;
-
     // setup animators
     forin(mixinConfig, function(property, animation) {
       var animator = createAnimator(animation);
@@ -807,24 +804,18 @@
         viewProps[property] = value;
       };
 
-      animator.oncomplete = function() {
-        activeAnimators--;
-      };
-
       // set animator target
-      activeAnimators++;
       animator.target = initialProps[property];
 
       // when value is set, set the animator target value
       var prop = {
         key: property,
         setter: function setter(value) {
+          // if already at target, we done!
           if (animator.target === value) {
             return;
           }
-          if (animator.resting) {
-            activeAnimators++;
-          }
+
           animator.target = value;
         },
         getter: function getter() {
@@ -842,11 +833,14 @@
     // expose internal write api
     return {
       write: function write(ts) {
+        var resting = true;
         animations.forEach(function(animation) {
           animation.interpolate(ts);
+          if (!animation.resting) {
+            resting = false;
+          }
         });
-        // if animators are active, we're busy
-        return activeAnimators === 0;
+        return resting;
       },
       destroy: function destroy() {}
     };
@@ -1425,20 +1419,30 @@
         });
 
         // add mixin functionality
-        forin(mixins, function(name, config) {
-          var mixinAPI = Mixins[name]({
-            mixinConfig: config,
-            viewProps: props,
-            viewState: state,
-            viewInternalAPI: internalAPIDefinition,
-            viewExternalAPI: externalAPIDefinition,
-            view: createObject(mixinAPIDefinition)
-          });
+        Object.keys(mixins)
+          .sort(function(a, b) {
+            // move styles to the back of the mixin list (so adjustments of other mixins are applied to the props correctly)
+            if (a === 'styles') {
+              return 1;
+            } else if (b === 'styles') {
+              return -1;
+            }
+            return 0;
+          })
+          .forEach(function(key) {
+            var mixinAPI = Mixins[key]({
+              mixinConfig: mixins[key],
+              viewProps: props,
+              viewState: state,
+              viewInternalAPI: internalAPIDefinition,
+              viewExternalAPI: externalAPIDefinition,
+              view: createObject(mixinAPIDefinition)
+            });
 
-          if (mixinAPI) {
-            activeMixins.push(mixinAPI);
-          }
-        });
+            if (mixinAPI) {
+              activeMixins.push(mixinAPI);
+            }
+          });
 
         // construct private api
         var internalAPI = createObject(internalAPIDefinition);
@@ -3167,8 +3171,8 @@ function signature:
     var process = function process(file, metadata) {
       var progressFn = function progressFn() {
         // we've not yet started the real download, stop here
-        // the request might not go through, server trouble, stuff like that
-        // if state.progress is null, the server does not allow computing progress
+        // the request might not go through, for instance, there might be some server trouble
+        // if state.progress is null, the server does not allow computing progress and we show the spinner instead
         if (state.duration === 0 || state.progress === null) {
           return;
         }
@@ -3199,7 +3203,12 @@ function signature:
 
           // if fake progress is done, and a response has been received,
           // and we've not yet called the complete method
-          if (progress === 1 && state.response && !state.complete) {
+          if (
+            state.response &&
+            state.perceivedProgress === 1 &&
+            !state.complete
+          ) {
+            // we done!
             completeFn();
           }
         },
@@ -6008,7 +6017,11 @@ function signature:
         // TODO: test for directories (should not be allowed)
         // Use FileReader, problem is that the files property gets lost in the process
 
-        resolve([].concat(toConsumableArray(dataTransfer.files)));
+        resolve(
+          dataTransfer.files
+            ? [].concat(toConsumableArray(dataTransfer.files))
+            : []
+        );
         return;
       }
 

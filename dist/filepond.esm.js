@@ -1,5 +1,5 @@
 /*
- * FilePond 1.4.0
+ * FilePond 1.4.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -522,9 +522,6 @@ const animations = ({
   // list of all active animations
   const animations = [];
 
-  // active animation counter
-  let activeAnimators = 0;
-
   // setup animators
   forin(mixinConfig, (property, animation) => {
     const animator = createAnimator(animation);
@@ -537,24 +534,18 @@ const animations = ({
       viewProps[property] = value;
     };
 
-    animator.oncomplete = () => {
-      activeAnimators--;
-    };
-
     // set animator target
-    activeAnimators++;
     animator.target = initialProps[property];
 
     // when value is set, set the animator target value
     const prop = {
       key: property,
       setter: value => {
+        // if already at target, we done!
         if (animator.target === value) {
           return;
         }
-        if (animator.resting) {
-          activeAnimators++;
-        }
+
         animator.target = value;
       },
       getter: () => viewProps[property]
@@ -570,11 +561,14 @@ const animations = ({
   // expose internal write api
   return {
     write: ts => {
+      let resting = true;
       animations.forEach(animation => {
         animation.interpolate(ts);
+        if (!animation.resting) {
+          resting = false;
+        }
       });
-      // if animators are active, we're busy
-      return activeAnimators === 0;
+      return resting;
     },
     destroy: () => {}
   };
@@ -1067,20 +1061,30 @@ const createView =
     });
 
     // add mixin functionality
-    forin(mixins, (name, config) => {
-      const mixinAPI = Mixins[name]({
-        mixinConfig: config,
-        viewProps: props,
-        viewState: state,
-        viewInternalAPI: internalAPIDefinition,
-        viewExternalAPI: externalAPIDefinition,
-        view: createObject(mixinAPIDefinition)
-      });
+    Object.keys(mixins)
+      .sort((a, b) => {
+        // move styles to the back of the mixin list (so adjustments of other mixins are applied to the props correctly)
+        if (a === 'styles') {
+          return 1;
+        } else if (b === 'styles') {
+          return -1;
+        }
+        return 0;
+      })
+      .forEach(key => {
+        const mixinAPI = Mixins[key]({
+          mixinConfig: mixins[key],
+          viewProps: props,
+          viewState: state,
+          viewInternalAPI: internalAPIDefinition,
+          viewExternalAPI: externalAPIDefinition,
+          view: createObject(mixinAPIDefinition)
+        });
 
-      if (mixinAPI) {
-        activeMixins.push(mixinAPI);
-      }
-    });
+        if (mixinAPI) {
+          activeMixins.push(mixinAPI);
+        }
+      });
 
     // construct private api
     const internalAPI = createObject(internalAPIDefinition);
@@ -2536,8 +2540,8 @@ const createFileProcessor = processFn => {
   const process = (file, metadata) => {
     const progressFn = () => {
       // we've not yet started the real download, stop here
-      // the request might not go through, server trouble, stuff like that
-      // if state.progress is null, the server does not allow computing progress
+      // the request might not go through, for instance, there might be some server trouble
+      // if state.progress is null, the server does not allow computing progress and we show the spinner instead
       if (state.duration === 0 || state.progress === null) {
         return;
       }
@@ -2568,7 +2572,12 @@ const createFileProcessor = processFn => {
 
         // if fake progress is done, and a response has been received,
         // and we've not yet called the complete method
-        if (progress === 1 && state.response && !state.complete) {
+        if (
+          state.response &&
+          state.perceivedProgress === 1 &&
+          !state.complete
+        ) {
+          // we done!
           completeFn();
         }
       },
@@ -5019,7 +5028,7 @@ const getFiles = dataTransfer =>
       // TODO: test for directories (should not be allowed)
       // Use FileReader, problem is that the files property gets lost in the process
 
-      resolve([...dataTransfer.files]);
+      resolve(dataTransfer.files ? [...dataTransfer.files] : []);
       return;
     }
 
