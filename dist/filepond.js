@@ -1,5 +1,5 @@
 /*
- * FilePond 1.4.1
+ * FilePond 1.5.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1688,7 +1688,8 @@
       method: method,
       headers: {},
       withCredentials: false,
-      timeout: timeout
+      timeout: timeout,
+      onload: null
     };
 
     // is a single url
@@ -2202,26 +2203,32 @@
     process: {
     url: '',
     method: 'POST',
-    withCredentials: false,
-    headers: {}
+            withCredentials: false,
+    headers: {},
+            onload: (response) => {
+                return response.id
+            }
     },
     revert: {
     url: '',
     method: 'DELETE',
     withCredentials: false,
-    headers: {}
+    headers: {},
+            onload: null
     },
     fetch: {
     url: '',
     method: 'GET',
     withCredentials: false,
-    headers: {}
+    headers: {},
+            onload: null
     },
     restore: {
     url: '',
     method: 'GET',
     withCredentials: false,
-    headers: {}
+    headers: {},
+            onload: null
     }
     }
     */
@@ -3055,14 +3062,27 @@ function signature:
       var formData = new FormData();
       formData.append(name, file, file.name);
 
-      // add metadata uder same name
+      // add metadata under same name
       if (isObject(metadata)) {
         formData.append(name, JSON.stringify(metadata));
       }
 
+      // set onload hanlder
+      var onload =
+        action.onload ||
+        function(res) {
+          return res;
+        };
+
       // send request object
       var request = sendRequest(formData, apiUrl + action.url, action);
-      request.onload = load;
+      request.onload = function(res) {
+        load(
+          _extends({}, res, {
+            body: onload(res.body)
+          })
+        );
+      };
       request.onerror = error;
       request.onprogress = progress;
       request.onabort = abort;
@@ -4690,9 +4710,6 @@ function signature:
 
     text(root.ref.main, root.query('GET_LABEL_FILE_PROCESSING_COMPLETE'));
     text(root.ref.sub, root.query('GET_LABEL_TAP_TO_UNDO'));
-
-    //const allowRevert = root.query('GET_ALLOW_REVERT');
-    //text(root.ref.sub, allowRevert ? root.query('GET_LABEL_TAP_TO_UNDO') : '');
   };
 
   var clear = function clear(_ref7) {

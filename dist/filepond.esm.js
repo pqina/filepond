@@ -1,5 +1,5 @@
 /*
- * FilePond 1.4.1
+ * FilePond 1.5.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1284,7 +1284,8 @@ const createAction = (name, outline, method, timeout) => {
     method,
     headers: {},
     withCredentials: false,
-    timeout
+    timeout,
+    onload: null
   };
 
   // is a single url
@@ -1703,26 +1704,32 @@ const defaultOptions = {
     process: {
     url: '',
     method: 'POST',
-    withCredentials: false,
-    headers: {}
+            withCredentials: false,
+    headers: {},
+            onload: (response) => {
+                return response.id
+            }
     },
     revert: {
     url: '',
     method: 'DELETE',
     withCredentials: false,
-    headers: {}
+    headers: {},
+            onload: null
     },
     fetch: {
     url: '',
     method: 'GET',
     withCredentials: false,
-    headers: {}
+    headers: {},
+            onload: null
     },
     restore: {
     url: '',
     method: 'GET',
     withCredentials: false,
-    headers: {}
+    headers: {},
+            onload: null
     }
     }
     */
@@ -2439,14 +2446,23 @@ const createProcessorFunction = (apiUrl = '', action, name) => {
     var formData = new FormData();
     formData.append(name, file, file.name);
 
-    // add metadata uder same name
+    // add metadata under same name
     if (isObject(metadata)) {
       formData.append(name, JSON.stringify(metadata));
     }
 
+    // set onload hanlder
+    const onload = action.onload || (res => res);
+
     // send request object
     const request = sendRequest(formData, apiUrl + action.url, action);
-    request.onload = load;
+    request.onload = res => {
+      load(
+        babelHelpers.extends({}, res, {
+          body: onload(res.body)
+        })
+      );
+    };
     request.onerror = error;
     request.onprogress = progress;
     request.onabort = abort;
@@ -3882,9 +3898,6 @@ const didAbortItemProcessing = ({ root }) => {
 const didCompleteItemProcessing$1 = ({ root }) => {
   text(root.ref.main, root.query('GET_LABEL_FILE_PROCESSING_COMPLETE'));
   text(root.ref.sub, root.query('GET_LABEL_TAP_TO_UNDO'));
-
-  //const allowRevert = root.query('GET_ALLOW_REVERT');
-  //text(root.ref.sub, allowRevert ? root.query('GET_LABEL_TAP_TO_UNDO') : '');
 };
 
 const clear = ({ root }) => {
