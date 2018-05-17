@@ -1,5 +1,5 @@
 /*
- * FilePond 1.5.1
+ * FilePond 1.5.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -187,8 +187,6 @@
   font-size: 0.625em;
   opacity: 0.5;
   transition: opacity 0.25s ease-in-out;
-  max-width: 15em;
-  overflow: hidden;
 }
 
 .filepond--file-wrapper {
