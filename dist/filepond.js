@@ -1,5 +1,5 @@
 /*
- * FilePond 1.5.0
+ * FilePond 1.5.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -7928,7 +7928,7 @@ function signature:
    * @param replacements - { "bar": 10 }
    */
   var replaceInString = function replaceInString(string, replacements) {
-    return string.replace(/(?:{([a-z]+)})/g, function(match, group) {
+    return string.replace(/(?:{([a-zA-Z]+)})/g, function(match, group) {
       return replacements[group];
     });
   };

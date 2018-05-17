@@ -1,5 +1,5 @@
 /*
- * FilePond 1.5.0
+ * FilePond 1.5.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -6741,7 +6741,7 @@ const createAppAPI = app => {
  * @param replacements - { "bar": 10 }
  */
 const replaceInString = (string, replacements) =>
-  string.replace(/(?:{([a-z]+)})/g, (match, group) => replacements[group]);
+  string.replace(/(?:{([a-zA-Z]+)})/g, (match, group) => replacements[group]);
 
 const images = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'tiff'];
 const text$1 = ['css', 'csv', 'html', 'txt'];
