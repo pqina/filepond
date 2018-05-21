@@ -37,8 +37,9 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 
 *   [React](https://github.com/pqina/react-filepond)
 *   [Vue](https://github.com/pqina/vue-filepond)
-*   [Angular](https://github.com/pqina/angular-filepond)
 *   [jQuery](https://github.com/pqina/jquery-filepond)
+*   [Angular](https://github.com/pqina/angular-filepond)
+*   [Angular 1](https://github.com/johnnyasantoss/angularjs-filepond)
 
 ### Boilerplates
 
