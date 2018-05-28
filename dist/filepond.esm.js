@@ -1,5 +1,5 @@
 /*
- * FilePond 1.5.2
+ * FilePond 1.5.4
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -3211,8 +3211,16 @@ const actions = (dispatch, query, state) => ({
         return;
       }
 
+      // id of first item we're about to remove
+      const item = state.items[0];
+
+      // if has been processed remove it from the server as well
+      if (item.status === ItemStatus.PROCESSING_COMPLETE) {
+        dispatch('REVERT_ITEM_PROCESSING', { query: item.id });
+      }
+
       // remove first item as it will be replaced by this item
-      dispatch('REMOVE_ITEM', { query: state.items[0].id });
+      dispatch('REMOVE_ITEM', { query: item.id });
     }
 
     // test if server file reference is supplied
@@ -3345,6 +3353,9 @@ const actions = (dispatch, query, state) => ({
     });
 
     item.on('process-abort', serverFileReference => {
+      // we'll revert any processed items
+      dispatch('REVERT_ITEM_PROCESSING', { query: id });
+
       // if we're instant uploading, the item is removed
       if (state.options.instantUpload) {
         dispatch('REMOVE_ITEM', { query: id });
@@ -3352,9 +3363,6 @@ const actions = (dispatch, query, state) => ({
         // we stopped processing
         dispatch('DID_ABORT_ITEM_PROCESSING', { id });
       }
-
-      // we'll revert any processed items
-      dispatch('REVERT_ITEM_PROCESSING', { query: id });
     });
 
     item.on('process-complete', serverFileReference => {
@@ -4412,6 +4420,7 @@ const StateMap = {
   DID_UPDATE_ITEM_LOAD_PROGRESS: 'loading',
   DID_THROW_ITEM_INVALID: 'load-invalid',
   DID_THROW_ITEM_LOAD_ERROR: 'load-error',
+  DID_LOAD_ITEM: 'idle',
   DID_START_ITEM_PROCESSING: 'busy',
   DID_REQUEST_ITEM_PROCESSING: 'busy',
   DID_UPDATE_ITEM_PROCESS_PROGRESS: 'processing',

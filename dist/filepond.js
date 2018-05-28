@@ -1,5 +1,5 @@
 /*
- * FilePond 1.5.2
+ * FilePond 1.5.4
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -3930,8 +3930,16 @@ function signature:
             return;
           }
 
+          // id of first item we're about to remove
+          var _item = state.items[0];
+
+          // if has been processed remove it from the server as well
+          if (_item.status === ItemStatus.PROCESSING_COMPLETE) {
+            dispatch('REVERT_ITEM_PROCESSING', { query: _item.id });
+          }
+
           // remove first item as it will be replaced by this item
-          dispatch('REMOVE_ITEM', { query: state.items[0].id });
+          dispatch('REMOVE_ITEM', { query: _item.id });
         }
 
         // test if server file reference is supplied
@@ -4070,6 +4078,9 @@ function signature:
         });
 
         item.on('process-abort', function(serverFileReference) {
+          // we'll revert any processed items
+          dispatch('REVERT_ITEM_PROCESSING', { query: id });
+
           // if we're instant uploading, the item is removed
           if (state.options.instantUpload) {
             dispatch('REMOVE_ITEM', { query: id });
@@ -4077,9 +4088,6 @@ function signature:
             // we stopped processing
             dispatch('DID_ABORT_ITEM_PROCESSING', { id: id });
           }
-
-          // we'll revert any processed items
-          dispatch('REVERT_ITEM_PROCESSING', { query: id });
         });
 
         item.on('process-complete', function(serverFileReference) {
@@ -5302,6 +5310,7 @@ function signature:
     DID_UPDATE_ITEM_LOAD_PROGRESS: 'loading',
     DID_THROW_ITEM_INVALID: 'load-invalid',
     DID_THROW_ITEM_LOAD_ERROR: 'load-error',
+    DID_LOAD_ITEM: 'idle',
     DID_START_ITEM_PROCESSING: 'busy',
     DID_REQUEST_ITEM_PROCESSING: 'busy',
     DID_UPDATE_ITEM_PROCESS_PROGRESS: 'processing',
