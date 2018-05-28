@@ -1,5 +1,5 @@
 /*
- * FilePond 1.6.0
+ * FilePond 1.6.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -8284,6 +8284,7 @@ function signature:
   exports.registerPlugin = registerPlugin;
   exports.getOptions = getOptions$$1;
   exports.setOptions = setOptions$$1;
+  exports.FileOrigin = FileOrigin;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 });

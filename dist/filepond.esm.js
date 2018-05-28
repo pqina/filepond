@@ -1,5 +1,5 @@
 /*
- * FilePond 1.6.0
+ * FilePond 1.6.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -7046,5 +7046,6 @@ export {
   supported,
   registerPlugin,
   getOptions$$1 as getOptions,
-  setOptions$$1 as setOptions
+  setOptions$$1 as setOptions,
+  FileOrigin
 };
