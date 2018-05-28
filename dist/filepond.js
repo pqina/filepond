@@ -1,5 +1,5 @@
 /*
- * FilePond 1.6.1
+ * FilePond 1.6.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -3405,6 +3405,12 @@ function signature:
     };
   };
 
+  var FileOrigin = {
+    INPUT: 1,
+    LIMBO: 2,
+    LOCAL: 3
+  };
+
   var createItem = function createItem() {
     var origin =
       arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
@@ -3518,7 +3524,12 @@ function signature:
           state.file = result;
 
           // file received
-          setStatus(ItemStatus.IDLE);
+          if (origin === FileOrigin.LIMBO && state.serverFileReference) {
+            setStatus(ItemStatus.PROCESSING_COMPLETE);
+          } else {
+            setStatus(ItemStatus.IDLE);
+          }
+
           api.fire('load');
         };
 
@@ -3722,12 +3733,6 @@ function signature:
     );
 
     return createObject(api);
-  };
-
-  var FileOrigin = {
-    INPUT: 1,
-    LIMBO: 2,
-    LOCAL: 3
   };
 
   var getItemById = function getItemById(items, itemId) {

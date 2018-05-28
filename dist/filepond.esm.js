@@ -1,5 +1,5 @@
 /*
- * FilePond 1.6.1
+ * FilePond 1.6.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2764,6 +2764,12 @@ const createFileStub = source => {
   };
 };
 
+const FileOrigin = {
+  INPUT: 1,
+  LIMBO: 2,
+  LOCAL: 3
+};
+
 const createItem = (origin = null, serverFileReference = null) => {
   // unique id for this item, is used to identify the item across views
   const id = getUniqueId();
@@ -2862,7 +2868,12 @@ const createItem = (origin = null, serverFileReference = null) => {
         state.file = result;
 
         // file received
-        setStatus(ItemStatus.IDLE);
+        if (origin === FileOrigin.LIMBO && state.serverFileReference) {
+          setStatus(ItemStatus.PROCESSING_COMPLETE);
+        } else {
+          setStatus(ItemStatus.IDLE);
+        }
+
         api.fire('load');
       };
 
@@ -3037,12 +3048,6 @@ const createItem = (origin = null, serverFileReference = null) => {
   );
 
   return createObject(api);
-};
-
-const FileOrigin = {
-  INPUT: 1,
-  LIMBO: 2,
-  LOCAL: 3
 };
 
 const getItemById = (items, itemId) => {
