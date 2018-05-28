@@ -1,5 +1,5 @@
 /*
- * FilePond 1.5.4
+ * FilePond 1.6.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -3406,8 +3406,10 @@ function signature:
   };
 
   var createItem = function createItem() {
-    var serverFileReference =
+    var origin =
       arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    var serverFileReference =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
 
     // unique id for this item, is used to identify the item across views
     var id = getUniqueId();
@@ -3665,6 +3667,11 @@ function signature:
             return id;
           }
         },
+        origin: {
+          get: function get$$1() {
+            return origin;
+          }
+        },
         serverId: {
           get: function get$$1() {
             return state.serverFileReference;
@@ -3689,6 +3696,7 @@ function signature:
         fileType: { get: getFileType },
         fileSize: { get: getFileSize },
         file: { get: getFile },
+
         source: {
           get: function get$$1() {
             return state.source;
@@ -3714,6 +3722,12 @@ function signature:
     );
 
     return createObject(api);
+  };
+
+  var FileOrigin = {
+    INPUT: 1,
+    LIMBO: 2,
+    LOCAL: 3
   };
 
   var getItemById = function getItemById(items, itemId) {
@@ -3942,14 +3956,17 @@ function signature:
           dispatch('REMOVE_ITEM', { query: _item.id });
         }
 
-        // test if server file reference is supplied
-        // type is either 'new', 'local' or 'limbo' ('remote' is for new files)
-        var isLocalServerFile = options.type === 'local';
-        var isLimboServerFile = options.type === 'limbo';
-        var isServerFile = isLocalServerFile || isLimboServerFile;
+        // where did the file originate
+        var origin =
+          options.type === 'local'
+            ? FileOrigin.LOCAL
+            : options.type === 'limbo' ? FileOrigin.LIMBO : FileOrigin.INPUT;
 
         // create a new blank item
-        var item = createItem(isServerFile ? source : null);
+        var item = createItem(
+          origin,
+          origin === FileOrigin.INPUT ? null : source
+        );
 
         // add item to list
         insertItem(state.items, item, index);
@@ -4022,10 +4039,7 @@ function signature:
                 query: query
               }).then(function(shouldPrepareOutput) {
                 var data = {
-                  isServerFile: isServerFile,
                   source: source,
-                  isLocalServerFile: isLocalServerFile,
-                  isLimboServerFile: isLimboServerFile,
                   success: success
 
                   // exit
@@ -4127,13 +4141,15 @@ function signature:
 
           // this creates a function that loads the file based on the type of file (string, base64, blob, file) and location of file (local, remote, limbo)
           createFileLoader(
-            isServerFile
-              ? options.type === 'limbo'
-                ? createFetchFunction(url, restore)
-                : createFetchFunction(url, load)
-              : isString(source) && isExternalURL(source)
-                ? createFetchFunction(url, fetch)
-                : fetchLocal
+            origin === FileOrigin.INPUT
+              ? // input
+                isString(source) && isExternalURL(source)
+                ? createFetchFunction(url, fetch) // remote url
+                : fetchLocal // local url
+              : // limbo or local
+                origin === FileOrigin.LIMBO
+                ? createFetchFunction(url, restore) // limbo
+                : createFetchFunction(url, load) // local
           ),
 
           // called when the file is loaded so it can be piped through the filters
@@ -4171,17 +4187,14 @@ function signature:
         var item = _ref6.item,
           data = _ref6.data;
         var success = data.success,
-          isServerFile = data.isServerFile,
-          source = data.source,
-          isLocalServerFile = data.isLocalServerFile,
-          isLimboServerFile = data.isLimboServerFile;
+          source = data.source;
 
         // let interface know the item has loaded
 
         dispatch('DID_LOAD_ITEM', {
           id: item.id,
           error: null,
-          serverFileReference: isServerFile ? source : null
+          serverFileReference: item.origin === FileOrigin.INPUT ? null : source
         });
 
         // item has been successfully loaded and added to the
@@ -4189,13 +4202,13 @@ function signature:
         success(createItemAPI(item));
 
         // if this is a local server file we need to show a different state
-        if (isLocalServerFile) {
+        if (item.origin === FileOrigin.LOCAL) {
           dispatch('DID_LOAD_LOCAL_ITEM', { id: item.id });
           return;
         }
 
         // if is a temp server file we prevent async upload call here (as the file is already on the server)
-        if (isLimboServerFile) {
+        if (item.origin === FileOrigin.LIMBO) {
           dispatch('DID_COMPLETE_ITEM_PROCESSING', {
             id: item.id,
             error: null,
