@@ -1,5 +1,5 @@
 /*
- * FilePond 1.6.2
+ * FilePond 1.7.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1285,7 +1285,8 @@ const createAction = (name, outline, method, timeout) => {
     headers: {},
     withCredentials: false,
     timeout,
-    onload: null
+    onload: null,
+    onerror: null
   };
 
   // is a single url
@@ -2222,7 +2223,7 @@ const createFileLoader = fetchFn => {
   return api;
 };
 
-const createResponse = (type, code, body, headers) => ({
+const createResponse$1 = (type, code, body, headers) => ({
   type,
   code,
   body,
@@ -2234,6 +2235,7 @@ const sendRequest = (data, url, options) => {
     onheaders: () => {},
     onprogress: () => {},
     onload: () => {},
+    ontimeout: () => {},
     onerror: () => {},
     onabort: () => {},
     abort: () => {
@@ -2305,32 +2307,22 @@ const sendRequest = (data, url, options) => {
     headersReceived = true;
 
     // we've probably received some useful data in response headers
-    api.onheaders(
-      createResponse('headers', xhr.status, null, xhr.getAllResponseHeaders())
-    );
+    api.onheaders(xhr);
   };
 
   // load successful
   xhr.onload = () => {
     // is classified as valid response
     if (xhr.status >= 200 && xhr.status < 300) {
-      api.onload(
-        createResponse(
-          'load',
-          xhr.status,
-          xhr.response,
-          xhr.getAllResponseHeaders()
-        )
-      );
+      api.onload(xhr);
     } else {
-      // not a valid response
-      api.onerror(createResponse('error', xhr.status, xhr.statusText));
+      api.onerror(xhr);
     }
   };
 
   // error during load
   xhr.onerror = () => {
-    api.onerror(createResponse('error', xhr.status, xhr.statusText));
+    api.onerror(xhr);
   };
 
   // request aborted
@@ -2346,7 +2338,7 @@ const sendRequest = (data, url, options) => {
   if (isInt(options.timeout)) {
     timeoutId = setTimeout(() => {
       timedOut = true;
-      api.onerror(createResponse('error', 0, 'timeout'));
+      api.ontimeout(xhr);
       api.abort();
     }, options.timeout);
   }
@@ -2373,6 +2365,10 @@ const sendRequest = (data, url, options) => {
   return api;
 };
 
+const createTimeoutResponse = cb => xhr => {
+  cb(createResponse('error', 0, 'Timeout', xhr.getAllResponseHeaders()));
+};
+
 const createFetchFunction = (apiUrl = '', action) => {
   // custom handler (should also handle file, load, error, progress and abort)
   if (typeof action === 'function') {
@@ -2384,6 +2380,10 @@ const createFetchFunction = (apiUrl = '', action) => {
     return null;
   }
 
+  // set onload hanlder
+  const onload = action.onload || (res => res);
+  const onerror = action.onerror || (res => null);
+
   // internal handler
   return (url, load, error, progress, abort, headers) => {
     // do local or remote request based on if the url is external
@@ -2394,22 +2394,53 @@ const createFetchFunction = (apiUrl = '', action) => {
         responseType: 'blob'
       })
     );
-    request.onload = response => {
-      // turn blob into a file
-      response.body = getFileFromBlob(
-        response.body,
-        getFilenameFromHeaders(response.headers) ||
-          getFilenameFromURL(url) ||
-          getDateString()
-      );
 
-      // pass updated response to handler method
-      load(response);
+    request.onload = xhr => {
+      // get headers
+      const headers = xhr.getAllResponseHeaders();
+
+      // get filename
+      const filename =
+        getFilenameFromHeaders(headers) ||
+        getFilenameFromURL(url) ||
+        getDateString();
+
+      // create response
+      load(
+        createResponse$1(
+          'load',
+          xhr.status,
+          getFileFromBlob(onload(xhr.response), filename),
+          headers
+        )
+      );
     };
-    request.onerror = error;
+
+    request.onerror = xhr => {
+      error(
+        createResponse$1(
+          'error',
+          xhr.status,
+          onerror(xhr.response) || xhr.statusText,
+          xhr.getAllResponseHeaders()
+        )
+      );
+    };
+
+    request.onheaders = xhr => {
+      headers(
+        createResponse$1(
+          'headers',
+          xhr.status,
+          null,
+          xhr.getAllResponseHeaders()
+        )
+      );
+    };
+
+    request.ontimeout = createTimeoutResponse(error);
     request.onprogress = progress;
     request.onabort = abort;
-    request.onheaders = headers;
 
     // should return request
     return request;
@@ -2418,7 +2449,7 @@ const createFetchFunction = (apiUrl = '', action) => {
 
 /*
 function signature:
-  (data, load, error, progress, abort) => {
+  (file, metadata, load, error, progress, abort) => {
     return {
     abort:() => {}
   }
@@ -2453,17 +2484,33 @@ const createProcessorFunction = (apiUrl = '', action, name) => {
 
     // set onload hanlder
     const onload = action.onload || (res => res);
+    const onerror = action.onerror || (res => null);
 
     // send request object
     const request = sendRequest(formData, apiUrl + action.url, action);
-    request.onload = res => {
+    request.onload = xhr => {
       load(
-        babelHelpers.extends({}, res, {
-          body: onload(res.body)
-        })
+        createResponse$1(
+          'load',
+          xhr.status,
+          onload(xhr.response),
+          xhr.getAllResponseHeaders()
+        )
       );
     };
-    request.onerror = error;
+
+    request.onerror = xhr => {
+      error(
+        createResponse$1(
+          'error',
+          xhr.status,
+          onerror(xhr.response) || xhr.statusText,
+          xhr.getAllResponseHeaders()
+        )
+      );
+    };
+
+    request.ontimeout = createTimeoutResponse(error);
     request.onprogress = progress;
     request.onabort = abort;
 
@@ -2487,6 +2534,10 @@ const createRevertFunction = (apiUrl = '', action) => {
     return (uniqueFileId, load) => load();
   }
 
+  // set onload hanlder
+  const onload = action.onload || (res => res);
+  const onerror = action.onerror || (res => null);
+
   // internal implementation
   return (uniqueFileId, load, error) => {
     const request = sendRequest(
@@ -2494,8 +2545,30 @@ const createRevertFunction = (apiUrl = '', action) => {
       apiUrl + action.url,
       action // contains method, headers and withCredentials properties
     );
-    request.onload = load;
-    request.onerror = error;
+    request.onload = xhr => {
+      load(
+        createResponse$1(
+          'load',
+          xhr.status,
+          onload(xhr.response),
+          xhr.getAllResponseHeaders()
+        )
+      );
+    };
+
+    request.onerror = xhr => {
+      error(
+        createResponse$1(
+          'error',
+          xhr.status,
+          onerror(xhr.response) || xhr.statusText,
+          xhr.getAllResponseHeaders()
+        )
+      );
+    };
+
+    request.ontimeout = createTimeoutResponse(error);
+
     return request;
   };
 };
@@ -3074,22 +3147,48 @@ const fetchLocal = (url, load, error, progress, abort, headers) => {
     method: 'GET',
     responseType: 'blob'
   });
-  request.onload = response => {
-    // turn blob into a file
-    response.body = getFileFromBlob(
-      response.body,
-      getFilenameFromHeaders(response.headers) ||
-        getFilenameFromURL(url) ||
-        getDateString()
-    );
 
-    // pass updated response to handler method
-    load(response);
+  request.onload = xhr => {
+    // get headers
+    const headers = xhr.getAllResponseHeaders();
+
+    // get filename
+    const filename =
+      getFilenameFromHeaders(headers) ||
+      getFilenameFromURL(url) ||
+      getDateString();
+
+    // create response
+    load(
+      createResponse$1(
+        'load',
+        xhr.status,
+        getFileFromBlob(xhr.response, filename),
+        headers
+      )
+    );
   };
-  request.onerror = error;
+
+  request.onerror = xhr => {
+    error(
+      createResponse$1(
+        'error',
+        xhr.status,
+        xhr.statusText,
+        xhr.getAllResponseHeaders()
+      )
+    );
+  };
+
+  request.onheaders = xhr => {
+    headers(
+      createResponse$1('headers', xhr.status, null, xhr.getAllResponseHeaders())
+    );
+  };
+
+  request.ontimeout = createTimeoutResponse(error);
   request.onprogress = progress;
   request.onabort = abort;
-  request.onheaders = headers;
 
   // should return request
   return request;
@@ -3118,7 +3217,7 @@ const getItemByQueryFromState = (state, itemHandler) => ({
   const item = getItemByQuery(state.items, query);
   if (!item) {
     failure({
-      error: createResponse('error', 0, 'Item not found'),
+      error: createResponse$1('error', 0, 'Item not found'),
       file: null
     });
     return;
@@ -3191,7 +3290,7 @@ const actions = (dispatch, query, state) => ({
     // if no source supplied
     if (isEmpty(source)) {
       failure({
-        error: createResponse('error', 0, 'No source'),
+        error: createResponse$1('error', 0, 'No source'),
         file: null
       });
       return;
@@ -3213,7 +3312,7 @@ const actions = (dispatch, query, state) => ({
         state.options.allowMultiple ||
         (!state.options.allowMultiple && !state.options.allowReplace)
       ) {
-        const error = createResponse('warning', 0, 'Max files');
+        const error = createResponse$1('warning', 0, 'Max files');
 
         dispatch('DID_THROW_MAX_FILES', {
           source,
