@@ -1,5 +1,5 @@
 /*
- * FilePond 1.7.0
+ * FilePond 1.7.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1767,6 +1767,16 @@
     return typeof value === 'undefined' ? 'undefined' : _typeof(value);
   };
 
+  var replaceSingleQuotes = function replaceSingleQuotes(str) {
+    return str
+      .replace(/{\s*'/g, '{"')
+      .replace(/'\s*}/g, '"}')
+      .replace(/'\s*:/g, '":')
+      .replace(/:\s*'/g, ':"')
+      .replace(/,\s*'/g, ',"')
+      .replace(/'\s*,/g, '",');
+  };
+
   var conversionTable = {
     array: toArray$1,
     boolean: toBoolean,
@@ -1777,6 +1787,13 @@
     bytes: toBytes,
     string: toString,
     serverapi: toServerAPI,
+    object: function object(value) {
+      try {
+        return JSON.parse(replaceSingleQuotes(value));
+      } catch (e) {
+        return null;
+      }
+    },
     function: function _function(value) {
       return toFunctionReference(value);
     }
