@@ -81,14 +81,14 @@ Or get it from a CDN:
   <!-- Filepond stylesheet -->
   <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
 
-  <!-- Load FilePond library -->
-  <script defer src="https://unpkg.com/filepond/dist/filepond.js"></script>
-
 </head>
 <body>
 
   <!-- We'll transform this input into a pond -->
   <input type="file" class="filepond">
+
+  <!-- Load FilePond library -->
+  <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
 
   <!-- Turn all file input elements into ponds -->
   <script>
