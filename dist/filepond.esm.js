@@ -4058,6 +4058,9 @@ const fileStatus = createView({
     DID_THROW_ITEM_PROCESSING_ERROR: error
   }),
   create: create$10,
+  didCreateView: root => {
+    applyFilters('CREATE_VIEW', babelHelpers.extends({}, root, { view: root }));
+  },
   mixins: {
     styles: ['translateX', 'translateY', 'opacity'],
     animations: {
