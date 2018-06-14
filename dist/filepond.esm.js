@@ -1,5 +1,5 @@
 /*
- * FilePond 1.7.1
+ * FilePond 1.7.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -4057,6 +4057,9 @@ const fileStatus = createView({
     DID_THROW_ITEM_INVALID: error,
     DID_THROW_ITEM_PROCESSING_ERROR: error
   }),
+  didCreateView: root => {
+    applyFilters('CREATE_VIEW', babelHelpers.extends({}, root, { view: root }));
+  },
   create: create$10,
   mixins: {
     styles: ['translateX', 'translateY', 'opacity'],
