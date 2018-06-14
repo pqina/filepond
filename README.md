@@ -25,6 +25,7 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 ### Plugins
 
 *   [File encode](https://github.com/pqina/filepond-plugin-file-encode)
+*   [File rename](https://github.com/pqina/filepond-plugin-file-rename)
 *   [File size validation](https://github.com/pqina/filepond-plugin-file-validate-size)
 *   [File type validation](https://github.com/pqina/filepond-plugin-file-validate-type)
 *   [Image size validation](https://github.com/pqina/filepond-plugin-image-validate-size)
