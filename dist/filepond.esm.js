@@ -1,5 +1,5 @@
 /*
- * FilePond 1.7.2
+ * FilePond 1.7.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -6426,7 +6426,9 @@ const createApp$1 = (initialOptions = {}) => {
       }
       const routes = eventRoutes[action.type];
       (Array.isArray(routes) ? routes : [routes]).forEach(route => {
-        exposeEvent(route(action.data));
+        setTimeout(() => {
+          exposeEvent(route(action.data));
+        }, 0);
       });
     });
   };
