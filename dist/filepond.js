@@ -1,5 +1,5 @@
 /*
- * FilePond 1.7.3
+ * FilePond 1.7.4
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2664,11 +2664,15 @@
       ) {
         var header = _step.value;
 
-        var dirtyFilename = header.split('filename=')[1];
-        if (!dirtyFilename) {
+        var matches = header.match(/filename="(.+)"/);
+        if (!matches) {
           continue;
         }
-        return dirtyFilename.replace(/["']+/g, '');
+        var filename = matches[1];
+        if (!filename) {
+          continue;
+        }
+        return filename;
       }
     } catch (err) {
       _didIteratorError = true;

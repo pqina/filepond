@@ -1,5 +1,5 @@
 /*
- * FilePond 1.7.3
+ * FilePond 1.7.4
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2090,11 +2090,15 @@ const getFileFromBase64DataURI = (dataURI, filename, extension) => {
 const getFilenameFromHeaders = headers => {
   const rows = headers.split('\n');
   for (const header of rows) {
-    const dirtyFilename = header.split('filename=')[1];
-    if (!dirtyFilename) {
+    const matches = header.match(/filename="(.+)"/);
+    if (!matches) {
       continue;
     }
-    return dirtyFilename.replace(/["']+/g, '');
+    const filename = matches[1];
+    if (!filename) {
+      continue;
+    }
+    return filename;
   }
   return null;
 };
