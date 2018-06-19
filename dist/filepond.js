@@ -1,5 +1,5 @@
 /*
- * FilePond 1.7.4
+ * FilePond 1.8.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2393,27 +2393,6 @@
     };
   };
 
-  var getItemIndexByQuery = function getItemIndexByQuery(items, query) {
-    // just return first index
-    if (isEmpty(query)) {
-      return 0;
-    }
-
-    // invalid queries
-    if (!isString(query)) {
-      return -1;
-    }
-
-    // return item by id (or -1 if not found)
-    return items.findIndex(function(item) {
-      return item.id === query;
-    });
-  };
-
-  var removeIndex = function removeIndex(arr, index) {
-    return arr.splice(index, 1);
-  };
-
   var hasRoomForItem = function hasRoomForItem(state) {
     var count = state.items.length;
 
@@ -2665,14 +2644,10 @@
         var header = _step.value;
 
         var matches = header.match(/filename="(.+)"/);
-        if (!matches) {
+        if (!matches || !matches[1]) {
           continue;
         }
-        var filename = matches[1];
-        if (!filename) {
-          continue;
-        }
-        return filename;
+        return matches[1];
       }
     } catch (err) {
       _didIteratorError = true;
@@ -3507,7 +3482,7 @@ function signature:
       // if is base64 data uri we need to determine the average size and type
       data[1] = source.length;
       data[2] = getMimeTypeFromBase64DataURI(source);
-    } else if (!(source instanceof File)) {
+    } else if (isString(source)) {
       // url
       data[0] = getFilenameFromURL(source);
       data[1] = 0;
@@ -3532,6 +3507,8 @@ function signature:
       arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
     var serverFileReference =
       arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+    var file =
+      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
 
     // unique id for this item, is used to identify the item across views
     var id = getUniqueId();
@@ -3544,7 +3521,7 @@ function signature:
       source: null,
 
       // file model reference
-      file: null,
+      file: file,
 
       // id of file on server
       serverFileReference: serverFileReference,
@@ -3587,6 +3564,12 @@ function signature:
     var load = function load(source, loader, onload) {
       // remember the original item source
       state.source = source;
+
+      // file stub is already there
+      if (state.file) {
+        api.fire('load-skip');
+        return;
+      }
 
       // set a stub file object while loading the actual data
       state.file = createFileStub(source);
@@ -3851,12 +3834,33 @@ function signature:
     return createObject(api);
   };
 
+  var getItemIndexByQuery = function getItemIndexByQuery(items, query) {
+    // just return first index
+    if (isEmpty(query)) {
+      return 0;
+    }
+
+    // invalid queries
+    if (!isString(query)) {
+      return -1;
+    }
+
+    // return item by id (or -1 if not found)
+    return items.findIndex(function(item) {
+      return item.id === query;
+    });
+  };
+
   var getItemById = function getItemById(items, itemId) {
     var index = getItemIndexByQuery(items, itemId);
     if (index < 0) {
       return;
     }
     return items[index] || null;
+  };
+
+  var removeIndex = function removeIndex(arr, index) {
+    return arr.splice(index, 1);
   };
 
   var removeItem = function removeItem(items, needle) {
@@ -4117,8 +4121,14 @@ function signature:
         // create a new blank item
         var item = createItem(
           origin,
-          origin === FileOrigin.INPUT ? null : source
+          origin === FileOrigin.INPUT ? null : source,
+          options.file
         );
+
+        // set initial meta data
+        Object.keys(options.metadata || {}).forEach(function(key) {
+          item.setMetadata(key, options.metadata[key]);
+        });
 
         // add item to list
         insertItem(state.items, item, index);
@@ -4176,6 +4186,17 @@ function signature:
 
         item.on('load-abort', function() {
           dispatch('REMOVE_ITEM', { query: id });
+        });
+
+        item.on('load-skip', function() {
+          dispatch('COMPLETE_LOAD_ITEM', {
+            query: id,
+            item: item,
+            data: {
+              source: source,
+              success: success
+            }
+          });
         });
 
         item.on('load', function() {
@@ -4266,7 +4287,8 @@ function signature:
 
         item.on('process-revert', function() {
           // if is instant upload remove the item
-          if (state.options.instantUpload) {
+          // or is a fake file
+          if (state.options.instantUpload || options.file) {
             dispatch('REMOVE_ITEM', { query: id });
           } else {
             dispatch('DID_REVERT_ITEM_PROCESSING', { id: id });
@@ -4802,6 +4824,9 @@ function signature:
       DID_THROW_ITEM_LOAD_ERROR: updateFileSizeOnError,
       DID_THROW_ITEM_INVALID: updateFileSizeOnError
     }),
+    didCreateView: function didCreateView(root) {
+      applyFilters('CREATE_VIEW', _extends({}, root, { view: root }));
+    },
     create: create$9,
     mixins: {
       styles: ['translateX', 'translateY'],
@@ -8188,6 +8213,10 @@ function signature:
     return renameFile(file, file.name);
   };
 
+  var isFile = function isFile(value) {
+    return value instanceof File || (value instanceof Blob && value.name);
+  };
+
   // utilities exposed to plugins
   // already registered plugins (can't register twice)
   var registeredPlugins = [];
@@ -8209,6 +8238,7 @@ function signature:
         Type: Type,
         forin: forin,
         isString: isString,
+        isFile: isFile,
         toNaturalFileSize: toNaturalFileSize,
         replaceInString: replaceInString,
         getExtensionFromFilename: getExtensionFromFilename,

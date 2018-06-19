@@ -1,5 +1,5 @@
 /*
- * FilePond 1.7.4
+ * FilePond 1.8.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1874,23 +1874,6 @@ const queries = state => ({
       isFunction(state.options.server.process))
 });
 
-const getItemIndexByQuery = (items, query) => {
-  // just return first index
-  if (isEmpty(query)) {
-    return 0;
-  }
-
-  // invalid queries
-  if (!isString(query)) {
-    return -1;
-  }
-
-  // return item by id (or -1 if not found)
-  return items.findIndex(item => item.id === query);
-};
-
-const removeIndex = (arr, index) => arr.splice(index, 1);
-
 const hasRoomForItem = state => {
   const count = state.items.length;
 
@@ -2091,14 +2074,10 @@ const getFilenameFromHeaders = headers => {
   const rows = headers.split('\n');
   for (const header of rows) {
     const matches = header.match(/filename="(.+)"/);
-    if (!matches) {
+    if (!matches || !matches[1]) {
       continue;
     }
-    const filename = matches[1];
-    if (!filename) {
-      continue;
-    }
-    return filename;
+    return matches[1];
   }
   return null;
 };
@@ -2843,7 +2822,7 @@ const createFileStub = source => {
     // if is base64 data uri we need to determine the average size and type
     data[1] = source.length;
     data[2] = getMimeTypeFromBase64DataURI(source);
-  } else if (!(source instanceof File)) {
+  } else if (isString(source)) {
     // url
     data[0] = getFilenameFromURL(source);
     data[1] = 0;
@@ -2863,7 +2842,7 @@ const FileOrigin = {
   LOCAL: 3
 };
 
-const createItem = (origin = null, serverFileReference = null) => {
+const createItem = (origin = null, serverFileReference = null, file = null) => {
   // unique id for this item, is used to identify the item across views
   const id = getUniqueId();
 
@@ -2875,7 +2854,7 @@ const createItem = (origin = null, serverFileReference = null) => {
     source: null,
 
     // file model reference
-    file: null,
+    file,
 
     // id of file on server
     serverFileReference,
@@ -2908,6 +2887,12 @@ const createItem = (origin = null, serverFileReference = null) => {
   const load = (source, loader, onload) => {
     // remember the original item source
     state.source = source;
+
+    // file stub is already there
+    if (state.file) {
+      api.fire('load-skip');
+      return;
+    }
 
     // set a stub file object while loading the actual data
     state.file = createFileStub(source);
@@ -3143,6 +3128,21 @@ const createItem = (origin = null, serverFileReference = null) => {
   return createObject(api);
 };
 
+const getItemIndexByQuery = (items, query) => {
+  // just return first index
+  if (isEmpty(query)) {
+    return 0;
+  }
+
+  // invalid queries
+  if (!isString(query)) {
+    return -1;
+  }
+
+  // return item by id (or -1 if not found)
+  return items.findIndex(item => item.id === query);
+};
+
 const getItemById = (items, itemId) => {
   const index = getItemIndexByQuery(items, itemId);
   if (index < 0) {
@@ -3150,6 +3150,8 @@ const getItemById = (items, itemId) => {
   }
   return items[index] || null;
 };
+
+const removeIndex = (arr, index) => arr.splice(index, 1);
 
 const removeItem = (items, needle) => {
   // get index of item
@@ -3364,8 +3366,14 @@ const actions = (dispatch, query, state) => ({
     // create a new blank item
     const item = createItem(
       origin,
-      origin === FileOrigin.INPUT ? null : source
+      origin === FileOrigin.INPUT ? null : source,
+      options.file
     );
+
+    // set initial meta data
+    Object.keys(options.metadata || {}).forEach(key => {
+      item.setMetadata(key, options.metadata[key]);
+    });
 
     // add item to list
     insertItem(state.items, item, index);
@@ -3423,6 +3431,17 @@ const actions = (dispatch, query, state) => ({
 
     item.on('load-abort', () => {
       dispatch('REMOVE_ITEM', { query: id });
+    });
+
+    item.on('load-skip', () => {
+      dispatch('COMPLETE_LOAD_ITEM', {
+        query: id,
+        item,
+        data: {
+          source,
+          success
+        }
+      });
     });
 
     item.on('load', () => {
@@ -3507,7 +3526,8 @@ const actions = (dispatch, query, state) => ({
 
     item.on('process-revert', () => {
       // if is instant upload remove the item
-      if (state.options.instantUpload) {
+      // or is a fake file
+      if (state.options.instantUpload || options.file) {
         dispatch('REMOVE_ITEM', { query: id });
       } else {
         dispatch('DID_REVERT_ITEM_PROCESSING', { id });
@@ -3971,6 +3991,9 @@ const fileInfo = createView({
     DID_THROW_ITEM_LOAD_ERROR: updateFileSizeOnError,
     DID_THROW_ITEM_INVALID: updateFileSizeOnError
   }),
+  didCreateView: root => {
+    applyFilters('CREATE_VIEW', babelHelpers.extends({}, root, { view: root }));
+  },
   create: create$9,
   mixins: {
     styles: ['translateX', 'translateY'],
@@ -6955,6 +6978,9 @@ const loadImage = (url, cb) =>
 
 const copyFile = file => renameFile(file, file.name);
 
+const isFile = value =>
+  value instanceof File || (value instanceof Blob && value.name);
+
 // utilities exposed to plugins
 // already registered plugins (can't register twice)
 const registeredPlugins = [];
@@ -6976,6 +7002,7 @@ const createAppPlugin = plugin => {
       Type,
       forin,
       isString,
+      isFile,
       toNaturalFileSize,
       replaceInString,
       getExtensionFromFilename,
