@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.1
+
+- Handle `Blob` with `name` property same as actual `File` object
+- Attempt to fix a problem where `elementFromPoint` could not be found in Angular component
+
+
 ## 1.8.0
 
 - Add view filter to file info view
@@ -10,7 +16,7 @@
 
 ## 1.7.4
 
-- Fix handling of Content-Disposition header to better extract the filename
+- Fix handling of `Content-Disposition` header to better extract the filename
 
  
 ## 1.7.3
@@ -27,6 +33,7 @@
 
 - Add view filter to file status view
 - Fix problem where attribute object value was not read correctly
+
 
 ## 1.7.0
 
@@ -193,9 +200,11 @@
 - Add support for file metadata
 - Improve performance
 
+
 ## 1.0.1
 
 - Add correct banners to library files
+
 
 ## 1.0.0
 

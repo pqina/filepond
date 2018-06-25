@@ -1,5 +1,5 @@
 /*
- * FilePond 1.8.0
+ * FilePond 1.8.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1922,18 +1922,6 @@ const insertItem = (items, item, index) => {
   return item;
 };
 
-const leftPad = (value, padding = '') =>
-  (padding + value).slice(-padding.length);
-
-const getDateString = (date = new Date()) =>
-  `${date.getFullYear()}-${leftPad(date.getMonth() + 1, '00')}-${leftPad(
-    date.getDate(),
-    '00'
-  )}_${leftPad(date.getHours(), '00')}-${leftPad(
-    date.getMinutes(),
-    '00'
-  )}-${leftPad(date.getSeconds(), '00')}`;
-
 const isBase64DataURI = str =>
   /^\s*data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?(;base64)?,([a-z0-9!$&',()*+;=\-._~:@\/?%\s]*)\s*$/i.test(
     str
@@ -1988,12 +1976,29 @@ const guesstimateExtension = type => {
   return '';
 };
 
+const leftPad = (value, padding = '') =>
+  (padding + value).slice(-padding.length);
+
+const getDateString$1 = (date = new Date()) =>
+  `${date.getFullYear()}-${leftPad(date.getMonth() + 1, '00')}-${leftPad(
+    date.getDate(),
+    '00'
+  )}_${leftPad(date.getHours(), '00')}-${leftPad(
+    date.getMinutes(),
+    '00'
+  )}-${leftPad(date.getSeconds(), '00')}`;
+
 const getFileFromBlob = (blob, filename, type = null, extension = null) => {
   const file =
     typeof type === 'string'
       ? blob.slice(0, blob.size, type)
       : blob.slice(0, blob.size, blob.type);
   file.lastModifiedDate = new Date();
+
+  // if blob has name property, use as filename if no filename supplied
+  if (!isString(filename)) {
+    filename = getDateString$1();
+  }
 
   // if filename supplied but no extension and filename has extension
   if (filename && extension === null && getExtensionFromFilename(filename)) {
@@ -2002,6 +2007,7 @@ const getFileFromBlob = (blob, filename, type = null, extension = null) => {
     extension = extension || guesstimateExtension(file.type);
     file.name = filename + (extension ? '.' + extension : '');
   }
+
   return file;
 };
 
@@ -2082,13 +2088,6 @@ const getFilenameFromHeaders = headers => {
   return null;
 };
 
-const renameFile = (file, name) => {
-  const renamedFile = file.slice(0, file.size, file.type);
-  renamedFile.lastModifiedDate = file.lastModifiedDate;
-  renamedFile.name = name;
-  return renamedFile;
-};
-
 const createFileLoader = fetchFn => {
   const state = {
     source: null,
@@ -2120,10 +2119,10 @@ const createFileLoader = fetchFn => {
       api.fire('load', source);
     } else if (source instanceof Blob) {
       // Load blobs, set default name to current date
-      api.fire('load', getFileFromBlob(source, getDateString()));
+      api.fire('load', getFileFromBlob(source, source.name));
     } else if (isBase64DataURI(source)) {
       // Load base 64, set default name to current date
-      api.fire('load', getFileFromBase64DataURI(source, getDateString()));
+      api.fire('load', getFileFromBase64DataURI(source));
     } else {
       // Deal as if is external URL, let's load it!
       loadURL(source);
@@ -2157,10 +2156,7 @@ const createFileLoader = fetchFn => {
 
         // turn blob response into a file
         if (response instanceof Blob) {
-          response = getFileFromBlob(
-            response,
-            getFilenameFromURL(url) || getDateString()
-          );
+          response = getFileFromBlob(response, getFilenameFromURL(url));
         }
 
         api.fire('load', response instanceof Blob ? response : response.body);
@@ -2402,7 +2398,7 @@ const createFetchFunction = (apiUrl = '', action) => {
       const filename =
         getFilenameFromHeaders(headers) ||
         getFilenameFromURL(url) ||
-        getDateString();
+        getDateString$1();
 
       // create response
       load(
@@ -2817,7 +2813,7 @@ const createFileStub = source => {
 
   // is blob or base64, then we need to set the name
   if (source instanceof Blob || isBase64DataURI(source)) {
-    data[0] = getDateString();
+    data[0] = source.name || getDateString();
   } else if (isBase64DataURI(source)) {
     // if is base64 data uri we need to determine the average size and type
     data[1] = source.length;
@@ -3175,10 +3171,7 @@ const fetchLocal = (url, load, error, progress, abort, headers) => {
     const headers = xhr.getAllResponseHeaders();
 
     // get filename
-    const filename =
-      getFilenameFromHeaders(headers) ||
-      getFilenameFromURL(url) ||
-      getDateString();
+    const filename = getFilenameFromHeaders(headers) || getFilenameFromURL(url);
 
     // create response
     load(
@@ -3229,6 +3222,9 @@ const getDomainFromURL = url => {
 const isExternalURL = url =>
   (url.indexOf(':') > -1 || url.indexOf('//') > -1) &&
   getDomainFromURL(location.href) !== getDomainFromURL(url);
+
+const isFile = value =>
+  value instanceof File || (value instanceof Blob && value.name);
 
 // returns item based on state
 const getItemByQueryFromState = (state, itemHandler) => ({
@@ -3319,11 +3315,12 @@ const actions = (dispatch, query, state) => ({
     }
 
     // filter out invalid file items, used to filter dropped directory contents
-    if (source instanceof Blob) {
-      if (state.options.ignoredFiles.includes(source.name.toLowerCase())) {
-        // fail silently
-        return;
-      }
+    if (
+      isFile(source) &&
+      state.options.ignoredFiles.includes(source.name.toLowerCase())
+    ) {
+      // fail silently
+      return;
     }
 
     // test if there's still room in the list of files
@@ -5406,15 +5403,23 @@ const createDragNDropObserver = element => {
   return observer;
 };
 
+const elementFromPoint = (root, point) => {
+  if (!('elementFromPoint' in root)) {
+    root = document;
+  }
+  return root.elementFromPoint(point.x, point.y);
+};
+
 const isEventTarget = (e, target) => {
   // get root
   const root = getRootNode(target);
 
   // get element at position
-  const elementAtPosition = root.elementFromPoint(
-    e.pageX - window.pageXOffset,
-    e.pageY - window.pageYOffset
-  );
+  // if root is not actual shadow DOM and does not have elementFromPoint method, use the one on document
+  const elementAtPosition = elementFromPoint(root, {
+    x: e.pageX - window.pageXOffset,
+    y: e.pageY - window.pageYOffset
+  });
 
   // test if target is the element or if one of its children is
   return elementAtPosition === target || target.contains(elementAtPosition);
@@ -6976,10 +6981,14 @@ const loadImage = (url, cb) =>
     img.src = url;
   });
 
-const copyFile = file => renameFile(file, file.name);
+const renameFile = (file, name) => {
+  const renamedFile = file.slice(0, file.size, file.type);
+  renamedFile.lastModifiedDate = file.lastModifiedDate;
+  renamedFile.name = name;
+  return renamedFile;
+};
 
-const isFile = value =>
-  value instanceof File || (value instanceof Blob && value.name);
+const copyFile = file => renameFile(file, file.name);
 
 // utilities exposed to plugins
 // already registered plugins (can't register twice)

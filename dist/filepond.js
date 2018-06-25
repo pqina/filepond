@@ -1,5 +1,5 @@
 /*
- * FilePond 1.8.0
+ * FilePond 1.8.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2445,32 +2445,6 @@
     return item;
   };
 
-  var leftPad = function leftPad(value) {
-    var padding =
-      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-    return (padding + value).slice(-padding.length);
-  };
-
-  var getDateString = function getDateString() {
-    var date =
-      arguments.length > 0 && arguments[0] !== undefined
-        ? arguments[0]
-        : new Date();
-    return (
-      date.getFullYear() +
-      '-' +
-      leftPad(date.getMonth() + 1, '00') +
-      '-' +
-      leftPad(date.getDate(), '00') +
-      '_' +
-      leftPad(date.getHours(), '00') +
-      '-' +
-      leftPad(date.getMinutes(), '00') +
-      '-' +
-      leftPad(date.getSeconds(), '00')
-    );
-  };
-
   var isBase64DataURI = function isBase64DataURI(str) {
     return /^\s*data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?(;base64)?,([a-z0-9!$&',()*+;=\-._~:@\/?%\s]*)\s*$/i.test(
       str
@@ -2529,6 +2503,32 @@
     return '';
   };
 
+  var leftPad = function leftPad(value) {
+    var padding =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+    return (padding + value).slice(-padding.length);
+  };
+
+  var getDateString$1 = function getDateString() {
+    var date =
+      arguments.length > 0 && arguments[0] !== undefined
+        ? arguments[0]
+        : new Date();
+    return (
+      date.getFullYear() +
+      '-' +
+      leftPad(date.getMonth() + 1, '00') +
+      '-' +
+      leftPad(date.getDate(), '00') +
+      '_' +
+      leftPad(date.getHours(), '00') +
+      '-' +
+      leftPad(date.getMinutes(), '00') +
+      '-' +
+      leftPad(date.getSeconds(), '00')
+    );
+  };
+
   var getFileFromBlob = function getFileFromBlob(blob, filename) {
     var type =
       arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
@@ -2541,6 +2541,11 @@
         : blob.slice(0, blob.size, blob.type);
     file.lastModifiedDate = new Date();
 
+    // if blob has name property, use as filename if no filename supplied
+    if (!isString(filename)) {
+      filename = getDateString$1();
+    }
+
     // if filename supplied but no extension and filename has extension
     if (filename && extension === null && getExtensionFromFilename(filename)) {
       file.name = filename;
@@ -2548,6 +2553,7 @@
       extension = extension || guesstimateExtension(file.type);
       file.name = filename + (extension ? '.' + extension : '');
     }
+
     return file;
   };
 
@@ -2667,13 +2673,6 @@
     return null;
   };
 
-  var renameFile = function renameFile(file, name) {
-    var renamedFile = file.slice(0, file.size, file.type);
-    renamedFile.lastModifiedDate = file.lastModifiedDate;
-    renamedFile.name = name;
-    return renamedFile;
-  };
-
   var createFileLoader = function createFileLoader(fetchFn) {
     var state = {
       source: null,
@@ -2707,10 +2706,10 @@
         api.fire('load', source);
       } else if (source instanceof Blob) {
         // Load blobs, set default name to current date
-        api.fire('load', getFileFromBlob(source, getDateString()));
+        api.fire('load', getFileFromBlob(source, source.name));
       } else if (isBase64DataURI(source)) {
         // Load base 64, set default name to current date
-        api.fire('load', getFileFromBase64DataURI(source, getDateString()));
+        api.fire('load', getFileFromBase64DataURI(source));
       } else {
         // Deal as if is external URL, let's load it!
         loadURL(source);
@@ -2744,10 +2743,7 @@
 
           // turn blob response into a file
           if (response instanceof Blob) {
-            response = getFileFromBlob(
-              response,
-              getFilenameFromURL(url) || getDateString()
-            );
+            response = getFileFromBlob(response, getFilenameFromURL(url));
           }
 
           api.fire('load', response instanceof Blob ? response : response.body);
@@ -3010,7 +3006,7 @@
         var filename =
           getFilenameFromHeaders(headers) ||
           getFilenameFromURL(url) ||
-          getDateString();
+          getDateString$1();
 
         // create response
         load(
@@ -3477,7 +3473,7 @@ function signature:
 
     // is blob or base64, then we need to set the name
     if (source instanceof Blob || isBase64DataURI(source)) {
-      data[0] = getDateString();
+      data[0] = source.name || getDateString();
     } else if (isBase64DataURI(source)) {
       // if is base64 data uri we need to determine the average size and type
       data[1] = source.length;
@@ -3894,10 +3890,7 @@ function signature:
       var headers = xhr.getAllResponseHeaders();
 
       // get filename
-      var filename =
-        getFilenameFromHeaders(headers) ||
-        getFilenameFromURL(url) ||
-        getDateString();
+      var filename = getFilenameFromHeaders(headers) || getFilenameFromURL(url);
 
       // create response
       load(
@@ -3955,6 +3948,10 @@ function signature:
       (url.indexOf(':') > -1 || url.indexOf('//') > -1) &&
       getDomainFromURL(location.href) !== getDomainFromURL(url)
     );
+  };
+
+  var isFile = function isFile(value) {
+    return value instanceof File || (value instanceof Blob && value.name);
   };
 
   // returns item based on state
@@ -4074,11 +4071,12 @@ function signature:
         }
 
         // filter out invalid file items, used to filter dropped directory contents
-        if (source instanceof Blob) {
-          if (state.options.ignoredFiles.includes(source.name.toLowerCase())) {
-            // fail silently
-            return;
-          }
+        if (
+          isFile(source) &&
+          state.options.ignoredFiles.includes(source.name.toLowerCase())
+        ) {
+          // fail silently
+          return;
         }
 
         // test if there's still room in the list of files
@@ -6464,15 +6462,23 @@ function signature:
     return observer;
   };
 
+  var elementFromPoint = function elementFromPoint(root, point) {
+    if (!('elementFromPoint' in root)) {
+      root = document;
+    }
+    return root.elementFromPoint(point.x, point.y);
+  };
+
   var isEventTarget = function isEventTarget(e, target) {
     // get root
     var root = getRootNode(target);
 
     // get element at position
-    var elementAtPosition = root.elementFromPoint(
-      e.pageX - window.pageXOffset,
-      e.pageY - window.pageYOffset
-    );
+    // if root is not actual shadow DOM and does not have elementFromPoint method, use the one on document
+    var elementAtPosition = elementFromPoint(root, {
+      x: e.pageX - window.pageXOffset,
+      y: e.pageY - window.pageYOffset
+    });
 
     // test if target is the element or if one of its children is
     return elementAtPosition === target || target.contains(elementAtPosition);
@@ -8209,12 +8215,15 @@ function signature:
     });
   };
 
-  var copyFile = function copyFile(file) {
-    return renameFile(file, file.name);
+  var renameFile = function renameFile(file, name) {
+    var renamedFile = file.slice(0, file.size, file.type);
+    renamedFile.lastModifiedDate = file.lastModifiedDate;
+    renamedFile.name = name;
+    return renamedFile;
   };
 
-  var isFile = function isFile(value) {
-    return value instanceof File || (value instanceof Blob && value.name);
+  var copyFile = function copyFile(file) {
+    return renameFile(file, file.name);
   };
 
   // utilities exposed to plugins
