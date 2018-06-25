@@ -1,5 +1,5 @@
 /*
- * FilePond 1.8.1
+ * FilePond 1.8.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -6850,18 +6850,27 @@ const createAppAtElement = (element, options = {}) => {
   // add additional option translators
   applyFilters('SET_ATTRIBUTE_TO_OPTION_MAP', attributeMapping);
 
-  // create final options object by extracting options from element
-  // and then overriding with options object
-  const mergedOptions = babelHelpers.extends(
-    {},
-    getAttributesAsObject(
-      element.nodeName === 'FIELDSET'
-        ? element.querySelector('input[type=file]')
-        : element,
-      attributeMapping
-    ),
-    options
+  // create final options object by setting options object and then overriding options supplied on element
+  const mergedOptions = babelHelpers.extends({}, options);
+
+  const attributeOptions = getAttributesAsObject(
+    element.nodeName === 'FIELDSET'
+      ? element.querySelector('input[type=file]')
+      : element,
+    attributeMapping
   );
+
+  // merge with options object
+  Object.keys(attributeOptions).forEach(key => {
+    if (isObject(attributeOptions[key])) {
+      if (!isObject(mergedOptions[key])) {
+        mergedOptions[key] = {};
+      }
+      Object.assign(mergedOptions[key], attributeOptions[key]);
+    } else {
+      mergedOptions[key] = attributeOptions[key];
+    }
+  });
 
   // if parent is a fieldset, get files from parent by selecting all input fields that are not file upload fields
   // these will then be automatically set to the initial files

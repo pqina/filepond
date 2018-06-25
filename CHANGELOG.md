@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.2
+
+- Fix problem where element options did not override page level options
+
+
 ## 1.8.1
 
 - Handle `Blob` with `name` property same as actual `File` object
