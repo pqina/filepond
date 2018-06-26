@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.3
+
+- Cleaning up some stray code
+
+
 ## 1.8.2
 
 - Fix problem where element options did not override page level options

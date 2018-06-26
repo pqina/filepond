@@ -1,5 +1,5 @@
 /*
- * FilePond 1.8.2
+ * FilePond 1.8.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2807,15 +2807,6 @@
     return api;
   };
 
-  var createResponse$1 = function createResponse(type, code, body, headers) {
-    return {
-      type: type,
-      code: code,
-      body: body,
-      headers: headers
-    };
-  };
-
   var sendRequest = function sendRequest(data, url, options) {
     var api = {
       onheaders: function onheaders() {},
@@ -2954,6 +2945,15 @@
     return api;
   };
 
+  var createResponse$1 = function createResponse(type, code, body, headers) {
+    return {
+      type: type,
+      code: code,
+      body: body,
+      headers: headers
+    };
+  };
+
   var createTimeoutResponse = function createTimeoutResponse(cb) {
     return function(xhr) {
       cb(createResponse('error', 0, 'Timeout', xhr.getAllResponseHeaders()));
@@ -3004,9 +3004,7 @@
 
         // get filename
         var filename =
-          getFilenameFromHeaders(headers) ||
-          getFilenameFromURL(url) ||
-          getDateString$1();
+          getFilenameFromHeaders(headers) || getFilenameFromURL(url);
 
         // create response
         load(

@@ -1,5 +1,5 @@
 /*
- * FilePond 1.8.2
+ * FilePond 1.8.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2218,13 +2218,6 @@ const createFileLoader = fetchFn => {
   return api;
 };
 
-const createResponse$1 = (type, code, body, headers) => ({
-  type,
-  code,
-  body,
-  headers
-});
-
 const sendRequest = (data, url, options) => {
   const api = {
     onheaders: () => {},
@@ -2360,6 +2353,13 @@ const sendRequest = (data, url, options) => {
   return api;
 };
 
+const createResponse$1 = (type, code, body, headers) => ({
+  type,
+  code,
+  body,
+  headers
+});
+
 const createTimeoutResponse = cb => xhr => {
   cb(createResponse('error', 0, 'Timeout', xhr.getAllResponseHeaders()));
 };
@@ -2396,9 +2396,7 @@ const createFetchFunction = (apiUrl = '', action) => {
 
       // get filename
       const filename =
-        getFilenameFromHeaders(headers) ||
-        getFilenameFromURL(url) ||
-        getDateString$1();
+        getFilenameFromHeaders(headers) || getFilenameFromURL(url);
 
       // create response
       load(
