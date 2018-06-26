@@ -30,6 +30,7 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink)**
 *   [File rename](https://github.com/pqina/filepond-plugin-file-rename)
 *   [File size validation](https://github.com/pqina/filepond-plugin-file-validate-size)
 *   [File type validation](https://github.com/pqina/filepond-plugin-file-validate-type)
+*   [File metadata](https://github.com/pqina/filepond-plugin-file-metadata)
 *   [Image size validation](https://github.com/pqina/filepond-plugin-image-validate-size)
 *   [Image preview](https://github.com/pqina/filepond-plugin-image-preview)
 *   [Image crop](https://github.com/pqina/filepond-plugin-image-crop)
