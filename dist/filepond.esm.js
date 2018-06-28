@@ -1,5 +1,5 @@
 /*
- * FilePond 1.8.4
+ * FilePond 1.8.5
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -6791,10 +6791,10 @@ const mapObject = (object, propertyMap) => {
 const getAttributesAsObject = (node, attributeMapping = {}) => {
   // turn attributes into object
   const output = [...node.attributes].reduce((obj, attribute) => {
-    obj[attributeNameToPropertyName(attribute.name)] = attr(
-      node,
-      attribute.name
-    );
+    const value = attr(node, attribute.name);
+
+    obj[attributeNameToPropertyName(attribute.name)] =
+      value === attribute.name ? true : value;
     return obj;
   }, {});
 

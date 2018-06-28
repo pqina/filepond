@@ -1,5 +1,5 @@
 /*
- * FilePond 1.8.4
+ * FilePond 1.8.5
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -8006,10 +8006,10 @@ function signature:
     var output = []
       .concat(toConsumableArray(node.attributes))
       .reduce(function(obj, attribute) {
-        obj[attributeNameToPropertyName(attribute.name)] = attr(
-          node,
-          attribute.name
-        );
+        var value = attr(node, attribute.name);
+
+        obj[attributeNameToPropertyName(attribute.name)] =
+          value === attribute.name ? true : value;
         return obj;
       }, {});
 

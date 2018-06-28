@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.8.5
+
+- Fix casting of input attributes without value to correct boolean
+
+
 ## 1.8.4
 
 - Fix problem where response timeout would throw an error
