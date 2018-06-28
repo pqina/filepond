@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.8.4
+
+- Fix problem where response timeout would throw an error
+- Improve handling of returned value by processing onload function
+
+
 ## 1.8.3
 
 - Cleaning up some stray code

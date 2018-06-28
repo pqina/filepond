@@ -1,5 +1,5 @@
 /*
- * FilePond 1.8.3
+ * FilePond 1.8.4
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2945,7 +2945,7 @@
     return api;
   };
 
-  var createResponse$1 = function createResponse(type, code, body, headers) {
+  var createResponse = function createResponse(type, code, body, headers) {
     return {
       type: type,
       code: code,
@@ -3008,7 +3008,7 @@
 
         // create response
         load(
-          createResponse$1(
+          createResponse(
             'load',
             xhr.status,
             getFileFromBlob(onload(xhr.response), filename),
@@ -3019,7 +3019,7 @@
 
       request.onerror = function(xhr) {
         error(
-          createResponse$1(
+          createResponse(
             'error',
             xhr.status,
             onerror(xhr.response) || xhr.statusText,
@@ -3030,7 +3030,7 @@
 
       request.onheaders = function(xhr) {
         headers(
-          createResponse$1(
+          createResponse(
             'headers',
             xhr.status,
             null,
@@ -3114,7 +3114,7 @@ function signature:
       var request = sendRequest(formData, apiUrl + action.url, action);
       request.onload = function(xhr) {
         load(
-          createResponse$1(
+          createResponse(
             'load',
             xhr.status,
             onload(xhr.response),
@@ -3125,7 +3125,7 @@ function signature:
 
       request.onerror = function(xhr) {
         error(
-          createResponse$1(
+          createResponse(
             'error',
             xhr.status,
             onerror(xhr.response) || xhr.statusText,
@@ -3185,7 +3185,7 @@ function signature:
       );
       request.onload = function(xhr) {
         load(
-          createResponse$1(
+          createResponse(
             'load',
             xhr.status,
             onload(xhr.response),
@@ -3196,7 +3196,7 @@ function signature:
 
       request.onerror = function(xhr) {
         error(
-          createResponse$1(
+          createResponse(
             'error',
             xhr.status,
             onerror(xhr.response) || xhr.statusText,
@@ -3336,15 +3336,14 @@ function signature:
         function(response) {
           // we put the response in state so we can access
           // it outside of this method
-          state.response =
-            typeof response === 'string'
-              ? {
-                  type: 'load',
-                  code: 200,
-                  body: response,
-                  headers: {}
-                }
-              : response;
+          state.response = isObject(response)
+            ? response
+            : {
+                type: 'load',
+                code: 200,
+                body: '' + response,
+                headers: {}
+              };
 
           // update duration
           state.duration = Date.now() - state.timestamp;
@@ -3368,13 +3367,13 @@ function signature:
           // update others about this error
           api.fire(
             'error',
-            typeof error === 'string'
-              ? {
+            isObject(error)
+              ? error
+              : {
                   type: 'error',
                   code: 0,
-                  body: error
+                  body: '' + error
                 }
-              : error
           );
         },
 
@@ -3892,7 +3891,7 @@ function signature:
 
       // create response
       load(
-        createResponse$1(
+        createResponse(
           'load',
           xhr.status,
           getFileFromBlob(xhr.response, filename),
@@ -3903,7 +3902,7 @@ function signature:
 
     request.onerror = function(xhr) {
       error(
-        createResponse$1(
+        createResponse(
           'error',
           xhr.status,
           xhr.statusText,
@@ -3914,12 +3913,7 @@ function signature:
 
     request.onheaders = function(xhr) {
       headers(
-        createResponse$1(
-          'headers',
-          xhr.status,
-          null,
-          xhr.getAllResponseHeaders()
-        )
+        createResponse('headers', xhr.status, null, xhr.getAllResponseHeaders())
       );
     };
 
@@ -3971,7 +3965,7 @@ function signature:
       var item = getItemByQuery(state.items, query);
       if (!item) {
         failure({
-          error: createResponse$1('error', 0, 'Item not found'),
+          error: createResponse('error', 0, 'Item not found'),
           file: null
         });
         return;
@@ -4062,7 +4056,7 @@ function signature:
         // if no source supplied
         if (isEmpty(source)) {
           failure({
-            error: createResponse$1('error', 0, 'No source'),
+            error: createResponse('error', 0, 'No source'),
             file: null
           });
           return;
@@ -4085,7 +4079,7 @@ function signature:
             state.options.allowMultiple ||
             (!state.options.allowMultiple && !state.options.allowReplace)
           ) {
-            var error = createResponse$1('warning', 0, 'Max files');
+            var error = createResponse('warning', 0, 'Max files');
 
             dispatch('DID_THROW_MAX_FILES', {
               source: source,
