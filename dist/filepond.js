@@ -1,5 +1,5 @@
 /*
- * FilePond 1.8.5
+ * FilePond 1.8.6
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2509,7 +2509,7 @@
     return (padding + value).slice(-padding.length);
   };
 
-  var getDateString$1 = function getDateString() {
+  var getDateString = function getDateString() {
     var date =
       arguments.length > 0 && arguments[0] !== undefined
         ? arguments[0]
@@ -2543,7 +2543,7 @@
 
     // if blob has name property, use as filename if no filename supplied
     if (!isString(filename)) {
-      filename = getDateString$1();
+      filename = getDateString();
     }
 
     // if filename supplied but no extension and filename has extension

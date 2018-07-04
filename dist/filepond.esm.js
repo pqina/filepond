@@ -1,5 +1,5 @@
 /*
- * FilePond 1.8.5
+ * FilePond 1.8.6
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1161,9 +1161,8 @@ const createRoute = routes => ({ root, props, actions = [] }) => {
     );
 };
 
-const insertBefore = (newNode, referenceNode) => {
-  return referenceNode.parentNode.insertBefore(newNode, referenceNode);
-};
+const insertBefore = (newNode, referenceNode) =>
+  referenceNode.parentNode.insertBefore(newNode, referenceNode);
 
 const insertAfter = (newNode, referenceNode) => {
   return referenceNode.parentNode.insertBefore(
@@ -1979,7 +1978,7 @@ const guesstimateExtension = type => {
 const leftPad = (value, padding = '') =>
   (padding + value).slice(-padding.length);
 
-const getDateString$1 = (date = new Date()) =>
+const getDateString = (date = new Date()) =>
   `${date.getFullYear()}-${leftPad(date.getMonth() + 1, '00')}-${leftPad(
     date.getDate(),
     '00'
@@ -1997,7 +1996,7 @@ const getFileFromBlob = (blob, filename, type = null, extension = null) => {
 
   // if blob has name property, use as filename if no filename supplied
   if (!isString(filename)) {
-    filename = getDateString$1();
+    filename = getDateString();
   }
 
   // if filename supplied but no extension and filename has extension
