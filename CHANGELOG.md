@@ -1,5 +1,20 @@
 # Changelog
 
+## 1.8.8
+
+- Add `metadata` handling to `addFile` method.
+
+
+## 1.8.7
+
+- Fix problem where setting `allowRevert` to `false` would hide the remove button.
+
+
+## 1.8.6
+
+- Fix problem where adding dataURIs would throw an error
+
+
 ## 1.8.5
 
 - Fix casting of input attributes without value to correct boolean

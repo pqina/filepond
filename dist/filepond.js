@@ -1,5 +1,5 @@
 /*
- * FilePond 1.8.7
+ * FilePond 1.8.8
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -7633,7 +7633,8 @@ function signature:
           source: source,
           index: options.index,
           success: resolve,
-          failure: reject
+          failure: reject,
+          options: options
         });
       });
     };
