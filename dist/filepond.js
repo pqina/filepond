@@ -1,5 +1,5 @@
 /*
- * FilePond 1.8.6
+ * FilePond 1.8.7
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -5118,15 +5118,18 @@ function signature:
     // allow reverting upload
     var allowRevert = root.query('GET_ALLOW_REVERT');
 
+    // is async set up
+    var isAsync = root.query('IS_ASYNC');
+
     // enabled buttons array
-    var enabledButtons = root.query('IS_ASYNC')
+    var enabledButtons = isAsync
       ? ButtonKeys.concat()
       : ButtonKeys.filter(function(key) {
           return !/Process/.test(key);
         });
 
     // remove last button (revert) if not allowed
-    if (!allowRevert) {
+    if (isAsync && !allowRevert) {
       enabledButtons.splice(-1, 1);
       var map = StyleMap['DID_COMPLETE_ITEM_PROCESSING'];
       map.info.translateX = calculateFileHorizontalCenterOffset;
@@ -8203,7 +8206,7 @@ function signature:
     };
   };
 
-  var loadImage = function loadImage(url, cb) {
+  var loadImage = function loadImage(url) {
     return new Promise(function(resolve, reject) {
       var img = new Image();
       img.onload = function() {

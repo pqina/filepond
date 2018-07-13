@@ -1,5 +1,5 @@
 /*
- * FilePond 1.8.6
+ * FilePond 1.8.7
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -4246,13 +4246,16 @@ const create$6 = ({ root, props }) => {
   // allow reverting upload
   const allowRevert = root.query('GET_ALLOW_REVERT');
 
+  // is async set up
+  const isAsync = root.query('IS_ASYNC');
+
   // enabled buttons array
-  const enabledButtons = root.query('IS_ASYNC')
+  const enabledButtons = isAsync
     ? ButtonKeys.concat()
     : ButtonKeys.filter(key => !/Process/.test(key));
 
   // remove last button (revert) if not allowed
-  if (!allowRevert) {
+  if (isAsync && !allowRevert) {
     enabledButtons.splice(-1, 1);
     const map = StyleMap['DID_COMPLETE_ITEM_PROCESSING'];
     map.info.translateX = calculateFileHorizontalCenterOffset;
@@ -6969,7 +6972,7 @@ const createWorker = fn => {
   };
 };
 
-const loadImage = (url, cb) =>
+const loadImage = url =>
   new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
