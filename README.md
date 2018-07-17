@@ -22,9 +22,13 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink)**
 *   **Image optimization**, automatic image resizing, **cropping**, and **fixes EXIF orientation**.
 *   **Responsive**, automatically scales to available space, is functional on both **mobile and desktop devices**.
 
-FilePond is compatible with a wide range of browsers, the oldest explicitely supported browser is IE11, for best cross browser support add [FilePond Polyfill](https://github.com/pqina/filepond-polyfill) to your project.
-
 [Learn more about FilePond](https://pqina.nl/filepond)
+
+
+### Browser Compatibility
+
+FilePond is compatible with a wide range of desktop and mobile browsers, the oldest explicitely supported browser is IE11, for best cross browser support add [FilePond Polyfill](https://github.com/pqina/filepond-polyfill) to your project.
+
 
 ### Plugins
 
