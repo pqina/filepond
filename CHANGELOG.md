@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.0
+
+- Automatically replace undo button counterclockwise arrow icon with remove button icon when `instantUpload` is set to `true`.
+
+
 ## 1.8.8
 
 - Add `metadata` handling to `addFile` method.

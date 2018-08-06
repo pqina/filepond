@@ -1,5 +1,5 @@
 /*
- * FilePond 1.8.8
+ * FilePond 2.0.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -4246,6 +4246,9 @@ const create$6 = ({ root, props }) => {
   // allow reverting upload
   const allowRevert = root.query('GET_ALLOW_REVERT');
 
+  // is instant uploading, need this to determine the icon of the undo button
+  const instantUpload = root.query('GET_INSTANT_UPLOAD');
+
   // is async set up
   const isAsync = root.query('IS_ASYNC');
 
@@ -4262,6 +4265,12 @@ const create$6 = ({ root, props }) => {
     map.info.translateY = calculateFileVerticalCenterOffset;
     map.status.translateY = calculateFileVerticalCenterOffset;
     map.processingCompleteIndicator = { opacity: 1, scaleX: 1, scaleY: 1 };
+  }
+
+  // update icon and label for revert button when instant uploading
+  if (instantUpload && allowRevert) {
+    Buttons['RevertItemProcessing'].label = 'GET_LABEL_BUTTON_REMOVE_ITEM';
+    Buttons['RevertItemProcessing'].icon = 'GET_ICON_REMOVE';
   }
 
   // create the button views
