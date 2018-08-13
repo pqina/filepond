@@ -1,5 +1,5 @@
 /*
- * FilePond 2.0.0
+ * FilePond 2.0.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -7038,7 +7038,8 @@ const createAppPlugin = plugin => {
       loadImage,
       copyFile,
       renameFile,
-      applyFilterChain
+      applyFilterChain,
+      createBlob
     }
   });
 
