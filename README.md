@@ -112,6 +112,16 @@ Or get it from a CDN:
 
 [Getting started with FilePond](https://pqina.nl/filepond/docs/patterns/getting-started/)
 
+## Publications
+
+*   [Smooth file uploading with React and FilePond](https://itnext.io/uploading-files-with-react-and-filepond-f8a798308557)
+*   [5 interesting technical challenges I faced while building FilePond](https://itnext.io/filepond-frontend-trickery-a3073c934c77)
+*   [Image uploads with Laravel and FilePond](https://devdojo.com/episode/image-uploads-with-laravel-and-filepond)
+*   [Integrating FilePond with Ember](https://alexdiliberto.com/ember-filepond/latest/)
+*   [FilePond launch day post-mortem](https://pqina.nl/blog/filepond-launch-day-post-mortem)
+*   [FilePond on ProductHunt](https://www.producthunt.com/posts/filepond-js)
+
+
 ## License
 
 **Please don't remove or change the disclaimers in the source files**
