@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.1
+
+- Fix problem where the drop indicator would render at the wrong location.
+- Fix problem where calling `removeFile` directly after `processFile` was resolved would throw an error.
+
+
 ## 2.1.0
 
 - Labels can now be set as functions, these functions will receive context information, this is useful to customize both he load error and processing error labels based on server response.

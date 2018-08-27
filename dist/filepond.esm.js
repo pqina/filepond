@@ -1,5 +1,5 @@
 /*
- * FilePond 2.1.0
+ * FilePond 2.1.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1577,6 +1577,10 @@ const createItemAPI = item => {
   const api = {};
   copyObjectPropertiesToObject(item, api, PRIVATE_METHODS);
   return api;
+};
+
+const nextTick = fn => {
+  setTimeout(fn, 16);
 };
 
 const getNonNumeric = str => /[^0-9]+/.exec(str);
@@ -5325,14 +5329,12 @@ const getLinksFromTransferMetaData = dataTransfer => {
 
 const dragNDropObservers = [];
 
-const eventPosition = e => {
-  return {
-    pageLeft: e.pageX,
-    pageTop: e.pageY,
-    scopeLeft: e.layerX || e.offsetX,
-    scopeTop: e.layerY || e.offsetY
-  };
-};
+const eventPosition = e => ({
+  pageLeft: e.pageX,
+  pageTop: e.pageY,
+  scopeLeft: e.offsetX || e.layerX,
+  scopeTop: e.offsetY || e.layerY
+});
 
 const createDragNDropClient = (element, scopeToObserve, filterElement) => {
   const observer = getDragNDropObserver(scopeToObserve);
@@ -6540,8 +6542,20 @@ const createApp$1 = (initialOptions = {}) => {
     new Promise((resolve, reject) => {
       store.dispatch('PROCESS_ITEM', {
         query,
-        success: resolve,
-        failure: reject
+        // the nextTick call pushes the resolve forwards,
+        // this allows other processes to finish up so when a dev
+        // immidiately calls removeFile after it resolves all goes well
+        // TODO: improve as this is kinda hacky
+        success: item => {
+          nextTick(() => {
+            resolve(item);
+          });
+        },
+        failure: error => {
+          nextTick(() => {
+            reject(error);
+          });
+        }
       });
     });
 

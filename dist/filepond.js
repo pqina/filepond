@@ -1,5 +1,5 @@
 /*
- * FilePond 2.1.0
+ * FilePond 2.1.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2051,6 +2051,10 @@
     var api = {};
     copyObjectPropertiesToObject(item, api, PRIVATE_METHODS);
     return api;
+  };
+
+  var nextTick = function nextTick(fn) {
+    setTimeout(fn, 16);
   };
 
   var getNonNumeric = function getNonNumeric(str) {
@@ -6390,8 +6394,8 @@ function signature:
     return {
       pageLeft: e.pageX,
       pageTop: e.pageY,
-      scopeLeft: e.layerX || e.offsetX,
-      scopeTop: e.layerY || e.offsetY
+      scopeLeft: e.offsetX || e.layerX,
+      scopeTop: e.offsetY || e.layerY
     };
   };
 
@@ -7721,8 +7725,20 @@ function signature:
       return new Promise(function(resolve, reject) {
         store.dispatch('PROCESS_ITEM', {
           query: query,
-          success: resolve,
-          failure: reject
+          // the nextTick call pushes the resolve forwards,
+          // this allows other processes to finish up so when a dev
+          // immidiately calls removeFile after it resolves all goes well
+          // TODO: improve as this is kinda hacky
+          success: function success(item) {
+            nextTick(function() {
+              resolve(item);
+            });
+          },
+          failure: function failure(error) {
+            nextTick(function() {
+              reject(error);
+            });
+          }
         });
       });
     };
