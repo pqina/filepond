@@ -1232,6 +1232,8 @@ const toBytes = value => {
   return toInt(naturalFileSize);
 };
 
+const isFunction = value => typeof value === 'function';
+
 const toFunctionReference = string => {
   let ref = self;
   let levels = string.split('.');
@@ -1368,7 +1370,7 @@ const conversionTable = {
   int: value => (getType(value) === 'bytes' ? toBytes(value) : toInt(value)),
   float: toFloat,
   bytes: toBytes,
-  string: toString,
+  string: value => (isFunction(value) ? value : toString(value)),
   serverapi: toServerAPI,
   object: value => {
     try {
@@ -1411,9 +1413,8 @@ const getValueByType = (newValue, defaultValue, valueType) => {
   return newValue;
 };
 
-const createOption = (option, defaultValue, valueType) => {
+const createOption = (defaultValue, valueType) => {
   let currentValue = defaultValue;
-
   return {
     get: () => currentValue,
     set: newValue => {
@@ -1426,7 +1427,7 @@ const createOptions = options => {
   const obj = {};
   forin(options, prop => {
     const optionDefinition = options[prop];
-    obj[prop] = createOption(prop, optionDefinition[0], optionDefinition[1]);
+    obj[prop] = createOption(optionDefinition[0], optionDefinition[1]);
   });
   return createObject(obj);
 };
@@ -1827,8 +1828,6 @@ const defaultOptions = {
   // custom initial files array
   files: [[], Type.ARRAY]
 };
-
-const isFunction = value => typeof value === 'function';
 
 const getItemByQuery = (items, query) => {
   // just return first index
@@ -3217,6 +3216,9 @@ const isExternalURL = url =>
 const isFile = value =>
   value instanceof File || (value instanceof Blob && value.name);
 
+const dynamicLabel = label => (...params) =>
+  isFunction(label) ? label(...params) : label;
+
 // returns item based on state
 const getItemByQueryFromState = (state, itemHandler) => ({
   query,
@@ -3383,13 +3385,15 @@ const actions = (dispatch, query, state) => ({
     });
 
     item.on('load-request-error', error => {
+      const mainStatus = dynamicLabel(state.options.labelFileLoadError)(error);
+
       // is client error, no way to recover
       if (error.code >= 400 && error.code < 500) {
         dispatch('DID_THROW_ITEM_INVALID', {
           id,
           error,
           status: {
-            main: state.options.labelFileLoadError,
+            main: mainStatus,
             sub: `${error.code} (${error.body})`
           }
         });
@@ -3404,7 +3408,7 @@ const actions = (dispatch, query, state) => ({
         id,
         error,
         status: {
-          main: state.options.labelFileLoadError,
+          main: mainStatus,
           sub: state.options.labelTapToRetry
         }
       });
@@ -3485,7 +3489,7 @@ const actions = (dispatch, query, state) => ({
         id,
         error,
         status: {
-          main: state.options.labelFileProcessingError,
+          main: dynamicLabel(state.options.labelFileProcessingError)(error),
           sub: state.options.labelTapToRetry
         }
       });

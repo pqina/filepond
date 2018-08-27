@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.0
+
+- Labels can now be set as functions, these functions will receive context information, this is useful to customize both he load error and processing error labels based on server response.
+
+
 ## 2.0.1
 
 - Add additional utilities to plugin API.

@@ -1637,6 +1637,10 @@
     return toInt(naturalFileSize);
   };
 
+  var isFunction = function isFunction(value) {
+    return typeof value === 'function';
+  };
+
   var toFunctionReference = function toFunctionReference(string) {
     var ref = self;
     var levels = string.split('.');
@@ -1785,7 +1789,9 @@
     },
     float: toFloat,
     bytes: toBytes,
-    string: toString,
+    string: function string(value) {
+      return isFunction(value) ? value : toString(value);
+    },
     serverapi: toServerAPI,
     object: function object(value) {
       try {
@@ -1840,9 +1846,8 @@
     return newValue;
   };
 
-  var createOption = function createOption(option, defaultValue, valueType) {
+  var createOption = function createOption(defaultValue, valueType) {
     var currentValue = defaultValue;
-
     return {
       get: function get() {
         return currentValue;
@@ -1857,7 +1862,7 @@
     var obj = {};
     forin(options, function(prop) {
       var optionDefinition = options[prop];
-      obj[prop] = createOption(prop, optionDefinition[0], optionDefinition[1]);
+      obj[prop] = createOption(optionDefinition[0], optionDefinition[1]);
     });
     return createObject(obj);
   };
@@ -2327,10 +2332,6 @@
 
     // custom initial files array
     files: [[], Type.ARRAY]
-  };
-
-  var isFunction = function isFunction(value) {
-    return typeof value === 'function';
   };
 
   var getItemByQuery = function getItemByQuery(items, query) {
@@ -3946,6 +3947,12 @@ function signature:
     return value instanceof File || (value instanceof Blob && value.name);
   };
 
+  var dynamicLabel = function dynamicLabel(label) {
+    return function() {
+      return isFunction(label) ? label.apply(undefined, arguments) : label;
+    };
+  };
+
   // returns item based on state
   var getItemByQueryFromState = function getItemByQueryFromState(
     state,
@@ -4143,13 +4150,17 @@ function signature:
         });
 
         item.on('load-request-error', function(error) {
+          var mainStatus = dynamicLabel(state.options.labelFileLoadError)(
+            error
+          );
+
           // is client error, no way to recover
           if (error.code >= 400 && error.code < 500) {
             dispatch('DID_THROW_ITEM_INVALID', {
               id: id,
               error: error,
               status: {
-                main: state.options.labelFileLoadError,
+                main: mainStatus,
                 sub: error.code + ' (' + error.body + ')'
               }
             });
@@ -4164,7 +4175,7 @@ function signature:
             id: id,
             error: error,
             status: {
-              main: state.options.labelFileLoadError,
+              main: mainStatus,
               sub: state.options.labelTapToRetry
             }
           });
@@ -4248,7 +4259,7 @@ function signature:
             id: id,
             error: error,
             status: {
-              main: state.options.labelFileProcessingError,
+              main: dynamicLabel(state.options.labelFileProcessingError)(error),
               sub: state.options.labelTapToRetry
             }
           });
