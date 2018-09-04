@@ -1,5 +1,5 @@
 /*
- * FilePond 2.1.2
+ * FilePond 2.1.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -5744,7 +5744,7 @@ function signature:
     if (!props.overflowing && props.overflow) {
       props.overflowing = true;
       root.element.dataset.state = 'overflow';
-      root.height = props.overflow - root.translateY;
+      root.height = props.overflow;
     }
   };
 
@@ -6989,10 +6989,13 @@ function signature:
       // link panel height to box bounding
       panel$$1.height = boxBounding.fixedHeight + root.rect.element.paddingTop;
 
+      // set list height
+      var listHeight = boxBounding.fixedHeight - list.rect.outer.top;
+
       // set overflow
       list.overflow =
         childrenBoundingHeight > panel$$1.height && isMultiItem
-          ? panel$$1.height
+          ? listHeight
           : null;
     } else if (boxBounding.cappedHeight) {
       // max-height
@@ -7015,10 +7018,13 @@ function signature:
         visualHeight + bottomPadding
       );
 
+      // set list height
+      var _listHeight = cappedChildrenBoundingHeight - list.rect.outer.top;
+
       // if can overflow, test if is currently overflowing
       list.overflow =
-        childrenBoundingHeight > panel$$1.height && isMultiItem
-          ? panel$$1.height
+        isMultiItem && childrenBoundingHeight > root.height
+          ? _listHeight
           : null;
     } else {
       // flexible height
