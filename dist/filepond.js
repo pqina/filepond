@@ -1,5 +1,5 @@
 /*
- * FilePond 2.1.1
+ * FilePond 2.1.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -16,163 +16,6 @@
     return value instanceof HTMLElement;
   };
 
-  var _typeof =
-    typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
-      ? function(obj) {
-          return typeof obj;
-        }
-      : function(obj) {
-          return obj &&
-            typeof Symbol === 'function' &&
-            obj.constructor === Symbol &&
-            obj !== Symbol.prototype
-            ? 'symbol'
-            : typeof obj;
-        };
-
-  var asyncGenerator = (function() {
-    function AwaitValue(value) {
-      this.value = value;
-    }
-
-    function AsyncGenerator(gen) {
-      var front, back;
-
-      function send(key, arg) {
-        return new Promise(function(resolve, reject) {
-          var request = {
-            key: key,
-            arg: arg,
-            resolve: resolve,
-            reject: reject,
-            next: null
-          };
-
-          if (back) {
-            back = back.next = request;
-          } else {
-            front = back = request;
-            resume(key, arg);
-          }
-        });
-      }
-
-      function resume(key, arg) {
-        try {
-          var result = gen[key](arg);
-          var value = result.value;
-
-          if (value instanceof AwaitValue) {
-            Promise.resolve(value.value).then(
-              function(arg) {
-                resume('next', arg);
-              },
-              function(arg) {
-                resume('throw', arg);
-              }
-            );
-          } else {
-            settle(result.done ? 'return' : 'normal', result.value);
-          }
-        } catch (err) {
-          settle('throw', err);
-        }
-      }
-
-      function settle(type, value) {
-        switch (type) {
-          case 'return':
-            front.resolve({
-              value: value,
-              done: true
-            });
-            break;
-
-          case 'throw':
-            front.reject(value);
-            break;
-
-          default:
-            front.resolve({
-              value: value,
-              done: false
-            });
-            break;
-        }
-
-        front = front.next;
-
-        if (front) {
-          resume(front.key, front.arg);
-        } else {
-          back = null;
-        }
-      }
-
-      this._invoke = send;
-
-      if (typeof gen.return !== 'function') {
-        this.return = undefined;
-      }
-    }
-
-    if (typeof Symbol === 'function' && Symbol.asyncIterator) {
-      AsyncGenerator.prototype[Symbol.asyncIterator] = function() {
-        return this;
-      };
-    }
-
-    AsyncGenerator.prototype.next = function(arg) {
-      return this._invoke('next', arg);
-    };
-
-    AsyncGenerator.prototype.throw = function(arg) {
-      return this._invoke('throw', arg);
-    };
-
-    AsyncGenerator.prototype.return = function(arg) {
-      return this._invoke('return', arg);
-    };
-
-    return {
-      wrap: function(fn) {
-        return function() {
-          return new AsyncGenerator(fn.apply(this, arguments));
-        };
-      },
-      await: function(value) {
-        return new AwaitValue(value);
-      }
-    };
-  })();
-
-  var _extends =
-    Object.assign ||
-    function(target) {
-      for (var i = 1; i < arguments.length; i++) {
-        var source = arguments[i];
-
-        for (var key in source) {
-          if (Object.prototype.hasOwnProperty.call(source, key)) {
-            target[key] = source[key];
-          }
-        }
-      }
-
-      return target;
-    };
-
-  var toConsumableArray = function(arr) {
-    if (Array.isArray(arr)) {
-      for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++)
-        arr2[i] = arr[i];
-
-      return arr2;
-    } else {
-      return Array.from(arr);
-    }
-  };
-
   var createStore = function createStore(initialState) {
     var queries =
       arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
@@ -180,7 +23,7 @@
       arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
 
     // internal state
-    var state = _extends({}, initialState);
+    var state = Object.assign({}, initialState);
 
     // contains all actions for next frame, is clear when actions are requested
     var actionQueue = [];
@@ -188,7 +31,7 @@
 
     // returns a duplicate of the current state
     var getState = function getState() {
-      return _extends({}, state);
+      return Object.assign({}, state);
     };
 
     // returns a duplicate of the actions array and clears the actions array
@@ -270,12 +113,12 @@
 
     var queryHandles = {};
     queries.forEach(function(query) {
-      queryHandles = _extends({}, query(state), queryHandles);
+      queryHandles = Object.assign({}, query(state), queryHandles);
     });
 
     var actionHandlers = {};
     actions.forEach(function(action) {
-      actionHandlers = _extends(
+      actionHandlers = Object.assign(
         {},
         action(dispatch, query, state),
         actionHandlers
@@ -285,12 +128,12 @@
     return api;
   };
 
-  var defineProperty$1 = function defineProperty$$1(obj, property, definition) {
+  var defineProperty = function defineProperty(obj, property, definition) {
     if (typeof definition === 'function') {
       obj[property] = definition;
       return;
     }
-    Object.defineProperty(obj, property, _extends({}, definition));
+    Object.defineProperty(obj, property, Object.assign({}, definition));
   };
 
   var forin = function forin(obj, cb) {
@@ -306,7 +149,7 @@
   var createObject = function createObject(definition) {
     var obj = {};
     forin(definition, function(property) {
-      defineProperty$1(obj, property, definition[property]);
+      defineProperty(obj, property, definition[property]);
     });
     return obj;
   };
@@ -319,6 +162,31 @@
       return node.getAttribute(name) || node.hasAttribute(name);
     }
     node.setAttribute(name, value);
+  };
+
+  var _typeof =
+    typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
+      ? function(obj) {
+          return typeof obj;
+        }
+      : function(obj) {
+          return obj &&
+            typeof Symbol === 'function' &&
+            obj.constructor === Symbol &&
+            obj !== Symbol.prototype
+            ? 'symbol'
+            : typeof obj;
+        };
+
+  var toConsumableArray = function(arr) {
+    if (Array.isArray(arr)) {
+      for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++)
+        arr2[i] = arr[i];
+
+      return arr2;
+    } else {
+      return Array.from(arr);
+    }
   };
 
   var ns = 'http://www.w3.org/2000/svg';
@@ -406,7 +274,7 @@
 
     var rect = {
       // the rectangle of the element itself
-      element: _extends({}, elementRect),
+      element: Object.assign({}, elementRect),
 
       // the rectangle of the element expanded to contain its children, does not include any margins
       inner: {
@@ -435,8 +303,8 @@
         return childView.rect;
       })
       .forEach(function(childViewRect) {
-        expandRect(rect.inner, _extends({}, childViewRect.inner));
-        expandRect(rect.outer, _extends({}, childViewRect.outer));
+        expandRect(rect.inner, Object.assign({}, childViewRect.inner));
+        expandRect(rect.outer, Object.assign({}, childViewRect.outer));
       });
 
     // calculate inner width and height
@@ -727,7 +595,7 @@
     var type = typeof def === 'string' ? def : def.type;
     var props =
       (typeof def === 'undefined' ? 'undefined' : _typeof(def)) === 'object'
-        ? _extends({}, def)
+        ? Object.assign({}, def)
         : {};
 
     return animator[type] ? animator[type](props) : null;
@@ -787,7 +655,7 @@
       viewExternalAPI = _ref.viewExternalAPI;
 
     // initial properties
-    var initialProps = _extends({}, viewProps);
+    var initialProps = Object.assign({}, viewProps);
 
     // list of all active animations
     var animations = [];
@@ -937,7 +805,7 @@
       view = _ref.view;
 
     // initial props
-    var initialProps = _extends({}, viewProps);
+    var initialProps = Object.assign({}, viewProps);
 
     // current props
     var currentProps = {};
@@ -980,10 +848,7 @@
         applyStyles(view.element, viewProps);
 
         // store new transforms
-        Object.assign.apply(
-          Object,
-          [currentProps].concat(toConsumableArray(viewProps))
-        );
+        Object.assign(currentProps, Object.assign({}, viewProps));
 
         // no longer busy
         return true;
@@ -1360,7 +1225,7 @@
         };
 
         // private API definition
-        var internalAPIDefinition = _extends({}, sharedAPIDefinition, {
+        var internalAPIDefinition = Object.assign({}, sharedAPIDefinition, {
           rect: {
             get: getRect
           },
@@ -1410,9 +1275,9 @@
         };
 
         // mixin API methods
-        var mixinAPIDefinition = _extends({}, sharedAPIDefinition, {
+        var mixinAPIDefinition = Object.assign({}, sharedAPIDefinition, {
           rect: {
-            get: function get$$1() {
+            get: function get() {
               return rect;
             }
           }
@@ -2157,7 +2022,7 @@
   };
 
   var getOptions$1 = function getOptions() {
-    return _extends({}, defaultOptions);
+    return Object.assign({}, defaultOptions);
   };
 
   var setOptions$1 = function setOptions(opts) {
@@ -2800,7 +2665,7 @@
       );
     };
 
-    var api = _extends({}, on(), {
+    var api = Object.assign({}, on(), {
       setSource: function setSource(source) {
         return (state.source = source);
       },
@@ -2833,7 +2698,7 @@
     var headersReceived = false;
 
     // set default options
-    options = _extends(
+    options = Object.assign(
       {
         method: 'POST',
         headers: {},
@@ -2998,7 +2863,7 @@
       var request = sendRequest(
         url,
         apiUrl + action.url,
-        _extends({}, action, {
+        Object.assign({}, action, {
           responseType: 'blob'
         })
       );
@@ -3444,7 +3309,7 @@ function signature:
       return Math.min(state.duration, state.perceivedDuration);
     };
 
-    var api = _extends({}, on(), {
+    var api = Object.assign({}, on(), {
       process: process, // start processing file
       abort: abort, // abort active process request
       getProgress: getProgress,
@@ -3709,7 +3574,7 @@ function signature:
 
       // when successfully transformed
       var success = function success(file) {
-        processor.process(file, _extends({}, metadata));
+        processor.process(file, Object.assign({}, metadata));
       };
 
       // something went wrong during transform phase
@@ -3768,35 +3633,35 @@ function signature:
 
     // exposed methods
 
-    var api = _extends(
+    var api = Object.assign(
       {
         id: {
-          get: function get$$1() {
+          get: function get() {
             return id;
           }
         },
         origin: {
-          get: function get$$1() {
+          get: function get() {
             return origin;
           }
         },
         serverId: {
-          get: function get$$1() {
+          get: function get() {
             return state.serverFileReference;
           }
         },
         status: {
-          get: function get$$1() {
+          get: function get() {
             return state.status;
           }
         },
         filename: {
-          get: function get$$1() {
+          get: function get() {
             return state.file.name;
           }
         },
         filenameWithoutExtension: {
-          get: function get$$1() {
+          get: function get() {
             return getFilenameWithoutExtension(state.file.name);
           }
         },
@@ -3806,13 +3671,13 @@ function signature:
         file: { get: getFile },
 
         source: {
-          get: function get$$1() {
+          get: function get() {
             return state.source;
           }
         },
 
         getMetadata: function getMetadata(name) {
-          return name ? metadata[name] : _extends({}, metadata);
+          return name ? metadata[name] : Object.assign({}, metadata);
         },
         setMetadata: function setMetadata(name, value) {
           return (metadata[name] = value);
@@ -4040,7 +3905,7 @@ function signature:
           // not in list, add
           dispatch(
             'ADD_ITEM',
-            _extends({}, file, {
+            Object.assign({}, file, {
               interactionMethod: InteractionMethod.NONE,
               index: index
             })
@@ -4186,7 +4051,10 @@ function signature:
         });
 
         item.on('load-file-error', function(error) {
-          dispatch('DID_THROW_ITEM_INVALID', _extends({}, error, { id: id }));
+          dispatch(
+            'DID_THROW_ITEM_INVALID',
+            Object.assign({}, error, { id: id })
+          );
         });
 
         item.on('load-abort', function() {
@@ -4830,7 +4698,7 @@ function signature:
       DID_THROW_ITEM_INVALID: updateFileSizeOnError
     }),
     didCreateView: function didCreateView(root) {
-      applyFilters('CREATE_VIEW', _extends({}, root, { view: root }));
+      applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
     },
     create: create$9,
     mixins: {
@@ -4946,7 +4814,7 @@ function signature:
       DID_THROW_ITEM_PROCESSING_ERROR: error
     }),
     didCreateView: function didCreateView(root) {
-      applyFilters('CREATE_VIEW', _extends({}, root, { view: root }));
+      applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
     },
     create: create$10,
     mixins: {
@@ -5316,7 +5184,7 @@ function signature:
     create: create$6,
     write: write$4,
     didCreateView: function didCreateView(root) {
-      applyFilters('CREATE_VIEW', _extends({}, root, { view: root }));
+      applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
     },
     name: 'file'
   });
@@ -5390,7 +5258,7 @@ function signature:
       DID_REVERT_ITEM_PROCESSING: didRevertItemProcessing
     }),
     didCreateView: function didCreateView(root) {
-      applyFilters('CREATE_VIEW', _extends({}, root, { view: root }));
+      applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
     },
     tag: 'fieldset',
     name: 'file-wrapper'
@@ -5637,7 +5505,7 @@ function signature:
         item,
 
         // props
-        _extends(
+        Object.assign(
           {
             id: id
           },
@@ -6990,7 +6858,10 @@ function signature:
 
     // Field label
     root.ref.label = root.appendChildView(
-      root.createChildView(dropLabel, _extends({}, props, { translateY: null }))
+      root.createChildView(
+        dropLabel,
+        Object.assign({}, props, { translateY: null })
+      )
     );
 
     // List of items
@@ -7005,7 +6876,7 @@ function signature:
 
     // Assistant notifies assistive tech when content changes
     root.ref.assistant = root.appendChildView(
-      root.createChildView(assistant, _extends({}, props))
+      root.createChildView(assistant, Object.assign({}, props))
     );
 
     // Measure (tests if fixed height was set)
@@ -7330,7 +7201,7 @@ function signature:
       root.ref.browser = root.appendChildView(
         root.createChildView(
           browser,
-          _extends({}, props, {
+          Object.assign({}, props, {
             onload: function onload(items) {
               forEachDelayed(items, function(source) {
                 root.dispatch('ADD_ITEM', {
@@ -7518,11 +7389,11 @@ function signature:
 
         // copy relevant props
         if (data.hasOwnProperty('error')) {
-          event.error = data.error ? _extends({}, data.error) : null;
+          event.error = data.error ? Object.assign({}, data.error) : null;
         }
 
         if (data.status) {
-          event.status = _extends({}, data.status);
+          event.status = Object.assign({}, data.status);
         }
 
         // only source is available, else add item if possible
@@ -7573,7 +7444,7 @@ function signature:
 
     var exposeEvent = function exposeEvent(event) {
       // create event object to be dispatched
-      var detail = _extends({ pond: exports }, event);
+      var detail = Object.assign({ pond: exports }, event);
       delete detail.type;
       view.element.dispatchEvent(
         new CustomEvent('FilePond:' + event.type, {
@@ -7789,7 +7660,7 @@ function signature:
       return mappedQueries.map(removeFile);
     };
 
-    var exports = _extends(
+    var exports = Object.assign(
       {},
       on(),
       readWriteApi,
@@ -7967,7 +7838,7 @@ function signature:
     });
 
     // set app options
-    var app = createApp$1(_extends({}, defaultOptions$$1, customOptions));
+    var app = createApp$1(Object.assign({}, defaultOptions$$1, customOptions));
 
     // return the plugin instance
     return app;
@@ -8101,7 +7972,7 @@ function signature:
     applyFilters('SET_ATTRIBUTE_TO_OPTION_MAP', attributeMapping);
 
     // create final options object by setting options object and then overriding options supplied on element
-    var mergedOptions = _extends({}, options);
+    var mergedOptions = Object.assign({}, options);
 
     var attributeOptions = getAttributesAsObject(
       element.nodeName === 'FIELDSET'
@@ -8373,7 +8244,7 @@ function signature:
   /**
    * Public Plugin methods
    */
-  var FileStatus = _extends({}, ItemStatus);
+  var FileStatus = Object.assign({}, ItemStatus);
 
   var OptionTypes = {};
   updateOptionTypes();

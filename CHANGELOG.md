@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.1.2
+
+- Cleaned up some stray babelHelpers.
+- Fix bug in render engine style method, should result in less unnecessary redraws.
+
+
 ## 2.1.1
 
 - Fix problem where the drop indicator would render at the wrong location.

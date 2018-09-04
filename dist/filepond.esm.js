@@ -1,5 +1,5 @@
 /*
- * FilePond 2.1.1
+ * FilePond 2.1.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -7,14 +7,14 @@ const isNode = value => value instanceof HTMLElement;
 
 const createStore = (initialState, queries = [], actions = []) => {
   // internal state
-  const state = babelHelpers.extends({}, initialState);
+  const state = Object.assign({}, initialState);
 
   // contains all actions for next frame, is clear when actions are requested
   const actionQueue = [];
   const dispatchQueue = [];
 
   // returns a duplicate of the current state
-  const getState = () => babelHelpers.extends({}, state);
+  const getState = () => Object.assign({}, state);
 
   // returns a duplicate of the actions array and clears the actions array
   const processActionQueue = () => {
@@ -77,12 +77,12 @@ const createStore = (initialState, queries = [], actions = []) => {
 
   let queryHandles = {};
   queries.forEach(query => {
-    queryHandles = babelHelpers.extends({}, query(state), queryHandles);
+    queryHandles = Object.assign({}, query(state), queryHandles);
   });
 
   let actionHandlers = {};
   actions.forEach(action => {
-    actionHandlers = babelHelpers.extends(
+    actionHandlers = Object.assign(
       {},
       action(dispatch, query, state),
       actionHandlers
@@ -97,7 +97,7 @@ const defineProperty = (obj, property, definition) => {
     obj[property] = definition;
     return;
   }
-  Object.defineProperty(obj, property, babelHelpers.extends({}, definition));
+  Object.defineProperty(obj, property, Object.assign({}, definition));
 };
 
 const forin = (obj, cb) => {
@@ -191,7 +191,7 @@ const getViewRect = (elementRect, childViews, offset, scale) => {
 
   const rect = {
     // the rectangle of the element itself
-    element: babelHelpers.extends({}, elementRect),
+    element: Object.assign({}, elementRect),
 
     // the rectangle of the element expanded to contain its children, does not include any margins
     inner: {
@@ -216,8 +216,8 @@ const getViewRect = (elementRect, childViews, offset, scale) => {
     .filter(childView => !childView.isRectIgnored())
     .map(childView => childView.rect)
     .forEach(childViewRect => {
-      expandRect(rect.inner, babelHelpers.extends({}, childViewRect.inner));
-      expandRect(rect.outer, babelHelpers.extends({}, childViewRect.outer));
+      expandRect(rect.inner, Object.assign({}, childViewRect.inner));
+      expandRect(rect.outer, Object.assign({}, childViewRect.outer));
     });
 
   // calculate inner width and height
@@ -470,7 +470,7 @@ const createAnimator = (definition, category, property) => {
       : definition[category] || definition;
 
   const type = typeof def === 'string' ? def : def.type;
-  const props = typeof def === 'object' ? babelHelpers.extends({}, def) : {};
+  const props = typeof def === 'object' ? Object.assign({}, def) : {};
 
   return animator[type] ? animator[type](props) : null;
 };
@@ -517,7 +517,7 @@ const animations = ({
   viewState
 }) => {
   // initial properties
-  const initialProps = babelHelpers.extends({}, viewProps);
+  const initialProps = Object.assign({}, viewProps);
 
   // list of all active animations
   const animations = [];
@@ -655,7 +655,7 @@ const styles = ({
   view
 }) => {
   // initial props
-  const initialProps = babelHelpers.extends({}, viewProps);
+  const initialProps = Object.assign({}, viewProps);
 
   // current props
   const currentProps = {};
@@ -696,7 +696,7 @@ const styles = ({
       applyStyles(view.element, viewProps);
 
       // store new transforms
-      Object.assign(currentProps, ...viewProps);
+      Object.assign(currentProps, Object.assign({}, viewProps));
 
       // no longer busy
       return true;
@@ -1008,33 +1008,29 @@ const createView =
     };
 
     // private API definition
-    const internalAPIDefinition = babelHelpers.extends(
-      {},
-      sharedAPIDefinition,
-      {
-        rect: {
-          get: getRect
-        },
+    const internalAPIDefinition = Object.assign({}, sharedAPIDefinition, {
+      rect: {
+        get: getRect
+      },
 
-        // access to custom children references
-        ref: {
-          get: getReference
-        },
+      // access to custom children references
+      ref: {
+        get: getReference
+      },
 
-        // dom modifiers
-        is: needle => name === needle,
-        appendChild: appendChild(element),
-        createChildView: createChildView(store),
-        appendChildView: appendChildView(element, childViews),
-        removeChildView: removeChildView(element, childViews),
-        registerWriter: writer => writers.push(writer),
-        registerReader: reader => readers.push(reader),
+      // dom modifiers
+      is: needle => name === needle,
+      appendChild: appendChild(element),
+      createChildView: createChildView(store),
+      appendChildView: appendChildView(element, childViews),
+      removeChildView: removeChildView(element, childViews),
+      registerWriter: writer => writers.push(writer),
+      registerReader: reader => readers.push(reader),
 
-        // access to data store
-        dispatch: store.dispatch,
-        query: store.query
-      }
-    );
+      // access to data store
+      dispatch: store.dispatch,
+      query: store.query
+    });
 
     // public view API methods
     const externalAPIDefinition = {
@@ -1054,7 +1050,7 @@ const createView =
     };
 
     // mixin API methods
-    const mixinAPIDefinition = babelHelpers.extends({}, sharedAPIDefinition, {
+    const mixinAPIDefinition = Object.assign({}, sharedAPIDefinition, {
       rect: {
         get: () => rect
       }
@@ -1653,7 +1649,7 @@ const addFilter = (key, cb) => filters.push({ key, cb });
 const extendDefaultOptions = additionalOptions =>
   Object.assign(defaultOptions, additionalOptions);
 
-const getOptions$1 = () => babelHelpers.extends({}, defaultOptions);
+const getOptions$1 = () => Object.assign({}, defaultOptions);
 
 const setOptions$1 = opts => {
   forin(opts, (key, value) => {
@@ -2210,7 +2206,7 @@ const createFileLoader = fetchFn => {
     );
   };
 
-  const api = babelHelpers.extends({}, on(), {
+  const api = Object.assign({}, on(), {
     setSource: source => (state.source = source),
     getProgress, // file load progress
     abort, // abort file load
@@ -2241,7 +2237,7 @@ const sendRequest = (data, url, options) => {
   let headersReceived = false;
 
   // set default options
-  options = babelHelpers.extends(
+  options = Object.assign(
     {
       method: 'POST',
       headers: {},
@@ -2387,7 +2383,7 @@ const createFetchFunction = (apiUrl = '', action) => {
     const request = sendRequest(
       url,
       apiUrl + action.url,
-      babelHelpers.extends({}, action, {
+      Object.assign({}, action, {
         responseType: 'blob'
       })
     );
@@ -2777,7 +2773,7 @@ const createFileProcessor = processFn => {
     state.progress ? Math.min(state.progress, state.perceivedProgress) : null;
   const getDuration = () => Math.min(state.duration, state.perceivedDuration);
 
-  const api = babelHelpers.extends({}, on(), {
+  const api = Object.assign({}, on(), {
     process, // start processing file
     abort, // abort active process request
     getProgress,
@@ -3024,7 +3020,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
     // when successfully transformed
     const success = file => {
-      processor.process(file, babelHelpers.extends({}, metadata));
+      processor.process(file, Object.assign({}, metadata));
     };
 
     // something went wrong during transform phase
@@ -3083,7 +3079,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
   // exposed methods
 
-  const api = babelHelpers.extends(
+  const api = Object.assign(
     {
       id: { get: () => id },
       origin: { get: () => origin },
@@ -3101,7 +3097,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       source: { get: () => state.source },
 
       getMetadata: name =>
-        name ? metadata[name] : babelHelpers.extends({}, metadata),
+        name ? metadata[name] : Object.assign({}, metadata),
       setMetadata: (name, value) => (metadata[name] = value),
 
       abortLoad,
@@ -3281,7 +3277,7 @@ const actions = (dispatch, query, state) => ({
       // not in list, add
       dispatch(
         'ADD_ITEM',
-        babelHelpers.extends({}, file, {
+        Object.assign({}, file, {
           interactionMethod: InteractionMethod.NONE,
           index
         })
@@ -3419,10 +3415,7 @@ const actions = (dispatch, query, state) => ({
     });
 
     item.on('load-file-error', error => {
-      dispatch(
-        'DID_THROW_ITEM_INVALID',
-        babelHelpers.extends({}, error, { id })
-      );
+      dispatch('DID_THROW_ITEM_INVALID', Object.assign({}, error, { id }));
     });
 
     item.on('load-abort', () => {
@@ -3988,7 +3981,7 @@ const fileInfo = createView({
     DID_THROW_ITEM_INVALID: updateFileSizeOnError
   }),
   didCreateView: root => {
-    applyFilters('CREATE_VIEW', babelHelpers.extends({}, root, { view: root }));
+    applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
   },
   create: create$9,
   mixins: {
@@ -4081,7 +4074,7 @@ const fileStatus = createView({
     DID_THROW_ITEM_PROCESSING_ERROR: error
   }),
   didCreateView: root => {
-    applyFilters('CREATE_VIEW', babelHelpers.extends({}, root, { view: root }));
+    applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
   },
   create: create$10,
   mixins: {
@@ -4402,7 +4395,7 @@ const file = createView({
   create: create$6,
   write: write$4,
   didCreateView: root => {
-    applyFilters('CREATE_VIEW', babelHelpers.extends({}, root, { view: root }));
+    applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
   },
   name: 'file'
 });
@@ -4462,7 +4455,7 @@ const fileWrapper = createView({
     DID_REVERT_ITEM_PROCESSING: didRevertItemProcessing
   }),
   didCreateView: root => {
-    applyFilters('CREATE_VIEW', babelHelpers.extends({}, root, { view: root }));
+    applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
   },
   tag: 'fieldset',
   name: 'file-wrapper'
@@ -4684,7 +4677,7 @@ const addItemView = ({ root, action }) => {
       item,
 
       // props
-      babelHelpers.extends(
+      Object.assign(
         {
           id
         },
@@ -5868,7 +5861,7 @@ const create$1 = ({ root, props }) => {
   root.ref.label = root.appendChildView(
     root.createChildView(
       dropLabel,
-      babelHelpers.extends({}, props, { translateY: null })
+      Object.assign({}, props, { translateY: null })
     )
   );
 
@@ -5884,7 +5877,7 @@ const create$1 = ({ root, props }) => {
 
   // Assistant notifies assistive tech when content changes
   root.ref.assistant = root.appendChildView(
-    root.createChildView(assistant, babelHelpers.extends({}, props))
+    root.createChildView(assistant, Object.assign({}, props))
   );
 
   // Measure (tests if fixed height was set)
@@ -6185,7 +6178,7 @@ const toggleAllowBrowse = ({ root, props, action }) => {
     root.ref.browser = root.appendChildView(
       root.createChildView(
         browser,
-        babelHelpers.extends({}, props, {
+        Object.assign({}, props, {
           onload: items => {
             forEachDelayed(items, source => {
               root.dispatch('ADD_ITEM', {
@@ -6360,11 +6353,11 @@ const createApp$1 = (initialOptions = {}) => {
 
     // copy relevant props
     if (data.hasOwnProperty('error')) {
-      event.error = data.error ? babelHelpers.extends({}, data.error) : null;
+      event.error = data.error ? Object.assign({}, data.error) : null;
     }
 
     if (data.status) {
-      event.status = babelHelpers.extends({}, data.status);
+      event.status = Object.assign({}, data.status);
     }
 
     // only source is available, else add item if possible
@@ -6414,7 +6407,7 @@ const createApp$1 = (initialOptions = {}) => {
 
   const exposeEvent = event => {
     // create event object to be dispatched
-    const detail = babelHelpers.extends({ pond: exports }, event);
+    const detail = Object.assign({ pond: exports }, event);
     delete detail.type;
     view.element.dispatchEvent(
       new CustomEvent(`FilePond:${event.type}`, {
@@ -6586,7 +6579,7 @@ const createApp$1 = (initialOptions = {}) => {
     return mappedQueries.map(removeFile);
   };
 
-  const exports = babelHelpers.extends(
+  const exports = Object.assign(
     {},
     on(),
     readWriteApi,
@@ -6752,9 +6745,7 @@ const createAppObject = (customOptions = {}) => {
   });
 
   // set app options
-  const app = createApp$1(
-    babelHelpers.extends({}, defaultOptions$$1, customOptions)
-  );
+  const app = createApp$1(Object.assign({}, defaultOptions$$1, customOptions));
 
   // return the plugin instance
   return app;
@@ -6873,7 +6864,7 @@ const createAppAtElement = (element, options = {}) => {
   applyFilters('SET_ATTRIBUTE_TO_OPTION_MAP', attributeMapping);
 
   // create final options object by setting options object and then overriding options supplied on element
-  const mergedOptions = babelHelpers.extends({}, options);
+  const mergedOptions = Object.assign({}, options);
 
   const attributeOptions = getAttributesAsObject(
     element.nodeName === 'FIELDSET'
@@ -7124,7 +7115,7 @@ const updateOptionTypes = () =>
 /**
  * Public Plugin methods
  */
-const FileStatus = babelHelpers.extends({}, ItemStatus);
+const FileStatus = Object.assign({}, ItemStatus);
 
 const OptionTypes = {};
 updateOptionTypes();
