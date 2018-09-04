@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.3
+
+- Fix problem where max-height of filepond root would not be respected by file list.
+
+
 ## 2.1.2
 
 - Cleaned up some stray babelHelpers.
