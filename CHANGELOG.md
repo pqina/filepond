@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.2.0
+
+- Fix problem where `maxFiles` was not enforced when dropping a set of files, each file was added in sequence till `maxFiles` was reached while the set as a whole should've been invalidated at once.
+
+
 ## 2.1.3
 
 - Fix problem where max-height of filepond root would not be respected by file list.

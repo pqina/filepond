@@ -1,5 +1,5 @@
 /*
- * FilePond 2.1.3
+ * FilePond 2.2.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -7101,6 +7101,32 @@ function signature:
     );
   };
 
+  var exceedsMaxFiles = function exceedsMaxFiles(root, items) {
+    var allowReplace = root.query('GET_ALLOW_REPLACE');
+    var allowMultiple = root.query('GET_ALLOW_MULTIPLE');
+    var totalItems = root.query('GET_TOTAL_ITEMS');
+    var maxItems = root.query('GET_MAX_FILES');
+
+    // total amount of items being dragged
+    var totalBrowseItems = items.length;
+
+    // if does not allow multiple items and dragging more than one item
+    if (!allowMultiple && totalBrowseItems > 1) {
+      return true;
+    }
+
+    // limit max items to one if not allowed to drop multiple items
+    maxItems = allowMultiple ? maxItems : allowReplace ? maxItems : 1;
+
+    // no more room?
+    var hasMaxItems = isInt(maxItems);
+    if (hasMaxItems && totalItems + totalBrowseItems > maxItems) {
+      return true;
+    }
+
+    return false;
+  };
+
   var toggleAllowDrop = function toggleAllowDrop(_ref3) {
     var root = _ref3.root,
       props = _ref3.props,
@@ -7110,30 +7136,13 @@ function signature:
       var hopper = createHopper(
         root.element,
         function(items) {
-          var allowReplace = root.query('GET_ALLOW_REPLACE');
-          var allowMultiple = root.query('GET_ALLOW_MULTIPLE');
-          var totalItems = root.query('GET_TOTAL_ITEMS');
-          var dropValidation = root.query('GET_DROP_VALIDATION');
-          var maxItems = root.query('GET_MAX_TOTAL_ITEMS');
-
-          // total amount of items being dragged
-          var totalDragItems = items.length;
-
-          // if does not allow multiple items and dragging more than one item
-          if (!allowMultiple && totalDragItems > 1) {
-            return false;
-          }
-
-          // limit max items to one if not allowed to drop multiple items
-          maxItems = allowMultiple ? maxItems : allowReplace ? maxItems : 1;
-
-          // no more room?
-          var hasMaxItems = isInt(maxItems);
-          if (hasMaxItems && totalItems + totalDragItems > maxItems) {
+          // these files don't fit so stop here
+          if (exceedsMaxFiles(root, items)) {
             return false;
           }
 
           // all items should be validated by all filters as valid
+          var dropValidation = root.query('GET_DROP_VALIDATION');
           return dropValidation
             ? items.every(function(item) {
                 return applyFilters('ALLOW_HOPPER_ITEM', item, {
@@ -7209,6 +7218,12 @@ function signature:
           browser,
           Object.assign({}, props, {
             onload: function onload(items) {
+              // these files don't fit so stop here
+              if (exceedsMaxFiles(root, items)) {
+                return false;
+              }
+
+              // add items!
               forEachDelayed(items, function(source) {
                 root.dispatch('ADD_ITEM', {
                   interactionMethod: InteractionMethod.BROWSE,

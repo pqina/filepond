@@ -1,5 +1,5 @@
 /*
- * FilePond 2.1.3
+ * FilePond 2.2.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -6086,35 +6086,44 @@ const calculateChildrenBoundingBoxHeight = children => {
   );
 };
 
+const exceedsMaxFiles = (root, items) => {
+  const allowReplace = root.query('GET_ALLOW_REPLACE');
+  const allowMultiple = root.query('GET_ALLOW_MULTIPLE');
+  const totalItems = root.query('GET_TOTAL_ITEMS');
+  let maxItems = root.query('GET_MAX_FILES');
+
+  // total amount of items being dragged
+  const totalBrowseItems = items.length;
+
+  // if does not allow multiple items and dragging more than one item
+  if (!allowMultiple && totalBrowseItems > 1) {
+    return true;
+  }
+
+  // limit max items to one if not allowed to drop multiple items
+  maxItems = allowMultiple ? maxItems : allowReplace ? maxItems : 1;
+
+  // no more room?
+  const hasMaxItems = isInt(maxItems);
+  if (hasMaxItems && totalItems + totalBrowseItems > maxItems) {
+    return true;
+  }
+
+  return false;
+};
+
 const toggleAllowDrop = ({ root, props, action }) => {
   if (action.value && !root.ref.hopper) {
     const hopper = createHopper(
       root.element,
       items => {
-        const allowReplace = root.query('GET_ALLOW_REPLACE');
-        const allowMultiple = root.query('GET_ALLOW_MULTIPLE');
-        const totalItems = root.query('GET_TOTAL_ITEMS');
-        const dropValidation = root.query('GET_DROP_VALIDATION');
-        let maxItems = root.query('GET_MAX_TOTAL_ITEMS');
-
-        // total amount of items being dragged
-        const totalDragItems = items.length;
-
-        // if does not allow multiple items and dragging more than one item
-        if (!allowMultiple && totalDragItems > 1) {
-          return false;
-        }
-
-        // limit max items to one if not allowed to drop multiple items
-        maxItems = allowMultiple ? maxItems : allowReplace ? maxItems : 1;
-
-        // no more room?
-        const hasMaxItems = isInt(maxItems);
-        if (hasMaxItems && totalItems + totalDragItems > maxItems) {
+        // these files don't fit so stop here
+        if (exceedsMaxFiles(root, items)) {
           return false;
         }
 
         // all items should be validated by all filters as valid
+        const dropValidation = root.query('GET_DROP_VALIDATION');
         return dropValidation
           ? items.every(item =>
               applyFilters('ALLOW_HOPPER_ITEM', item, {
@@ -6184,6 +6193,12 @@ const toggleAllowBrowse = ({ root, props, action }) => {
         browser,
         Object.assign({}, props, {
           onload: items => {
+            // these files don't fit so stop here
+            if (exceedsMaxFiles(root, items)) {
+              return false;
+            }
+
+            // add items!
             forEachDelayed(items, source => {
               root.dispatch('ADD_ITEM', {
                 interactionMethod: InteractionMethod.BROWSE,
