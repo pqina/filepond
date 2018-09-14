@@ -1,5 +1,5 @@
 /*
- * FilePond 2.2.0
+ * FilePond 2.2.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -5741,10 +5741,14 @@ function signature:
     }
 
     // if is not overflowing currently but does receive overflow value
-    if (!props.overflowing && props.overflow) {
-      props.overflowing = true;
-      root.element.dataset.state = 'overflow';
-      root.height = props.overflow;
+    // !props.overflowing &&
+    if (props.overflow) {
+      var newHeight = Math.round(props.overflow);
+      if (newHeight !== root.height) {
+        props.overflowing = true;
+        root.element.dataset.state = 'overflow';
+        root.height = newHeight;
+      }
     }
   };
 
@@ -6994,9 +6998,7 @@ function signature:
 
       // set overflow
       list.overflow =
-        childrenBoundingHeight > panel$$1.height && isMultiItem
-          ? listHeight
-          : null;
+        childrenBoundingHeight > panel$$1.height ? listHeight : null;
     } else if (boxBounding.cappedHeight) {
       // max-height
 
@@ -7010,22 +7012,27 @@ function signature:
       );
 
       // update root height
-      root.height = cappedChildrenBoundingHeight + bottomPadding;
+      root.height =
+        cappedChildrenBoundingHeight +
+        bottomPadding +
+        root.rect.element.paddingTop;
+
+      var maxHeight = cappedChildrenBoundingHeight + bottomPadding;
 
       // set visual height
       panel$$1.height = Math.min(
-        boxBounding.cappedHeight + root.rect.element.paddingTop,
+        boxBounding.cappedHeight,
         visualHeight + bottomPadding
       );
 
       // set list height
-      var _listHeight = cappedChildrenBoundingHeight - list.rect.outer.top;
+      var _listHeight =
+        cappedChildrenBoundingHeight -
+        list.rect.outer.top -
+        root.rect.element.paddingTop;
 
       // if can overflow, test if is currently overflowing
-      list.overflow =
-        isMultiItem && childrenBoundingHeight > root.height
-          ? _listHeight
-          : null;
+      list.overflow = childrenBoundingHeight > maxHeight ? _listHeight : null;
     } else {
       // flexible height
 
@@ -8108,6 +8115,7 @@ function signature:
     });
     var workerURL = URL.createObjectURL(workerBlob);
     var worker = new Worker(workerURL);
+    URL.revokeObjectURL(workerURL);
 
     return {
       transfer: function transfer(message, cb) {},
@@ -8130,7 +8138,6 @@ function signature:
       },
       terminate: function terminate() {
         worker.terminate();
-        URL.revokeObjectURL(workerURL);
       }
     };
   };

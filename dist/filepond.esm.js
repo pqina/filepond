@@ -1,5 +1,5 @@
 /*
- * FilePond 2.2.0
+ * FilePond 2.2.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -4879,10 +4879,14 @@ const write$1 = ({ root, props, actions }) => {
   }
 
   // if is not overflowing currently but does receive overflow value
-  if (!props.overflowing && props.overflow) {
-    props.overflowing = true;
-    root.element.dataset.state = 'overflow';
-    root.height = props.overflow;
+  // !props.overflowing &&
+  if (props.overflow) {
+    const newHeight = Math.round(props.overflow);
+    if (newHeight !== root.height) {
+      props.overflowing = true;
+      root.element.dataset.state = 'overflow';
+      root.height = newHeight;
+    }
   }
 };
 
@@ -5892,13 +5896,7 @@ const write = ({ root, props, actions }) => {
   route({ root, props, actions });
 
   // get quick references to various high level parts of the upload tool
-  const {
-    hopper,
-    label,
-    list,
-    panel: panel$$1,
-    browser: browser$$1
-  } = root.ref;
+  const { hopper, label, list, panel: panel$$1 } = root.ref;
 
   // bool to indicate if we're full or not
   const isMultiItem = root.query('GET_ALLOW_MULTIPLE');
@@ -5988,9 +5986,7 @@ const write = ({ root, props, actions }) => {
 
     // set overflow
     list.overflow =
-      childrenBoundingHeight > panel$$1.height && isMultiItem
-        ? listHeight
-        : null;
+      childrenBoundingHeight > panel$$1.height ? listHeight : null;
   } else if (boxBounding.cappedHeight) {
     // max-height
 
@@ -6004,20 +6000,27 @@ const write = ({ root, props, actions }) => {
     );
 
     // update root height
-    root.height = cappedChildrenBoundingHeight + bottomPadding;
+    root.height =
+      cappedChildrenBoundingHeight +
+      bottomPadding +
+      root.rect.element.paddingTop;
+
+    const maxHeight = cappedChildrenBoundingHeight + bottomPadding;
 
     // set visual height
     panel$$1.height = Math.min(
-      boxBounding.cappedHeight + root.rect.element.paddingTop,
+      boxBounding.cappedHeight,
       visualHeight + bottomPadding
     );
 
     // set list height
-    const listHeight = cappedChildrenBoundingHeight - list.rect.outer.top;
+    const listHeight =
+      cappedChildrenBoundingHeight -
+      list.rect.outer.top -
+      root.rect.element.paddingTop;
 
     // if can overflow, test if is currently overflowing
-    list.overflow =
-      isMultiItem && childrenBoundingHeight > root.height ? listHeight : null;
+    list.overflow = childrenBoundingHeight > maxHeight ? listHeight : null;
   } else {
     // flexible height
 
@@ -6078,11 +6081,11 @@ const calculateChildrenBoundingBoxHeight = children => {
     children
 
       // no use of outer and inner as that includes translations
-      .reduce((height, child) => {
-        return (
-          height + child.rect.inner.bottom + child.rect.element.marginBottom
-        );
-      }, 0)
+      .reduce(
+        (height, child) =>
+          height + child.rect.inner.bottom + child.rect.element.marginBottom,
+        0
+      )
   );
 };
 
@@ -6983,6 +6986,7 @@ const createWorker = fn => {
   });
   const workerURL = URL.createObjectURL(workerBlob);
   const worker = new Worker(workerURL);
+  URL.revokeObjectURL(workerURL);
 
   return {
     transfer: (message, cb) => {},
@@ -7005,7 +7009,6 @@ const createWorker = fn => {
     },
     terminate: () => {
       worker.terminate();
-      URL.revokeObjectURL(workerURL);
     }
   };
 };
