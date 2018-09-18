@@ -7087,10 +7087,14 @@ const state = {
 const name = 'filepond';
 
 // is in browser
-const hasNavigator = typeof navigator !== 'undefined';
+const hasNavigator =
+  typeof navigator !== 'undefined' &&
+  typeof window !== 'undefined' &&
+  typeof document !== 'undefined';
 
 // app painter, cannot be paused or stopped at the moment
 const painter =
+  hasTiming &&
   hasNavigator &&
   createPainter(createUpdater(state.apps, '_read', '_write'), 60);
 
