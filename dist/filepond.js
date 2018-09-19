@@ -8222,8 +8222,8 @@ function signature:
 
   // app painter, cannot be paused or stopped at the moment
   var painter =
-    hasTiming &&
     hasNavigator &&
+    hasTiming() &&
     createPainter(createUpdater(state.apps, '_read', '_write'), 60);
 
   // fire load event

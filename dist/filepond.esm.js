@@ -7094,8 +7094,8 @@ const hasNavigator =
 
 // app painter, cannot be paused or stopped at the moment
 const painter =
-  hasTiming &&
   hasNavigator &&
+  hasTiming() &&
   createPainter(createUpdater(state.apps, '_read', '_write'), 60);
 
 // fire load event
