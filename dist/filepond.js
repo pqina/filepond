@@ -8220,10 +8220,14 @@ function signature:
     typeof window !== 'undefined' &&
     typeof document !== 'undefined';
 
+  // performance global is available
+  var hasPerformance = 
+    typeof performance !== 'undefined';
+
   // app painter, cannot be paused or stopped at the moment
   var painter =
     hasNavigator &&
-    hasTiming() &&
+    hasPerformance &&
     createPainter(createUpdater(state.apps, '_read', '_write'), 60);
 
   // fire load event

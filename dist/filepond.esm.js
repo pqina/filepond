@@ -7092,10 +7092,13 @@ const hasNavigator =
   typeof window !== 'undefined' &&
   typeof document !== 'undefined';
 
+const hasPerformance =
+  typeof performance !== 'undefined';
+
 // app painter, cannot be paused or stopped at the moment
 const painter =
   hasNavigator &&
-  hasTiming() &&
+  hasPerformance &&
   createPainter(createUpdater(state.apps, '_read', '_write'), 60);
 
 // fire load event
