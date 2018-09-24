@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.3.0
+
+- Improve browser environment detection [#123](https://github.com/pqina/filepond/pull/123).
+- Add `beforeRemoveFile` callback to allow user confirmation before actual file removal.
+
+
 ## 2.2.1
 
 - Fix another problem where list overflow would not render correctly.

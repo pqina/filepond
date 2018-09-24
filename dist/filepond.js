@@ -1,5 +1,5 @@
 /*
- * FilePond 2.2.1
+ * FilePond 2.3.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2199,6 +2199,9 @@
     onprocessfile: [null, Type.FUNCTION],
     onremovefile: [null, Type.FUNCTION],
 
+    // hooks
+    beforeRemoveFile: [null, Type.FUNCTION],
+
     // custom initial files array
     files: [[], Type.ARRAY]
   };
@@ -4324,6 +4327,35 @@ function signature:
         dispatch('REQUEST_ITEM_PROCESSING', { query: item });
       }),
 
+      REQUEST_REMOVE_ITEM: getItemByQueryFromState(state, function(item) {
+        var handleRemove = function handleRemove(shouldRemove) {
+          if (!shouldRemove) {
+            return;
+          }
+          dispatch('REMOVE_ITEM', { query: item });
+        };
+
+        var fn = query('GET_BEFORE_REMOVE_FILE');
+        if (!fn) {
+          return handleRemove(true);
+        }
+
+        var requestRemoveResult = fn(createItemAPI(item));
+
+        if (requestRemoveResult == null) {
+          // undefined or null
+          return handleRemove(true);
+        }
+
+        if (typeof requestRemoveResult === 'boolean') {
+          return handleRemove(requestRemoveResult);
+        }
+
+        if (typeof requestRemoveResult.then === 'function') {
+          requestRemoveResult.then(handleRemove);
+        }
+      }),
+
       REMOVE_ITEM: getItemByQueryFromState(state, function(item, success) {
         // get id reference
         var id = item.id;
@@ -4844,7 +4876,7 @@ function signature:
     },
     RemoveItem: {
       label: 'GET_LABEL_BUTTON_REMOVE_ITEM',
-      action: 'REMOVE_ITEM',
+      action: 'REQUEST_REMOVE_ITEM',
       icon: 'GET_ICON_REMOVE',
       className: 'filepond--action-remove-item'
     },
@@ -8221,16 +8253,16 @@ function signature:
   // plugin name
   var name = 'filepond';
 
-  // is in browser
-  var hasNavigator = typeof navigator !== 'undefined';
+  // is in browser (based on https://stackoverflow.com/a/31090240/1774081)
+  var isBrowser = new Function(
+    'try {return this===window}catch(e){return false}'
+  );
 
-  // app painter, cannot be paused or stopped at the moment
-  var painter =
-    hasNavigator &&
+  // start painter and fire load event
+  if (isBrowser) {
+    // app painter, cannot be paused or stopped at the moment
     createPainter(createUpdater(state.apps, '_read', '_write'), 60);
 
-  // fire load event
-  if (hasNavigator) {
     // fire loaded event so we know when FilePond is available
     var dispatch = function dispatch() {
       // let others know we have area ready
@@ -8358,7 +8390,7 @@ function signature:
   }; // iOS 8.x
 
   var supported = function supported() {
-    if (!hasNavigator) {
+    if (!isBrowser) {
       return false;
     }
     return !(
