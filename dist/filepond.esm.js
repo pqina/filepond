@@ -1,5 +1,5 @@
 /*
- * FilePond 2.3.0
+ * FilePond 3.0.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -160,8 +160,6 @@ const appendChild = parent => (child, index) => {
 };
 
 const appendChildView = (parent, childViews) => (view, index) => {
-  // todo: expand with location and target option (child, 'before', target)
-
   if (typeof index !== 'undefined') {
     childViews.splice(index, 0, view);
   } else {
@@ -335,6 +333,12 @@ const spring =
           position = value;
         }
 
+        // next target value will not be animated to
+        if (target === null) {
+          target = value;
+          position = value;
+        }
+
         // let start moving to target
         target = value;
 
@@ -405,10 +409,10 @@ const tween =
           api.onupdate((t >= 0 ? easing(reverse ? 1 - p : p) : 0) * target);
         } else {
           t = 1;
-          resting = true;
           p = reverse ? 0 : 1;
           api.onupdate(p * target);
           api.oncomplete(p * target);
+          resting = true;
         }
       };
 
@@ -501,9 +505,7 @@ const addGetSet = (keys, obj, props, overwrite = false) => {
   });
 };
 
-const isEmpty = value => value == null;
-
-const isDefined = value => !isEmpty(value);
+const isDefined = value => value != null;
 
 // add to state,
 // add getters and setters to internal and external api (if not set)
@@ -563,10 +565,10 @@ const animations = ({
     write: ts => {
       let resting = true;
       animations.forEach(animation => {
-        animation.interpolate(ts);
         if (!animation.resting) {
           resting = false;
         }
+        animation.interpolate(ts);
       });
       return resting;
     },
@@ -644,7 +646,9 @@ const defaults = {
   translateY: 0,
   rotateX: 0,
   rotateY: 0,
-  rotateZ: 0
+  rotateZ: 0,
+  originX: 0,
+  originY: 0
 };
 
 const styles = ({
@@ -725,6 +729,7 @@ const applyStyles = (
   element,
   {
     opacity,
+    perspective,
     translateX,
     translateY,
     scaleX,
@@ -732,72 +737,90 @@ const applyStyles = (
     rotateX,
     rotateY,
     rotateZ,
+    originX,
+    originY,
+    width,
     height
   }
 ) => {
-  const transforms = [];
-  const styles = [];
+  let transforms = '';
+  let styles = '';
+
+  // handle transform origin
+  if (isDefined(originX) || isDefined(originY)) {
+    styles += `transform-origin: ${originX || 0}px ${originY || 0}px;`;
+  }
 
   // transform order is relevant
+  // 0. perspective
+  if (isDefined(perspective)) {
+    transforms += `perspective(${perspective}px) `;
+  }
 
   // 1. translate
   if (isDefined(translateX) || isDefined(translateY)) {
-    transforms.push(
-      `translate3d(${translateX || 0}px, ${translateY || 0}px, 0)`
-    );
+    transforms += `translate3d(${translateX || 0}px, ${translateY || 0}px, 0) `;
   }
 
   // 2. scale
   if (isDefined(scaleX) || isDefined(scaleY)) {
-    transforms.push(
-      `scale3d(${isDefined(scaleX) ? scaleX : 1}, ${
-        isDefined(scaleY) ? scaleY : 1
-      }, 1)`
-    );
+    transforms += `scale3d(${isDefined(scaleX) ? scaleX : 1}, ${
+      isDefined(scaleY) ? scaleY : 1
+    }, 1) `;
   }
 
   // 3. rotate
-  if (isDefined(rotateZ) || isDefined(rotateY) || isDefined(rotateX)) {
-    transforms.push(
-      `rotate3d(${rotateX || 0}, ${rotateY || 0}, ${rotateZ || 0}, 360deg)`
-    );
+  if (isDefined(rotateZ)) {
+    transforms += `rotateZ(${rotateZ}rad) `;
+  }
+
+  if (isDefined(rotateX)) {
+    transforms += `rotateX(${rotateX}rad) `;
+  }
+
+  if (isDefined(rotateY)) {
+    transforms += `rotateY(${rotateY}rad) `;
   }
 
   // add transforms
   if (transforms.length) {
-    styles.push(`transform:${transforms.join(' ')}`);
+    styles += `transform:${transforms};`;
   }
 
   // add opacity
   if (isDefined(opacity)) {
-    styles.push(`opacity:${opacity}`);
+    styles += `opacity:${opacity};`;
 
     // if we reach zero, we make the element inaccessible
     if (opacity === 0) {
-      styles.push('visibility:hidden');
+      styles += `visibility:hidden;`;
     }
 
     // if we're below 100% opacity this element can't be clicked
     if (opacity < 1) {
-      styles.push('pointer-events:none;');
+      styles += `pointer-events:none;`;
     }
   }
 
   // add height
   if (isDefined(height)) {
-    styles.push(`height:${height}px`);
+    styles += `height:${height}px;`;
+  }
+
+  // add width
+  if (isDefined(width)) {
+    styles += `width:${width}px;`;
   }
 
   // apply styles
-  const currentStyles = element.getAttribute('style') || '';
-  const newStyles = styles.join(';');
+  const currentStyle = element.currentStyle || '';
 
   // if new styles does not match current styles, lets update!
-  if (
-    newStyles.length !== currentStyles.length ||
-    newStyles !== currentStyles
-  ) {
-    element.setAttribute('style', newStyles);
+  if (styles.length !== currentStyle.length || styles !== currentStyle) {
+    element.setAttribute('style', styles);
+    // store current styles so we can compare them to new styles later on
+    // _not_ setting the style attribute is faster
+    element.currentStyle = styles;
   }
 };
 
@@ -809,11 +832,14 @@ const Mixins = {
 };
 
 const updateRect = (rect = {}, element = {}, style = {}) => {
-  rect.paddingTop = parseInt(style.paddingTop, 10) || 0;
-  rect.marginTop = parseInt(style.marginTop, 10) || 0;
-  rect.marginRight = parseInt(style.marginRight, 10) || 0;
-  rect.marginBottom = parseInt(style.marginBottom, 10) || 0;
-  rect.marginLeft = parseInt(style.marginLeft, 10) || 0;
+  if (!element.layoutCalculated) {
+    rect.paddingTop = parseInt(style.paddingTop, 10) || 0;
+    rect.marginTop = parseInt(style.marginTop, 10) || 0;
+    rect.marginRight = parseInt(style.marginRight, 10) || 0;
+    rect.marginBottom = parseInt(style.marginBottom, 10) || 0;
+    rect.marginLeft = parseInt(style.marginLeft, 10) || 0;
+    element.layoutCalculated = true;
+  }
 
   rect.left = element.offsetLeft || 0;
   rect.top = element.offsetTop || 0;
@@ -850,6 +876,7 @@ const createView =
 
     // rect related
     ignoreRect = false,
+    ignoreRectUpdate = false,
 
     // mixins
     mixins = []
@@ -868,6 +895,9 @@ const createView =
     // element rectangle
     const rect = updateRect();
     let frameRect = null;
+
+    // rest state
+    let isResting = false;
 
     // pretty self explanatory
     const childViews = [];
@@ -918,11 +948,14 @@ const createView =
       // read child views
       childViews.forEach(child => child._read());
 
-      // update my rectangle
-      updateRect(rect, element, style);
+      const shouldUpdate = !(ignoreRectUpdate && rect.width && rect.height);
+      if (shouldUpdate) {
+        updateRect(rect, element, style);
+      }
 
-      // writers
-      readers.forEach(reader => reader({ root: internalAPI, props, rect }));
+      // readers
+      const api = { root: internalAPI, props, rect };
+      readers.forEach(reader => reader(api));
     };
 
     /**
@@ -969,8 +1002,13 @@ const createView =
 
       // append new elements to DOM and update those
       childViews
-        .filter(child => !child.element.parentNode)
+        //.filter(child => !child.element.parentNode)
         .forEach((child, index) => {
+          // skip
+          if (child.element.parentNode) {
+            return;
+          }
+
           // append to DOM
           internalAPI.appendChild(child.element, index);
 
@@ -984,13 +1022,18 @@ const createView =
           resting = false;
         });
 
+      // update resting state
+      isResting = resting;
+
       // let parent know if we are resting
       return resting;
     };
 
     const _destroy = () => {
       activeMixins.forEach(mixin => mixin.destroy());
-      destroyers.forEach(destroyer => destroyer({ root: internalAPI }));
+      destroyers.forEach(destroyer => {
+        destroyer({ root: internalAPI });
+      });
       childViews.forEach(child => child._destroy());
     };
 
@@ -1022,10 +1065,19 @@ const createView =
       is: needle => name === needle,
       appendChild: appendChild(element),
       createChildView: createChildView(store),
+      linkView: view => {
+        childViews.push(view);
+        return view;
+      },
+      unlinkView: view => {
+        childViews.splice(childViews.indexOf(view), 1);
+      },
       appendChildView: appendChildView(element, childViews),
       removeChildView: removeChildView(element, childViews),
       registerWriter: writer => writers.push(writer),
       registerReader: reader => readers.push(reader),
+      registerDestroyer: destroyer => destroyers.push(destroyer),
+      invalidateLayout: () => (element.layoutCalculated = false),
 
       // access to data store
       dispatch: store.dispatch,
@@ -1042,6 +1094,9 @@ const createView =
       },
       rect: {
         get: getRect
+      },
+      resting: {
+        get: () => isResting
       },
       isRectIgnored: () => ignoreRect,
       _read,
@@ -1142,19 +1197,22 @@ const createPainter = (update, fps = 60) => {
 };
 
 const createUpdater = (apps, reader, writer) => ts => {
-  // all reads first (as these are free at the start of the frame)
+  // all reads first
   apps.forEach(app => app[reader]());
 
   // now update the DOM
   apps.forEach(app => app[writer](ts));
 };
 
-const createRoute = routes => ({ root, props, actions = [] }) => {
+const createRoute = (routes, fn) => ({ root, props, actions = [] }) => {
   actions
     .filter(action => routes[action.type])
     .forEach(action =>
       routes[action.type]({ root, props, action: action.data })
     );
+  if (fn) {
+    fn({ root, props, actions });
+  }
 };
 
 const insertBefore = (newNode, referenceNode) =>
@@ -1168,6 +1226,8 @@ const insertAfter = (newNode, referenceNode) => {
 };
 
 const isArray = value => Array.isArray(value);
+
+const isEmpty = value => value == null;
 
 const trim = str => str.trim();
 
@@ -1412,6 +1472,7 @@ const getValueByType = (newValue, defaultValue, valueType) => {
 const createOption = (defaultValue, valueType) => {
   let currentValue = defaultValue;
   return {
+    enumerable: true,
     get: () => currentValue,
     set: newValue => {
       currentValue = getValueByType(newValue, defaultValue, valueType);
@@ -1521,14 +1582,14 @@ const on = () => {
   };
   return {
     fire: (event, ...args) => {
-      setTimeout(() => {
-        listeners
-          .filter(listener => listener.event === event)
-          .map(listener => listener.cb)
-          .forEach(cb => {
+      listeners
+        .filter(listener => listener.event === event)
+        .map(listener => listener.cb)
+        .forEach(cb => {
+          setTimeout(() => {
             cb(...args);
-          });
-      }, 0);
+          }, 0);
+        });
     },
     on: (event, cb) => {
       listeners.push({ event, cb });
@@ -1566,7 +1627,9 @@ const PRIVATE_METHODS = [
   'on',
   'off',
   'onOnce',
-  'retryLoad'
+  'retryLoad',
+  'extend',
+  'requestProcessing'
 ];
 
 const createItemAPI = item => {
@@ -1824,9 +1887,18 @@ const defaultOptions = {
   onprocessfilerevert: [null, Type.FUNCTION],
   onprocessfile: [null, Type.FUNCTION],
   onremovefile: [null, Type.FUNCTION],
+  onpreparefile: [null, Type.FUNCTION],
 
   // hooks
   beforeRemoveFile: [null, Type.FUNCTION],
+
+  // styles
+  stylePanelLayout: [null, Type.STRING], // null 'integrated', 'compact', 'circle'
+  stylePanelAspectRatio: [null, Type.STRING], // null or '3:2' or 1
+  styleButtonRemoveItemPosition: ['left', Type.STRING],
+  styleButtonProcessItemPosition: ['right', Type.STRING],
+  styleLoadIndicatorPosition: ['right', Type.STRING],
+  styleProgressIndicatorPosition: ['right', Type.STRING],
 
   // custom initial files array
   files: [[], Type.ARRAY]
@@ -1852,6 +1924,17 @@ const getItemByQuery = (items, query) => {
   return items.find(item => item.id === query) || null;
 };
 
+const getNumericAspectRatioFromString = aspectRatio => {
+  if (isEmpty(aspectRatio)) {
+    return aspectRatio;
+  }
+  if (/:/.test(aspectRatio)) {
+    const [w, h] = aspectRatio.split(':');
+    return h / w;
+  }
+  return parseFloat(aspectRatio);
+};
+
 const queries = state => ({
   GET_ITEM: query => getItemByQuery(state.items, query),
 
@@ -1865,6 +1948,22 @@ const queries = state => ({
   GET_ITEM_SIZE: query => {
     const item = getItemByQuery(state.items, query);
     return item ? item.fileSize : null;
+  },
+
+  GET_STYLES: () =>
+    Object.keys(state.options)
+      .filter(key => /^style/.test(key))
+      .map(option => ({
+        name: option,
+        value: state.options[option]
+      })),
+
+  GET_PANEL_ASPECT_RATIO: () => {
+    const isShapeCircle = /circle/.test(state.options.stylePanelLayout);
+    const aspectRatio = isShapeCircle
+      ? 1
+      : getNumericAspectRatioFromString(state.options.stylePanelAspectRatio);
+    return aspectRatio;
   },
 
   GET_TOTAL_ITEMS: () => state.items.length,
@@ -2858,6 +2957,9 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     activeProcessor: null
   };
 
+  // callback used when abort processing is called to link back to the resolve method
+  let abortProcessingRequestComplete = null;
+
   /**
    * Externally added item metadata
    */
@@ -2975,6 +3077,9 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
   // file processor
   const process = (processor, onprocess) => {
+    // reset abort callback
+    abortProcessingRequestComplete = null;
+
     // if no file loaded we'll wait for the load event
     if (!(state.file instanceof Blob)) {
       api.on('load', () => {
@@ -3014,6 +3119,11 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
       setStatus(ItemStatus.IDLE);
       api.fire('process-abort');
+
+      // has timeout so doesn't interfere with remove action
+      if (abortProcessingRequestComplete) {
+        abortProcessingRequestComplete();
+      }
     });
 
     processor.on('progress', progress => {
@@ -3036,28 +3146,31 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     state.activeProcessor = processor;
   };
 
-  const revert = revertFileUpload => {
-    // cannot revert without a server id for this process
-    if (state.serverFileReference === null) {
-      return;
-    }
-
-    // revert the upload (fire and forget)
-    revertFileUpload(
-      state.serverFileReference,
-      () => {
-        // reset file server id as now it's no available on the server
-        state.serverFileReference = null;
-      },
-      error => {
-        // TODO: handle revert error
+  const revert = revertFileUpload =>
+    new Promise(resolve => {
+      // cannot revert without a server id for this process
+      if (state.serverFileReference === null) {
+        resolve();
+        return;
       }
-    );
 
-    // fire event
-    setStatus(ItemStatus.IDLE);
-    api.fire('process-revert');
-  };
+      // revert the upload (fire and forget)
+      revertFileUpload(
+        state.serverFileReference,
+        () => {
+          // reset file server id as now it's no available on the server
+          state.serverFileReference = null;
+          resolve();
+        },
+        error => {
+          // TODO: handle revert error
+        }
+      );
+
+      // fire event
+      setStatus(ItemStatus.IDLE);
+      api.fire('process-revert');
+    });
 
   const abortLoad = () => {
     if (!state.activeLoader) {
@@ -3073,14 +3186,46 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     state.activeLoader.load();
   };
 
-  const abortProcessing = () => {
-    if (!state.activeProcessor) {
-      return;
-    }
-    state.activeProcessor.abort();
+  const requestProcessing = () => {
+    setStatus(ItemStatus.PROCESSING);
   };
 
+  const abortProcessing = () =>
+    new Promise(resolve => {
+      if (!state.activeProcessor) {
+        return;
+      }
+      abortProcessingRequestComplete = () => {
+        resolve();
+      };
+      state.activeProcessor.abort();
+    });
+
   // exposed methods
+
+  const setMetadata = (key, value) => {
+    const keys = key.split('.');
+    const root = keys[0];
+    const last = keys.pop();
+    let data = metadata;
+    keys.forEach(key => (data = data[key]));
+
+    // compare old value against new value, if they're the same, we're not updating
+    if (JSON.stringify(data[last]) === JSON.stringify(value)) {
+      return;
+    }
+
+    // update value
+    data[last] = value;
+
+    api.fire('metadata-update', {
+      key: root,
+      value: metadata[root]
+    });
+  };
+
+  const getMetadata = key =>
+    key ? metadata[key] : Object.assign({}, metadata);
 
   const api = Object.assign(
     {
@@ -3099,12 +3244,24 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
       source: { get: () => state.source },
 
-      getMetadata: name =>
-        name ? metadata[name] : Object.assign({}, metadata),
-      setMetadata: (name, value) => (metadata[name] = value),
+      getMetadata,
+      setMetadata: (key, value) => {
+        if (isObject(key) && !value) {
+          const data = key;
+          Object.keys(data).forEach(key => {
+            setMetadata(key, data[key]);
+          });
+          return key;
+        }
+        setMetadata(key, value);
+        return value;
+      },
+
+      extend: (name, handler) => (itemAPI[name] = handler),
 
       abortLoad,
       retryLoad,
+      requestProcessing,
       abortProcessing,
 
       load,
@@ -3114,7 +3271,10 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     on()
   );
 
-  return createObject(api);
+  // create it here instead of returning it instantly so we can extend it later
+  const itemAPI = createObject(api);
+
+  return itemAPI;
 };
 
 const getItemIndexByQuery = (items, query) => {
@@ -3208,6 +3368,7 @@ const getDomainFromURL = url => {
   }
   return url
     .toLowerCase()
+    .replace('blob:', '')
     .replace(/([a-z])?:\/\//, '$1')
     .split('/')[0];
 };
@@ -3221,6 +3382,8 @@ const isFile = value =>
 
 const dynamicLabel = label => (...params) =>
   isFunction(label) ? label(...params) : label;
+
+const isMockItem = item => !isFile(item.file);
 
 // returns item based on state
 const getItemByQueryFromState = (state, itemHandler) => ({
@@ -3288,6 +3451,69 @@ const actions = (dispatch, query, state) => ({
     });
   },
 
+  DID_UPDATE_ITEM_METADATA: ({ id, change }) => {
+    const item = getItemById(state.items, id);
+
+    // only revert and attempt to upload when we're uploading to a server
+    if (!query('IS_ASYNC')) {
+      // should we update the output data
+      applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query }).then(
+        shouldPrepareOutput => {
+          if (!shouldPrepareOutput) {
+            retun;
+          }
+          dispatch(
+            'REQUEST_PREPARE_OUTPUT',
+            {
+              query: id,
+              item,
+              ready: file => {
+                dispatch('DID_PREPARE_OUTPUT', { id, file });
+              }
+            },
+            true
+          );
+        }
+      );
+
+      return;
+    }
+
+    // for async scenarios
+    const upload = () => {
+      dispatch('REQUEST_ITEM_PROCESSING', { query: id });
+    };
+
+    const revert = doUpload => {
+      item
+        .revert(
+          createRevertFunction(
+            state.options.server.url,
+            state.options.server.revert
+          )
+        )
+        .then(doUpload ? upload : () => {});
+    };
+
+    const abort = doUpload => {
+      item.abortProcessing().then(doUpload ? upload : () => {});
+    };
+
+    // if we should re-upload the file immidiately
+    if (item.status === ItemStatus.PROCESSING_COMPLETE) {
+      return revert(state.options.instantUpload);
+    }
+
+    // if currently uploading, cancel upload
+    if (item.status === ItemStatus.PROCESSING) {
+      return abort(state.options.instantUpload);
+    }
+
+    if (state.options.instantUpload) {
+      upload();
+    }
+  },
+
   /**
    * @param source
    * @param index
@@ -3343,7 +3569,12 @@ const actions = (dispatch, query, state) => ({
 
       // if has been processed remove it from the server as well
       if (item.status === ItemStatus.PROCESSING_COMPLETE) {
-        dispatch('REVERT_ITEM_PROCESSING', { query: item.id });
+        item.revert(
+          createRevertFunction(
+            state.options.server.url,
+            state.options.server.revert
+          )
+        );
       }
 
       // remove first item as it will be replaced by this item
@@ -3367,6 +3598,9 @@ const actions = (dispatch, query, state) => ({
     Object.keys(options.metadata || {}).forEach(key => {
       item.setMetadata(key, options.metadata[key]);
     });
+
+    // created the item, let plugins add methods
+    applyFilters('DID_CREATE_ITEM', item, { query });
 
     // add item to list
     insertItem(state.items, item, index);
@@ -3440,25 +3674,42 @@ const actions = (dispatch, query, state) => ({
       // item loaded, allow plugins to
       // - read data (quickly)
       // - add metadata
-      applyFilterChain('DID_LOAD_ITEM', item, { query }).then(() => {
-        // let plugins decide if the output data should be prepared at this point
-        // means we'll do this and wait for idle state
-        applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query }).then(
-          shouldPrepareOutput => {
-            const data = {
-              source,
-              success
+      applyFilterChain('DID_LOAD_ITEM', item, { query, dispatch })
+        .then(() => {
+          // now interested in metadata updates
+          item.on('metadata-update', change => {
+            dispatch('DID_UPDATE_ITEM_METADATA', { id, change });
+          });
 
-              // exit
+          // let plugins decide if the output data should be prepared at this point
+          // means we'll do this and wait for idle state
+          applyFilterChain('SHOULD_PREPARE_OUTPUT', false, {
+            item,
+            query
+          }).then(shouldPrepareOutput => {
+            const loadComplete = () => {
+              dispatch('COMPLETE_LOAD_ITEM', {
+                query: id,
+                item,
+                data: {
+                  source,
+                  success
+                }
+              });
             };
+
+            // exit
             if (shouldPrepareOutput) {
               // wait for idle state and then run PREPARE_OUTPUT
               dispatch(
-                'REQUEST_PREPARE_LOAD_ITEM',
+                'REQUEST_PREPARE_OUTPUT',
                 {
                   query: id,
                   item,
-                  data
+                  ready: file => {
+                    dispatch('DID_PREPARE_OUTPUT', { id, file });
+                    loadComplete();
+                  }
                 },
                 true
               );
@@ -3466,14 +3717,14 @@ const actions = (dispatch, query, state) => ({
               return;
             }
 
-            dispatch('COMPLETE_LOAD_ITEM', {
-              query: id,
-              item,
-              data
-            });
-          }
-        );
-      });
+            loadComplete();
+          });
+        })
+        .catch(() => {
+          dispatch('REMOVE_ITEM', {
+            query: id
+          });
+        });
     });
 
     item.on('process-start', () => {
@@ -3495,19 +3746,6 @@ const actions = (dispatch, query, state) => ({
       });
     });
 
-    item.on('process-abort', serverFileReference => {
-      // we'll revert any processed items
-      dispatch('REVERT_ITEM_PROCESSING', { query: id });
-
-      // if we're instant uploading, the item is removed
-      if (state.options.instantUpload) {
-        dispatch('REMOVE_ITEM', { query: id });
-      } else {
-        // we stopped processing
-        dispatch('DID_ABORT_ITEM_PROCESSING', { id });
-      }
-    });
-
     item.on('process-complete', serverFileReference => {
       dispatch('DID_COMPLETE_ITEM_PROCESSING', {
         id,
@@ -3516,14 +3754,12 @@ const actions = (dispatch, query, state) => ({
       });
     });
 
+    item.on('process-abort', () => {
+      dispatch('DID_ABORT_ITEM_PROCESSING', { id });
+    });
+
     item.on('process-revert', () => {
-      // if is instant upload remove the item
-      // or is a fake file
-      if (state.options.instantUpload || options.file) {
-        dispatch('REMOVE_ITEM', { query: id });
-      } else {
-        dispatch('DID_REVERT_ITEM_PROCESSING', { id });
-      }
+      dispatch('DID_REVERT_ITEM_PROCESSING', { id });
     });
 
     // let view know the item has been inserted
@@ -3558,7 +3794,7 @@ const actions = (dispatch, query, state) => ({
     );
   },
 
-  REQUEST_PREPARE_LOAD_ITEM: ({ item, data }) => {
+  REQUEST_PREPARE_OUTPUT: ({ item, ready }) => {
     // allow plugins to alter the file data
     applyFilterChain('PREPARE_OUTPUT', item.file, { query, item }).then(
       result => {
@@ -3566,10 +3802,7 @@ const actions = (dispatch, query, state) => ({
           query,
           item
         }).then(result => {
-          dispatch('COMPLETE_LOAD_ITEM', {
-            item,
-            data
-          });
+          ready(result);
         });
       }
     );
@@ -3619,6 +3852,8 @@ const actions = (dispatch, query, state) => ({
   REQUEST_ITEM_PROCESSING: getItemByQueryFromState(state, item => {
     const id = item.id;
 
+    item.requestProcessing();
+
     dispatch('DID_REQUEST_ITEM_PROCESSING', { id });
 
     dispatch('PROCESS_ITEM', { query: item }, true);
@@ -3647,11 +3882,11 @@ const actions = (dispatch, query, state) => ({
       // called when the file is about to be processed so it can be piped through the transform filters
       (file, success, error) => {
         // allow plugins to alter the file data
-        applyFilterChain('PREPARE_OUTPUT', file, {
-          query,
-          item
-        })
-          .then(success)
+        applyFilterChain('PREPARE_OUTPUT', file, { query, item })
+          .then(file => {
+            dispatch('DID_PREPARE_OUTPUT', { id: item.id, file });
+            success(file);
+          })
           .catch(error);
       }
     );
@@ -3719,21 +3954,32 @@ const actions = (dispatch, query, state) => ({
   }),
 
   ABORT_ITEM_PROCESSING: getItemByQueryFromState(state, item => {
-    // stop processing this file
-    item.abortProcessing();
-
-    // the file will throw an event and that will take
-    // care of removing the item from the list
+    item.abortProcessing().then(() => {
+      const shouldRemove = state.options.instantUpload;
+      if (shouldRemove) {
+        setTimeout(() => {
+          dispatch('REMOVE_ITEM', { query: item.id });
+        }, 16);
+      }
+    });
   }),
 
   REVERT_ITEM_PROCESSING: getItemByQueryFromState(state, item => {
-    // remove from server
-    item.revert(
-      createRevertFunction(
-        state.options.server.url,
-        state.options.server.revert
+    item
+      .revert(
+        createRevertFunction(
+          state.options.server.url,
+          state.options.server.revert
+        )
       )
-    );
+      .then(() => {
+        const shouldRemove = state.options.instantUpload || isMockItem(item);
+        if (shouldRemove) {
+          setTimeout(() => {
+            dispatch('REMOVE_ITEM', { query: item.id });
+          }, 16);
+        }
+      });
   }),
 
   SET_OPTIONS: ({ options }) => {
@@ -3743,11 +3989,11 @@ const actions = (dispatch, query, state) => ({
   }
 });
 
+const formatFilename = name => decodeURI(name);
+
 const createElement$1 = tagName => {
   return document.createElement(tagName);
 };
-
-const formatFilename = name => decodeURI(name);
 
 const text = (node, value) => {
   let textNode = node.childNodes[0];
@@ -3869,6 +4115,7 @@ const write$5 = ({ root, props }) => {
 const progressIndicator = createView({
   tag: 'div',
   name: 'progress-indicator',
+  ignoreRectUpdate: true,
   ignoreRect: true,
   create: create$7,
   write: write$5,
@@ -3909,6 +4156,7 @@ const fileActionButton = createView({
     type: 'button'
   },
   ignoreRect: true,
+  ignoreRectUpdate: true,
   name: 'file-action-button',
   mixins: {
     apis: ['label'],
@@ -4006,6 +4254,7 @@ const updateFileSizeOnError = ({ root, props }) => {
 const fileInfo = createView({
   name: 'file-info',
   ignoreRect: true,
+  ignoreRectUpdate: true,
   write: createRoute({
     DID_LOAD_ITEM: updateFile,
     DID_UPDATE_ITEM_META: updateFile,
@@ -4093,6 +4342,7 @@ const error = ({ root, action }) => {
 const fileStatus = createView({
   name: 'file-status',
   ignoreRect: true,
+  ignoreRectUpdate: true,
   write: createRoute({
     DID_LOAD_ITEM: clear,
     DID_REVERT_ITEM_PROCESSING: clear,
@@ -4122,46 +4372,54 @@ const fileStatus = createView({
 /**
  * Button definitions for the file view
  */
+
 const Buttons = {
   AbortItemLoad: {
     label: 'GET_LABEL_BUTTON_ABORT_ITEM_LOAD',
     action: 'ABORT_ITEM_LOAD',
-    className: 'filepond--action-abort-item-load'
+    className: 'filepond--action-abort-item-load',
+    align: 'LOAD_INDICATOR_POSITION' // right
   },
   RetryItemLoad: {
     label: 'GET_LABEL_BUTTON_RETRY_ITEM_LOAD',
     action: 'RETRY_ITEM_LOAD',
     icon: 'GET_ICON_RETRY',
-    className: 'filepond--action-retry-item-load'
+    className: 'filepond--action-retry-item-load',
+    align: 'BUTTON_PROCESS_ITEM_POSITION' // right
   },
   RemoveItem: {
     label: 'GET_LABEL_BUTTON_REMOVE_ITEM',
     action: 'REQUEST_REMOVE_ITEM',
     icon: 'GET_ICON_REMOVE',
-    className: 'filepond--action-remove-item'
+    className: 'filepond--action-remove-item',
+    align: 'BUTTON_REMOVE_ITEM_POSITION' // left
   },
   ProcessItem: {
     label: 'GET_LABEL_BUTTON_PROCESS_ITEM',
     action: 'REQUEST_ITEM_PROCESSING',
     icon: 'GET_ICON_PROCESS',
-    className: 'filepond--action-process-item'
+    className: 'filepond--action-process-item',
+    align: 'BUTTON_PROCESS_ITEM_POSITION' // right
   },
   AbortItemProcessing: {
     label: 'GET_LABEL_BUTTON_ABORT_ITEM_PROCESSING',
     action: 'ABORT_ITEM_PROCESSING',
-    className: 'filepond--action-abort-item-processing'
+    className: 'filepond--action-abort-item-processing',
+    align: 'BUTTON_PROCESS_ITEM_POSITION' // right
   },
   RetryItemProcessing: {
     label: 'GET_LABEL_BUTTON_RETRY_ITEM_PROCESSING',
     action: 'RETRY_ITEM_PROCESSING',
     icon: 'GET_ICON_RETRY',
-    className: 'filepond--action-retry-item-processing'
+    className: 'filepond--action-retry-item-processing',
+    align: 'BUTTON_PROCESS_ITEM_POSITION' // right
   },
   RevertItemProcessing: {
     label: 'GET_LABEL_BUTTON_UNDO_ITEM_PROCESSING',
     action: 'REVERT_ITEM_PROCESSING',
     icon: 'GET_ICON_UNDO',
-    className: 'filepond--action-revert-item-processing'
+    className: 'filepond--action-revert-item-processing',
+    align: 'BUTTON_PROCESS_ITEM_POSITION' // right
   }
 };
 
@@ -4276,6 +4534,8 @@ const processingCompleteIndicatorView = createView({
  * Creates the file view
  */
 const create$6 = ({ root, props }) => {
+  const { id } = props;
+
   // allow reverting upload
   const allowRevert = root.query('GET_ALLOW_REVERT');
 
@@ -4320,12 +4580,17 @@ const create$6 = ({ root, props }) => {
       root.appendChildView(buttonView);
     }
 
+    // add position attribute
+    buttonView.element.dataset.align = root.query(
+      `GET_STYLE_${definition.align}`
+    );
+
     // add class
     buttonView.element.classList.add(definition.className);
 
     // handle interactions
     buttonView.on('click', () => {
-      root.dispatch(definition.action, { query: props.id });
+      root.dispatch(definition.action, { query: id });
     });
 
     // set reference
@@ -4333,35 +4598,39 @@ const create$6 = ({ root, props }) => {
   });
 
   // create file info view
-  root.ref.info = root.appendChildView(
-    root.createChildView(fileInfo, { id: props.id })
-  );
+  root.ref.info = root.appendChildView(root.createChildView(fileInfo, { id }));
 
   // create file status view
   root.ref.status = root.appendChildView(
-    root.createChildView(fileStatus, { id: props.id })
+    root.createChildView(fileStatus, { id })
   );
 
   // checkmark
   root.ref.processingCompleteIndicator = root.appendChildView(
     root.createChildView(processingCompleteIndicatorView)
   );
+  root.ref.processingCompleteIndicator.element.dataset.align = root.query(
+    `GET_STYLE_BUTTON_PROCESS_ITEM_POSITION`
+  );
 
   // add progress indicators
-  root.ref.loadProgressIndicator = root.appendChildView(
+  const loadIndicatorView = root.appendChildView(
     root.createChildView(progressIndicator, { opacity: 0 })
   );
-  root.ref.loadProgressIndicator.element.classList.add(
-    'filepond--load-indicator'
+  loadIndicatorView.element.classList.add('filepond--load-indicator');
+  loadIndicatorView.element.dataset.align = root.query(
+    `GET_STYLE_LOAD_INDICATOR_POSITION`
   );
+  root.ref.loadProgressIndicator = loadIndicatorView;
 
-  root.ref.processProgressIndicator = root.appendChildView(
+  const progressIndicatorView = root.appendChildView(
     root.createChildView(progressIndicator, { opacity: 0 })
   );
-
-  root.ref.processProgressIndicator.element.classList.add(
-    'filepond--process-indicator'
+  progressIndicatorView.element.classList.add('filepond--process-indicator');
+  progressIndicatorView.element.dataset.align = root.query(
+    `GET_STYLE_PROGRESS_INDICATOR_POSITION`
   );
+  root.ref.processProgressIndicator = progressIndicatorView;
 };
 
 const write$4 = ({ root, actions, props }) => {
@@ -4375,13 +4644,13 @@ const write$4 = ({ root, actions, props }) => {
     .find(action => StyleMap[action.type]);
 
   // no need to set same state twice
-  if (!action || (action && action.type === props.currentStyle)) {
+  if (!action || (action && action.type === root.ref.currentAction)) {
     return;
   }
 
   // set current state
-  props.currentStyle = action.type;
-  const newStyles = StyleMap[props.currentStyle];
+  root.ref.currentAction = action.type;
+  const newStyles = StyleMap[root.ref.currentAction];
 
   forin(DefaultStyle, (name, defaultStyles) => {
     // get reference to control
@@ -4480,6 +4749,7 @@ const didRevertItemProcessing = ({ root, action }) => {
 
 const fileWrapper = createView({
   create: create$5,
+  ignoreRect: true,
   write: createRoute({
     DID_LOAD_ITEM: didLoadItem,
     DID_REMOVE_ITEM: didRemoveItem,
@@ -4535,7 +4805,8 @@ const create$11 = ({ root, props }) => {
 const createSection = (root, section, className) => {
   const viewConstructor = createView({
     name: `panel-${section.name} filepond--${className}`,
-    mixins: section.mixins
+    mixins: section.mixins,
+    ignoreRectUpdate: true
   });
 
   const view = root.createChildView(viewConstructor, section.props);
@@ -4621,8 +4892,13 @@ const write$3 = ({ root, actions, props }) => {
   // update panel height
   root.ref.panel.height = root.ref.controls.rect.inner.height;
 
-  // set panel height
-  root.height = root.ref.controls.rect.inner.height;
+  // set own height
+  const aspectRatio = root.query('GET_PANEL_ASPECT_RATIO');
+  if (aspectRatio) {
+    root.height = root.rect.element.width * aspectRatio;
+  } else {
+    root.height = root.ref.controls.rect.inner.height;
+  }
 
   // select last state change action
   let action = [...actions]
@@ -4662,7 +4938,7 @@ const item = createView({
       scaleY: 'spring',
       translateX: 'spring',
       translateY: 'spring',
-      opacity: { type: 'tween', duration: 250 }
+      opacity: { type: 'tween', duration: 150 }
     }
   }
 });
@@ -4773,6 +5049,25 @@ const dragTranslation = (childIndex, dragIndex, itemMargin) => {
   return 0;
 };
 
+const easeOutCirc = t => {
+  const t1 = t - 1;
+  return Math.sqrt(1 - t1 * t1);
+};
+
+const read = ({ root }) => {
+  let total = 0;
+
+  root.childViews.filter(child => child.rect.outer.height).forEach(child => {
+    const height = child.rect.element.height + child.rect.element.marginBottom;
+    total += child.markedForRemoval
+      ? height * easeOutCirc(child.opacity)
+      : height;
+  });
+
+  root.rect.outer.height = total;
+  root.rect.outer.bottom = root.rect.outer.height;
+};
+
 /**
  * Write to view
  * @param root
@@ -4807,16 +5102,23 @@ const write$2 = ({ root, props, actions }) => {
         child.opacity = 1;
       }
 
+      const itemHeight =
+        childRect.element.height + childRect.element.marginBottom;
+      const height = child.markedForRemoval
+        ? itemHeight * child.opacity
+        : itemHeight;
+
       // calculate next child offset (reduce height by y scale for views that are being removed)
-      offset += childRect.outer.height;
+      offset += height;
     });
 
   // remove marked views
   root.childViews
-    .filter(view => view.markedForRemoval && view.opacity === 0)
+    .filter(view => view.markedForRemoval && view.resting && view.opacity === 0)
     .forEach(view => {
       root.removeChildView(view);
       resting = false;
+      view._destroy();
     });
 
   return resting;
@@ -4841,6 +5143,7 @@ const filterSetItemActions = (child, actions) =>
 const list = createView({
   create: create$3,
   write: write$2,
+  read,
   tag: 'ul',
   name: 'list',
   filterFrameActionsForChild: filterSetItemActions,
@@ -4980,7 +5283,7 @@ const create$12 = ({ root, props }) => {
   attr(root.element, 'aria-labelledby', `filepond--drop-label-${props.id}`);
 
   // handle changes to the input field
-  root.element.addEventListener('change', () => {
+  root.ref.handleChange = e => {
     if (!root.element.value) {
       return;
     }
@@ -4996,7 +5299,8 @@ const create$12 = ({ root, props }) => {
       // reset input, it's just for exposing a method to drop files, should not retain any state
       resetFileInput(root.element);
     }, 250);
-  });
+  };
+  root.element.addEventListener('change', root.ref.handleChange);
 };
 
 const setAcceptedFileTypes = ({ root, action }) => {
@@ -5049,10 +5353,14 @@ const browser = createView({
   tag: 'input',
   name: 'browser',
   ignoreRect: true,
+  ignoreRectUpdate: true,
   attributes: {
     type: 'file'
   },
   create: create$12,
+  destroy: ({ root }) => {
+    root.element.removeEventListener('change', root.ref.handleChange);
+  },
   write: createRoute({
     DID_ADD_ITEM: updateRequiredStatus,
     DID_REMOVE_ITEM: updateRequiredStatus,
@@ -5202,6 +5510,7 @@ const route$4 = createRoute({
 
 const drip = createView({
   ignoreRect: true,
+  ignoreRectUpdate: true,
   name: 'drip',
   write: write$8
 });
@@ -5862,6 +6171,7 @@ const itemError = ({ root, action }) => {
 const assistant = createView({
   create: create$14,
   ignoreRect: true,
+  ignoreRectUpdate: true,
   write: createRoute({
     DID_LOAD_ITEM: itemAdded,
     DID_REMOVE_ITEM: itemRemoved,
@@ -5877,6 +6187,11 @@ const assistant = createView({
   tag: 'span',
   name: 'assistant'
 });
+
+const toCamels = (string, separator = '-') =>
+  string.replace(new RegExp(`${separator}.`, 'g'), sub =>
+    sub.charAt(1).toUpperCase()
+  );
 
 const create$1 = ({ root, props }) => {
   // Add id
@@ -5921,17 +6236,38 @@ const create$1 = ({ root, props }) => {
   root.ref.measure = createElement$1('div');
   root.ref.measure.style.height = '100%';
   root.element.appendChild(root.ref.measure);
+
+  // apply initial style properties
+  root
+    .query('GET_STYLES')
+    .filter(style => !isEmpty(style.value))
+    .map(({ name, value }) => {
+      root.element.dataset[name] = value;
+    });
 };
 
 const write = ({ root, props, actions }) => {
   // route actions
   route({ root, props, actions });
 
+  // apply style properties
+  actions
+    .filter(action => /^DID_SET_STYLE_/.test(action.type))
+    .filter(action => !isEmpty(action.data.value))
+    .map(({ type, data }) => {
+      const name = toCamels(type.substr(8).toLowerCase(), '_');
+      root.element.dataset[name] = data.value;
+      root.invalidateLayout();
+    });
+
   // get quick references to various high level parts of the upload tool
   const { hopper, label, list, panel: panel$$1 } = root.ref;
 
   // bool to indicate if we're full or not
   const isMultiItem = root.query('GET_ALLOW_MULTIPLE');
+  const aspectRatio = root.query('GET_PANEL_ASPECT_RATIO');
+  const panelLayout = root.query('GET_STYLE_PANEL_LAYOUT');
+  const labelCentered = !isEmpty(panelLayout);
   const totalItems = root.query('GET_TOTAL_ITEMS');
   const maxItems = root.query('GET_MAX_FILES');
   const atMaxCapacity = isMultiItem
@@ -5965,13 +6301,13 @@ const write = ({ root, props, actions }) => {
       } else if (interactionMethod === InteractionMethod.BROWSE) {
         label.translateY = 40;
       } else {
-        label.translateY = -40;
+        label.translateY = 30;
       }
     }
   } else if (!atMaxCapacity) {
     // reveal label
     label.opacity = 1;
-    label.translateY = root.rect.element.paddingTop;
+    label.translateY = labelCentered ? 0 : root.rect.element.paddingTop;
     label.translateX = 0;
 
     // we use label for bounding box
@@ -6004,17 +6340,29 @@ const write = ({ root, props, actions }) => {
   );
   const bottomPadding = totalItems > 0 ? root.rect.element.paddingTop * 0.5 : 0;
 
-  if (boxBounding.fixedHeight) {
+  if (aspectRatio) {
+    const width = root.rect.element.width;
+    const height = width * aspectRatio;
+    root.element.style.height = `${height}px`;
+    const listHeight = height - list.rect.outer.top;
+    panel$$1.scalable = false;
+    panel$$1.height = height + root.rect.element.paddingTop;
+    list.overflow =
+      isMultiItem && childrenBoundingHeight > panel$$1.height
+        ? listHeight
+        : null;
+  } else if (boxBounding.fixedHeight) {
     // fixed height
+    const height = boxBounding.fixedHeight;
 
     // fixed height panel
     panel$$1.scalable = false;
 
     // link panel height to box bounding
-    panel$$1.height = boxBounding.fixedHeight + root.rect.element.paddingTop;
+    panel$$1.height = height + root.rect.element.paddingTop;
 
     // set list height
-    const listHeight = boxBounding.fixedHeight - list.rect.outer.top;
+    const listHeight = height - list.rect.outer.top;
 
     // set overflow
     list.overflow =
@@ -6075,11 +6423,9 @@ const calculateChildrenVisualHeight = children => {
       // calculate the total height occupied by all children
       .reduce((max, child) => {
         const bottom = child.rect.outer.bottom;
-
         if (bottom > max) {
           max = bottom;
         }
-
         return max;
       }, 0)
   );
@@ -6336,6 +6682,7 @@ const createApp$1 = (initialOptions = {}) => {
   //
   let resting = false;
   let hidden = false;
+
   const readWriteApi = {
     // necessary for update loop
 
@@ -6370,7 +6717,7 @@ const createApp$1 = (initialOptions = {}) => {
       const actions$$1 = store
         .processActionQueue()
 
-        // filter out set actions (will trigger DID_SET)
+        // filter out set actions (these will automatically trigger DID_SET)
         .filter(action => !/^SET_/.test(action.type));
 
       // if was idling and no actions stop here
@@ -6414,6 +6761,10 @@ const createApp$1 = (initialOptions = {}) => {
       event.status = Object.assign({}, data.status);
     }
 
+    if (data.file) {
+      event.output = data.file;
+    }
+
     // only source is available, else add item if possible
     if (data.source) {
       event.file = data.source;
@@ -6444,6 +6795,8 @@ const createApp$1 = (initialOptions = {}) => {
     DID_THROW_ITEM_INVALID: [createEvent('error'), createEvent('addfile')],
 
     DID_THROW_ITEM_LOAD_ERROR: [createEvent('error'), createEvent('addfile')],
+
+    DID_PREPARE_OUTPUT: createEvent('preparefile'),
 
     DID_START_ITEM_PROCESSING: createEvent('processfilestart'),
     DID_UPDATE_ITEM_PROCESS_PROGRESS: createEvent('processfileprogress'),
@@ -6487,7 +6840,7 @@ const createApp$1 = (initialOptions = {}) => {
       params.push(event.file);
     }
 
-    // append otherp props
+    // append other props
     const filtered = ['type', 'error', 'file'];
     Object.keys(event)
       .filter(key => !filtered.includes(key))
@@ -6805,11 +7158,6 @@ const createAppObject = (customOptions = {}) => {
   return app;
 };
 
-const toCamels = (string, separator = '-') =>
-  string.replace(new RegExp(`${separator}.`, 'g'), sub =>
-    sub.charAt(1).toUpperCase()
-  );
-
 const lowerCaseFirstLetter = string =>
   string.charAt(0).toLowerCase() + string.slice(1);
 
@@ -7066,7 +7414,6 @@ const renameFile = (file, name) => {
 
 const copyFile = file => renameFile(file, file.name);
 
-// utilities exposed to plugins
 // already registered plugins (can't register twice)
 const registeredPlugins = [];
 
@@ -7101,8 +7448,13 @@ const createAppPlugin = plugin => {
       loadImage,
       copyFile,
       renameFile,
+      createBlob,
       applyFilterChain,
-      createBlob
+      text,
+      getNumericAspectRatioFromString
+    },
+    views: {
+      fileActionButton
     }
   });
 
@@ -7121,10 +7473,9 @@ const state = {
 // plugin name
 const name = 'filepond';
 
-// is in browser (based on https://stackoverflow.com/a/31090240/1774081)
-const isBrowser = new Function(
-  'try {return this===window}catch(e){return false}'
-);
+// is in browser
+const isBrowser =
+  typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
 // start painter and fire load event
 if (isBrowser) {

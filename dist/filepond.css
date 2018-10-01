@@ -1,5 +1,5 @@
 /*
- * FilePond 2.3.0
+ * FilePond 3.0.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -62,6 +62,10 @@
   top: 0;
   margin: 0 0 1em 0;
   color: #4f4f4f;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
   will-change: transform, opacity;
 }
 
@@ -111,6 +115,14 @@
 .filepond--file-action-button:hover,
 .filepond--file-action-button:focus {
   box-shadow: 0 0 0 0.125em rgba(255, 255, 255, 0.9);
+}
+.filepond--file-action-button::after {
+  position: absolute;
+  left: -0.75em;
+  right: -0.75em;
+  top: -0.75em;
+  bottom: -0.75em;
+  content: '';
 }
 
 .filepond--file-info {
@@ -194,7 +206,6 @@
   margin: 0;
   padding: 0;
   min-width: 0;
-  height: 100%;
 }
 .filepond--file-wrapper > legend {
   position: absolute;
@@ -233,21 +244,33 @@
   z-index: 2;
 }
 .filepond--file .filepond--processing-complete-indicator,
+.filepond--file .filepond--progress-indicator,
 .filepond--file .filepond--file-action-button {
   position: absolute;
 }
-.filepond--file .filepond--progress-indicator {
-  position: absolute;
-  top: 0.75em;
-  right: 0.75em;
-}
-.filepond--file .filepond--action-remove-item {
+.filepond--file [data-align*='left'] {
   left: 0.5625em;
 }
-.filepond--file .filepond--processing-complete-indicator,
-.filepond--file
-  .filepond--file-action-button:not(.filepond--action-remove-item) {
+.filepond--file [data-align*='right'] {
   right: 0.5625em;
+}
+.filepond--file [data-align*='center'] {
+  left: calc(50% - 0.8125em);
+}
+.filepond--file [data-align*='bottom'] {
+  bottom: 1.125em;
+}
+.filepond--file [data-align='center'] {
+  top: calc(50% - 0.8125em);
+}
+.filepond--file .filepond--progress-indicator {
+  margin-top: 0.1875em;
+}
+.filepond--file .filepond--progress-indicator[data-align*='right'] {
+  margin-right: 0.1875em;
+}
+.filepond--file .filepond--progress-indicator[data-align*='left'] {
+  margin-left: 0.1875em;
 }
 
 [data-filepond-item-state='cancelled'] .filepond--file-info,
@@ -435,19 +458,17 @@
   top: 0;
   left: 0;
   right: 0;
+  z-index: 1;
   padding: 0;
-  margin: 0 0 0.5em 0;
+  margin: 0;
+  margin-bottom: 0.5em;
   will-change: transform, opacity;
 }
 .filepond--item > .filepond--panel {
-  z-index: 1;
+  z-index: -1;
 }
 .filepond--item > .filepond--panel .filepond--panel-bottom {
   box-shadow: 0 0.0625em 0.125em -0.0625em rgba(0, 0, 0, 0.25);
-}
-.filepond--item > .filepond--file-wrapper {
-  position: relative;
-  z-index: 2;
 }
 
 .filepond--item-panel {
@@ -515,6 +536,80 @@
   padding: 0;
   list-style-type: none;
   will-change: transform;
+}
+
+.filepond--root[data-style-panel-layout~='integrated'] {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.filepond--root[data-style-panel-layout~='compact'],
+.filepond--root[data-style-panel-layout~='integrated'] {
+  padding: 0;
+}
+.filepond--root[data-style-panel-layout~='compact'] .filepond--list-scroller,
+.filepond--root[data-style-panel-layout~='integrated']
+  .filepond--list-scroller {
+  overflow: hidden;
+  height: 100%;
+}
+.filepond--root[data-style-panel-layout~='compact'] .filepond--list,
+.filepond--root[data-style-panel-layout~='integrated'] .filepond--list {
+  left: 0;
+  right: 0;
+  height: 100%;
+}
+.filepond--root[data-style-panel-layout~='compact'] .filepond--item,
+.filepond--root[data-style-panel-layout~='integrated'] .filepond--item {
+  margin-bottom: 0;
+}
+.filepond--root[data-style-panel-layout~='compact'] .filepond--file-wrapper,
+.filepond--root[data-style-panel-layout~='integrated'] .filepond--file-wrapper {
+  height: 100%;
+}
+.filepond--root[data-style-panel-layout~='compact'] .filepond--panel-root,
+.filepond--root[data-style-panel-layout~='integrated'] .filepond--panel-root {
+  border-radius: 0;
+}
+.filepond--root[data-style-panel-layout~='compact'] .filepond--panel-root > *,
+.filepond--root[data-style-panel-layout~='integrated']
+  .filepond--panel-root
+  > * {
+  display: none;
+}
+.filepond--root[data-style-panel-layout~='compact'] .filepond--drop-label,
+.filepond--root[data-style-panel-layout~='integrated'] .filepond--drop-label {
+  bottom: 0;
+  margin-bottom: 0;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-align: center;
+  align-items: center;
+}
+.filepond--root[data-style-panel-layout~='compact'] .filepond--item-panel,
+.filepond--root[data-style-panel-layout~='integrated'] .filepond--item-panel {
+  display: none;
+}
+
+.filepond--root[data-style-panel-layout~='circle'] {
+  border-radius: 99999rem;
+  overflow: hidden;
+}
+.filepond--root[data-style-panel-layout~='circle'] > .filepond--panel {
+  border-radius: inherit;
+}
+.filepond--root[data-style-panel-layout~='circle'] > .filepond--panel > * {
+  display: none;
+}
+.filepond--root[data-style-panel-layout~='circle'] .filepond--file-info {
+  display: none;
+}
+.filepond--root[data-style-panel-layout~='circle'] .filepond--file-status {
+  display: none;
 }
 
 .filepond--panel-root {
@@ -626,6 +721,7 @@
 .filepond--progress-indicator svg {
   width: 100%;
   height: 100%;
+  transform-box: fill-box;
 }
 
 .filepond--progress-indicator path {

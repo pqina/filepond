@@ -1,5 +1,31 @@
 # Changelog
 
+## 3.0.0
+
+- Small internal flow changes to facilitate integration with the Image Editor plugin
+- Improve performance
+- Improve file loader so it now supports `blob` URLs
+- Add `stylePanelLayout` setting to set layout mode for panel
+- Add `stylePanelAspectRatio` setting to fix aspect ratio of panel
+- Add `styleButtonRemoveItemPosition` to control remove button position on image preview
+- Add `styleButtonProcessItemPosition` to control item processing position on image preview
+- Add `styleLoadIndicatorPosition` to control load indicator position on image preview
+- Add `styleProgressIndicatorPosition` to control process indicator position on image preview
+- Add method to automatically update data when file metadata is updated
+- Fix animation rest state detection
+
+Please note that this update will require installing new versions of the following plugins:
+- File Encode
+- Image Crop
+- Image Preview
+- Image Transform
+
+
+## 2.3.1
+
+- Fix improved browser environment detection.
+
+
 ## 2.3.0
 
 - Improve browser environment detection [#123](https://github.com/pqina/filepond/pull/123).
