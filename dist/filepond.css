@@ -1,5 +1,5 @@
 /*
- * FilePond 3.0.1
+ * FilePond 3.0.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -589,6 +589,7 @@
   justify-content: center;
   -ms-flex-align: center;
   align-items: center;
+  z-index: 7;
 }
 .filepond--root[data-style-panel-layout~='compact'] .filepond--item-panel,
 .filepond--root[data-style-panel-layout~='integrated'] .filepond--item-panel {

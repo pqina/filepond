@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.2
+
+- Fix problem with label not being clickable while in integrated layout mode.
+
+
 ## 3.0.1
 
 - Fix problem where timeout would incorrectly trigger for uploads.
