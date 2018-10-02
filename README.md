@@ -28,7 +28,9 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink)**
 
 FilePond is compatible with a wide range of desktop and mobile browsers, the oldest explicitely supported browser is IE11, for best cross browser support add [FilePond Polyfill](https://github.com/pqina/filepond-polyfill) and a [Promises polyfill](https://github.com/stefanpenner/es6-promise) to your project.
 
-FilePond uses [<img src="https://github.com/pqina/filepond-github-assets/blob/master/browserstack-logo.svg" height="24" alt="BrowserStack"/>](https://www.browserstack.com/) for compatibility testing.
+FilePond uses [BrowserStack](https://www.browserstack.com/) for compatibility testing.
+
+[<img src="https://github.com/pqina/filepond-github-assets/blob/master/browserstack-logo.svg" height="32" alt="BrowserStack"/>](https://www.browserstack.com/)
 
 ### Plugins
 
