@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.1
+
+- Fix problem where timeout would incorrectly trigger for uploads.
+
+
 ## 3.0.0
 
 - Small internal flow changes to facilitate integration with the Image Editor plugin

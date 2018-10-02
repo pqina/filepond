@@ -1,5 +1,5 @@
 /*
- * FilePond 3.0.0
+ * FilePond 3.0.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1636,7 +1636,7 @@
     var api = {};
 
     api.url = isString(outline) ? outline : outline.url || '';
-    api.timeout = outline.timeout ? parseInt(outline.timeout, 10) : 7000;
+    api.timeout = outline.timeout ? parseInt(outline.timeout, 10) : 0;
 
     forin(methods, function(key) {
       api[key] = createAction(key, outline[key], methods[key], api.timeout);
@@ -2852,8 +2852,6 @@
     };
 
     // timeout identifier, only used when timeout is defined
-    var timeoutId = null;
-    var timedOut = false;
     var aborted = false;
     var headersReceived = false;
 
@@ -2869,7 +2867,6 @@
 
     // if method is GET, add any received data to url
     if (/GET/i.test(options.method) && data) {
-      //url = `${ url }${ hasQueryString(url) ? '&' : '?' }data=${ encodeURIComponent(typeof data === 'string' ? data : JSON.stringify(data)) }`;
       url =
         '' +
         url +
@@ -2884,11 +2881,8 @@
     // progress of load
     var process = /GET/i.test(options.method) ? xhr : xhr.upload;
     process.onprogress = function(e) {
-      // progress event received, timeout no longer needed
-      clearTimeout(timeoutId);
-
       // no progress event when aborted ( onprogress is called once after abort() )
-      if (aborted || timedOut) {
+      if (aborted) {
         return;
       }
 
@@ -2906,9 +2900,6 @@
       if (xhr.readyState === 4 && xhr.status === 0) {
         return;
       }
-
-      // timeout no longer needed as connection is setup
-      clearTimeout(timeoutId);
 
       if (headersReceived) {
         return;
@@ -2932,25 +2923,23 @@
 
     // error during load
     xhr.onerror = function() {
-      api.onerror(xhr);
+      return api.onerror(xhr);
     };
 
     // request aborted
     xhr.onabort = function() {
-      if (timedOut) {
-        return;
-      }
       aborted = true;
       api.onabort();
     };
 
+    // request timeout
+    xhr.ontimeout = function() {
+      return api.ontimeout(xhr);
+    };
+
     // set timeout if defined
     if (isInt(options.timeout)) {
-      timeoutId = setTimeout(function() {
-        timedOut = true;
-        api.ontimeout(xhr);
-        api.abort();
-      }, options.timeout);
+      xhr.timeout = options.timeout;
     }
 
     // add headers

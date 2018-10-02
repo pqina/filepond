@@ -1,5 +1,5 @@
 /*
- * FilePond 3.0.0
+ * FilePond 3.0.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1315,7 +1315,7 @@ const createServerAPI = outline => {
   const api = {};
 
   api.url = isString(outline) ? outline : outline.url || '';
-  api.timeout = outline.timeout ? parseInt(outline.timeout, 10) : 7000;
+  api.timeout = outline.timeout ? parseInt(outline.timeout, 10) : 0;
 
   forin(methods, key => {
     api[key] = createAction(key, outline[key], methods[key], api.timeout);
@@ -2333,8 +2333,6 @@ const sendRequest = (data, url, options) => {
   };
 
   // timeout identifier, only used when timeout is defined
-  let timeoutId = null;
-  let timedOut = false;
   let aborted = false;
   let headersReceived = false;
 
@@ -2350,7 +2348,6 @@ const sendRequest = (data, url, options) => {
 
   // if method is GET, add any received data to url
   if (/GET/i.test(options.method) && data) {
-    //url = `${ url }${ hasQueryString(url) ? '&' : '?' }data=${ encodeURIComponent(typeof data === 'string' ? data : JSON.stringify(data)) }`;
     url = `${url}${encodeURIComponent(
       typeof data === 'string' ? data : JSON.stringify(data)
     )}`;
@@ -2362,11 +2359,8 @@ const sendRequest = (data, url, options) => {
   // progress of load
   const process = /GET/i.test(options.method) ? xhr : xhr.upload;
   process.onprogress = e => {
-    // progress event received, timeout no longer needed
-    clearTimeout(timeoutId);
-
     // no progress event when aborted ( onprogress is called once after abort() )
-    if (aborted || timedOut) {
+    if (aborted) {
       return;
     }
 
@@ -2384,9 +2378,6 @@ const sendRequest = (data, url, options) => {
     if (xhr.readyState === 4 && xhr.status === 0) {
       return;
     }
-
-    // timeout no longer needed as connection is setup
-    clearTimeout(timeoutId);
 
     if (headersReceived) {
       return;
@@ -2409,26 +2400,20 @@ const sendRequest = (data, url, options) => {
   };
 
   // error during load
-  xhr.onerror = () => {
-    api.onerror(xhr);
-  };
+  xhr.onerror = () => api.onerror(xhr);
 
   // request aborted
   xhr.onabort = () => {
-    if (timedOut) {
-      return;
-    }
     aborted = true;
     api.onabort();
   };
 
+  // request timeout
+  xhr.ontimeout = () => api.ontimeout(xhr);
+
   // set timeout if defined
   if (isInt(options.timeout)) {
-    timeoutId = setTimeout(() => {
-      timedOut = true;
-      api.ontimeout(xhr);
-      api.abort();
-    }, options.timeout);
+    xhr.timeout = options.timeout;
   }
 
   // add headers
