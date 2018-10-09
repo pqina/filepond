@@ -1,5 +1,5 @@
 /*
- * FilePond 3.0.2
+ * FilePond 3.0.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -722,6 +722,7 @@
 .filepond--progress-indicator svg {
   width: 100%;
   height: 100%;
+  vertical-align: top;
   transform-box: fill-box;
 }
 

@@ -1,5 +1,5 @@
 /*
- * FilePond 3.0.2
+ * FilePond 3.0.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -813,14 +813,17 @@ const applyStyles = (
   }
 
   // apply styles
-  const currentStyle = element.currentStyle || '';
+  const elementCurrentStyle = element.elementCurrentStyle || '';
 
   // if new styles does not match current styles, lets update!
-  if (styles.length !== currentStyle.length || styles !== currentStyle) {
+  if (
+    styles.length !== elementCurrentStyle.length ||
+    styles !== elementCurrentStyle
+  ) {
     element.setAttribute('style', styles);
     // store current styles so we can compare them to new styles later on
-    // _not_ setting the style attribute is faster
-    element.currentStyle = styles;
+    // _not_ getting the style attribute is faster
+    element.elementCurrentStyle = styles;
   }
 };
 
@@ -2411,13 +2414,15 @@ const sendRequest = (data, url, options) => {
   // request timeout
   xhr.ontimeout = () => api.ontimeout(xhr);
 
-  // set timeout if defined
+  // open up open up!
+  xhr.open(options.method, url, true);
+
+  // set timeout if defined (do it after open so IE11 plays ball)
   if (isInt(options.timeout)) {
     xhr.timeout = options.timeout;
   }
 
   // add headers
-  xhr.open(options.method, url, true);
   Object.keys(options.headers).forEach(key => {
     xhr.setRequestHeader(key, options.headers[key]);
   });

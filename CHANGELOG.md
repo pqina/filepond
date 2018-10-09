@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.3
+
+- Fix problem with XMLHttpRequest timeout on Internet Explorer 11.
+- Fix problem with custom properties on element on Internet Explorer 11.
+
+
 ## 3.0.2
 
 - Fix problem with label not being clickable while in integrated layout mode.
