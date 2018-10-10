@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.0
+
+- Improve diffing when updating the `files` property.
+- Add `onupdatefiles` callback that is triggered when a file is added or removed to a pond instance.
+
+
 ## 3.0.4
 
 - Fix problem where feature detection would throw error on iOS 8.x

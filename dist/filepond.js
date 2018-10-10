@@ -1,5 +1,5 @@
 /*
- * FilePond 3.0.4
+ * FilePond 3.1.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2310,6 +2310,7 @@
     onprocessfile: [null, Type.FUNCTION],
     onremovefile: [null, Type.FUNCTION],
     onpreparefile: [null, Type.FUNCTION],
+    onupdatefiles: [null, Type.FUNCTION],
 
     // hooks
     beforeRemoveFile: [null, Type.FUNCTION],
@@ -4108,7 +4109,7 @@ function signature:
           // if item not is in new value, remove
           if (
             !files.find(function(file) {
-              return file.source === item.source;
+              return file.source === item.source || file.source === item.file;
             })
           ) {
             dispatch('REMOVE_ITEM', { query: item });
@@ -4120,7 +4121,7 @@ function signature:
           // if file is already in list
           if (
             [].concat(toConsumableArray(state.items)).find(function(item) {
-              return item.source === file.source;
+              return item.source === file.source || item.file === file.source;
             })
           ) {
             return;
@@ -4480,6 +4481,9 @@ function signature:
           interactionMethod: interactionMethod
         });
 
+        // the item list has been updated
+        dispatch('DID_UPDATE_ITEMS', { items: state.items });
+
         // start loading the source
 
         var _ref5 = state.options.server || {},
@@ -4680,7 +4684,11 @@ function signature:
       // private action for timing the removal of an item from the items list
       SPLICE_ITEM: function SPLICE_ITEM(_ref8) {
         var id = _ref8.id;
-        return removeItem(state.items, getItemById(state.items, id));
+
+        removeItem(state.items, getItemById(state.items, id));
+
+        // the item list has been updated
+        dispatch('DID_UPDATE_ITEMS', { items: state.items });
       },
 
       ABORT_ITEM_LOAD: getItemByQueryFromState(state, function(item) {
@@ -7911,6 +7919,11 @@ function signature:
           event.file = item ? createItemAPI(item) : null;
         }
 
+        // map all items in a possible items array
+        if (data.items) {
+          event.items = data.items.map(createItemAPI);
+        }
+
         // if this is a progress event add the progress amount
         if (/progress/.test(name)) {
           event.progress = data.progress;
@@ -7948,7 +7961,9 @@ function signature:
         createEvent('processfile')
       ],
 
-      SPLICE_ITEM: createEvent('removefile')
+      SPLICE_ITEM: createEvent('removefile'),
+
+      DID_UPDATE_ITEMS: createEvent('updatefiles')
     };
 
     var exposeEvent = function exposeEvent(event) {

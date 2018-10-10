@@ -1,5 +1,5 @@
 /*
- * FilePond 3.0.4
+ * FilePond 3.1.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1891,6 +1891,7 @@ const defaultOptions = {
   onprocessfile: [null, Type.FUNCTION],
   onremovefile: [null, Type.FUNCTION],
   onpreparefile: [null, Type.FUNCTION],
+  onupdatefiles: [null, Type.FUNCTION],
 
   // hooks
   beforeRemoveFile: [null, Type.FUNCTION],
@@ -3418,7 +3419,11 @@ const actions = (dispatch, query, state) => ({
     // test if items should be moved
     [...state.items].forEach(item => {
       // if item not is in new value, remove
-      if (!files.find(file => file.source === item.source)) {
+      if (
+        !files.find(
+          file => file.source === item.source || file.source === item.file
+        )
+      ) {
         dispatch('REMOVE_ITEM', { query: item });
       }
     });
@@ -3426,7 +3431,11 @@ const actions = (dispatch, query, state) => ({
     // add new files
     files.forEach((file, index) => {
       // if file is already in list
-      if ([...state.items].find(item => item.source === file.source)) {
+      if (
+        [...state.items].find(
+          item => item.source === file.source || item.file === file.source
+        )
+      ) {
         return;
       }
 
@@ -3755,6 +3764,9 @@ const actions = (dispatch, query, state) => ({
     // let view know the item has been inserted
     dispatch('DID_ADD_ITEM', { id, index, interactionMethod });
 
+    // the item list has been updated
+    dispatch('DID_UPDATE_ITEMS', { items: state.items });
+
     // start loading the source
     const { url, load, restore, fetch } = state.options.server || {};
 
@@ -3932,8 +3944,12 @@ const actions = (dispatch, query, state) => ({
   }),
 
   // private action for timing the removal of an item from the items list
-  SPLICE_ITEM: ({ id }) =>
-    removeItem(state.items, getItemById(state.items, id)),
+  SPLICE_ITEM: ({ id }) => {
+    removeItem(state.items, getItemById(state.items, id));
+
+    // the item list has been updated
+    dispatch('DID_UPDATE_ITEMS', { items: state.items });
+  },
 
   ABORT_ITEM_LOAD: getItemByQueryFromState(state, item => {
     // stop loading this file
@@ -6763,6 +6779,11 @@ const createApp$1 = (initialOptions = {}) => {
       event.file = item ? createItemAPI(item) : null;
     }
 
+    // map all items in a possible items array
+    if (data.items) {
+      event.items = data.items.map(createItemAPI);
+    }
+
     // if this is a progress event add the progress amount
     if (/progress/.test(name)) {
       event.progress = data.progress;
@@ -6799,7 +6820,9 @@ const createApp$1 = (initialOptions = {}) => {
       createEvent('processfile')
     ],
 
-    SPLICE_ITEM: createEvent('removefile')
+    SPLICE_ITEM: createEvent('removefile'),
+
+    DID_UPDATE_ITEMS: createEvent('updatefiles')
   };
 
   const exposeEvent = event => {
