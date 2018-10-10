@@ -1,5 +1,5 @@
 /*
- * FilePond 3.0.3
+ * FilePond 3.0.4
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -3513,7 +3513,7 @@ function signature:
     };
   };
 
-  var FileOrigin = {
+  var FileOrigin$1 = {
     INPUT: 1,
     LIMBO: 2,
     LOCAL: 3
@@ -3643,7 +3643,7 @@ function signature:
           state.file = result;
 
           // file received
-          if (origin === FileOrigin.LIMBO && state.serverFileReference) {
+          if (origin === FileOrigin$1.LIMBO && state.serverFileReference) {
             setStatus(ItemStatus.PROCESSING_COMPLETE);
           } else {
             setStatus(ItemStatus.IDLE);
@@ -4276,13 +4276,15 @@ function signature:
         // where did the file originate
         var origin =
           options.type === 'local'
-            ? FileOrigin.LOCAL
-            : options.type === 'limbo' ? FileOrigin.LIMBO : FileOrigin.INPUT;
+            ? FileOrigin$1.LOCAL
+            : options.type === 'limbo'
+              ? FileOrigin$1.LIMBO
+              : FileOrigin$1.INPUT;
 
         // create a new blank item
         var item = createItem(
           origin,
-          origin === FileOrigin.INPUT ? null : source,
+          origin === FileOrigin$1.INPUT ? null : source,
           options.file
         );
 
@@ -4491,13 +4493,13 @@ function signature:
 
           // this creates a function that loads the file based on the type of file (string, base64, blob, file) and location of file (local, remote, limbo)
           createFileLoader(
-            origin === FileOrigin.INPUT
+            origin === FileOrigin$1.INPUT
               ? // input
                 isString(source) && isExternalURL(source)
                 ? createFetchFunction(url, fetch) // remote url
                 : fetchLocal // local url
               : // limbo or local
-                origin === FileOrigin.LIMBO
+                origin === FileOrigin$1.LIMBO
                 ? createFetchFunction(url, restore) // limbo
                 : createFetchFunction(url, load) // local
           ),
@@ -4541,7 +4543,8 @@ function signature:
         dispatch('DID_LOAD_ITEM', {
           id: item.id,
           error: null,
-          serverFileReference: item.origin === FileOrigin.INPUT ? null : source
+          serverFileReference:
+            item.origin === FileOrigin$1.INPUT ? null : source
         });
 
         // item has been successfully loaded and added to the
@@ -4549,13 +4552,13 @@ function signature:
         success(createItemAPI(item));
 
         // if this is a local server file we need to show a different state
-        if (item.origin === FileOrigin.LOCAL) {
+        if (item.origin === FileOrigin$1.LOCAL) {
           dispatch('DID_LOAD_LOCAL_ITEM', { id: item.id });
           return;
         }
 
         // if is a temp server file we prevent async upload call here (as the file is already on the server)
-        if (item.origin === FileOrigin.LIMBO) {
+        if (item.origin === FileOrigin$1.LIMBO) {
           dispatch('DID_COMPLETE_ITEM_PROCESSING', {
             id: item.id,
             error: null,
@@ -8684,131 +8687,7 @@ function signature:
     extendDefaultOptions(pluginOutline.options);
   };
 
-  /**
-   * Plugin internal state (over all instances)
-   */
-  var state = {
-    // active app instances, used to redraw the apps and to find the later
-    apps: []
-  };
-
-  // plugin name
-  var name = 'filepond';
-
-  // is in browser
-  var isBrowser =
-    typeof window !== 'undefined' && typeof window.document !== 'undefined';
-
-  // start painter and fire load event
-  if (isBrowser) {
-    // app painter, cannot be paused or stopped at the moment
-    createPainter(createUpdater(state.apps, '_read', '_write'), 60);
-
-    // fire loaded event so we know when FilePond is available
-    var dispatch = function dispatch() {
-      // let others know we have area ready
-      document.dispatchEvent(
-        new CustomEvent('FilePond:loaded', {
-          detail: {
-            supported: supported,
-            create: create,
-            destroy: destroy,
-            parse: parse,
-            find: find,
-            registerPlugin: registerPlugin,
-            setOptions: setOptions$$1
-          }
-        })
-      );
-
-      // clean up event
-      document.removeEventListener('DOMContentLoaded', dispatch);
-    };
-
-    if (document.readyState !== 'loading') {
-      // move to back of execution queue, FilePond should have been exported by then
-      setTimeout(function() {
-        return dispatch();
-      }, 0);
-    } else {
-      document.addEventListener('DOMContentLoaded', dispatch);
-    }
-  }
-
-  // updates the OptionTypes object based on the current options
-  var updateOptionTypes = function updateOptionTypes() {
-    return forin(getOptions$1(), function(key, value) {
-      OptionTypes[key] = value[1];
-    });
-  };
-
-  /**
-   * Public Plugin methods
-   */
-  var FileStatus = Object.assign({}, ItemStatus);
-
-  var OptionTypes = {};
-  updateOptionTypes();
-
-  // create method, creates apps and adds them to the app array
-  var create = function create() {
-    var app = createApp.apply(undefined, arguments);
-    app.on('destroy', destroy);
-    state.apps.push(app);
-    return createAppAPI(app);
-  };
-
-  // destroys apps and removes them from the app array
-  var destroy = function destroy(hook) {
-    // returns true if the app was destroyed successfully
-    var indexToRemove = state.apps.findIndex(function(app) {
-      return app.isAttachedTo(hook);
-    });
-    if (indexToRemove >= 0) {
-      // remove from apps
-      var app = state.apps.splice(indexToRemove, 1)[0];
-
-      // restore original dom element
-      app.restoreElement();
-
-      return true;
-    }
-
-    return false;
-  };
-
-  // parses the given context for plugins (does not include the context element itself)
-  var parse = function parse(context) {
-    // get all possible hooks
-    var matchedHooks = [].concat(
-      toConsumableArray(context.querySelectorAll('.' + name))
-    );
-
-    // filter out already active hooks
-    var newHooks = matchedHooks.filter(function(newHook) {
-      return !state.apps.find(function(app) {
-        return app.isAttachedTo(newHook);
-      });
-    });
-
-    // create new instance for each hook
-    return newHooks.map(function(hook) {
-      return create(hook);
-    });
-  };
-
-  // returns an app based on the given element hook
-  var find = function find(hook) {
-    var app = state.apps.find(function(app) {
-      return app.isAttachedTo(hook);
-    });
-    if (!app) {
-      return null;
-    }
-    return createAppAPI(app);
-  };
-
-  // returns true if plugin is supported
+  // feature detection used by supported() method
   var isOperaMini = function isOperaMini() {
     return (
       Object.prototype.toString.call(window.operamini) === '[object OperaMini]'
@@ -8829,72 +8708,207 @@ function signature:
   var hasTiming = function hasTiming() {
     return 'performance' in window;
   }; // iOS 8.x
+  var isBrowser = function isBrowser() {
+    return (
+      typeof window !== 'undefined' && typeof window.document !== 'undefined'
+    );
+  };
 
-  var supported = function supported() {
-    if (!isBrowser) {
-      return false;
-    }
-    return !(
+  var supported = (function() {
+    var isSupported = !// Can't run on Opera Mini due to lack of everything
+    (
       isOperaMini() ||
+      // Can't run on Node
+      !isBrowser() ||
+      // Require these APIs to feature detect a modern browser
       !hasVisibility() ||
       !hasPromises() ||
       !hasBlobSlice() ||
       !hasCreateObjectURL() ||
       !hasTiming()
     );
+    return function() {
+      return isSupported;
+    };
+  })();
+
+  /**
+   * Plugin internal state (over all instances)
+   */
+  var state = {
+    // active app instances, used to redraw the apps and to find the later
+    apps: []
   };
 
-  // adds a plugin extension
-  var registerPlugin = function registerPlugin() {
-    for (
-      var _len = arguments.length, plugins = Array(_len), _key = 0;
-      _key < _len;
-      _key++
-    ) {
-      plugins[_key] = arguments[_key];
+  // plugin name
+  var name = 'filepond';
+
+  /**
+   * Public Plugin methods
+   */
+  var fn = function fn() {};
+  exports.FileStatus = {};
+  exports.OptionTypes = {};
+  exports.create = fn;
+  exports.destroy = fn;
+  exports.parse = fn;
+  exports.find = fn;
+  exports.registerPlugin = fn;
+  exports.getOptions = fn;
+  exports.setOptions = fn;
+  exports.FileOrigin = {};
+
+  // if not supported, no API
+  if (supported()) {
+    // start painter and fire load event
+    if (isBrowser) {
+      // app painter, cannot be paused or stopped at the moment
+      createPainter(createUpdater(state.apps, '_read', '_write'), 60);
+
+      // fire loaded event so we know when FilePond is available
+      var dispatch = function dispatch() {
+        // let others know we have area ready
+        document.dispatchEvent(
+          new CustomEvent('FilePond:loaded', {
+            detail: {
+              supported: supported,
+              create: exports.create,
+              destroy: exports.destroy,
+              parse: exports.parse,
+              find: exports.find,
+              registerPlugin: exports.registerPlugin,
+              setOptions: exports.setOptions
+            }
+          })
+        );
+
+        // clean up event
+        document.removeEventListener('DOMContentLoaded', dispatch);
+      };
+
+      if (document.readyState !== 'loading') {
+        // move to back of execution queue, FilePond should have been exported by then
+        setTimeout(function() {
+          return dispatch();
+        }, 0);
+      } else {
+        document.addEventListener('DOMContentLoaded', dispatch);
+      }
     }
 
-    // register plugins
-    plugins.forEach(createAppPlugin);
+    // updates the OptionTypes object based on the current options
+    var updateOptionTypes = function updateOptionTypes() {
+      return forin(getOptions$1(), function(key, value) {
+        exports.OptionTypes[key] = value[1];
+      });
+    };
 
-    // update OptionTypes, each plugin might have extended the default options
+    exports.FileOrigin = Object.assign({}, FileOrigin$1);
+    exports.FileStatus = Object.assign({}, ItemStatus);
+
+    exports.OptionTypes = {};
     updateOptionTypes();
-  };
 
-  var getOptions$$1 = function getOptions$$1() {
-    var opts = {};
-    forin(getOptions$1(), function(key, value) {
-      opts[key] = value[0];
-    });
-    return opts;
-  };
+    // create method, creates apps and adds them to the app array
+    exports.create = function create() {
+      var app = createApp.apply(undefined, arguments);
+      app.on('destroy', exports.destroy);
+      state.apps.push(app);
+      return createAppAPI(app);
+    };
 
-  var setOptions$$1 = function setOptions$$1(opts) {
-    if (isObject(opts)) {
-      // update existing plugins
-      state.apps.forEach(function(app) {
-        app.setOptions(opts);
+    // destroys apps and removes them from the app array
+    exports.destroy = function destroy(hook) {
+      // returns true if the app was destroyed successfully
+      var indexToRemove = state.apps.findIndex(function(app) {
+        return app.isAttachedTo(hook);
+      });
+      if (indexToRemove >= 0) {
+        // remove from apps
+        var app = state.apps.splice(indexToRemove, 1)[0];
+
+        // restore original dom element
+        app.restoreElement();
+
+        return true;
+      }
+
+      return false;
+    };
+
+    // parses the given context for plugins (does not include the context element itself)
+    exports.parse = function parse(context) {
+      // get all possible hooks
+      var matchedHooks = [].concat(
+        toConsumableArray(context.querySelectorAll('.' + name))
+      );
+
+      // filter out already active hooks
+      var newHooks = matchedHooks.filter(function(newHook) {
+        return !state.apps.find(function(app) {
+          return app.isAttachedTo(newHook);
+        });
       });
 
-      // override defaults
-      setOptions$1(opts);
-    }
+      // create new instance for each hook
+      return newHooks.map(function(hook) {
+        return exports.create(hook);
+      });
+    };
 
-    // return new options
-    return getOptions$$1();
-  };
+    // returns an app based on the given element hook
+    exports.find = function find(hook) {
+      var app = state.apps.find(function(app) {
+        return app.isAttachedTo(hook);
+      });
+      if (!app) {
+        return null;
+      }
+      return createAppAPI(app);
+    };
 
-  exports.FileStatus = FileStatus;
-  exports.OptionTypes = OptionTypes;
-  exports.create = create;
-  exports.destroy = destroy;
-  exports.parse = parse;
-  exports.find = find;
+    // adds a plugin extension
+    exports.registerPlugin = function registerPlugin() {
+      for (
+        var _len = arguments.length, plugins = Array(_len), _key = 0;
+        _key < _len;
+        _key++
+      ) {
+        plugins[_key] = arguments[_key];
+      }
+
+      // register plugins
+      plugins.forEach(createAppPlugin);
+
+      // update OptionTypes, each plugin might have extended the default options
+      updateOptionTypes();
+    };
+
+    exports.getOptions = function getOptions$$1() {
+      var opts = {};
+      forin(getOptions$1(), function(key, value) {
+        opts[key] = value[0];
+      });
+      return opts;
+    };
+
+    exports.setOptions = function setOptions$$1(opts) {
+      if (isObject(opts)) {
+        // update existing plugins
+        state.apps.forEach(function(app) {
+          app.setOptions(opts);
+        });
+
+        // override defaults
+        setOptions$1(opts);
+      }
+
+      // return new options
+      return exports.getOptions();
+    };
+  }
+
   exports.supported = supported;
-  exports.registerPlugin = registerPlugin;
-  exports.getOptions = getOptions$$1;
-  exports.setOptions = setOptions$$1;
-  exports.FileOrigin = FileOrigin;
 
   Object.defineProperty(exports, '__esModule', { value: true });
 });

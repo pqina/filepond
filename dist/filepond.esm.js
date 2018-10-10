@@ -1,5 +1,5 @@
 /*
- * FilePond 3.0.3
+ * FilePond 3.0.4
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2914,7 +2914,7 @@ const createFileStub = source => {
   };
 };
 
-const FileOrigin = {
+const FileOrigin$1 = {
   INPUT: 1,
   LIMBO: 2,
   LOCAL: 3
@@ -3027,7 +3027,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
         state.file = result;
 
         // file received
-        if (origin === FileOrigin.LIMBO && state.serverFileReference) {
+        if (origin === FileOrigin$1.LIMBO && state.serverFileReference) {
           setStatus(ItemStatus.PROCESSING_COMPLETE);
         } else {
           setStatus(ItemStatus.IDLE);
@@ -3574,13 +3574,13 @@ const actions = (dispatch, query, state) => ({
     // where did the file originate
     const origin =
       options.type === 'local'
-        ? FileOrigin.LOCAL
-        : options.type === 'limbo' ? FileOrigin.LIMBO : FileOrigin.INPUT;
+        ? FileOrigin$1.LOCAL
+        : options.type === 'limbo' ? FileOrigin$1.LIMBO : FileOrigin$1.INPUT;
 
     // create a new blank item
     const item = createItem(
       origin,
-      origin === FileOrigin.INPUT ? null : source,
+      origin === FileOrigin$1.INPUT ? null : source,
       options.file
     );
 
@@ -3763,13 +3763,13 @@ const actions = (dispatch, query, state) => ({
 
       // this creates a function that loads the file based on the type of file (string, base64, blob, file) and location of file (local, remote, limbo)
       createFileLoader(
-        origin === FileOrigin.INPUT
+        origin === FileOrigin$1.INPUT
           ? // input
             isString(source) && isExternalURL(source)
             ? createFetchFunction(url, fetch) // remote url
             : fetchLocal // local url
           : // limbo or local
-            origin === FileOrigin.LIMBO
+            origin === FileOrigin$1.LIMBO
             ? createFetchFunction(url, restore) // limbo
             : createFetchFunction(url, load) // local
       ),
@@ -3805,7 +3805,7 @@ const actions = (dispatch, query, state) => ({
     dispatch('DID_LOAD_ITEM', {
       id: item.id,
       error: null,
-      serverFileReference: item.origin === FileOrigin.INPUT ? null : source
+      serverFileReference: item.origin === FileOrigin$1.INPUT ? null : source
     });
 
     // item has been successfully loaded and added to the
@@ -3813,13 +3813,13 @@ const actions = (dispatch, query, state) => ({
     success(createItemAPI(item));
 
     // if this is a local server file we need to show a different state
-    if (item.origin === FileOrigin.LOCAL) {
+    if (item.origin === FileOrigin$1.LOCAL) {
       dispatch('DID_LOAD_LOCAL_ITEM', { id: item.id });
       return;
     }
 
     // if is a temp server file we prevent async upload call here (as the file is already on the server)
-    if (item.origin === FileOrigin.LIMBO) {
+    if (item.origin === FileOrigin$1.LIMBO) {
       dispatch('DID_COMPLETE_ITEM_PROCESSING', {
         id: item.id,
         error: null,
@@ -7452,6 +7452,34 @@ const createAppPlugin = plugin => {
   extendDefaultOptions(pluginOutline.options);
 };
 
+// feature detection used by supported() method
+const isOperaMini = () =>
+  Object.prototype.toString.call(window.operamini) === '[object OperaMini]';
+const hasPromises = () => 'Promise' in window;
+const hasBlobSlice = () => 'slice' in Blob.prototype;
+const hasCreateObjectURL = () =>
+  'URL' in window && 'createObjectURL' in window.URL;
+const hasVisibility = () => 'visibilityState' in document;
+const hasTiming = () => 'performance' in window; // iOS 8.x
+const isBrowser = () =>
+  typeof window !== 'undefined' && typeof window.document !== 'undefined';
+
+const supported = (() => {
+  const isSupported = !// Can't run on Opera Mini due to lack of everything
+  (
+    isOperaMini() ||
+    // Can't run on Node
+    !isBrowser() ||
+    // Require these APIs to feature detect a modern browser
+    !hasVisibility() ||
+    !hasPromises() ||
+    !hasBlobSlice() ||
+    !hasCreateObjectURL() ||
+    !hasTiming()
+  );
+  return () => isSupported;
+})();
+
 /**
  * Plugin internal state (over all instances)
  */
@@ -7463,172 +7491,160 @@ const state = {
 // plugin name
 const name = 'filepond';
 
-// is in browser
-const isBrowser =
-  typeof window !== 'undefined' && typeof window.document !== 'undefined';
-
-// start painter and fire load event
-if (isBrowser) {
-  // app painter, cannot be paused or stopped at the moment
-  createPainter(createUpdater(state.apps, '_read', '_write'), 60);
-
-  // fire loaded event so we know when FilePond is available
-  const dispatch = () => {
-    // let others know we have area ready
-    document.dispatchEvent(
-      new CustomEvent('FilePond:loaded', {
-        detail: {
-          supported,
-          create,
-          destroy,
-          parse,
-          find,
-          registerPlugin,
-          setOptions: setOptions$$1
-        }
-      })
-    );
-
-    // clean up event
-    document.removeEventListener('DOMContentLoaded', dispatch);
-  };
-
-  if (document.readyState !== 'loading') {
-    // move to back of execution queue, FilePond should have been exported by then
-    setTimeout(() => dispatch(), 0);
-  } else {
-    document.addEventListener('DOMContentLoaded', dispatch);
-  }
-}
-
-// updates the OptionTypes object based on the current options
-const updateOptionTypes = () =>
-  forin(getOptions$1(), (key, value) => {
-    OptionTypes[key] = value[1];
-  });
-
 /**
  * Public Plugin methods
  */
-const FileStatus = Object.assign({}, ItemStatus);
+const fn = () => {};
+let FileStatus = {};
+let OptionTypes = {};
+let create = fn;
+let destroy = fn;
+let parse = fn;
+let find = fn;
+let registerPlugin = fn;
+let getOptions = fn;
+let setOptions = fn;
+let FileOrigin = {};
 
-const OptionTypes = {};
-updateOptionTypes();
+// if not supported, no API
+if (supported()) {
+  // start painter and fire load event
+  if (isBrowser) {
+    // app painter, cannot be paused or stopped at the moment
+    createPainter(createUpdater(state.apps, '_read', '_write'), 60);
 
-// create method, creates apps and adds them to the app array
-const create = (...args) => {
-  const app = createApp(...args);
-  app.on('destroy', destroy);
-  state.apps.push(app);
-  return createAppAPI(app);
-};
+    // fire loaded event so we know when FilePond is available
+    const dispatch = () => {
+      // let others know we have area ready
+      document.dispatchEvent(
+        new CustomEvent('FilePond:loaded', {
+          detail: {
+            supported,
+            create,
+            destroy,
+            parse,
+            find,
+            registerPlugin,
+            setOptions
+          }
+        })
+      );
 
-// destroys apps and removes them from the app array
-const destroy = hook => {
-  // returns true if the app was destroyed successfully
-  const indexToRemove = state.apps.findIndex(app => app.isAttachedTo(hook));
-  if (indexToRemove >= 0) {
-    // remove from apps
-    const app = state.apps.splice(indexToRemove, 1)[0];
+      // clean up event
+      document.removeEventListener('DOMContentLoaded', dispatch);
+    };
 
-    // restore original dom element
-    app.restoreElement();
-
-    return true;
+    if (document.readyState !== 'loading') {
+      // move to back of execution queue, FilePond should have been exported by then
+      setTimeout(() => dispatch(), 0);
+    } else {
+      document.addEventListener('DOMContentLoaded', dispatch);
+    }
   }
 
-  return false;
-};
-
-// parses the given context for plugins (does not include the context element itself)
-const parse = context => {
-  // get all possible hooks
-  const matchedHooks = [...context.querySelectorAll(`.${name}`)];
-
-  // filter out already active hooks
-  const newHooks = matchedHooks.filter(
-    newHook => !state.apps.find(app => app.isAttachedTo(newHook))
-  );
-
-  // create new instance for each hook
-  return newHooks.map(hook => create(hook));
-};
-
-// returns an app based on the given element hook
-const find = hook => {
-  const app = state.apps.find(app => app.isAttachedTo(hook));
-  if (!app) {
-    return null;
-  }
-  return createAppAPI(app);
-};
-
-// returns true if plugin is supported
-const isOperaMini = () =>
-  Object.prototype.toString.call(window.operamini) === '[object OperaMini]';
-const hasPromises = () => 'Promise' in window;
-const hasBlobSlice = () => 'slice' in Blob.prototype;
-const hasCreateObjectURL = () =>
-  'URL' in window && 'createObjectURL' in window.URL;
-const hasVisibility = () => 'visibilityState' in document;
-const hasTiming = () => 'performance' in window; // iOS 8.x
-
-const supported = () => {
-  if (!isBrowser) {
-    return false;
-  }
-  return !(
-    isOperaMini() ||
-    !hasVisibility() ||
-    !hasPromises() ||
-    !hasBlobSlice() ||
-    !hasCreateObjectURL() ||
-    !hasTiming()
-  );
-};
-
-// adds a plugin extension
-const registerPlugin = (...plugins) => {
-  // register plugins
-  plugins.forEach(createAppPlugin);
-
-  // update OptionTypes, each plugin might have extended the default options
-  updateOptionTypes();
-};
-
-const getOptions$$1 = () => {
-  const opts = {};
-  forin(getOptions$1(), (key, value) => {
-    opts[key] = value[0];
-  });
-  return opts;
-};
-
-const setOptions$$1 = opts => {
-  if (isObject(opts)) {
-    // update existing plugins
-    state.apps.forEach(app => {
-      app.setOptions(opts);
+  // updates the OptionTypes object based on the current options
+  const updateOptionTypes = () =>
+    forin(getOptions$1(), (key, value) => {
+      OptionTypes[key] = value[1];
     });
 
-    // override defaults
-    setOptions$1(opts);
-  }
+  FileOrigin = Object.assign({}, FileOrigin$1);
+  FileStatus = Object.assign({}, ItemStatus);
 
-  // return new options
-  return getOptions$$1();
-};
+  OptionTypes = {};
+  updateOptionTypes();
+
+  // create method, creates apps and adds them to the app array
+  create = (...args) => {
+    const app = createApp(...args);
+    app.on('destroy', destroy);
+    state.apps.push(app);
+    return createAppAPI(app);
+  };
+
+  // destroys apps and removes them from the app array
+  destroy = hook => {
+    // returns true if the app was destroyed successfully
+    const indexToRemove = state.apps.findIndex(app => app.isAttachedTo(hook));
+    if (indexToRemove >= 0) {
+      // remove from apps
+      const app = state.apps.splice(indexToRemove, 1)[0];
+
+      // restore original dom element
+      app.restoreElement();
+
+      return true;
+    }
+
+    return false;
+  };
+
+  // parses the given context for plugins (does not include the context element itself)
+  parse = context => {
+    // get all possible hooks
+    const matchedHooks = [...context.querySelectorAll(`.${name}`)];
+
+    // filter out already active hooks
+    const newHooks = matchedHooks.filter(
+      newHook => !state.apps.find(app => app.isAttachedTo(newHook))
+    );
+
+    // create new instance for each hook
+    return newHooks.map(hook => create(hook));
+  };
+
+  // returns an app based on the given element hook
+  find = hook => {
+    const app = state.apps.find(app => app.isAttachedTo(hook));
+    if (!app) {
+      return null;
+    }
+    return createAppAPI(app);
+  };
+
+  // adds a plugin extension
+  registerPlugin = (...plugins) => {
+    // register plugins
+    plugins.forEach(createAppPlugin);
+
+    // update OptionTypes, each plugin might have extended the default options
+    updateOptionTypes();
+  };
+
+  getOptions = () => {
+    const opts = {};
+    forin(getOptions$1(), (key, value) => {
+      opts[key] = value[0];
+    });
+    return opts;
+  };
+
+  setOptions = opts => {
+    if (isObject(opts)) {
+      // update existing plugins
+      state.apps.forEach(app => {
+        app.setOptions(opts);
+      });
+
+      // override defaults
+      setOptions$1(opts);
+    }
+
+    // return new options
+    return getOptions();
+  };
+}
 
 export {
+  supported,
   FileStatus,
   OptionTypes,
   create,
   destroy,
   parse,
   find,
-  supported,
   registerPlugin,
-  getOptions$$1 as getOptions,
-  setOptions$$1 as setOptions,
+  getOptions,
+  setOptions,
   FileOrigin
 };

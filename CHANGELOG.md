@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.0.4
+
+- Fix problem where feature detection would throw error on iOS 8.x
+
+
 ## 3.0.3
 
 - Fix problem with XMLHttpRequest timeout on Internet Explorer 11.
