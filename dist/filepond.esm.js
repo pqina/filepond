@@ -1,5 +1,5 @@
 /*
- * FilePond 3.1.0
+ * FilePond 3.1.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -3563,6 +3563,7 @@ const actions = (dispatch, query, state) => ({
         return;
       }
 
+      // let's replace the item
       // id of first item we're about to remove
       const item = state.items[0];
 
@@ -4806,6 +4807,8 @@ const create$11 = ({ root, props }) => {
   });
 
   root.element.classList.add(`filepond--${props.name}`);
+
+  root.ref.scalable = null;
 };
 
 const createSection = (root, section, className) => {
@@ -4821,14 +4824,16 @@ const createSection = (root, section, className) => {
 };
 
 const write$7 = ({ root, props }) => {
+  // update scalable state
+  if (root.ref.scalable === null || props.scalable !== root.ref.scalable) {
+    root.ref.scalable = isBoolean(props.scalable) ? props.scalable : true;
+    root.element.dataset.scalable = root.ref.scalable;
+  }
+
+  // no height, can't set
   if (!props.height) {
     return;
   }
-
-  // can it scale?
-  root.element.dataset.scalable = isBoolean(props.scalable)
-    ? props.scalable
-    : true;
 
   // get child rects
   const topRect = root.ref.top.rect.element;
@@ -4900,7 +4905,8 @@ const write$3 = ({ root, actions, props }) => {
 
   // set own height
   const aspectRatio = root.query('GET_PANEL_ASPECT_RATIO');
-  if (aspectRatio) {
+  const allowMultiple = root.query('GET_ALLOW_MULTIPLE');
+  if (aspectRatio && !allowMultiple) {
     root.height = root.rect.element.width * aspectRatio;
   } else {
     root.height = root.ref.controls.rect.inner.height;
@@ -5108,8 +5114,10 @@ const write$2 = ({ root, props, actions }) => {
         child.opacity = 1;
       }
 
-      const itemHeight =
-        childRect.element.height + childRect.element.marginBottom;
+      let itemHeight =
+        childRect.element.height +
+        childRect.element.marginTop +
+        childRect.element.marginBottom;
       const height = child.markedForRemoval
         ? itemHeight * child.opacity
         : itemHeight;
@@ -5237,7 +5245,10 @@ const listScroller = createView({
   name: 'list-scroller',
   mixins: {
     apis: ['overflow'],
-    styles: ['height', 'translateY']
+    styles: ['height', 'translateY'],
+    animations: {
+      translateY: 'spring'
+    }
   }
 });
 
@@ -5405,6 +5416,9 @@ const create$13 = ({ root, props }) => {
     }
   });
 
+  // update
+  updateLabelValue(label, props.caption);
+
   // add!
   root.appendChild(label);
   root.ref.label = label;
@@ -5421,14 +5435,14 @@ const updateLabelValue = (label, value) => {
 
 const dropLabel = createView({
   name: 'drop-label',
+  ignoreRect: true,
   create: create$13,
   write: createRoute({
-    DID_SET_LABEL_IDLE: ({ root, action, props }) => {
-      props.caption = updateLabelValue(root.ref.label, action.value);
+    DID_SET_LABEL_IDLE: ({ root, action }) => {
+      updateLabelValue(root.ref.label, action.value);
     }
   }),
   mixins: {
-    apis: ['caption'],
     styles: ['opacity', 'translateX', 'translateY'],
     animations: {
       opacity: { type: 'tween', duration: 150 },
@@ -6199,6 +6213,8 @@ const toCamels = (string, separator = '-') =>
     sub.charAt(1).toUpperCase()
   );
 
+const MAX_FILES_LIMIT = 1000000;
+
 const create$1 = ({ root, props }) => {
   // Add id
   const id = root.query('GET_ID');
@@ -6218,7 +6234,10 @@ const create$1 = ({ root, props }) => {
   root.ref.label = root.appendChildView(
     root.createChildView(
       dropLabel,
-      Object.assign({}, props, { translateY: null })
+      Object.assign({}, props, {
+        translateY: null,
+        caption: root.query('GET_LABEL_IDLE')
+      })
     )
   );
 
@@ -6243,6 +6262,9 @@ const create$1 = ({ root, props }) => {
   root.ref.measure.style.height = '100%';
   root.element.appendChild(root.ref.measure);
 
+  // information on the root height or fixed height status
+  root.ref.bounds = null;
+
   // apply initial style properties
   root
     .query('GET_STYLES')
@@ -6253,6 +6275,16 @@ const create$1 = ({ root, props }) => {
 };
 
 const write = ({ root, props, actions }) => {
+  // get box bounds, we do this only once
+  let bounds = root.ref.bounds;
+  if (!bounds) {
+    bounds = root.ref.bounds = calculateRootBoundingBoxHeight(root);
+
+    // destroy measure element
+    root.element.removeChild(root.ref.measure);
+    root.ref.measure = null;
+  }
+
   // route actions
   route({ root, props, actions });
 
@@ -6269,27 +6301,24 @@ const write = ({ root, props, actions }) => {
   // get quick references to various high level parts of the upload tool
   const { hopper, label, list, panel: panel$$1 } = root.ref;
 
+  // sets correct state to hopper scope
+  if (hopper) {
+    hopper.updateHopperState();
+  }
+
   // bool to indicate if we're full or not
-  const isMultiItem = root.query('GET_ALLOW_MULTIPLE');
   const aspectRatio = root.query('GET_PANEL_ASPECT_RATIO');
-  const panelLayout = root.query('GET_STYLE_PANEL_LAYOUT');
-  const labelCentered = !isEmpty(panelLayout);
+  const isMultiItem = root.query('GET_ALLOW_MULTIPLE');
   const totalItems = root.query('GET_TOTAL_ITEMS');
-  const maxItems = root.query('GET_MAX_FILES');
-  const atMaxCapacity = isMultiItem
-    ? totalItems === maxItems
-    : totalItems === 1;
-
-  // views not used in height calculation
-  const childrenUsedForBoundingCalculation = [...list.childViews[0].childViews];
-
-  // views used to calculate the visual height of the container (which is passed to panel)
-  const childrenUsedForVisualHeightCalculation = [list];
+  const maxItems = isMultiItem
+    ? root.query('GET_MAX_FILES') || MAX_FILES_LIMIT
+    : 1;
+  const atMaxCapacity = totalItems === maxItems;
 
   // action used to add item
   const addAction = actions.find(action => action.type === 'DID_ADD_ITEM');
 
-  // if at max capacity hide the label
+  // if reached max capacity and we've just reached it
   if (atMaxCapacity && addAction) {
     // get interaction type
     const interactionMethod = addAction.data.interactionMethod;
@@ -6297,11 +6326,9 @@ const write = ({ root, props, actions }) => {
     // hide label
     label.opacity = 0;
 
-    // if is multi-item, the label is always moved upwards
     if (isMultiItem) {
-      label.translateY = -label.rect.element.height;
+      label.translateY = -40;
     } else {
-      // based on interaction method we move label in different directions
       if (interactionMethod === InteractionMethod.API) {
         label.translateX = 40;
       } else if (interactionMethod === InteractionMethod.BROWSE) {
@@ -6311,166 +6338,177 @@ const write = ({ root, props, actions }) => {
       }
     }
   } else if (!atMaxCapacity) {
-    // reveal label
     label.opacity = 1;
-    label.translateY = labelCentered ? 0 : root.rect.element.paddingTop;
     label.translateX = 0;
-
-    // we use label for bounding box
-    childrenUsedForVisualHeightCalculation.push(label);
-    childrenUsedForBoundingCalculation.push(label);
+    label.translateY = 0;
   }
 
-  // sets correct state to hopper scope
-  if (hopper) {
-    hopper.updateHopperState();
-  }
+  const listItemMargin = calculateListItemMargin(root);
 
-  // need a label to do anything
-  if (!label.caption) {
-    return;
-  }
+  const listHeight = calculateListHeight(root, maxItems);
+  const labelHeight = label.rect.element.height;
+  const currentLabelHeight = !isMultiItem || atMaxCapacity ? 0 : labelHeight;
 
-  // link list to label bottom position (including bottom margin)
-  list.translateY = isMultiItem
-    ? label.rect.outer.bottom
-    : root.rect.element.paddingTop;
+  const listMarginTop = atMaxCapacity ? list.rect.element.marginTop : 0;
+  const listMarginBottom =
+    totalItems === 0 ? 0 : list.rect.element.marginBottom;
 
-  // update bounding box if has changed
-  const boxBounding = calculateRootBoundingBoxHeight(root, props);
-  const childrenBoundingHeight = calculateChildrenBoundingBoxHeight(
-    childrenUsedForBoundingCalculation
-  );
-  const visualHeight = calculateChildrenVisualHeight(
-    childrenUsedForVisualHeightCalculation
-  );
-  const bottomPadding = totalItems > 0 ? root.rect.element.paddingTop * 0.5 : 0;
+  const visualHeight =
+    currentLabelHeight + listMarginTop + listHeight.visual + listMarginBottom;
+  const boundsHeight =
+    currentLabelHeight + listMarginTop + listHeight.bounds + listMarginBottom;
+
+  // link list to label bottom position
+  list.translateY =
+    Math.max(0, currentLabelHeight - list.rect.element.marginTop) -
+    listItemMargin.top;
 
   if (aspectRatio) {
+    // fixed aspect ratio
+
+    // calculate height based on width
     const width = root.rect.element.width;
     const height = width * aspectRatio;
-    root.element.style.height = `${height}px`;
-    const listHeight = height - list.rect.outer.top;
+
+    // fix height of panel so it adheres to aspect ratio
     panel$$1.scalable = false;
-    panel$$1.height = height + root.rect.element.paddingTop;
-    list.overflow =
-      isMultiItem && childrenBoundingHeight > panel$$1.height
-        ? listHeight
-        : null;
-  } else if (boxBounding.fixedHeight) {
+    panel$$1.height = height;
+
+    // available height for list
+    const listAvailableHeight =
+      // the height of the panel minus the label height
+      height -
+      currentLabelHeight -
+      // the room we leave open between the end of the list and the panel bottom
+      (listMarginBottom - listItemMargin.bottom) -
+      // if we're full we need to leave some room between the top of the panel and the list
+      (atMaxCapacity ? listMarginTop : 0);
+
+    if (listHeight.visual > listAvailableHeight) {
+      list.overflow = listAvailableHeight;
+    } else {
+      list.overflow = null;
+    }
+
+    // set container bounds (so pushes siblings downwards)
+    root.height = height;
+  } else if (bounds.fixedHeight) {
     // fixed height
-    const height = boxBounding.fixedHeight;
 
-    // fixed height panel
+    // fix height of panel
     panel$$1.scalable = false;
 
-    // link panel height to box bounding
-    panel$$1.height = height + root.rect.element.paddingTop;
+    // available height for list
+    const listAvailableHeight =
+      // the height of the panel minus the label height
+      bounds.fixedHeight -
+      currentLabelHeight -
+      // the room we leave open between the end of the list and the panel bottom
+      (listMarginBottom - listItemMargin.bottom) -
+      // if we're full we need to leave some room between the top of the panel and the list
+      (atMaxCapacity ? listMarginTop : 0);
 
     // set list height
-    const listHeight = height - list.rect.outer.top;
+    if (listHeight.visual > listAvailableHeight) {
+      list.overflow = listAvailableHeight;
+    } else {
+      list.overflow = null;
+    }
 
-    // set overflow
-    list.overflow =
-      childrenBoundingHeight > panel$$1.height ? listHeight : null;
-  } else if (boxBounding.cappedHeight) {
+    // no need to set container bounds as these are handles by CSS fixed height
+  } else if (bounds.cappedHeight) {
     // max-height
 
     // not a fixed height panel
+    const isCappedHeight = visualHeight >= bounds.cappedHeight;
+    const panelHeight = Math.min(bounds.cappedHeight, visualHeight);
     panel$$1.scalable = true;
+    panel$$1.height = isCappedHeight
+      ? panelHeight
+      : panelHeight - listItemMargin.top - listItemMargin.bottom;
 
-    // limit children bounding height to the set capped height
-    const cappedChildrenBoundingHeight = Math.min(
-      boxBounding.cappedHeight,
-      childrenBoundingHeight
+    // available height for list
+    const listAvailableHeight =
+      // the height of the panel minus the label height
+      panelHeight -
+      currentLabelHeight -
+      // the room we leave open between the end of the list and the panel bottom
+      (listMarginBottom - listItemMargin.bottom) -
+      // if we're full we need to leave some room between the top of the panel and the list
+      (atMaxCapacity ? listMarginTop : 0);
+
+    // set list height (if is overflowing)
+    if (
+      visualHeight > bounds.cappedHeight &&
+      listHeight.visual > listAvailableHeight
+    ) {
+      list.overflow = listAvailableHeight;
+    } else {
+      list.overflow = null;
+    }
+
+    // set container bounds (so pushes siblings downwards)
+    root.height = Math.min(
+      bounds.cappedHeight,
+      boundsHeight - listItemMargin.top - listItemMargin.bottom
     );
-
-    // update root height
-    root.height =
-      cappedChildrenBoundingHeight +
-      bottomPadding +
-      root.rect.element.paddingTop;
-
-    const maxHeight = cappedChildrenBoundingHeight + bottomPadding;
-
-    // set visual height
-    panel$$1.height = Math.min(
-      boxBounding.cappedHeight,
-      visualHeight + bottomPadding
-    );
-
-    // set list height
-    const listHeight =
-      cappedChildrenBoundingHeight -
-      list.rect.outer.top -
-      root.rect.element.paddingTop;
-
-    // if can overflow, test if is currently overflowing
-    list.overflow = childrenBoundingHeight > maxHeight ? listHeight : null;
   } else {
     // flexible height
 
     // not a fixed height panel
+    const itemMargin =
+      totalItems > 0 ? listItemMargin.top + listItemMargin.bottom : 0;
     panel$$1.scalable = true;
+    panel$$1.height = Math.max(labelHeight, visualHeight - itemMargin);
 
-    // set to new bounding
-    root.height =
-      childrenBoundingHeight + bottomPadding + root.rect.element.paddingTop;
-
-    // set height to new visual height
-    panel$$1.height = visualHeight + bottomPadding;
+    // set container bounds (so pushes siblings downwards)
+    root.height = Math.max(labelHeight, boundsHeight - itemMargin);
   }
 };
 
-const calculateChildrenVisualHeight = children => {
-  return (
-    children
-
-      // calculate the total height occupied by all children
-      .reduce((max, child) => {
-        const bottom = child.rect.outer.bottom;
-        if (bottom > max) {
-          max = bottom;
-        }
-        return max;
-      }, 0)
-  );
+const calculateListItemMargin = root => {
+  const item = root.ref.list.childViews[0].childViews[0];
+  return item
+    ? {
+        top: item.rect.element.marginTop,
+        bottom: item.rect.element.marginBottom
+      }
+    : {
+        top: 0,
+        bottom: 0
+      };
 };
 
-const calculateRootBoundingBoxHeight = (root, props) => {
-  // only calculate first time
-  if (props.boxBounding) {
-    return props.boxBounding;
-  }
+const calculateListHeight = (root, maxItems) => {
+  let visual = 0;
+  let bounds = 0;
 
+  root.ref.list.childViews[0].childViews.forEach((item, index) => {
+    // don't count items above max items list
+    if (index >= maxItems) return;
+
+    // calculate the total height of all items in the list
+    const rect = item.rect.element;
+    const itemHeight = rect.height + rect.marginTop + rect.marginBottom;
+    bounds += itemHeight;
+    visual += item.markedForRemoval ? item.opacity * itemHeight : itemHeight;
+  });
+
+  return {
+    visual,
+    bounds
+  };
+};
+
+const calculateRootBoundingBoxHeight = root => {
   const height = root.ref.measureHeight || null;
   const cappedHeight = parseInt(root.style.maxHeight, 10) || null;
   const fixedHeight = height === 0 ? null : height;
 
-  props.boxBounding = {
+  return {
     cappedHeight,
     fixedHeight
   };
-
-  // destroy measure element
-  root.element.removeChild(root.ref.measure);
-  root.ref.measure = null;
-
-  // done!
-  return props.boxBounding;
-};
-
-const calculateChildrenBoundingBoxHeight = children => {
-  return (
-    children
-
-      // no use of outer and inner as that includes translations
-      .reduce(
-        (height, child) =>
-          height + child.rect.inner.bottom + child.rect.element.marginBottom,
-        0
-      )
-  );
 };
 
 const exceedsMaxFiles = (root, items) => {

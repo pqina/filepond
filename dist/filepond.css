@@ -1,5 +1,5 @@
 /*
- * FilePond 3.1.0
+ * FilePond 3.1.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -60,8 +60,15 @@
   left: 1em;
   right: 1em;
   top: 0;
-  margin: 0 0 1em 0;
+  margin: 0;
   color: #4f4f4f;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-align: center;
+  align-items: center;
+  height: 0px;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -71,9 +78,8 @@
 
 .filepond--drop-label label {
   display: block;
-  padding: 1em 0;
-  margin: 0;
   cursor: default;
+  padding: 0.5em;
   font-size: 0.875em;
   font-weight: normal;
   text-align: center;
@@ -461,7 +467,8 @@
   z-index: 1;
   padding: 0;
   margin: 0;
-  margin-bottom: 0.5em;
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
   will-change: transform, opacity;
 }
 .filepond--item > .filepond--panel {
@@ -500,8 +507,14 @@
 
 .filepond--list-scroller[data-state='overflow'] {
   overflow-y: scroll;
-  overflow-x: visible;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  -webkit-mask: linear-gradient(
+    to bottom,
+    #000 calc(100% - 0.5em),
+    transparent 100%
+  );
+  mask: linear-gradient(to bottom, #000 calc(100% - 0.5em), transparent 100%);
 }
 .filepond--list-scroller[data-state='overflow'] .filepond--list {
   bottom: 0;
@@ -545,30 +558,33 @@
   margin: 0;
 }
 
-.filepond--root[data-style-panel-layout~='compact'],
-.filepond--root[data-style-panel-layout~='integrated'] {
-  padding: 0;
-}
 .filepond--root[data-style-panel-layout~='compact'] .filepond--list-scroller,
 .filepond--root[data-style-panel-layout~='integrated']
   .filepond--list-scroller {
   overflow: hidden;
   height: 100%;
+  margin-top: 0;
+  margin-bottom: 0;
 }
+
 .filepond--root[data-style-panel-layout~='compact'] .filepond--list,
 .filepond--root[data-style-panel-layout~='integrated'] .filepond--list {
   left: 0;
   right: 0;
   height: 100%;
 }
+
 .filepond--root[data-style-panel-layout~='compact'] .filepond--item,
 .filepond--root[data-style-panel-layout~='integrated'] .filepond--item {
+  margin-top: 0;
   margin-bottom: 0;
 }
+
 .filepond--root[data-style-panel-layout~='compact'] .filepond--file-wrapper,
 .filepond--root[data-style-panel-layout~='integrated'] .filepond--file-wrapper {
   height: 100%;
 }
+
 .filepond--root[data-style-panel-layout~='compact'] .filepond--panel-root,
 .filepond--root[data-style-panel-layout~='integrated'] .filepond--panel-root {
   border-radius: 0;
@@ -579,10 +595,11 @@
   > * {
   display: none;
 }
+
 .filepond--root[data-style-panel-layout~='compact'] .filepond--drop-label,
 .filepond--root[data-style-panel-layout~='integrated'] .filepond--drop-label {
   bottom: 0;
-  margin-bottom: 0;
+  height: auto;
   display: -ms-flexbox;
   display: flex;
   -ms-flex-pack: center;
@@ -591,6 +608,7 @@
   align-items: center;
   z-index: 7;
 }
+
 .filepond--root[data-style-panel-layout~='compact'] .filepond--item-panel,
 .filepond--root[data-style-panel-layout~='integrated'] .filepond--item-panel {
   display: none;
@@ -624,8 +642,16 @@
   top: 0;
   right: 0;
   margin: 0;
-  height: auto !important;
+  height: 100% !important;
   pointer-events: none;
+}
+
+.filepond-panel:not([data-scalable='false']) {
+  height: auto !important;
+}
+
+.filepond--panel[data-scalable='false'] > div {
+  display: none;
 }
 
 .filepond--panel[data-scalable='true'] {
@@ -633,13 +659,6 @@
   transform-style: preserve-3d;
   background-color: transparent !important;
   border: none !important;
-}
-
-.filepond--panel[data-scalable='false'] {
-  bottom: 0;
-}
-.filepond--panel[data-scalable='false'] > div {
-  display: none;
 }
 
 .filepond--panel-top,
@@ -756,7 +775,6 @@
   box-sizing: border-box;
   position: relative;
   margin-bottom: 1em;
-  padding-top: 1em;
   /* base font size for whole component */
   font-size: 1rem;
   /* base line height */
@@ -775,4 +793,16 @@
   font-size: inherit;
   box-sizing: inherit;
   line-height: inherit;
+}
+
+/**
+ * Root element children layout
+ */
+.filepond--root .filepond--drop-label {
+  min-height: 4.75em;
+}
+
+.filepond--root .filepond--list-scroller {
+  margin-top: 1em;
+  margin-bottom: 1em;
 }

@@ -1,5 +1,5 @@
 /*
- * FilePond 3.1.0
+ * FilePond 3.1.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -4257,6 +4257,7 @@ function signature:
             return;
           }
 
+          // let's replace the item
           // id of first item we're about to remove
           var _item = state.items[0];
 
@@ -5686,6 +5687,8 @@ function signature:
     });
 
     root.element.classList.add('filepond--' + props.name);
+
+    root.ref.scalable = null;
   };
 
   var createSection = function createSection(root, section, className) {
@@ -5704,14 +5707,16 @@ function signature:
     var root = _ref2.root,
       props = _ref2.props;
 
+    // update scalable state
+    if (root.ref.scalable === null || props.scalable !== root.ref.scalable) {
+      root.ref.scalable = isBoolean(props.scalable) ? props.scalable : true;
+      root.element.dataset.scalable = root.ref.scalable;
+    }
+
+    // no height, can't set
     if (!props.height) {
       return;
     }
-
-    // can it scale?
-    root.element.dataset.scalable = isBoolean(props.scalable)
-      ? props.scalable
-      : true;
 
     // get child rects
     var topRect = root.ref.top.rect.element;
@@ -5791,7 +5796,8 @@ function signature:
 
     // set own height
     var aspectRatio = root.query('GET_PANEL_ASPECT_RATIO');
-    if (aspectRatio) {
+    var allowMultiple = root.query('GET_ALLOW_MULTIPLE');
+    if (aspectRatio && !allowMultiple) {
       root.height = root.rect.element.width * aspectRatio;
     } else {
       root.height = root.ref.controls.rect.inner.height;
@@ -6033,7 +6039,9 @@ function signature:
         }
 
         var itemHeight =
-          childRect.element.height + childRect.element.marginBottom;
+          childRect.element.height +
+          childRect.element.marginTop +
+          childRect.element.marginBottom;
         var height = child.markedForRemoval
           ? itemHeight * child.opacity
           : itemHeight;
@@ -6180,7 +6188,10 @@ function signature:
     name: 'list-scroller',
     mixins: {
       apis: ['overflow'],
-      styles: ['height', 'translateY']
+      styles: ['height', 'translateY'],
+      animations: {
+        translateY: 'spring'
+      }
     }
   });
 
@@ -6376,6 +6387,9 @@ function signature:
       }
     });
 
+    // update
+    updateLabelValue(label, props.caption);
+
     // add!
     root.appendChild(label);
     root.ref.label = label;
@@ -6392,18 +6406,17 @@ function signature:
 
   var dropLabel = createView({
     name: 'drop-label',
+    ignoreRect: true,
     create: create$13,
     write: createRoute({
       DID_SET_LABEL_IDLE: function DID_SET_LABEL_IDLE(_ref2) {
         var root = _ref2.root,
-          action = _ref2.action,
-          props = _ref2.props;
+          action = _ref2.action;
 
-        props.caption = updateLabelValue(root.ref.label, action.value);
+        updateLabelValue(root.ref.label, action.value);
       }
     }),
     mixins: {
-      apis: ['caption'],
       styles: ['opacity', 'translateX', 'translateY'],
       animations: {
         opacity: { type: 'tween', duration: 150 },
@@ -7281,6 +7294,8 @@ function signature:
     });
   };
 
+  var MAX_FILES_LIMIT = 1000000;
+
   var create$1 = function create(_ref) {
     var root = _ref.root,
       props = _ref.props;
@@ -7303,7 +7318,10 @@ function signature:
     root.ref.label = root.appendChildView(
       root.createChildView(
         dropLabel,
-        Object.assign({}, props, { translateY: null })
+        Object.assign({}, props, {
+          translateY: null,
+          caption: root.query('GET_LABEL_IDLE')
+        })
       )
     );
 
@@ -7328,6 +7346,9 @@ function signature:
     root.ref.measure.style.height = '100%';
     root.element.appendChild(root.ref.measure);
 
+    // information on the root height or fixed height status
+    root.ref.bounds = null;
+
     // apply initial style properties
     root
       .query('GET_STYLES')
@@ -7346,6 +7367,16 @@ function signature:
     var root = _ref3.root,
       props = _ref3.props,
       actions = _ref3.actions;
+
+    // get box bounds, we do this only once
+    var bounds = root.ref.bounds;
+    if (!bounds) {
+      bounds = root.ref.bounds = calculateRootBoundingBoxHeight(root);
+
+      // destroy measure element
+      root.element.removeChild(root.ref.measure);
+      root.ref.measure = null;
+    }
 
     // route actions
     route({ root: root, props: props, actions: actions });
@@ -7374,32 +7405,27 @@ function signature:
       list = _root$ref.list,
       panel$$1 = _root$ref.panel;
 
+    // sets correct state to hopper scope
+
+    if (hopper) {
+      hopper.updateHopperState();
+    }
+
     // bool to indicate if we're full or not
-
-    var isMultiItem = root.query('GET_ALLOW_MULTIPLE');
     var aspectRatio = root.query('GET_PANEL_ASPECT_RATIO');
-    var panelLayout = root.query('GET_STYLE_PANEL_LAYOUT');
-    var labelCentered = !isEmpty(panelLayout);
+    var isMultiItem = root.query('GET_ALLOW_MULTIPLE');
     var totalItems = root.query('GET_TOTAL_ITEMS');
-    var maxItems = root.query('GET_MAX_FILES');
-    var atMaxCapacity = isMultiItem
-      ? totalItems === maxItems
-      : totalItems === 1;
-
-    // views not used in height calculation
-    var childrenUsedForBoundingCalculation = [].concat(
-      toConsumableArray(list.childViews[0].childViews)
-    );
-
-    // views used to calculate the visual height of the container (which is passed to panel)
-    var childrenUsedForVisualHeightCalculation = [list];
+    var maxItems = isMultiItem
+      ? root.query('GET_MAX_FILES') || MAX_FILES_LIMIT
+      : 1;
+    var atMaxCapacity = totalItems === maxItems;
 
     // action used to add item
     var addAction = actions.find(function(action) {
       return action.type === 'DID_ADD_ITEM';
     });
 
-    // if at max capacity hide the label
+    // if reached max capacity and we've just reached it
     if (atMaxCapacity && addAction) {
       // get interaction type
       var interactionMethod = addAction.data.interactionMethod;
@@ -7407,11 +7433,9 @@ function signature:
       // hide label
       label.opacity = 0;
 
-      // if is multi-item, the label is always moved upwards
       if (isMultiItem) {
-        label.translateY = -label.rect.element.height;
+        label.translateY = -40;
       } else {
-        // based on interaction method we move label in different directions
         if (interactionMethod === InteractionMethod.API) {
           label.translateX = 40;
         } else if (interactionMethod === InteractionMethod.BROWSE) {
@@ -7421,173 +7445,179 @@ function signature:
         }
       }
     } else if (!atMaxCapacity) {
-      // reveal label
       label.opacity = 1;
-      label.translateY = labelCentered ? 0 : root.rect.element.paddingTop;
       label.translateX = 0;
-
-      // we use label for bounding box
-      childrenUsedForVisualHeightCalculation.push(label);
-      childrenUsedForBoundingCalculation.push(label);
+      label.translateY = 0;
     }
 
-    // sets correct state to hopper scope
-    if (hopper) {
-      hopper.updateHopperState();
-    }
+    var listItemMargin = calculateListItemMargin(root);
 
-    // need a label to do anything
-    if (!label.caption) {
-      return;
-    }
+    var listHeight = calculateListHeight(root, maxItems);
+    var labelHeight = label.rect.element.height;
+    var currentLabelHeight = !isMultiItem || atMaxCapacity ? 0 : labelHeight;
 
-    // link list to label bottom position (including bottom margin)
-    list.translateY = isMultiItem
-      ? label.rect.outer.bottom
-      : root.rect.element.paddingTop;
+    var listMarginTop = atMaxCapacity ? list.rect.element.marginTop : 0;
+    var listMarginBottom =
+      totalItems === 0 ? 0 : list.rect.element.marginBottom;
 
-    // update bounding box if has changed
-    var boxBounding = calculateRootBoundingBoxHeight(root, props);
-    var childrenBoundingHeight = calculateChildrenBoundingBoxHeight(
-      childrenUsedForBoundingCalculation
-    );
-    var visualHeight = calculateChildrenVisualHeight(
-      childrenUsedForVisualHeightCalculation
-    );
-    var bottomPadding = totalItems > 0 ? root.rect.element.paddingTop * 0.5 : 0;
+    var visualHeight =
+      currentLabelHeight + listMarginTop + listHeight.visual + listMarginBottom;
+    var boundsHeight =
+      currentLabelHeight + listMarginTop + listHeight.bounds + listMarginBottom;
+
+    // link list to label bottom position
+    list.translateY =
+      Math.max(0, currentLabelHeight - list.rect.element.marginTop) -
+      listItemMargin.top;
 
     if (aspectRatio) {
+      // fixed aspect ratio
+
+      // calculate height based on width
       var width = root.rect.element.width;
       var height = width * aspectRatio;
-      root.element.style.height = height + 'px';
-      var listHeight = height - list.rect.outer.top;
+
+      // fix height of panel so it adheres to aspect ratio
       panel$$1.scalable = false;
-      panel$$1.height = height + root.rect.element.paddingTop;
-      list.overflow =
-        isMultiItem && childrenBoundingHeight > panel$$1.height
-          ? listHeight
-          : null;
-    } else if (boxBounding.fixedHeight) {
+      panel$$1.height = height;
+
+      // available height for list
+      var listAvailableHeight =
+        // the height of the panel minus the label height
+        height -
+        currentLabelHeight -
+        // the room we leave open between the end of the list and the panel bottom
+        (listMarginBottom - listItemMargin.bottom) -
+        // if we're full we need to leave some room between the top of the panel and the list
+        (atMaxCapacity ? listMarginTop : 0);
+
+      if (listHeight.visual > listAvailableHeight) {
+        list.overflow = listAvailableHeight;
+      } else {
+        list.overflow = null;
+      }
+
+      // set container bounds (so pushes siblings downwards)
+      root.height = height;
+    } else if (bounds.fixedHeight) {
       // fixed height
-      var _height = boxBounding.fixedHeight;
 
-      // fixed height panel
+      // fix height of panel
       panel$$1.scalable = false;
 
-      // link panel height to box bounding
-      panel$$1.height = _height + root.rect.element.paddingTop;
+      // available height for list
+      var _listAvailableHeight =
+        // the height of the panel minus the label height
+        bounds.fixedHeight -
+        currentLabelHeight -
+        // the room we leave open between the end of the list and the panel bottom
+        (listMarginBottom - listItemMargin.bottom) -
+        // if we're full we need to leave some room between the top of the panel and the list
+        (atMaxCapacity ? listMarginTop : 0);
 
       // set list height
-      var _listHeight = _height - list.rect.outer.top;
+      if (listHeight.visual > _listAvailableHeight) {
+        list.overflow = _listAvailableHeight;
+      } else {
+        list.overflow = null;
+      }
 
-      // set overflow
-      list.overflow =
-        childrenBoundingHeight > panel$$1.height ? _listHeight : null;
-    } else if (boxBounding.cappedHeight) {
+      // no need to set container bounds as these are handles by CSS fixed height
+    } else if (bounds.cappedHeight) {
       // max-height
 
       // not a fixed height panel
+      var isCappedHeight = visualHeight >= bounds.cappedHeight;
+      var panelHeight = Math.min(bounds.cappedHeight, visualHeight);
       panel$$1.scalable = true;
+      panel$$1.height = isCappedHeight
+        ? panelHeight
+        : panelHeight - listItemMargin.top - listItemMargin.bottom;
 
-      // limit children bounding height to the set capped height
-      var cappedChildrenBoundingHeight = Math.min(
-        boxBounding.cappedHeight,
-        childrenBoundingHeight
+      // available height for list
+      var _listAvailableHeight2 =
+        // the height of the panel minus the label height
+        panelHeight -
+        currentLabelHeight -
+        // the room we leave open between the end of the list and the panel bottom
+        (listMarginBottom - listItemMargin.bottom) -
+        // if we're full we need to leave some room between the top of the panel and the list
+        (atMaxCapacity ? listMarginTop : 0);
+
+      // set list height (if is overflowing)
+      if (
+        visualHeight > bounds.cappedHeight &&
+        listHeight.visual > _listAvailableHeight2
+      ) {
+        list.overflow = _listAvailableHeight2;
+      } else {
+        list.overflow = null;
+      }
+
+      // set container bounds (so pushes siblings downwards)
+      root.height = Math.min(
+        bounds.cappedHeight,
+        boundsHeight - listItemMargin.top - listItemMargin.bottom
       );
-
-      // update root height
-      root.height =
-        cappedChildrenBoundingHeight +
-        bottomPadding +
-        root.rect.element.paddingTop;
-
-      var maxHeight = cappedChildrenBoundingHeight + bottomPadding;
-
-      // set visual height
-      panel$$1.height = Math.min(
-        boxBounding.cappedHeight,
-        visualHeight + bottomPadding
-      );
-
-      // set list height
-      var _listHeight2 =
-        cappedChildrenBoundingHeight -
-        list.rect.outer.top -
-        root.rect.element.paddingTop;
-
-      // if can overflow, test if is currently overflowing
-      list.overflow = childrenBoundingHeight > maxHeight ? _listHeight2 : null;
     } else {
       // flexible height
 
       // not a fixed height panel
+      var itemMargin =
+        totalItems > 0 ? listItemMargin.top + listItemMargin.bottom : 0;
       panel$$1.scalable = true;
+      panel$$1.height = Math.max(labelHeight, visualHeight - itemMargin);
 
-      // set to new bounding
-      root.height =
-        childrenBoundingHeight + bottomPadding + root.rect.element.paddingTop;
-
-      // set height to new visual height
-      panel$$1.height = visualHeight + bottomPadding;
+      // set container bounds (so pushes siblings downwards)
+      root.height = Math.max(labelHeight, boundsHeight - itemMargin);
     }
   };
 
-  var calculateChildrenVisualHeight = function calculateChildrenVisualHeight(
-    children
-  ) {
-    return (
-      children
+  var calculateListItemMargin = function calculateListItemMargin(root) {
+    var item = root.ref.list.childViews[0].childViews[0];
+    return item
+      ? {
+          top: item.rect.element.marginTop,
+          bottom: item.rect.element.marginBottom
+        }
+      : {
+          top: 0,
+          bottom: 0
+        };
+  };
 
-        // calculate the total height occupied by all children
-        .reduce(function(max, child) {
-          var bottom = child.rect.outer.bottom;
-          if (bottom > max) {
-            max = bottom;
-          }
-          return max;
-        }, 0)
-    );
+  var calculateListHeight = function calculateListHeight(root, maxItems) {
+    var visual = 0;
+    var bounds = 0;
+
+    root.ref.list.childViews[0].childViews.forEach(function(item, index) {
+      // don't count items above max items list
+      if (index >= maxItems) return;
+
+      // calculate the total height of all items in the list
+      var rect = item.rect.element;
+      var itemHeight = rect.height + rect.marginTop + rect.marginBottom;
+      bounds += itemHeight;
+      visual += item.markedForRemoval ? item.opacity * itemHeight : itemHeight;
+    });
+
+    return {
+      visual: visual,
+      bounds: bounds
+    };
   };
 
   var calculateRootBoundingBoxHeight = function calculateRootBoundingBoxHeight(
-    root,
-    props
+    root
   ) {
-    // only calculate first time
-    if (props.boxBounding) {
-      return props.boxBounding;
-    }
-
     var height = root.ref.measureHeight || null;
     var cappedHeight = parseInt(root.style.maxHeight, 10) || null;
     var fixedHeight = height === 0 ? null : height;
 
-    props.boxBounding = {
+    return {
       cappedHeight: cappedHeight,
       fixedHeight: fixedHeight
     };
-
-    // destroy measure element
-    root.element.removeChild(root.ref.measure);
-    root.ref.measure = null;
-
-    // done!
-    return props.boxBounding;
-  };
-
-  var calculateChildrenBoundingBoxHeight = function calculateChildrenBoundingBoxHeight(
-    children
-  ) {
-    return (
-      children
-
-        // no use of outer and inner as that includes translations
-        .reduce(function(height, child) {
-          return (
-            height + child.rect.inner.bottom + child.rect.element.marginBottom
-          );
-        }, 0)
-    );
   };
 
   var exceedsMaxFiles = function exceedsMaxFiles(root, items) {
