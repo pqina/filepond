@@ -1,5 +1,16 @@
 # Changelog
 
+## 3.1.2
+
+- Fix problem where remove call would throw error depending on the state of the upload.
+- Fix problem where clicking on abort before upload had started would not cancel upload.
+
+
+## 3.1.1
+
+- Fix problem where panel overflow would render incorrectly.
+
+
 ## 3.1.0
 
 - Improve diffing when updating the `files` property.

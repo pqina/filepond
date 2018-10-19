@@ -1,5 +1,5 @@
 /*
- * FilePond 3.1.1
+ * FilePond 3.1.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1287,7 +1287,7 @@
             return mixin.destroy();
           });
           destroyers.forEach(function(destroyer) {
-            destroyer({ root: internalAPI });
+            destroyer({ root: internalAPI, props: props });
           });
           childViews.forEach(function(child) {
             return child._destroy();
@@ -2020,6 +2020,8 @@
     'onOnce',
     'retryLoad',
     'extend',
+    'archive',
+    'release',
     'requestProcessing'
   ];
 
@@ -2031,6 +2033,14 @@
 
   var nextTick = function nextTick(fn) {
     setTimeout(fn, 16);
+  };
+
+  var removeReleasedItems = function removeReleasedItems(items) {
+    items.forEach(function(item, index) {
+      if (item.released) {
+        arrayRemove(items, index);
+      }
+    });
   };
 
   var getNonNumeric = function getNonNumeric(str) {
@@ -2370,14 +2380,28 @@
     return parseFloat(aspectRatio);
   };
 
+  var getActiveItems = function getActiveItems(items) {
+    return items.filter(function(item) {
+      return !item.archived;
+    });
+  };
+
   var queries = function queries(state) {
     return {
       GET_ITEM: function GET_ITEM(query) {
         return getItemByQuery(state.items, query);
       },
 
+      GET_ACTIVE_ITEM: function GET_ACTIVE_ITEM(query) {
+        return getItemByQuery(getActiveItems(state.items), query);
+      },
+
+      GET_ACTIVE_ITEMS: function GET_ACTIVE_ITEMS(query) {
+        return getActiveItems(state.items);
+      },
+
       GET_ITEMS: function GET_ITEMS(query) {
-        return [].concat(toConsumableArray(state.items));
+        return state.items;
       },
 
       GET_ITEM_NAME: function GET_ITEM_NAME(query) {
@@ -2414,7 +2438,7 @@
       },
 
       GET_TOTAL_ITEMS: function GET_TOTAL_ITEMS() {
-        return state.items.length;
+        return getActiveItems(state.items).length;
       },
 
       IS_ASYNC: function IS_ASYNC() {
@@ -2428,7 +2452,7 @@
   };
 
   var hasRoomForItem = function hasRoomForItem(state) {
-    var count = state.items.length;
+    var count = getActiveItems(state.items).length;
 
     // if cannot have multiple items, to add one item it should currently not contain items
     if (!state.options.allowMultiple) {
@@ -3314,7 +3338,7 @@ function signature:
       var completeFn = function completeFn() {
         state.complete = true;
 
-        api.fire('load', state.response.body);
+        api.fire('load-perceived', state.response.body);
       };
 
       // let's start processing
@@ -3375,6 +3399,9 @@ function signature:
 
           // force progress to 1 as we're now done
           state.progress = 1;
+
+          // actual load is done let's share results
+          api.fire('load', state.response.body);
 
           // we are really done
           // if perceived progress is 1 ( wait for perceived progress to complete )
@@ -3535,6 +3562,12 @@ function signature:
      * Internal item state
      */
     var state = {
+      // is archived
+      archived: false,
+
+      // removed from view
+      released: false,
+
       // original source
       source: null,
 
@@ -3567,6 +3600,22 @@ function signature:
       return (state.status = status);
     };
 
+    // fire event unless the item has been archived
+    var fire = function fire(event) {
+      for (
+        var _len = arguments.length,
+          params = Array(_len > 1 ? _len - 1 : 0),
+          _key = 1;
+        _key < _len;
+        _key++
+      ) {
+        params[_key - 1] = arguments[_key];
+      }
+
+      if (state.released) return;
+      api.fire.apply(api, [event].concat(params));
+    };
+
     // file data
     var getFileExtension = function getFileExtension() {
       return getExtensionFromFilename(state.file.name);
@@ -3588,7 +3637,7 @@ function signature:
 
       // file stub is already there
       if (state.file) {
-        api.fire('load-skip');
+        fire('load-skip');
         return;
       }
 
@@ -3597,7 +3646,7 @@ function signature:
 
       // starts loading
       loader.on('init', function() {
-        api.fire('load-init');
+        fire('load-init');
       });
 
       // we'eve received a size indication, let's update the stub
@@ -3609,28 +3658,28 @@ function signature:
         state.file.filename = meta.filename;
 
         // size has been updated
-        api.fire('load-meta');
+        fire('load-meta');
       });
 
       // the file is now loading we need to update the progress indicators
       loader.on('progress', function(progress) {
         setStatus(ItemStatus.LOADING);
 
-        api.fire('load-progress', progress);
+        fire('load-progress', progress);
       });
 
       // an error was thrown while loading the file, we need to switch to error state
       loader.on('error', function(error) {
         setStatus(ItemStatus.LOAD_ERROR);
 
-        api.fire('load-request-error', error);
+        fire('load-request-error', error);
       });
 
       // user or another process aborted the file load (cannot retry)
       loader.on('abort', function() {
         setStatus(ItemStatus.INIT);
 
-        api.fire('load-abort');
+        fire('load-abort');
       });
 
       // done loading
@@ -3650,16 +3699,16 @@ function signature:
             setStatus(ItemStatus.IDLE);
           }
 
-          api.fire('load');
+          fire('load');
         };
 
         var error = function error(result) {
           // set original file
           state.file = file;
-          api.fire('load-meta');
+          fire('load-meta');
 
           setStatus(ItemStatus.LOAD_ERROR);
-          api.fire('load-file-error', result);
+          fire('load-file-error', result);
         };
 
         // if we already have a server file reference, we don't need to call the onload method
@@ -3696,8 +3745,12 @@ function signature:
       }
 
       // setup processor
-
       processor.on('load', function(serverFileReference) {
+        // need this id to be able to rever the upload
+        state.serverFileReference = serverFileReference;
+      });
+
+      processor.on('load-perceived', function(serverFileReference) {
         // no longer required
         state.activeProcessor = null;
 
@@ -3705,17 +3758,17 @@ function signature:
         state.serverFileReference = serverFileReference;
 
         setStatus(ItemStatus.PROCESSING_COMPLETE);
-        api.fire('process-complete', serverFileReference);
+        fire('process-complete', serverFileReference);
       });
 
       processor.on('start', function() {
-        api.fire('process-start');
+        fire('process-start');
       });
 
       processor.on('error', function(error) {
         state.activeProcessor = null;
         setStatus(ItemStatus.PROCESSING_ERROR);
-        api.fire('process-error', error);
+        fire('process-error', error);
       });
 
       processor.on('abort', function(serverFileReference) {
@@ -3725,7 +3778,7 @@ function signature:
         state.serverFileReference = serverFileReference;
 
         setStatus(ItemStatus.IDLE);
-        api.fire('process-abort');
+        fire('process-abort');
 
         // has timeout so doesn't interfere with remove action
         if (abortProcessingRequestComplete) {
@@ -3735,7 +3788,7 @@ function signature:
 
       processor.on('progress', function(progress) {
         setStatus(ItemStatus.PROCESSING);
-        api.fire('process-progress', progress);
+        fire('process-progress', progress);
       });
 
       // when successfully transformed
@@ -3770,13 +3823,14 @@ function signature:
             resolve();
           },
           function(error) {
+            resolve();
             // TODO: handle revert error
           }
         );
 
         // fire event
         setStatus(ItemStatus.IDLE);
-        api.fire('process-revert');
+        fire('process-revert');
       });
     };
 
@@ -3801,11 +3855,14 @@ function signature:
     var abortProcessing = function abortProcessing() {
       return new Promise(function(resolve) {
         if (!state.activeProcessor) {
+          resolve();
           return;
         }
+
         abortProcessingRequestComplete = function abortProcessingRequestComplete() {
           resolve();
         };
+
         state.activeProcessor.abort();
       });
     };
@@ -3829,7 +3886,7 @@ function signature:
       // update value
       data[last] = value;
 
-      api.fire('metadata-update', {
+      fire('metadata-update', {
         key: root,
         value: metadata[root]
       });
@@ -3908,7 +3965,26 @@ function signature:
         process: process,
         revert: revert
       },
-      on()
+      on(),
+      {
+        release: function release() {
+          return (state.released = true);
+        },
+        released: {
+          get: function get() {
+            return state.released;
+          }
+        },
+
+        archive: function archive() {
+          return (state.archived = true);
+        },
+        archived: {
+          get: function get() {
+            return state.archived;
+          }
+        }
+      }
     );
 
     // create it here instead of returning it instantly so we can extend it later
@@ -3940,23 +4016,6 @@ function signature:
       return;
     }
     return items[index] || null;
-  };
-
-  var removeIndex = function removeIndex(arr, index) {
-    return arr.splice(index, 1);
-  };
-
-  var removeItem = function removeItem(items, needle) {
-    // get index of item
-    var index = items.findIndex(function(item) {
-      return item === needle;
-    });
-
-    // remove it from array
-    removeIndex(items, index);
-
-    // return removed item
-    return needle;
   };
 
   var fetchLocal = function fetchLocal(
@@ -4081,7 +4140,7 @@ function signature:
        * Aborts all ongoing processes
        */
       ABORT_ALL: function ABORT_ALL() {
-        query('GET_ITEMS').forEach(function(item) {
+        getActiveItems(state.items).forEach(function(item) {
           item.abortLoad();
           item.abortProcessing();
         });
@@ -4105,7 +4164,8 @@ function signature:
         // loop over files, if file is in list, leave it be, if not, remove
 
         // test if items should be moved
-        [].concat(toConsumableArray(state.items)).forEach(function(item) {
+        var activeItems = getActiveItems(state.items);
+        activeItems.forEach(function(item) {
           // if item not is in new value, remove
           if (
             !files.find(function(file) {
@@ -4117,10 +4177,11 @@ function signature:
         });
 
         // add new files
+        activeItems = getActiveItems(state.items);
         files.forEach(function(file, index) {
           // if file is already in list
           if (
-            [].concat(toConsumableArray(state.items)).find(function(item) {
+            activeItems.find(function(item) {
               return item.source === file.source || item.file === file.source;
             })
           ) {
@@ -4259,7 +4320,7 @@ function signature:
 
           // let's replace the item
           // id of first item we're about to remove
-          var _item = state.items[0];
+          var _item = getActiveItems(state.items)[0];
 
           // if has been processed remove it from the server as well
           if (_item.status === ItemStatus.PROCESSING_COMPLETE) {
@@ -4483,7 +4544,7 @@ function signature:
         });
 
         // the item list has been updated
-        dispatch('DID_UPDATE_ITEMS', { items: state.items });
+        dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
 
         // start loading the source
 
@@ -4666,47 +4727,43 @@ function signature:
         }
       }),
 
+      RELEASE_ITEM: getItemByQueryFromState(state, function(item) {
+        item.release();
+      }),
+
       REMOVE_ITEM: getItemByQueryFromState(state, function(item, success) {
         // get id reference
         var id = item.id;
 
+        // archive the item, this does not remove it from the list
+        getItemById(state.items, id).archive();
+
         // tell the view the item has been removed
         dispatch('DID_REMOVE_ITEM', { id: id, item: item });
 
-        // now remove it from the item list,
-        // we remove it from the list after the view has been updated
-        // to make sure the item is available for view rendering till removed
-        dispatch('SPLICE_ITEM', { id: id, item: item });
+        // now the list has been modified
+        dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
 
         // correctly removed
         success(createItemAPI(item));
       }),
 
-      // private action for timing the removal of an item from the items list
-      SPLICE_ITEM: function SPLICE_ITEM(_ref8) {
-        var id = _ref8.id;
-
-        removeItem(state.items, getItemById(state.items, id));
-
-        // the item list has been updated
-        dispatch('DID_UPDATE_ITEMS', { items: state.items });
-      },
-
       ABORT_ITEM_LOAD: getItemByQueryFromState(state, function(item) {
-        // stop loading this file
         item.abortLoad();
-
-        // the file will throw an event and that will take
-        // care of removing the item from the list
       }),
 
       ABORT_ITEM_PROCESSING: getItemByQueryFromState(state, function(item) {
+        // test if is already processed
+        if (item.serverId) {
+          dispatch('REVERT_ITEM_PROCESSING', { id: item.id });
+          return;
+        }
+
+        // abort
         item.abortProcessing().then(function() {
           var shouldRemove = state.options.instantUpload;
           if (shouldRemove) {
-            setTimeout(function() {
-              dispatch('REMOVE_ITEM', { query: item.id });
-            }, 16);
+            dispatch('REMOVE_ITEM', { query: item.id });
           }
         });
       }),
@@ -4722,15 +4779,13 @@ function signature:
           .then(function() {
             var shouldRemove = state.options.instantUpload || isMockItem(item);
             if (shouldRemove) {
-              setTimeout(function() {
-                dispatch('REMOVE_ITEM', { query: item.id });
-              }, 16);
+              dispatch('REMOVE_ITEM', { query: item.id });
             }
           });
       }),
 
-      SET_OPTIONS: function SET_OPTIONS(_ref9) {
-        var options = _ref9.options;
+      SET_OPTIONS: function SET_OPTIONS(_ref8) {
+        var options = _ref8.options;
 
         forin(options, function(key, value) {
           dispatch('SET_' + fromCamels(key, '_').toUpperCase(), {
@@ -5829,6 +5884,12 @@ function signature:
   var item = createView({
     create: create$4,
     write: write$3,
+    destroy: function destroy(_ref3) {
+      var root = _ref3.root,
+        props = _ref3.props;
+
+      root.dispatch('RELEASE_ITEM', { query: props.id });
+    },
     tag: 'li',
     name: 'item',
     mixins: {
@@ -6053,7 +6114,7 @@ function signature:
     // remove marked views
     root.childViews
       .filter(function(view) {
-        return view.markedForRemoval && view.resting && view.opacity === 0;
+        return view.markedForRemoval && view.opacity === 0;
       })
       .forEach(function(view) {
         root.removeChildView(view);
@@ -7906,6 +7967,9 @@ function signature:
         // update the view
         resting = view._write(ts, actions$$1);
 
+        // will clean up all archived items
+        removeReleasedItems(store.query('GET_ITEMS'));
+
         // now idling
         if (resting) {
           store.processDispatchQueue();
@@ -7991,7 +8055,7 @@ function signature:
         createEvent('processfile')
       ],
 
-      SPLICE_ITEM: createEvent('removefile'),
+      ARCHIVE_ITEM: createEvent('removefile'),
 
       DID_UPDATE_ITEMS: createEvent('updatefiles')
     };
@@ -8070,7 +8134,7 @@ function signature:
     };
 
     var getFile = function getFile(query) {
-      return store.query('GET_ITEM', query);
+      return store.query('GET_ACTIVE_ITEM', query);
     };
 
     var addFile = function addFile(source) {
@@ -8093,7 +8157,7 @@ function signature:
       store.dispatch('REMOVE_ITEM', { query: query });
 
       // see if item has been removed
-      return store.query('GET_ITEM', query) === null;
+      return store.query('GET_ACTIVE_ITEM', query) === null;
     };
 
     var addFiles = function addFiles() {
@@ -8143,7 +8207,7 @@ function signature:
     };
 
     var getFiles = function getFiles() {
-      return store.query('GET_ITEMS');
+      return store.query('GET_ACTIVE_ITEMS');
     };
 
     var processFile = function processFile(query) {

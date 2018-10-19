@@ -1,5 +1,5 @@
 /*
- * FilePond 3.1.1
+ * FilePond 3.1.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1035,7 +1035,7 @@ const createView =
     const _destroy = () => {
       activeMixins.forEach(mixin => mixin.destroy());
       destroyers.forEach(destroyer => {
-        destroyer({ root: internalAPI });
+        destroyer({ root: internalAPI, props });
       });
       childViews.forEach(child => child._destroy());
     };
@@ -1632,6 +1632,8 @@ const PRIVATE_METHODS = [
   'onOnce',
   'retryLoad',
   'extend',
+  'archive',
+  'release',
   'requestProcessing'
 ];
 
@@ -1643,6 +1645,14 @@ const createItemAPI = item => {
 
 const nextTick = fn => {
   setTimeout(fn, 16);
+};
+
+const removeReleasedItems = items => {
+  items.forEach((item, index) => {
+    if (item.released) {
+      arrayRemove(items, index);
+    }
+  });
 };
 
 const getNonNumeric = str => /[^0-9]+/.exec(str);
@@ -1939,10 +1949,16 @@ const getNumericAspectRatioFromString = aspectRatio => {
   return parseFloat(aspectRatio);
 };
 
+const getActiveItems = items => items.filter(item => !item.archived);
+
 const queries = state => ({
   GET_ITEM: query => getItemByQuery(state.items, query),
 
-  GET_ITEMS: query => [...state.items],
+  GET_ACTIVE_ITEM: query => getItemByQuery(getActiveItems(state.items), query),
+
+  GET_ACTIVE_ITEMS: query => getActiveItems(state.items),
+
+  GET_ITEMS: query => state.items,
 
   GET_ITEM_NAME: query => {
     const item = getItemByQuery(state.items, query);
@@ -1970,7 +1986,7 @@ const queries = state => ({
     return aspectRatio;
   },
 
-  GET_TOTAL_ITEMS: () => state.items.length,
+  GET_TOTAL_ITEMS: () => getActiveItems(state.items).length,
 
   IS_ASYNC: () =>
     isObject(state.options.server) &&
@@ -1979,7 +1995,7 @@ const queries = state => ({
 });
 
 const hasRoomForItem = state => {
-  const count = state.items.length;
+  const count = getActiveItems(state.items).length;
 
   // if cannot have multiple items, to add one item it should currently not contain items
   if (!state.options.allowMultiple) {
@@ -2721,7 +2737,7 @@ const createFileProcessor = processFn => {
     const completeFn = () => {
       state.complete = true;
 
-      api.fire('load', state.response.body);
+      api.fire('load-perceived', state.response.body);
     };
 
     // let's start processing
@@ -2782,6 +2798,9 @@ const createFileProcessor = processFn => {
 
         // force progress to 1 as we're now done
         state.progress = 1;
+
+        // actual load is done let's share results
+        api.fire('load', state.response.body);
 
         // we are really done
         // if perceived progress is 1 ( wait for perceived progress to complete )
@@ -2929,6 +2948,12 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
    * Internal item state
    */
   const state = {
+    // is archived
+    archived: false,
+
+    // removed from view
+    released: false,
+
     // original source
     source: null,
 
@@ -2959,6 +2984,12 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
   // item data
   const setStatus = status => (state.status = status);
 
+  // fire event unless the item has been archived
+  const fire = (event, ...params) => {
+    if (state.released) return;
+    api.fire(event, ...params);
+  };
+
   // file data
   const getFileExtension = () => getExtensionFromFilename(state.file.name);
   const getFileType = () => state.file.type;
@@ -2972,7 +3003,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
     // file stub is already there
     if (state.file) {
-      api.fire('load-skip');
+      fire('load-skip');
       return;
     }
 
@@ -2981,7 +3012,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
     // starts loading
     loader.on('init', () => {
-      api.fire('load-init');
+      fire('load-init');
     });
 
     // we'eve received a size indication, let's update the stub
@@ -2993,28 +3024,28 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       state.file.filename = meta.filename;
 
       // size has been updated
-      api.fire('load-meta');
+      fire('load-meta');
     });
 
     // the file is now loading we need to update the progress indicators
     loader.on('progress', progress => {
       setStatus(ItemStatus.LOADING);
 
-      api.fire('load-progress', progress);
+      fire('load-progress', progress);
     });
 
     // an error was thrown while loading the file, we need to switch to error state
     loader.on('error', error => {
       setStatus(ItemStatus.LOAD_ERROR);
 
-      api.fire('load-request-error', error);
+      fire('load-request-error', error);
     });
 
     // user or another process aborted the file load (cannot retry)
     loader.on('abort', () => {
       setStatus(ItemStatus.INIT);
 
-      api.fire('load-abort');
+      fire('load-abort');
     });
 
     // done loading
@@ -3034,16 +3065,16 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
           setStatus(ItemStatus.IDLE);
         }
 
-        api.fire('load');
+        fire('load');
       };
 
       const error = result => {
         // set original file
         state.file = file;
-        api.fire('load-meta');
+        fire('load-meta');
 
         setStatus(ItemStatus.LOAD_ERROR);
-        api.fire('load-file-error', result);
+        fire('load-file-error', result);
       };
 
       // if we already have a server file reference, we don't need to call the onload method
@@ -3080,8 +3111,12 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     }
 
     // setup processor
-
     processor.on('load', serverFileReference => {
+      // need this id to be able to rever the upload
+      state.serverFileReference = serverFileReference;
+    });
+
+    processor.on('load-perceived', serverFileReference => {
       // no longer required
       state.activeProcessor = null;
 
@@ -3089,17 +3124,17 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       state.serverFileReference = serverFileReference;
 
       setStatus(ItemStatus.PROCESSING_COMPLETE);
-      api.fire('process-complete', serverFileReference);
+      fire('process-complete', serverFileReference);
     });
 
     processor.on('start', () => {
-      api.fire('process-start');
+      fire('process-start');
     });
 
     processor.on('error', error => {
       state.activeProcessor = null;
       setStatus(ItemStatus.PROCESSING_ERROR);
-      api.fire('process-error', error);
+      fire('process-error', error);
     });
 
     processor.on('abort', serverFileReference => {
@@ -3109,7 +3144,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       state.serverFileReference = serverFileReference;
 
       setStatus(ItemStatus.IDLE);
-      api.fire('process-abort');
+      fire('process-abort');
 
       // has timeout so doesn't interfere with remove action
       if (abortProcessingRequestComplete) {
@@ -3119,7 +3154,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
     processor.on('progress', progress => {
       setStatus(ItemStatus.PROCESSING);
-      api.fire('process-progress', progress);
+      fire('process-progress', progress);
     });
 
     // when successfully transformed
@@ -3154,13 +3189,14 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
           resolve();
         },
         error => {
+          resolve();
           // TODO: handle revert error
         }
       );
 
       // fire event
       setStatus(ItemStatus.IDLE);
-      api.fire('process-revert');
+      fire('process-revert');
     });
 
   const abortLoad = () => {
@@ -3184,11 +3220,14 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
   const abortProcessing = () =>
     new Promise(resolve => {
       if (!state.activeProcessor) {
+        resolve();
         return;
       }
+
       abortProcessingRequestComplete = () => {
         resolve();
       };
+
       state.activeProcessor.abort();
     });
 
@@ -3209,7 +3248,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     // update value
     data[last] = value;
 
-    api.fire('metadata-update', {
+    fire('metadata-update', {
       key: root,
       value: metadata[root]
     });
@@ -3259,7 +3298,14 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       process,
       revert
     },
-    on()
+    on(),
+    {
+      release: () => (state.released = true),
+      released: { get: () => state.released },
+
+      archive: () => (state.archived = true),
+      archived: { get: () => state.archived }
+    }
   );
 
   // create it here instead of returning it instantly so we can extend it later
@@ -3289,19 +3335,6 @@ const getItemById = (items, itemId) => {
     return;
   }
   return items[index] || null;
-};
-
-const removeIndex = (arr, index) => arr.splice(index, 1);
-
-const removeItem = (items, needle) => {
-  // get index of item
-  const index = items.findIndex(item => item === needle);
-
-  // remove it from array
-  removeIndex(items, index);
-
-  // return removed item
-  return needle;
 };
 
 const fetchLocal = (url, load, error, progress, abort, headers) => {
@@ -3398,7 +3431,7 @@ const actions = (dispatch, query, state) => ({
    * Aborts all ongoing processes
    */
   ABORT_ALL: () => {
-    query('GET_ITEMS').forEach(item => {
+    getActiveItems(state.items).forEach(item => {
       item.abortLoad();
       item.abortProcessing();
     });
@@ -3417,7 +3450,8 @@ const actions = (dispatch, query, state) => ({
     // loop over files, if file is in list, leave it be, if not, remove
 
     // test if items should be moved
-    [...state.items].forEach(item => {
+    let activeItems = getActiveItems(state.items);
+    activeItems.forEach(item => {
       // if item not is in new value, remove
       if (
         !files.find(
@@ -3429,10 +3463,11 @@ const actions = (dispatch, query, state) => ({
     });
 
     // add new files
+    activeItems = getActiveItems(state.items);
     files.forEach((file, index) => {
       // if file is already in list
       if (
-        [...state.items].find(
+        activeItems.find(
           item => item.source === file.source || item.file === file.source
         )
       ) {
@@ -3565,7 +3600,7 @@ const actions = (dispatch, query, state) => ({
 
       // let's replace the item
       // id of first item we're about to remove
-      const item = state.items[0];
+      const item = getActiveItems(state.items)[0];
 
       // if has been processed remove it from the server as well
       if (item.status === ItemStatus.PROCESSING_COMPLETE) {
@@ -3766,7 +3801,7 @@ const actions = (dispatch, query, state) => ({
     dispatch('DID_ADD_ITEM', { id, index, interactionMethod });
 
     // the item list has been updated
-    dispatch('DID_UPDATE_ITEMS', { items: state.items });
+    dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
 
     // start loading the source
     const { url, load, restore, fetch } = state.options.server || {};
@@ -3928,45 +3963,43 @@ const actions = (dispatch, query, state) => ({
     }
   }),
 
+  RELEASE_ITEM: getItemByQueryFromState(state, item => {
+    item.release();
+  }),
+
   REMOVE_ITEM: getItemByQueryFromState(state, (item, success) => {
     // get id reference
     const id = item.id;
 
+    // archive the item, this does not remove it from the list
+    getItemById(state.items, id).archive();
+
     // tell the view the item has been removed
     dispatch('DID_REMOVE_ITEM', { id, item });
 
-    // now remove it from the item list,
-    // we remove it from the list after the view has been updated
-    // to make sure the item is available for view rendering till removed
-    dispatch('SPLICE_ITEM', { id, item });
+    // now the list has been modified
+    dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
 
     // correctly removed
     success(createItemAPI(item));
   }),
 
-  // private action for timing the removal of an item from the items list
-  SPLICE_ITEM: ({ id }) => {
-    removeItem(state.items, getItemById(state.items, id));
-
-    // the item list has been updated
-    dispatch('DID_UPDATE_ITEMS', { items: state.items });
-  },
-
   ABORT_ITEM_LOAD: getItemByQueryFromState(state, item => {
-    // stop loading this file
     item.abortLoad();
-
-    // the file will throw an event and that will take
-    // care of removing the item from the list
   }),
 
   ABORT_ITEM_PROCESSING: getItemByQueryFromState(state, item => {
+    // test if is already processed
+    if (item.serverId) {
+      dispatch('REVERT_ITEM_PROCESSING', { id: item.id });
+      return;
+    }
+
+    // abort
     item.abortProcessing().then(() => {
       const shouldRemove = state.options.instantUpload;
       if (shouldRemove) {
-        setTimeout(() => {
-          dispatch('REMOVE_ITEM', { query: item.id });
-        }, 16);
+        dispatch('REMOVE_ITEM', { query: item.id });
       }
     });
   }),
@@ -3982,9 +4015,7 @@ const actions = (dispatch, query, state) => ({
       .then(() => {
         const shouldRemove = state.options.instantUpload || isMockItem(item);
         if (shouldRemove) {
-          setTimeout(() => {
-            dispatch('REMOVE_ITEM', { query: item.id });
-          }, 16);
+          dispatch('REMOVE_ITEM', { query: item.id });
         }
       });
   }),
@@ -4933,6 +4964,9 @@ const write$3 = ({ root, actions, props }) => {
 const item = createView({
   create: create$4,
   write: write$3,
+  destroy: ({ root, props }) => {
+    root.dispatch('RELEASE_ITEM', { query: props.id });
+  },
   tag: 'li',
   name: 'item',
   mixins: {
@@ -5128,7 +5162,7 @@ const write$2 = ({ root, props, actions }) => {
 
   // remove marked views
   root.childViews
-    .filter(view => view.markedForRemoval && view.resting && view.opacity === 0)
+    .filter(view => view.markedForRemoval && view.opacity === 0)
     .forEach(view => {
       root.removeChildView(view);
       resting = false;
@@ -6775,6 +6809,9 @@ const createApp$1 = (initialOptions = {}) => {
       // update the view
       resting = view._write(ts, actions$$1);
 
+      // will clean up all archived items
+      removeReleasedItems(store.query('GET_ITEMS'));
+
       // now idling
       if (resting) {
         store.processDispatchQueue();
@@ -6858,7 +6895,7 @@ const createApp$1 = (initialOptions = {}) => {
       createEvent('processfile')
     ],
 
-    SPLICE_ITEM: createEvent('removefile'),
+    ARCHIVE_ITEM: createEvent('removefile'),
 
     DID_UPDATE_ITEMS: createEvent('updatefiles')
   };
@@ -6930,7 +6967,7 @@ const createApp$1 = (initialOptions = {}) => {
   //
   const setOptions = options => store.dispatch('SET_OPTIONS', { options });
 
-  const getFile = query => store.query('GET_ITEM', query);
+  const getFile = query => store.query('GET_ACTIVE_ITEM', query);
 
   const addFile = (source, options = {}) =>
     new Promise((resolve, reject) => {
@@ -6949,7 +6986,7 @@ const createApp$1 = (initialOptions = {}) => {
     store.dispatch('REMOVE_ITEM', { query });
 
     // see if item has been removed
-    return store.query('GET_ITEM', query) === null;
+    return store.query('GET_ACTIVE_ITEM', query) === null;
   };
 
   const addFiles = (...args) =>
@@ -6987,7 +7024,7 @@ const createApp$1 = (initialOptions = {}) => {
       });
     });
 
-  const getFiles = () => store.query('GET_ITEMS');
+  const getFiles = () => store.query('GET_ACTIVE_ITEMS');
 
   const processFile = query =>
     new Promise((resolve, reject) => {
