@@ -1,5 +1,5 @@
 /*
- * FilePond 3.1.3
+ * FilePond 3.1.4
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -3493,7 +3493,7 @@ const actions = (dispatch, query, state) => ({
       applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query }).then(
         shouldPrepareOutput => {
           if (!shouldPrepareOutput) {
-            retun;
+            return;
           }
           dispatch(
             'REQUEST_PREPARE_OUTPUT',

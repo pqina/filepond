@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.1.4
+
+- Fix syntax error [#147](https://github.com/pqina/filepond/pull/147)
+
+
 ## 3.1.3
 
 - Fix additional problem with quick file removals.
