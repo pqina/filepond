@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.1.3
+
+- Fix syntax error
+
+
 ## 3.1.2
 
 - Fix problem where remove call would throw error depending on the state of the upload.

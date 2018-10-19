@@ -1,5 +1,5 @@
 /*
- * FilePond 3.1.2
+ * FilePond 3.1.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -4212,7 +4212,7 @@ function signature:
             query: query
           }).then(function(shouldPrepareOutput) {
             if (!shouldPrepareOutput) {
-              retun;
+              return;
             }
             dispatch(
               'REQUEST_PREPARE_OUTPUT',
