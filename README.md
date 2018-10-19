@@ -40,6 +40,7 @@ FilePond uses [BrowserStack](https://www.browserstack.com/) for compatibility te
 *   [File type validation](https://github.com/pqina/filepond-plugin-file-validate-type)
 *   [File metadata](https://github.com/pqina/filepond-plugin-file-metadata)
 *   [File poster](https://github.com/pqina/filepond-plugin-file-poster)
+*   [Image editor](https://pqina.nl/filepond/image-editor.html)
 *   [Image size validation](https://github.com/pqina/filepond-plugin-image-validate-size)
 *   [Image preview](https://github.com/pqina/filepond-plugin-image-preview)
 *   [Image crop](https://github.com/pqina/filepond-plugin-image-crop)
