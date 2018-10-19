@@ -1,5 +1,5 @@
 /*
- * FilePond 3.1.2
+ * FilePond 3.1.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2031,10 +2031,6 @@
     return api;
   };
 
-  var nextTick = function nextTick(fn) {
-    setTimeout(fn, 16);
-  };
-
   var removeReleasedItems = function removeReleasedItems(items) {
     items.forEach(function(item, index) {
       if (item.released) {
@@ -3855,6 +3851,9 @@ function signature:
     var abortProcessing = function abortProcessing() {
       return new Promise(function(resolve) {
         if (!state.activeProcessor) {
+          setStatus(ItemStatus.IDLE);
+          fire('process-abort');
+
           resolve();
           return;
         }
@@ -4232,7 +4231,10 @@ function signature:
 
         // for async scenarios
         var upload = function upload() {
-          dispatch('REQUEST_ITEM_PROCESSING', { query: id });
+          // we push this forward a bit so the interface is updated correctly
+          setTimeout(function() {
+            dispatch('REQUEST_ITEM_PROCESSING', { query: id });
+          }, 32);
         };
 
         var revert = function revert(doUpload) {
@@ -4644,14 +4646,22 @@ function signature:
         item.retryLoad();
       }),
 
-      REQUEST_ITEM_PROCESSING: getItemByQueryFromState(state, function(item) {
+      REQUEST_ITEM_PROCESSING: getItemByQueryFromState(state, function(
+        item,
+        success,
+        failure
+      ) {
         var id = item.id;
 
         item.requestProcessing();
 
         dispatch('DID_REQUEST_ITEM_PROCESSING', { id: id });
 
-        dispatch('PROCESS_ITEM', { query: item }, true);
+        dispatch(
+          'PROCESS_ITEM',
+          { query: item, success: success, failure: failure },
+          true
+        );
       }),
 
       PROCESS_ITEM: getItemByQueryFromState(state, function(
@@ -4659,6 +4669,11 @@ function signature:
         success,
         failure
       ) {
+        // should be in processing state, else is aborted
+        if (item.status !== ItemStatus.PROCESSING) {
+          return;
+        }
+
         // we done function
         item.onOnce('process-complete', function() {
           success(createItemAPI(item));
@@ -8212,21 +8227,13 @@ function signature:
 
     var processFile = function processFile(query) {
       return new Promise(function(resolve, reject) {
-        store.dispatch('PROCESS_ITEM', {
+        store.dispatch('REQUEST_ITEM_PROCESSING', {
           query: query,
-          // the nextTick call pushes the resolve forwards,
-          // this allows other processes to finish up so when a dev
-          // immidiately calls removeFile after it resolves all goes well
-          // TODO: improve as this is kinda hacky
           success: function success(item) {
-            nextTick(function() {
-              resolve(item);
-            });
+            resolve(item);
           },
           failure: function failure(error) {
-            nextTick(function() {
-              reject(error);
-            });
+            reject(error);
           }
         });
       });

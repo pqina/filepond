@@ -1,5 +1,5 @@
 /*
- * FilePond 3.1.2
+ * FilePond 3.1.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1643,10 +1643,6 @@ const createItemAPI = item => {
   return api;
 };
 
-const nextTick = fn => {
-  setTimeout(fn, 16);
-};
-
 const removeReleasedItems = items => {
   items.forEach((item, index) => {
     if (item.released) {
@@ -3220,6 +3216,9 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
   const abortProcessing = () =>
     new Promise(resolve => {
       if (!state.activeProcessor) {
+        setStatus(ItemStatus.IDLE);
+        fire('process-abort');
+
         resolve();
         return;
       }
@@ -3515,7 +3514,10 @@ const actions = (dispatch, query, state) => ({
 
     // for async scenarios
     const upload = () => {
-      dispatch('REQUEST_ITEM_PROCESSING', { query: id });
+      // we push this forward a bit so the interface is updated correctly
+      setTimeout(() => {
+        dispatch('REQUEST_ITEM_PROCESSING', { query: id });
+      }, 32);
     };
 
     const revert = doUpload => {
@@ -3887,17 +3889,25 @@ const actions = (dispatch, query, state) => ({
     item.retryLoad();
   }),
 
-  REQUEST_ITEM_PROCESSING: getItemByQueryFromState(state, item => {
-    const id = item.id;
+  REQUEST_ITEM_PROCESSING: getItemByQueryFromState(
+    state,
+    (item, success, failure) => {
+      const id = item.id;
 
-    item.requestProcessing();
+      item.requestProcessing();
 
-    dispatch('DID_REQUEST_ITEM_PROCESSING', { id });
+      dispatch('DID_REQUEST_ITEM_PROCESSING', { id });
 
-    dispatch('PROCESS_ITEM', { query: item }, true);
-  }),
+      dispatch('PROCESS_ITEM', { query: item, success, failure }, true);
+    }
+  ),
 
   PROCESS_ITEM: getItemByQueryFromState(state, (item, success, failure) => {
+    // should be in processing state, else is aborted
+    if (item.status !== ItemStatus.PROCESSING) {
+      return;
+    }
+
     // we done function
     item.onOnce('process-complete', () => {
       success(createItemAPI(item));
@@ -4712,11 +4722,11 @@ const route$3 = createRoute({
   DID_SET_LABEL_BUTTON_ABORT_ITEM_LOAD: ({ root, action }) => {
     root.ref.buttonAbortItemLoad.label = action.value;
   },
-  DID_REQUEST_ITEM_PROCESSING: ({ root, action }) => {
+  DID_REQUEST_ITEM_PROCESSING: ({ root }) => {
     root.ref.processProgressIndicator.spin = true;
     root.ref.processProgressIndicator.progress = 0;
   },
-  DID_START_ITEM_LOAD: ({ root, action }) => {
+  DID_START_ITEM_LOAD: ({ root }) => {
     root.ref.loadProgressIndicator.spin = true;
     root.ref.loadProgressIndicator.progress = 0;
   },
@@ -7028,21 +7038,13 @@ const createApp$1 = (initialOptions = {}) => {
 
   const processFile = query =>
     new Promise((resolve, reject) => {
-      store.dispatch('PROCESS_ITEM', {
+      store.dispatch('REQUEST_ITEM_PROCESSING', {
         query,
-        // the nextTick call pushes the resolve forwards,
-        // this allows other processes to finish up so when a dev
-        // immidiately calls removeFile after it resolves all goes well
-        // TODO: improve as this is kinda hacky
         success: item => {
-          nextTick(() => {
-            resolve(item);
-          });
+          resolve(item);
         },
         failure: error => {
-          nextTick(() => {
-            reject(error);
-          });
+          reject(error);
         }
       });
     });
