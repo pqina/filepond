@@ -1,5 +1,5 @@
 /*
- * FilePond 3.1.4
+ * FilePond 3.1.5
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -8704,7 +8704,6 @@ function signature:
     });
     var workerURL = URL.createObjectURL(workerBlob);
     var worker = new Worker(workerURL);
-    URL.revokeObjectURL(workerURL);
 
     return {
       transfer: function transfer(message, cb) {},
@@ -8727,6 +8726,7 @@ function signature:
       },
       terminate: function terminate() {
         worker.terminate();
+        URL.revokeObjectURL(workerURL);
       }
     };
   };

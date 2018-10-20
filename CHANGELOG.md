@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.1.5
+
+- Fix problem with WebWorkers not working correctly on Edge and IE.
+
+
 ## 3.1.4
 
 - Fix syntax error [#147](https://github.com/pqina/filepond/pull/147)
@@ -14,6 +19,9 @@
 
 - Fix problem where remove call would throw error depending on the state of the upload.
 - Fix problem where clicking on abort before upload had started would not cancel upload.
+
+Please note that this update will require installing new versions of the following plugins:
+- File Validate Size
 
 
 ## 3.1.1
