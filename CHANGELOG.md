@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.1.6
+
+- Fix problem where remove callback would no longer work.
+
+
 ## 3.1.5
 
 - Fix problem with WebWorkers not working correctly on Edge and IE.

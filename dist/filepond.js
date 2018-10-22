@@ -1,5 +1,5 @@
 /*
- * FilePond 3.1.5
+ * FilePond 3.1.6
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -8070,7 +8070,7 @@ function signature:
         createEvent('processfile')
       ],
 
-      ARCHIVE_ITEM: createEvent('removefile'),
+      DID_REMOVE_ITEM: createEvent('removefile'),
 
       DID_UPDATE_ITEMS: createEvent('updatefiles')
     };
