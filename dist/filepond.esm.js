@@ -1,8 +1,10 @@
 /*
- * FilePond 3.1.6
+ * FilePond 3.2.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
+
+/* eslint-disable */
 const isNode = value => value instanceof HTMLElement;
 
 const createStore = (initialState, queries = [], actions = []) => {
@@ -1162,7 +1164,23 @@ const createView =
     return createObject(externalAPIDefinition, props);
   };
 
-const createPainter = (update, fps = 60) => {
+const createPainter = (read, write, fps = 60) => {
+  const name = '__framePainter';
+
+  // set global painter
+  if (window[name]) {
+    window[name].readers.push(read);
+    window[name].writers.push(write);
+    return;
+  }
+
+  window[name] = {
+    readers: [read],
+    writers: [write]
+  };
+
+  const painter = window[name];
+
   const interval = 1000 / fps;
   let last = null;
   let frame = null;
@@ -1187,7 +1205,8 @@ const createPainter = (update, fps = 60) => {
     last = ts - delta % interval;
 
     // update view
-    update(ts);
+    painter.readers.forEach(read => read());
+    painter.writers.forEach(write => write(ts));
   };
 
   tick(performance.now());
@@ -1197,14 +1216,6 @@ const createPainter = (update, fps = 60) => {
       window.cancelAnimationFrame(frame);
     }
   };
-};
-
-const createUpdater = (apps, reader, writer) => ts => {
-  // all reads first
-  apps.forEach(app => app[reader]());
-
-  // now update the DOM
-  apps.forEach(app => app[writer](ts));
 };
 
 const createRoute = (routes, fn) => ({ root, props, actions = [] }) => {
@@ -7611,7 +7622,14 @@ if (supported()) {
   // start painter and fire load event
   if (isBrowser) {
     // app painter, cannot be paused or stopped at the moment
-    createPainter(createUpdater(state.apps, '_read', '_write'), 60);
+    createPainter(
+      () => {
+        state.apps.forEach(app => app._read());
+      },
+      ts => {
+        state.apps.forEach(app => app._write(ts));
+      }
+    );
 
     // fire loaded event so we know when FilePond is available
     const dispatch = () => {

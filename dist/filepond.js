@@ -1,8 +1,10 @@
 /*
- * FilePond 3.1.6
+ * FilePond 3.2.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
+
+/* eslint-disable */
 (function(global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined'
     ? factory(exports)
@@ -1433,9 +1435,25 @@
       };
     };
 
-  var createPainter = function createPainter(update) {
+  var createPainter = function createPainter(read, write) {
     var fps =
-      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 60;
+      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 60;
+
+    var name = '__framePainter';
+
+    // set global painter
+    if (window[name]) {
+      window[name].readers.push(read);
+      window[name].writers.push(write);
+      return;
+    }
+
+    window[name] = {
+      readers: [read],
+      writers: [write]
+    };
+
+    var painter = window[name];
 
     var interval = 1000 / fps;
     var last = null;
@@ -1461,7 +1479,12 @@
       last = ts - delta % interval;
 
       // update view
-      update(ts);
+      painter.readers.forEach(function(read) {
+        return read();
+      });
+      painter.writers.forEach(function(write) {
+        return write(ts);
+      });
     };
 
     tick(performance.now());
@@ -1470,20 +1493,6 @@
       pause: function pause() {
         window.cancelAnimationFrame(frame);
       }
-    };
-  };
-
-  var createUpdater = function createUpdater(apps, reader, writer) {
-    return function(ts) {
-      // all reads first
-      apps.forEach(function(app) {
-        return app[reader]();
-      });
-
-      // now update the DOM
-      apps.forEach(function(app) {
-        return app[writer](ts);
-      });
     };
   };
 
@@ -8879,7 +8888,18 @@ function signature:
     // start painter and fire load event
     if (isBrowser) {
       // app painter, cannot be paused or stopped at the moment
-      createPainter(createUpdater(state.apps, '_read', '_write'), 60);
+      createPainter(
+        function() {
+          state.apps.forEach(function(app) {
+            return app._read();
+          });
+        },
+        function(ts) {
+          state.apps.forEach(function(app) {
+            return app._write(ts);
+          });
+        }
+      );
 
       // fire loaded event so we know when FilePond is available
       var dispatch = function dispatch() {

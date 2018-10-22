@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.2.0
+
+- Add global scoped property for painter so multiple libraries can subscribe to read and write DOM operations. This is mostly in preparation for a standalone version of the Image Editor plugin.
+
+
 ## 3.1.6
 
 - Fix problem where remove callback would no longer work.
