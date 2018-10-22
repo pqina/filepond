@@ -32,6 +32,14 @@ FilePond uses [BrowserStack](https://www.browserstack.com/) for compatibility te
 
 [<img src="https://github.com/pqina/filepond-github-assets/blob/master/browserstack-logo.svg" height="32" alt="BrowserStack"/>](https://www.browserstack.com/)
 
+
+### Time to learn ES6?
+
+FilePond is written in ES6. The docs also feature a lot of ES6 code examples.
+
+If you want to learn how to write modern ES6 JavaScript as well, [ES6 for Everyone by Wes Bos](http://bit.ly/es6-course) is highly recommended.
+
+
 ### Plugins
 
 *   [File encode](https://github.com/pqina/filepond-plugin-file-encode)
