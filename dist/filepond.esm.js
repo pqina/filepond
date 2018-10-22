@@ -1,5 +1,5 @@
 /*
- * FilePond 3.2.0
+ * FilePond 3.2.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -3419,6 +3419,8 @@ const dynamicLabel = label => (...params) =>
 
 const isMockItem = item => !isFile(item.file);
 
+let updateItemsTimeout = null;
+
 // returns item based on state
 const getItemByQueryFromState = (state, itemHandler) => ({
   query,
@@ -3814,7 +3816,10 @@ const actions = (dispatch, query, state) => ({
     dispatch('DID_ADD_ITEM', { id, index, interactionMethod });
 
     // the item list has been updated
-    dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
+    clearTimeout(updateItemsTimeout);
+    updateItemsTimeout = setTimeout(() => {
+      dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
+    }, 0);
 
     // start loading the source
     const { url, load, restore, fetch } = state.options.server || {};
@@ -3999,7 +4004,10 @@ const actions = (dispatch, query, state) => ({
     dispatch('DID_REMOVE_ITEM', { id, item });
 
     // now the list has been modified
-    dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
+    clearTimeout(updateItemsTimeout);
+    updateItemsTimeout = setTimeout(() => {
+      dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
+    }, 0);
 
     // correctly removed
     success(createItemAPI(item));

@@ -1,5 +1,5 @@
 /*
- * FilePond 3.2.0
+ * FilePond 3.2.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -4114,6 +4114,8 @@ function signature:
     return !isFile(item.file);
   };
 
+  var updateItemsTimeout = null;
+
   // returns item based on state
   var getItemByQueryFromState = function getItemByQueryFromState(
     state,
@@ -4555,7 +4557,10 @@ function signature:
         });
 
         // the item list has been updated
-        dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
+        clearTimeout(updateItemsTimeout);
+        updateItemsTimeout = setTimeout(function() {
+          dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
+        }, 0);
 
         // start loading the source
 
@@ -4766,7 +4771,10 @@ function signature:
         dispatch('DID_REMOVE_ITEM', { id: id, item: item });
 
         // now the list has been modified
-        dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
+        clearTimeout(updateItemsTimeout);
+        updateItemsTimeout = setTimeout(function() {
+          dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
+        }, 0);
 
         // correctly removed
         success(createItemAPI(item));
