@@ -1,5 +1,5 @@
 /*
- * FilePond 3.2.2
+ * FilePond 3.2.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
