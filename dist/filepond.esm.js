@@ -1,5 +1,5 @@
 /*
- * FilePond 3.2.1
+ * FilePond 3.2.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1645,6 +1645,7 @@ const PRIVATE_METHODS = [
   'extend',
   'archive',
   'release',
+  'released',
   'requestProcessing'
 ];
 
@@ -2852,7 +2853,7 @@ const createFileProcessor = processFn => {
         state.perceivedPerformanceUpdater.clear();
 
         // fire the abort event so we can switch visuals
-        api.fire('abort');
+        api.fire('abort', state.response ? state.response.body : null);
       }
     );
   };
@@ -2871,9 +2872,6 @@ const createFileProcessor = processFn => {
 
     // if has response object, we've completed the request
     state.complete = true;
-
-    // now aborted, if server returned a response, let's pass it along
-    api.fire('abort', state.response ? state.response.body : null);
   };
 
   const reset = () => {
@@ -2909,6 +2907,7 @@ const getFilenameWithoutExtension = name =>
 const ItemStatus = {
   INIT: 1,
   IDLE: 2,
+  PROCESSING_QUEUED: 9,
   PROCESSING: 3,
   PROCESSING_PAUSED: 4,
   PROCESSING_COMPLETE: 5,
@@ -3106,6 +3105,9 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
   // file processor
   const process = (processor, onprocess) => {
+    // now processing
+    setStatus(ItemStatus.PROCESSING);
+
     // reset abort callback
     abortProcessingRequestComplete = null;
 
@@ -3119,7 +3121,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
     // setup processor
     processor.on('load', serverFileReference => {
-      // need this id to be able to rever the upload
+      // need this id to be able to revert the upload
       state.serverFileReference = serverFileReference;
     });
 
@@ -3160,12 +3162,15 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     });
 
     processor.on('progress', progress => {
-      setStatus(ItemStatus.PROCESSING);
       fire('process-progress', progress);
     });
 
     // when successfully transformed
     const success = file => {
+      // if was archived in the mean time, don't process
+      if (state.archived) return;
+
+      // process file!
       processor.process(file, Object.assign({}, metadata));
     };
 
@@ -3221,7 +3226,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
   };
 
   const requestProcessing = () => {
-    setStatus(ItemStatus.PROCESSING);
+    setStatus(ItemStatus.PROCESSING_QUEUED);
   };
 
   const abortProcessing = () =>
@@ -3910,6 +3915,11 @@ const actions = (dispatch, query, state) => ({
     (item, success, failure) => {
       const id = item.id;
 
+      // already queued
+      if (item.status === ItemStatus.PROCESSING_QUEUED) {
+        return;
+      }
+
       item.requestProcessing();
 
       dispatch('DID_REQUEST_ITEM_PROCESSING', { id });
@@ -3919,8 +3929,8 @@ const actions = (dispatch, query, state) => ({
   ),
 
   PROCESS_ITEM: getItemByQueryFromState(state, (item, success, failure) => {
-    // should be in processing state, else is aborted
-    if (item.status !== ItemStatus.PROCESSING) {
+    // if was not queued or is already processing exit here
+    if (item.status === ItemStatus.PROCESSING) {
       return;
     }
 

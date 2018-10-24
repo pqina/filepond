@@ -1,5 +1,17 @@
 # Changelog
 
+## 3.2.2
+
+- Add preparations for queueing file processing.
+- Improve guards against errors when items are removed.
+- Improve alignment of drop label.
+
+
+## 3.2.1
+
+- Group updateitems callback for better compatibility with React.
+
+
 ## 3.2.0
 
 - Add global scoped property for painter so multiple libraries can subscribe to read and write DOM operations. This is mostly in preparation for a standalone version of the Image Editor plugin.

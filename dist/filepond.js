@@ -1,5 +1,5 @@
 /*
- * FilePond 3.2.1
+ * FilePond 3.2.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2031,6 +2031,7 @@
     'extend',
     'archive',
     'release',
+    'released',
     'requestProcessing'
   ];
 
@@ -3451,7 +3452,7 @@ function signature:
           state.perceivedPerformanceUpdater.clear();
 
           // fire the abort event so we can switch visuals
-          api.fire('abort');
+          api.fire('abort', state.response ? state.response.body : null);
         }
       );
     };
@@ -3470,9 +3471,6 @@ function signature:
 
       // if has response object, we've completed the request
       state.complete = true;
-
-      // now aborted, if server returned a response, let's pass it along
-      api.fire('abort', state.response ? state.response.body : null);
     };
 
     var reset = function reset() {
@@ -3514,6 +3512,7 @@ function signature:
   var ItemStatus = {
     INIT: 1,
     IDLE: 2,
+    PROCESSING_QUEUED: 9,
     PROCESSING: 3,
     PROCESSING_PAUSED: 4,
     PROCESSING_COMPLETE: 5,
@@ -3738,6 +3737,9 @@ function signature:
 
     // file processor
     var process = function process(processor, onprocess) {
+      // now processing
+      setStatus(ItemStatus.PROCESSING);
+
       // reset abort callback
       abortProcessingRequestComplete = null;
 
@@ -3751,7 +3753,7 @@ function signature:
 
       // setup processor
       processor.on('load', function(serverFileReference) {
-        // need this id to be able to rever the upload
+        // need this id to be able to revert the upload
         state.serverFileReference = serverFileReference;
       });
 
@@ -3792,12 +3794,15 @@ function signature:
       });
 
       processor.on('progress', function(progress) {
-        setStatus(ItemStatus.PROCESSING);
         fire('process-progress', progress);
       });
 
       // when successfully transformed
       var success = function success(file) {
+        // if was archived in the mean time, don't process
+        if (state.archived) return;
+
+        // process file!
         processor.process(file, Object.assign({}, metadata));
       };
 
@@ -3854,7 +3859,7 @@ function signature:
     };
 
     var requestProcessing = function requestProcessing() {
-      setStatus(ItemStatus.PROCESSING);
+      setStatus(ItemStatus.PROCESSING_QUEUED);
     };
 
     var abortProcessing = function abortProcessing() {
@@ -4667,6 +4672,11 @@ function signature:
       ) {
         var id = item.id;
 
+        // already queued
+        if (item.status === ItemStatus.PROCESSING_QUEUED) {
+          return;
+        }
+
         item.requestProcessing();
 
         dispatch('DID_REQUEST_ITEM_PROCESSING', { id: id });
@@ -4683,8 +4693,8 @@ function signature:
         success,
         failure
       ) {
-        // should be in processing state, else is aborted
-        if (item.status !== ItemStatus.PROCESSING) {
+        // if was not queued or is already processing exit here
+        if (item.status === ItemStatus.PROCESSING) {
           return;
         }
 

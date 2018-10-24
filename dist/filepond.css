@@ -1,5 +1,5 @@
 /*
- * FilePond 3.2.1
+ * FilePond 3.2.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -81,6 +81,7 @@
 .filepond--drop-label label {
   display: block;
   cursor: default;
+  margin: 0;
   padding: 0.5em;
   font-size: 0.875em;
   font-weight: normal;
