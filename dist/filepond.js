@@ -4810,6 +4810,44 @@ function signature:
         });
       }),
 
+      REQUEST_REVERT_ITEM_PROCESSING: getItemByQueryFromState(state, function(
+        item
+      ) {
+        // not instant uploading, revert immidiately
+        if (!state.options.instantUpload) {
+          dispatch('REVERT_ITEM_PROCESSING');
+          return;
+        }
+
+        // if we're instant uploading the file will also be removed if we revert,
+        // so if a before remove file hook is defined we need to run it now
+        var handleRevert = function handleRevert(shouldRevert) {
+          if (!shouldRevert) {
+            return;
+          }
+          dispatch('REVERT_ITEM_PROCESSING', { query: item });
+        };
+
+        var fn = query('GET_BEFORE_REMOVE_FILE');
+        if (!fn) {
+          return handleRevert(true);
+        }
+
+        var requestRemoveResult = fn(createItemAPI(item));
+        if (requestRemoveResult == null) {
+          // undefined or null
+          return handleRevert(true);
+        }
+
+        if (typeof requestRemoveResult === 'boolean') {
+          return handleRevert(requestRemoveResult);
+        }
+
+        if (typeof requestRemoveResult.then === 'function') {
+          requestRemoveResult.then(handleRevert);
+        }
+      }),
+
       REVERT_ITEM_PROCESSING: getItemByQueryFromState(state, function(item) {
         item
           .revert(
@@ -5332,7 +5370,7 @@ function signature:
     },
     RevertItemProcessing: {
       label: 'GET_LABEL_BUTTON_UNDO_ITEM_PROCESSING',
-      action: 'REVERT_ITEM_PROCESSING',
+      action: 'REQUEST_REVERT_ITEM_PROCESSING',
       icon: 'GET_ICON_UNDO',
       className: 'filepond--action-revert-item-processing',
       align: 'BUTTON_PROCESS_ITEM_POSITION' // right

@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.2.3
+
+- Fix problem where `beforeRemoveFile` hook was not called when in `instantUpload` mode and reverting an upload. 
+
+
 ## 3.2.2
 
 - Add preparations for queueing file processing.
