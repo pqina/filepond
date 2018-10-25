@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.2.4
+
+- Fix problem where server side rendering would not work correctly.
+
+
 ## 3.2.3
 
 - Fix problem where `beforeRemoveFile` hook was not called when in `instantUpload` mode and reverting an upload. 

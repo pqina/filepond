@@ -1,5 +1,5 @@
 /*
- * FilePond 3.2.3
+ * FilePond 3.2.4
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -8896,18 +8896,19 @@ function signature:
   };
 
   var supported = (function() {
-    var isSupported = !// Can't run on Opera Mini due to lack of everything
-    (
-      isOperaMini() ||
-      // Can't run on Node
-      !isBrowser() ||
+    // Runs immidiately and then remembers result for subsequent calls
+    var isSupported =
+      // Has to be a browser
+      isBrowser() &&
+      // Can't run on Opera Mini due to lack of everything
+      !isOperaMini() &&
       // Require these APIs to feature detect a modern browser
-      !hasVisibility() ||
-      !hasPromises() ||
-      !hasBlobSlice() ||
-      !hasCreateObjectURL() ||
-      !hasTiming()
-    );
+      hasVisibility() &&
+      hasPromises() &&
+      hasBlobSlice() &&
+      hasCreateObjectURL() &&
+      hasTiming();
+
     return function() {
       return isSupported;
     };
@@ -8942,50 +8943,47 @@ function signature:
   // if not supported, no API
   if (supported()) {
     // start painter and fire load event
-    if (isBrowser) {
-      // app painter, cannot be paused or stopped at the moment
-      createPainter(
-        function() {
-          state.apps.forEach(function(app) {
-            return app._read();
-          });
-        },
-        function(ts) {
-          state.apps.forEach(function(app) {
-            return app._write(ts);
-          });
-        }
+    createPainter(
+      function() {
+        state.apps.forEach(function(app) {
+          return app._read();
+        });
+      },
+      function(ts) {
+        state.apps.forEach(function(app) {
+          return app._write(ts);
+        });
+      }
+    );
+
+    // fire loaded event so we know when FilePond is available
+    var dispatch = function dispatch() {
+      // let others know we have area ready
+      document.dispatchEvent(
+        new CustomEvent('FilePond:loaded', {
+          detail: {
+            supported: supported,
+            create: exports.create,
+            destroy: exports.destroy,
+            parse: exports.parse,
+            find: exports.find,
+            registerPlugin: exports.registerPlugin,
+            setOptions: exports.setOptions
+          }
+        })
       );
 
-      // fire loaded event so we know when FilePond is available
-      var dispatch = function dispatch() {
-        // let others know we have area ready
-        document.dispatchEvent(
-          new CustomEvent('FilePond:loaded', {
-            detail: {
-              supported: supported,
-              create: exports.create,
-              destroy: exports.destroy,
-              parse: exports.parse,
-              find: exports.find,
-              registerPlugin: exports.registerPlugin,
-              setOptions: exports.setOptions
-            }
-          })
-        );
+      // clean up event
+      document.removeEventListener('DOMContentLoaded', dispatch);
+    };
 
-        // clean up event
-        document.removeEventListener('DOMContentLoaded', dispatch);
-      };
-
-      if (document.readyState !== 'loading') {
-        // move to back of execution queue, FilePond should have been exported by then
-        setTimeout(function() {
-          return dispatch();
-        }, 0);
-      } else {
-        document.addEventListener('DOMContentLoaded', dispatch);
-      }
+    if (document.readyState !== 'loading') {
+      // move to back of execution queue, FilePond should have been exported by then
+      setTimeout(function() {
+        return dispatch();
+      }, 0);
+    } else {
+      document.addEventListener('DOMContentLoaded', dispatch);
     }
 
     // updates the OptionTypes object based on the current options
