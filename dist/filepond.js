@@ -1,5 +1,5 @@
 /*
- * FilePond 3.2.4
+ * FilePond 3.2.5
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1099,6 +1099,9 @@
         _ref$didCreateView = _ref.didCreateView,
         didCreateView =
           _ref$didCreateView === undefined ? function() {} : _ref$didCreateView,
+        _ref$didWriteView = _ref.didWriteView,
+        didWriteView =
+          _ref$didWriteView === undefined ? function() {} : _ref$didWriteView,
         _ref$ignoreRect = _ref.ignoreRect,
         ignoreRect = _ref$ignoreRect === undefined ? false : _ref$ignoreRect,
         _ref$ignoreRectUpdate = _ref.ignoreRectUpdate,
@@ -1279,6 +1282,13 @@
 
           // update resting state
           isResting = resting;
+
+          didWriteView({
+            props: props,
+            root: internalAPI,
+            actions: frameActions,
+            timestamp: ts
+          });
 
           // let parent know if we are resting
           return resting;
@@ -6191,17 +6201,6 @@ function signature:
         offset += height;
       });
 
-    // remove marked views
-    root.childViews
-      .filter(function(view) {
-        return view.markedForRemoval && view.opacity === 0;
-      })
-      .forEach(function(view) {
-        root.removeChildView(view);
-        resting = false;
-        view._destroy();
-      });
-
     return resting;
   };
 
@@ -6228,6 +6227,18 @@ function signature:
     read: read,
     tag: 'ul',
     name: 'list',
+    didWriteView: function didWriteView(_ref6) {
+      var root = _ref6.root;
+
+      root.childViews
+        .filter(function(view) {
+          return view.markedForRemoval && view.opacity === 0 && view.resting;
+        })
+        .forEach(function(view) {
+          view._destroy();
+          root.removeChildView(view);
+        });
+    },
     filterFrameActionsForChild: filterSetItemActions,
     mixins: {
       apis: ['dragIndex']

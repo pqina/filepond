@@ -1,5 +1,5 @@
 /*
- * FilePond 3.2.4
+ * FilePond 3.2.5
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -878,6 +878,7 @@ const createView =
     // hooks
     filterFrameActionsForChild = (child, actions) => actions,
     didCreateView = () => {},
+    didWriteView = () => {},
 
     // rect related
     ignoreRect = false,
@@ -1029,6 +1030,13 @@ const createView =
 
       // update resting state
       isResting = resting;
+
+      didWriteView({
+        props,
+        root: internalAPI,
+        actions: frameActions,
+        timestamp: ts
+      });
 
       // let parent know if we are resting
       return resting;
@@ -5235,15 +5243,6 @@ const write$2 = ({ root, props, actions }) => {
       offset += height;
     });
 
-  // remove marked views
-  root.childViews
-    .filter(view => view.markedForRemoval && view.opacity === 0)
-    .forEach(view => {
-      root.removeChildView(view);
-      resting = false;
-      view._destroy();
-    });
-
   return resting;
 };
 
@@ -5269,6 +5268,16 @@ const list = createView({
   read,
   tag: 'ul',
   name: 'list',
+  didWriteView: ({ root }) => {
+    root.childViews
+      .filter(
+        view => view.markedForRemoval && view.opacity === 0 && view.resting
+      )
+      .forEach(view => {
+        view._destroy();
+        root.removeChildView(view);
+      });
+  },
   filterFrameActionsForChild: filterSetItemActions,
   mixins: {
     apis: ['dragIndex']

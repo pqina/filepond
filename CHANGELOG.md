@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.2.5
+
+- Fix issue where items would be removed before item sub views were all in rest state.
+
+
 ## 3.2.4
 
 - Fix problem where server side rendering would not work correctly.
