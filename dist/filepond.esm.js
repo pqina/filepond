@@ -1,5 +1,5 @@
 /*
- * FilePond 3.2.5
+ * FilePond 3.3.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1226,14 +1226,19 @@ const createPainter = (read, write, fps = 60) => {
   };
 };
 
-const createRoute = (routes, fn) => ({ root, props, actions = [] }) => {
+const createRoute = (routes, fn) => ({
+  root,
+  props,
+  actions = [],
+  timestamp
+}) => {
   actions
     .filter(action => routes[action.type])
     .forEach(action =>
-      routes[action.type]({ root, props, action: action.data })
+      routes[action.type]({ root, props, action: action.data, timestamp })
     );
   if (fn) {
-    fn({ root, props, actions });
+    fn({ root, props, actions, timestamp });
   }
 };
 
@@ -3256,7 +3261,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
   // exposed methods
 
-  const setMetadata = (key, value) => {
+  const setMetadata = (key, value, silent) => {
     const keys = key.split('.');
     const root = keys[0];
     const last = keys.pop();
@@ -3270,6 +3275,8 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
     // update value
     data[last] = value;
+
+    if (silent) return;
 
     fire('metadata-update', {
       key: root,
@@ -3298,15 +3305,15 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       source: { get: () => state.source },
 
       getMetadata,
-      setMetadata: (key, value) => {
-        if (isObject(key) && !value) {
+      setMetadata: (key, value, silent) => {
+        if (isObject(key)) {
           const data = key;
           Object.keys(data).forEach(key => {
-            setMetadata(key, data[key]);
+            setMetadata(key, data[key], value);
           });
           return key;
         }
-        setMetadata(key, value);
+        setMetadata(key, value, silent);
         return value;
       },
 
@@ -3652,8 +3659,13 @@ const actions = (dispatch, query, state) => ({
 
     // create a new blank item
     const item = createItem(
+      // where did this file come from
       origin,
+
+      // an input file never has a server file reference
       origin === FileOrigin$1.INPUT ? null : source,
+
+      // file mock data, if defined
       options.file
     );
 

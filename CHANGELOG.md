@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.3.0
+
+- Add feature to silently update metadata so it doesn't trigger an update.
+
+
 ## 3.2.5
 
 - Fix issue where items would be removed before item sub views were all in rest state.

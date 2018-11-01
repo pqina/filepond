@@ -1,5 +1,5 @@
 /*
- * FilePond 3.2.5
+ * FilePond 3.3.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1511,7 +1511,8 @@
       var root = _ref.root,
         props = _ref.props,
         _ref$actions = _ref.actions,
-        actions = _ref$actions === undefined ? [] : _ref$actions;
+        actions = _ref$actions === undefined ? [] : _ref$actions,
+        timestamp = _ref.timestamp;
 
       actions
         .filter(function(action) {
@@ -1521,11 +1522,17 @@
           return routes[action.type]({
             root: root,
             props: props,
-            action: action.data
+            action: action.data,
+            timestamp: timestamp
           });
         });
       if (fn) {
-        fn({ root: root, props: props, actions: actions });
+        fn({
+          root: root,
+          props: props,
+          actions: actions,
+          timestamp: timestamp
+        });
       }
     };
   };
@@ -3892,7 +3899,7 @@ function signature:
 
     // exposed methods
 
-    var _setMetadata = function _setMetadata(key, value) {
+    var _setMetadata = function _setMetadata(key, value, silent) {
       var keys = key.split('.');
       var root = keys[0];
       var last = keys.pop();
@@ -3908,6 +3915,8 @@ function signature:
 
       // update value
       data[last] = value;
+
+      if (silent) return;
 
       fire('metadata-update', {
         key: root,
@@ -3963,15 +3972,15 @@ function signature:
         },
 
         getMetadata: getMetadata,
-        setMetadata: function setMetadata(key, value) {
-          if (isObject(key) && !value) {
+        setMetadata: function setMetadata(key, value, silent) {
+          if (isObject(key)) {
             var data = key;
             Object.keys(data).forEach(function(key) {
-              _setMetadata(key, data[key]);
+              _setMetadata(key, data[key], value);
             });
             return key;
           }
-          _setMetadata(key, value);
+          _setMetadata(key, value, silent);
           return value;
         },
 
@@ -4374,8 +4383,13 @@ function signature:
 
         // create a new blank item
         var item = createItem(
+          // where did this file come from
           origin,
+
+          // an input file never has a server file reference
           origin === FileOrigin$1.INPUT ? null : source,
+
+          // file mock data, if defined
           options.file
         );
 
