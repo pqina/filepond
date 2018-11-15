@@ -1,5 +1,5 @@
 /*
- * FilePond 3.3.0
+ * FilePond 3.3.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -7806,6 +7806,10 @@ function signature:
     // no more room?
     var hasMaxItems = isInt(maxItems);
     if (hasMaxItems && totalItems + totalBrowseItems > maxItems) {
+      root.dispatch('DID_THROW_MAX_FILES', {
+        source: items,
+        error: createResponse('warning', 0, 'Max files')
+      });
       return true;
     }
 
@@ -8621,8 +8625,15 @@ function signature:
       arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
     // turn attributes into object
-    var output = []
-      .concat(toConsumableArray(node.attributes))
+    var attributes = [];
+    forin(node.attributes, function(index) {
+      attributes.push(node.attributes[index]);
+    });
+
+    var output = attributes
+      .filter(function(attribute) {
+        return attribute.name;
+      })
       .reduce(function(obj, attribute) {
         var value = attr(node, attribute.name);
 

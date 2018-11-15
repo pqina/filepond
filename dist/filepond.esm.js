@@ -1,5 +1,5 @@
 /*
- * FilePond 3.3.0
+ * FilePond 3.3.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -6661,6 +6661,10 @@ const exceedsMaxFiles = (root, items) => {
   // no more room?
   const hasMaxItems = isInt(maxItems);
   if (hasMaxItems && totalItems + totalBrowseItems > maxItems) {
+    root.dispatch('DID_THROW_MAX_FILES', {
+      source: items,
+      error: createResponse('warning', 0, 'Max files')
+    });
     return true;
   }
 
@@ -7389,13 +7393,20 @@ const mapObject = (object, propertyMap) => {
 
 const getAttributesAsObject = (node, attributeMapping = {}) => {
   // turn attributes into object
-  const output = [...node.attributes].reduce((obj, attribute) => {
-    const value = attr(node, attribute.name);
+  const attributes = [];
+  forin(node.attributes, index => {
+    attributes.push(node.attributes[index]);
+  });
 
-    obj[attributeNameToPropertyName(attribute.name)] =
-      value === attribute.name ? true : value;
-    return obj;
-  }, {});
+  const output = attributes
+    .filter(attribute => attribute.name)
+    .reduce((obj, attribute) => {
+      const value = attr(node, attribute.name);
+
+      obj[attributeNameToPropertyName(attribute.name)] =
+        value === attribute.name ? true : value;
+      return obj;
+    }, {});
 
   // do mapping of object properties
   mapObject(output, attributeMapping);

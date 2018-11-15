@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.3.1
+
+- Fix problem where exceeding the max file limit would not throw an error
+
+
 ## 3.3.0
 
 - Add feature to silently update metadata so it doesn't trigger an update.
