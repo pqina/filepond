@@ -1,5 +1,5 @@
 /*
- * FilePond 3.3.1
+ * FilePond 3.3.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -4066,7 +4066,7 @@ const actions = (dispatch, query, state) => ({
   REQUEST_REVERT_ITEM_PROCESSING: getItemByQueryFromState(state, item => {
     // not instant uploading, revert immidiately
     if (!state.options.instantUpload) {
-      dispatch('REVERT_ITEM_PROCESSING');
+      dispatch('REVERT_ITEM_PROCESSING', { query: item });
       return;
     }
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.3.2
+
+- Fix problem where revert call would revert wrong file item.
+
+
 ## 3.3.1
 
 - Fix problem where exceeding the max file limit would not throw an error
