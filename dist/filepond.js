@@ -1,5 +1,5 @@
 /*
- * FilePond 3.3.2
+ * FilePond 3.3.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2730,11 +2730,13 @@
       ) {
         var header = _step.value;
 
-        var matches = header.match(/filename="(.+)"/);
-        if (!matches || !matches[1]) {
+        var matches =
+          header.match(/(?:filename="(.+)")|(?:filename=(.+))/) || [];
+        var result = matches[1] || matches[2];
+        if (!result) {
           continue;
         }
-        return matches[1];
+        return result;
       }
     } catch (err) {
       _didIteratorError = true;
@@ -2915,6 +2917,9 @@
       },
       options
     );
+
+    // encode url
+    url = encodeURI(url);
 
     // if method is GET, add any received data to url
     if (/GET/i.test(options.method) && data) {
@@ -4901,7 +4906,7 @@ function signature:
   };
 
   var formatFilename = function formatFilename(name) {
-    return decodeURI(name);
+    return name;
   };
 
   var createElement$1 = function createElement(tagName) {

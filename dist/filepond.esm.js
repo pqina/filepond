@@ -1,5 +1,5 @@
 /*
- * FilePond 3.3.2
+ * FilePond 3.3.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2219,12 +2219,13 @@ const getFileFromBase64DataURI = (dataURI, filename, extension) => {
 
 const getFilenameFromHeaders = headers => {
   const rows = headers.split('\n');
-  for (const header of rows) {
-    const matches = header.match(/filename="(.+)"/);
-    if (!matches || !matches[1]) {
+  for (let header of rows) {
+    const matches = header.match(/(?:filename="(.+)")|(?:filename=(.+))/) || [];
+    const result = matches[1] || matches[2];
+    if (!result) {
       continue;
     }
-    return matches[1];
+    return result;
   }
   return null;
 };
@@ -2386,6 +2387,9 @@ const sendRequest = (data, url, options) => {
     },
     options
   );
+
+  // encode url
+  url = encodeURI(url);
 
   // if method is GET, add any received data to url
   if (/GET/i.test(options.method) && data) {
@@ -4122,7 +4126,7 @@ const actions = (dispatch, query, state) => ({
   }
 });
 
-const formatFilename = name => decodeURI(name);
+const formatFilename = name => name;
 
 const createElement$1 = tagName => {
   return document.createElement(tagName);

@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.3.3
+
+- Fix filename matching of content-disposition header when the filename is not wrapped in quotes.
+- Fix problem where special characters in filename prevented a file from being added
+
+
 ## 3.3.2
 
 - Fix problem where revert call would revert wrong file item.
