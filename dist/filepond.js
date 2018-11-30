@@ -1671,6 +1671,9 @@
       api[key] = createAction(key, outline[key], methods[key], api.timeout);
     });
 
+    // special treatment for remove
+    api.remove = outline.remove || null;
+
     return api;
   };
 
@@ -3656,7 +3659,9 @@ function signature:
       return state.file;
     };
 
-    // loads files
+    //
+    // logic to load a file
+    //
     var load = function load(source, loader, onload) {
       // remember the original item source
       state.source = source;
@@ -3757,7 +3762,23 @@ function signature:
       loader.load();
     };
 
-    // file processor
+    var retryLoad = function retryLoad() {
+      if (!state.activeLoader) {
+        return;
+      }
+      state.activeLoader.load();
+    };
+
+    var abortLoad = function abortLoad() {
+      if (!state.activeLoader) {
+        return;
+      }
+      state.activeLoader.abort();
+    };
+
+    //
+    // logic to process a file
+    //
     var process = function process(processor, onprocess) {
       // now processing
       setStatus(ItemStatus.PROCESSING);
@@ -3838,6 +3859,31 @@ function signature:
       state.activeProcessor = processor;
     };
 
+    var requestProcessing = function requestProcessing() {
+      setStatus(ItemStatus.PROCESSING_QUEUED);
+    };
+
+    var abortProcessing = function abortProcessing() {
+      return new Promise(function(resolve) {
+        if (!state.activeProcessor) {
+          setStatus(ItemStatus.IDLE);
+          fire('process-abort');
+
+          resolve();
+          return;
+        }
+
+        abortProcessingRequestComplete = function abortProcessingRequestComplete() {
+          resolve();
+        };
+
+        state.activeProcessor.abort();
+      });
+    };
+
+    //
+    // logic to revert a preocessed file
+    //
     var revert = function revert(revertFileUpload) {
       return new Promise(function(resolve) {
         // cannot revert without a server id for this process
@@ -3866,44 +3912,7 @@ function signature:
       });
     };
 
-    var abortLoad = function abortLoad() {
-      if (!state.activeLoader) {
-        return;
-      }
-      state.activeLoader.abort();
-    };
-
-    var retryLoad = function retryLoad() {
-      if (!state.activeLoader) {
-        return;
-      }
-      state.activeLoader.load();
-    };
-
-    var requestProcessing = function requestProcessing() {
-      setStatus(ItemStatus.PROCESSING_QUEUED);
-    };
-
-    var abortProcessing = function abortProcessing() {
-      return new Promise(function(resolve) {
-        if (!state.activeProcessor) {
-          setStatus(ItemStatus.IDLE);
-          fire('process-abort');
-
-          resolve();
-          return;
-        }
-
-        abortProcessingRequestComplete = function abortProcessingRequestComplete() {
-          resolve();
-        };
-
-        state.activeProcessor.abort();
-      });
-    };
-
     // exposed methods
-
     var _setMetadata = function _setMetadata(key, value, silent) {
       var keys = key.split('.');
       var root = keys[0];
@@ -4800,23 +4809,56 @@ function signature:
       }),
 
       REMOVE_ITEM: getItemByQueryFromState(state, function(item, success) {
-        // get id reference
-        var id = item.id;
+        var removeFromView = function removeFromView() {
+          // get id reference
+          var id = item.id;
 
-        // archive the item, this does not remove it from the list
-        getItemById(state.items, id).archive();
+          // archive the item, this does not remove it from the list
+          getItemById(state.items, id).archive();
 
-        // tell the view the item has been removed
-        dispatch('DID_REMOVE_ITEM', { id: id, item: item });
+          // tell the view the item has been removed
+          dispatch('DID_REMOVE_ITEM', { id: id, item: item });
 
-        // now the list has been modified
-        clearTimeout(updateItemsTimeout);
-        updateItemsTimeout = setTimeout(function() {
-          dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
-        }, 0);
+          // now the list has been modified
+          clearTimeout(updateItemsTimeout);
+          updateItemsTimeout = setTimeout(function() {
+            dispatch('DID_UPDATE_ITEMS', {
+              items: getActiveItems(state.items)
+            });
+          }, 0);
 
-        // correctly removed
-        success(createItemAPI(item));
+          // correctly removed
+          success(createItemAPI(item));
+        };
+
+        // if this is a local file and the server.remove function has been configured, send source there so dev can remove file from server
+        var server = state.options.server;
+        if (
+          item.origin === FileOrigin$1.LOCAL &&
+          server &&
+          isFunction(server.remove)
+        ) {
+          dispatch('DID_START_ITEM_REMOVE', { id: item.id });
+
+          server.remove(
+            item.source,
+            function() {
+              return removeFromView();
+            },
+            function(status) {
+              dispatch('DID_THROW_ITEM_REMOVE_ERROR', {
+                id: item.id,
+                error: createResponse('error', 0, status, null),
+                status: {
+                  main: status,
+                  sub: state.options.labelTapToRetry
+                }
+              });
+            }
+          );
+        } else {
+          removeFromView();
+        }
       }),
 
       ABORT_ITEM_LOAD: getItemByQueryFromState(state, function(item) {
@@ -5009,6 +5051,10 @@ function signature:
       return;
     }
 
+    if (props.align) {
+      root.element.dataset.align = props.align;
+    }
+
     // get width of stroke
     var ringStrokeWidth = parseInt(attr(root.ref.path, 'stroke-width'), 10);
 
@@ -5056,7 +5102,7 @@ function signature:
     create: create$7,
     write: write$5,
     mixins: {
-      apis: ['progress', 'spin'],
+      apis: ['progress', 'spin', 'align'],
       styles: ['opacity'],
       animations: {
         opacity: { type: 'tween', duration: 500 },
@@ -5336,7 +5382,8 @@ function signature:
       DID_UPDATE_ITEM_LOAD_PROGRESS: didSetItemLoadProgress,
       DID_THROW_ITEM_LOAD_ERROR: error,
       DID_THROW_ITEM_INVALID: error,
-      DID_THROW_ITEM_PROCESSING_ERROR: error
+      DID_THROW_ITEM_PROCESSING_ERROR: error,
+      DID_THROW_ITEM_REMOVE_ERROR: error
     }),
     didCreateView: function didCreateView(root) {
       applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
@@ -5431,6 +5478,18 @@ function signature:
     return Math.floor(root.ref.buttonRemoveItem.rect.element.left / 2);
   };
 
+  var getLoadIndicatorAlignment = function getLoadIndicatorAlignment(root) {
+    return root.query('GET_STYLE_LOAD_INDICATOR_POSITION');
+  };
+  var getProcessIndicatorAlignment = function getProcessIndicatorAlignment(
+    root
+  ) {
+    return root.query('GET_STYLE_PROGRESS_INDICATOR_POSITION');
+  };
+  var getRemoveIndicatorAligment = function getRemoveIndicatorAligment(root) {
+    return root.query('GET_STYLE_BUTTON_REMOVE_ITEM_POSITION');
+  };
+
   var DefaultStyle = {
     buttonAbortItemLoad: { opacity: 0 },
     buttonRetryItemLoad: { opacity: 0 },
@@ -5439,8 +5498,11 @@ function signature:
     buttonAbortItemProcessing: { opacity: 0 },
     buttonRetryItemProcessing: { opacity: 0 },
     buttonRevertItemProcessing: { opacity: 0 },
-    loadProgressIndicator: { opacity: 0 },
-    processProgressIndicator: { opacity: 0 },
+    loadProgressIndicator: { opacity: 0, align: getLoadIndicatorAlignment },
+    processProgressIndicator: {
+      opacity: 0,
+      align: getProcessIndicatorAlignment
+    },
     processingCompleteIndicator: { opacity: 0, scaleX: 0.75, scaleY: 0.75 },
     info: { translateX: 0, translateY: 0, opacity: 0 },
     status: { translateX: 0, translateY: 0, opacity: 0 }
@@ -5465,6 +5527,7 @@ function signature:
       info: { translateX: calculateFileInfoOffset },
       status: { translateX: calculateFileInfoOffset, opacity: 1 }
     },
+
     DID_START_ITEM_LOAD: {
       buttonAbortItemLoad: { opacity: 1 },
       loadProgressIndicator: { opacity: 1 },
@@ -5476,6 +5539,26 @@ function signature:
       info: { translateX: calculateFileInfoOffset },
       status: { opacity: 1 }
     },
+
+    DID_START_ITEM_REMOVE: {
+      processProgressIndicator: {
+        opacity: 1,
+        align: getRemoveIndicatorAligment
+      },
+      info: { translateX: calculateFileInfoOffset },
+      status: { opacity: 0 }
+    },
+
+    DID_THROW_ITEM_REMOVE_ERROR: {
+      processProgressIndicator: {
+        opacity: 0,
+        align: getRemoveIndicatorAligment
+      },
+      buttonRemoveItem: { opacity: 1 },
+      info: { translateX: calculateFileInfoOffset },
+      status: { opacity: 1, translateX: calculateFileInfoOffset }
+    },
+
     DID_LOAD_ITEM: IdleStyle,
     DID_LOAD_LOCAL_ITEM: {
       buttonRemoveItem: { opacity: 1 },
@@ -5616,21 +5699,21 @@ function signature:
 
     // add progress indicators
     var loadIndicatorView = root.appendChildView(
-      root.createChildView(progressIndicator, { opacity: 0 })
+      root.createChildView(progressIndicator, {
+        opacity: 0,
+        align: root.query('GET_STYLE_LOAD_INDICATOR_POSITION')
+      })
     );
     loadIndicatorView.element.classList.add('filepond--load-indicator');
-    loadIndicatorView.element.dataset.align = root.query(
-      'GET_STYLE_LOAD_INDICATOR_POSITION'
-    );
     root.ref.loadProgressIndicator = loadIndicatorView;
 
     var progressIndicatorView = root.appendChildView(
-      root.createChildView(progressIndicator, { opacity: 0 })
+      root.createChildView(progressIndicator, {
+        opacity: 0,
+        align: root.query('GET_STYLE_PROGRESS_INDICATOR_POSITION')
+      })
     );
     progressIndicatorView.element.classList.add('filepond--process-indicator');
-    progressIndicatorView.element.dataset.align = root.query(
-      'GET_STYLE_PROGRESS_INDICATOR_POSITION'
-    );
     root.ref.processProgressIndicator = progressIndicatorView;
   };
 
@@ -5694,32 +5777,46 @@ function signature:
 
       root.ref.buttonAbortItemLoad.label = action.value;
     },
-    DID_REQUEST_ITEM_PROCESSING: function DID_REQUEST_ITEM_PROCESSING(_ref6) {
-      var root = _ref6.root;
+    DID_SET_LABEL_BUTTON_ABORT_ITEM_REMOVAL: function DID_SET_LABEL_BUTTON_ABORT_ITEM_REMOVAL(
+      _ref6
+    ) {
+      var root = _ref6.root,
+        action = _ref6.action;
+
+      root.ref.buttonAbortItemRemoval.label = action.value;
+    },
+    DID_REQUEST_ITEM_PROCESSING: function DID_REQUEST_ITEM_PROCESSING(_ref7) {
+      var root = _ref7.root;
 
       root.ref.processProgressIndicator.spin = true;
       root.ref.processProgressIndicator.progress = 0;
     },
-    DID_START_ITEM_LOAD: function DID_START_ITEM_LOAD(_ref7) {
-      var root = _ref7.root;
+    DID_START_ITEM_LOAD: function DID_START_ITEM_LOAD(_ref8) {
+      var root = _ref8.root;
 
       root.ref.loadProgressIndicator.spin = true;
       root.ref.loadProgressIndicator.progress = 0;
     },
+    DID_START_ITEM_REMOVE: function DID_START_ITEM_REMOVE(_ref9) {
+      var root = _ref9.root;
+
+      root.ref.processProgressIndicator.spin = true;
+      root.ref.processProgressIndicator.progress = 0;
+    },
     DID_UPDATE_ITEM_LOAD_PROGRESS: function DID_UPDATE_ITEM_LOAD_PROGRESS(
-      _ref8
+      _ref10
     ) {
-      var root = _ref8.root,
-        action = _ref8.action;
+      var root = _ref10.root,
+        action = _ref10.action;
 
       root.ref.loadProgressIndicator.spin = false;
       root.ref.loadProgressIndicator.progress = action.progress;
     },
     DID_UPDATE_ITEM_PROCESS_PROGRESS: function DID_UPDATE_ITEM_PROCESS_PROGRESS(
-      _ref9
+      _ref11
     ) {
-      var root = _ref9.root,
-        action = _ref9.action;
+      var root = _ref11.root,
+        action = _ref11.action;
 
       root.ref.processProgressIndicator.spin = false;
       root.ref.processProgressIndicator.progress = action.progress;
@@ -5941,6 +6038,8 @@ function signature:
     DID_THROW_ITEM_INVALID: 'load-invalid',
     DID_THROW_ITEM_LOAD_ERROR: 'load-error',
     DID_LOAD_ITEM: 'idle',
+    DID_THROW_ITEM_REMOVE_ERROR: 'remove-error',
+    DID_START_ITEM_REMOVE: 'busy',
     DID_START_ITEM_PROCESSING: 'busy',
     DID_REQUEST_ITEM_PROCESSING: 'busy',
     DID_UPDATE_ITEM_PROCESS_PROGRESS: 'processing',
@@ -7449,6 +7548,7 @@ function signature:
       DID_ABORT_ITEM_PROCESSING: itemProcessedUndo,
       DID_REVERT_ITEM_PROCESSING: itemProcessedUndo,
 
+      DID_THROW_ITEM_REMOVE_ERROR: itemError,
       DID_THROW_ITEM_LOAD_ERROR: itemError,
       DID_THROW_ITEM_INVALID: itemError,
       DID_THROW_ITEM_PROCESSING_ERROR: itemError

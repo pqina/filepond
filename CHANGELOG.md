@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.4.0
+
+- Add `server.remove` property, this property can be optionally set to a method to call when the remove button is tapped on a `local` file. This allows removing files from the server. Please note that allowing clients to remove files from the server is a potential security risk and requires extra caution.
+
+By default the property is `null`. The advise is to not use this method and only make changes to the server after the parent form has been submitted. The form POST will contain all the loaded file names and relevant file data, it should be enough to determine the files to remove and the files to keep.
+
+
 ## 3.3.3
 
 - Fix filename matching of content-disposition header when the filename is not wrapped in quotes.

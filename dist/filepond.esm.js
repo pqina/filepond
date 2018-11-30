@@ -1348,6 +1348,9 @@ const createServerAPI = outline => {
     api[key] = createAction(key, outline[key], methods[key], api.timeout);
   });
 
+  // special treatment for remove
+  api.remove = outline.remove || null;
+
   return api;
 };
 
@@ -3019,7 +3022,9 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
   const getFileSize = () => state.file.size;
   const getFile = () => state.file;
 
-  // loads files
+  //
+  // logic to load a file
+  //
   const load = (source, loader, onload) => {
     // remember the original item source
     state.source = source;
@@ -3120,7 +3125,23 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     loader.load();
   };
 
-  // file processor
+  const retryLoad = () => {
+    if (!state.activeLoader) {
+      return;
+    }
+    state.activeLoader.load();
+  };
+
+  const abortLoad = () => {
+    if (!state.activeLoader) {
+      return;
+    }
+    state.activeLoader.abort();
+  };
+
+  //
+  // logic to process a file
+  //
   const process = (processor, onprocess) => {
     // now processing
     setStatus(ItemStatus.PROCESSING);
@@ -3201,6 +3222,30 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     state.activeProcessor = processor;
   };
 
+  const requestProcessing = () => {
+    setStatus(ItemStatus.PROCESSING_QUEUED);
+  };
+
+  const abortProcessing = () =>
+    new Promise(resolve => {
+      if (!state.activeProcessor) {
+        setStatus(ItemStatus.IDLE);
+        fire('process-abort');
+
+        resolve();
+        return;
+      }
+
+      abortProcessingRequestComplete = () => {
+        resolve();
+      };
+
+      state.activeProcessor.abort();
+    });
+
+  //
+  // logic to revert a preocessed file
+  //
   const revert = revertFileUpload =>
     new Promise(resolve => {
       // cannot revert without a server id for this process
@@ -3228,43 +3273,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       fire('process-revert');
     });
 
-  const abortLoad = () => {
-    if (!state.activeLoader) {
-      return;
-    }
-    state.activeLoader.abort();
-  };
-
-  const retryLoad = () => {
-    if (!state.activeLoader) {
-      return;
-    }
-    state.activeLoader.load();
-  };
-
-  const requestProcessing = () => {
-    setStatus(ItemStatus.PROCESSING_QUEUED);
-  };
-
-  const abortProcessing = () =>
-    new Promise(resolve => {
-      if (!state.activeProcessor) {
-        setStatus(ItemStatus.IDLE);
-        fire('process-abort');
-
-        resolve();
-        return;
-      }
-
-      abortProcessingRequestComplete = () => {
-        resolve();
-      };
-
-      state.activeProcessor.abort();
-    });
-
   // exposed methods
-
   const setMetadata = (key, value, silent) => {
     const keys = key.split('.');
     const root = keys[0];
@@ -4028,23 +4037,52 @@ const actions = (dispatch, query, state) => ({
   }),
 
   REMOVE_ITEM: getItemByQueryFromState(state, (item, success) => {
-    // get id reference
-    const id = item.id;
+    const removeFromView = () => {
+      // get id reference
+      const id = item.id;
 
-    // archive the item, this does not remove it from the list
-    getItemById(state.items, id).archive();
+      // archive the item, this does not remove it from the list
+      getItemById(state.items, id).archive();
 
-    // tell the view the item has been removed
-    dispatch('DID_REMOVE_ITEM', { id, item });
+      // tell the view the item has been removed
+      dispatch('DID_REMOVE_ITEM', { id, item });
 
-    // now the list has been modified
-    clearTimeout(updateItemsTimeout);
-    updateItemsTimeout = setTimeout(() => {
-      dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
-    }, 0);
+      // now the list has been modified
+      clearTimeout(updateItemsTimeout);
+      updateItemsTimeout = setTimeout(() => {
+        dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
+      }, 0);
 
-    // correctly removed
-    success(createItemAPI(item));
+      // correctly removed
+      success(createItemAPI(item));
+    };
+
+    // if this is a local file and the server.remove function has been configured, send source there so dev can remove file from server
+    const server = state.options.server;
+    if (
+      item.origin === FileOrigin$1.LOCAL &&
+      server &&
+      isFunction(server.remove)
+    ) {
+      dispatch('DID_START_ITEM_REMOVE', { id: item.id });
+
+      server.remove(
+        item.source,
+        () => removeFromView(),
+        status => {
+          dispatch('DID_THROW_ITEM_REMOVE_ERROR', {
+            id: item.id,
+            error: createResponse('error', 0, status, null),
+            status: {
+              main: status,
+              sub: state.options.labelTapToRetry
+            }
+          });
+        }
+      );
+    } else {
+      removeFromView();
+    }
   }),
 
   ABORT_ITEM_LOAD: getItemByQueryFromState(state, item => {
@@ -4210,6 +4248,10 @@ const write$5 = ({ root, props }) => {
     return;
   }
 
+  if (props.align) {
+    root.element.dataset.align = props.align;
+  }
+
   // get width of stroke
   const ringStrokeWidth = parseInt(attr(root.ref.path, 'stroke-width'), 10);
 
@@ -4257,7 +4299,7 @@ const progressIndicator = createView({
   create: create$7,
   write: write$5,
   mixins: {
-    apis: ['progress', 'spin'],
+    apis: ['progress', 'spin', 'align'],
     styles: ['opacity'],
     animations: {
       opacity: { type: 'tween', duration: 500 },
@@ -4490,7 +4532,8 @@ const fileStatus = createView({
     DID_UPDATE_ITEM_LOAD_PROGRESS: didSetItemLoadProgress,
     DID_THROW_ITEM_LOAD_ERROR: error,
     DID_THROW_ITEM_INVALID: error,
-    DID_THROW_ITEM_PROCESSING_ERROR: error
+    DID_THROW_ITEM_PROCESSING_ERROR: error,
+    DID_THROW_ITEM_REMOVE_ERROR: error
   }),
   didCreateView: root => {
     applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
@@ -4576,6 +4619,13 @@ const calculateFileVerticalCenterOffset = root =>
 const calculateFileHorizontalCenterOffset = root =>
   Math.floor(root.ref.buttonRemoveItem.rect.element.left / 2);
 
+const getLoadIndicatorAlignment = root =>
+  root.query('GET_STYLE_LOAD_INDICATOR_POSITION');
+const getProcessIndicatorAlignment = root =>
+  root.query('GET_STYLE_PROGRESS_INDICATOR_POSITION');
+const getRemoveIndicatorAligment = root =>
+  root.query('GET_STYLE_BUTTON_REMOVE_ITEM_POSITION');
+
 const DefaultStyle = {
   buttonAbortItemLoad: { opacity: 0 },
   buttonRetryItemLoad: { opacity: 0 },
@@ -4584,8 +4634,8 @@ const DefaultStyle = {
   buttonAbortItemProcessing: { opacity: 0 },
   buttonRetryItemProcessing: { opacity: 0 },
   buttonRevertItemProcessing: { opacity: 0 },
-  loadProgressIndicator: { opacity: 0 },
-  processProgressIndicator: { opacity: 0 },
+  loadProgressIndicator: { opacity: 0, align: getLoadIndicatorAlignment },
+  processProgressIndicator: { opacity: 0, align: getProcessIndicatorAlignment },
   processingCompleteIndicator: { opacity: 0, scaleX: 0.75, scaleY: 0.75 },
   info: { translateX: 0, translateY: 0, opacity: 0 },
   status: { translateX: 0, translateY: 0, opacity: 0 }
@@ -4610,6 +4660,7 @@ const StyleMap = {
     info: { translateX: calculateFileInfoOffset },
     status: { translateX: calculateFileInfoOffset, opacity: 1 }
   },
+
   DID_START_ITEM_LOAD: {
     buttonAbortItemLoad: { opacity: 1 },
     loadProgressIndicator: { opacity: 1 },
@@ -4621,6 +4672,20 @@ const StyleMap = {
     info: { translateX: calculateFileInfoOffset },
     status: { opacity: 1 }
   },
+
+  DID_START_ITEM_REMOVE: {
+    processProgressIndicator: { opacity: 1, align: getRemoveIndicatorAligment },
+    info: { translateX: calculateFileInfoOffset },
+    status: { opacity: 0 }
+  },
+
+  DID_THROW_ITEM_REMOVE_ERROR: {
+    processProgressIndicator: { opacity: 0, align: getRemoveIndicatorAligment },
+    buttonRemoveItem: { opacity: 1 },
+    info: { translateX: calculateFileInfoOffset },
+    status: { opacity: 1, translateX: calculateFileInfoOffset }
+  },
+
   DID_LOAD_ITEM: IdleStyle,
   DID_LOAD_LOCAL_ITEM: {
     buttonRemoveItem: { opacity: 1 },
@@ -4752,21 +4817,21 @@ const create$6 = ({ root, props }) => {
 
   // add progress indicators
   const loadIndicatorView = root.appendChildView(
-    root.createChildView(progressIndicator, { opacity: 0 })
+    root.createChildView(progressIndicator, {
+      opacity: 0,
+      align: root.query(`GET_STYLE_LOAD_INDICATOR_POSITION`)
+    })
   );
   loadIndicatorView.element.classList.add('filepond--load-indicator');
-  loadIndicatorView.element.dataset.align = root.query(
-    `GET_STYLE_LOAD_INDICATOR_POSITION`
-  );
   root.ref.loadProgressIndicator = loadIndicatorView;
 
   const progressIndicatorView = root.appendChildView(
-    root.createChildView(progressIndicator, { opacity: 0 })
+    root.createChildView(progressIndicator, {
+      opacity: 0,
+      align: root.query(`GET_STYLE_PROGRESS_INDICATOR_POSITION`)
+    })
   );
   progressIndicatorView.element.classList.add('filepond--process-indicator');
-  progressIndicatorView.element.dataset.align = root.query(
-    `GET_STYLE_PROGRESS_INDICATOR_POSITION`
-  );
   root.ref.processProgressIndicator = progressIndicatorView;
 };
 
@@ -4811,6 +4876,9 @@ const route$3 = createRoute({
   DID_SET_LABEL_BUTTON_ABORT_ITEM_LOAD: ({ root, action }) => {
     root.ref.buttonAbortItemLoad.label = action.value;
   },
+  DID_SET_LABEL_BUTTON_ABORT_ITEM_REMOVAL: ({ root, action }) => {
+    root.ref.buttonAbortItemRemoval.label = action.value;
+  },
   DID_REQUEST_ITEM_PROCESSING: ({ root }) => {
     root.ref.processProgressIndicator.spin = true;
     root.ref.processProgressIndicator.progress = 0;
@@ -4818,6 +4886,10 @@ const route$3 = createRoute({
   DID_START_ITEM_LOAD: ({ root }) => {
     root.ref.loadProgressIndicator.spin = true;
     root.ref.loadProgressIndicator.progress = 0;
+  },
+  DID_START_ITEM_REMOVE: ({ root }) => {
+    root.ref.processProgressIndicator.spin = true;
+    root.ref.processProgressIndicator.progress = 0;
   },
   DID_UPDATE_ITEM_LOAD_PROGRESS: ({ root, action }) => {
     root.ref.loadProgressIndicator.spin = false;
@@ -5020,6 +5092,8 @@ const StateMap = {
   DID_THROW_ITEM_INVALID: 'load-invalid',
   DID_THROW_ITEM_LOAD_ERROR: 'load-error',
   DID_LOAD_ITEM: 'idle',
+  DID_THROW_ITEM_REMOVE_ERROR: 'remove-error',
+  DID_START_ITEM_REMOVE: 'busy',
   DID_START_ITEM_PROCESSING: 'busy',
   DID_REQUEST_ITEM_PROCESSING: 'busy',
   DID_UPDATE_ITEM_PROCESS_PROGRESS: 'processing',
@@ -6334,6 +6408,7 @@ const assistant = createView({
     DID_ABORT_ITEM_PROCESSING: itemProcessedUndo,
     DID_REVERT_ITEM_PROCESSING: itemProcessedUndo,
 
+    DID_THROW_ITEM_REMOVE_ERROR: itemError,
     DID_THROW_ITEM_LOAD_ERROR: itemError,
     DID_THROW_ITEM_INVALID: itemError,
     DID_THROW_ITEM_PROCESSING_ERROR: itemError
