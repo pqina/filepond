@@ -1,5 +1,5 @@
 /*
- * FilePond 3.4.0
+ * FilePond 3.5.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2039,7 +2039,7 @@
       });
   };
 
-  var PRIVATE_METHODS = [
+  var PRIVATE = [
     'fire',
     'process',
     'revert',
@@ -2050,6 +2050,7 @@
     'retryLoad',
     'extend',
     'archive',
+    'archived',
     'release',
     'released',
     'requestProcessing'
@@ -2057,7 +2058,7 @@
 
   var createItemAPI = function createItemAPI(item) {
     var api = {};
-    copyObjectPropertiesToObject(item, api, PRIVATE_METHODS);
+    copyObjectPropertiesToObject(item, api, PRIVATE);
     return api;
   };
 
@@ -2349,6 +2350,7 @@
     onupdatefiles: [null, Type.FUNCTION],
 
     // hooks
+    beforeAddFile: [null, Type.FUNCTION],
     beforeRemoveFile: [null, Type.FUNCTION],
 
     // styles
@@ -4148,11 +4150,45 @@ function signature:
     };
   };
 
+  // TODO:
+  // this might cause trouble when multiple filepond instances are running on the same page
+  var updateItemsTimeout = null;
+
   var isMockItem = function isMockItem(item) {
     return !isFile(item.file);
   };
 
-  var updateItemsTimeout = null;
+  var optionalPromise = function optionalPromise(fn) {
+    for (
+      var _len = arguments.length,
+        params = Array(_len > 1 ? _len - 1 : 0),
+        _key = 1;
+      _key < _len;
+      _key++
+    ) {
+      params[_key - 1] = arguments[_key];
+    }
+
+    return new Promise(function(resolve) {
+      if (!fn) {
+        return resolve(true);
+      }
+
+      var result = fn.apply(undefined, params);
+
+      if (result == null) {
+        return resolve(true);
+      }
+
+      if (typeof result === 'boolean') {
+        return resolve(result);
+      }
+
+      if (typeof result.then === 'function') {
+        result.then(resolve);
+      }
+    });
+  };
 
   // returns item based on state
   var getItemByQueryFromState = function getItemByQueryFromState(
@@ -4492,6 +4528,60 @@ function signature:
         });
 
         item.on('load', function() {
+          var handleAdd = function handleAdd(shouldAdd) {
+            // no should not add this file
+            if (!shouldAdd) {
+              dispatch('REMOVE_ITEM', {
+                query: id
+              });
+              return;
+            }
+
+            // now interested in metadata updates
+            item.on('metadata-update', function(change) {
+              dispatch('DID_UPDATE_ITEM_METADATA', { id: id, change: change });
+            });
+
+            // let plugins decide if the output data should be prepared at this point
+            // means we'll do this and wait for idle state
+            applyFilterChain('SHOULD_PREPARE_OUTPUT', false, {
+              item: item,
+              query: query
+            }).then(function(shouldPrepareOutput) {
+              var loadComplete = function loadComplete() {
+                dispatch('COMPLETE_LOAD_ITEM', {
+                  query: id,
+                  item: item,
+                  data: {
+                    source: source,
+                    success: success
+                  }
+                });
+              };
+
+              // exit
+              if (shouldPrepareOutput) {
+                // wait for idle state and then run PREPARE_OUTPUT
+                dispatch(
+                  'REQUEST_PREPARE_OUTPUT',
+                  {
+                    query: id,
+                    item: item,
+                    ready: function ready(file) {
+                      dispatch('DID_PREPARE_OUTPUT', { id: id, file: file });
+                      loadComplete();
+                    }
+                  },
+                  true
+                );
+
+                return;
+              }
+
+              loadComplete();
+            });
+          };
+
           // item loaded, allow plugins to
           // - read data (quickly)
           // - add metadata
@@ -4500,57 +4590,13 @@ function signature:
             dispatch: dispatch
           })
             .then(function() {
-              // now interested in metadata updates
-              item.on('metadata-update', function(change) {
-                dispatch('DID_UPDATE_ITEM_METADATA', {
-                  id: id,
-                  change: change
-                });
-              });
-
-              // let plugins decide if the output data should be prepared at this point
-              // means we'll do this and wait for idle state
-              applyFilterChain('SHOULD_PREPARE_OUTPUT', false, {
-                item: item,
-                query: query
-              }).then(function(shouldPrepareOutput) {
-                var loadComplete = function loadComplete() {
-                  dispatch('COMPLETE_LOAD_ITEM', {
-                    query: id,
-                    item: item,
-                    data: {
-                      source: source,
-                      success: success
-                    }
-                  });
-                };
-
-                // exit
-                if (shouldPrepareOutput) {
-                  // wait for idle state and then run PREPARE_OUTPUT
-                  dispatch(
-                    'REQUEST_PREPARE_OUTPUT',
-                    {
-                      query: id,
-                      item: item,
-                      ready: function ready(file) {
-                        dispatch('DID_PREPARE_OUTPUT', { id: id, file: file });
-                        loadComplete();
-                      }
-                    },
-                    true
-                  );
-
-                  return;
-                }
-
-                loadComplete();
-              });
+              optionalPromise(
+                query('GET_BEFORE_ADD_FILE'),
+                createItemAPI(item)
+              ).then(handleAdd);
             })
             .catch(function() {
-              dispatch('REMOVE_ITEM', {
-                query: id
-              });
+              handleAdd(false);
             });
         });
 
@@ -4776,32 +4822,15 @@ function signature:
       }),
 
       REQUEST_REMOVE_ITEM: getItemByQueryFromState(state, function(item) {
-        var handleRemove = function handleRemove(shouldRemove) {
+        optionalPromise(
+          query('GET_BEFORE_REMOVE_FILE'),
+          createItemAPI(item)
+        ).then(function(shouldRemove) {
           if (!shouldRemove) {
             return;
           }
           dispatch('REMOVE_ITEM', { query: item });
-        };
-
-        var fn = query('GET_BEFORE_REMOVE_FILE');
-        if (!fn) {
-          return handleRemove(true);
-        }
-
-        var requestRemoveResult = fn(createItemAPI(item));
-
-        if (requestRemoveResult == null) {
-          // undefined or null
-          return handleRemove(true);
-        }
-
-        if (typeof requestRemoveResult === 'boolean') {
-          return handleRemove(requestRemoveResult);
-        }
-
-        if (typeof requestRemoveResult.then === 'function') {
-          requestRemoveResult.then(handleRemove);
-        }
+        });
       }),
 
       RELEASE_ITEM: getItemByQueryFromState(state, function(item) {
@@ -8857,12 +8886,12 @@ function signature:
       : createAppObject.apply(undefined, arguments);
   };
 
-  var PRIVATE_METHODS$1 = ['fire', '_read', '_write'];
+  var PRIVATE_METHODS = ['fire', '_read', '_write'];
 
   var createAppAPI = function createAppAPI(app) {
     var api = {};
 
-    copyObjectPropertiesToObject(app, api, PRIVATE_METHODS$1);
+    copyObjectPropertiesToObject(app, api, PRIVATE_METHODS);
 
     return api;
   };

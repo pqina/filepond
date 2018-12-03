@@ -1,5 +1,5 @@
 /*
- * FilePond 3.4.0
+ * FilePond 3.5.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1649,7 +1649,7 @@ const copyObjectPropertiesToObject = (src, target, excluded) => {
     );
 };
 
-const PRIVATE_METHODS = [
+const PRIVATE = [
   'fire',
   'process',
   'revert',
@@ -1660,6 +1660,7 @@ const PRIVATE_METHODS = [
   'retryLoad',
   'extend',
   'archive',
+  'archived',
   'release',
   'released',
   'requestProcessing'
@@ -1667,7 +1668,7 @@ const PRIVATE_METHODS = [
 
 const createItemAPI = item => {
   const api = {};
-  copyObjectPropertiesToObject(item, api, PRIVATE_METHODS);
+  copyObjectPropertiesToObject(item, api, PRIVATE);
   return api;
 };
 
@@ -1928,6 +1929,7 @@ const defaultOptions = {
   onupdatefiles: [null, Type.FUNCTION],
 
   // hooks
+  beforeAddFile: [null, Type.FUNCTION],
   beforeRemoveFile: [null, Type.FUNCTION],
 
   // styles
@@ -3450,9 +3452,32 @@ const isFile = value =>
 const dynamicLabel = label => (...params) =>
   isFunction(label) ? label(...params) : label;
 
+// TODO:
+// this might cause trouble when multiple filepond instances are running on the same page
+let updateItemsTimeout = null;
+
 const isMockItem = item => !isFile(item.file);
 
-let updateItemsTimeout = null;
+const optionalPromise = (fn, ...params) =>
+  new Promise(resolve => {
+    if (!fn) {
+      return resolve(true);
+    }
+
+    const result = fn(...params);
+
+    if (result == null) {
+      return resolve(true);
+    }
+
+    if (typeof result === 'boolean') {
+      return resolve(result);
+    }
+
+    if (typeof result.then === 'function') {
+      result.then(resolve);
+    }
+  });
 
 // returns item based on state
 const getItemByQueryFromState = (state, itemHandler) => ({
@@ -3759,22 +3784,24 @@ const actions = (dispatch, query, state) => ({
     });
 
     item.on('load', () => {
-      // item loaded, allow plugins to
-      // - read data (quickly)
-      // - add metadata
-      applyFilterChain('DID_LOAD_ITEM', item, { query, dispatch })
-        .then(() => {
-          // now interested in metadata updates
-          item.on('metadata-update', change => {
-            dispatch('DID_UPDATE_ITEM_METADATA', { id, change });
+      const handleAdd = shouldAdd => {
+        // no should not add this file
+        if (!shouldAdd) {
+          dispatch('REMOVE_ITEM', {
+            query: id
           });
+          return;
+        }
 
-          // let plugins decide if the output data should be prepared at this point
-          // means we'll do this and wait for idle state
-          applyFilterChain('SHOULD_PREPARE_OUTPUT', false, {
-            item,
-            query
-          }).then(shouldPrepareOutput => {
+        // now interested in metadata updates
+        item.on('metadata-update', change => {
+          dispatch('DID_UPDATE_ITEM_METADATA', { id, change });
+        });
+
+        // let plugins decide if the output data should be prepared at this point
+        // means we'll do this and wait for idle state
+        applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query }).then(
+          shouldPrepareOutput => {
             const loadComplete = () => {
               dispatch('COMPLETE_LOAD_ITEM', {
                 query: id,
@@ -3806,12 +3833,22 @@ const actions = (dispatch, query, state) => ({
             }
 
             loadComplete();
-          });
+          }
+        );
+      };
+
+      // item loaded, allow plugins to
+      // - read data (quickly)
+      // - add metadata
+      applyFilterChain('DID_LOAD_ITEM', item, { query, dispatch })
+        .then(() => {
+          optionalPromise(
+            query('GET_BEFORE_ADD_FILE'),
+            createItemAPI(item)
+          ).then(handleAdd);
         })
         .catch(() => {
-          dispatch('REMOVE_ITEM', {
-            query: id
-          });
+          handleAdd(false);
         });
     });
 
@@ -4004,32 +4041,14 @@ const actions = (dispatch, query, state) => ({
   }),
 
   REQUEST_REMOVE_ITEM: getItemByQueryFromState(state, item => {
-    const handleRemove = shouldRemove => {
-      if (!shouldRemove) {
-        return;
+    optionalPromise(query('GET_BEFORE_REMOVE_FILE'), createItemAPI(item)).then(
+      shouldRemove => {
+        if (!shouldRemove) {
+          return;
+        }
+        dispatch('REMOVE_ITEM', { query: item });
       }
-      dispatch('REMOVE_ITEM', { query: item });
-    };
-
-    const fn = query('GET_BEFORE_REMOVE_FILE');
-    if (!fn) {
-      return handleRemove(true);
-    }
-
-    const requestRemoveResult = fn(createItemAPI(item));
-
-    if (requestRemoveResult == null) {
-      // undefined or null
-      return handleRemove(true);
-    }
-
-    if (typeof requestRemoveResult === 'boolean') {
-      return handleRemove(requestRemoveResult);
-    }
-
-    if (typeof requestRemoveResult.then === 'function') {
-      requestRemoveResult.then(handleRemove);
-    }
+    );
   }),
 
   RELEASE_ITEM: getItemByQueryFromState(state, item => {
@@ -7585,12 +7604,12 @@ const createAppAtElement = (element, options = {}) => {
 const createApp = (...args) =>
   isNode(args[0]) ? createAppAtElement(...args) : createAppObject(...args);
 
-const PRIVATE_METHODS$1 = ['fire', '_read', '_write'];
+const PRIVATE_METHODS = ['fire', '_read', '_write'];
 
 const createAppAPI = app => {
   const api = {};
 
-  copyObjectPropertiesToObject(app, api, PRIVATE_METHODS$1);
+  copyObjectPropertiesToObject(app, api, PRIVATE_METHODS);
 
   return api;
 };

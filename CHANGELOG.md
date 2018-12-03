@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.5.0
+
+- Add `beforeAddFile` hook, this can be used to quickly validate files before they're being added.
+
+
 ## 3.4.0
 
 - Add `server.remove` property, this property can be optionally set to a method to call when the remove button is tapped on a `local` file. This allows removing files from the server. Please note that allowing clients to remove files from the server is a potential security risk and requires extra caution.
