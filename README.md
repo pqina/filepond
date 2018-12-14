@@ -65,9 +65,10 @@ If you want to learn how to write modern ES6 JavaScript as well, [ES6 for Everyo
 *   [Angular 1](https://github.com/johnnyasantoss/angularjs-filepond)
 *   [Ember](https://github.com/alexdiliberto/ember-filepond)
 
-### Boilerplates
+### Backend
 
 *   [PHP](https://github.com/pqina/filepond-boilerplate-php)
+*   [Django](https://github.com/ImperialCollegeLondon/django-drf-filepond) 
 
 
 ## Quick Start
