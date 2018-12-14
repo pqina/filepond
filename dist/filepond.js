@@ -1,5 +1,5 @@
 /*
- * FilePond 3.5.0
+ * FilePond 3.5.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -4754,12 +4754,25 @@ function signature:
         success,
         failure
       ) {
-        var id = item.id;
+        // cannot be queued (or is already queued)
+        var itemCanBeQueuedForProcessing =
+          // waiting for something
+          item.status === ItemStatus.IDLE ||
+          // processing went wrong earlier
+          item.status === ItemStatus.PROCESSING_ERROR ||
+          // was paused
+          item.status === ItemStatus.PROCESSING_PAUSED;
+
+        if (!itemCanBeQueuedForProcessing) {
+          return;
+        }
 
         // already queued
         if (item.status === ItemStatus.PROCESSING_QUEUED) {
           return;
         }
+
+        var id = item.id;
 
         item.requestProcessing();
 

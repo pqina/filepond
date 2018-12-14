@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.5.1
+
+- Fix problem where `processFile` and `processFiles` would reprocess already processed files.
+
+
 ## 3.5.0
 
 - Add `beforeAddFile` hook, this can be used to quickly validate files before they're being added.
