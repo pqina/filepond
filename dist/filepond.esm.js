@@ -1,5 +1,5 @@
 /*
- * FilePond 3.5.1
+ * FilePond 3.6.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1373,6 +1373,7 @@ const createAction = (name, outline, method, timeout) => {
     withCredentials: false,
     timeout,
     onload: null,
+    ondata: null,
     onerror: null
   };
 
@@ -2593,26 +2594,33 @@ const createProcessorFunction = (apiUrl = '', action, name) => {
 
   // internal handler
   return (file, metadata, load, error, progress, abort) => {
+    // set onload hanlder
+    const ondata = action.ondata || (fd => fd);
+    const onload = action.onload || (res => res);
+    const onerror = action.onerror || (res => null);
+
     // no file received
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
     // create formdata object
     var formData = new FormData();
-    formData.append(name, file, file.name);
 
     // add metadata under same name
     if (isObject(metadata)) {
       formData.append(name, JSON.stringify(metadata));
     }
 
-    // set onload hanlder
-    const onload = action.onload || (res => res);
-    const onerror = action.onerror || (res => null);
+    // Turn into an array of objects so no matter what the input, we can handle it the same way
+    (file instanceof Blob ? [{ name: null, file }] : file).forEach(item => {
+      formData.append(
+        name,
+        item.file,
+        item.name === null ? item.file.name : `${item.name}${item.file.name}`
+      );
+    });
 
     // send request object
-    const request = sendRequest(formData, apiUrl + action.url, action);
+    const request = sendRequest(ondata(formData), apiUrl + action.url, action);
     request.onload = xhr => {
       load(
         createResponse(
@@ -2968,6 +2976,17 @@ const FileOrigin$1 = {
   LOCAL: 3
 };
 
+const deepCloneObject = src => {
+  if (!isObject(src)) return src;
+  const target = isArray(src) ? [] : {};
+  for (const key in src) {
+    if (!src.hasOwnProperty(key)) continue;
+    const v = src[key];
+    target[key] = v && isObject(v) ? deepCloneObject(v) : v;
+  }
+  return target;
+};
+
 const createItem = (origin = null, serverFileReference = null, file = null) => {
   // unique id for this item, is used to identify the item across views
   const id = getUniqueId();
@@ -3246,7 +3265,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     });
 
   //
-  // logic to revert a preocessed file
+  // logic to revert a processed file
   //
   const revert = revertFileUpload =>
     new Promise(resolve => {
@@ -3299,8 +3318,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     });
   };
 
-  const getMetadata = key =>
-    key ? metadata[key] : Object.assign({}, metadata);
+  const getMetadata = key => deepCloneObject(key ? metadata[key] : metadata);
 
   const api = Object.assign(
     {

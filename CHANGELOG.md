@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.6.0
+
+- Add support for uploading transform plugin variants.
+- Add `server.process.ondata` which allows adding entries to the formdata before it's sent to the server.
+
+
 ## 3.5.1
 
 - Fix problem where `processFile` and `processFiles` would reprocess already processed files.

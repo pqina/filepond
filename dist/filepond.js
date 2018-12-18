@@ -1,5 +1,5 @@
 /*
- * FilePond 3.5.1
+ * FilePond 3.6.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1696,6 +1696,7 @@
       withCredentials: false,
       timeout: timeout,
       onload: null,
+      ondata: null,
       onerror: null
     };
 
@@ -3166,21 +3167,12 @@ function signature:
 
     // internal handler
     return function(file, metadata, load, error, progress, abort) {
-      // no file received
-      if (!file) {
-        return;
-      }
-
-      // create formdata object
-      var formData = new FormData();
-      formData.append(name, file, file.name);
-
-      // add metadata under same name
-      if (isObject(metadata)) {
-        formData.append(name, JSON.stringify(metadata));
-      }
-
       // set onload hanlder
+      var ondata =
+        action.ondata ||
+        function(fd) {
+          return fd;
+        };
       var onload =
         action.onload ||
         function(res) {
@@ -3192,8 +3184,32 @@ function signature:
           return null;
         };
 
+      // no file received
+      if (!file) return;
+
+      // create formdata object
+      var formData = new FormData();
+
+      // add metadata under same name
+      if (isObject(metadata)) {
+        formData.append(name, JSON.stringify(metadata));
+      }
+
+      // Turn into an array of objects so no matter what the input, we can handle it the same way
+      (file instanceof Blob ? [{ name: null, file: file }] : file).forEach(
+        function(item) {
+          formData.append(
+            name,
+            item.file,
+            item.name === null
+              ? item.file.name
+              : '' + item.name + item.file.name
+          );
+        }
+      );
+
       // send request object
-      var request = sendRequest(formData, apiUrl + action.url, action);
+      var request = sendRequest(ondata(formData), apiUrl + action.url, action);
       request.onload = function(xhr) {
         load(
           createResponse(
@@ -3578,6 +3594,17 @@ function signature:
     LOCAL: 3
   };
 
+  var deepCloneObject = function deepCloneObject(src) {
+    if (!isObject(src)) return src;
+    var target = isArray(src) ? [] : {};
+    for (var key in src) {
+      if (!src.hasOwnProperty(key)) continue;
+      var v = src[key];
+      target[key] = v && isObject(v) ? deepCloneObject(v) : v;
+    }
+    return target;
+  };
+
   var createItem = function createItem() {
     var origin =
       arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
@@ -3884,7 +3911,7 @@ function signature:
     };
 
     //
-    // logic to revert a preocessed file
+    // logic to revert a processed file
     //
     var revert = function revert(revertFileUpload) {
       return new Promise(function(resolve) {
@@ -3941,7 +3968,7 @@ function signature:
     };
 
     var getMetadata = function getMetadata(key) {
-      return key ? metadata[key] : Object.assign({}, metadata);
+      return deepCloneObject(key ? metadata[key] : metadata);
     };
 
     var api = Object.assign(
