@@ -1,5 +1,5 @@
 /*
- * FilePond 3.6.0
+ * FilePond 3.7.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2228,51 +2228,14 @@
     dropOnElement: [true, Type.BOOLEAN], // Drop needs to happen on element (set to false to also load drops outside of Up)
     dropValidation: [false, Type.BOOLEAN], // Enable or disable validating files on drop
     ignoredFiles: [['.ds_store', 'thumbs.db', 'desktop.ini'], Type.ARRAY],
-    // catchDirectories: [true, Type.BOOLEAN],					// Allow dropping directories in modern browsers
 
     // Upload related
     instantUpload: [true, Type.BOOLEAN], // Should upload files immidiately on drop
-    // TODO: parallel: [1, Type.INT],							// Maximum files to upload in parallel
-    // TODO: chunks: [false, Type.BOOLEAN],						// Use chunk uploading
-    // TODO: chunkSize: [.5 * (1024 * 1024), Type.INT],			// Upload in 512KB chunks
+    maxParallelUploads: [2, Type.INT], // Maximum files to upload in parallel
+    // TODO: chunks: [false, Type.BOOLEAN],	// Use chunk uploading
+    // TODO: chunkSize: [.5 * (1024 * 1024), Type.INT],	// Upload in 512KB chunks
 
-    // by default no async api is supplied
-    /* expected format
-    {
-    url: '',
-    timeout: 1000,
-    process: {
-    url: '',
-    method: 'POST',
-            withCredentials: false,
-    headers: {},
-            onload: (response) => {
-                return response.id
-            }
-    },
-    revert: {
-    url: '',
-    method: 'DELETE',
-    withCredentials: false,
-    headers: {},
-            onload: null
-    },
-    fetch: {
-    url: '',
-    method: 'GET',
-    withCredentials: false,
-    headers: {},
-            onload: null
-    },
-    restore: {
-    url: '',
-    method: 'GET',
-    withCredentials: false,
-    headers: {},
-            onload: null
-    }
-    }
-    */
+    // The server api end points to use for uploading (see docs)
     server: [null, Type.SERVER_API],
 
     // Labels and status messages
@@ -2415,6 +2378,18 @@
     });
   };
 
+  var ItemStatus = {
+    INIT: 1,
+    IDLE: 2,
+    PROCESSING_QUEUED: 9,
+    PROCESSING: 3,
+    PROCESSING_PAUSED: 4,
+    PROCESSING_COMPLETE: 5,
+    PROCESSING_ERROR: 6,
+    LOADING: 7,
+    LOAD_ERROR: 8
+  };
+
   var queries = function queries(state) {
     return {
       GET_ITEM: function GET_ITEM(query) {
@@ -2464,6 +2439,12 @@
               state.options.stylePanelAspectRatio
             );
         return aspectRatio;
+      },
+
+      GET_ITEMS_BY_STATUS: function GET_ITEMS_BY_STATUS(status) {
+        return getActiveItems(state.items).filter(function(item) {
+          return item.status === status;
+        });
       },
 
       GET_TOTAL_ITEMS: function GET_TOTAL_ITEMS() {
@@ -2722,7 +2703,34 @@
     );
   };
 
-  var getFilenameFromHeaders = function getFilenameFromHeaders(headers) {
+  var getFileNameFromHeader = function getFileNameFromHeader(header) {
+    var matches = header.match(/(?:filename="(.+)")|(?:filename=(.+))/) || [];
+    return matches[1] || matches[2];
+  };
+
+  var getFileSizeFromHeader = function getFileSizeFromHeader(header) {
+    if (/content-length:/i.test(header)) {
+      var size = header.match(/[0-9]+/)[0];
+      return size ? parseInt(size, 10) : null;
+    }
+    return null;
+  };
+
+  var getTranfserIdFromHeader = function getTranfserIdFromHeader(header) {
+    if (/x-content-transfer-id:/i.test(header)) {
+      var id = (header.split(':')[1] || '').trim();
+      return id || null;
+    }
+    return null;
+  };
+
+  var getFileInfoFromHeaders = function getFileInfoFromHeaders(headers) {
+    var info = {
+      source: null,
+      name: null,
+      size: null
+    };
+
     var rows = headers.split('\n');
     var _iteratorNormalCompletion = true;
     var _didIteratorError = false;
@@ -2736,13 +2744,23 @@
       ) {
         var header = _step.value;
 
-        var matches =
-          header.match(/(?:filename="(.+)")|(?:filename=(.+))/) || [];
-        var result = matches[1] || matches[2];
-        if (!result) {
+        var name = getFileNameFromHeader(header);
+        if (name) {
+          info.name = name;
           continue;
         }
-        return result;
+
+        var size = getFileSizeFromHeader(header);
+        if (size) {
+          info.size = size;
+          continue;
+        }
+
+        var source = getTranfserIdFromHeader(header);
+        if (source) {
+          info.source = source;
+          continue;
+        }
       }
     } catch (err) {
       _didIteratorError = true;
@@ -2759,7 +2777,7 @@
       }
     }
 
-    return null;
+    return info;
   };
 
   var createFileLoader = function createFileLoader(fetchFn) {
@@ -2874,11 +2892,13 @@
           api.fire('abort');
         },
         function(response) {
+          var fileinfo = getFileInfoFromHeaders(
+            typeof response === 'string' ? response : response.headers
+          );
           api.fire('meta', {
-            size: state.size,
-            filename: getFilenameFromHeaders(
-              typeof response === 'string' ? response : response.headers
-            )
+            size: state.size || fileinfo.size,
+            filename: fileinfo.name,
+            source: fileinfo.source
           });
         }
       );
@@ -2894,6 +2914,10 @@
     });
 
     return api;
+  };
+
+  var isGet = function isGet(method) {
+    return /GET|HEAD/.test(method);
   };
 
   var sendRequest = function sendRequest(data, url, options) {
@@ -2928,7 +2952,8 @@
     url = encodeURI(url);
 
     // if method is GET, add any received data to url
-    if (/GET/i.test(options.method) && data) {
+
+    if (isGet(options.method) && data) {
       url =
         '' +
         url +
@@ -2941,7 +2966,7 @@
     var xhr = new XMLHttpRequest();
 
     // progress of load
-    var process = /GET/i.test(options.method) ? xhr : xhr.upload;
+    var process = isGet(options.method) ? xhr : xhr.upload;
     process.onprogress = function(e) {
       // no progress event when aborted ( onprogress is called once after abort() )
       if (aborted) {
@@ -3087,7 +3112,7 @@
 
         // get filename
         var filename =
-          getFilenameFromHeaders(headers) || getFilenameFromURL(url);
+          getFileInfoFromHeaders(headers).name || getFilenameFromURL(url);
 
         // create response
         load(
@@ -3552,18 +3577,6 @@ function signature:
     return name.substr(0, name.lastIndexOf('.')) || name;
   };
 
-  var ItemStatus = {
-    INIT: 1,
-    IDLE: 2,
-    PROCESSING_QUEUED: 9,
-    PROCESSING: 3,
-    PROCESSING_PAUSED: 4,
-    PROCESSING_COMPLETE: 5,
-    PROCESSING_ERROR: 6,
-    LOADING: 7,
-    LOAD_ERROR: 8
-  };
-
   var createFileStub = function createFileStub(source) {
     var data = [source.name, source.size, source.type];
 
@@ -3717,6 +3730,11 @@ function signature:
         // set name of file stub
         state.file.filename = meta.filename;
 
+        // if has received source, we done
+        origin = FileOrigin$1.LIMBO;
+        state.serverFileReference = meta.source;
+        state.status = ItemStatus.PROCESSING_COMPLETE;
+
         // size has been updated
         fire('load-meta');
       });
@@ -3750,7 +3768,7 @@ function signature:
         // called when file has loaded succesfully
         var success = function success(result) {
           // set (possibly) transformed file
-          state.file = result;
+          state.file = result.size > 0 ? result : state.file;
 
           // file received
           if (origin === FileOrigin$1.LIMBO && state.serverFileReference) {
@@ -4111,7 +4129,8 @@ function signature:
       var headers = xhr.getAllResponseHeaders();
 
       // get filename
-      var filename = getFilenameFromHeaders(headers) || getFilenameFromURL(url);
+      var filename =
+        getFileInfoFromHeaders(headers).name || getFilenameFromURL(url);
 
       // create response
       load(
@@ -4180,6 +4199,8 @@ function signature:
   // TODO:
   // this might cause trouble when multiple filepond instances are running on the same page
   var updateItemsTimeout = null;
+
+  var processingQueue = [];
 
   var isMockItem = function isMockItem(item) {
     return !isFile(item.file);
@@ -4790,20 +4811,15 @@ function signature:
           // was paused
           item.status === ItemStatus.PROCESSING_PAUSED;
 
-        if (!itemCanBeQueuedForProcessing) {
-          return;
-        }
+        // not ready to be processed
+        if (!itemCanBeQueuedForProcessing) return;
 
-        // already queued
-        if (item.status === ItemStatus.PROCESSING_QUEUED) {
-          return;
-        }
-
-        var id = item.id;
+        // already queued for processing
+        if (item.status === ItemStatus.PROCESSING_QUEUED) return;
 
         item.requestProcessing();
 
-        dispatch('DID_REQUEST_ITEM_PROCESSING', { id: id });
+        dispatch('DID_REQUEST_ITEM_PROCESSING', { id: item.id });
 
         dispatch(
           'PROCESS_ITEM',
@@ -4817,14 +4833,47 @@ function signature:
         success,
         failure
       ) {
-        // if was not queued or is already processing exit here
-        if (item.status === ItemStatus.PROCESSING) {
+        var maxParallelUploads = query('GET_MAX_PARALLEL_UPLOADS');
+        var totalCurrentUploads = query(
+          'GET_ITEMS_BY_STATUS',
+          ItemStatus.PROCESSING
+        ).length;
+
+        // queue and wait till queue is freed up
+        if (totalCurrentUploads === maxParallelUploads) {
+          // queue for later processing
+          processingQueue.push({
+            item: item,
+            success: success,
+            failure: failure
+          });
+
+          // stop it!
           return;
         }
 
+        // if was not queued or is already processing exit here
+        if (item.status === ItemStatus.PROCESSING) return;
+
         // we done function
         item.onOnce('process-complete', function() {
+          // done!
           success(createItemAPI(item));
+
+          // process queueud items
+          {
+            var queued = processingQueue.shift();
+            if (!queued) return;
+            dispatch(
+              'PROCESS_ITEM',
+              {
+                query: queued.item,
+                success: queued.success,
+                failure: queued.failure
+              },
+              true
+            );
+          }
         });
 
         // we error function

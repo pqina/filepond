@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.7.0
+
+- Add `maxParallelUploads` option to limit the amount of files being uploaded in parallel.
+- Add option to only fetch file head when downloading remote URLs. File is downloaded to the server and server sends a unique file id to the client. Set `server.fetch.method` to `'HEAD'` the server needs to repond with custom header `X-Content-Transfer-Id` and a unique id. See [handle_fetch_remote_file](https://github.com/pqina/filepond-server-php/blob/master/index.php#L91) in FilePond PHP Server for an example implementation.
+
+
 ## 3.6.0
 
 - Add support for uploading transform plugin variants.
