@@ -1,5 +1,5 @@
 /*
- * FilePond 3.7.0
+ * FilePond 3.7.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -3731,9 +3731,11 @@ function signature:
         state.file.filename = meta.filename;
 
         // if has received source, we done
-        origin = FileOrigin$1.LIMBO;
-        state.serverFileReference = meta.source;
-        state.status = ItemStatus.PROCESSING_COMPLETE;
+        if (meta.source) {
+          origin = FileOrigin$1.LIMBO;
+          state.serverFileReference = meta.source;
+          state.status = ItemStatus.PROCESSING_COMPLETE;
+        }
 
         // size has been updated
         fire('load-meta');

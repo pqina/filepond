@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.7.1
+
+- Fix problem where URLs would immidiately be in processed state.
+
+
 ## 3.7.0
 
 - Add `maxParallelUploads` option to limit the amount of files being uploaded in parallel.
