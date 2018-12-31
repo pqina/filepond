@@ -9112,6 +9112,7 @@ function signature:
         createRoute: createRoute,
         createWorker: createWorker,
         createView: createView,
+        createItemAPI: createItemAPI,
         loadImage: loadImage,
         copyFile: copyFile,
         renameFile: renameFile,

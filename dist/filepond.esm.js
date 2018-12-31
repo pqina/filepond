@@ -7809,6 +7809,7 @@ const createAppPlugin = plugin => {
       createRoute,
       createWorker,
       createView,
+      createItemAPI,
       loadImage,
       copyFile,
       renameFile,

@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.7.2
+
+- Expose `createItemAPI` to plugins.
+
+
 ## 3.7.1
 
 - Fix problem where URLs would immidiately be in processed state.
