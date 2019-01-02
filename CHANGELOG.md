@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.7.3
+
+- Fix problem where upload complete indicator would not show when image preview was active.
+
+
 ## 3.7.2
 
 - Expose `createItemAPI` to plugins.

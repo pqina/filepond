@@ -1,5 +1,5 @@
 /*
- * FilePond 3.7.2
+ * FilePond 3.7.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -261,7 +261,7 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  z-index: 2;
+  z-index: 3;
 }
 .filepond--file .filepond--processing-complete-indicator,
 .filepond--file .filepond--progress-indicator,
