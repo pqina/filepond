@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.7.4
+
+- Fix problem where subsequent calls to `processFile` would not automatically revert an uploaded file or abort an active upload.
+
+
 ## 3.7.3
 
 - Fix problem where upload complete indicator would not show when image preview was active.

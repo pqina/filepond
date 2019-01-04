@@ -1,5 +1,5 @@
 /*
- * FilePond 3.7.3
+ * FilePond 3.7.4
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -4031,7 +4031,32 @@ const actions = (dispatch, query, state) => ({
         item.status === ItemStatus.PROCESSING_PAUSED;
 
       // not ready to be processed
-      if (!itemCanBeQueuedForProcessing) return;
+      if (!itemCanBeQueuedForProcessing) {
+        const process = () => {
+          setTimeout(() => {
+            dispatch('REQUEST_ITEM_PROCESSING', {
+              query: item,
+              success,
+              failure
+            });
+          }, 32);
+        };
+
+        if (item.status === ItemStatus.PROCESSING_COMPLETE) {
+          item
+            .revert(
+              createRevertFunction(
+                state.options.server.url,
+                state.options.server.revert
+              )
+            )
+            .then(process);
+        } else if (item.status === ItemStatus.PROCESSING) {
+          item.abortProcessing().then(process);
+        }
+
+        return;
+      }
 
       // already queued for processing
       if (item.status === ItemStatus.PROCESSING_QUEUED) return;
@@ -4073,19 +4098,17 @@ const actions = (dispatch, query, state) => ({
       success(createItemAPI(item));
 
       // process queueud items
-      {
-        const queued = processingQueue.shift();
-        if (!queued) return;
-        dispatch(
-          'PROCESS_ITEM',
-          {
-            query: queued.item,
-            success: queued.success,
-            failure: queued.failure
-          },
-          true
-        );
-      }
+      const queued = processingQueue.shift();
+      if (!queued) return;
+      dispatch(
+        'PROCESS_ITEM',
+        {
+          query: queued.item,
+          success: queued.success,
+          failure: queued.failure
+        },
+        true
+      );
     });
 
     // we error function
@@ -4213,9 +4236,7 @@ const actions = (dispatch, query, state) => ({
     // if we're instant uploading the file will also be removed if we revert,
     // so if a before remove file hook is defined we need to run it now
     const handleRevert = shouldRevert => {
-      if (!shouldRevert) {
-        return;
-      }
+      if (!shouldRevert) return;
       dispatch('REVERT_ITEM_PROCESSING', { query: item });
     };
 
