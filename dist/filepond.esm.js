@@ -1,5 +1,5 @@
 /*
- * FilePond 3.7.4
+ * FilePond 3.7.5
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -7340,7 +7340,12 @@ const createApp$1 = (initialOptions = {}) => {
   const processFiles = (...args) => {
     const queries$$1 = Array.isArray(args[0]) ? args[0] : args;
     if (!queries$$1.length) {
-      return Promise.all(getFiles().map(processFile));
+      const files = getFiles().filter(
+        item =>
+          item.status !== ItemStatus.PROCESSING &&
+          item.status !== ItemStatus.PROCESSING_COMPLETE
+      );
+      return Promise.all(files.map(processFile));
     }
     return Promise.all(queries$$1.map(processFile));
   };

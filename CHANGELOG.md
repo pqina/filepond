@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.7.5
+
+- Fix problem where calling `processFiles` without arguments would re-process already processed files.
+
+
 ## 3.7.4
 
 - Fix problem where subsequent calls to `processFile` would not automatically revert an uploaded file or abort an active upload.
