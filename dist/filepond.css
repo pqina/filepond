@@ -1,5 +1,5 @@
 /*
- * FilePond 3.7.5
+ * FilePond 3.7.6
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -96,8 +96,7 @@
 
 .filepond--label-action {
   text-decoration: underline;
-  -webkit-text-decoration-skip: ink;
-  text-decoration-skip: ink;
+  text-decoration-skip-ink: auto;
   -webkit-text-decoration-color: #a7a4a4;
   text-decoration-color: #a7a4a4;
   cursor: pointer;

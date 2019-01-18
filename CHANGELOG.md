@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.7.6
+
+- Switched browse text underline to `text-decoration-skip-ink: auto` instead of `text-decoration-skip: ink` to prevent eslint warnings.
+
+
 ## 3.7.5
 
 - Fix problem where calling `processFiles` without arguments would re-process already processed files.
