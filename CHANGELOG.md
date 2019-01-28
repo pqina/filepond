@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.7.7
+
+- Improve `onlistupdate` event so it can be better synced with adapter components.
+
+
 ## 3.7.6
 
 - Switched browse text underline to `text-decoration-skip-ink: auto` instead of `text-decoration-skip: ink` to prevent eslint warnings.

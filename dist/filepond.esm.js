@@ -1,5 +1,5 @@
 /*
- * FilePond 3.7.6
+ * FilePond 3.7.7
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1524,6 +1524,12 @@ const createInitialState = options => ({
   // model
   items: [],
 
+  // timeout used for calling update items
+  listUpdateTimeout: null,
+
+  // queue of items waiting to be processed
+  processingQueue: [],
+
   // options
   options: createOptions(options)
 });
@@ -1940,18 +1946,6 @@ const getNumericAspectRatioFromString = aspectRatio => {
 };
 
 const getActiveItems = items => items.filter(item => !item.archived);
-
-const ItemStatus = {
-  INIT: 1,
-  IDLE: 2,
-  PROCESSING_QUEUED: 9,
-  PROCESSING: 3,
-  PROCESSING_PAUSED: 4,
-  PROCESSING_COMPLETE: 5,
-  PROCESSING_ERROR: 6,
-  LOADING: 7,
-  LOAD_ERROR: 8
-};
 
 const queries = state => ({
   GET_ITEM: query => getItemByQuery(state.items, query),
@@ -2956,6 +2950,18 @@ const createFileProcessor = processFn => {
 const getFilenameWithoutExtension = name =>
   name.substr(0, name.lastIndexOf('.')) || name;
 
+const ItemStatus = {
+  INIT: 1,
+  IDLE: 2,
+  PROCESSING_QUEUED: 9,
+  PROCESSING: 3,
+  PROCESSING_PAUSED: 4,
+  PROCESSING_COMPLETE: 5,
+  PROCESSING_ERROR: 6,
+  LOADING: 7,
+  LOAD_ERROR: 8
+};
+
 const createFileStub = source => {
   let data = [source.name, source.size, source.type];
 
@@ -3488,13 +3494,14 @@ const isFile = value =>
 const dynamicLabel = label => (...params) =>
   isFunction(label) ? label(...params) : label;
 
-// TODO:
-// this might cause trouble when multiple filepond instances are running on the same page
-let updateItemsTimeout = null;
-
-const processingQueue = [];
-
 const isMockItem = item => !isFile(item.file);
+
+const listUpdated = (dispatch, state) => {
+  clearTimeout(state.listUpdateTimeout);
+  state.listUpdateTimeout = setTimeout(() => {
+    dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
+  }, 0);
+};
 
 const optionalPromise = (fn, ...params) =>
   new Promise(resolve => {
@@ -3556,9 +3563,9 @@ const actions = (dispatch, query, state) => ({
     }));
 
     // loop over files, if file is in list, leave it be, if not, remove
-
     // test if items should be moved
     let activeItems = getActiveItems(state.items);
+
     activeItems.forEach(item => {
       // if item not is in new value, remove
       if (
@@ -3578,9 +3585,8 @@ const actions = (dispatch, query, state) => ({
         activeItems.find(
           item => item.source === file.source || item.file === file.source
         )
-      ) {
+      )
         return;
-      }
 
       // not in list, add
       dispatch(
@@ -3849,6 +3855,8 @@ const actions = (dispatch, query, state) => ({
                   success
                 }
               });
+
+              listUpdated(dispatch, state);
             };
 
             // exit
@@ -3928,11 +3936,7 @@ const actions = (dispatch, query, state) => ({
     // let view know the item has been inserted
     dispatch('DID_ADD_ITEM', { id, index, interactionMethod });
 
-    // the item list has been updated
-    clearTimeout(updateItemsTimeout);
-    updateItemsTimeout = setTimeout(() => {
-      dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
-    }, 0);
+    listUpdated(dispatch, state);
 
     // start loading the source
     const { url, load, restore, fetch } = state.options.server || {};
@@ -4079,7 +4083,7 @@ const actions = (dispatch, query, state) => ({
     // queue and wait till queue is freed up
     if (totalCurrentUploads === maxParallelUploads) {
       // queue for later processing
-      processingQueue.push({
+      state.processingQueue.push({
         item,
         success,
         failure
@@ -4098,7 +4102,7 @@ const actions = (dispatch, query, state) => ({
       success(createItemAPI(item));
 
       // process queueud items
-      const queued = processingQueue.shift();
+      const queued = state.processingQueue.shift();
       if (!queued) return;
       dispatch(
         'PROCESS_ITEM',
@@ -4131,6 +4135,7 @@ const actions = (dispatch, query, state) => ({
         applyFilterChain('PREPARE_OUTPUT', file, { query, item })
           .then(file => {
             dispatch('DID_PREPARE_OUTPUT', { id: item.id, file });
+
             success(file);
           })
           .catch(error);
@@ -4169,10 +4174,7 @@ const actions = (dispatch, query, state) => ({
       dispatch('DID_REMOVE_ITEM', { id, item });
 
       // now the list has been modified
-      clearTimeout(updateItemsTimeout);
-      updateItemsTimeout = setTimeout(() => {
-        dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
-      }, 0);
+      listUpdated(dispatch, state);
 
       // correctly removed
       success(createItemAPI(item));

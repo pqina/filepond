@@ -1,5 +1,5 @@
 /*
- * FilePond 3.7.6
+ * FilePond 3.7.7
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1876,6 +1876,12 @@
       // model
       items: [],
 
+      // timeout used for calling update items
+      listUpdateTimeout: null,
+
+      // queue of items waiting to be processed
+      processingQueue: [],
+
       // options
       options: createOptions(options)
     };
@@ -2376,18 +2382,6 @@
     return items.filter(function(item) {
       return !item.archived;
     });
-  };
-
-  var ItemStatus = {
-    INIT: 1,
-    IDLE: 2,
-    PROCESSING_QUEUED: 9,
-    PROCESSING: 3,
-    PROCESSING_PAUSED: 4,
-    PROCESSING_COMPLETE: 5,
-    PROCESSING_ERROR: 6,
-    LOADING: 7,
-    LOAD_ERROR: 8
   };
 
   var queries = function queries(state) {
@@ -3577,6 +3571,18 @@ function signature:
     return name.substr(0, name.lastIndexOf('.')) || name;
   };
 
+  var ItemStatus = {
+    INIT: 1,
+    IDLE: 2,
+    PROCESSING_QUEUED: 9,
+    PROCESSING: 3,
+    PROCESSING_PAUSED: 4,
+    PROCESSING_COMPLETE: 5,
+    PROCESSING_ERROR: 6,
+    LOADING: 7,
+    LOAD_ERROR: 8
+  };
+
   var createFileStub = function createFileStub(source) {
     var data = [source.name, source.size, source.type];
 
@@ -4198,14 +4204,15 @@ function signature:
     };
   };
 
-  // TODO:
-  // this might cause trouble when multiple filepond instances are running on the same page
-  var updateItemsTimeout = null;
-
-  var processingQueue = [];
-
   var isMockItem = function isMockItem(item) {
     return !isFile(item.file);
+  };
+
+  var listUpdated = function listUpdated(dispatch, state) {
+    clearTimeout(state.listUpdateTimeout);
+    state.listUpdateTimeout = setTimeout(function() {
+      dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
+    }, 0);
   };
 
   var optionalPromise = function optionalPromise(fn) {
@@ -4296,9 +4303,9 @@ function signature:
         });
 
         // loop over files, if file is in list, leave it be, if not, remove
-
         // test if items should be moved
         var activeItems = getActiveItems(state.items);
+
         activeItems.forEach(function(item) {
           // if item not is in new value, remove
           if (
@@ -4318,9 +4325,8 @@ function signature:
             activeItems.find(function(item) {
               return item.source === file.source || item.file === file.source;
             })
-          ) {
+          )
             return;
-          }
 
           // not in list, add
           dispatch(
@@ -4607,6 +4613,8 @@ function signature:
                     success: success
                   }
                 });
+
+                listUpdated(dispatch, state);
               };
 
               // exit
@@ -4695,11 +4703,7 @@ function signature:
           interactionMethod: interactionMethod
         });
 
-        // the item list has been updated
-        clearTimeout(updateItemsTimeout);
-        updateItemsTimeout = setTimeout(function() {
-          dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
-        }, 0);
+        listUpdated(dispatch, state);
 
         // start loading the source
 
@@ -4869,7 +4873,7 @@ function signature:
         // queue and wait till queue is freed up
         if (totalCurrentUploads === maxParallelUploads) {
           // queue for later processing
-          processingQueue.push({
+          state.processingQueue.push({
             item: item,
             success: success,
             failure: failure
@@ -4888,7 +4892,7 @@ function signature:
           success(createItemAPI(item));
 
           // process queueud items
-          var queued = processingQueue.shift();
+          var queued = state.processingQueue.shift();
           if (!queued) return;
           dispatch(
             'PROCESS_ITEM',
@@ -4924,6 +4928,7 @@ function signature:
             })
               .then(function(file) {
                 dispatch('DID_PREPARE_OUTPUT', { id: item.id, file: file });
+
                 success(file);
               })
               .catch(error);
@@ -4963,12 +4968,7 @@ function signature:
           dispatch('DID_REMOVE_ITEM', { id: id, item: item });
 
           // now the list has been modified
-          clearTimeout(updateItemsTimeout);
-          updateItemsTimeout = setTimeout(function() {
-            dispatch('DID_UPDATE_ITEMS', {
-              items: getActiveItems(state.items)
-            });
-          }, 0);
+          listUpdated(dispatch, state);
 
           // correctly removed
           success(createItemAPI(item));
