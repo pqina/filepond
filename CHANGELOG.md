@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.8.0
+
+- Add `forceRevert` option, set to `true` to force a revert action to finish before continuing.
+
+
 ## 3.7.7
 
 - Improve `onlistupdate` event so it can be better synced with adapter components.

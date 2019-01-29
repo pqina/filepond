@@ -1,5 +1,5 @@
 /*
- * FilePond 3.7.7
+ * FilePond 3.8.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2221,10 +2221,9 @@
     allowMultiple: [false, Type.BOOLEAN], // Allow multiple files (disabled by default, as multiple attribute is also required on input to allow multiple)
     allowReplace: [true, Type.BOOLEAN], // Allow dropping a file on other file to replace it (only works when multiple is set to false)
     allowRevert: [true, Type.BOOLEAN], // Allows user to revert file upload
-    // TODO: allowDrag: [true, Type.BOOLEAN],					// Allow dragging files
-    // TODO: allowSwipe: [true, Type.BOOLEAN],					// Allow swipe to remove files
-    // TODO: allowRemoveAll: [true, Type.BOOLEAN],				// Allow removing all items at once
-    // TODO: allowUploadAll: [true, Type.BOOLEAN],				// Allow uploading all items at once
+
+    // Revert mode
+    forceRevert: [false, Type.BOOLEAN], // Set to 'force' to require the file to be reverted before removal
 
     // Input requirements
     maxFiles: [null, Type.INT], // Max number of files
@@ -2238,8 +2237,6 @@
     // Upload related
     instantUpload: [true, Type.BOOLEAN], // Should upload files immidiately on drop
     maxParallelUploads: [2, Type.INT], // Maximum files to upload in parallel
-    // TODO: chunks: [false, Type.BOOLEAN],	// Use chunk uploading
-    // TODO: chunkSize: [.5 * (1024 * 1024), Type.INT],	// Upload in 512KB chunks
 
     // The server api end points to use for uploading (see docs)
     server: [null, Type.SERVER_API],
@@ -2265,13 +2262,11 @@
     labelFileProcessingComplete: ['Upload complete', Type.STRING],
     labelFileProcessingAborted: ['Upload cancelled', Type.STRING],
     labelFileProcessingError: ['Error during upload', Type.STRING],
-    // labelFileProcessingPaused: ['Upload paused', Type.STRING],
+    labelFileProcessingRevertError: ['Error during revert', Type.STRING],
 
     labelTapToCancel: ['tap to cancel', Type.STRING],
     labelTapToRetry: ['tap to retry', Type.STRING],
     labelTapToUndo: ['tap to undo', Type.STRING],
-    // labelTapToPause: ['tap to pause', Type.STRING],
-    // labelTapToResume: ['tap to resume', Type.STRING],
 
     labelButtonRemoveItem: ['Remove', Type.STRING],
     labelButtonAbortItemLoad: ['Abort', Type.STRING],
@@ -3576,9 +3571,9 @@ function signature:
     IDLE: 2,
     PROCESSING_QUEUED: 9,
     PROCESSING: 3,
-    PROCESSING_PAUSED: 4,
     PROCESSING_COMPLETE: 5,
     PROCESSING_ERROR: 6,
+    PROCESSING_REVERT_ERROR: 10,
     LOADING: 7,
     LOAD_ERROR: 8
   };
@@ -3939,8 +3934,8 @@ function signature:
     //
     // logic to revert a processed file
     //
-    var revert = function revert(revertFileUpload) {
-      return new Promise(function(resolve) {
+    var revert = function revert(revertFileUpload, forceRevert) {
+      return new Promise(function(resolve, reject) {
         // cannot revert without a server id for this process
         if (state.serverFileReference === null) {
           resolve();
@@ -3956,8 +3951,16 @@ function signature:
             resolve();
           },
           function(error) {
-            resolve();
-            // TODO: handle revert error
+            // don't set error state when reverting is optional, it will always resolve
+            if (!forceRevert) {
+              resolve();
+              return;
+            }
+
+            // oh no errors
+            setStatus(ItemStatus.PROCESSING_REVERT_ERROR);
+            fire('process-revert-error');
+            reject(error);
           }
         );
 
@@ -4384,9 +4387,11 @@ function signature:
               createRevertFunction(
                 state.options.server.url,
                 state.options.server.revert
-              )
+              ),
+              query('GET_FORCE_REVERT')
             )
-            .then(doUpload ? upload : function() {});
+            .then(doUpload ? upload : function() {})
+            .catch(function() {});
         };
 
         var abort = function abort(doUpload) {
@@ -4466,13 +4471,35 @@ function signature:
           var _item = getActiveItems(state.items)[0];
 
           // if has been processed remove it from the server as well
-          if (_item.status === ItemStatus.PROCESSING_COMPLETE) {
-            _item.revert(
-              createRevertFunction(
-                state.options.server.url,
-                state.options.server.revert
+          if (
+            _item.status === ItemStatus.PROCESSING_COMPLETE ||
+            _item.status === ItemStatus.PROCESSING_REVERT_ERROR
+          ) {
+            var forceRevert = query('GET_FORCE_REVERT');
+            _item
+              .revert(
+                createRevertFunction(
+                  state.options.server.url,
+                  state.options.server.revert
+                ),
+                forceRevert
               )
-            );
+              .then(function() {
+                if (!forceRevert) return;
+
+                // try to add now
+                dispatch('ADD_ITEM', {
+                  source: source,
+                  index: index,
+                  interactionMethod: interactionMethod,
+                  success: success,
+                  failure: failure,
+                  options: options
+                });
+              })
+              .catch(function() {}); // no need to handle this catch state for now
+
+            if (forceRevert) return;
           }
 
           // remove first item as it will be replaced by this item
@@ -4680,6 +4707,19 @@ function signature:
           });
         });
 
+        item.on('process-revert-error', function(error) {
+          dispatch('DID_THROW_ITEM_PROCESSING_REVERT_ERROR', {
+            id: id,
+            error: error,
+            status: {
+              main: dynamicLabel(state.options.labelFileProcessingRevertError)(
+                error
+              ),
+              sub: state.options.labelTapToRetry
+            }
+          });
+        });
+
         item.on('process-complete', function(serverFileReference) {
           dispatch('DID_COMPLETE_ITEM_PROCESSING', {
             id: id,
@@ -4813,9 +4853,7 @@ function signature:
           // waiting for something
           item.status === ItemStatus.IDLE ||
           // processing went wrong earlier
-          item.status === ItemStatus.PROCESSING_ERROR ||
-          // was paused
-          item.status === ItemStatus.PROCESSING_PAUSED;
+          item.status === ItemStatus.PROCESSING_ERROR;
 
         // not ready to be processed
         if (!itemCanBeQueuedForProcessing) {
@@ -4829,15 +4867,21 @@ function signature:
             }, 32);
           };
 
-          if (item.status === ItemStatus.PROCESSING_COMPLETE) {
+          // if already done processing or tried to revert but didn't work, try again
+          if (
+            item.status === ItemStatus.PROCESSING_COMPLETE ||
+            item.status === ItemStatus.PROCESSING_REVERT_ERROR
+          ) {
             item
               .revert(
                 createRevertFunction(
                   state.options.server.url,
                   state.options.server.revert
-                )
+                ),
+                query('GET_FORCE_REVERT')
               )
-              .then(process);
+              .then(process)
+              .catch(function() {}); // don't continue with processing if something went wrong
           } else if (item.status === ItemStatus.PROCESSING) {
             item.abortProcessing().then(process);
           }
@@ -5066,14 +5110,16 @@ function signature:
             createRevertFunction(
               state.options.server.url,
               state.options.server.revert
-            )
+            ),
+            query('GET_FORCE_REVERT')
           )
           .then(function() {
             var shouldRemove = state.options.instantUpload || isMockItem(item);
             if (shouldRemove) {
               dispatch('REMOVE_ITEM', { query: item.id });
             }
-          });
+          })
+          .catch(function() {});
       }),
 
       SET_OPTIONS: function SET_OPTIONS(_ref8) {
@@ -5524,6 +5570,7 @@ function signature:
       DID_THROW_ITEM_LOAD_ERROR: error,
       DID_THROW_ITEM_INVALID: error,
       DID_THROW_ITEM_PROCESSING_ERROR: error,
+      DID_THROW_ITEM_PROCESSING_REVERT_ERROR: error,
       DID_THROW_ITEM_REMOVE_ERROR: error
     }),
     didCreateView: function didCreateView(root) {
@@ -5719,6 +5766,11 @@ function signature:
       buttonRetryItemProcessing: { opacity: 1 },
       status: { opacity: 1 },
       info: { translateX: calculateFileInfoOffset }
+    },
+    DID_THROW_ITEM_PROCESSING_REVERT_ERROR: {
+      buttonRevertItemProcessing: { opacity: 1 },
+      status: { opacity: 1 },
+      info: { opacity: 1 }
     },
     DID_ABORT_ITEM_PROCESSING: {
       buttonRemoveItem: { opacity: 1 },
@@ -6186,6 +6238,7 @@ function signature:
     DID_UPDATE_ITEM_PROCESS_PROGRESS: 'processing',
     DID_COMPLETE_ITEM_PROCESSING: 'processing-complete',
     DID_THROW_ITEM_PROCESSING_ERROR: 'processing-error',
+    DID_THROW_ITEM_PROCESSING_REVERT_ERROR: 'processing-revert-error',
     DID_ABORT_ITEM_PROCESSING: 'cancelled',
     DID_REVERT_ITEM_PROCESSING: 'idle'
   };
@@ -8593,7 +8646,8 @@ function signature:
         var files = getFiles().filter(function(item) {
           return (
             item.status !== ItemStatus.PROCESSING &&
-            item.status !== ItemStatus.PROCESSING_COMPLETE
+            item.status !== ItemStatus.PROCESSING_COMPLETE &&
+            item.status !== ItemStatus.PROCESSING_REVERT_ERROR
           );
         });
         return Promise.all(files.map(processFile));
