@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.8.2
+
+- Fix problem where remove server error message was passed directly to client without label. Set `labelFileRemoveError` to a string to change default error, set it to a function to show custom server error. `{ labelFileRemoveError: serverError => serverError }`
+
+
 ## 3.8.1
 
 - Expose `dispatch` call to plugin item extensions.

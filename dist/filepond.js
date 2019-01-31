@@ -1,5 +1,5 @@
 /*
- * FilePond 3.8.1
+ * FilePond 3.8.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2256,8 +2256,9 @@
     labelFileCountPlural: ['files in list', Type.STRING],
     labelFileLoading: ['Loading', Type.STRING],
     labelFileAdded: ['Added', Type.STRING], // assistive only
-    labelFileRemoved: ['Removed', Type.STRING], // assistive only
     labelFileLoadError: ['Error during load', Type.STRING],
+    labelFileRemoved: ['Removed', Type.STRING], // assistive only
+    labelFileRemoveError: ['Error during remove', Type.STRING],
     labelFileProcessing: ['Uploading', Type.STRING],
     labelFileProcessingComplete: ['Upload complete', Type.STRING],
     labelFileProcessingAborted: ['Upload cancelled', Type.STRING],
@@ -5040,7 +5041,9 @@ function signature:
                 id: item.id,
                 error: createResponse('error', 0, status, null),
                 status: {
-                  main: status,
+                  main: dynamicLabel(state.options.labelFileRemoveError)(
+                    status
+                  ),
                   sub: state.options.labelTapToRetry
                 }
               });
