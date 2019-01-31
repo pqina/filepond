@@ -1,5 +1,5 @@
 /*
- * FilePond 3.8.0
+ * FilePond 3.8.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -4532,7 +4532,10 @@ function signature:
         });
 
         // created the item, let plugins add methods
-        applyFilters('DID_CREATE_ITEM', item, { query: query });
+        applyFilters('DID_CREATE_ITEM', item, {
+          query: query,
+          dispatch: dispatch
+        });
 
         // add item to list
         insertItem(state.items, item, index);

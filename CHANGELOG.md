@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.8.1
+
+- Expose `dispatch` call to plugin item extensions.
+
+
 ## 3.8.0
 
 - Add `forceRevert` option, set to `true` to force a revert action to finish before continuing.
