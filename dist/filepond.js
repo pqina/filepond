@@ -1,5 +1,5 @@
 /*
- * FilePond 3.8.2
+ * FilePond 3.9.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2227,6 +2227,7 @@
 
     // Input requirements
     maxFiles: [null, Type.INT], // Max number of files
+    checkValidity: [false, Type.BOOLEAN], // Enables custom validity messages
 
     // Drag 'n Drop related
     dropOnPage: [false, Type.BOOLEAN], // Allow dropping of files anywhere on page (prevents browser from opening file if dropped outside of Up)
@@ -2249,7 +2250,7 @@
       'Drag & Drop your files or <span class="filepond--label-action">Browse</span>',
       Type.STRING
     ],
-
+    labelInvalidField: ['Field contains invalid files', Type.STRING],
     labelFileWaitingForSize: ['Waiting for size', Type.STRING],
     labelFileSizeNotAvailable: ['Size not available', Type.STRING],
     labelFileCountSingular: ['file in list', Type.STRING],
@@ -6790,16 +6791,32 @@ function signature:
     );
   };
 
-  var updateRequiredStatus = function updateRequiredStatus(_ref8) {
-    var root = _ref8.root;
+  var updateRequiredStatus = function updateRequiredStatus(_ref7) {
+    var root = _ref7.root;
 
     // always remove the required attribute when more than zero items
     if (root.query('GET_TOTAL_ITEMS') > 0) {
       attrToggle(root.element, 'required', false);
-    } else if (root.query('GET_REQUIRED')) {
-      // if zero items, we only add it if the field is required
-      attrToggle(root.element, 'required', true);
+    } else {
+      // remove any validation messages
+      var shouldCheckValidity = root.query('GET_CHECK_VALIDITY');
+      if (shouldCheckValidity) {
+        root.element.setCustomValidity('');
+      }
+
+      // we only add required if the field has been deemed required
+      if (root.query('GET_REQUIRED')) {
+        attrToggle(root.element, 'required', true);
+      }
     }
+  };
+
+  var updateFieldValidityStatus = function updateFieldValidityStatus(_ref8) {
+    var root = _ref8.root;
+
+    var shouldCheckValidity = root.query('GET_CHECK_VALIDITY');
+    if (!shouldCheckValidity) return;
+    root.element.setCustomValidity(root.query('GET_LABEL_INVALID_FIELD'));
   };
 
   var browser = createView({
@@ -6817,8 +6834,10 @@ function signature:
       root.element.removeEventListener('change', root.ref.handleChange);
     },
     write: createRoute({
-      DID_ADD_ITEM: updateRequiredStatus,
+      DID_LOAD_ITEM: updateRequiredStatus,
+      DID_THROW_ITEM_INVALID: updateFieldValidityStatus,
       DID_REMOVE_ITEM: updateRequiredStatus,
+
       DID_SET_ALLOW_BROWSE: toggleAllowBrowse$1,
       DID_SET_ALLOW_MULTIPLE: toggleAllowMultiple,
       DID_SET_ACCEPTED_FILE_TYPES: setAcceptedFileTypes,

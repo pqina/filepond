@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.9.0
+
+- Add `checkValidity` which is set to `false` by default. If it's set to `true`, FilePond will set the contents of the `labelInvalidField` property as the field custom validity message if it contains invalid files (files that for instance exceed max file size or fail other tests).
+
+
 ## 3.8.2
 
 - Fix problem where remove server error message was passed directly to client without label. Set `labelFileRemoveError` to a string to change default error, set it to a function to show custom server error. `{ labelFileRemoveError: serverError => serverError }`
