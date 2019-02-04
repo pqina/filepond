@@ -1,5 +1,5 @@
 /*
- * FilePond 4.0.0
+ * FilePond 4.0.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -7444,7 +7444,7 @@ const createApp$1 = (initialOptions = {}) => {
   // re-render on window resize start and finish
   let resizing = false;
   let timer = null;
-  window.addEventListener('resize', () => {
+  const resizeHandler = () => {
     if (!resizing) {
       resizing = true;
       store.dispatch('DID_START_RESIZE');
@@ -7454,7 +7454,8 @@ const createApp$1 = (initialOptions = {}) => {
       resizing = false;
       store.dispatch('DID_STOP_RESIZE');
     }, 500);
-  });
+  };
+  window.addEventListener('resize', resizeHandler);
 
   // render initial view
   const view = root(store, { id: getUniqueId() });

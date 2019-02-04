@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.0.1
+
+- Fix problem where window resize handler was removed incorrectly resulting in an error.
+
+
 ## 4.0.0
 
 Multiple improvements, small fixes and new features. As updating will result in animation speed changes, changes to the way files are added to the files list, and will require an update of the image preview plugin, the version has been bumped to 4.0.0
