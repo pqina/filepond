@@ -1,5 +1,5 @@
 /*
- * FilePond 3.9.0
+ * FilePond 4.0.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -456,6 +456,16 @@
   pointer-events: none;
 }
 
+.filepond--hopper[data-hopper-state='drag-over']::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+}
+
 .filepond--progress-indicator {
   z-index: 103;
 }
@@ -479,9 +489,7 @@
   right: 0;
   z-index: 1;
   padding: 0;
-  margin: 0;
-  margin-top: 0.25em;
-  margin-bottom: 0.25em;
+  margin: 0.25em;
   will-change: transform, opacity;
 }
 .filepond--item > .filepond--panel {
@@ -565,8 +573,8 @@
 
 /* used for padding so allowed to be restyled */
 .filepond--list {
-  left: 1em;
-  right: 1em;
+  left: 0.75em;
+  right: 0.75em;
 }
 
 .filepond--root[data-style-panel-layout~='integrated'] {
@@ -574,6 +582,35 @@
   height: 100%;
   max-width: none;
   margin: 0;
+}
+
+.filepond--root[data-style-panel-layout~='circle'] .filepond--panel-root,
+.filepond--root[data-style-panel-layout~='integrated'] .filepond--panel-root {
+  border-radius: 0;
+}
+.filepond--root[data-style-panel-layout~='circle'] .filepond--panel-root > *,
+.filepond--root[data-style-panel-layout~='integrated']
+  .filepond--panel-root
+  > * {
+  display: none;
+}
+
+.filepond--root[data-style-panel-layout~='circle'] .filepond--drop-label,
+.filepond--root[data-style-panel-layout~='integrated'] .filepond--drop-label {
+  bottom: 0;
+  height: auto;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -ms-flex-align: center;
+  align-items: center;
+  z-index: 7;
+}
+
+.filepond--root[data-style-panel-layout~='circle'] .filepond--item-panel,
+.filepond--root[data-style-panel-layout~='integrated'] .filepond--item-panel {
+  display: none;
 }
 
 .filepond--root[data-style-panel-layout~='compact'] .filepond--list-scroller,
@@ -594,42 +631,12 @@
 
 .filepond--root[data-style-panel-layout~='compact'] .filepond--item,
 .filepond--root[data-style-panel-layout~='integrated'] .filepond--item {
-  margin-top: 0;
-  margin-bottom: 0;
+  margin: 0;
 }
 
 .filepond--root[data-style-panel-layout~='compact'] .filepond--file-wrapper,
 .filepond--root[data-style-panel-layout~='integrated'] .filepond--file-wrapper {
   height: 100%;
-}
-
-.filepond--root[data-style-panel-layout~='compact'] .filepond--panel-root,
-.filepond--root[data-style-panel-layout~='integrated'] .filepond--panel-root {
-  border-radius: 0;
-}
-.filepond--root[data-style-panel-layout~='compact'] .filepond--panel-root > *,
-.filepond--root[data-style-panel-layout~='integrated']
-  .filepond--panel-root
-  > * {
-  display: none;
-}
-
-.filepond--root[data-style-panel-layout~='compact'] .filepond--drop-label,
-.filepond--root[data-style-panel-layout~='integrated'] .filepond--drop-label {
-  bottom: 0;
-  height: auto;
-  display: -ms-flexbox;
-  display: flex;
-  -ms-flex-pack: center;
-  justify-content: center;
-  -ms-flex-align: center;
-  align-items: center;
-  z-index: 7;
-}
-
-.filepond--root[data-style-panel-layout~='compact'] .filepond--item-panel,
-.filepond--root[data-style-panel-layout~='integrated'] .filepond--item-panel {
-  display: none;
 }
 
 .filepond--root[data-style-panel-layout~='circle'] {

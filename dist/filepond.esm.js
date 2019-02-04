@@ -1,5 +1,5 @@
 /*
- * FilePond 3.9.0
+ * FilePond 4.0.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -968,7 +968,7 @@ const createView =
      * Write data to DOM
      * @private
      */
-    const _write = (ts, frameActions = []) => {
+    const _write = (ts, frameActions, shouldOptimize) => {
       // if no actions, we assume that the view is resting
       let resting = frameActions.length === 0;
 
@@ -978,7 +978,8 @@ const createView =
           props,
           root: internalAPI,
           actions: frameActions,
-          timestamp: ts
+          timestamp: ts,
+          shouldOptimize
         });
         if (writerResting === false) {
           resting = false;
@@ -999,7 +1000,8 @@ const createView =
         // if a child view is not resting, we are not resting
         const childResting = child._write(
           ts,
-          filterFrameActionsForChild(child, frameActions)
+          filterFrameActionsForChild(child, frameActions),
+          shouldOptimize
         );
         if (!childResting) {
           resting = false;
@@ -1022,7 +1024,11 @@ const createView =
           child._read();
 
           // re-call write
-          child._write(ts, filterFrameActionsForChild(child, frameActions));
+          child._write(
+            ts,
+            filterFrameActionsForChild(child, frameActions),
+            shouldOptimize
+          );
 
           // we just added somthing to the dom, no rest
           resting = false;
@@ -1230,15 +1236,22 @@ const createRoute = (routes, fn) => ({
   root,
   props,
   actions = [],
-  timestamp
+  timestamp,
+  shouldOptimize
 }) => {
   actions
     .filter(action => routes[action.type])
     .forEach(action =>
-      routes[action.type]({ root, props, action: action.data, timestamp })
+      routes[action.type]({
+        root,
+        props,
+        action: action.data,
+        timestamp,
+        shouldOptimize
+      })
     );
   if (fn) {
-    fn({ root, props, actions, timestamp });
+    fn({ root, props, actions, timestamp, shouldOptimize });
   }
 };
 
@@ -1559,6 +1572,7 @@ const createOptionActions = options => (dispatch, query, state) => {
   const obj = {};
   forin(options, key => {
     const name = fromCamels(key, '_').toUpperCase();
+
     obj[`SET_${name}`] = action => {
       try {
         state.options[key] = action.value;
@@ -1593,17 +1607,6 @@ const getUniqueId = () =>
   Math.random()
     .toString(36)
     .substr(2, 9);
-
-const forEachDelayed = (items, cb, delay = 75) =>
-  items.map(
-    (item, index) =>
-      new Promise((resolve, reject) => {
-        setTimeout(() => {
-          cb(item);
-          resolve();
-        }, delay * index);
-      })
-  );
 
 const arrayRemove = (arr, index) => arr.splice(index, 1);
 
@@ -1808,6 +1811,10 @@ const defaultOptions = {
   maxFiles: [null, Type.INT], // Max number of files
   checkValidity: [false, Type.BOOLEAN], // Enables custom validity messages
 
+  // Where to put file
+  itemInsertLocation: ['before', Type.STRING], // Default index in list to add items that have been dropped at the top of the list
+  itemInsertInterval: [75, Type.INT],
+
   // Drag 'n Drop related
   dropOnPage: [false, Type.BOOLEAN], // Allow dropping of files anywhere on page (prevents browser from opening file if dropped outside of Up)
   dropOnElement: [true, Type.BOOLEAN], // Drop needs to happen on element (set to false to also load drops outside of Up)
@@ -1902,6 +1909,7 @@ const defaultOptions = {
   // styles
   stylePanelLayout: [null, Type.STRING], // null 'integrated', 'compact', 'circle'
   stylePanelAspectRatio: [null, Type.STRING], // null or '3:2' or 1
+  styleItemPanelAspectRatio: [null, Type.STRING],
   styleButtonRemoveItemPosition: ['left', Type.STRING],
   styleButtonProcessItemPosition: ['right', Type.STRING],
   styleLoadIndicatorPosition: ['right', Type.STRING],
@@ -1978,6 +1986,8 @@ const queries = state => ({
       : getNumericAspectRatioFromString(state.options.stylePanelAspectRatio);
     return aspectRatio;
   },
+
+  GET_ITEM_PANEL_ASPECT_RATIO: () => state.options.styleItemPanelAspectRatio,
 
   GET_ITEMS_BY_STATUS: status =>
     getActiveItems(state.items).filter(item => item.status === status),
@@ -2947,7 +2957,7 @@ const createFileProcessor = processFn => {
 const getFilenameWithoutExtension = name =>
   name.substr(0, name.lastIndexOf('.')) || name;
 
-const ItemStatus = {
+const ItemStatus$1 = {
   INIT: 1,
   IDLE: 2,
   PROCESSING_QUEUED: 9,
@@ -3025,8 +3035,8 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
     // current item status
     status: serverFileReference
-      ? ItemStatus.PROCESSING_COMPLETE
-      : ItemStatus.INIT,
+      ? ItemStatus$1.PROCESSING_COMPLETE
+      : ItemStatus$1.INIT,
 
     // active processes
     activeLoader: null,
@@ -3089,7 +3099,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       if (meta.source) {
         origin = FileOrigin$1.LIMBO;
         state.serverFileReference = meta.source;
-        state.status = ItemStatus.PROCESSING_COMPLETE;
+        state.status = ItemStatus$1.PROCESSING_COMPLETE;
       }
 
       // size has been updated
@@ -3098,21 +3108,21 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
     // the file is now loading we need to update the progress indicators
     loader.on('progress', progress => {
-      setStatus(ItemStatus.LOADING);
+      setStatus(ItemStatus$1.LOADING);
 
       fire('load-progress', progress);
     });
 
     // an error was thrown while loading the file, we need to switch to error state
     loader.on('error', error => {
-      setStatus(ItemStatus.LOAD_ERROR);
+      setStatus(ItemStatus$1.LOAD_ERROR);
 
       fire('load-request-error', error);
     });
 
     // user or another process aborted the file load (cannot retry)
     loader.on('abort', () => {
-      setStatus(ItemStatus.INIT);
+      setStatus(ItemStatus$1.INIT);
 
       fire('load-abort');
     });
@@ -3129,9 +3139,9 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
         // file received
         if (origin === FileOrigin$1.LIMBO && state.serverFileReference) {
-          setStatus(ItemStatus.PROCESSING_COMPLETE);
+          setStatus(ItemStatus$1.PROCESSING_COMPLETE);
         } else {
-          setStatus(ItemStatus.IDLE);
+          setStatus(ItemStatus$1.IDLE);
         }
 
         fire('load');
@@ -3142,7 +3152,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
         state.file = file;
         fire('load-meta');
 
-        setStatus(ItemStatus.LOAD_ERROR);
+        setStatus(ItemStatus$1.LOAD_ERROR);
         fire('load-file-error', result);
       };
 
@@ -3185,7 +3195,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
   //
   const process = (processor, onprocess) => {
     // now processing
-    setStatus(ItemStatus.PROCESSING);
+    setStatus(ItemStatus$1.PROCESSING);
 
     // reset abort callback
     abortProcessingRequestComplete = null;
@@ -3211,7 +3221,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       // need this id to be able to rever the upload
       state.serverFileReference = serverFileReference;
 
-      setStatus(ItemStatus.PROCESSING_COMPLETE);
+      setStatus(ItemStatus$1.PROCESSING_COMPLETE);
       fire('process-complete', serverFileReference);
     });
 
@@ -3221,7 +3231,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
     processor.on('error', error => {
       state.activeProcessor = null;
-      setStatus(ItemStatus.PROCESSING_ERROR);
+      setStatus(ItemStatus$1.PROCESSING_ERROR);
       fire('process-error', error);
     });
 
@@ -3231,7 +3241,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       // if file was uploaded but processing was cancelled during perceived processor time store file reference
       state.serverFileReference = serverFileReference;
 
-      setStatus(ItemStatus.IDLE);
+      setStatus(ItemStatus$1.IDLE);
       fire('process-abort');
 
       // has timeout so doesn't interfere with remove action
@@ -3264,13 +3274,13 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
   };
 
   const requestProcessing = () => {
-    setStatus(ItemStatus.PROCESSING_QUEUED);
+    setStatus(ItemStatus$1.PROCESSING_QUEUED);
   };
 
   const abortProcessing = () =>
     new Promise(resolve => {
       if (!state.activeProcessor) {
-        setStatus(ItemStatus.IDLE);
+        setStatus(ItemStatus$1.IDLE);
         fire('process-abort');
 
         resolve();
@@ -3311,14 +3321,14 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
           }
 
           // oh no errors
-          setStatus(ItemStatus.PROCESSING_REVERT_ERROR);
+          setStatus(ItemStatus$1.PROCESSING_REVERT_ERROR);
           fire('process-revert-error');
           reject(error);
         }
       );
 
       // fire event
-      setStatus(ItemStatus.IDLE);
+      setStatus(ItemStatus$1.IDLE);
       fire('process-revert');
     });
 
@@ -3529,6 +3539,10 @@ const optionalPromise = (fn, ...params) =>
     }
   });
 
+const sortItems = (state, compare) => {
+  state.items.sort((a, b) => compare(createItemAPI(a), createItemAPI(b)));
+};
+
 // returns item based on state
 const getItemByQueryFromState = (state, itemHandler) => ({
   query,
@@ -3658,18 +3672,62 @@ const actions = (dispatch, query, state) => ({
     };
 
     // if we should re-upload the file immidiately
-    if (item.status === ItemStatus.PROCESSING_COMPLETE) {
+    if (item.status === ItemStatus$1.PROCESSING_COMPLETE) {
       return revert(state.options.instantUpload);
     }
 
     // if currently uploading, cancel upload
-    if (item.status === ItemStatus.PROCESSING) {
+    if (item.status === ItemStatus$1.PROCESSING) {
       return abort(state.options.instantUpload);
     }
 
     if (state.options.instantUpload) {
       upload();
     }
+  },
+
+  SORT: ({ compare }) => {
+    sortItems(state, compare);
+  },
+
+  ADD_ITEMS: ({
+    items,
+    index,
+    interactionMethod,
+    success = () => {},
+    failure = () => {}
+  }) => {
+    let currentIndex = index;
+
+    if (index === -1 || typeof index === 'undefined') {
+      const insertLocation = query('GET_ITEM_INSERT_LOCATION');
+      const totalItems = query('GET_TOTAL_ITEMS');
+      currentIndex = insertLocation === 'before' ? 0 : totalItems;
+    }
+
+    const ignoredFiles = query('GET_IGNORED_FILES');
+    const isValidFile = source =>
+      isFile(source)
+        ? !ignoredFiles.includes(source.name.toLowerCase())
+        : !isEmpty(source);
+    const validItems = items.filter(isValidFile);
+
+    const promises = validItems.map(
+      source =>
+        new Promise((resolve, reject) => {
+          dispatch('ADD_ITEM', {
+            interactionMethod,
+            source,
+            success: resolve,
+            failure: reject,
+            index: currentIndex++
+          });
+        })
+    );
+
+    Promise.all(promises)
+      .then(success)
+      .catch(failure);
   },
 
   /**
@@ -3679,7 +3737,7 @@ const actions = (dispatch, query, state) => ({
    */
   ADD_ITEM: ({
     source,
-    index,
+    index = -1,
     interactionMethod,
     success = () => {},
     failure = () => {},
@@ -3719,6 +3777,7 @@ const actions = (dispatch, query, state) => ({
         });
 
         failure({ error, file: null });
+
         return;
       }
 
@@ -3728,8 +3787,8 @@ const actions = (dispatch, query, state) => ({
 
       // if has been processed remove it from the server as well
       if (
-        item.status === ItemStatus.PROCESSING_COMPLETE ||
-        item.status === ItemStatus.PROCESSING_REVERT_ERROR
+        item.status === ItemStatus$1.PROCESSING_COMPLETE ||
+        item.status === ItemStatus$1.PROCESSING_REVERT_ERROR
       ) {
         const forceRevert = query('GET_FORCE_REVERT');
         item
@@ -3790,6 +3849,12 @@ const actions = (dispatch, query, state) => ({
 
     // add item to list
     insertItem(state.items, item, index);
+
+    // sort items in list
+    const itemInsertLocation = query('GET_ITEM_INSERT_LOCATION');
+    if (isFunction(itemInsertLocation) && source) {
+      sortItems(state, itemInsertLocation);
+    }
 
     // get a quick reference to the item id
     const id = item.id;
@@ -4026,6 +4091,12 @@ const actions = (dispatch, query, state) => ({
   COMPLETE_LOAD_ITEM: ({ item, data }) => {
     const { success, source } = data;
 
+    // sort items in list
+    const itemInsertLocation = query('GET_ITEM_INSERT_LOCATION');
+    if (isFunction(itemInsertLocation) && source) {
+      sortItems(state, itemInsertLocation);
+    }
+
     // let interface know the item has loaded
     dispatch('DID_LOAD_ITEM', {
       id: item.id,
@@ -4070,9 +4141,9 @@ const actions = (dispatch, query, state) => ({
       // cannot be queued (or is already queued)
       const itemCanBeQueuedForProcessing =
         // waiting for something
-        item.status === ItemStatus.IDLE ||
+        item.status === ItemStatus$1.IDLE ||
         // processing went wrong earlier
-        item.status === ItemStatus.PROCESSING_ERROR;
+        item.status === ItemStatus$1.PROCESSING_ERROR;
 
       // not ready to be processed
       if (!itemCanBeQueuedForProcessing) {
@@ -4088,8 +4159,8 @@ const actions = (dispatch, query, state) => ({
 
         // if already done processing or tried to revert but didn't work, try again
         if (
-          item.status === ItemStatus.PROCESSING_COMPLETE ||
-          item.status === ItemStatus.PROCESSING_REVERT_ERROR
+          item.status === ItemStatus$1.PROCESSING_COMPLETE ||
+          item.status === ItemStatus$1.PROCESSING_REVERT_ERROR
         ) {
           item
             .revert(
@@ -4101,7 +4172,7 @@ const actions = (dispatch, query, state) => ({
             )
             .then(process)
             .catch(() => {}); // don't continue with processing if something went wrong
-        } else if (item.status === ItemStatus.PROCESSING) {
+        } else if (item.status === ItemStatus$1.PROCESSING) {
           item.abortProcessing().then(process);
         }
 
@@ -4109,7 +4180,7 @@ const actions = (dispatch, query, state) => ({
       }
 
       // already queued for processing
-      if (item.status === ItemStatus.PROCESSING_QUEUED) return;
+      if (item.status === ItemStatus$1.PROCESSING_QUEUED) return;
 
       item.requestProcessing();
 
@@ -4123,7 +4194,7 @@ const actions = (dispatch, query, state) => ({
     const maxParallelUploads = query('GET_MAX_PARALLEL_UPLOADS');
     const totalCurrentUploads = query(
       'GET_ITEMS_BY_STATUS',
-      ItemStatus.PROCESSING
+      ItemStatus$1.PROCESSING
     ).length;
 
     // queue and wait till queue is freed up
@@ -4140,7 +4211,7 @@ const actions = (dispatch, query, state) => ({
     }
 
     // if was not queued or is already processing exit here
-    if (item.status === ItemStatus.PROCESSING) return;
+    if (item.status === ItemStatus$1.PROCESSING) return;
 
     // we done function
     item.onOnce('process-complete', () => {
@@ -5012,7 +5083,7 @@ const create$6 = ({ root, props }) => {
 
 const write$4 = ({ root, actions, props }) => {
   // route actions
-  route$3({ root, actions, props });
+  route$4({ root, actions, props });
 
   // select last state change action
   let action = [...actions]
@@ -5044,7 +5115,7 @@ const write$4 = ({ root, actions, props }) => {
   });
 };
 
-const route$3 = createRoute({
+const route$4 = createRoute({
   DID_SET_LABEL_BUTTON_ABORT_ITEM_PROCESSING: ({ root, action }) => {
     root.ref.buttonAbortItemProcessing.label = action.value;
   },
@@ -5119,7 +5190,7 @@ const didLoadItem = ({ root, action, props }) => {
   );
 };
 
-const didRemoveItem = ({ root, action }) => {
+const didRemoveItem = ({ root }) => {
   root.ref.data.removeAttribute('value');
 };
 
@@ -5240,12 +5311,24 @@ const panel = createView({
   }
 });
 
+const ITEM_TRANSLATE_SPRING = {
+  type: 'spring',
+  stiffness: 0.75,
+  damping: 0.45,
+  mass: 10
+};
+
+const ITEM_SCALE_SPRING = 'spring';
+
 /**
  * Creates the file view
  */
 const create$4 = ({ root, props }) => {
+  // set id
+  root.element.id = `filepond--item-${props.id}`;
+
   // file view
-  root.ref.controls = root.appendChildView(
+  root.ref.container = root.appendChildView(
     root.createChildView(fileWrapper, { id: props.id })
   );
 
@@ -5279,18 +5362,33 @@ const StateMap = {
   DID_REVERT_ITEM_PROCESSING: 'idle'
 };
 
-const write$3 = ({ root, actions, props }) => {
-  // update panel height
-  root.ref.panel.height = root.ref.controls.rect.inner.height;
-
-  // set own height
-  const aspectRatio = root.query('GET_PANEL_ASPECT_RATIO');
-  const allowMultiple = root.query('GET_ALLOW_MULTIPLE');
-  if (aspectRatio && !allowMultiple) {
-    root.height = root.rect.element.width * aspectRatio;
-  } else {
-    root.height = root.ref.controls.rect.inner.height;
+const route$3 = createRoute({
+  DID_UPDATE_PANEL_HEIGHT: ({ root, action }) => {
+    const { height } = action;
+    root.height = height;
   }
+});
+
+const write$3 = ({ root, actions, props, shouldOptimize }) => {
+  // route actions
+  const aspectRatio =
+    root.query('GET_ITEM_PANEL_ASPECT_RATIO') ||
+    root.query('GET_PANEL_ASPECT_RATIO');
+  if (!aspectRatio) {
+    route$3({ root, actions, props });
+    if (!root.height) {
+      root.height = root.ref.container.rect.element.height;
+    }
+  } else if (!shouldOptimize) {
+    root.height = root.rect.element.width * aspectRatio;
+  }
+
+  // sync panel height with item height
+  if (shouldOptimize) {
+    root.ref.panel.height = null;
+  }
+
+  root.ref.panel.height = root.height;
 
   // select last state change action
   let action = [...actions]
@@ -5299,9 +5397,7 @@ const write$3 = ({ root, actions, props }) => {
     .find(action => StateMap[action.type]);
 
   // no need to set same state twice
-  if (!action || (action && action.type === props.currentState)) {
-    return;
-  }
+  if (!action || (action && action.type === props.currentState)) return;
 
   // set current state
   props.currentState = action.type;
@@ -5319,7 +5415,7 @@ const item = createView({
   tag: 'li',
   name: 'item',
   mixins: {
-    apis: ['id', 'markedForRemoval'],
+    apis: ['id', 'interactionMethod', 'markedForRemoval', 'spawnDate'],
     styles: [
       'translateX',
       'translateY',
@@ -5329,18 +5425,82 @@ const item = createView({
       'height'
     ],
     animations: {
-      scaleX: 'spring',
-      scaleY: 'spring',
-      translateX: 'spring',
-      translateY: 'spring',
+      scaleX: ITEM_SCALE_SPRING,
+      scaleY: ITEM_SCALE_SPRING,
+      translateX: ITEM_TRANSLATE_SPRING,
+      translateY: ITEM_TRANSLATE_SPRING,
       opacity: { type: 'tween', duration: 150 }
     }
   }
 });
 
+const getItemIndexByPosition = (view, positionInView) => {
+  if (!positionInView) return;
+
+  const horizontalSpace = view.rect.element.width;
+  const children = view.childViews;
+  const l = children.length;
+  let last = null;
+
+  // -1, don't move items to accomodate (either add to top or bottom)
+  if (l === 0 || positionInView.top < children[0].rect.element.top) return -1;
+
+  // let's get the item width
+  const item = children[0];
+  const itemRect = item.rect.element;
+  const itemHorizontalMargin = itemRect.marginLeft + itemRect.marginRight;
+  const itemWidth = itemRect.width + itemHorizontalMargin;
+  const itemsPerRow = Math.round(horizontalSpace / itemWidth);
+
+  // stack
+  if (itemsPerRow === 1) {
+    for (let index = 0; index < l; index++) {
+      const child = children[index];
+      const childMid = child.rect.outer.top + child.rect.element.height * 0.5;
+      if (positionInView.top < childMid) {
+        return index;
+      }
+    }
+    return l;
+  }
+
+  // grid
+  const itemVerticalMargin = itemRect.marginTop + itemRect.marginBottom;
+  const itemHeight = itemRect.height + itemVerticalMargin;
+  for (let index = 0; index < l; index++) {
+    const indexX = index % itemsPerRow;
+    const indexY = Math.floor(index / itemsPerRow);
+
+    const offsetX = indexX * itemWidth;
+    const offsetY = indexY * itemHeight;
+
+    const itemTop = offsetY - itemRect.marginTop;
+    const itemRight = offsetX + itemWidth;
+    const itemBottom = offsetY + itemHeight + itemRect.marginBottom;
+
+    if (positionInView.top < itemBottom && positionInView.top > itemTop) {
+      if (positionInView.left < itemRight) {
+        return index;
+      } else if (index !== l - 1) {
+        last = index;
+      } else {
+        last = null;
+      }
+    }
+  }
+
+  if (last !== null) {
+    return last;
+  }
+
+  return l;
+};
+
 const create$3 = ({ root, props }) => {
   // need to set role to list as otherwise it won't be read as a list by VoiceOver
   attr(root.element, 'role', 'list');
+
+  root.ref.lastItemSpanwDate = Date.now();
 };
 
 /**
@@ -5351,28 +5511,20 @@ const create$3 = ({ root, props }) => {
 const addItemView = ({ root, action }) => {
   const { id, index, interactionMethod } = action;
 
-  const animation = {
-    opacity: 0
-  };
+  root.ref.addIndex = index;
 
-  if (interactionMethod === InteractionMethod.NONE) {
-    animation.translateY = null;
+  const now = Date.now();
+  let spawnDate = now;
+  let opacity = 1;
+
+  if (interactionMethod !== InteractionMethod.NONE) {
+    opacity = 0;
+    const cooldown = root.query('GET_ITEM_INSERT_INTERVAL');
+    const dist = now - root.ref.lastItemSpanwDate;
+    spawnDate = dist < cooldown ? now + (cooldown - dist) : now;
   }
 
-  if (interactionMethod === InteractionMethod.DROP) {
-    animation.scaleX = 0.8;
-    animation.scaleY = 0.8;
-    animation.translateY = null;
-  }
-
-  if (interactionMethod === InteractionMethod.BROWSE) {
-    animation.translateY = -30;
-  }
-
-  if (interactionMethod === InteractionMethod.API) {
-    animation.translateX = -100;
-    animation.translateY = null;
-  }
+  root.ref.lastItemSpanwDate = spawnDate;
 
   root.appendChildView(
     root.createChildView(
@@ -5380,15 +5532,57 @@ const addItemView = ({ root, action }) => {
       item,
 
       // props
-      Object.assign(
-        {
-          id
-        },
-        animation
-      )
+      {
+        spawnDate,
+        id,
+        opacity,
+        interactionMethod
+      }
     ),
     index
   );
+};
+
+const moveItem = (item$$1, x, y, vx = 0, vy = 1) => {
+  item$$1.translateX = x;
+  item$$1.translateY = y;
+
+  if (Date.now() > item$$1.spawnDate) {
+    // reveal element
+    if (item$$1.opacity === 0) {
+      introItemView(item$$1, x, y, vx, vy);
+    }
+
+    // make sure is default scale every frame
+    item$$1.scaleX = 1;
+    item$$1.scaleY = 1;
+    item$$1.opacity = 1;
+  }
+};
+
+const introItemView = (item$$1, x, y, vx, vy) => {
+  if (item$$1.interactionMethod === InteractionMethod.NONE) {
+    item$$1.translateX = null;
+    item$$1.translateX = x;
+    item$$1.translateY = null;
+    item$$1.translateY = y;
+  } else if (item$$1.interactionMethod === InteractionMethod.DROP) {
+    item$$1.translateX = null;
+    item$$1.translateX = x - vx * 20;
+
+    item$$1.translateY = null;
+    item$$1.translateY = y - vy * 10;
+
+    item$$1.scaleX = 0.8;
+    item$$1.scaleY = 0.8;
+  } else if (item$$1.interactionMethod === InteractionMethod.BROWSE) {
+    item$$1.translateY = null;
+    item$$1.translateY = y - 30;
+  } else if (item$$1.interactionMethod === InteractionMethod.API) {
+    item$$1.translateX = null;
+    item$$1.translateX = x - 30;
+    item$$1.translateY = null;
+  }
 };
 
 /**
@@ -5424,92 +5618,136 @@ const route$2 = createRoute({
   DID_REMOVE_ITEM: removeItemView
 });
 
-const dragTranslation = (childIndex, dragIndex, itemMargin) => {
-  if (childIndex - 1 === dragIndex) {
-    return itemMargin / 6;
-  }
-
-  if (childIndex === dragIndex) {
-    return itemMargin / 2;
-  }
-
-  if (childIndex + 1 === dragIndex) {
-    return -itemMargin / 2;
-  }
-
-  if (childIndex + 2 === dragIndex) {
-    return -itemMargin / 6;
-  }
-
-  return 0;
-};
-
-const easeOutCirc = t => {
-  const t1 = t - 1;
-  return Math.sqrt(1 - t1 * t1);
-};
-
-const read = ({ root }) => {
-  let total = 0;
-
-  root.childViews.filter(child => child.rect.outer.height).forEach(child => {
-    const height = child.rect.element.height + child.rect.element.marginBottom;
-    total += child.markedForRemoval
-      ? height * easeOutCirc(child.opacity)
-      : height;
-  });
-
-  root.rect.outer.height = total;
-  root.rect.outer.bottom = root.rect.outer.height;
-};
-
 /**
  * Write to view
  * @param root
  * @param actions
  * @param props
  */
-const write$2 = ({ root, props, actions }) => {
+const write$2 = ({ root, props, actions, shouldOptimize }) => {
   // route actions
   route$2({ root, props, actions });
 
-  let resting = true;
+  const { dragCoordinates } = props;
 
-  // update item positions
-  let offset = 0;
-  root.childViews
-    .filter(child => child.rect.outer.height)
-    .forEach((child, childIndex) => {
-      const childRect = child.rect;
+  // get index
+  const dragIndex = dragCoordinates
+    ? getItemIndexByPosition(root, dragCoordinates)
+    : null;
 
-      // set this child offset
-      child.translateX = 0;
-      child.translateY =
-        offset +
-        (props.dragIndex > -1
-          ? dragTranslation(childIndex, props.dragIndex, 10)
-          : 0);
+  // available space on horizontal axis
+  const horizontalSpace = root.rect.element.width;
 
-      // show child if it's not marked for removal
-      if (!child.markedForRemoval) {
-        child.scaleX = 1;
-        child.scaleY = 1;
-        child.opacity = 1;
+  // only draw children that have dimensions
+  const visibleChildren = root.childViews.filter(
+    child => child.rect.outer.height
+  );
+
+  // sort based on current active items
+  const children = root
+    .query('GET_ACTIVE_ITEMS')
+    .map(item$$1 => visibleChildren.find(child => child.id === item$$1.id))
+    .filter(item$$1 => item$$1);
+
+  // add index is used to reserve the dropped/added item index till the actual item is rendered
+  const addIndex = root.ref.addIndex || null;
+
+  // add index no longer needed till possibly next draw
+  root.ref.addIndex = null;
+
+  let dragIndexOffset = 0;
+  let removeIndexOffset = 0;
+  let addIndexOffset = 0;
+
+  if (children.length === 0) return;
+
+  const childRect = children[0].rect.element;
+  const itemVerticalMargin = childRect.marginTop + childRect.marginBottom;
+  const itemHorizontalMargin = childRect.marginLeft + childRect.marginRight;
+  const itemWidth = childRect.width + itemHorizontalMargin;
+  const itemHeight = childRect.height + itemVerticalMargin;
+  const itemsPerRow = Math.round(horizontalSpace / itemWidth);
+
+  // stack
+  if (itemsPerRow === 1) {
+    let offsetY = 0;
+    let dragOffset = 0;
+
+    children.forEach((child, index) => {
+      if (dragIndex) {
+        let dist = index - dragIndex;
+        if (dist === -2) {
+          dragOffset = -itemVerticalMargin * 0.25;
+        } else if (dist === -1) {
+          dragOffset = -itemVerticalMargin * 0.75;
+        } else if (dist === 0) {
+          dragOffset = itemVerticalMargin * 0.75;
+        } else if (dist === 1) {
+          dragOffset = itemVerticalMargin * 0.25;
+        } else {
+          dragOffset = 0;
+        }
       }
 
-      let itemHeight =
-        childRect.element.height +
-        childRect.element.marginTop +
-        childRect.element.marginBottom;
-      const height = child.markedForRemoval
-        ? itemHeight * child.opacity
-        : itemHeight;
+      if (shouldOptimize) {
+        child.translateX = null;
+        child.translateY = null;
+      }
 
-      // calculate next child offset (reduce height by y scale for views that are being removed)
-      offset += height;
+      if (!child.markedForRemoval) {
+        moveItem(child, 0, offsetY + dragOffset);
+      }
+
+      let itemHeight = child.rect.element.height + itemVerticalMargin;
+
+      let visualHeight =
+        itemHeight * (child.markedForRemoval ? child.opacity : 1);
+
+      offsetY += visualHeight;
     });
+  } else {
+    // grid
+    let prevX = 0;
+    let prevY = 0;
 
-  return resting;
+    children.forEach((child, index) => {
+      if (index === dragIndex) {
+        dragIndexOffset = 1;
+      }
+
+      if (index === addIndex) {
+        addIndexOffset += 1;
+      }
+
+      if (child.markedForRemoval && child.opacity < 0.5) {
+        removeIndexOffset -= 1;
+      }
+
+      const visualIndex =
+        index + addIndexOffset + dragIndexOffset + removeIndexOffset;
+
+      const indexX = visualIndex % itemsPerRow;
+      const indexY = Math.floor(visualIndex / itemsPerRow);
+
+      const offsetX = indexX * itemWidth;
+      const offsetY = indexY * itemHeight;
+
+      const vectorX = Math.sign(offsetX - prevX);
+      const vectorY = Math.sign(offsetY - prevY);
+
+      prevX = offsetX;
+      prevY = offsetY;
+
+      if (child.markedForRemoval) return;
+
+      if (shouldOptimize) {
+        child.translateX = null;
+        child.translateY = null;
+      }
+
+      moveItem(child, offsetX, offsetY, vectorX, vectorY);
+    });
+  }
 };
 
 /**
@@ -5531,7 +5769,6 @@ const filterSetItemActions = (child, actions) =>
 const list = createView({
   create: create$3,
   write: write$2,
-  read,
   tag: 'ul',
   name: 'list',
   didWriteView: ({ root }) => {
@@ -5546,26 +5783,9 @@ const list = createView({
   },
   filterFrameActionsForChild: filterSetItemActions,
   mixins: {
-    apis: ['dragIndex']
+    apis: ['dragCoordinates']
   }
 });
-
-const getItemIndexByPosition = (view, positionInView) => {
-  let i = 0;
-  const childViews = view.childViews;
-  const l = childViews.length;
-  for (; i < l; i++) {
-    const item = childViews[i];
-    const itemRect = item.rect.outer;
-    const itemRectMid = itemRect.top + itemRect.height * 0.5;
-
-    if (positionInView.top < itemRectMid) {
-      return i;
-    }
-  }
-
-  return l;
-};
 
 const create$2 = ({ root, props }) => {
   root.ref.list = root.appendChildView(root.createChildView(list));
@@ -5576,11 +5796,12 @@ const create$2 = ({ root, props }) => {
 
 const storeDragCoordinates = ({ root, props, action }) => {
   props.dragCoordinates = {
-    left: action.position.scopeLeft,
+    left: action.position.scopeLeft - root.ref.list.rect.element.left,
     top:
       action.position.scopeTop -
-      root.rect.outer.top +
-      root.rect.element.scrollTop
+      (root.rect.outer.top +
+        root.rect.element.marginTop +
+        root.rect.element.scrollTop)
   };
 };
 
@@ -5598,9 +5819,7 @@ const write$1 = ({ root, props, actions }) => {
   route$1({ root, props, actions });
 
   // current drag position
-  root.ref.list.dragIndex = props.dragCoordinates
-    ? getItemIndexByPosition(root.ref.list, props.dragCoordinates)
-    : -1;
+  root.ref.list.dragCoordinates = props.dragCoordinates;
 
   // if currently overflowing but no longer received overflow
   if (props.overflowing && !props.overflow) {
@@ -5612,7 +5831,6 @@ const write$1 = ({ root, props, actions }) => {
   }
 
   // if is not overflowing currently but does receive overflow value
-  // !props.overflowing &&
   if (props.overflow) {
     const newHeight = Math.round(props.overflow);
     if (newHeight !== root.height) {
@@ -5628,7 +5846,7 @@ const listScroller = createView({
   write: write$1,
   name: 'list-scroller',
   mixins: {
-    apis: ['overflow'],
+    apis: ['overflow', 'dragCoordinates'],
     styles: ['height', 'translateY'],
     animations: {
       translateY: 'spring'
@@ -5912,7 +6130,7 @@ const explodeBlob = ({ root }) => {
 };
 
 const write$8 = ({ root, props, actions }) => {
-  route$4({ root, props, actions });
+  route$5({ root, props, actions });
 
   const { blob: blob$$1 } = root.ref;
 
@@ -5922,7 +6140,7 @@ const write$8 = ({ root, props, actions }) => {
   }
 };
 
-const route$4 = createRoute({
+const route$5 = createRoute({
   DID_DRAG: moveBlob,
   DID_DROP: explodeBlob,
   DID_END_DRAG: hideBlob
@@ -5937,6 +6155,29 @@ const drip = createView({
 
 const getRootNode = element =>
   'getRootNode' in element ? element.getRootNode() : document;
+
+const images = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'tiff'];
+const text$1 = ['css', 'csv', 'html', 'txt'];
+const map = {
+  zip: 'zip|compressed',
+  epub: 'application/epub+zip'
+};
+
+const guesstimateMimeType = (extension = '') => {
+  extension = extension.toLowerCase();
+  if (images.includes(extension)) {
+    return (
+      'image/' +
+      (extension === 'jpg'
+        ? 'jpeg'
+        : extension === 'svg' ? 'svg+xml' : extension)
+    );
+  }
+  if (text$1.includes(extension)) {
+    return 'text/' + extension;
+  }
+  return map[extension] || null;
+};
 
 const requestDataTransferItems = dataTransfer =>
   new Promise((resolve, reject) => {
@@ -6026,7 +6267,7 @@ const getFilesInDirectory = entry =>
             // read as file
             totalFilesFound++;
             entry.file(file => {
-              files.push(file);
+              files.push(correctMissingFileType(file));
 
               if (totalFilesFound === files.length) {
                 resolve(files);
@@ -6040,6 +6281,20 @@ const getFilesInDirectory = entry =>
     // go!
     readEntries(entry);
   });
+
+const correctMissingFileType = file => {
+  if (file.type.length) return file;
+  const date = file.lastModifiedDate;
+  const name = file.name;
+  file = file.slice(
+    0,
+    file.size,
+    guesstimateMimeType(getExtensionFromFilename(file.name))
+  );
+  file.name = name;
+  file.lastModifiedDate = date;
+  return file;
+};
 
 const isDirectoryEntry = item =>
   isEntry(item) && (getAsEntry(item) || {}).isDirectory;
@@ -6290,6 +6545,7 @@ const drop = (root, clients) => e => {
   e.preventDefault();
 
   const dataTransfer = e.dataTransfer;
+
   requestDataTransferItems(dataTransfer).then(items => {
     clients.forEach(client => {
       const { filterElement, element, ondrop, onexit, allowdrop } = client;
@@ -6460,34 +6716,6 @@ const createPaster = () => {
   return api;
 };
 
-const debounce = (func, interval = 16, immidiateOnly = true) => {
-  let last = Date.now();
-  let timeout = null;
-
-  return (...args) => {
-    clearTimeout(timeout);
-
-    const dist = Date.now() - last;
-
-    const fn = () => {
-      last = Date.now();
-      func(...args);
-    };
-
-    if (dist < interval) {
-      // we need to delay by the difference between interval and dist
-      // for example: if distance is 10 ms and interval is 16 ms,
-      // we need to wait an additional 6ms before calling the function)
-      if (!immidiateOnly) {
-        timeout = setTimeout(fn, interval - dist);
-      }
-    } else {
-      // go!
-      fn();
-    }
-  };
-};
-
 /**
  * Creates the file view
  */
@@ -6614,6 +6842,34 @@ const toCamels = (string, separator = '-') =>
     sub.charAt(1).toUpperCase()
   );
 
+const debounce = (func, interval = 16, immidiateOnly = true) => {
+  let last = Date.now();
+  let timeout = null;
+
+  return (...args) => {
+    clearTimeout(timeout);
+
+    const dist = Date.now() - last;
+
+    const fn = () => {
+      last = Date.now();
+      func(...args);
+    };
+
+    if (dist < interval) {
+      // we need to delay by the difference between interval and dist
+      // for example: if distance is 10 ms and interval is 16 ms,
+      // we need to wait an additional 6ms before calling the function)
+      if (!immidiateOnly) {
+        timeout = setTimeout(fn, interval - dist);
+      }
+    } else {
+      // go!
+      fn();
+    }
+  };
+};
+
 const MAX_FILES_LIMIT = 1000000;
 
 const create$1 = ({ root, props }) => {
@@ -6673,9 +6929,23 @@ const create$1 = ({ root, props }) => {
     .map(({ name, value }) => {
       root.element.dataset[name] = value;
     });
+
+  // determine if width changed
+  root.ref.widthPrevious = null;
+  root.ref.widthUpdated = debounce(() => {
+    root.dispatch('DID_RESIZE_ROOT');
+  }, 250);
+
+  //
+  root.ref.updateHistory = [];
 };
 
 const write = ({ root, props, actions }) => {
+  if (root.rect.element.width !== root.ref.widthPrevious) {
+    root.ref.widthPrevious = root.rect.element.width;
+    root.ref.widthUpdated();
+  }
+
   // get box bounds, we do this only once
   let bounds = root.ref.bounds;
   if (!bounds) {
@@ -6746,7 +7016,8 @@ const write = ({ root, props, actions }) => {
 
   const listItemMargin = calculateListItemMargin(root);
 
-  const listHeight = calculateListHeight(root, maxItems);
+  const listHeight = calculateListHeight(root);
+
   const labelHeight = label.rect.element.height;
   const currentLabelHeight = !isMultiItem || atMaxCapacity ? 0 : labelHeight;
 
@@ -6770,6 +7041,27 @@ const write = ({ root, props, actions }) => {
     // calculate height based on width
     const width = root.rect.element.width;
     const height = width * aspectRatio;
+
+    // remember this width
+    const history = root.ref.updateHistory;
+    history.push(width);
+
+    const MAX_BOUNCES = 2;
+    if (history.length > MAX_BOUNCES * 2) {
+      const l = history.length;
+      const bottom = l - 10;
+      let bounces = 0;
+      for (let i = l; i >= bottom; i--) {
+        if (history[i] === history[i - 2]) {
+          bounces++;
+        }
+
+        if (bounces >= MAX_BOUNCES) {
+          // dont adjust height
+          return;
+        }
+      }
+    }
 
     // fix height of panel so it adheres to aspect ratio
     panel$$1.scalable = false;
@@ -6880,25 +7172,55 @@ const calculateListItemMargin = root => {
       };
 };
 
-const calculateListHeight = (root, maxItems) => {
+const calculateListHeight = root => {
   let visual = 0;
   let bounds = 0;
 
-  root.ref.list.childViews[0].childViews.forEach((item, index) => {
-    // don't count items above max items list
-    if (index >= maxItems) return;
+  // get file list reference
+  const scrollList = root.ref.list;
+  const itemList = scrollList.childViews[0];
+  const children = itemList.childViews;
 
-    // calculate the total height of all items in the list
-    const rect = item.rect.element;
-    const itemHeight = rect.height + rect.marginTop + rect.marginBottom;
-    bounds += itemHeight;
-    visual += item.markedForRemoval ? item.opacity * itemHeight : itemHeight;
-  });
+  // no children, done!
+  if (children.length === 0) return { visual, bounds };
 
-  return {
-    visual,
-    bounds
-  };
+  const horizontalSpace = itemList.rect.element.width;
+  const dragIndex = getItemIndexByPosition(
+    itemList,
+    scrollList.dragCoordinates
+  );
+
+  const childRect = children[0].rect.element;
+
+  const itemVerticalMargin = childRect.marginTop + childRect.marginBottom;
+  const itemHorizontalMargin = childRect.marginLeft + childRect.marginRight;
+
+  const itemWidth = childRect.width + itemHorizontalMargin;
+  const itemHeight = childRect.height + itemVerticalMargin;
+
+  const newItem = typeof dragIndex !== 'undefined' && dragIndex >= 0 ? 1 : 0;
+  const removedItem = children.find(
+    child => child.markedForRemoval && child.opacity < 0.45
+  )
+    ? -1
+    : 0;
+  const verticalItemCount = children.length + newItem + removedItem;
+  const itemsPerRow = Math.round(horizontalSpace / itemWidth);
+
+  // stack
+  if (itemsPerRow === 1) {
+    children.forEach(item => {
+      const height = item.rect.element.height + itemVerticalMargin;
+      bounds += height;
+      visual += height * item.opacity;
+    });
+  } else {
+    // grid
+    bounds = Math.ceil(verticalItemCount / itemsPerRow) * itemHeight;
+    visual = bounds;
+  }
+
+  return { visual, bounds };
 };
 
 const calculateRootBoundingBoxHeight = root => {
@@ -6942,15 +7264,28 @@ const exceedsMaxFiles = (root, items) => {
   return false;
 };
 
+const getDragIndex = (list, position) => {
+  const itemList = list.childViews[0];
+  return getItemIndexByPosition(itemList, {
+    left: position.scopeLeft - itemList.rect.element.left,
+    top:
+      position.scopeTop -
+      (list.rect.outer.top +
+        list.rect.element.marginTop +
+        list.rect.element.scrollTop)
+  });
+};
+
+/**
+ * Enable or disable file drop functionality
+ */
 const toggleAllowDrop = ({ root, props, action }) => {
   if (action.value && !root.ref.hopper) {
     const hopper = createHopper(
       root.element,
       items => {
         // these files don't fit so stop here
-        if (exceedsMaxFiles(root, items)) {
-          return false;
-        }
+        if (exceedsMaxFiles(root, items)) return false;
 
         // all items should be validated by all filters as valid
         const dropValidation = root.query('GET_DROP_VALIDATION');
@@ -6969,21 +7304,10 @@ const toggleAllowDrop = ({ root, props, action }) => {
     );
 
     hopper.onload = (items, position) => {
-      const itemList = root.ref.list.childViews[0];
-      const index = getItemIndexByPosition(itemList, {
-        left: position.scopeLeft,
-        top:
-          position.scopeTop -
-          root.ref.list.rect.outer.top +
-          root.ref.list.element.scrollTop
-      });
-
-      forEachDelayed(items, source => {
-        root.dispatch('ADD_ITEM', {
-          interactionMethod: InteractionMethod.DROP,
-          source,
-          index
-        });
+      root.dispatch('ADD_ITEMS', {
+        items,
+        index: getDragIndex(root.ref.list, position),
+        interactionMethod: InteractionMethod.DROP
       });
 
       root.dispatch('DID_DROP', { position });
@@ -7024,17 +7348,13 @@ const toggleAllowBrowse = ({ root, props, action }) => {
         Object.assign({}, props, {
           onload: items => {
             // these files don't fit so stop here
-            if (exceedsMaxFiles(root, items)) {
-              return false;
-            }
+            if (exceedsMaxFiles(root, items)) return false;
 
             // add items!
-            forEachDelayed(items, source => {
-              root.dispatch('ADD_ITEM', {
-                interactionMethod: InteractionMethod.BROWSE,
-                source,
-                index: 0
-              });
+            root.dispatch('ADD_ITEMS', {
+              items,
+              index: -1,
+              interactionMethod: InteractionMethod.BROWSE
             });
           }
         })
@@ -7053,12 +7373,10 @@ const toggleAllowPaste = ({ root, action }) => {
   if (action.value) {
     root.ref.paster = createPaster();
     root.ref.paster.onload = items => {
-      forEachDelayed(items, source => {
-        root.dispatch('ADD_ITEM', {
-          interactionMethod: InteractionMethod.PASTE,
-          source,
-          index: 0
-        });
+      root.dispatch('ADD_ITEMS', {
+        items,
+        index: getDragIndex(root.ref.list, position),
+        interactionMethod: InteractionMethod.PASTE
       });
     };
   } else if (root.ref.paster) {
@@ -7123,6 +7441,21 @@ const createApp$1 = (initialOptions = {}) => {
   // set initial options
   store.dispatch('SET_OPTIONS', { options: initialOptions });
 
+  // re-render on window resize start and finish
+  let resizing = false;
+  let timer = null;
+  window.addEventListener('resize', () => {
+    if (!resizing) {
+      resizing = true;
+      store.dispatch('DID_START_RESIZE');
+    }
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      resizing = false;
+      store.dispatch('DID_STOP_RESIZE');
+    }, 500);
+  });
+
   // render initial view
   const view = root(store, { id: getUniqueId() });
 
@@ -7178,7 +7511,7 @@ const createApp$1 = (initialOptions = {}) => {
       routeActionsToEvents(actions$$1);
 
       // update the view
-      resting = view._write(ts, actions$$1);
+      resting = view._write(ts, actions$$1, resizing);
 
       // will clean up all archived items
       removeReleasedItems(store.query('GET_ITEMS'));
@@ -7383,15 +7716,12 @@ const createApp$1 = (initialOptions = {}) => {
         sources.push(...args);
       }
 
-      const sourcePromises = [];
-      const delayPromises = forEachDelayed(sources, source => {
-        sourcePromises.push(addFile(source, options));
-      });
-
-      Promise.all(delayPromises).then(() => {
-        Promise.all(sourcePromises).then(results => {
-          resolve(results);
-        });
+      store.dispatch('ADD_ITEMS', {
+        items: sources,
+        index: options.index,
+        interactionMethod: InteractionMethod.API,
+        success: resolve,
+        failure: reject
       });
     });
 
@@ -7503,6 +7833,11 @@ const createApp$1 = (initialOptions = {}) => {
       removeFiles,
 
       /**
+       * Sort list of files
+       */
+      sort: compare => store.dispatch('SORT', { compare }),
+
+      /**
        * Browse the file system for a file
        */
       browse: () => {
@@ -7526,6 +7861,9 @@ const createApp$1 = (initialOptions = {}) => {
 
         // destroy view
         view._destroy();
+
+        // stop listening to resize
+        window.removeEventListener('resize', resizeHandler);
 
         // dispatch destroy
         store.dispatch('DID_DESTROY');
@@ -7801,29 +8139,6 @@ const createAppAPI = app => {
 const replaceInString = (string, replacements) =>
   string.replace(/(?:{([a-zA-Z]+)})/g, (match, group) => replacements[group]);
 
-const images = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'tiff'];
-const text$1 = ['css', 'csv', 'html', 'txt'];
-const map = {
-  zip: 'zip|compressed',
-  epub: 'application/epub+zip'
-};
-
-const guesstimateMimeType = (extension = '') => {
-  extension = extension.toLowerCase();
-  if (images.includes(extension)) {
-    return (
-      'image/' +
-      (extension === 'jpg'
-        ? 'jpeg'
-        : extension === 'svg' ? 'svg+xml' : extension)
-    );
-  }
-  if (text$1.includes(extension)) {
-    return 'text/' + extension;
-  }
-  return map[extension] || null;
-};
-
 const createWorker = fn => {
   const workerBlob = new Blob(['(', fn.toString(), ')()'], {
     type: 'application/javascript'
@@ -8029,7 +8344,7 @@ if (supported()) {
     });
 
   FileOrigin = Object.assign({}, FileOrigin$1);
-  FileStatus = Object.assign({}, ItemStatus);
+  FileStatus = Object.assign({}, ItemStatus$1);
 
   OptionTypes = {};
   updateOptionTypes();

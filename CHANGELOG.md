@@ -1,5 +1,40 @@
 # Changelog
 
+## 4.0.0
+
+Multiple improvements, small fixes and new features. As updating will result in animation speed changes, changes to the way files are added to the files list, and will require an update of the image preview plugin, the version has been bumped to 4.0.0
+
+- Add grid layout feature. Assign a fixed width to a filepond item and FilePond will render the items in rows.
+
+The code below will render a list view on small viewports, a 50/50 grid on medium viewports, and a 33/33/33 grid on wide viewports. The `.5em` in each calc statement is equivalent to the combined left and right margin of each filepond item.
+
+```css
+@media (min-width: 30em) {
+    .filepond--item {
+        width: calc(50% - .5em);
+    }
+}
+
+@media (min-width: 50em) {
+    .filepond--item {
+        width: calc(33.33% - .5em);
+    }
+}
+```
+
+- Add `styleItemPanelAspectRatio` to control the item panel aspect ratio and render item panels in a fixed size.
+- Add `sort` method on FilePond instance for sorting FilePond files.
+- Add `itemInsertLocation` property to set default insert location of files or sort method.
+- Add `itemInsertInterval` to control the small delay between adding items to the files list.
+- Improve drag and drop performance.
+- Improve file insert logic and performance.
+- Improve rendering of file previews will now scale correctly when window is resized.
+- Improve handling of dropped directories on Firefox, file type was missing, now guestimates file type based on file extension.
+- Small tweaks and changes to file animation durations and intros.
+- Fixed drag coordinates being slightly out of place.
+- Multiple small fixes and code improvements.
+
+
 ## 3.9.0
 
 - Add `checkValidity` which is set to `false` by default. If it's set to `true`, FilePond will set the contents of the `labelInvalidField` property as the field custom validity message if it contains invalid files (files that for instance exceed max file size or fail other tests).

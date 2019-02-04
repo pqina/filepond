@@ -1,5 +1,5 @@
 /*
- * FilePond 3.9.0
+ * FilePond 4.0.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1211,12 +1211,7 @@
          * Write data to DOM
          * @private
          */
-        var _write = function _write(ts) {
-          var frameActions =
-            arguments.length > 1 && arguments[1] !== undefined
-              ? arguments[1]
-              : [];
-
+        var _write = function _write(ts, frameActions, shouldOptimize) {
           // if no actions, we assume that the view is resting
           var resting = frameActions.length === 0;
 
@@ -1226,7 +1221,8 @@
               props: props,
               root: internalAPI,
               actions: frameActions,
-              timestamp: ts
+              timestamp: ts,
+              shouldOptimize: shouldOptimize
             });
             if (writerResting === false) {
               resting = false;
@@ -1251,7 +1247,8 @@
               // if a child view is not resting, we are not resting
               var childResting = child._write(
                 ts,
-                filterFrameActionsForChild(child, frameActions)
+                filterFrameActionsForChild(child, frameActions),
+                shouldOptimize
               );
               if (!childResting) {
                 resting = false;
@@ -1274,7 +1271,11 @@
               child._read();
 
               // re-call write
-              child._write(ts, filterFrameActionsForChild(child, frameActions));
+              child._write(
+                ts,
+                filterFrameActionsForChild(child, frameActions),
+                shouldOptimize
+              );
 
               // we just added somthing to the dom, no rest
               resting = false;
@@ -1512,7 +1513,8 @@
         props = _ref.props,
         _ref$actions = _ref.actions,
         actions = _ref$actions === undefined ? [] : _ref$actions,
-        timestamp = _ref.timestamp;
+        timestamp = _ref.timestamp,
+        shouldOptimize = _ref.shouldOptimize;
 
       actions
         .filter(function(action) {
@@ -1523,7 +1525,8 @@
             root: root,
             props: props,
             action: action.data,
-            timestamp: timestamp
+            timestamp: timestamp,
+            shouldOptimize: shouldOptimize
           });
         });
       if (fn) {
@@ -1531,7 +1534,8 @@
           root: root,
           props: props,
           actions: actions,
-          timestamp: timestamp
+          timestamp: timestamp,
+          shouldOptimize: shouldOptimize
         });
       }
     };
@@ -1920,6 +1924,7 @@
       var obj = {};
       forin(options, function(key) {
         var name = fromCamels(key, '_').toUpperCase();
+
         obj['SET_' + name] = function(action) {
           try {
             state.options[key] = action.value;
@@ -1958,19 +1963,6 @@
     return Math.random()
       .toString(36)
       .substr(2, 9);
-  };
-
-  var forEachDelayed = function forEachDelayed(items, cb) {
-    var delay =
-      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 75;
-    return items.map(function(item, index) {
-      return new Promise(function(resolve, reject) {
-        setTimeout(function() {
-          cb(item);
-          resolve();
-        }, delay * index);
-      });
-    });
   };
 
   var arrayRemove = function arrayRemove(arr, index) {
@@ -2229,6 +2221,10 @@
     maxFiles: [null, Type.INT], // Max number of files
     checkValidity: [false, Type.BOOLEAN], // Enables custom validity messages
 
+    // Where to put file
+    itemInsertLocation: ['before', Type.STRING], // Default index in list to add items that have been dropped at the top of the list
+    itemInsertInterval: [75, Type.INT],
+
     // Drag 'n Drop related
     dropOnPage: [false, Type.BOOLEAN], // Allow dropping of files anywhere on page (prevents browser from opening file if dropped outside of Up)
     dropOnElement: [true, Type.BOOLEAN], // Drop needs to happen on element (set to false to also load drops outside of Up)
@@ -2323,6 +2319,7 @@
     // styles
     stylePanelLayout: [null, Type.STRING], // null 'integrated', 'compact', 'circle'
     stylePanelAspectRatio: [null, Type.STRING], // null or '3:2' or 1
+    styleItemPanelAspectRatio: [null, Type.STRING],
     styleButtonRemoveItemPosition: ['left', Type.STRING],
     styleButtonProcessItemPosition: ['right', Type.STRING],
     styleLoadIndicatorPosition: ['right', Type.STRING],
@@ -2430,6 +2427,10 @@
               state.options.stylePanelAspectRatio
             );
         return aspectRatio;
+      },
+
+      GET_ITEM_PANEL_ASPECT_RATIO: function GET_ITEM_PANEL_ASPECT_RATIO() {
+        return state.options.styleItemPanelAspectRatio;
       },
 
       GET_ITEMS_BY_STATUS: function GET_ITEMS_BY_STATUS(status) {
@@ -3568,7 +3569,7 @@ function signature:
     return name.substr(0, name.lastIndexOf('.')) || name;
   };
 
-  var ItemStatus = {
+  var ItemStatus$1 = {
     INIT: 1,
     IDLE: 2,
     PROCESSING_QUEUED: 9,
@@ -3653,8 +3654,8 @@ function signature:
 
       // current item status
       status: serverFileReference
-        ? ItemStatus.PROCESSING_COMPLETE
-        : ItemStatus.INIT,
+        ? ItemStatus$1.PROCESSING_COMPLETE
+        : ItemStatus$1.INIT,
 
       // active processes
       activeLoader: null,
@@ -3737,7 +3738,7 @@ function signature:
         if (meta.source) {
           origin = FileOrigin$1.LIMBO;
           state.serverFileReference = meta.source;
-          state.status = ItemStatus.PROCESSING_COMPLETE;
+          state.status = ItemStatus$1.PROCESSING_COMPLETE;
         }
 
         // size has been updated
@@ -3746,21 +3747,21 @@ function signature:
 
       // the file is now loading we need to update the progress indicators
       loader.on('progress', function(progress) {
-        setStatus(ItemStatus.LOADING);
+        setStatus(ItemStatus$1.LOADING);
 
         fire('load-progress', progress);
       });
 
       // an error was thrown while loading the file, we need to switch to error state
       loader.on('error', function(error) {
-        setStatus(ItemStatus.LOAD_ERROR);
+        setStatus(ItemStatus$1.LOAD_ERROR);
 
         fire('load-request-error', error);
       });
 
       // user or another process aborted the file load (cannot retry)
       loader.on('abort', function() {
-        setStatus(ItemStatus.INIT);
+        setStatus(ItemStatus$1.INIT);
 
         fire('load-abort');
       });
@@ -3777,9 +3778,9 @@ function signature:
 
           // file received
           if (origin === FileOrigin$1.LIMBO && state.serverFileReference) {
-            setStatus(ItemStatus.PROCESSING_COMPLETE);
+            setStatus(ItemStatus$1.PROCESSING_COMPLETE);
           } else {
-            setStatus(ItemStatus.IDLE);
+            setStatus(ItemStatus$1.IDLE);
           }
 
           fire('load');
@@ -3790,7 +3791,7 @@ function signature:
           state.file = file;
           fire('load-meta');
 
-          setStatus(ItemStatus.LOAD_ERROR);
+          setStatus(ItemStatus$1.LOAD_ERROR);
           fire('load-file-error', result);
         };
 
@@ -3833,7 +3834,7 @@ function signature:
     //
     var process = function process(processor, onprocess) {
       // now processing
-      setStatus(ItemStatus.PROCESSING);
+      setStatus(ItemStatus$1.PROCESSING);
 
       // reset abort callback
       abortProcessingRequestComplete = null;
@@ -3859,7 +3860,7 @@ function signature:
         // need this id to be able to rever the upload
         state.serverFileReference = serverFileReference;
 
-        setStatus(ItemStatus.PROCESSING_COMPLETE);
+        setStatus(ItemStatus$1.PROCESSING_COMPLETE);
         fire('process-complete', serverFileReference);
       });
 
@@ -3869,7 +3870,7 @@ function signature:
 
       processor.on('error', function(error) {
         state.activeProcessor = null;
-        setStatus(ItemStatus.PROCESSING_ERROR);
+        setStatus(ItemStatus$1.PROCESSING_ERROR);
         fire('process-error', error);
       });
 
@@ -3879,7 +3880,7 @@ function signature:
         // if file was uploaded but processing was cancelled during perceived processor time store file reference
         state.serverFileReference = serverFileReference;
 
-        setStatus(ItemStatus.IDLE);
+        setStatus(ItemStatus$1.IDLE);
         fire('process-abort');
 
         // has timeout so doesn't interfere with remove action
@@ -3912,13 +3913,13 @@ function signature:
     };
 
     var requestProcessing = function requestProcessing() {
-      setStatus(ItemStatus.PROCESSING_QUEUED);
+      setStatus(ItemStatus$1.PROCESSING_QUEUED);
     };
 
     var abortProcessing = function abortProcessing() {
       return new Promise(function(resolve) {
         if (!state.activeProcessor) {
-          setStatus(ItemStatus.IDLE);
+          setStatus(ItemStatus$1.IDLE);
           fire('process-abort');
 
           resolve();
@@ -3960,14 +3961,14 @@ function signature:
             }
 
             // oh no errors
-            setStatus(ItemStatus.PROCESSING_REVERT_ERROR);
+            setStatus(ItemStatus$1.PROCESSING_REVERT_ERROR);
             fire('process-revert-error');
             reject(error);
           }
         );
 
         // fire event
-        setStatus(ItemStatus.IDLE);
+        setStatus(ItemStatus$1.IDLE);
         fire('process-revert');
       });
     };
@@ -4252,6 +4253,12 @@ function signature:
     });
   };
 
+  var sortItems = function sortItems(state, compare) {
+    state.items.sort(function(a, b) {
+      return compare(createItemAPI(a), createItemAPI(b));
+    });
+  };
+
   // returns item based on state
   var getItemByQueryFromState = function getItemByQueryFromState(
     state,
@@ -4401,12 +4408,12 @@ function signature:
         };
 
         // if we should re-upload the file immidiately
-        if (item.status === ItemStatus.PROCESSING_COMPLETE) {
+        if (item.status === ItemStatus$1.PROCESSING_COMPLETE) {
           return revert(state.options.instantUpload);
         }
 
         // if currently uploading, cancel upload
-        if (item.status === ItemStatus.PROCESSING) {
+        if (item.status === ItemStatus$1.PROCESSING) {
           return abort(state.options.instantUpload);
         }
 
@@ -4415,21 +4422,70 @@ function signature:
         }
       },
 
+      SORT: function SORT(_ref4) {
+        var compare = _ref4.compare;
+
+        sortItems(state, compare);
+      },
+
+      ADD_ITEMS: function ADD_ITEMS(_ref5) {
+        var items = _ref5.items,
+          index = _ref5.index,
+          interactionMethod = _ref5.interactionMethod,
+          _ref5$success = _ref5.success,
+          success = _ref5$success === undefined ? function() {} : _ref5$success,
+          _ref5$failure = _ref5.failure,
+          failure = _ref5$failure === undefined ? function() {} : _ref5$failure;
+
+        var currentIndex = index;
+
+        if (index === -1 || typeof index === 'undefined') {
+          var insertLocation = query('GET_ITEM_INSERT_LOCATION');
+          var totalItems = query('GET_TOTAL_ITEMS');
+          currentIndex = insertLocation === 'before' ? 0 : totalItems;
+        }
+
+        var ignoredFiles = query('GET_IGNORED_FILES');
+        var isValidFile = function isValidFile(source) {
+          return isFile(source)
+            ? !ignoredFiles.includes(source.name.toLowerCase())
+            : !isEmpty(source);
+        };
+        var validItems = items.filter(isValidFile);
+
+        var promises = validItems.map(function(source) {
+          return new Promise(function(resolve, reject) {
+            dispatch('ADD_ITEM', {
+              interactionMethod: interactionMethod,
+              source: source,
+              success: resolve,
+              failure: reject,
+              index: currentIndex++
+            });
+          });
+        });
+
+        Promise.all(promises)
+          .then(success)
+          .catch(failure);
+      },
+
       /**
        * @param source
        * @param index
        * @param interactionMethod
        */
-      ADD_ITEM: function ADD_ITEM(_ref4) {
-        var source = _ref4.source,
-          index = _ref4.index,
-          interactionMethod = _ref4.interactionMethod,
-          _ref4$success = _ref4.success,
-          success = _ref4$success === undefined ? function() {} : _ref4$success,
-          _ref4$failure = _ref4.failure,
-          failure = _ref4$failure === undefined ? function() {} : _ref4$failure,
-          _ref4$options = _ref4.options,
-          options = _ref4$options === undefined ? {} : _ref4$options;
+      ADD_ITEM: function ADD_ITEM(_ref6) {
+        var source = _ref6.source,
+          _ref6$index = _ref6.index,
+          index = _ref6$index === undefined ? -1 : _ref6$index,
+          interactionMethod = _ref6.interactionMethod,
+          _ref6$success = _ref6.success,
+          success = _ref6$success === undefined ? function() {} : _ref6$success,
+          _ref6$failure = _ref6.failure,
+          failure = _ref6$failure === undefined ? function() {} : _ref6$failure,
+          _ref6$options = _ref6.options,
+          options = _ref6$options === undefined ? {} : _ref6$options;
 
         // if no source supplied
         if (isEmpty(source)) {
@@ -4465,6 +4521,7 @@ function signature:
             });
 
             failure({ error: error, file: null });
+
             return;
           }
 
@@ -4474,8 +4531,8 @@ function signature:
 
           // if has been processed remove it from the server as well
           if (
-            _item.status === ItemStatus.PROCESSING_COMPLETE ||
-            _item.status === ItemStatus.PROCESSING_REVERT_ERROR
+            _item.status === ItemStatus$1.PROCESSING_COMPLETE ||
+            _item.status === ItemStatus$1.PROCESSING_REVERT_ERROR
           ) {
             var forceRevert = query('GET_FORCE_REVERT');
             _item
@@ -4541,6 +4598,12 @@ function signature:
 
         // add item to list
         insertItem(state.items, item, index);
+
+        // sort items in list
+        var itemInsertLocation = query('GET_ITEM_INSERT_LOCATION');
+        if (isFunction(itemInsertLocation) && source) {
+          sortItems(state, itemInsertLocation);
+        }
 
         // get a quick reference to the item id
         var id = item.id;
@@ -4752,11 +4815,11 @@ function signature:
 
         // start loading the source
 
-        var _ref5 = state.options.server || {},
-          url = _ref5.url,
-          load = _ref5.load,
-          restore = _ref5.restore,
-          fetch = _ref5.fetch;
+        var _ref7 = state.options.server || {},
+          url = _ref7.url,
+          load = _ref7.load,
+          restore = _ref7.restore,
+          fetch = _ref7.fetch;
 
         item.load(
           source,
@@ -4784,9 +4847,9 @@ function signature:
         );
       },
 
-      REQUEST_PREPARE_OUTPUT: function REQUEST_PREPARE_OUTPUT(_ref6) {
-        var item = _ref6.item,
-          ready = _ref6.ready;
+      REQUEST_PREPARE_OUTPUT: function REQUEST_PREPARE_OUTPUT(_ref8) {
+        var item = _ref8.item,
+          ready = _ref8.ready;
 
         // allow plugins to alter the file data
         applyFilterChain('PREPARE_OUTPUT', item.file, {
@@ -4802,14 +4865,20 @@ function signature:
         });
       },
 
-      COMPLETE_LOAD_ITEM: function COMPLETE_LOAD_ITEM(_ref7) {
-        var item = _ref7.item,
-          data = _ref7.data;
+      COMPLETE_LOAD_ITEM: function COMPLETE_LOAD_ITEM(_ref9) {
+        var item = _ref9.item,
+          data = _ref9.data;
         var success = data.success,
           source = data.source;
 
-        // let interface know the item has loaded
+        // sort items in list
 
+        var itemInsertLocation = query('GET_ITEM_INSERT_LOCATION');
+        if (isFunction(itemInsertLocation) && source) {
+          sortItems(state, itemInsertLocation);
+        }
+
+        // let interface know the item has loaded
         dispatch('DID_LOAD_ITEM', {
           id: item.id,
           error: null,
@@ -4856,9 +4925,9 @@ function signature:
         // cannot be queued (or is already queued)
         var itemCanBeQueuedForProcessing =
           // waiting for something
-          item.status === ItemStatus.IDLE ||
+          item.status === ItemStatus$1.IDLE ||
           // processing went wrong earlier
-          item.status === ItemStatus.PROCESSING_ERROR;
+          item.status === ItemStatus$1.PROCESSING_ERROR;
 
         // not ready to be processed
         if (!itemCanBeQueuedForProcessing) {
@@ -4874,8 +4943,8 @@ function signature:
 
           // if already done processing or tried to revert but didn't work, try again
           if (
-            item.status === ItemStatus.PROCESSING_COMPLETE ||
-            item.status === ItemStatus.PROCESSING_REVERT_ERROR
+            item.status === ItemStatus$1.PROCESSING_COMPLETE ||
+            item.status === ItemStatus$1.PROCESSING_REVERT_ERROR
           ) {
             item
               .revert(
@@ -4887,7 +4956,7 @@ function signature:
               )
               .then(process)
               .catch(function() {}); // don't continue with processing if something went wrong
-          } else if (item.status === ItemStatus.PROCESSING) {
+          } else if (item.status === ItemStatus$1.PROCESSING) {
             item.abortProcessing().then(process);
           }
 
@@ -4895,7 +4964,7 @@ function signature:
         }
 
         // already queued for processing
-        if (item.status === ItemStatus.PROCESSING_QUEUED) return;
+        if (item.status === ItemStatus$1.PROCESSING_QUEUED) return;
 
         item.requestProcessing();
 
@@ -4916,7 +4985,7 @@ function signature:
         var maxParallelUploads = query('GET_MAX_PARALLEL_UPLOADS');
         var totalCurrentUploads = query(
           'GET_ITEMS_BY_STATUS',
-          ItemStatus.PROCESSING
+          ItemStatus$1.PROCESSING
         ).length;
 
         // queue and wait till queue is freed up
@@ -4933,7 +5002,7 @@ function signature:
         }
 
         // if was not queued or is already processing exit here
-        if (item.status === ItemStatus.PROCESSING) return;
+        if (item.status === ItemStatus$1.PROCESSING) return;
 
         // we done function
         item.onOnce('process-complete', function() {
@@ -5129,8 +5198,8 @@ function signature:
           .catch(function() {});
       }),
 
-      SET_OPTIONS: function SET_OPTIONS(_ref8) {
-        var options = _ref8.options;
+      SET_OPTIONS: function SET_OPTIONS(_ref10) {
+        var options = _ref10.options;
 
         forin(options, function(key, value) {
           dispatch('SET_' + fromCamels(key, '_').toUpperCase(), {
@@ -5923,7 +5992,7 @@ function signature:
       props = _ref3.props;
 
     // route actions
-    route$3({ root: root, actions: actions, props: props });
+    route$4({ root: root, actions: actions, props: props });
 
     // select last state change action
     var action = []
@@ -5960,7 +6029,7 @@ function signature:
     });
   };
 
-  var route$3 = createRoute({
+  var route$4 = createRoute({
     DID_SET_LABEL_BUTTON_ABORT_ITEM_PROCESSING: function DID_SET_LABEL_BUTTON_ABORT_ITEM_PROCESSING(
       _ref4
     ) {
@@ -6208,6 +6277,15 @@ function signature:
     }
   });
 
+  var ITEM_TRANSLATE_SPRING = {
+    type: 'spring',
+    stiffness: 0.75,
+    damping: 0.45,
+    mass: 10
+  };
+
+  var ITEM_SCALE_SPRING = 'spring';
+
   /**
    * Creates the file view
    */
@@ -6215,8 +6293,11 @@ function signature:
     var root = _ref.root,
       props = _ref.props;
 
+    // set id
+    root.element.id = 'filepond--item-' + props.id;
+
     // file view
-    root.ref.controls = root.appendChildView(
+    root.ref.container = root.appendChildView(
       root.createChildView(fileWrapper, { id: props.id })
     );
 
@@ -6250,22 +6331,41 @@ function signature:
     DID_REVERT_ITEM_PROCESSING: 'idle'
   };
 
-  var write$3 = function write(_ref2) {
-    var root = _ref2.root,
-      actions = _ref2.actions,
-      props = _ref2.props;
+  var route$3 = createRoute({
+    DID_UPDATE_PANEL_HEIGHT: function DID_UPDATE_PANEL_HEIGHT(_ref2) {
+      var root = _ref2.root,
+        action = _ref2.action;
+      var height = action.height;
 
-    // update panel height
-    root.ref.panel.height = root.ref.controls.rect.inner.height;
-
-    // set own height
-    var aspectRatio = root.query('GET_PANEL_ASPECT_RATIO');
-    var allowMultiple = root.query('GET_ALLOW_MULTIPLE');
-    if (aspectRatio && !allowMultiple) {
-      root.height = root.rect.element.width * aspectRatio;
-    } else {
-      root.height = root.ref.controls.rect.inner.height;
+      root.height = height;
     }
+  });
+
+  var write$3 = function write(_ref3) {
+    var root = _ref3.root,
+      actions = _ref3.actions,
+      props = _ref3.props,
+      shouldOptimize = _ref3.shouldOptimize;
+
+    // route actions
+    var aspectRatio =
+      root.query('GET_ITEM_PANEL_ASPECT_RATIO') ||
+      root.query('GET_PANEL_ASPECT_RATIO');
+    if (!aspectRatio) {
+      route$3({ root: root, actions: actions, props: props });
+      if (!root.height) {
+        root.height = root.ref.container.rect.element.height;
+      }
+    } else if (!shouldOptimize) {
+      root.height = root.rect.element.width * aspectRatio;
+    }
+
+    // sync panel height with item height
+    if (shouldOptimize) {
+      root.ref.panel.height = null;
+    }
+
+    root.ref.panel.height = root.height;
 
     // select last state change action
     var action = []
@@ -6279,9 +6379,7 @@ function signature:
       });
 
     // no need to set same state twice
-    if (!action || (action && action.type === props.currentState)) {
-      return;
-    }
+    if (!action || (action && action.type === props.currentState)) return;
 
     // set current state
     props.currentState = action.type;
@@ -6293,16 +6391,16 @@ function signature:
   var item = createView({
     create: create$4,
     write: write$3,
-    destroy: function destroy(_ref3) {
-      var root = _ref3.root,
-        props = _ref3.props;
+    destroy: function destroy(_ref4) {
+      var root = _ref4.root,
+        props = _ref4.props;
 
       root.dispatch('RELEASE_ITEM', { query: props.id });
     },
     tag: 'li',
     name: 'item',
     mixins: {
-      apis: ['id', 'markedForRemoval'],
+      apis: ['id', 'interactionMethod', 'markedForRemoval', 'spawnDate'],
       styles: [
         'translateX',
         'translateY',
@@ -6312,20 +6410,87 @@ function signature:
         'height'
       ],
       animations: {
-        scaleX: 'spring',
-        scaleY: 'spring',
-        translateX: 'spring',
-        translateY: 'spring',
+        scaleX: ITEM_SCALE_SPRING,
+        scaleY: ITEM_SCALE_SPRING,
+        translateX: ITEM_TRANSLATE_SPRING,
+        translateY: ITEM_TRANSLATE_SPRING,
         opacity: { type: 'tween', duration: 150 }
       }
     }
   });
+
+  var getItemIndexByPosition = function getItemIndexByPosition(
+    view,
+    positionInView
+  ) {
+    if (!positionInView) return;
+
+    var horizontalSpace = view.rect.element.width;
+    var children = view.childViews;
+    var l = children.length;
+    var last = null;
+
+    // -1, don't move items to accomodate (either add to top or bottom)
+    if (l === 0 || positionInView.top < children[0].rect.element.top) return -1;
+
+    // let's get the item width
+    var item = children[0];
+    var itemRect = item.rect.element;
+    var itemHorizontalMargin = itemRect.marginLeft + itemRect.marginRight;
+    var itemWidth = itemRect.width + itemHorizontalMargin;
+    var itemsPerRow = Math.round(horizontalSpace / itemWidth);
+
+    // stack
+    if (itemsPerRow === 1) {
+      for (var index = 0; index < l; index++) {
+        var child = children[index];
+        var childMid = child.rect.outer.top + child.rect.element.height * 0.5;
+        if (positionInView.top < childMid) {
+          return index;
+        }
+      }
+      return l;
+    }
+
+    // grid
+    var itemVerticalMargin = itemRect.marginTop + itemRect.marginBottom;
+    var itemHeight = itemRect.height + itemVerticalMargin;
+    for (var _index = 0; _index < l; _index++) {
+      var indexX = _index % itemsPerRow;
+      var indexY = Math.floor(_index / itemsPerRow);
+
+      var offsetX = indexX * itemWidth;
+      var offsetY = indexY * itemHeight;
+
+      var itemTop = offsetY - itemRect.marginTop;
+      var itemRight = offsetX + itemWidth;
+      var itemBottom = offsetY + itemHeight + itemRect.marginBottom;
+
+      if (positionInView.top < itemBottom && positionInView.top > itemTop) {
+        if (positionInView.left < itemRight) {
+          return _index;
+        } else if (_index !== l - 1) {
+          last = _index;
+        } else {
+          last = null;
+        }
+      }
+    }
+
+    if (last !== null) {
+      return last;
+    }
+
+    return l;
+  };
 
   var create$3 = function create(_ref) {
     var root = _ref.root;
 
     // need to set role to list as otherwise it won't be read as a list by VoiceOver
     attr(root.element, 'role', 'list');
+
+    root.ref.lastItemSpanwDate = Date.now();
   };
 
   /**
@@ -6340,28 +6505,20 @@ function signature:
       index = action.index,
       interactionMethod = action.interactionMethod;
 
-    var animation = {
-      opacity: 0
-    };
+    root.ref.addIndex = index;
 
-    if (interactionMethod === InteractionMethod.NONE) {
-      animation.translateY = null;
+    var now = Date.now();
+    var spawnDate = now;
+    var opacity = 1;
+
+    if (interactionMethod !== InteractionMethod.NONE) {
+      opacity = 0;
+      var cooldown = root.query('GET_ITEM_INSERT_INTERVAL');
+      var dist = now - root.ref.lastItemSpanwDate;
+      spawnDate = dist < cooldown ? now + (cooldown - dist) : now;
     }
 
-    if (interactionMethod === InteractionMethod.DROP) {
-      animation.scaleX = 0.8;
-      animation.scaleY = 0.8;
-      animation.translateY = null;
-    }
-
-    if (interactionMethod === InteractionMethod.BROWSE) {
-      animation.translateY = -30;
-    }
-
-    if (interactionMethod === InteractionMethod.API) {
-      animation.translateX = -100;
-      animation.translateY = null;
-    }
+    root.ref.lastItemSpanwDate = spawnDate;
 
     root.appendChildView(
       root.createChildView(
@@ -6369,15 +6526,62 @@ function signature:
         item,
 
         // props
-        Object.assign(
-          {
-            id: id
-          },
-          animation
-        )
+        {
+          spawnDate: spawnDate,
+          id: id,
+          opacity: opacity,
+          interactionMethod: interactionMethod
+        }
       ),
       index
     );
+  };
+
+  var moveItem = function moveItem(item$$1, x, y) {
+    var vx =
+      arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
+    var vy =
+      arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 1;
+
+    item$$1.translateX = x;
+    item$$1.translateY = y;
+
+    if (Date.now() > item$$1.spawnDate) {
+      // reveal element
+      if (item$$1.opacity === 0) {
+        introItemView(item$$1, x, y, vx, vy);
+      }
+
+      // make sure is default scale every frame
+      item$$1.scaleX = 1;
+      item$$1.scaleY = 1;
+      item$$1.opacity = 1;
+    }
+  };
+
+  var introItemView = function introItemView(item$$1, x, y, vx, vy) {
+    if (item$$1.interactionMethod === InteractionMethod.NONE) {
+      item$$1.translateX = null;
+      item$$1.translateX = x;
+      item$$1.translateY = null;
+      item$$1.translateY = y;
+    } else if (item$$1.interactionMethod === InteractionMethod.DROP) {
+      item$$1.translateX = null;
+      item$$1.translateX = x - vx * 20;
+
+      item$$1.translateY = null;
+      item$$1.translateY = y - vy * 10;
+
+      item$$1.scaleX = 0.8;
+      item$$1.scaleY = 0.8;
+    } else if (item$$1.interactionMethod === InteractionMethod.BROWSE) {
+      item$$1.translateY = null;
+      item$$1.translateY = y - 30;
+    } else if (item$$1.interactionMethod === InteractionMethod.API) {
+      item$$1.translateX = null;
+      item$$1.translateX = x - 30;
+      item$$1.translateY = null;
+    }
   };
 
   /**
@@ -6418,109 +6622,148 @@ function signature:
     DID_REMOVE_ITEM: removeItemView
   });
 
-  var dragTranslation = function dragTranslation(
-    childIndex,
-    dragIndex,
-    itemMargin
-  ) {
-    if (childIndex - 1 === dragIndex) {
-      return itemMargin / 6;
-    }
-
-    if (childIndex === dragIndex) {
-      return itemMargin / 2;
-    }
-
-    if (childIndex + 1 === dragIndex) {
-      return -itemMargin / 2;
-    }
-
-    if (childIndex + 2 === dragIndex) {
-      return -itemMargin / 6;
-    }
-
-    return 0;
-  };
-
-  var easeOutCirc = function easeOutCirc(t) {
-    var t1 = t - 1;
-    return Math.sqrt(1 - t1 * t1);
-  };
-
-  var read = function read(_ref4) {
-    var root = _ref4.root;
-
-    var total = 0;
-
-    root.childViews
-      .filter(function(child) {
-        return child.rect.outer.height;
-      })
-      .forEach(function(child) {
-        var height =
-          child.rect.element.height + child.rect.element.marginBottom;
-        total += child.markedForRemoval
-          ? height * easeOutCirc(child.opacity)
-          : height;
-      });
-
-    root.rect.outer.height = total;
-    root.rect.outer.bottom = root.rect.outer.height;
-  };
-
   /**
    * Write to view
    * @param root
    * @param actions
    * @param props
    */
-  var write$2 = function write(_ref5) {
-    var root = _ref5.root,
-      props = _ref5.props,
-      actions = _ref5.actions;
+  var write$2 = function write(_ref4) {
+    var root = _ref4.root,
+      props = _ref4.props,
+      actions = _ref4.actions,
+      shouldOptimize = _ref4.shouldOptimize;
 
     // route actions
     route$2({ root: root, props: props, actions: actions });
 
-    var resting = true;
+    var dragCoordinates = props.dragCoordinates;
 
-    // update item positions
-    var offset = 0;
-    root.childViews
-      .filter(function(child) {
-        return child.rect.outer.height;
+    // get index
+
+    var dragIndex = dragCoordinates
+      ? getItemIndexByPosition(root, dragCoordinates)
+      : null;
+
+    // available space on horizontal axis
+    var horizontalSpace = root.rect.element.width;
+
+    // only draw children that have dimensions
+    var visibleChildren = root.childViews.filter(function(child) {
+      return child.rect.outer.height;
+    });
+
+    // sort based on current active items
+    var children = root
+      .query('GET_ACTIVE_ITEMS')
+      .map(function(item$$1) {
+        return visibleChildren.find(function(child) {
+          return child.id === item$$1.id;
+        });
       })
-      .forEach(function(child, childIndex) {
-        var childRect = child.rect;
-
-        // set this child offset
-        child.translateX = 0;
-        child.translateY =
-          offset +
-          (props.dragIndex > -1
-            ? dragTranslation(childIndex, props.dragIndex, 10)
-            : 0);
-
-        // show child if it's not marked for removal
-        if (!child.markedForRemoval) {
-          child.scaleX = 1;
-          child.scaleY = 1;
-          child.opacity = 1;
-        }
-
-        var itemHeight =
-          childRect.element.height +
-          childRect.element.marginTop +
-          childRect.element.marginBottom;
-        var height = child.markedForRemoval
-          ? itemHeight * child.opacity
-          : itemHeight;
-
-        // calculate next child offset (reduce height by y scale for views that are being removed)
-        offset += height;
+      .filter(function(item$$1) {
+        return item$$1;
       });
 
-    return resting;
+    // add index is used to reserve the dropped/added item index till the actual item is rendered
+    var addIndex = root.ref.addIndex || null;
+
+    // add index no longer needed till possibly next draw
+    root.ref.addIndex = null;
+
+    var dragIndexOffset = 0;
+    var removeIndexOffset = 0;
+    var addIndexOffset = 0;
+
+    if (children.length === 0) return;
+
+    var childRect = children[0].rect.element;
+    var itemVerticalMargin = childRect.marginTop + childRect.marginBottom;
+    var itemHorizontalMargin = childRect.marginLeft + childRect.marginRight;
+    var itemWidth = childRect.width + itemHorizontalMargin;
+    var itemHeight = childRect.height + itemVerticalMargin;
+    var itemsPerRow = Math.round(horizontalSpace / itemWidth);
+
+    // stack
+    if (itemsPerRow === 1) {
+      var offsetY = 0;
+      var dragOffset = 0;
+
+      children.forEach(function(child, index) {
+        if (dragIndex) {
+          var dist = index - dragIndex;
+          if (dist === -2) {
+            dragOffset = -itemVerticalMargin * 0.25;
+          } else if (dist === -1) {
+            dragOffset = -itemVerticalMargin * 0.75;
+          } else if (dist === 0) {
+            dragOffset = itemVerticalMargin * 0.75;
+          } else if (dist === 1) {
+            dragOffset = itemVerticalMargin * 0.25;
+          } else {
+            dragOffset = 0;
+          }
+        }
+
+        if (shouldOptimize) {
+          child.translateX = null;
+          child.translateY = null;
+        }
+
+        if (!child.markedForRemoval) {
+          moveItem(child, 0, offsetY + dragOffset);
+        }
+
+        var itemHeight = child.rect.element.height + itemVerticalMargin;
+
+        var visualHeight =
+          itemHeight * (child.markedForRemoval ? child.opacity : 1);
+
+        offsetY += visualHeight;
+      });
+    } else {
+      // grid
+      var prevX = 0;
+      var prevY = 0;
+
+      children.forEach(function(child, index) {
+        if (index === dragIndex) {
+          dragIndexOffset = 1;
+        }
+
+        if (index === addIndex) {
+          addIndexOffset += 1;
+        }
+
+        if (child.markedForRemoval && child.opacity < 0.5) {
+          removeIndexOffset -= 1;
+        }
+
+        var visualIndex =
+          index + addIndexOffset + dragIndexOffset + removeIndexOffset;
+
+        var indexX = visualIndex % itemsPerRow;
+        var indexY = Math.floor(visualIndex / itemsPerRow);
+
+        var offsetX = indexX * itemWidth;
+        var offsetY = indexY * itemHeight;
+
+        var vectorX = Math.sign(offsetX - prevX);
+        var vectorY = Math.sign(offsetY - prevY);
+
+        prevX = offsetX;
+        prevY = offsetY;
+
+        if (child.markedForRemoval) return;
+
+        if (shouldOptimize) {
+          child.translateX = null;
+          child.translateY = null;
+        }
+
+        moveItem(child, offsetX, offsetY, vectorX, vectorY);
+      });
+    }
   };
 
   /**
@@ -6543,11 +6786,10 @@ function signature:
   var list = createView({
     create: create$3,
     write: write$2,
-    read: read,
     tag: 'ul',
     name: 'list',
-    didWriteView: function didWriteView(_ref6) {
-      var root = _ref6.root;
+    didWriteView: function didWriteView(_ref5) {
+      var root = _ref5.root;
 
       root.childViews
         .filter(function(view) {
@@ -6560,29 +6802,9 @@ function signature:
     },
     filterFrameActionsForChild: filterSetItemActions,
     mixins: {
-      apis: ['dragIndex']
+      apis: ['dragCoordinates']
     }
   });
-
-  var getItemIndexByPosition = function getItemIndexByPosition(
-    view,
-    positionInView
-  ) {
-    var i = 0;
-    var childViews = view.childViews;
-    var l = childViews.length;
-    for (; i < l; i++) {
-      var item = childViews[i];
-      var itemRect = item.rect.outer;
-      var itemRectMid = itemRect.top + itemRect.height * 0.5;
-
-      if (positionInView.top < itemRectMid) {
-        return i;
-      }
-    }
-
-    return l;
-  };
 
   var create$2 = function create(_ref) {
     var root = _ref.root,
@@ -6600,11 +6822,12 @@ function signature:
       action = _ref2.action;
 
     props.dragCoordinates = {
-      left: action.position.scopeLeft,
+      left: action.position.scopeLeft - root.ref.list.rect.element.left,
       top:
         action.position.scopeTop -
-        root.rect.outer.top +
-        root.rect.element.scrollTop
+        (root.rect.outer.top +
+          root.rect.element.marginTop +
+          root.rect.element.scrollTop)
     };
   };
 
@@ -6628,9 +6851,7 @@ function signature:
     route$1({ root: root, props: props, actions: actions });
 
     // current drag position
-    root.ref.list.dragIndex = props.dragCoordinates
-      ? getItemIndexByPosition(root.ref.list, props.dragCoordinates)
-      : -1;
+    root.ref.list.dragCoordinates = props.dragCoordinates;
 
     // if currently overflowing but no longer received overflow
     if (props.overflowing && !props.overflow) {
@@ -6642,7 +6863,6 @@ function signature:
     }
 
     // if is not overflowing currently but does receive overflow value
-    // !props.overflowing &&
     if (props.overflow) {
       var newHeight = Math.round(props.overflow);
       if (newHeight !== root.height) {
@@ -6658,7 +6878,7 @@ function signature:
     write: write$1,
     name: 'list-scroller',
     mixins: {
-      apis: ['overflow'],
+      apis: ['overflow', 'dragCoordinates'],
       styles: ['height', 'translateY'],
       animations: {
         translateY: 'spring'
@@ -6988,7 +7208,7 @@ function signature:
       props = _ref5.props,
       actions = _ref5.actions;
 
-    route$4({ root: root, props: props, actions: actions });
+    route$5({ root: root, props: props, actions: actions });
 
     var blob$$1 = root.ref.blob;
 
@@ -6998,7 +7218,7 @@ function signature:
     }
   };
 
-  var route$4 = createRoute({
+  var route$5 = createRoute({
     DID_DRAG: moveBlob,
     DID_DROP: explodeBlob,
     DID_END_DRAG: hideBlob
@@ -7013,6 +7233,32 @@ function signature:
 
   var getRootNode = function getRootNode(element) {
     return 'getRootNode' in element ? element.getRootNode() : document;
+  };
+
+  var images = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'tiff'];
+  var text$1 = ['css', 'csv', 'html', 'txt'];
+  var map = {
+    zip: 'zip|compressed',
+    epub: 'application/epub+zip'
+  };
+
+  var guesstimateMimeType = function guesstimateMimeType() {
+    var extension =
+      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+
+    extension = extension.toLowerCase();
+    if (images.includes(extension)) {
+      return (
+        'image/' +
+        (extension === 'jpg'
+          ? 'jpeg'
+          : extension === 'svg' ? 'svg+xml' : extension)
+      );
+    }
+    if (text$1.includes(extension)) {
+      return 'text/' + extension;
+    }
+    return map[extension] || null;
   };
 
   var requestDataTransferItems = function requestDataTransferItems(
@@ -7123,7 +7369,7 @@ function signature:
               // read as file
               totalFilesFound++;
               entry.file(function(file) {
-                files.push(file);
+                files.push(correctMissingFileType(file));
 
                 if (totalFilesFound === files.length) {
                   resolve(files);
@@ -7137,6 +7383,20 @@ function signature:
       // go!
       readEntries(entry);
     });
+  };
+
+  var correctMissingFileType = function correctMissingFileType(file) {
+    if (file.type.length) return file;
+    var date = file.lastModifiedDate;
+    var name = file.name;
+    file = file.slice(
+      0,
+      file.size,
+      guesstimateMimeType(getExtensionFromFilename(file.name))
+    );
+    file.name = name;
+    file.lastModifiedDate = date;
+    return file;
   };
 
   var isDirectoryEntry = function isDirectoryEntry(item) {
@@ -7410,6 +7670,7 @@ function signature:
       e.preventDefault();
 
       var dataTransfer = e.dataTransfer;
+
       requestDataTransferItems(dataTransfer).then(function(items) {
         clients.forEach(function(client) {
           var filterElement = client.filterElement,
@@ -7591,47 +7852,6 @@ function signature:
     return api;
   };
 
-  var debounce = function debounce(func) {
-    var interval =
-      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 16;
-    var immidiateOnly =
-      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-
-    var last = Date.now();
-    var timeout = null;
-
-    return function() {
-      for (
-        var _len = arguments.length, args = Array(_len), _key = 0;
-        _key < _len;
-        _key++
-      ) {
-        args[_key] = arguments[_key];
-      }
-
-      clearTimeout(timeout);
-
-      var dist = Date.now() - last;
-
-      var fn = function fn() {
-        last = Date.now();
-        func.apply(undefined, args);
-      };
-
-      if (dist < interval) {
-        // we need to delay by the difference between interval and dist
-        // for example: if distance is 10 ms and interval is 16 ms,
-        // we need to wait an additional 6ms before calling the function)
-        if (!immidiateOnly) {
-          timeout = setTimeout(fn, interval - dist);
-        }
-      } else {
-        // go!
-        fn();
-      }
-    };
-  };
-
   /**
    * Creates the file view
    */
@@ -7784,6 +8004,47 @@ function signature:
     });
   };
 
+  var debounce = function debounce(func) {
+    var interval =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 16;
+    var immidiateOnly =
+      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+
+    var last = Date.now();
+    var timeout = null;
+
+    return function() {
+      for (
+        var _len = arguments.length, args = Array(_len), _key = 0;
+        _key < _len;
+        _key++
+      ) {
+        args[_key] = arguments[_key];
+      }
+
+      clearTimeout(timeout);
+
+      var dist = Date.now() - last;
+
+      var fn = function fn() {
+        last = Date.now();
+        func.apply(undefined, args);
+      };
+
+      if (dist < interval) {
+        // we need to delay by the difference between interval and dist
+        // for example: if distance is 10 ms and interval is 16 ms,
+        // we need to wait an additional 6ms before calling the function)
+        if (!immidiateOnly) {
+          timeout = setTimeout(fn, interval - dist);
+        }
+      } else {
+        // go!
+        fn();
+      }
+    };
+  };
+
   var MAX_FILES_LIMIT = 1000000;
 
   var create$1 = function create(_ref) {
@@ -7851,12 +8112,26 @@ function signature:
 
         root.element.dataset[name] = value;
       });
+
+    // determine if width changed
+    root.ref.widthPrevious = null;
+    root.ref.widthUpdated = debounce(function() {
+      root.dispatch('DID_RESIZE_ROOT');
+    }, 250);
+
+    //
+    root.ref.updateHistory = [];
   };
 
   var write = function write(_ref3) {
     var root = _ref3.root,
       props = _ref3.props,
       actions = _ref3.actions;
+
+    if (root.rect.element.width !== root.ref.widthPrevious) {
+      root.ref.widthPrevious = root.rect.element.width;
+      root.ref.widthUpdated();
+    }
 
     // get box bounds, we do this only once
     var bounds = root.ref.bounds;
@@ -7942,7 +8217,8 @@ function signature:
 
     var listItemMargin = calculateListItemMargin(root);
 
-    var listHeight = calculateListHeight(root, maxItems);
+    var listHeight = calculateListHeight(root);
+
     var labelHeight = label.rect.element.height;
     var currentLabelHeight = !isMultiItem || atMaxCapacity ? 0 : labelHeight;
 
@@ -7966,6 +8242,27 @@ function signature:
       // calculate height based on width
       var width = root.rect.element.width;
       var height = width * aspectRatio;
+
+      // remember this width
+      var history = root.ref.updateHistory;
+      history.push(width);
+
+      var MAX_BOUNCES = 2;
+      if (history.length > MAX_BOUNCES * 2) {
+        var l = history.length;
+        var bottom = l - 10;
+        var bounces = 0;
+        for (var i = l; i >= bottom; i--) {
+          if (history[i] === history[i - 2]) {
+            bounces++;
+          }
+
+          if (bounces >= MAX_BOUNCES) {
+            // dont adjust height
+            return;
+          }
+        }
+      }
 
       // fix height of panel so it adheres to aspect ratio
       panel$$1.scalable = false;
@@ -8076,25 +8373,55 @@ function signature:
         };
   };
 
-  var calculateListHeight = function calculateListHeight(root, maxItems) {
+  var calculateListHeight = function calculateListHeight(root) {
     var visual = 0;
     var bounds = 0;
 
-    root.ref.list.childViews[0].childViews.forEach(function(item, index) {
-      // don't count items above max items list
-      if (index >= maxItems) return;
+    // get file list reference
+    var scrollList = root.ref.list;
+    var itemList = scrollList.childViews[0];
+    var children = itemList.childViews;
 
-      // calculate the total height of all items in the list
-      var rect = item.rect.element;
-      var itemHeight = rect.height + rect.marginTop + rect.marginBottom;
-      bounds += itemHeight;
-      visual += item.markedForRemoval ? item.opacity * itemHeight : itemHeight;
-    });
+    // no children, done!
+    if (children.length === 0) return { visual: visual, bounds: bounds };
 
-    return {
-      visual: visual,
-      bounds: bounds
-    };
+    var horizontalSpace = itemList.rect.element.width;
+    var dragIndex = getItemIndexByPosition(
+      itemList,
+      scrollList.dragCoordinates
+    );
+
+    var childRect = children[0].rect.element;
+
+    var itemVerticalMargin = childRect.marginTop + childRect.marginBottom;
+    var itemHorizontalMargin = childRect.marginLeft + childRect.marginRight;
+
+    var itemWidth = childRect.width + itemHorizontalMargin;
+    var itemHeight = childRect.height + itemVerticalMargin;
+
+    var newItem = typeof dragIndex !== 'undefined' && dragIndex >= 0 ? 1 : 0;
+    var removedItem = children.find(function(child) {
+      return child.markedForRemoval && child.opacity < 0.45;
+    })
+      ? -1
+      : 0;
+    var verticalItemCount = children.length + newItem + removedItem;
+    var itemsPerRow = Math.round(horizontalSpace / itemWidth);
+
+    // stack
+    if (itemsPerRow === 1) {
+      children.forEach(function(item) {
+        var height = item.rect.element.height + itemVerticalMargin;
+        bounds += height;
+        visual += height * item.opacity;
+      });
+    } else {
+      // grid
+      bounds = Math.ceil(verticalItemCount / itemsPerRow) * itemHeight;
+      visual = bounds;
+    }
+
+    return { visual: visual, bounds: bounds };
   };
 
   var calculateRootBoundingBoxHeight = function calculateRootBoundingBoxHeight(
@@ -8140,6 +8467,21 @@ function signature:
     return false;
   };
 
+  var getDragIndex = function getDragIndex(list, position) {
+    var itemList = list.childViews[0];
+    return getItemIndexByPosition(itemList, {
+      left: position.scopeLeft - itemList.rect.element.left,
+      top:
+        position.scopeTop -
+        (list.rect.outer.top +
+          list.rect.element.marginTop +
+          list.rect.element.scrollTop)
+    });
+  };
+
+  /**
+   * Enable or disable file drop functionality
+   */
   var toggleAllowDrop = function toggleAllowDrop(_ref5) {
     var root = _ref5.root,
       props = _ref5.props,
@@ -8150,9 +8492,7 @@ function signature:
         root.element,
         function(items) {
           // these files don't fit so stop here
-          if (exceedsMaxFiles(root, items)) {
-            return false;
-          }
+          if (exceedsMaxFiles(root, items)) return false;
 
           // all items should be validated by all filters as valid
           var dropValidation = root.query('GET_DROP_VALIDATION');
@@ -8173,21 +8513,10 @@ function signature:
       );
 
       hopper.onload = function(items, position) {
-        var itemList = root.ref.list.childViews[0];
-        var index = getItemIndexByPosition(itemList, {
-          left: position.scopeLeft,
-          top:
-            position.scopeTop -
-            root.ref.list.rect.outer.top +
-            root.ref.list.element.scrollTop
-        });
-
-        forEachDelayed(items, function(source) {
-          root.dispatch('ADD_ITEM', {
-            interactionMethod: InteractionMethod.DROP,
-            source: source,
-            index: index
-          });
+        root.dispatch('ADD_ITEMS', {
+          items: items,
+          index: getDragIndex(root.ref.list, position),
+          interactionMethod: InteractionMethod.DROP
         });
 
         root.dispatch('DID_DROP', { position: position });
@@ -8232,17 +8561,13 @@ function signature:
           Object.assign({}, props, {
             onload: function onload(items) {
               // these files don't fit so stop here
-              if (exceedsMaxFiles(root, items)) {
-                return false;
-              }
+              if (exceedsMaxFiles(root, items)) return false;
 
               // add items!
-              forEachDelayed(items, function(source) {
-                root.dispatch('ADD_ITEM', {
-                  interactionMethod: InteractionMethod.BROWSE,
-                  source: source,
-                  index: 0
-                });
+              root.dispatch('ADD_ITEMS', {
+                items: items,
+                index: -1,
+                interactionMethod: InteractionMethod.BROWSE
               });
             }
           })
@@ -8264,12 +8589,10 @@ function signature:
     if (action.value) {
       root.ref.paster = createPaster();
       root.ref.paster.onload = function(items) {
-        forEachDelayed(items, function(source) {
-          root.dispatch('ADD_ITEM', {
-            interactionMethod: InteractionMethod.PASTE,
-            source: source,
-            index: 0
-          });
+        root.dispatch('ADD_ITEMS', {
+          items: items,
+          index: getDragIndex(root.ref.list, position),
+          interactionMethod: InteractionMethod.PASTE
         });
       };
     } else if (root.ref.paster) {
@@ -8341,6 +8664,21 @@ function signature:
     // set initial options
     store.dispatch('SET_OPTIONS', { options: initialOptions });
 
+    // re-render on window resize start and finish
+    var resizing = false;
+    var timer = null;
+    window.addEventListener('resize', function() {
+      if (!resizing) {
+        resizing = true;
+        store.dispatch('DID_START_RESIZE');
+      }
+      clearTimeout(timer);
+      timer = setTimeout(function() {
+        resizing = false;
+        store.dispatch('DID_STOP_RESIZE');
+      }, 500);
+    });
+
     // render initial view
     var view = root(store, { id: getUniqueId() });
 
@@ -8398,7 +8736,7 @@ function signature:
         routeActionsToEvents(actions$$1);
 
         // update the view
-        resting = view._write(ts, actions$$1);
+        resting = view._write(ts, actions$$1, resizing);
 
         // will clean up all archived items
         removeReleasedItems(store.query('GET_ITEMS'));
@@ -8626,15 +8964,12 @@ function signature:
           sources.push.apply(sources, args);
         }
 
-        var sourcePromises = [];
-        var delayPromises = forEachDelayed(sources, function(source) {
-          sourcePromises.push(addFile(source, options));
-        });
-
-        Promise.all(delayPromises).then(function() {
-          Promise.all(sourcePromises).then(function(results) {
-            resolve(results);
-          });
+        store.dispatch('ADD_ITEMS', {
+          items: sources,
+          index: options.index,
+          interactionMethod: InteractionMethod.API,
+          success: resolve,
+          failure: reject
         });
       });
     };
@@ -8770,6 +9105,13 @@ function signature:
         removeFiles: removeFiles,
 
         /**
+         * Sort list of files
+         */
+        sort: function sort(compare) {
+          return store.dispatch('SORT', { compare: compare });
+        },
+
+        /**
          * Browse the file system for a file
          */
         browse: function browse() {
@@ -8793,6 +9135,9 @@ function signature:
 
           // destroy view
           view._destroy();
+
+          // stop listening to resize
+          window.removeEventListener('resize', resizeHandler);
 
           // dispatch destroy
           store.dispatch('DID_DESTROY');
@@ -9104,32 +9449,6 @@ function signature:
     });
   };
 
-  var images = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'tiff'];
-  var text$1 = ['css', 'csv', 'html', 'txt'];
-  var map = {
-    zip: 'zip|compressed',
-    epub: 'application/epub+zip'
-  };
-
-  var guesstimateMimeType = function guesstimateMimeType() {
-    var extension =
-      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-
-    extension = extension.toLowerCase();
-    if (images.includes(extension)) {
-      return (
-        'image/' +
-        (extension === 'jpg'
-          ? 'jpeg'
-          : extension === 'svg' ? 'svg+xml' : extension)
-      );
-    }
-    if (text$1.includes(extension)) {
-      return 'text/' + extension;
-    }
-    return map[extension] || null;
-  };
-
   var createWorker = function createWorker(fn) {
     var workerBlob = new Blob(['(', fn.toString(), ')()'], {
       type: 'application/javascript'
@@ -9362,7 +9681,7 @@ function signature:
     };
 
     exports.FileOrigin = Object.assign({}, FileOrigin$1);
-    exports.FileStatus = Object.assign({}, ItemStatus);
+    exports.FileStatus = Object.assign({}, ItemStatus$1);
 
     exports.OptionTypes = {};
     updateOptionTypes();
