@@ -1,5 +1,5 @@
 /*
- * FilePond 4.0.1
+ * FilePond 4.0.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2069,6 +2069,18 @@
     });
   };
 
+  var ItemStatus = {
+    INIT: 1,
+    IDLE: 2,
+    PROCESSING_QUEUED: 9,
+    PROCESSING: 3,
+    PROCESSING_COMPLETE: 5,
+    PROCESSING_ERROR: 6,
+    PROCESSING_REVERT_ERROR: 10,
+    LOADING: 7,
+    LOAD_ERROR: 8
+  };
+
   var getNonNumeric = function getNonNumeric(str) {
     return /[^0-9]+/.exec(str);
   };
@@ -3569,18 +3581,6 @@ function signature:
     return name.substr(0, name.lastIndexOf('.')) || name;
   };
 
-  var ItemStatus$1 = {
-    INIT: 1,
-    IDLE: 2,
-    PROCESSING_QUEUED: 9,
-    PROCESSING: 3,
-    PROCESSING_COMPLETE: 5,
-    PROCESSING_ERROR: 6,
-    PROCESSING_REVERT_ERROR: 10,
-    LOADING: 7,
-    LOAD_ERROR: 8
-  };
-
   var createFileStub = function createFileStub(source) {
     var data = [source.name, source.size, source.type];
 
@@ -3654,8 +3654,8 @@ function signature:
 
       // current item status
       status: serverFileReference
-        ? ItemStatus$1.PROCESSING_COMPLETE
-        : ItemStatus$1.INIT,
+        ? ItemStatus.PROCESSING_COMPLETE
+        : ItemStatus.INIT,
 
       // active processes
       activeLoader: null,
@@ -3738,7 +3738,7 @@ function signature:
         if (meta.source) {
           origin = FileOrigin$1.LIMBO;
           state.serverFileReference = meta.source;
-          state.status = ItemStatus$1.PROCESSING_COMPLETE;
+          state.status = ItemStatus.PROCESSING_COMPLETE;
         }
 
         // size has been updated
@@ -3747,21 +3747,21 @@ function signature:
 
       // the file is now loading we need to update the progress indicators
       loader.on('progress', function(progress) {
-        setStatus(ItemStatus$1.LOADING);
+        setStatus(ItemStatus.LOADING);
 
         fire('load-progress', progress);
       });
 
       // an error was thrown while loading the file, we need to switch to error state
       loader.on('error', function(error) {
-        setStatus(ItemStatus$1.LOAD_ERROR);
+        setStatus(ItemStatus.LOAD_ERROR);
 
         fire('load-request-error', error);
       });
 
       // user or another process aborted the file load (cannot retry)
       loader.on('abort', function() {
-        setStatus(ItemStatus$1.INIT);
+        setStatus(ItemStatus.INIT);
 
         fire('load-abort');
       });
@@ -3778,9 +3778,9 @@ function signature:
 
           // file received
           if (origin === FileOrigin$1.LIMBO && state.serverFileReference) {
-            setStatus(ItemStatus$1.PROCESSING_COMPLETE);
+            setStatus(ItemStatus.PROCESSING_COMPLETE);
           } else {
-            setStatus(ItemStatus$1.IDLE);
+            setStatus(ItemStatus.IDLE);
           }
 
           fire('load');
@@ -3791,7 +3791,7 @@ function signature:
           state.file = file;
           fire('load-meta');
 
-          setStatus(ItemStatus$1.LOAD_ERROR);
+          setStatus(ItemStatus.LOAD_ERROR);
           fire('load-file-error', result);
         };
 
@@ -3834,7 +3834,7 @@ function signature:
     //
     var process = function process(processor, onprocess) {
       // now processing
-      setStatus(ItemStatus$1.PROCESSING);
+      setStatus(ItemStatus.PROCESSING);
 
       // reset abort callback
       abortProcessingRequestComplete = null;
@@ -3860,7 +3860,7 @@ function signature:
         // need this id to be able to rever the upload
         state.serverFileReference = serverFileReference;
 
-        setStatus(ItemStatus$1.PROCESSING_COMPLETE);
+        setStatus(ItemStatus.PROCESSING_COMPLETE);
         fire('process-complete', serverFileReference);
       });
 
@@ -3870,7 +3870,7 @@ function signature:
 
       processor.on('error', function(error) {
         state.activeProcessor = null;
-        setStatus(ItemStatus$1.PROCESSING_ERROR);
+        setStatus(ItemStatus.PROCESSING_ERROR);
         fire('process-error', error);
       });
 
@@ -3880,7 +3880,7 @@ function signature:
         // if file was uploaded but processing was cancelled during perceived processor time store file reference
         state.serverFileReference = serverFileReference;
 
-        setStatus(ItemStatus$1.IDLE);
+        setStatus(ItemStatus.IDLE);
         fire('process-abort');
 
         // has timeout so doesn't interfere with remove action
@@ -3913,13 +3913,13 @@ function signature:
     };
 
     var requestProcessing = function requestProcessing() {
-      setStatus(ItemStatus$1.PROCESSING_QUEUED);
+      setStatus(ItemStatus.PROCESSING_QUEUED);
     };
 
     var abortProcessing = function abortProcessing() {
       return new Promise(function(resolve) {
         if (!state.activeProcessor) {
-          setStatus(ItemStatus$1.IDLE);
+          setStatus(ItemStatus.IDLE);
           fire('process-abort');
 
           resolve();
@@ -3961,14 +3961,14 @@ function signature:
             }
 
             // oh no errors
-            setStatus(ItemStatus$1.PROCESSING_REVERT_ERROR);
+            setStatus(ItemStatus.PROCESSING_REVERT_ERROR);
             fire('process-revert-error');
             reject(error);
           }
         );
 
         // fire event
-        setStatus(ItemStatus$1.IDLE);
+        setStatus(ItemStatus.IDLE);
         fire('process-revert');
       });
     };
@@ -4408,12 +4408,12 @@ function signature:
         };
 
         // if we should re-upload the file immidiately
-        if (item.status === ItemStatus$1.PROCESSING_COMPLETE) {
+        if (item.status === ItemStatus.PROCESSING_COMPLETE) {
           return revert(state.options.instantUpload);
         }
 
         // if currently uploading, cancel upload
-        if (item.status === ItemStatus$1.PROCESSING) {
+        if (item.status === ItemStatus.PROCESSING) {
           return abort(state.options.instantUpload);
         }
 
@@ -4531,8 +4531,8 @@ function signature:
 
           // if has been processed remove it from the server as well
           if (
-            _item.status === ItemStatus$1.PROCESSING_COMPLETE ||
-            _item.status === ItemStatus$1.PROCESSING_REVERT_ERROR
+            _item.status === ItemStatus.PROCESSING_COMPLETE ||
+            _item.status === ItemStatus.PROCESSING_REVERT_ERROR
           ) {
             var forceRevert = query('GET_FORCE_REVERT');
             _item
@@ -4925,9 +4925,9 @@ function signature:
         // cannot be queued (or is already queued)
         var itemCanBeQueuedForProcessing =
           // waiting for something
-          item.status === ItemStatus$1.IDLE ||
+          item.status === ItemStatus.IDLE ||
           // processing went wrong earlier
-          item.status === ItemStatus$1.PROCESSING_ERROR;
+          item.status === ItemStatus.PROCESSING_ERROR;
 
         // not ready to be processed
         if (!itemCanBeQueuedForProcessing) {
@@ -4943,8 +4943,8 @@ function signature:
 
           // if already done processing or tried to revert but didn't work, try again
           if (
-            item.status === ItemStatus$1.PROCESSING_COMPLETE ||
-            item.status === ItemStatus$1.PROCESSING_REVERT_ERROR
+            item.status === ItemStatus.PROCESSING_COMPLETE ||
+            item.status === ItemStatus.PROCESSING_REVERT_ERROR
           ) {
             item
               .revert(
@@ -4956,7 +4956,7 @@ function signature:
               )
               .then(process)
               .catch(function() {}); // don't continue with processing if something went wrong
-          } else if (item.status === ItemStatus$1.PROCESSING) {
+          } else if (item.status === ItemStatus.PROCESSING) {
             item.abortProcessing().then(process);
           }
 
@@ -4964,7 +4964,7 @@ function signature:
         }
 
         // already queued for processing
-        if (item.status === ItemStatus$1.PROCESSING_QUEUED) return;
+        if (item.status === ItemStatus.PROCESSING_QUEUED) return;
 
         item.requestProcessing();
 
@@ -4985,7 +4985,7 @@ function signature:
         var maxParallelUploads = query('GET_MAX_PARALLEL_UPLOADS');
         var totalCurrentUploads = query(
           'GET_ITEMS_BY_STATUS',
-          ItemStatus$1.PROCESSING
+          ItemStatus.PROCESSING
         ).length;
 
         // queue and wait till queue is freed up
@@ -5002,7 +5002,7 @@ function signature:
         }
 
         // if was not queued or is already processing exit here
-        if (item.status === ItemStatus$1.PROCESSING) return;
+        if (item.status === ItemStatus.PROCESSING) return;
 
         // we done function
         item.onOnce('process-complete', function() {
@@ -9682,7 +9682,7 @@ function signature:
     };
 
     exports.FileOrigin = Object.assign({}, FileOrigin$1);
-    exports.FileStatus = Object.assign({}, ItemStatus$1);
+    exports.FileStatus = Object.assign({}, ItemStatus);
 
     exports.OptionTypes = {};
     updateOptionTypes();

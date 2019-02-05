@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.0.2
+
+- Fix problem with undefine `ItemStatus` object in `processFiles` method
+
+
 ## 4.0.1
 
 - Fix problem where window resize handler was removed incorrectly resulting in an error.

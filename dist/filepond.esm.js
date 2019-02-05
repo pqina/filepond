@@ -1,5 +1,5 @@
 /*
- * FilePond 4.0.1
+ * FilePond 4.0.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1690,6 +1690,18 @@ const removeReleasedItems = items => {
   });
 };
 
+const ItemStatus = {
+  INIT: 1,
+  IDLE: 2,
+  PROCESSING_QUEUED: 9,
+  PROCESSING: 3,
+  PROCESSING_COMPLETE: 5,
+  PROCESSING_ERROR: 6,
+  PROCESSING_REVERT_ERROR: 10,
+  LOADING: 7,
+  LOAD_ERROR: 8
+};
+
 const getNonNumeric = str => /[^0-9]+/.exec(str);
 
 const getDecimalSeparator = () => getNonNumeric((1.1).toLocaleString())[0];
@@ -2957,18 +2969,6 @@ const createFileProcessor = processFn => {
 const getFilenameWithoutExtension = name =>
   name.substr(0, name.lastIndexOf('.')) || name;
 
-const ItemStatus$1 = {
-  INIT: 1,
-  IDLE: 2,
-  PROCESSING_QUEUED: 9,
-  PROCESSING: 3,
-  PROCESSING_COMPLETE: 5,
-  PROCESSING_ERROR: 6,
-  PROCESSING_REVERT_ERROR: 10,
-  LOADING: 7,
-  LOAD_ERROR: 8
-};
-
 const createFileStub = source => {
   let data = [source.name, source.size, source.type];
 
@@ -3035,8 +3035,8 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
     // current item status
     status: serverFileReference
-      ? ItemStatus$1.PROCESSING_COMPLETE
-      : ItemStatus$1.INIT,
+      ? ItemStatus.PROCESSING_COMPLETE
+      : ItemStatus.INIT,
 
     // active processes
     activeLoader: null,
@@ -3099,7 +3099,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       if (meta.source) {
         origin = FileOrigin$1.LIMBO;
         state.serverFileReference = meta.source;
-        state.status = ItemStatus$1.PROCESSING_COMPLETE;
+        state.status = ItemStatus.PROCESSING_COMPLETE;
       }
 
       // size has been updated
@@ -3108,21 +3108,21 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
     // the file is now loading we need to update the progress indicators
     loader.on('progress', progress => {
-      setStatus(ItemStatus$1.LOADING);
+      setStatus(ItemStatus.LOADING);
 
       fire('load-progress', progress);
     });
 
     // an error was thrown while loading the file, we need to switch to error state
     loader.on('error', error => {
-      setStatus(ItemStatus$1.LOAD_ERROR);
+      setStatus(ItemStatus.LOAD_ERROR);
 
       fire('load-request-error', error);
     });
 
     // user or another process aborted the file load (cannot retry)
     loader.on('abort', () => {
-      setStatus(ItemStatus$1.INIT);
+      setStatus(ItemStatus.INIT);
 
       fire('load-abort');
     });
@@ -3139,9 +3139,9 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
         // file received
         if (origin === FileOrigin$1.LIMBO && state.serverFileReference) {
-          setStatus(ItemStatus$1.PROCESSING_COMPLETE);
+          setStatus(ItemStatus.PROCESSING_COMPLETE);
         } else {
-          setStatus(ItemStatus$1.IDLE);
+          setStatus(ItemStatus.IDLE);
         }
 
         fire('load');
@@ -3152,7 +3152,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
         state.file = file;
         fire('load-meta');
 
-        setStatus(ItemStatus$1.LOAD_ERROR);
+        setStatus(ItemStatus.LOAD_ERROR);
         fire('load-file-error', result);
       };
 
@@ -3195,7 +3195,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
   //
   const process = (processor, onprocess) => {
     // now processing
-    setStatus(ItemStatus$1.PROCESSING);
+    setStatus(ItemStatus.PROCESSING);
 
     // reset abort callback
     abortProcessingRequestComplete = null;
@@ -3221,7 +3221,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       // need this id to be able to rever the upload
       state.serverFileReference = serverFileReference;
 
-      setStatus(ItemStatus$1.PROCESSING_COMPLETE);
+      setStatus(ItemStatus.PROCESSING_COMPLETE);
       fire('process-complete', serverFileReference);
     });
 
@@ -3231,7 +3231,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
     processor.on('error', error => {
       state.activeProcessor = null;
-      setStatus(ItemStatus$1.PROCESSING_ERROR);
+      setStatus(ItemStatus.PROCESSING_ERROR);
       fire('process-error', error);
     });
 
@@ -3241,7 +3241,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       // if file was uploaded but processing was cancelled during perceived processor time store file reference
       state.serverFileReference = serverFileReference;
 
-      setStatus(ItemStatus$1.IDLE);
+      setStatus(ItemStatus.IDLE);
       fire('process-abort');
 
       // has timeout so doesn't interfere with remove action
@@ -3274,13 +3274,13 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
   };
 
   const requestProcessing = () => {
-    setStatus(ItemStatus$1.PROCESSING_QUEUED);
+    setStatus(ItemStatus.PROCESSING_QUEUED);
   };
 
   const abortProcessing = () =>
     new Promise(resolve => {
       if (!state.activeProcessor) {
-        setStatus(ItemStatus$1.IDLE);
+        setStatus(ItemStatus.IDLE);
         fire('process-abort');
 
         resolve();
@@ -3321,14 +3321,14 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
           }
 
           // oh no errors
-          setStatus(ItemStatus$1.PROCESSING_REVERT_ERROR);
+          setStatus(ItemStatus.PROCESSING_REVERT_ERROR);
           fire('process-revert-error');
           reject(error);
         }
       );
 
       // fire event
-      setStatus(ItemStatus$1.IDLE);
+      setStatus(ItemStatus.IDLE);
       fire('process-revert');
     });
 
@@ -3672,12 +3672,12 @@ const actions = (dispatch, query, state) => ({
     };
 
     // if we should re-upload the file immidiately
-    if (item.status === ItemStatus$1.PROCESSING_COMPLETE) {
+    if (item.status === ItemStatus.PROCESSING_COMPLETE) {
       return revert(state.options.instantUpload);
     }
 
     // if currently uploading, cancel upload
-    if (item.status === ItemStatus$1.PROCESSING) {
+    if (item.status === ItemStatus.PROCESSING) {
       return abort(state.options.instantUpload);
     }
 
@@ -3787,8 +3787,8 @@ const actions = (dispatch, query, state) => ({
 
       // if has been processed remove it from the server as well
       if (
-        item.status === ItemStatus$1.PROCESSING_COMPLETE ||
-        item.status === ItemStatus$1.PROCESSING_REVERT_ERROR
+        item.status === ItemStatus.PROCESSING_COMPLETE ||
+        item.status === ItemStatus.PROCESSING_REVERT_ERROR
       ) {
         const forceRevert = query('GET_FORCE_REVERT');
         item
@@ -4141,9 +4141,9 @@ const actions = (dispatch, query, state) => ({
       // cannot be queued (or is already queued)
       const itemCanBeQueuedForProcessing =
         // waiting for something
-        item.status === ItemStatus$1.IDLE ||
+        item.status === ItemStatus.IDLE ||
         // processing went wrong earlier
-        item.status === ItemStatus$1.PROCESSING_ERROR;
+        item.status === ItemStatus.PROCESSING_ERROR;
 
       // not ready to be processed
       if (!itemCanBeQueuedForProcessing) {
@@ -4159,8 +4159,8 @@ const actions = (dispatch, query, state) => ({
 
         // if already done processing or tried to revert but didn't work, try again
         if (
-          item.status === ItemStatus$1.PROCESSING_COMPLETE ||
-          item.status === ItemStatus$1.PROCESSING_REVERT_ERROR
+          item.status === ItemStatus.PROCESSING_COMPLETE ||
+          item.status === ItemStatus.PROCESSING_REVERT_ERROR
         ) {
           item
             .revert(
@@ -4172,7 +4172,7 @@ const actions = (dispatch, query, state) => ({
             )
             .then(process)
             .catch(() => {}); // don't continue with processing if something went wrong
-        } else if (item.status === ItemStatus$1.PROCESSING) {
+        } else if (item.status === ItemStatus.PROCESSING) {
           item.abortProcessing().then(process);
         }
 
@@ -4180,7 +4180,7 @@ const actions = (dispatch, query, state) => ({
       }
 
       // already queued for processing
-      if (item.status === ItemStatus$1.PROCESSING_QUEUED) return;
+      if (item.status === ItemStatus.PROCESSING_QUEUED) return;
 
       item.requestProcessing();
 
@@ -4194,7 +4194,7 @@ const actions = (dispatch, query, state) => ({
     const maxParallelUploads = query('GET_MAX_PARALLEL_UPLOADS');
     const totalCurrentUploads = query(
       'GET_ITEMS_BY_STATUS',
-      ItemStatus$1.PROCESSING
+      ItemStatus.PROCESSING
     ).length;
 
     // queue and wait till queue is freed up
@@ -4211,7 +4211,7 @@ const actions = (dispatch, query, state) => ({
     }
 
     // if was not queued or is already processing exit here
-    if (item.status === ItemStatus$1.PROCESSING) return;
+    if (item.status === ItemStatus.PROCESSING) return;
 
     // we done function
     item.onOnce('process-complete', () => {
@@ -8345,7 +8345,7 @@ if (supported()) {
     });
 
   FileOrigin = Object.assign({}, FileOrigin$1);
-  FileStatus = Object.assign({}, ItemStatus$1);
+  FileStatus = Object.assign({}, ItemStatus);
 
   OptionTypes = {};
   updateOptionTypes();
