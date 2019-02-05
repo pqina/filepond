@@ -1,5 +1,5 @@
 /*
- * FilePond 4.0.1
+ * FilePond 4.0.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -9006,9 +9006,9 @@ function signature:
       if (!queries$$1.length) {
         var files = getFiles().filter(function(item) {
           return (
-            item.status !== ItemStatus.PROCESSING &&
-            item.status !== ItemStatus.PROCESSING_COMPLETE &&
-            item.status !== ItemStatus.PROCESSING_REVERT_ERROR
+            item.status !== ItemStatus$1.PROCESSING &&
+            item.status !== ItemStatus$1.PROCESSING_COMPLETE &&
+            item.status !== ItemStatus$1.PROCESSING_REVERT_ERROR
           );
         });
         return Promise.all(files.map(processFile));

@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.0.2
+
+- Fix reference to ItemStatus var in processingFiles method.
+
 ## 4.0.1
 
 - Fix problem where window resize handler was removed incorrectly resulting in an error.
@@ -157,7 +161,7 @@ By default the property is `null`. The advise is to not use this method and only
 
 ## 3.2.3
 
-- Fix problem where `beforeRemoveFile` hook was not called when in `instantUpload` mode and reverting an upload. 
+- Fix problem where `beforeRemoveFile` hook was not called when in `instantUpload` mode and reverting an upload.
 
 
 ## 3.2.2
@@ -366,7 +370,7 @@ Please note that this update will require installing new versions of the followi
 
 - Fix handling of `Content-Disposition` header to better extract the filename
 
- 
+
 ## 1.7.3
 
 - Events are now fired asynchronous, this allows internal processes to finish up
