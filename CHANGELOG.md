@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.1.0
+
+- Add `itemInsertLocationFreedom` property, set to `false` to stop user from picking the location in the file list where the file is added.
+
+
 ## 4.0.2
 
 - Fix problem with undefine `ItemStatus` object in `processFiles` method

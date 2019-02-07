@@ -1,5 +1,5 @@
 /*
- * FilePond 4.0.2
+ * FilePond 4.1.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2234,6 +2234,7 @@
     checkValidity: [false, Type.BOOLEAN], // Enables custom validity messages
 
     // Where to put file
+    itemInsertLocationFreedom: [true, Type.BOOLEAN], // Set to false to always add items to begin or end of list
     itemInsertLocation: ['before', Type.STRING], // Default index in list to add items that have been dropped at the top of the list
     itemInsertInterval: [75, Type.INT],
 
@@ -4596,11 +4597,18 @@ function signature:
           dispatch: dispatch
         });
 
+        // where to insert new items
+        var itemInsertLocation = query('GET_ITEM_INSERT_LOCATION');
+
+        // adjust index if is not allowed to pick location
+        if (!state.options.itemInsertLocationFreedom) {
+          index = itemInsertLocation === 'before' ? -1 : state.items.length;
+        }
+
         // add item to list
         insertItem(state.items, item, index);
 
         // sort items in list
-        var itemInsertLocation = query('GET_ITEM_INSERT_LOCATION');
         if (isFunction(itemInsertLocation) && source) {
           sortItems(state, itemInsertLocation);
         }
@@ -6811,7 +6819,6 @@ function signature:
       props = _ref.props;
 
     root.ref.list = root.appendChildView(root.createChildView(list));
-
     props.dragCoordinates = null;
     props.overflowing = false;
   };
@@ -6821,6 +6828,7 @@ function signature:
       props = _ref2.props,
       action = _ref2.action;
 
+    if (!root.query('GET_ITEM_INSERT_LOCATION_FREEDOM')) return;
     props.dragCoordinates = {
       left: action.position.scopeLeft - root.ref.list.rect.element.left,
       top:
