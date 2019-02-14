@@ -1,5 +1,5 @@
 /*
- * FilePond 4.1.0
+ * FilePond 4.1.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -225,6 +225,7 @@
   margin: 0;
   padding: 0;
   min-width: 0;
+  height: 100%;
 }
 .filepond--file-wrapper.filepond--file-wrapper > legend {
   position: absolute;

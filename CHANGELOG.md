@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.1.1
+
+- Fix problem where error shake animation would mess up preview image.
+
+
 ## 4.1.0
 
 - Add `itemInsertLocationFreedom` property, set to `false` to stop user from picking the location in the file list where the file is added.
