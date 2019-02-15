@@ -3911,7 +3911,11 @@ const actions = (dispatch, query, state) => ({
     });
 
     item.on('load-file-error', error => {
-      dispatch('DID_THROW_ITEM_INVALID', Object.assign({}, error, { id }));
+      dispatch('DID_THROW_ITEM_INVALID', {
+        id,
+        error: error.status,
+        status: error.status
+      });
     });
 
     item.on('load-abort', () => {

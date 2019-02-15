@@ -4665,10 +4665,11 @@ function signature:
         });
 
         item.on('load-file-error', function(error) {
-          dispatch(
-            'DID_THROW_ITEM_INVALID',
-            Object.assign({}, error, { id: id })
-          );
+          dispatch('DID_THROW_ITEM_INVALID', {
+            id: id,
+            error: error.status,
+            status: error.status
+          });
         });
 
         item.on('load-abort', function() {

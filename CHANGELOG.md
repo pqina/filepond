@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.1.2
+
+- Fix problem where `onaddfile` callback parameters were reversed when file validation plugins prevented file load
+
+
 ## 4.1.1
 
 - Fix problem where error shake animation would mess up preview image.
