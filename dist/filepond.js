@@ -1,5 +1,5 @@
 /*
- * FilePond 4.1.2
+ * FilePond 4.1.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -8673,6 +8673,13 @@ function signature:
     // set initial options
     store.dispatch('SET_OPTIONS', { options: initialOptions });
 
+    // kick thread if visibility changes
+    var visibilityHandler = function visibilityHandler() {
+      if (document.hidden) return;
+      store.dispatch('KICK');
+    };
+    document.addEventListener('visibilitychange', visibilityHandler);
+
     // re-render on window resize start and finish
     var resizing = false;
     var timer = null;
@@ -9148,6 +9155,9 @@ function signature:
 
           // stop listening to resize
           window.removeEventListener('resize', resizeHandler);
+
+          // stop listening to the visiblitychange event
+          document.addEventListener('visibilitychange', visibilityHandler);
 
           // dispatch destroy
           store.dispatch('DID_DESTROY');

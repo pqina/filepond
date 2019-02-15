@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.1.3
+
+- Improve the way that FilePond resumes drawing when a tab retains focus.
+
+
 ## 4.1.2
 
 - Fix problem where `onaddfile` callback parameters were reversed when file validation plugins prevented file load
