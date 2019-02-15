@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.1.4
+
+- Only hide preview images when resizing the window horizontally, fixes problem with resize events on iOS.
+
+
 ## 4.1.3
 
 - Improve the way that FilePond resumes drawing when a tab retains focus.

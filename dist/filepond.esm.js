@@ -1,5 +1,5 @@
 /*
- * FilePond 4.1.3
+ * FilePond 4.1.4
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -7461,17 +7461,24 @@ const createApp$1 = (initialOptions = {}) => {
   document.addEventListener('visibilitychange', visibilityHandler);
 
   // re-render on window resize start and finish
-  let resizing = false;
-  let timer = null;
+  let resizeDoneTimer = null;
+  let isResizing = false;
+  let isResizingHorizontally = false;
+  let initialWindowWidth = null;
+  let currentWindowWidth = null;
   const resizeHandler = () => {
-    if (!resizing) {
-      resizing = true;
-      store.dispatch('DID_START_RESIZE');
+    if (!isResizing) {
+      isResizing = true;
     }
-    clearTimeout(timer);
-    timer = setTimeout(() => {
-      resizing = false;
-      store.dispatch('DID_STOP_RESIZE');
+    clearTimeout(resizeDoneTimer);
+    resizeDoneTimer = setTimeout(() => {
+      isResizing = false;
+      initialWindowWidth = null;
+      currentWindowWidth = null;
+      if (isResizingHorizontally) {
+        isResizingHorizontally = false;
+        store.dispatch('DID_STOP_RESIZE');
+      }
     }, 500);
   };
   window.addEventListener('resize', resizeHandler);
@@ -7482,8 +7489,8 @@ const createApp$1 = (initialOptions = {}) => {
   //
   // PRIVATE API -------------------------------------------------------------------------------------
   //
-  let resting = false;
-  let hidden = false;
+  let isResting = false;
+  let isHidden = false;
 
   const readWriteApi = {
     // necessary for update loop
@@ -7493,16 +7500,31 @@ const createApp$1 = (initialOptions = {}) => {
      * @private
      */
     _read: () => {
-      // if resting, no need to read as numbers will still all be correct
-      if (resting) {
-        return;
+      // test if we're resizing horizontally
+      // TODO: see if we can optimize this by measuring root rect
+      if (isResizing) {
+        currentWindowWidth = window.innerWidth;
+        if (!initialWindowWidth) {
+          initialWindowWidth = currentWindowWidth;
+        }
+
+        if (
+          !isResizingHorizontally &&
+          currentWindowWidth !== initialWindowWidth
+        ) {
+          store.dispatch('DID_START_RESIZE');
+          isResizingHorizontally = true;
+        }
       }
+
+      // if resting, no need to read as numbers will still all be correct
+      if (isResting) return;
 
       // read view data
       view._read();
 
       // if root is hidden
-      hidden = view.rect.element.hidden;
+      isHidden = view.rect.element.hidden;
     },
 
     /**
@@ -7511,9 +7533,7 @@ const createApp$1 = (initialOptions = {}) => {
      */
     _write: ts => {
       // don't do anything while hidden
-      if (hidden) {
-        return;
-      }
+      if (isHidden) return;
 
       // get all actions from store
       const actions$$1 = store
@@ -7523,21 +7543,19 @@ const createApp$1 = (initialOptions = {}) => {
         .filter(action => !/^SET_/.test(action.type));
 
       // if was idling and no actions stop here
-      if (resting && !actions$$1.length) {
-        return;
-      }
+      if (isResting && !actions$$1.length) return;
 
       // some actions might trigger events
       routeActionsToEvents(actions$$1);
 
       // update the view
-      resting = view._write(ts, actions$$1, resizing);
+      isResting = view._write(ts, actions$$1, isResizingHorizontally);
 
       // will clean up all archived items
       removeReleasedItems(store.query('GET_ITEMS'));
 
       // now idling
-      if (resting) {
+      if (isResting) {
         store.processDispatchQueue();
       }
     }
