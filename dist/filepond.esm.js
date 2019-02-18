@@ -1,5 +1,5 @@
 /*
- * FilePond 4.1.4
+ * FilePond 4.2.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1795,6 +1795,9 @@ const defaultOptions = {
 
   // input field name to use
   name: ['filepond', Type.STRING],
+
+  // disable the field
+  disabled: [false, Type.BOOLEAN],
 
   // classname to put on wrapper
   className: [null, Type.STRING],
@@ -4568,15 +4571,19 @@ const progressIndicator = createView({
 const create$8 = ({ root, props }) => {
   root.element.title = props.label;
   root.element.innerHTML = props.icon || '';
-  props.disabled = false;
+
+  props.isDisabled = false;
 };
 
 const write$6 = ({ root, props }) => {
-  if (props.opacity === 0 && !props.disabled) {
-    props.disabled = true;
+  const { isDisabled } = props;
+  const shouldDisable = root.query('GET_DISABLED') || props.opacity === 0;
+
+  if (shouldDisable && !isDisabled) {
+    props.isDisabled = true;
     attr(root.element, 'disabled', 'disabled');
-  } else if (props.opacity > 0 && props.disabled) {
-    props.disabled = false;
+  } else if (!shouldDisable && isDisabled) {
+    props.isDisabled = false;
     root.element.removeAttribute('disabled');
   }
 };
@@ -5185,8 +5192,13 @@ const create$5 = ({ root, props }) => {
   const dataContainer = createElement$1('input');
   dataContainer.type = 'hidden';
   dataContainer.name = root.query('GET_NAME');
+  dataContainer.disabled = root.query('GET_DISABLED');
   root.ref.data = dataContainer;
   root.appendChild(dataContainer);
+};
+
+const didSetDisabled = ({ root }) => {
+  root.ref.data.disabled = root.query('GET_DISABLED');
 };
 
 /**
@@ -5218,6 +5230,7 @@ const fileWrapper = createView({
   create: create$5,
   ignoreRect: true,
   write: createRoute({
+    DID_SET_DISABLED: didSetDisabled,
     DID_LOAD_ITEM: didLoadItem,
     DID_REMOVE_ITEM: didRemoveItem,
     DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing,
@@ -5947,8 +5960,11 @@ const toggleAllowMultiple = ({ root, action }) => {
   attrToggle(root.element, 'multiple', action.value);
 };
 
-const toggleAllowBrowse$1 = ({ root, action }) => {
-  attrToggle(root.element, 'disabled', !action.value);
+const toggleDisabled = ({ root, action }) => {
+  const isDisabled = root.query('GET_DISABLED');
+  const doesAllowBrowse = root.query('GET_ALLOW_BROWSE');
+  const disableField = isDisabled || !doesAllowBrowse;
+  attrToggle(root.element, 'disabled', disableField);
 };
 
 const toggleRequired = ({ root, action }) => {
@@ -6011,7 +6027,8 @@ const browser = createView({
     DID_THROW_ITEM_INVALID: updateFieldValidityStatus,
     DID_REMOVE_ITEM: updateRequiredStatus,
 
-    DID_SET_ALLOW_BROWSE: toggleAllowBrowse$1,
+    DID_SET_DISABLED: toggleDisabled,
+    DID_SET_ALLOW_BROWSE: toggleDisabled,
     DID_SET_ALLOW_MULTIPLE: toggleAllowMultiple,
     DID_SET_ACCEPTED_FILE_TYPES: setAcceptedFileTypes,
     DID_SET_CAPTURE_METHOD: setCaptureMethod,
@@ -6037,13 +6054,23 @@ const create$13 = ({ root, props }) => {
 
   // handle keys
   label.addEventListener('keydown', e => {
-    if (e.keyCode === Key.ENTER || e.keyCode === Key.SPACE) {
-      // stops from triggering the element a second time
-      e.preventDefault();
+    const isActivationKey = e.keyCode === Key.ENTER || e.keyCode === Key.SPACE;
+    if (!isActivationKey) return;
+    // stops from triggering the element a second time
+    e.preventDefault();
 
-      // click link (will then in turn activate file input)
-      root.ref.label.click();
-    }
+    // click link (will then in turn activate file input)
+    root.ref.label.click();
+  });
+
+  root.element.addEventListener('click', e => {
+    const isLabelClick = e.target === label || label.contains(e.target);
+
+    // don't want to click twice
+    if (isLabelClick) return;
+
+    // click link (will then in turn activate file input)
+    root.ref.label.click();
   });
 
   // update
@@ -7291,8 +7318,11 @@ const getDragIndex = (list, position) => {
 /**
  * Enable or disable file drop functionality
  */
-const toggleAllowDrop = ({ root, props, action }) => {
-  if (action.value && !root.ref.hopper) {
+const toggleDrop = root => {
+  const isAllowed = root.query('GET_ALLOW_DROP');
+  const isDisabled = root.query('GET_DISABLED');
+  const enabled = isAllowed && !isDisabled;
+  if (enabled && !root.ref.hopper) {
     const hopper = createHopper(
       root.element,
       items => {
@@ -7342,7 +7372,7 @@ const toggleAllowDrop = ({ root, props, action }) => {
     root.ref.hopper = hopper;
 
     root.ref.drip = root.appendChildView(root.createChildView(drip));
-  } else if (!action.value && root.ref.hopper) {
+  } else if (!enabled && root.ref.hopper) {
     root.ref.hopper.destroy();
     root.ref.hopper = null;
     root.removeChildView(root.ref.drip);
@@ -7352,8 +7382,11 @@ const toggleAllowDrop = ({ root, props, action }) => {
 /**
  * Enable or disable browse functionality
  */
-const toggleAllowBrowse = ({ root, props, action }) => {
-  if (action.value) {
+const toggleBrowse = (root, props) => {
+  const isAllowed = root.query('GET_ALLOW_BROWSE');
+  const isDisabled = root.query('GET_DISABLED');
+  const enabled = isAllowed && !isDisabled;
+  if (enabled && !root.ref.browser) {
     root.ref.browser = root.appendChildView(
       root.createChildView(
         browser,
@@ -7373,7 +7406,7 @@ const toggleAllowBrowse = ({ root, props, action }) => {
       ),
       0
     );
-  } else if (root.ref.browser) {
+  } else if (!enabled && root.ref.browser) {
     root.removeChildView(root.ref.browser);
   }
 };
@@ -7381,8 +7414,11 @@ const toggleAllowBrowse = ({ root, props, action }) => {
 /**
  * Enable or disable paste functionality
  */
-const toggleAllowPaste = ({ root, action }) => {
-  if (action.value) {
+const togglePaste = root => {
+  const isAllowed = root.query('GET_ALLOW_PASTE');
+  const isDisabled = root.query('GET_DISABLED');
+  const enabled = isAllowed && !isDisabled;
+  if (enabled && !root.ref.paster) {
     root.ref.paster = createPaster();
     root.ref.paster.onload = items => {
       root.dispatch('ADD_ITEMS', {
@@ -7391,7 +7427,7 @@ const toggleAllowPaste = ({ root, action }) => {
         interactionMethod: InteractionMethod.PASTE
       });
     };
-  } else if (root.ref.paster) {
+  } else if (!enabled && root.ref.paster) {
     root.ref.paster.destroy();
     root.ref.paster = null;
   }
@@ -7401,9 +7437,27 @@ const toggleAllowPaste = ({ root, action }) => {
  * Route actions
  */
 const route = createRoute({
-  DID_SET_ALLOW_BROWSE: toggleAllowBrowse,
-  DID_SET_ALLOW_DROP: toggleAllowDrop,
-  DID_SET_ALLOW_PASTE: toggleAllowPaste
+  DID_SET_ALLOW_BROWSE: ({ root, props }) => {
+    toggleBrowse(root, props);
+  },
+  DID_SET_ALLOW_DROP: ({ root }) => {
+    toggleDrop(root);
+  },
+  DID_SET_ALLOW_PASTE: ({ root }) => {
+    togglePaste(root);
+  },
+  DID_SET_DISABLED: ({ root, props }) => {
+    toggleDrop(root);
+    togglePaste(root);
+    toggleBrowse(root, props);
+
+    const isDisabled = root.query('GET_DISABLED');
+    if (isDisabled) {
+      root.element.dataset.disabled = 'disabled';
+    } else {
+      delete root.element.dataset.disabled;
+    }
+  }
 });
 
 const root = createView({

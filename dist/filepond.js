@@ -1,5 +1,5 @@
 /*
- * FilePond 4.1.4
+ * FilePond 4.2.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2205,6 +2205,9 @@
 
     // input field name to use
     name: ['filepond', Type.STRING],
+
+    // disable the field
+    disabled: [false, Type.BOOLEAN],
 
     // classname to put on wrapper
     className: [null, Type.STRING],
@@ -5394,18 +5397,22 @@ function signature:
 
     root.element.title = props.label;
     root.element.innerHTML = props.icon || '';
-    props.disabled = false;
+
+    props.isDisabled = false;
   };
 
   var write$6 = function write(_ref2) {
     var root = _ref2.root,
       props = _ref2.props;
+    var isDisabled = props.isDisabled;
 
-    if (props.opacity === 0 && !props.disabled) {
-      props.disabled = true;
+    var shouldDisable = root.query('GET_DISABLED') || props.opacity === 0;
+
+    if (shouldDisable && !isDisabled) {
+      props.isDisabled = true;
       attr(root.element, 'disabled', 'disabled');
-    } else if (props.opacity > 0 && props.disabled) {
-      props.disabled = false;
+    } else if (!shouldDisable && isDisabled) {
+      props.isDisabled = false;
       root.element.removeAttribute('disabled');
     }
   };
@@ -6130,17 +6137,24 @@ function signature:
     var dataContainer = createElement$1('input');
     dataContainer.type = 'hidden';
     dataContainer.name = root.query('GET_NAME');
+    dataContainer.disabled = root.query('GET_DISABLED');
     root.ref.data = dataContainer;
     root.appendChild(dataContainer);
+  };
+
+  var didSetDisabled = function didSetDisabled(_ref2) {
+    var root = _ref2.root;
+
+    root.ref.data.disabled = root.query('GET_DISABLED');
   };
 
   /**
    * Data storage
    */
-  var didLoadItem = function didLoadItem(_ref2) {
-    var root = _ref2.root,
-      action = _ref2.action,
-      props = _ref2.props;
+  var didLoadItem = function didLoadItem(_ref3) {
+    var root = _ref3.root,
+      action = _ref3.action,
+      props = _ref3.props;
 
     root.ref.data.value = action.serverFileReference;
 
@@ -6151,21 +6165,21 @@ function signature:
     );
   };
 
-  var didRemoveItem = function didRemoveItem(_ref3) {
-    var root = _ref3.root;
+  var didRemoveItem = function didRemoveItem(_ref4) {
+    var root = _ref4.root;
 
     root.ref.data.removeAttribute('value');
   };
 
-  var didCompleteItemProcessing = function didCompleteItemProcessing(_ref4) {
-    var root = _ref4.root,
-      action = _ref4.action;
+  var didCompleteItemProcessing = function didCompleteItemProcessing(_ref5) {
+    var root = _ref5.root,
+      action = _ref5.action;
 
     root.ref.data.value = action.serverFileReference;
   };
 
-  var didRevertItemProcessing = function didRevertItemProcessing(_ref5) {
-    var root = _ref5.root;
+  var didRevertItemProcessing = function didRevertItemProcessing(_ref6) {
+    var root = _ref6.root;
 
     root.ref.data.removeAttribute('value');
   };
@@ -6174,6 +6188,7 @@ function signature:
     create: create$5,
     ignoreRect: true,
     write: createRoute({
+      DID_SET_DISABLED: didSetDisabled,
       DID_LOAD_ITEM: didLoadItem,
       DID_REMOVE_ITEM: didRemoveItem,
       DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing,
@@ -6988,11 +7003,13 @@ function signature:
     attrToggle(root.element, 'multiple', action.value);
   };
 
-  var toggleAllowBrowse$1 = function toggleAllowBrowse(_ref4) {
-    var root = _ref4.root,
-      action = _ref4.action;
+  var toggleDisabled = function toggleDisabled(_ref4) {
+    var root = _ref4.root;
 
-    attrToggle(root.element, 'disabled', !action.value);
+    var isDisabled = root.query('GET_DISABLED');
+    var doesAllowBrowse = root.query('GET_ALLOW_BROWSE');
+    var disableField = isDisabled || !doesAllowBrowse;
+    attrToggle(root.element, 'disabled', disableField);
   };
 
   var toggleRequired = function toggleRequired(_ref5) {
@@ -7067,7 +7084,8 @@ function signature:
       DID_THROW_ITEM_INVALID: updateFieldValidityStatus,
       DID_REMOVE_ITEM: updateRequiredStatus,
 
-      DID_SET_ALLOW_BROWSE: toggleAllowBrowse$1,
+      DID_SET_DISABLED: toggleDisabled,
+      DID_SET_ALLOW_BROWSE: toggleDisabled,
       DID_SET_ALLOW_MULTIPLE: toggleAllowMultiple,
       DID_SET_ACCEPTED_FILE_TYPES: setAcceptedFileTypes,
       DID_SET_CAPTURE_METHOD: setCaptureMethod,
@@ -7096,13 +7114,23 @@ function signature:
 
     // handle keys
     label.addEventListener('keydown', function(e) {
-      if (e.keyCode === Key.ENTER || e.keyCode === Key.SPACE) {
-        // stops from triggering the element a second time
-        e.preventDefault();
+      var isActivationKey = e.keyCode === Key.ENTER || e.keyCode === Key.SPACE;
+      if (!isActivationKey) return;
+      // stops from triggering the element a second time
+      e.preventDefault();
 
-        // click link (will then in turn activate file input)
-        root.ref.label.click();
-      }
+      // click link (will then in turn activate file input)
+      root.ref.label.click();
+    });
+
+    root.element.addEventListener('click', function(e) {
+      var isLabelClick = e.target === label || label.contains(e.target);
+
+      // don't want to click twice
+      if (isLabelClick) return;
+
+      // click link (will then in turn activate file input)
+      root.ref.label.click();
     });
 
     // update
@@ -8491,12 +8519,11 @@ function signature:
   /**
    * Enable or disable file drop functionality
    */
-  var toggleAllowDrop = function toggleAllowDrop(_ref5) {
-    var root = _ref5.root,
-      props = _ref5.props,
-      action = _ref5.action;
-
-    if (action.value && !root.ref.hopper) {
+  var toggleDrop = function toggleDrop(root) {
+    var isAllowed = root.query('GET_ALLOW_DROP');
+    var isDisabled = root.query('GET_DISABLED');
+    var enabled = isAllowed && !isDisabled;
+    if (enabled && !root.ref.hopper) {
       var hopper = createHopper(
         root.element,
         function(items) {
@@ -8548,7 +8575,7 @@ function signature:
       root.ref.hopper = hopper;
 
       root.ref.drip = root.appendChildView(root.createChildView(drip));
-    } else if (!action.value && root.ref.hopper) {
+    } else if (!enabled && root.ref.hopper) {
       root.ref.hopper.destroy();
       root.ref.hopper = null;
       root.removeChildView(root.ref.drip);
@@ -8558,12 +8585,11 @@ function signature:
   /**
    * Enable or disable browse functionality
    */
-  var toggleAllowBrowse = function toggleAllowBrowse(_ref6) {
-    var root = _ref6.root,
-      props = _ref6.props,
-      action = _ref6.action;
-
-    if (action.value) {
+  var toggleBrowse = function toggleBrowse(root, props) {
+    var isAllowed = root.query('GET_ALLOW_BROWSE');
+    var isDisabled = root.query('GET_DISABLED');
+    var enabled = isAllowed && !isDisabled;
+    if (enabled && !root.ref.browser) {
       root.ref.browser = root.appendChildView(
         root.createChildView(
           browser,
@@ -8583,7 +8609,7 @@ function signature:
         ),
         0
       );
-    } else if (root.ref.browser) {
+    } else if (!enabled && root.ref.browser) {
       root.removeChildView(root.ref.browser);
     }
   };
@@ -8591,11 +8617,11 @@ function signature:
   /**
    * Enable or disable paste functionality
    */
-  var toggleAllowPaste = function toggleAllowPaste(_ref7) {
-    var root = _ref7.root,
-      action = _ref7.action;
-
-    if (action.value) {
+  var togglePaste = function togglePaste(root) {
+    var isAllowed = root.query('GET_ALLOW_PASTE');
+    var isDisabled = root.query('GET_DISABLED');
+    var enabled = isAllowed && !isDisabled;
+    if (enabled && !root.ref.paster) {
       root.ref.paster = createPaster();
       root.ref.paster.onload = function(items) {
         root.dispatch('ADD_ITEMS', {
@@ -8604,7 +8630,7 @@ function signature:
           interactionMethod: InteractionMethod.PASTE
         });
       };
-    } else if (root.ref.paster) {
+    } else if (!enabled && root.ref.paster) {
       root.ref.paster.destroy();
       root.ref.paster = null;
     }
@@ -8614,15 +8640,43 @@ function signature:
    * Route actions
    */
   var route = createRoute({
-    DID_SET_ALLOW_BROWSE: toggleAllowBrowse,
-    DID_SET_ALLOW_DROP: toggleAllowDrop,
-    DID_SET_ALLOW_PASTE: toggleAllowPaste
+    DID_SET_ALLOW_BROWSE: function DID_SET_ALLOW_BROWSE(_ref5) {
+      var root = _ref5.root,
+        props = _ref5.props;
+
+      toggleBrowse(root, props);
+    },
+    DID_SET_ALLOW_DROP: function DID_SET_ALLOW_DROP(_ref6) {
+      var root = _ref6.root;
+
+      toggleDrop(root);
+    },
+    DID_SET_ALLOW_PASTE: function DID_SET_ALLOW_PASTE(_ref7) {
+      var root = _ref7.root;
+
+      togglePaste(root);
+    },
+    DID_SET_DISABLED: function DID_SET_DISABLED(_ref8) {
+      var root = _ref8.root,
+        props = _ref8.props;
+
+      toggleDrop(root);
+      togglePaste(root);
+      toggleBrowse(root, props);
+
+      var isDisabled = root.query('GET_DISABLED');
+      if (isDisabled) {
+        root.element.dataset.disabled = 'disabled';
+      } else {
+        delete root.element.dataset.disabled;
+      }
+    }
   });
 
   var root = createView({
     name: 'root',
-    read: function read(_ref8) {
-      var root = _ref8.root;
+    read: function read(_ref9) {
+      var root = _ref9.root;
 
       if (root.ref.measure) {
         root.ref.measureHeight = root.ref.measure.offsetHeight;
@@ -8630,8 +8684,8 @@ function signature:
     },
     create: create$1,
     write: write,
-    destroy: function destroy(_ref9) {
-      var root = _ref9.root;
+    destroy: function destroy(_ref10) {
+      var root = _ref10.root;
 
       if (root.ref.paster) {
         root.ref.paster.destroy();

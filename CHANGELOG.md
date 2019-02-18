@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.2.0
+
+- Add `disabled` property, can be set as an attribute on the file input or as a property in the FilePond options object.
+- Add catching clicks on the entire pond label element to make it easier to click the label.
+
+
 ## 4.1.4
 
 - Only hide preview images when resizing the window horizontally, fixes problem with resize events on iOS.
