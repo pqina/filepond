@@ -9,7 +9,7 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 
 21 KB gzipped. FilePond adapters are available for **[React](https://github.com/pqina/react-filepond)**, **[Vue](https://github.com/pqina/vue-filepond)**, **[Angular](https://github.com/pqina/ngx-filepond)** and **[jQuery](https://github.com/pqina/jquery-filepond)**
 
-FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink)**
+FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 
 <img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif?raw=true" width="370" alt=""/>
 
@@ -22,23 +22,14 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink)**
 *   **Image optimization**, automatic image resizing, **cropping**, and **fixes EXIF orientation**.
 *   **Responsive**, automatically scales to available space, is functional on both **mobile and desktop devices**.
 
-[Learn more about FilePond](https://pqina.nl/filepond)
+[Learn more about FilePond](https://pqina.nl/filepond/)
 
 
-### Browser Compatibility
+### Looking for a great Image Editor?
 
-FilePond is compatible with a wide range of desktop and mobile browsers, the oldest explicitly supported browser is IE11, for best cross browser support add [FilePond Polyfill](https://github.com/pqina/filepond-polyfill) and [Babel polyfill](https://babeljs.io/docs/en/babel-polyfill) to your project.
+**Doka.js** might be just what you're looking for. It's a Modern JavaScript Image Editor, Doka supports setting **crop aspect ratios**, **resizing**, **rotating**, **cropping**, and **flipping** images. Above all, it integrates beautifully with FilePond.
 
-FilePond uses [BrowserStack](https://www.browserstack.com/) for compatibility testing.
-
-[<img src="https://github.com/pqina/filepond-github-assets/blob/master/browserstack-logo.svg" height="32" alt="BrowserStack"/>](https://www.browserstack.com/)
-
-
-### Time to learn ES6?
-
-FilePond is written in ES6. The docs also feature a lot of ES6 code examples.
-
-If you want to learn how to write modern ES6 JavaScript as well, [ES6 for Everyone by Wes Bos](http://bit.ly/es6-course) is highly recommended.
+[Learn more about Doka](https://pqina.nl/doka/)
 
 
 ### Plugins
@@ -138,6 +129,15 @@ Or get it from a CDN:
 *   [Integrating FilePond with Ember](https://alexdiliberto.com/ember-filepond/latest/)
 *   [FilePond launch day post-mortem](https://pqina.nl/blog/filepond-launch-day-post-mortem)
 *   [FilePond on ProductHunt](https://www.producthunt.com/posts/filepond-js)
+
+
+### Browser Compatibility
+
+FilePond is compatible with a wide range of desktop and mobile browsers, the oldest explicitly supported browser is IE11, for best cross browser support add [FilePond Polyfill](https://github.com/pqina/filepond-polyfill) and [Babel polyfill](https://babeljs.io/docs/en/babel-polyfill) to your project.
+
+FilePond uses [BrowserStack](https://www.browserstack.com/) for compatibility testing.
+
+[<img src="https://github.com/pqina/filepond-github-assets/blob/master/browserstack-logo.svg" height="32" alt="BrowserStack"/>](https://www.browserstack.com/)
 
 
 ## Contributing
