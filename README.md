@@ -57,6 +57,7 @@ If you want to learn how to write modern ES6 JavaScript as well, [ES6 for Everyo
 *   [Image transform](https://github.com/pqina/filepond-plugin-image-transform)
 *   [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
 
+
 ### Adapters
 
 *   [React](https://github.com/pqina/react-filepond)
@@ -66,10 +67,12 @@ If you want to learn how to write modern ES6 JavaScript as well, [ES6 for Everyo
 *   [Angular 1](https://github.com/johnnyasantoss/angularjs-filepond)
 *   [Ember](https://github.com/alexdiliberto/ember-filepond)
 
+
 ### Backend
 
 *   [PHP](https://github.com/pqina/filepond-boilerplate-php)
 *   [Django](https://github.com/ImperialCollegeLondon/django-drf-filepond) 
+*   [Laravel](https://github.com/Sopamo/laravel-filepond)
 
 
 ## Quick Start
@@ -126,6 +129,7 @@ Or get it from a CDN:
 
 [Getting started with FilePond](https://pqina.nl/filepond/docs/patterns/getting-started/)
 
+
 ## Publications
 
 *   [Smooth file uploading with React and FilePond](https://itnext.io/uploading-files-with-react-and-filepond-f8a798308557)
@@ -134,6 +138,12 @@ Or get it from a CDN:
 *   [Integrating FilePond with Ember](https://alexdiliberto.com/ember-filepond/latest/)
 *   [FilePond launch day post-mortem](https://pqina.nl/blog/filepond-launch-day-post-mortem)
 *   [FilePond on ProductHunt](https://www.producthunt.com/posts/filepond-js)
+
+
+## Contributing
+
+Currently only the build targets of FilePond are on GitHub which makes contributing difficult. I'm aware that this is not ideal. There are concrete plans to add the source and build scripts, but due to a busy schedule this hasn't happened yet.
+https://github.com/pqina/filepond/issues/62
 
 
 ## License
