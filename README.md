@@ -4,12 +4,11 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/pqina/filepond/blob/master/LICENSE)
 [![npm version](https://badge.fury.io/js/filepond.svg)](https://www.npmjs.com/package/filepond)
-[![Backlog on WIP.chat](https://img.shields.io/badge/backlog-wip.chat-yellow.svg)](https://wip.chat/products/191/pending)
 [![Support on Patreon](https://img.shields.io/badge/support-patreon-salmon.svg)](https://www.patreon.com/rikschennink)
 
 21 KB gzipped. FilePond adapters are available for **[React](https://github.com/pqina/react-filepond)**, **[Vue](https://github.com/pqina/vue-filepond)**, **[Angular](https://github.com/pqina/ngx-filepond)** and **[jQuery](https://github.com/pqina/jquery-filepond)**
 
-FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink)**
+FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 
 <img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif?raw=true" width="370" alt=""/>
 
@@ -22,23 +21,14 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink)**
 *   **Image optimization**, automatic image resizing, **cropping**, and **fixes EXIF orientation**.
 *   **Responsive**, automatically scales to available space, is functional on both **mobile and desktop devices**.
 
-[Learn more about FilePond](https://pqina.nl/filepond)
+[Learn more about FilePond](https://pqina.nl/filepond/)
 
 
-### Browser Compatibility
+### Looking for a great Image Editor?
 
-FilePond is compatible with a wide range of desktop and mobile browsers, the oldest explicitely supported browser is IE11, for best cross browser support add [FilePond Polyfill](https://github.com/pqina/filepond-polyfill) and [Babel polyfill](https://babeljs.io/docs/en/babel-polyfill) to your project.
+**Doka.js** might be just what you're looking for. It's a Modern JavaScript Image Editor, Doka supports setting **crop aspect ratios**, **resizing**, **rotating**, **cropping**, and **flipping** images. Above all, it integrates beautifully with FilePond.
 
-FilePond uses [BrowserStack](https://www.browserstack.com/) for compatibility testing.
-
-[<img src="https://github.com/pqina/filepond-github-assets/blob/master/browserstack-logo.svg" height="32" alt="BrowserStack"/>](https://www.browserstack.com/)
-
-
-### Time to learn ES6?
-
-FilePond is written in ES6. The docs also feature a lot of ES6 code examples.
-
-If you want to learn how to write modern ES6 JavaScript as well, [ES6 for Everyone by Wes Bos](http://bit.ly/es6-course) is highly recommended.
+[Learn more about Doka](https://pqina.nl/doka/)
 
 
 ### Plugins
@@ -57,6 +47,7 @@ If you want to learn how to write modern ES6 JavaScript as well, [ES6 for Everyo
 *   [Image transform](https://github.com/pqina/filepond-plugin-image-transform)
 *   [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
 
+
 ### Adapters
 
 *   [React](https://github.com/pqina/react-filepond)
@@ -66,10 +57,12 @@ If you want to learn how to write modern ES6 JavaScript as well, [ES6 for Everyo
 *   [Angular 1](https://github.com/johnnyasantoss/angularjs-filepond)
 *   [Ember](https://github.com/alexdiliberto/ember-filepond)
 
+
 ### Backend
 
 *   [PHP](https://github.com/pqina/filepond-boilerplate-php)
 *   [Django](https://github.com/ImperialCollegeLondon/django-drf-filepond) 
+*   [Laravel](https://github.com/Sopamo/laravel-filepond)
 
 
 ## Quick Start
@@ -126,6 +119,7 @@ Or get it from a CDN:
 
 [Getting started with FilePond](https://pqina.nl/filepond/docs/patterns/getting-started/)
 
+
 ## Publications
 
 *   [Smooth file uploading with React and FilePond](https://itnext.io/uploading-files-with-react-and-filepond-f8a798308557)
@@ -134,6 +128,21 @@ Or get it from a CDN:
 *   [Integrating FilePond with Ember](https://alexdiliberto.com/ember-filepond/latest/)
 *   [FilePond launch day post-mortem](https://pqina.nl/blog/filepond-launch-day-post-mortem)
 *   [FilePond on ProductHunt](https://www.producthunt.com/posts/filepond-js)
+
+
+### Browser Compatibility
+
+FilePond is compatible with a wide range of desktop and mobile browsers, the oldest explicitly supported browser is IE11, for best cross browser support add [FilePond Polyfill](https://github.com/pqina/filepond-polyfill) and [Babel polyfill](https://babeljs.io/docs/en/babel-polyfill) to your project.
+
+FilePond uses [BrowserStack](https://www.browserstack.com/) for compatibility testing.
+
+[<img src="https://github.com/pqina/filepond-github-assets/blob/master/browserstack-logo.svg" height="32" alt="BrowserStack"/>](https://www.browserstack.com/)
+
+
+## Contributing
+
+Currently only the build targets of FilePond are on GitHub which makes contributing difficult. I'm aware that this is not ideal. There are concrete plans to add the source and build scripts, but due to a busy schedule this hasn't happened yet.
+https://github.com/pqina/filepond/issues/62
 
 
 ## License
