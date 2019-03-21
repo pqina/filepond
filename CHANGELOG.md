@@ -1,5 +1,14 @@
 # Changelog
 
+## 4.3.0
+
+- Fix problem where `addFiles` would not correctly map passed options to files.
+- Fix problem where upload error would prevent processing of other files.
+- Fix problem where the field would not "exist" if it had no value. Now if FilePond is empty the internal file input element is given the name attribute, this is removed when a file is added (as the name is then present on the file's hidden input element).
+- Add `onprocessfiles` which is called when all files have been processed.
+- Add `onactivatefile` which is called when a user clicks or taps on a file item.
+
+
 ## 4.2.0
 
 - Add `disabled` property, can be set as an attribute on the file input or as a property in the FilePond options object.

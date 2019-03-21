@@ -1,5 +1,5 @@
 /*
- * FilePond 4.2.0
+ * FilePond 4.3.0
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2316,6 +2316,7 @@
     oninit: [null, Type.FUNCTION],
     onwarning: [null, Type.FUNCTION],
     onerror: [null, Type.FUNCTION],
+    onactivatefile: [null, Type.FUNCTION],
     onaddfilestart: [null, Type.FUNCTION],
     onaddfileprogress: [null, Type.FUNCTION],
     onaddfile: [null, Type.FUNCTION],
@@ -2324,6 +2325,7 @@
     onprocessfileabort: [null, Type.FUNCTION],
     onprocessfilerevert: [null, Type.FUNCTION],
     onprocessfile: [null, Type.FUNCTION],
+    onprocessfiles: [null, Type.FUNCTION],
     onremovefile: [null, Type.FUNCTION],
     onpreparefile: [null, Type.FUNCTION],
     onupdatefiles: [null, Type.FUNCTION],
@@ -4461,10 +4463,11 @@ function signature:
           return new Promise(function(resolve, reject) {
             dispatch('ADD_ITEM', {
               interactionMethod: interactionMethod,
-              source: source,
+              source: source.source || source,
               success: resolve,
               failure: reject,
-              index: currentIndex++
+              index: currentIndex++,
+              options: source.options || {}
             });
           });
         });
@@ -5016,28 +5019,42 @@ function signature:
         // if was not queued or is already processing exit here
         if (item.status === ItemStatus.PROCESSING) return;
 
-        // we done function
-        item.onOnce('process-complete', function() {
-          // done!
-          success(createItemAPI(item));
-
+        var processNext = function processNext() {
           // process queueud items
           var queued = state.processingQueue.shift();
-          if (!queued) return;
-          dispatch(
-            'PROCESS_ITEM',
-            {
-              query: queued.item,
-              success: queued.success,
-              failure: queued.failure
-            },
-            true
-          );
+
+          // process queued item
+          if (queued) {
+            dispatch(
+              'PROCESS_ITEM',
+              {
+                query: queued.item,
+                success: queued.success,
+                failure: queued.failure
+              },
+              true
+            );
+          }
+        };
+
+        // we done function
+        item.onOnce('process-complete', function() {
+          success(createItemAPI(item));
+          processNext();
+
+          // All items processed? No errors?
+          var allItemsProcessed =
+            query('GET_ITEMS_BY_STATUS', ItemStatus.PROCESSING_COMPLETE)
+              .length === state.items.length;
+          if (allItemsProcessed) {
+            dispatch('DID_COMPLETE_ITEM_PROCESSING_ALL');
+          }
         });
 
         // we error function
         item.onOnce('process-error', function(error) {
           failure({ error: error, file: createItemAPI(item) });
+          processNext();
         });
 
         // start file processing
@@ -5956,7 +5973,8 @@ function signature:
       buttonView.element.classList.add(definition.className);
 
       // handle interactions
-      buttonView.on('click', function() {
+      buttonView.on('click', function(e) {
+        e.stopPropagation();
         root.dispatch(definition.action, { query: id });
       });
 
@@ -6317,8 +6335,14 @@ function signature:
     var root = _ref.root,
       props = _ref.props;
 
+    // select
+    root.ref.handleClick = function() {
+      return root.dispatch('DID_ACTIVATE_ITEM', { id: props.id });
+    };
+
     // set id
     root.element.id = 'filepond--item-' + props.id;
+    root.element.addEventListener('click', root.ref.handleClick);
 
     // file view
     root.ref.container = root.appendChildView(
@@ -6419,6 +6443,7 @@ function signature:
       var root = _ref4.root,
         props = _ref4.props;
 
+      root.element.removeEventListener('click', root.ref.handleClick);
       root.dispatch('RELEASE_ITEM', { query: props.id });
     },
     tag: 'li',
@@ -6957,6 +6982,9 @@ function signature:
     // set id so can be referenced from outside labels
     root.element.id = 'filepond--browser-' + props.id;
 
+    // set name of element (is removed when a value is set)
+    attr(root.element, 'name', root.query('GET_NAME'));
+
     // we have to link this element to the status element
     attr(root.element, 'aria-controls', 'filepond--assistant-' + props.id);
 
@@ -7039,20 +7067,25 @@ function signature:
 
   var updateRequiredStatus = function updateRequiredStatus(_ref7) {
     var root = _ref7.root;
-
+    var element = root.element;
     // always remove the required attribute when more than zero items
+
     if (root.query('GET_TOTAL_ITEMS') > 0) {
-      attrToggle(root.element, 'required', false);
+      attrToggle(element, 'required', false);
+      attrToggle(element, 'name', false);
     } else {
+      // add name attribute
+      attrToggle(element, 'name', true, root.query('GET_NAME'));
+
       // remove any validation messages
       var shouldCheckValidity = root.query('GET_CHECK_VALIDITY');
       if (shouldCheckValidity) {
-        root.element.setCustomValidity('');
+        element.setCustomValidity('');
       }
 
       // we only add required if the field has been deemed required
       if (root.query('GET_REQUIRED')) {
-        attrToggle(root.element, 'required', true);
+        attrToggle(element, 'required', true);
       }
     }
   };
@@ -7081,8 +7114,8 @@ function signature:
     },
     write: createRoute({
       DID_LOAD_ITEM: updateRequiredStatus,
-      DID_THROW_ITEM_INVALID: updateFieldValidityStatus,
       DID_REMOVE_ITEM: updateRequiredStatus,
+      DID_THROW_ITEM_INVALID: updateFieldValidityStatus,
 
       DID_SET_DISABLED: toggleDisabled,
       DID_SET_ALLOW_BROWSE: toggleDisabled,
@@ -8156,7 +8189,7 @@ function signature:
       root.dispatch('DID_RESIZE_ROOT');
     }, 250);
 
-    //
+    // history of updates
     root.ref.updateHistory = [];
   };
 
@@ -8908,6 +8941,7 @@ function signature:
       DID_UPDATE_ITEM_PROCESS_PROGRESS: createEvent('processfileprogress'),
       DID_ABORT_ITEM_PROCESSING: createEvent('processfileabort'),
       DID_COMPLETE_ITEM_PROCESSING: createEvent('processfile'),
+      DID_COMPLETE_ITEM_PROCESSING_ALL: createEvent('processfiles'),
       DID_REVERT_ITEM_PROCESSING: createEvent('processfilerevert'),
 
       DID_THROW_ITEM_PROCESSING_ERROR: [
@@ -8917,7 +8951,9 @@ function signature:
 
       DID_REMOVE_ITEM: createEvent('removefile'),
 
-      DID_UPDATE_ITEMS: createEvent('updatefiles')
+      DID_UPDATE_ITEMS: createEvent('updatefiles'),
+
+      DID_ACTIVATE_ITEM: createEvent('activatefile')
     };
 
     var exposeEvent = function exposeEvent(event) {
@@ -8943,6 +8979,7 @@ function signature:
       if (event.hasOwnProperty('error')) {
         params.push(event.error);
       }
+
       // file is always section
       if (event.hasOwnProperty('file')) {
         params.push(event.file);
