@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.3.2
+
+- Fix issue where 0 byte files would not upload to the server.
+
+
 ## 4.3.1
 
 - Add `status` property to the FilePond instance, use this property to determine the current FilePond status (`EMPTY`, `IDLE`, `ERROR`, `BUSY`, or `READY`).

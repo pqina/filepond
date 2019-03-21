@@ -1,5 +1,5 @@
 /*
- * FilePond 4.3.1
+ * FilePond 4.3.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -3588,9 +3588,7 @@ function signature:
 
     var abort = function abort() {
       // no request running, can't abort
-      if (!state.request) {
-        return;
-      }
+      if (!state.request) return;
 
       // stop updater
       state.perceivedPerformanceUpdater.clear();
@@ -3666,6 +3664,10 @@ function signature:
     INPUT: 1,
     LIMBO: 2,
     LOCAL: 3
+  };
+
+  var isFile = function isFile(value) {
+    return value instanceof File || (value instanceof Blob && value.name);
   };
 
   var deepCloneObject = function deepCloneObject(src) {
@@ -3831,7 +3833,7 @@ function signature:
         // called when file has loaded succesfully
         var success = function success(result) {
           // set (possibly) transformed file
-          state.file = result.size > 0 ? result : state.file;
+          state.file = isFile(result) ? result : state.file;
 
           // file received
           if (origin === FileOrigin$1.LIMBO && state.serverFileReference) {
@@ -4255,10 +4257,6 @@ function signature:
       (url.indexOf(':') > -1 || url.indexOf('//') > -1) &&
       getDomainFromURL(location.href) !== getDomainFromURL(url)
     );
-  };
-
-  var isFile = function isFile(value) {
-    return value instanceof File || (value instanceof Blob && value.name);
   };
 
   var dynamicLabel = function dynamicLabel(label) {

@@ -1,5 +1,5 @@
 /*
- * FilePond 4.3.1
+ * FilePond 4.3.2
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2972,9 +2972,7 @@ const createFileProcessor = processFn => {
 
   const abort = () => {
     // no request running, can't abort
-    if (!state.request) {
-      return;
-    }
+    if (!state.request) return;
 
     // stop updater
     state.perceivedPerformanceUpdater.clear();
@@ -3045,6 +3043,9 @@ const FileOrigin$1 = {
   LIMBO: 2,
   LOCAL: 3
 };
+
+const isFile = value =>
+  value instanceof File || (value instanceof Blob && value.name);
 
 const deepCloneObject = src => {
   if (!isObject(src)) return src;
@@ -3182,7 +3183,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       // called when file has loaded succesfully
       const success = result => {
         // set (possibly) transformed file
-        state.file = result.size > 0 ? result : state.file;
+        state.file = isFile(result) ? result : state.file;
 
         // file received
         if (origin === FileOrigin$1.LIMBO && state.serverFileReference) {
@@ -3549,9 +3550,6 @@ const getDomainFromURL = url => {
 const isExternalURL = url =>
   (url.indexOf(':') > -1 || url.indexOf('//') > -1) &&
   getDomainFromURL(location.href) !== getDomainFromURL(url);
-
-const isFile = value =>
-  value instanceof File || (value instanceof Blob && value.name);
 
 const dynamicLabel = label => (...params) =>
   isFunction(label) ? label(...params) : label;
