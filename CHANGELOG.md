@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.3.1
+
+- Add `status` property to the FilePond instance, use this property to determine the current FilePond status (`EMPTY`, `IDLE`, `ERROR`, `BUSY`, or `READY`).
+
+
 ## 4.3.0
 
 - Fix problem where `addFiles` would not correctly map passed options to files.

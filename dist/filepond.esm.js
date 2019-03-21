@@ -1,5 +1,5 @@
 /*
- * FilePond 4.3.0
+ * FilePond 4.3.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -1970,7 +1970,48 @@ const getNumericAspectRatioFromString = aspectRatio => {
 
 const getActiveItems = items => items.filter(item => !item.archived);
 
+const Status$1 = {
+  EMPTY: 0,
+  IDLE: 1, // waiting
+  ERROR: 2, // a file is in error state
+  BUSY: 3, // busy processing or loading
+  READY: 4 // all files uploaded
+};
+
+const ITEM_ERROR = [
+  ItemStatus.LOAD_ERROR,
+  ItemStatus.PROCESSING_ERROR,
+  ItemStatus.PROCESSING_REVERT_ERROR
+];
+const ITEM_BUSY = [
+  ItemStatus.LOADING,
+  ItemStatus.PROCESSING,
+  ItemStatus.PROCESSING_QUEUED,
+  ItemStatus.INIT
+];
+const ITEM_READY = [ItemStatus.PROCESSING_COMPLETE];
+
+const isItemInErrorState = item => ITEM_ERROR.includes(item.status);
+const isItemInBusyState = item => ITEM_BUSY.includes(item.status);
+const isItemInReadyState = item => ITEM_READY.includes(item.status);
+
 const queries = state => ({
+  GET_STATUS: () => {
+    const items = getActiveItems(state.items);
+
+    const { EMPTY, ERROR, BUSY, IDLE, READY } = Status$1;
+
+    if (items.length === 0) return EMPTY;
+
+    if (items.some(isItemInErrorState)) return ERROR;
+
+    if (items.some(isItemInBusyState)) return BUSY;
+
+    if (items.some(isItemInReadyState)) return READY;
+
+    return IDLE;
+  },
+
   GET_ITEM: query => getItemByQuery(state.items, query),
 
   GET_ACTIVE_ITEM: query => getItemByQuery(getActiveItems(state.items), query),
@@ -8059,6 +8100,13 @@ const createApp$1 = (initialOptions = {}) => {
        */
       element: {
         get: () => view.element
+      },
+
+      /**
+       * Returns the current pond status
+       */
+      status: {
+        get: () => store.query('GET_STATUS')
       }
     }
   );
@@ -8417,7 +8465,9 @@ const name = 'filepond';
  * Public Plugin methods
  */
 const fn = () => {};
+let Status = {};
 let FileStatus = {};
+let FileOrigin = {};
 let OptionTypes = {};
 let create = fn;
 let destroy = fn;
@@ -8426,7 +8476,6 @@ let find = fn;
 let registerPlugin = fn;
 let getOptions = fn;
 let setOptions = fn;
-let FileOrigin = {};
 
 // if not supported, no API
 if (supported()) {
@@ -8474,6 +8523,7 @@ if (supported()) {
       OptionTypes[key] = value[1];
     });
 
+  Status = Object.assign({}, Status$1);
   FileOrigin = Object.assign({}, FileOrigin$1);
   FileStatus = Object.assign({}, ItemStatus);
 
@@ -8563,7 +8613,9 @@ if (supported()) {
 
 export {
   supported,
+  Status,
   FileStatus,
+  FileOrigin,
   OptionTypes,
   create,
   destroy,
@@ -8571,6 +8623,5 @@ export {
   find,
   registerPlugin,
   getOptions,
-  setOptions,
-  FileOrigin
+  setOptions
 };

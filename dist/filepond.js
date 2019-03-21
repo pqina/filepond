@@ -1,5 +1,5 @@
 /*
- * FilePond 4.3.0
+ * FilePond 4.3.1
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -2396,8 +2396,59 @@
     });
   };
 
+  var Status$1 = {
+    EMPTY: 0,
+    IDLE: 1, // waiting
+    ERROR: 2, // a file is in error state
+    BUSY: 3, // busy processing or loading
+    READY: 4 // all files uploaded
+  };
+
+  var ITEM_ERROR = [
+    ItemStatus.LOAD_ERROR,
+    ItemStatus.PROCESSING_ERROR,
+    ItemStatus.PROCESSING_REVERT_ERROR
+  ];
+  var ITEM_BUSY = [
+    ItemStatus.LOADING,
+    ItemStatus.PROCESSING,
+    ItemStatus.PROCESSING_QUEUED,
+    ItemStatus.INIT
+  ];
+  var ITEM_READY = [ItemStatus.PROCESSING_COMPLETE];
+
+  var isItemInErrorState = function isItemInErrorState(item) {
+    return ITEM_ERROR.includes(item.status);
+  };
+  var isItemInBusyState = function isItemInBusyState(item) {
+    return ITEM_BUSY.includes(item.status);
+  };
+  var isItemInReadyState = function isItemInReadyState(item) {
+    return ITEM_READY.includes(item.status);
+  };
+
   var queries = function queries(state) {
     return {
+      GET_STATUS: function GET_STATUS() {
+        var items = getActiveItems(state.items);
+
+        var EMPTY = Status$1.EMPTY,
+          ERROR = Status$1.ERROR,
+          BUSY = Status$1.BUSY,
+          IDLE = Status$1.IDLE,
+          READY = Status$1.READY;
+
+        if (items.length === 0) return EMPTY;
+
+        if (items.some(isItemInErrorState)) return ERROR;
+
+        if (items.some(isItemInBusyState)) return BUSY;
+
+        if (items.some(isItemInReadyState)) return READY;
+
+        return IDLE;
+      },
+
       GET_ITEM: function GET_ITEM(query) {
         return getItemByQuery(state.items, query);
       },
@@ -9340,6 +9391,15 @@ function signature:
           get: function get$$1() {
             return view.element;
           }
+        },
+
+        /**
+         * Returns the current pond status
+         */
+        status: {
+          get: function get$$1() {
+            return store.query('GET_STATUS');
+          }
         }
       }
     );
@@ -9745,7 +9805,9 @@ function signature:
    * Public Plugin methods
    */
   var fn = function fn() {};
+  exports.Status = {};
   exports.FileStatus = {};
+  exports.FileOrigin = {};
   exports.OptionTypes = {};
   exports.create = fn;
   exports.destroy = fn;
@@ -9754,7 +9816,6 @@ function signature:
   exports.registerPlugin = fn;
   exports.getOptions = fn;
   exports.setOptions = fn;
-  exports.FileOrigin = {};
 
   // if not supported, no API
   if (supported()) {
@@ -9809,6 +9870,7 @@ function signature:
       });
     };
 
+    exports.Status = Object.assign({}, Status$1);
     exports.FileOrigin = Object.assign({}, FileOrigin$1);
     exports.FileStatus = Object.assign({}, ItemStatus);
 
