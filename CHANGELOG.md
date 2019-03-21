@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.3.3
+
+- Fix issue where aborting a file load while the file was being prepared (for instance, encoded) did not work.
+
+
 ## 4.3.2
 
 - Fix issue where 0 byte files would not upload to the server.

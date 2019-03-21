@@ -1,5 +1,5 @@
 /*
- * FilePond 4.3.2
+ * FilePond 4.3.3
  * Licensed under MIT, https://opensource.org/licenses/MIT
  * Please visit https://pqina.nl/filepond for details.
  */
@@ -3821,7 +3821,6 @@ function signature:
       // user or another process aborted the file load (cannot retry)
       loader.on('abort', function() {
         setStatus(ItemStatus.INIT);
-
         fire('load-abort');
       });
 
@@ -3882,10 +3881,12 @@ function signature:
     };
 
     var abortLoad = function abortLoad() {
-      if (!state.activeLoader) {
+      if (state.activeLoader) {
+        state.activeLoader.abort();
         return;
       }
-      state.activeLoader.abort();
+      setStatus(ItemStatus.INIT);
+      fire('load-abort');
     };
 
     //
@@ -4915,6 +4916,9 @@ function signature:
         var item = _ref8.item,
           ready = _ref8.ready;
 
+        // don't handle archived items, an item could have been archived (load aborted) while waiting to be prepared
+        if (item.archived) return;
+
         // allow plugins to alter the file data
         applyFilterChain('PREPARE_OUTPUT', item.file, {
           query: query,
@@ -4924,6 +4928,10 @@ function signature:
             query: query,
             item: item
           }).then(function(result) {
+            // don't handle archived items, an item could have been archived (load aborted) while being prepared
+            if (item.archived) return;
+
+            // we done!
             ready(result);
           });
         });
