@@ -38,6 +38,7 @@ const createBuild = (options) => {
 	// return Rollup config
 	return {
 		input: 'src/js/index.js',
+		treeshake: false,
 		output: [
 			{
 				format,
