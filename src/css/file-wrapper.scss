@@ -1,0 +1,21 @@
+/* Hard to override styles */
+.filepond--file-wrapper.filepond--file-wrapper {
+    border: none;
+    margin: 0;
+    padding: 0;
+    min-width: 0;
+    height: 100%;
+
+    // hide legend for visual users
+    > legend {
+        position: absolute;
+        overflow: hidden;
+        height: 1px;
+        width: 1px;
+        padding: 0;
+        border: 0;
+        clip: rect(1px, 1px, 1px, 1px);
+        clip-path: inset(50%);
+        white-space: nowrap;
+    }
+}

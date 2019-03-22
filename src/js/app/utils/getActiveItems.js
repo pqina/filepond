@@ -1,0 +1,1 @@
+export const getActiveItems = (items) => items.filter(item => !item.archived);

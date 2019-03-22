@@ -1,0 +1,19 @@
+.filepond--list-scroller {
+    z-index: 6;
+}
+
+.filepond--drop-label {
+    z-index: 5;
+}
+
+.filepond--drip {
+    z-index: 3;
+}
+
+.filepond--root > .filepond--panel {
+    z-index: 2;
+}
+
+.filepond--browser {
+    z-index: 1;
+}

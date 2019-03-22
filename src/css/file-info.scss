@@ -1,0 +1,44 @@
+.filepond--file-info {
+    position: static;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex: 1;
+    margin: 0 0.5em 0 0;
+    min-width: 0;
+
+    // will be animated
+    will-change: transform, opacity;
+
+    // can't do anything with this info
+    pointer-events: none;
+    user-select: none;
+
+    // no margins on children
+    * {
+        margin: 0;
+    }
+
+    // we don't want to have these overrules so these selectors are a bit more specific
+    .filepond--file-info-main {
+        font-size: 0.75em;
+        line-height: 1.2;
+
+        // we want ellipsis if this bar gets too wide
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+        width: 100%;
+    }
+
+    .filepond--file-info-sub {
+        font-size: 0.625em;
+        opacity: 0.5;
+        transition: opacity .25s ease-in-out;
+        white-space: nowrap;
+    }
+
+    .filepond--file-info-sub:empty {
+        display: none;
+    }
+}

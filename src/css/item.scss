@@ -1,0 +1,51 @@
+.filepond--item {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+
+    padding: 0;
+    margin: .25em;
+
+    will-change: transform, opacity;
+
+    // item children order
+    > .filepond--panel {
+        z-index: -1;
+
+        // has a slight shadow
+        .filepond--panel-bottom {
+            box-shadow: 0 0.0625em 0.125em -0.0625em rgba(0, 0, 0, 0.25);
+        }
+    }
+    
+}
+
+// states
+$color-default: #64605e;
+$color-success: #369763;
+$color-error: #c44e47;
+
+.filepond--item-panel {
+    background-color: $color-default;
+}
+
+[data-filepond-item-state='processing-complete'] {
+    .filepond--item-panel {
+        background-color: $color-success;
+    }
+}
+
+[data-filepond-item-state*='invalid'],
+[data-filepond-item-state*='error'] {
+    .filepond--item-panel {
+        background-color: $color-error;
+    }
+}
+
+// style of item panel
+.filepond--item-panel {
+    border-radius: 0.5em;
+    transition: background-color 0.25s;
+}

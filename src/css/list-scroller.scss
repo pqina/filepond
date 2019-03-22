@@ -1,0 +1,46 @@
+// normal mode
+.filepond--list-scroller {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin: 0;
+    will-change: transform;
+}
+
+// scroll mode
+.filepond--list-scroller[data-state='overflow'] {
+
+    .filepond--list {
+        bottom: 0;
+        right: 0;
+    }
+
+    overflow-y: scroll;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    mask: linear-gradient(to bottom, #000 calc(100% - .5em), transparent 100%);
+}
+
+
+//
+// style scrollbar
+//
+.filepond--list-scroller::-webkit-scrollbar {
+    background: transparent;
+}
+
+.filepond--list-scroller::-webkit-scrollbar:vertical {
+    width: 1em;
+}
+
+.filepond--list-scroller::-webkit-scrollbar:horizontal {
+    height: 0;
+}
+
+.filepond--list-scroller::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 99999px;
+    border: 0.3125em solid transparent;
+    background-clip: content-box;
+}

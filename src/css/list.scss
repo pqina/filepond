@@ -1,0 +1,17 @@
+/* hard to overide styles on purpose */
+.filepond--list.filepond--list {
+    position: absolute;
+    top: 0;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+
+    // prevents endless paint calls on filepond--list-scroller
+    will-change: transform;
+}
+
+/* used for padding so allowed to be restyled */
+.filepond--list {
+    left: .75em;
+    right: .75em;
+}

@@ -1,0 +1,61 @@
+.filepond--root {
+    /* layout*/
+    box-sizing: border-box;
+    position: relative;
+    margin-bottom: 1em;
+
+    /* base font size for whole component */
+    font-size: 1rem;
+
+    /* base line height */
+    line-height: normal;
+
+    /* up uses default system font family */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+        Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol';
+
+    /* will increase font weight a bit on Safari */
+    font-weight: 450;
+
+    // default text alignment
+    text-align: left;
+
+    // better text rendering on Safari
+    text-rendering: optimizeLegibility;
+
+    // text direction is ltr for now
+    direction: ltr;
+
+    // optimize rendering
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/contain
+    contain: layout style size;
+
+    // correct box sizing, line-height and positioning on child elements
+    * {
+        font-size: inherit;
+        box-sizing: inherit;
+        line-height: inherit;
+    }
+
+    // block everything
+    &[data-disabled] {
+        pointer-events: none;
+    }
+}
+
+/**
+ * Root element children layout
+ */
+.filepond--root {
+
+    .filepond--drop-label {
+        min-height: 4.75em;
+    }
+
+    .filepond--list-scroller {
+        margin-top:1em;
+        margin-bottom:1em;
+    }
+    
+}

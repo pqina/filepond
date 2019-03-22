@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FilePond Demo</title>
+    <link href="./dist/filepond.css" rel="stylesheet">
+</head>
+<body>
+
+    <input type="file"/>
+    
+    <script src="./dist/filepond.js"></script>
+    
+    <script>
+        // Get a reference to the file input element
+        const inputElement = document.querySelector('input[type="file"]');
+
+        // Create the FilePond instance
+        const pond = FilePond.create(inputElement);
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,165 @@
+import { guesstimateMimeType } from '../../utils/guesstimateMimeType';
+import { getExtensionFromFilename } from '../../utils/getExtensionFromFilename';
+
+export const requestDataTransferItems = dataTransfer =>
+    new Promise((resolve, reject) => {
+        // try to get links from transfer, if found, we'll exit immidiately
+        // as only one link can be dragged at once
+        const links = getLinks(dataTransfer);
+        if (links.length) {
+            resolve(links);
+            return;
+        }
+
+        // try to get files from the transfer
+        getFiles(dataTransfer).then(resolve);
+    });
+
+/**
+ * Extracts files from a DataTransfer object
+ */
+const getFiles = dataTransfer =>
+    new Promise((resolve, reject) => {
+        // get the transfer items as promises
+        const promisedFiles = (dataTransfer.items
+            ? Array.from(dataTransfer.items)
+            : []
+        )
+
+            // only keep file system items (files and directories)
+            .filter(item => isFileSystemItem(item))
+
+            // map each item to promise
+            .map(item => getFilesFromItem(item));
+
+        // if is empty, see if we can extract some info from the files property as a fallback
+        if (!promisedFiles.length) {
+            // TODO: test for directories (should not be allowed)
+            // Use FileReader, problem is that the files property gets lost in the process
+
+            resolve(dataTransfer.files ? Array.from(dataTransfer.files) : []);
+            return;
+        }
+
+        // done!
+        Promise.all(promisedFiles).then(returendFileGroups => {
+            // flatten groups
+            const files = [];
+            returendFileGroups.forEach(group => {
+                files.push.apply(files, group);
+            });
+
+            // done (filter out empty files)!
+            resolve(files.filter(file => file));
+        });
+    });
+
+const isFileSystemItem = item => {
+    if (isEntry(item)) {
+        const entry = getAsEntry(item);
+        if (entry) {
+            return entry.isFile || entry.isDirectory;
+        }
+    }
+    return item.kind === 'file';
+};
+
+const getFilesFromItem = item =>
+    new Promise((resolve, reject) => {
+        if (isDirectoryEntry(item)) {
+            getFilesInDirectory(getAsEntry(item)).then(resolve);
+            return;
+        }
+
+        resolve([item.getAsFile()]);
+    });
+
+const getFilesInDirectory = entry =>
+    new Promise((resolve, reject) => {
+        const files = [];
+
+        // the total entries to read
+        let totalFilesFound = 0;
+
+        // the recursive function
+        const readEntries = dirEntry => {
+            const directoryReader = dirEntry.createReader();
+            directoryReader.readEntries(entries => {
+                entries.forEach(entry => {
+                    
+                    // recursively read more directories
+                    if (entry.isDirectory) {
+                        readEntries(entry);
+                    } else {
+                        // read as file
+                        totalFilesFound++;
+                        entry.file(file => {
+
+                            files.push(correctMissingFileType(file));
+
+                            if (totalFilesFound === files.length) {
+                                resolve(files);
+                            }
+                        });
+                    }
+                });
+            });
+        };
+
+        // go!
+        readEntries(entry);
+    });
+
+const correctMissingFileType = (file) => {
+    if (file.type.length) return file;
+    const date = file.lastModifiedDate;
+    const name = file.name;
+    file = file.slice(0, file.size, guesstimateMimeType(getExtensionFromFilename(file.name)));
+    file.name = name;
+    file.lastModifiedDate = date;
+    return file;
+}
+
+const isDirectoryEntry = item =>
+    isEntry(item) && (getAsEntry(item) || {}).isDirectory;
+
+const isEntry = item => 'webkitGetAsEntry' in item;
+
+const getAsEntry = item => item.webkitGetAsEntry();
+
+/**
+ * Extracts links from a DataTransfer object
+ */
+const getLinks = dataTransfer => {
+    let links = [];
+    try {
+        // look in meta data property
+        links = getLinksFromTransferMetaData(dataTransfer);
+        if (links.length) {
+            return links;
+        }
+        links = getLinksFromTransferURLData(dataTransfer);
+    } catch (e) {
+        // nope nope nope (probably IE trouble)
+    }
+    return links;
+};
+
+const getLinksFromTransferURLData = dataTransfer => {
+    let data = dataTransfer.getData('url');
+    if (typeof data === 'string' && data.length) {
+        return [data];
+    }
+    return [];
+};
+
+const getLinksFromTransferMetaData = dataTransfer => {
+    let data = dataTransfer.getData('text/html');
+    if (typeof data === 'string' && data.length) {
+        const matches = data.match(/src\s*=\s*"(.+?)"/);
+        if (matches) {
+            return [matches[1]];
+        }
+    }
+    return [];
+};

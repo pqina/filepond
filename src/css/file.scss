@@ -1,0 +1,171 @@
+.filepond--file {
+    $item-spacing-horizontal: 0.5625em;
+    $item-spacing-vertical: 0.5625em;
+
+    position: static;
+    display: flex;
+    height: 100%;
+    align-items: flex-start;
+
+    padding: $item-spacing-vertical $item-spacing-horizontal;
+
+    color: #fff;
+    border-radius: 0.5em;
+
+    // control positions
+    .filepond--file-status {
+        margin-left: auto;
+        margin-right: 2.25em;
+    }
+
+    .filepond--processing-complete-indicator {
+        pointer-events: none;
+        user-select: none;
+        z-index: 3;
+    }
+
+    .filepond--processing-complete-indicator,
+    .filepond--progress-indicator,
+    .filepond--file-action-button {
+        position: absolute;
+    }
+
+    // .filepond--file-action-button
+    [data-align*='left'] {
+        left: $item-spacing-horizontal;
+    }
+
+    [data-align*='right'] {
+        right: $item-spacing-horizontal;
+    }
+
+    [data-align*='center'] {
+        left: calc(50% - .8125em); // .8125 is half of button width
+    }
+
+    [data-align*='bottom'] {
+        bottom: $item-spacing-vertical * 2;
+    }
+
+    [data-align='center'] {
+        top: calc(50% - .8125em);
+    }
+
+    .filepond--progress-indicator {
+        margin-top: .1875em;
+
+        &[data-align*='right'] {
+            margin-right: .1875em;
+        }
+
+        &[data-align*='left'] {
+            margin-left: .1875em;
+        }
+    }
+}
+
+// make sure text does not overlap
+[data-filepond-item-state='cancelled'],
+[data-filepond-item-state*='invalid'],
+[data-filepond-item-state*='error'] {
+    .filepond--file-info {
+        margin-right: 2.25em;
+    }
+}
+
+
+[data-filepond-item-state='processing-complete'] {
+
+    // busy state
+    .filepond--action-revert-item-processing svg {
+        animation: fall 0.5s 0.125s linear both;
+    }
+
+    // hide details by default, only show when can revert
+    .filepond--file-info-sub,
+    .filepond--file-status-sub {
+        opacity:0;
+    }
+
+    .filepond--action-revert-item-processing ~ .filepond--file-info .filepond--file-info-sub,
+    .filepond--action-revert-item-processing ~ .filepond--file-status .filepond--file-status-sub {
+        opacity:.5;
+    }
+
+}
+
+
+
+
+// file state can be invalid or error, both are visually similar but
+// having them as separate states might be useful
+[data-filepond-item-state*='invalid'],
+[data-filepond-item-state*='error'] {
+    .filepond--panel,
+    .filepond--file-wrapper 
+    {
+        animation: shake 0.65s linear both;
+    }
+}
+
+// spins progress indicator when file is marked as busy
+[data-filepond-item-state*='busy'] {
+    .filepond--progress-indicator svg {
+        animation: spin 1s linear infinite;
+    }
+}
+
+/**
+ * States
+ */
+@keyframes spin {
+    0% {
+        transform: rotateZ(0deg);
+    }
+
+    100% {
+        transform: rotateZ(360deg);
+    }
+}
+
+@keyframes shake {
+    10%,
+    90% {
+        transform: translateX(-0.0625em);
+    }
+
+    20%,
+    80% {
+        transform: translateX(0.125em);
+    }
+
+    30%,
+    50%,
+    70% {
+        transform: translateX(-0.25em);
+    }
+
+    40%,
+    60% {
+        transform: translateX(0.25em);
+    }
+}
+
+@keyframes fall {
+    0% {
+        opacity: 0;
+        transform: scale(0.5);
+        animation-timing-function: ease-out;
+    }
+
+    70% {
+        opacity: 1;
+        transform: scale(1.1);
+        animation-timing-function: ease-in-out;
+    }
+
+    100% {
+        transform: scale(1);
+        animation-timing-function: ease-out;
+    }
+}

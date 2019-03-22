@@ -1,0 +1,28 @@
+.filepond--progress-indicator {
+    position: static;
+    width: 1.25em;
+    height: 1.25em;
+
+    color: #fff;
+
+    // can't have margins
+    margin: 0;
+
+    // no interaction possible with progress indicator
+    pointer-events: none;
+
+    // will be animated
+    will-change: transform, opacity;
+}
+
+.filepond--progress-indicator svg {
+    width: 100%;
+    height: 100%;
+    vertical-align: top;
+    transform-box: fill-box; // should center the animation correctly when zoomed in
+}
+
+.filepond--progress-indicator path {
+    fill: none;
+    stroke: currentColor;
+}

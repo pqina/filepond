@@ -120,6 +120,13 @@ Or get it from a CDN:
 [Getting started with FilePond](https://pqina.nl/filepond/docs/patterns/getting-started/)
 
 
+## Build
+
+```
+npm run build
+```
+
+
 ## Publications
 
 *   [Smooth file uploading with React and FilePond](https://itnext.io/uploading-files-with-react-and-filepond-f8a798308557)

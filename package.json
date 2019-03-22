@@ -1,8 +1,13 @@
 {
     "name": "filepond",
-    "version": "4.3.3",
+    "version": "4.3.4",
     "description": "FilePond, Where files go to stretch their bits.",
-    "homepage": "https://pqina.nl/filepond",
+    "license": "MIT",
+    "author": {
+        "name": "PQINA",
+        "url": "https://pqina.nl/"
+    },
+    "homepage": "https://pqina.nl/filepond/",
     "repository": "pqina/filepond",
     "main": "dist/filepond.js",
     "browser": "dist/filepond.js",
@@ -18,9 +23,37 @@
         "image",
         "preview"
     ],
-    "license": "MIT",
-    "author": {
-        "name": "PQINA",
-        "url": "https://pqina.nl"
+    "browserslist": [
+        "last 3 versions",
+        "edge >= 12",
+        "ie >= 10"
+    ],
+    "files": [
+        "dist"
+    ],
+    "scripts": {
+        "start": "npx rollup -c -w",
+        "build": "npm run scripts | npm run styles",
+        "scripts": "npx rollup -c",
+        "styles": "npm run styles:pretty && npm run styles:nano",
+        "styles:pretty": "cat src/css/* | npx node-sass | npx postcss --no-map --use autoprefixer | npx prettier --single-quote --parser css | node banner-cli.js FilePond > dist/filepond.css",
+        "styles:nano": "cat src/css/* | npx node-sass | npx postcss --no-map --use autoprefixer --use cssnano | node banner-cli.js FilePond > dist/filepond.min.css"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.4.0",
+        "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
+        "@babel/preset-env": "^7.4.2",
+        "autoprefixer": "^9.5.0",
+        "cssnano": "^4.1.10",
+        "node-sass": "^4.11.0",
+        "postcss-cli": "^6.1.2",
+        "prettier": "^1.16.4",
+        "rollup": "^1.7.0",
+        "rollup-plugin-babel": "^4.3.2",
+        "rollup-plugin-commonjs": "^9.2.1",
+        "rollup-plugin-license": "^0.8.1",
+        "rollup-plugin-node-resolve": "^4.0.1",
+        "rollup-plugin-prettier": "^0.6.0",
+        "rollup-plugin-terser": "^4.0.4"
     }
 }

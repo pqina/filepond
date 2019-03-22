@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.3.4
+
+- Add source code
+- Add build scripts
+
+
 ## 4.3.3
 
 - Fix issue where aborting a file load while the file was being prepared (for instance, encoded) did not work.
