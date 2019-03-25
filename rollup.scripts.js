@@ -22,18 +22,18 @@ const createBuild = (options) => {
 	if (transpile) {
 		plugins.push(babel({
 			exclude: ['node_modules/**']
-		}))
+		}));
 	}
 	if (minify) {
-		plugins.push(terser())
+		plugins.push(terser());
 	}
 	else {
 		plugins.push(prettier({
 			singleQuote: true,
 			parser: 'babel'
-		}))
+		}));
 	}
-	plugins.push(license({banner: banner(options)}))
+	plugins.push(license({banner: banner(options)}));
 	
 	// return Rollup config
 	return {

@@ -24,14 +24,16 @@
         "preview"
     ],
     "browserslist": [
-        "last 3 versions",
-        "edge >= 12",
-        "ie >= 10"
+        "last 1 version and not Explorer 10",
+        "Explorer 11",
+        "iOS >= 9",
+        "Android >= 4.4"
     ],
     "files": [
         "dist"
     ],
     "scripts": {
+        "test": "npx jest",
         "start": "npx rollup -c -w",
         "build": "npm run scripts | npm run styles",
         "scripts": "npx rollup -c",
@@ -42,9 +44,12 @@
     "devDependencies": {
         "@babel/core": "^7.4.0",
         "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
+        "@babel/plugin-transform-template-literals": "^7.2.0",
         "@babel/preset-env": "^7.4.2",
         "autoprefixer": "^9.5.0",
+        "babel-jest": "^24.5.0",
         "cssnano": "^4.1.10",
+        "jest": "^24.5.0",
         "node-sass": "^4.11.0",
         "postcss-cli": "^6.1.2",
         "prettier": "^1.16.4",

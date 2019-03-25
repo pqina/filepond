@@ -1,22 +1,25 @@
-/*
- * FilePond 4.3.3
- * Licensed under MIT, https://opensource.org/licenses/MIT
- * Please visit https://pqina.nl/filepond for details.
+/*!
+ * FilePond 4.3.4
+ * Licensed under MIT, https://opensource.org/licenses/MIT/
+ * Please visit https://pqina.nl/filepond/ for details.
  */
 
 /* eslint-disable */
+
 const isNode = value => value instanceof HTMLElement;
 
 const createStore = (initialState, queries = [], actions = []) => {
   // internal state
-  const state = Object.assign({}, initialState);
+  const state = {
+    ...initialState
+  };
 
   // contains all actions for next frame, is clear when actions are requested
   const actionQueue = [];
   const dispatchQueue = [];
 
   // returns a duplicate of the current state
-  const getState = () => Object.assign({}, state);
+  const getState = () => ({ ...state });
 
   // returns a duplicate of the actions array and clears the actions array
   const processActionQueue = () => {
@@ -79,16 +82,18 @@ const createStore = (initialState, queries = [], actions = []) => {
 
   let queryHandles = {};
   queries.forEach(query => {
-    queryHandles = Object.assign({}, query(state), queryHandles);
+    queryHandles = {
+      ...query(state),
+      ...queryHandles
+    };
   });
 
   let actionHandlers = {};
   actions.forEach(action => {
-    actionHandlers = Object.assign(
-      {},
-      action(dispatch, query, state),
-      actionHandlers
-    );
+    actionHandlers = {
+      ...action(dispatch, query, state),
+      ...actionHandlers
+    };
   });
 
   return api;
@@ -99,7 +104,7 @@ const defineProperty = (obj, property, definition) => {
     obj[property] = definition;
     return;
   }
-  Object.defineProperty(obj, property, Object.assign({}, definition));
+  Object.defineProperty(obj, property, { ...definition });
 };
 
 const forin = (obj, cb) => {
@@ -191,7 +196,9 @@ const getViewRect = (elementRect, childViews, offset, scale) => {
 
   const rect = {
     // the rectangle of the element itself
-    element: Object.assign({}, elementRect),
+    element: {
+      ...elementRect
+    },
 
     // the rectangle of the element expanded to contain its children, does not include any margins
     inner: {
@@ -216,8 +223,8 @@ const getViewRect = (elementRect, childViews, offset, scale) => {
     .filter(childView => !childView.isRectIgnored())
     .map(childView => childView.rect)
     .forEach(childViewRect => {
-      expandRect(rect.inner, Object.assign({}, childViewRect.inner));
-      expandRect(rect.outer, Object.assign({}, childViewRect.outer));
+      expandRect(rect.inner, { ...childViewRect.inner });
+      expandRect(rect.outer, { ...childViewRect.outer });
     });
 
   // calculate inner width and height
@@ -377,6 +384,7 @@ const spring =
       return api;
     };
 
+const easeLinear = t => t;
 const easeInOutQuad = t => (t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t);
 
 const tween =
@@ -476,7 +484,7 @@ const createAnimator = (definition, category, property) => {
       : definition[category] || definition;
 
   const type = typeof def === 'string' ? def : def.type;
-  const props = typeof def === 'object' ? Object.assign({}, def) : {};
+  const props = typeof def === 'object' ? { ...def } : {};
 
   return animator[type] ? animator[type](props) : null;
 };
@@ -521,7 +529,7 @@ const animations = ({
   viewState
 }) => {
   // initial properties
-  const initialProps = Object.assign({}, viewProps);
+  const initialProps = { ...viewProps };
 
   // list of all active animations
   const animations = [];
@@ -661,7 +669,7 @@ const styles = ({
   view
 }) => {
   // initial props
-  const initialProps = Object.assign({}, viewProps);
+  const initialProps = { ...viewProps };
 
   // current props
   const currentProps = {};
@@ -702,7 +710,7 @@ const styles = ({
       applyStyles(view.element, viewProps);
 
       // store new transforms
-      Object.assign(currentProps, Object.assign({}, viewProps));
+      Object.assign(currentProps, { ...viewProps });
 
       // no longer busy
       return true;
@@ -932,7 +940,7 @@ const createView =
 
     // core view methods
     const getElement = () => element;
-    const getChildViews = () => [...childViews];
+    const getChildViews = () => childViews.concat();
     const getReference = () => ref;
     const createChildView = store => (view, props) => view(store, props);
     const getRect = () => {
@@ -996,17 +1004,19 @@ const createView =
       });
 
       // updates child views that are currently attached to the DOM
-      childViews.filter(child => !!child.element.parentNode).forEach(child => {
-        // if a child view is not resting, we are not resting
-        const childResting = child._write(
-          ts,
-          filterFrameActionsForChild(child, frameActions),
-          shouldOptimize
-        );
-        if (!childResting) {
-          resting = false;
-        }
-      });
+      childViews
+        .filter(child => !!child.element.parentNode)
+        .forEach(child => {
+          // if a child view is not resting, we are not resting
+          const childResting = child._write(
+            ts,
+            filterFrameActionsForChild(child, frameActions),
+            shouldOptimize
+          );
+          if (!childResting) {
+            resting = false;
+          }
+        });
 
       // append new elements to DOM and update those
       childViews
@@ -1070,7 +1080,8 @@ const createView =
     };
 
     // private API definition
-    const internalAPIDefinition = Object.assign({}, sharedAPIDefinition, {
+    const internalAPIDefinition = {
+      ...sharedAPIDefinition,
       rect: {
         get: getRect
       },
@@ -1101,7 +1112,7 @@ const createView =
       // access to data store
       dispatch: store.dispatch,
       query: store.query
-    });
+    };
 
     // public view API methods
     const externalAPIDefinition = {
@@ -1124,11 +1135,12 @@ const createView =
     };
 
     // mixin API methods
-    const mixinAPIDefinition = Object.assign({}, sharedAPIDefinition, {
+    const mixinAPIDefinition = {
+      ...sharedAPIDefinition,
       rect: {
         get: () => rect
       }
-    });
+    };
 
     // add mixin functionality
     Object.keys(mixins)
@@ -1216,7 +1228,7 @@ const createPainter = (read, write, fps = 60) => {
     }
 
     // align next frame
-    last = ts - delta % interval;
+    last = ts - (delta % interval);
 
     // update view
     painter.readers.forEach(read => read());
@@ -1295,7 +1307,9 @@ const isString = value => typeof value === 'string';
 const toNumber = value =>
   isNumber(value)
     ? value
-    : isString(value) ? toString(value).replace(/[a-z]+/gi, '') : 0;
+    : isString(value)
+    ? toString(value).replace(/[a-z]+/gi, '')
+    : 0;
 
 const toInt = value => parseInt(toNumber(value), 10);
 
@@ -1576,8 +1590,9 @@ const createOptionActions = options => (dispatch, query, state) => {
     obj[`SET_${name}`] = action => {
       try {
         state.options[key] = action.value;
-      } catch (e) {}
-      // nope, failed
+      } catch (e) {
+        // nope, failed
+      }
 
       // we successfully set the value of this option
       dispatch(`DID_SET_${name}`, { value: state.options[key] });
@@ -1772,9 +1787,9 @@ const addFilter = (key, cb) => filters.push({ key, cb });
 const extendDefaultOptions = additionalOptions =>
   Object.assign(defaultOptions, additionalOptions);
 
-const getOptions$1 = () => Object.assign({}, defaultOptions);
+const getOptions = () => ({ ...defaultOptions });
 
-const setOptions$1 = opts => {
+const setOptions = opts => {
   forin(opts, (key, value) => {
     // key does not exist, so this option cannot be set
     if (!defaultOptions[key]) {
@@ -1962,15 +1977,15 @@ const getNumericAspectRatioFromString = aspectRatio => {
     return aspectRatio;
   }
   if (/:/.test(aspectRatio)) {
-    const [w, h] = aspectRatio.split(':');
-    return h / w;
+    const parts = aspectRatio.split(':');
+    return parts[1] / parts[0];
   }
   return parseFloat(aspectRatio);
 };
 
 const getActiveItems = items => items.filter(item => !item.archived);
 
-const Status$1 = {
+const Status = {
   EMPTY: 0,
   IDLE: 1, // waiting
   ERROR: 2, // a file is in error state
@@ -1999,7 +2014,7 @@ const queries = state => ({
   GET_STATUS: () => {
     const items = getActiveItems(state.items);
 
-    const { EMPTY, ERROR, BUSY, IDLE, READY } = Status$1;
+    const { EMPTY, ERROR, BUSY, IDLE, READY } = Status;
 
     if (items.length === 0) return EMPTY;
 
@@ -2435,12 +2450,13 @@ const createFileLoader = fetchFn => {
     );
   };
 
-  const api = Object.assign({}, on(), {
+  const api = {
+    ...on(),
     setSource: source => (state.source = source),
     getProgress, // file load progress
     abort, // abort file load
     load // start load
-  });
+  };
 
   return api;
 };
@@ -2466,14 +2482,12 @@ const sendRequest = (data, url, options) => {
   let headersReceived = false;
 
   // set default options
-  options = Object.assign(
-    {
-      method: 'POST',
-      headers: {},
-      withCredentials: false
-    },
-    options
-  );
+  options = {
+    method: 'POST',
+    headers: {},
+    withCredentials: false,
+    ...options
+  };
 
   // encode url
   url = encodeURI(url);
@@ -2602,13 +2616,10 @@ const createFetchFunction = (apiUrl = '', action) => {
   // internal handler
   return (url, load, error, progress, abort, headers) => {
     // do local or remote request based on if the url is external
-    const request = sendRequest(
-      url,
-      apiUrl + action.url,
-      Object.assign({}, action, {
-        responseType: 'blob'
-      })
-    );
+    const request = sendRequest(url, apiUrl + action.url, {
+      ...action,
+      responseType: 'blob'
+    });
 
     request.onload = xhr => {
       // get headers
@@ -3000,13 +3011,14 @@ const createFileProcessor = processFn => {
     state.progress ? Math.min(state.progress, state.perceivedProgress) : null;
   const getDuration = () => Math.min(state.duration, state.perceivedDuration);
 
-  const api = Object.assign({}, on(), {
+  const api = {
+    ...on(),
     process, // start processing file
     abort, // abort active process request
     getProgress,
     getDuration,
     reset
-  });
+  };
 
   return api;
 };
@@ -3038,7 +3050,7 @@ const createFileStub = source => {
   };
 };
 
-const FileOrigin$1 = {
+const FileOrigin = {
   INPUT: 1,
   LIMBO: 2,
   LOCAL: 3
@@ -3145,7 +3157,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
       // if has received source, we done
       if (meta.source) {
-        origin = FileOrigin$1.LIMBO;
+        origin = FileOrigin.LIMBO;
         state.serverFileReference = meta.source;
         state.status = ItemStatus.PROCESSING_COMPLETE;
       }
@@ -3185,7 +3197,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
         state.file = isFile(result) ? result : state.file;
 
         // file received
-        if (origin === FileOrigin$1.LIMBO && state.serverFileReference) {
+        if (origin === FileOrigin.LIMBO && state.serverFileReference) {
           setStatus(ItemStatus.PROCESSING_COMPLETE);
         } else {
           setStatus(ItemStatus.IDLE);
@@ -3309,7 +3321,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       if (state.archived) return;
 
       // process file!
-      processor.process(file, Object.assign({}, metadata));
+      processor.process(file, { ...metadata });
     };
 
     // something went wrong during transform phase
@@ -3407,56 +3419,54 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
   const getMetadata = key => deepCloneObject(key ? metadata[key] : metadata);
 
-  const api = Object.assign(
-    {
-      id: { get: () => id },
-      origin: { get: () => origin },
-      serverId: { get: () => state.serverFileReference },
-      status: { get: () => state.status },
-      filename: { get: () => state.file.name },
-      filenameWithoutExtension: {
-        get: () => getFilenameWithoutExtension(state.file.name)
-      },
-      fileExtension: { get: getFileExtension },
-      fileType: { get: getFileType },
-      fileSize: { get: getFileSize },
-      file: { get: getFile },
-
-      source: { get: () => state.source },
-
-      getMetadata,
-      setMetadata: (key, value, silent) => {
-        if (isObject(key)) {
-          const data = key;
-          Object.keys(data).forEach(key => {
-            setMetadata(key, data[key], value);
-          });
-          return key;
-        }
-        setMetadata(key, value, silent);
-        return value;
-      },
-
-      extend: (name, handler) => (itemAPI[name] = handler),
-
-      abortLoad,
-      retryLoad,
-      requestProcessing,
-      abortProcessing,
-
-      load,
-      process,
-      revert
+  const api = {
+    id: { get: () => id },
+    origin: { get: () => origin },
+    serverId: { get: () => state.serverFileReference },
+    status: { get: () => state.status },
+    filename: { get: () => state.file.name },
+    filenameWithoutExtension: {
+      get: () => getFilenameWithoutExtension(state.file.name)
     },
-    on(),
-    {
-      release: () => (state.released = true),
-      released: { get: () => state.released },
+    fileExtension: { get: getFileExtension },
+    fileType: { get: getFileType },
+    fileSize: { get: getFileSize },
+    file: { get: getFile },
 
-      archive: () => (state.archived = true),
-      archived: { get: () => state.archived }
-    }
-  );
+    source: { get: () => state.source },
+
+    getMetadata,
+    setMetadata: (key, value, silent) => {
+      if (isObject(key)) {
+        const data = key;
+        Object.keys(data).forEach(key => {
+          setMetadata(key, data[key], value);
+        });
+        return key;
+      }
+      setMetadata(key, value, silent);
+      return value;
+    },
+
+    extend: (name, handler) => (itemAPI[name] = handler),
+
+    abortLoad,
+    retryLoad,
+    requestProcessing,
+    abortProcessing,
+
+    load,
+    process,
+    revert,
+
+    ...on(),
+
+    release: () => (state.released = true),
+    released: { get: () => state.released },
+
+    archive: () => (state.archived = true),
+    archived: { get: () => state.archived }
+  };
 
   // create it here instead of returning it instantly so we can extend it later
   const itemAPI = createObject(api);
@@ -3654,13 +3664,11 @@ const actions = (dispatch, query, state) => ({
         return;
 
       // not in list, add
-      dispatch(
-        'ADD_ITEM',
-        Object.assign({}, file, {
-          interactionMethod: InteractionMethod.NONE,
-          index
-        })
-      );
+      dispatch('ADD_ITEM', {
+        ...file,
+        interactionMethod: InteractionMethod.NONE,
+        index
+      });
     });
   },
 
@@ -3871,8 +3879,10 @@ const actions = (dispatch, query, state) => ({
     // where did the file originate
     const origin =
       options.type === 'local'
-        ? FileOrigin$1.LOCAL
-        : options.type === 'limbo' ? FileOrigin$1.LIMBO : FileOrigin$1.INPUT;
+        ? FileOrigin.LOCAL
+        : options.type === 'limbo'
+        ? FileOrigin.LIMBO
+        : FileOrigin.INPUT;
 
     // create a new blank item
     const item = createItem(
@@ -3880,7 +3890,7 @@ const actions = (dispatch, query, state) => ({
       origin,
 
       // an input file never has a server file reference
-      origin === FileOrigin$1.INPUT ? null : source,
+      origin === FileOrigin.INPUT ? null : source,
 
       // file mock data, if defined
       options.file
@@ -4111,15 +4121,15 @@ const actions = (dispatch, query, state) => ({
 
       // this creates a function that loads the file based on the type of file (string, base64, blob, file) and location of file (local, remote, limbo)
       createFileLoader(
-        origin === FileOrigin$1.INPUT
+        origin === FileOrigin.INPUT
           ? // input
             isString(source) && isExternalURL(source)
             ? createFetchFunction(url, fetch) // remote url
             : fetchLocal // local url
           : // limbo or local
-            origin === FileOrigin$1.LIMBO
-            ? createFetchFunction(url, restore) // limbo
-            : createFetchFunction(url, load) // local
+          origin === FileOrigin.LIMBO
+          ? createFetchFunction(url, restore) // limbo
+          : createFetchFunction(url, load) // local
       ),
 
       // called when the file is loaded so it can be piped through the filters
@@ -4166,7 +4176,7 @@ const actions = (dispatch, query, state) => ({
     dispatch('DID_LOAD_ITEM', {
       id: item.id,
       error: null,
-      serverFileReference: item.origin === FileOrigin$1.INPUT ? null : source
+      serverFileReference: item.origin === FileOrigin.INPUT ? null : source
     });
 
     // item has been successfully loaded and added to the
@@ -4174,13 +4184,13 @@ const actions = (dispatch, query, state) => ({
     success(createItemAPI(item));
 
     // if this is a local server file we need to show a different state
-    if (item.origin === FileOrigin$1.LOCAL) {
+    if (item.origin === FileOrigin.LOCAL) {
       dispatch('DID_LOAD_LOCAL_ITEM', { id: item.id });
       return;
     }
 
     // if is a temp server file we prevent async upload call here (as the file is already on the server)
-    if (item.origin === FileOrigin$1.LIMBO) {
+    if (item.origin === FileOrigin.LIMBO) {
       dispatch('DID_COMPLETE_ITEM_PROCESSING', {
         id: item.id,
         error: null,
@@ -4379,7 +4389,7 @@ const actions = (dispatch, query, state) => ({
     // if this is a local file and the server.remove function has been configured, send source there so dev can remove file from server
     const server = state.options.server;
     if (
-      item.origin === FileOrigin$1.LOCAL &&
+      item.origin === FileOrigin.LOCAL &&
       server &&
       isFunction(server.remove)
     ) {
@@ -4500,7 +4510,7 @@ const text = (node, value) => {
 };
 
 const polarToCartesian = (centerX, centerY, radius, angleInDegrees) => {
-  const angleInRadians = (angleInDegrees % 360 - 90) * Math.PI / 180.0;
+  const angleInRadians = (((angleInDegrees % 360) - 90) * Math.PI) / 180.0;
   return {
     x: centerX + radius * Math.cos(angleInRadians),
     y: centerY + radius * Math.sin(angleInRadians)
@@ -4543,7 +4553,7 @@ const percentageArc = (x, y, radius, from, to) => {
   );
 };
 
-const create$7 = ({ root, props }) => {
+const create = ({ root, props }) => {
   // start at 0
   props.spin = false;
   props.progress = 0;
@@ -4562,7 +4572,7 @@ const create$7 = ({ root, props }) => {
   root.appendChild(svg);
 };
 
-const write$5 = ({ root, props }) => {
+const write = ({ root, props }) => {
   if (props.opacity === 0) {
     return;
   }
@@ -4615,8 +4625,8 @@ const progressIndicator = createView({
   name: 'progress-indicator',
   ignoreRectUpdate: true,
   ignoreRect: true,
-  create: create$7,
-  write: write$5,
+  create,
+  write,
   mixins: {
     apis: ['progress', 'spin', 'align'],
     styles: ['opacity'],
@@ -4632,14 +4642,14 @@ const progressIndicator = createView({
   }
 });
 
-const create$8 = ({ root, props }) => {
+const create$1 = ({ root, props }) => {
   root.element.title = props.label;
   root.element.innerHTML = props.icon || '';
 
   props.isDisabled = false;
 };
 
-const write$6 = ({ root, props }) => {
+const write$1 = ({ root, props }) => {
   const { isDisabled } = props;
   const shouldDisable = root.query('GET_DISABLED') || props.opacity === 0;
 
@@ -4672,8 +4682,8 @@ const fileActionButton = createView({
     },
     listeners: true
   },
-  create: create$8,
-  write: write$6
+  create: create$1,
+  write: write$1
 });
 
 const toNaturalFileSize = (bytes, decimalSeparator = '.') => {
@@ -4711,7 +4721,7 @@ const removeDecimalsWhenZero = (value, decimalCount, separator) => {
     .join(separator);
 };
 
-const create$9 = ({ root, props }) => {
+const create$2 = ({ root, props }) => {
   // filename
   const fileName = createElement$1('span');
   fileName.className = 'filepond--file-info-main';
@@ -4764,9 +4774,9 @@ const fileInfo = createView({
     DID_THROW_ITEM_INVALID: updateFileSizeOnError
   }),
   didCreateView: root => {
-    applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
+    applyFilters('CREATE_VIEW', { ...root, view: root });
   },
-  create: create$9,
+  create: create$2,
   mixins: {
     styles: ['translateX', 'translateY'],
     animations: {
@@ -4778,7 +4788,7 @@ const fileInfo = createView({
 
 const toPercentage = value => Math.round(value * 100);
 
-const create$10 = ({ root, props }) => {
+const create$3 = ({ root, props }) => {
   // main status
   const main = createElement$1('span');
   main.className = 'filepond--file-status-main';
@@ -4826,7 +4836,7 @@ const didAbortItemProcessing = ({ root }) => {
   text(root.ref.sub, root.query('GET_LABEL_TAP_TO_RETRY'));
 };
 
-const didCompleteItemProcessing$1 = ({ root }) => {
+const didCompleteItemProcessing = ({ root }) => {
   text(root.ref.main, root.query('GET_LABEL_FILE_PROCESSING_COMPLETE'));
   text(root.ref.sub, root.query('GET_LABEL_TAP_TO_UNDO'));
 };
@@ -4850,7 +4860,7 @@ const fileStatus = createView({
     DID_REVERT_ITEM_PROCESSING: clear,
     DID_REQUEST_ITEM_PROCESSING: didRequestItemProcessing,
     DID_ABORT_ITEM_PROCESSING: didAbortItemProcessing,
-    DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing$1,
+    DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing,
     DID_UPDATE_ITEM_PROCESS_PROGRESS: didSetItemProcessProgress,
     DID_UPDATE_ITEM_LOAD_PROGRESS: didSetItemLoadProgress,
     DID_THROW_ITEM_LOAD_ERROR: error,
@@ -4860,9 +4870,9 @@ const fileStatus = createView({
     DID_THROW_ITEM_REMOVE_ERROR: error
   }),
   didCreateView: root => {
-    applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
+    applyFilters('CREATE_VIEW', { ...root, view: root });
   },
-  create: create$10,
+  create: create$3,
   mixins: {
     styles: ['translateX', 'translateY', 'opacity'],
     animations: {
@@ -5064,7 +5074,7 @@ const processingCompleteIndicatorView = createView({
 /**
  * Creates the file view
  */
-const create$6 = ({ root, props }) => {
+const create$4 = ({ root, props }) => {
   const { id } = props;
 
   // allow reverting upload
@@ -5165,12 +5175,13 @@ const create$6 = ({ root, props }) => {
   root.ref.processProgressIndicator = progressIndicatorView;
 };
 
-const write$4 = ({ root, actions, props }) => {
+const write$2 = ({ root, actions, props }) => {
   // route actions
-  route$4({ root, actions, props });
+  route({ root, actions, props });
 
   // select last state change action
-  let action = [...actions]
+  let action = actions
+    .concat()
     .filter(action => /^DID_/.test(action.type))
     .reverse()
     .find(action => StyleMap[action.type]);
@@ -5199,7 +5210,7 @@ const write$4 = ({ root, actions, props }) => {
   });
 };
 
-const route$4 = createRoute({
+const route = createRoute({
   DID_SET_LABEL_BUTTON_ABORT_ITEM_PROCESSING: ({ root, action }) => {
     root.ref.buttonAbortItemProcessing.label = action.value;
   },
@@ -5232,10 +5243,10 @@ const route$4 = createRoute({
 });
 
 const file = createView({
-  create: create$6,
-  write: write$4,
+  create: create$4,
+  write: write$2,
   didCreateView: root => {
-    applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
+    applyFilters('CREATE_VIEW', { ...root, view: root });
   },
   name: 'file'
 });
@@ -5283,7 +5294,7 @@ const didRemoveItem = ({ root }) => {
   root.ref.data.removeAttribute('value');
 };
 
-const didCompleteItemProcessing = ({ root, action }) => {
+const didCompleteItemProcessing$1 = ({ root, action }) => {
   root.ref.data.value = action.serverFileReference;
 };
 
@@ -5298,11 +5309,11 @@ const fileWrapper = createView({
     DID_SET_DISABLED: didSetDisabled,
     DID_LOAD_ITEM: didLoadItem,
     DID_REMOVE_ITEM: didRemoveItem,
-    DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing,
+    DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing$1,
     DID_REVERT_ITEM_PROCESSING: didRevertItemProcessing
   }),
   didCreateView: root => {
-    applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
+    applyFilters('CREATE_VIEW', { ...root, view: root });
   },
   tag: 'fieldset',
   name: 'file-wrapper'
@@ -5310,7 +5321,7 @@ const fileWrapper = createView({
 
 const PANEL_SPRING_PROPS = { type: 'spring', damping: 0.6, mass: 7 };
 
-const create$11 = ({ root, props }) => {
+const create$6 = ({ root, props }) => {
   [
     {
       name: 'top'
@@ -5361,7 +5372,7 @@ const createSection = (root, section, className) => {
   root.ref[section.name] = root.appendChildView(view);
 };
 
-const write$7 = ({ root, props }) => {
+const write$3 = ({ root, props }) => {
   // update scalable state
   if (root.ref.scalable === null || props.scalable !== root.ref.scalable) {
     root.ref.scalable = isBoolean(props.scalable) ? props.scalable : true;
@@ -5393,8 +5404,8 @@ const write$7 = ({ root, props }) => {
 
 const panel = createView({
   name: 'panel',
-  write: write$7,
-  create: create$11,
+  write: write$3,
+  create: create$6,
   ignoreRect: true,
   mixins: {
     apis: ['height', 'scalable']
@@ -5413,7 +5424,7 @@ const ITEM_SCALE_SPRING = 'spring';
 /**
  * Creates the file view
  */
-const create$4 = ({ root, props }) => {
+const create$7 = ({ root, props }) => {
   // select
   root.ref.handleClick = () =>
     root.dispatch('DID_ACTIVATE_ITEM', { id: props.id });
@@ -5457,20 +5468,20 @@ const StateMap = {
   DID_REVERT_ITEM_PROCESSING: 'idle'
 };
 
-const route$3 = createRoute({
+const route$1 = createRoute({
   DID_UPDATE_PANEL_HEIGHT: ({ root, action }) => {
     const { height } = action;
     root.height = height;
   }
 });
 
-const write$3 = ({ root, actions, props, shouldOptimize }) => {
+const write$4 = ({ root, actions, props, shouldOptimize }) => {
   // route actions
   const aspectRatio =
     root.query('GET_ITEM_PANEL_ASPECT_RATIO') ||
     root.query('GET_PANEL_ASPECT_RATIO');
   if (!aspectRatio) {
-    route$3({ root, actions, props });
+    route$1({ root, actions, props });
     if (!root.height) {
       root.height = root.ref.container.rect.element.height;
     }
@@ -5486,7 +5497,8 @@ const write$3 = ({ root, actions, props, shouldOptimize }) => {
   root.ref.panel.height = root.height;
 
   // select last state change action
-  let action = [...actions]
+  let action = actions
+    .concat()
     .filter(action => /^DID_/.test(action.type))
     .reverse()
     .find(action => StateMap[action.type]);
@@ -5502,8 +5514,8 @@ const write$3 = ({ root, actions, props, shouldOptimize }) => {
 };
 
 const item = createView({
-  create: create$4,
-  write: write$3,
+  create: create$7,
+  write: write$4,
   destroy: ({ root, props }) => {
     root.element.removeEventListener('click', root.ref.handleClick);
     root.dispatch('RELEASE_ITEM', { query: props.id });
@@ -5592,7 +5604,7 @@ const getItemIndexByPosition = (view, positionInView) => {
   return l;
 };
 
-const create$3 = ({ root, props }) => {
+const create$8 = ({ root, props }) => {
   // need to set role to list as otherwise it won't be read as a list by VoiceOver
   attr(root.element, 'role', 'list');
 
@@ -5639,45 +5651,45 @@ const addItemView = ({ root, action }) => {
   );
 };
 
-const moveItem = (item$$1, x, y, vx = 0, vy = 1) => {
-  item$$1.translateX = x;
-  item$$1.translateY = y;
+const moveItem = (item, x, y, vx = 0, vy = 1) => {
+  item.translateX = x;
+  item.translateY = y;
 
-  if (Date.now() > item$$1.spawnDate) {
+  if (Date.now() > item.spawnDate) {
     // reveal element
-    if (item$$1.opacity === 0) {
-      introItemView(item$$1, x, y, vx, vy);
+    if (item.opacity === 0) {
+      introItemView(item, x, y, vx, vy);
     }
 
     // make sure is default scale every frame
-    item$$1.scaleX = 1;
-    item$$1.scaleY = 1;
-    item$$1.opacity = 1;
+    item.scaleX = 1;
+    item.scaleY = 1;
+    item.opacity = 1;
   }
 };
 
-const introItemView = (item$$1, x, y, vx, vy) => {
-  if (item$$1.interactionMethod === InteractionMethod.NONE) {
-    item$$1.translateX = null;
-    item$$1.translateX = x;
-    item$$1.translateY = null;
-    item$$1.translateY = y;
-  } else if (item$$1.interactionMethod === InteractionMethod.DROP) {
-    item$$1.translateX = null;
-    item$$1.translateX = x - vx * 20;
+const introItemView = (item, x, y, vx, vy) => {
+  if (item.interactionMethod === InteractionMethod.NONE) {
+    item.translateX = null;
+    item.translateX = x;
+    item.translateY = null;
+    item.translateY = y;
+  } else if (item.interactionMethod === InteractionMethod.DROP) {
+    item.translateX = null;
+    item.translateX = x - vx * 20;
 
-    item$$1.translateY = null;
-    item$$1.translateY = y - vy * 10;
+    item.translateY = null;
+    item.translateY = y - vy * 10;
 
-    item$$1.scaleX = 0.8;
-    item$$1.scaleY = 0.8;
-  } else if (item$$1.interactionMethod === InteractionMethod.BROWSE) {
-    item$$1.translateY = null;
-    item$$1.translateY = y - 30;
-  } else if (item$$1.interactionMethod === InteractionMethod.API) {
-    item$$1.translateX = null;
-    item$$1.translateX = x - 30;
-    item$$1.translateY = null;
+    item.scaleX = 0.8;
+    item.scaleY = 0.8;
+  } else if (item.interactionMethod === InteractionMethod.BROWSE) {
+    item.translateY = null;
+    item.translateY = y - 30;
+  } else if (item.interactionMethod === InteractionMethod.API) {
+    item.translateX = null;
+    item.translateX = x - 30;
+    item.translateY = null;
   }
 };
 
@@ -5720,7 +5732,7 @@ const route$2 = createRoute({
  * @param actions
  * @param props
  */
-const write$2 = ({ root, props, actions, shouldOptimize }) => {
+const write$5 = ({ root, props, actions, shouldOptimize }) => {
   // route actions
   route$2({ root, props, actions });
 
@@ -5742,8 +5754,8 @@ const write$2 = ({ root, props, actions, shouldOptimize }) => {
   // sort based on current active items
   const children = root
     .query('GET_ACTIVE_ITEMS')
-    .map(item$$1 => visibleChildren.find(child => child.id === item$$1.id))
-    .filter(item$$1 => item$$1);
+    .map(item => visibleChildren.find(child => child.id === item.id))
+    .filter(item => item);
 
   // add index is used to reserve the dropped/added item index till the actual item is rendered
   const addIndex = root.ref.addIndex || null;
@@ -5801,8 +5813,9 @@ const write$2 = ({ root, props, actions, shouldOptimize }) => {
 
       offsetY += visualHeight;
     });
-  } else {
-    // grid
+  }
+  // grid
+  else {
     let prevX = 0;
     let prevY = 0;
 
@@ -5863,8 +5876,8 @@ const filterSetItemActions = (child, actions) =>
   });
 
 const list = createView({
-  create: create$3,
-  write: write$2,
+  create: create$8,
+  write: write$5,
   tag: 'ul',
   name: 'list',
   didWriteView: ({ root }) => {
@@ -5883,7 +5896,7 @@ const list = createView({
   }
 });
 
-const create$2 = ({ root, props }) => {
+const create$9 = ({ root, props }) => {
   root.ref.list = root.appendChildView(root.createChildView(list));
   props.dragCoordinates = null;
   props.overflowing = false;
@@ -5905,14 +5918,14 @@ const clearDragCoordinates = ({ props }) => {
   props.dragCoordinates = null;
 };
 
-const route$1 = createRoute({
+const route$3 = createRoute({
   DID_DRAG: storeDragCoordinates,
   DID_END_DRAG: clearDragCoordinates
 });
 
-const write$1 = ({ root, props, actions }) => {
+const write$6 = ({ root, props, actions }) => {
   // route actions
-  route$1({ root, props, actions });
+  route$3({ root, props, actions });
 
   // current drag position
   root.ref.list.dragCoordinates = props.dragCoordinates;
@@ -5938,8 +5951,8 @@ const write$1 = ({ root, props, actions }) => {
 };
 
 const listScroller = createView({
-  create: create$2,
-  write: write$1,
+  create: create$9,
+  write: write$6,
   name: 'list-scroller',
   mixins: {
     apis: ['overflow', 'dragCoordinates'],
@@ -5987,7 +6000,7 @@ const resetFileInput = input => {
   }
 };
 
-const create$12 = ({ root, props }) => {
+const create$a = ({ root, props }) => {
   // set id so can be referenced from outside labels
   root.element.id = `filepond--browser-${props.id}`;
 
@@ -6007,7 +6020,7 @@ const create$12 = ({ root, props }) => {
     }
 
     // extract files
-    const files = [...root.element.files];
+    const files = Array.from(root.element.files);
 
     // we add a little delay so the OS file select window can move out of the way before we add our file
     setTimeout(() => {
@@ -6045,8 +6058,9 @@ const toggleRequired = ({ root, action }) => {
   // want to remove required, always possible
   if (!action.value) {
     attrToggle(root.element, 'required', false);
-  } else if (root.query('GET_TOTAL_ITEMS') === 0) {
-    // if want to make required, only possible when zero items
+  }
+  // if want to make required, only possible when zero items
+  else if (root.query('GET_TOTAL_ITEMS') === 0) {
     attrToggle(root.element, 'required', true);
   }
 };
@@ -6097,7 +6111,7 @@ const browser = createView({
   attributes: {
     type: 'file'
   },
-  create: create$12,
+  create: create$a,
   destroy: ({ root }) => {
     root.element.removeEventListener('change', root.ref.handleChange);
   },
@@ -6120,7 +6134,7 @@ const Key = {
   SPACE: 32
 };
 
-const create$13 = ({ root, props }) => {
+const create$b = ({ root, props }) => {
   // create the label and link it to the file browser
   const label = createElement$1('label');
   attr(label, 'for', `filepond--browser-${props.id}`);
@@ -6172,7 +6186,7 @@ const updateLabelValue = (label, value) => {
 const dropLabel = createView({
   name: 'drop-label',
   ignoreRect: true,
-  create: create$13,
+  create: create$b,
   write: createRoute({
     DID_SET_LABEL_IDLE: ({ root, action }) => {
       updateLabelValue(root.ref.label, action.value);
@@ -6247,18 +6261,18 @@ const explodeBlob = ({ root }) => {
   root.ref.blob.opacity = 0;
 };
 
-const write$8 = ({ root, props, actions }) => {
-  route$5({ root, props, actions });
+const write$7 = ({ root, props, actions }) => {
+  route$4({ root, props, actions });
 
-  const { blob: blob$$1 } = root.ref;
+  const { blob } = root.ref;
 
-  if (actions.length === 0 && blob$$1 && blob$$1.opacity === 0) {
-    root.removeChildView(blob$$1);
+  if (actions.length === 0 && blob && blob.opacity === 0) {
+    root.removeChildView(blob);
     root.ref.blob = null;
   }
 };
 
-const route$5 = createRoute({
+const route$4 = createRoute({
   DID_DRAG: moveBlob,
   DID_DROP: explodeBlob,
   DID_END_DRAG: hideBlob
@@ -6268,7 +6282,7 @@ const drip = createView({
   ignoreRect: true,
   ignoreRectUpdate: true,
   name: 'drip',
-  write: write$8
+  write: write$7
 });
 
 const getRootNode = element =>
@@ -6276,6 +6290,7 @@ const getRootNode = element =>
 
 const images = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'tiff'];
 const text$1 = ['css', 'csv', 'html', 'txt'];
+const apps = ['rtf', 'pdf', 'json'];
 const map = {
   zip: 'zip|compressed',
   epub: 'application/epub+zip'
@@ -6288,7 +6303,9 @@ const guesstimateMimeType = (extension = '') => {
       'image/' +
       (extension === 'jpg'
         ? 'jpeg'
-        : extension === 'svg' ? 'svg+xml' : extension)
+        : extension === 'svg'
+        ? 'svg+xml'
+        : extension)
     );
   }
   if (text$1.includes(extension)) {
@@ -6317,7 +6334,11 @@ const requestDataTransferItems = dataTransfer =>
 const getFiles = dataTransfer =>
   new Promise((resolve, reject) => {
     // get the transfer items as promises
-    const promisedFiles = (dataTransfer.items ? [...dataTransfer.items] : [])
+    const promisedFiles = (dataTransfer.items
+      ? Array.from(dataTransfer.items)
+      : []
+    )
+
       // only keep file system items (files and directories)
       .filter(item => isFileSystemItem(item))
 
@@ -6329,7 +6350,7 @@ const getFiles = dataTransfer =>
       // TODO: test for directories (should not be allowed)
       // Use FileReader, problem is that the files property gets lost in the process
 
-      resolve(dataTransfer.files ? [...dataTransfer.files] : []);
+      resolve(dataTransfer.files ? Array.from(dataTransfer.files) : []);
       return;
     }
 
@@ -6338,7 +6359,7 @@ const getFiles = dataTransfer =>
       // flatten groups
       const files = [];
       returendFileGroups.forEach(group => {
-        files.push(...group);
+        files.push.apply(files, group);
       });
 
       // done (filter out empty files)!
@@ -6837,7 +6858,7 @@ const createPaster = () => {
 /**
  * Creates the file view
  */
-const create$14 = ({ root, props }) => {
+const create$c = ({ root, props }) => {
   root.element.id = `filepond--assistant-${props.id}`;
   attr(root.element, 'role', 'status');
   attr(root.element, 'aria-live', 'polite');
@@ -6935,7 +6956,7 @@ const itemError = ({ root, action }) => {
 };
 
 const assistant = createView({
-  create: create$14,
+  create: create$c,
   ignoreRect: true,
   ignoreRectUpdate: true,
   write: createRoute({
@@ -6990,7 +7011,7 @@ const debounce = (func, interval = 16, immidiateOnly = true) => {
 
 const MAX_FILES_LIMIT = 1000000;
 
-const create$1 = ({ root, props }) => {
+const create$d = ({ root, props }) => {
   // Add id
   const id = root.query('GET_ID');
   if (id) {
@@ -7007,13 +7028,11 @@ const create$1 = ({ root, props }) => {
 
   // Field label
   root.ref.label = root.appendChildView(
-    root.createChildView(
-      dropLabel,
-      Object.assign({}, props, {
-        translateY: null,
-        caption: root.query('GET_LABEL_IDLE')
-      })
-    )
+    root.createChildView(dropLabel, {
+      ...props,
+      translateY: null,
+      caption: root.query('GET_LABEL_IDLE')
+    })
   );
 
   // List of items
@@ -7028,7 +7047,7 @@ const create$1 = ({ root, props }) => {
 
   // Assistant notifies assistive tech when content changes
   root.ref.assistant = root.appendChildView(
-    root.createChildView(assistant, Object.assign({}, props))
+    root.createChildView(assistant, { ...props })
   );
 
   // Measure (tests if fixed height was set)
@@ -7058,7 +7077,7 @@ const create$1 = ({ root, props }) => {
   root.ref.updateHistory = [];
 };
 
-const write = ({ root, props, actions }) => {
+const write$8 = ({ root, props, actions }) => {
   if (root.rect.element.width !== root.ref.widthPrevious) {
     root.ref.widthPrevious = root.rect.element.width;
     root.ref.widthUpdated();
@@ -7075,7 +7094,7 @@ const write = ({ root, props, actions }) => {
   }
 
   // route actions
-  route({ root, props, actions });
+  route$5({ root, props, actions });
 
   // apply style properties
   actions
@@ -7088,7 +7107,7 @@ const write = ({ root, props, actions }) => {
     });
 
   // get quick references to various high level parts of the upload tool
-  const { hopper, label, list, panel: panel$$1 } = root.ref;
+  const { hopper, label, list, panel } = root.ref;
 
   // sets correct state to hopper scope
   if (hopper) {
@@ -7182,8 +7201,8 @@ const write = ({ root, props, actions }) => {
     }
 
     // fix height of panel so it adheres to aspect ratio
-    panel$$1.scalable = false;
-    panel$$1.height = height;
+    panel.scalable = false;
+    panel.height = height;
 
     // available height for list
     const listAvailableHeight =
@@ -7207,7 +7226,7 @@ const write = ({ root, props, actions }) => {
     // fixed height
 
     // fix height of panel
-    panel$$1.scalable = false;
+    panel.scalable = false;
 
     // available height for list
     const listAvailableHeight =
@@ -7233,8 +7252,8 @@ const write = ({ root, props, actions }) => {
     // not a fixed height panel
     const isCappedHeight = visualHeight >= bounds.cappedHeight;
     const panelHeight = Math.min(bounds.cappedHeight, visualHeight);
-    panel$$1.scalable = true;
-    panel$$1.height = isCappedHeight
+    panel.scalable = true;
+    panel.height = isCappedHeight
       ? panelHeight
       : panelHeight - listItemMargin.top - listItemMargin.bottom;
 
@@ -7269,8 +7288,8 @@ const write = ({ root, props, actions }) => {
     // not a fixed height panel
     const itemMargin =
       totalItems > 0 ? listItemMargin.top + listItemMargin.bottom : 0;
-    panel$$1.scalable = true;
-    panel$$1.height = Math.max(labelHeight, visualHeight - itemMargin);
+    panel.scalable = true;
+    panel.height = Math.max(labelHeight, visualHeight - itemMargin);
 
     // set container bounds (so pushes siblings downwards)
     root.height = Math.max(labelHeight, boundsHeight - itemMargin);
@@ -7332,8 +7351,9 @@ const calculateListHeight = root => {
       bounds += height;
       visual += height * item.opacity;
     });
-  } else {
-    // grid
+  }
+  // grid
+  else {
     bounds = Math.ceil(verticalItemCount / itemsPerRow) * itemHeight;
     visual = bounds;
   }
@@ -7467,22 +7487,20 @@ const toggleBrowse = (root, props) => {
   const enabled = isAllowed && !isDisabled;
   if (enabled && !root.ref.browser) {
     root.ref.browser = root.appendChildView(
-      root.createChildView(
-        browser,
-        Object.assign({}, props, {
-          onload: items => {
-            // these files don't fit so stop here
-            if (exceedsMaxFiles(root, items)) return false;
+      root.createChildView(browser, {
+        ...props,
+        onload: items => {
+          // these files don't fit so stop here
+          if (exceedsMaxFiles(root, items)) return false;
 
-            // add items!
-            root.dispatch('ADD_ITEMS', {
-              items,
-              index: -1,
-              interactionMethod: InteractionMethod.BROWSE
-            });
-          }
-        })
-      ),
+          // add items!
+          root.dispatch('ADD_ITEMS', {
+            items,
+            index: -1,
+            interactionMethod: InteractionMethod.BROWSE
+          });
+        }
+      }),
       0
     );
   } else if (!enabled && root.ref.browser) {
@@ -7515,7 +7533,7 @@ const togglePaste = root => {
 /**
  * Route actions
  */
-const route = createRoute({
+const route$5 = createRoute({
   DID_SET_ALLOW_BROWSE: ({ root, props }) => {
     toggleBrowse(root, props);
   },
@@ -7546,8 +7564,8 @@ const root = createView({
       root.ref.measureHeight = root.ref.measure.offsetHeight;
     }
   },
-  create: create$1,
-  write,
+  create: create$d,
+  write: write$8,
   destroy: ({ root }) => {
     if (root.ref.paster) {
       root.ref.paster.destroy();
@@ -7561,26 +7579,24 @@ const root = createView({
   }
 });
 
-// defaults
-// view
 // creates the app
-const createApp$1 = (initialOptions = {}) => {
+const createApp = (initialOptions = {}) => {
   // let element
   let originalElement = null;
 
   // get default options
-  const defaultOptions$$1 = getOptions$1();
+  const defaultOptions = getOptions();
 
   // create the data store, this will contain all our app info
   const store = createStore(
     // initial state (should be serializable)
-    createInitialState(defaultOptions$$1),
+    createInitialState(defaultOptions),
 
     // queries
-    [queries, createOptionQueries(defaultOptions$$1)],
+    [queries, createOptionQueries(defaultOptions)],
 
     // action handlers
-    [actions, createOptionActions(defaultOptions$$1)]
+    [actions, createOptionActions(defaultOptions)]
   );
 
   // set initial options
@@ -7669,20 +7685,20 @@ const createApp$1 = (initialOptions = {}) => {
       if (isHidden) return;
 
       // get all actions from store
-      const actions$$1 = store
+      const actions = store
         .processActionQueue()
 
         // filter out set actions (these will automatically trigger DID_SET)
         .filter(action => !/^SET_/.test(action.type));
 
       // if was idling and no actions stop here
-      if (isResting && !actions$$1.length) return;
+      if (isResting && !actions.length) return;
 
       // some actions might trigger events
-      routeActionsToEvents(actions$$1);
+      routeActionsToEvents(actions);
 
       // update the view
-      isResting = view._write(ts, actions$$1, isResizingHorizontally);
+      isResting = view._write(ts, actions, isResizingHorizontally);
 
       // will clean up all archived items
       removeReleasedItems(store.query('GET_ITEMS'));
@@ -7710,11 +7726,11 @@ const createApp$1 = (initialOptions = {}) => {
 
     // copy relevant props
     if (data.hasOwnProperty('error')) {
-      event.error = data.error ? Object.assign({}, data.error) : null;
+      event.error = data.error ? { ...data.error } : null;
     }
 
     if (data.status) {
-      event.status = Object.assign({}, data.status);
+      event.status = { ...data.status };
     }
 
     if (data.file) {
@@ -7780,7 +7796,7 @@ const createApp$1 = (initialOptions = {}) => {
 
   const exposeEvent = event => {
     // create event object to be dispatched
-    const detail = Object.assign({ pond: exports }, event);
+    const detail = { pond: exports, ...event };
     delete detail.type;
     view.element.dispatchEvent(
       new CustomEvent(`FilePond:${event.type}`, {
@@ -7823,12 +7839,12 @@ const createApp$1 = (initialOptions = {}) => {
     }
   };
 
-  const routeActionsToEvents = actions$$1 => {
-    if (!actions$$1.length) {
+  const routeActionsToEvents = actions => {
+    if (!actions.length) {
       return;
     }
 
-    actions$$1.forEach(action => {
+    actions.forEach(action => {
       if (!eventRoutes[action.type]) {
         return;
       }
@@ -7875,7 +7891,7 @@ const createApp$1 = (initialOptions = {}) => {
 
       // user passed a sources array
       if (isArray(args[0])) {
-        sources.push(...args[0]);
+        sources.push.apply(sources, args[0]);
         Object.assign(options, args[1] || {});
       } else {
         // user passed sources as arguments, last one might be options object
@@ -7916,8 +7932,8 @@ const createApp$1 = (initialOptions = {}) => {
     });
 
   const processFiles = (...args) => {
-    const queries$$1 = Array.isArray(args[0]) ? args[0] : args;
-    if (!queries$$1.length) {
+    const queries = Array.isArray(args[0]) ? args[0] : args;
+    if (!queries.length) {
       const files = getFiles().filter(
         item =>
           item.status !== ItemStatus.PROCESSING &&
@@ -7926,196 +7942,198 @@ const createApp$1 = (initialOptions = {}) => {
       );
       return Promise.all(files.map(processFile));
     }
-    return Promise.all(queries$$1.map(processFile));
+    return Promise.all(queries.map(processFile));
   };
 
   const removeFiles = (...args) => {
-    const queries$$1 = Array.isArray(args[0]) ? args[0] : args;
+    const queries = Array.isArray(args[0]) ? args[0] : args;
     const files = getFiles();
 
-    if (!queries$$1.length) {
+    if (!queries.length) {
       return Promise.all(files.map(removeFile));
     }
 
     // when removing by index the indexes shift after each file removal so we need to convert indexes to ids
-    const mappedQueries = queries$$1
-      .map(
-        query =>
-          isNumber(query) ? (files[query] ? files[query].id : null) : query
+    const mappedQueries = queries
+      .map(query =>
+        isNumber(query) ? (files[query] ? files[query].id : null) : query
       )
       .filter(query => query);
 
     return mappedQueries.map(removeFile);
   };
 
-  const exports = Object.assign(
-    {},
-    on(),
-    readWriteApi,
-    createOptionAPI(store, defaultOptions$$1),
-    {
-      /**
-       * Override options defined in options object
-       * @param options
-       */
-      setOptions,
+  const exports = {
+    // supports events
+    ...on(),
 
-      /**
-       * Load the given file
-       * @param source - the source of the file (either a File, base64 data uri or url)
-       * @param options - object, { index: 0 }
-       */
-      addFile,
+    // inject private api methods
+    ...readWriteApi,
 
-      /**
-       * Load the given files
-       * @param sources - the sources of the files to load
-       * @param options - object, { index: 0 }
-       */
-      addFiles,
+    // inject all getters and setters
+    ...createOptionAPI(store, defaultOptions),
 
-      /**
-       * Returns the file objects matching the given query
-       * @param query { string, number, null }
-       */
-      getFile,
+    /**
+     * Override options defined in options object
+     * @param options
+     */
+    setOptions,
 
-      /**
-       * Upload file with given name
-       * @param query { string, number, null  }
-       */
-      processFile,
+    /**
+     * Load the given file
+     * @param source - the source of the file (either a File, base64 data uri or url)
+     * @param options - object, { index: 0 }
+     */
+    addFile,
 
-      /**
-       * Removes a file by its name
-       * @param query { string, number, null  }
-       */
-      removeFile,
+    /**
+     * Load the given files
+     * @param sources - the sources of the files to load
+     * @param options - object, { index: 0 }
+     */
+    addFiles,
 
-      /**
-       * Returns all files (wrapped in public api)
-       */
-      getFiles,
+    /**
+     * Returns the file objects matching the given query
+     * @param query { string, number, null }
+     */
+    getFile,
 
-      /**
-       * Starts uploading all files
-       */
-      processFiles,
+    /**
+     * Upload file with given name
+     * @param query { string, number, null  }
+     */
+    processFile,
 
-      /**
-       * Clears all files from the files list
-       */
-      removeFiles,
+    /**
+     * Removes a file by its name
+     * @param query { string, number, null  }
+     */
+    removeFile,
 
-      /**
-       * Sort list of files
-       */
-      sort: compare => store.dispatch('SORT', { compare }),
+    /**
+     * Returns all files (wrapped in public api)
+     */
+    getFiles,
 
-      /**
-       * Browse the file system for a file
-       */
-      browse: () => {
-        // needs to be trigger directly as user action needs to be traceable (is not traceable in requestAnimationFrame)
-        var input = view.element.querySelector('input[type=file]');
-        if (input) {
-          input.click();
-        }
-      },
+    /**
+     * Starts uploading all files
+     */
+    processFiles,
 
-      /**
-       * Destroys the app
-       */
-      destroy: () => {
-        // request destruction
-        exports.fire('destroy', view.element);
+    /**
+     * Clears all files from the files list
+     */
+    removeFiles,
 
-        // stop active processes (file uploads, fetches, stuff like that)
-        // loop over items and depending on states call abort for ongoing processes
-        store.dispatch('ABORT_ALL');
+    /**
+     * Sort list of files
+     */
+    sort: compare => store.dispatch('SORT', { compare }),
 
-        // destroy view
-        view._destroy();
-
-        // stop listening to resize
-        window.removeEventListener('resize', resizeHandler);
-
-        // stop listening to the visiblitychange event
-        document.addEventListener('visibilitychange', visibilityHandler);
-
-        // dispatch destroy
-        store.dispatch('DID_DESTROY');
-      },
-
-      /**
-       * Inserts the plugin before the target element
-       */
-      insertBefore: element => insertBefore(view.element, element),
-
-      /**
-       * Inserts the plugin after the target element
-       */
-      insertAfter: element => insertAfter(view.element, element),
-
-      /**
-       * Appends the plugin to the target element
-       */
-      appendTo: element => element.appendChild(view.element),
-
-      /**
-       * Replaces an element with the app
-       */
-      replaceElement: element => {
-        // insert the app before the element
-        insertBefore(view.element, element);
-
-        // remove the original element
-        element.parentNode.removeChild(element);
-
-        // remember original element
-        originalElement = element;
-      },
-
-      /**
-       * Restores the original element
-       */
-      restoreElement: () => {
-        if (!originalElement) {
-          return; // no element to restore
-        }
-
-        // restore original element
-        insertAfter(originalElement, view.element);
-
-        // remove our element
-        view.element.parentNode.removeChild(view.element);
-
-        // remove reference
-        originalElement = null;
-      },
-
-      /**
-       * Returns true if the app root is attached to given element
-       * @param element
-       */
-      isAttachedTo: element =>
-        view.element === element || originalElement === element,
-
-      /**
-       * Returns the root element
-       */
-      element: {
-        get: () => view.element
-      },
-
-      /**
-       * Returns the current pond status
-       */
-      status: {
-        get: () => store.query('GET_STATUS')
+    /**
+     * Browse the file system for a file
+     */
+    browse: () => {
+      // needs to be trigger directly as user action needs to be traceable (is not traceable in requestAnimationFrame)
+      var input = view.element.querySelector('input[type=file]');
+      if (input) {
+        input.click();
       }
+    },
+
+    /**
+     * Destroys the app
+     */
+    destroy: () => {
+      // request destruction
+      exports.fire('destroy', view.element);
+
+      // stop active processes (file uploads, fetches, stuff like that)
+      // loop over items and depending on states call abort for ongoing processes
+      store.dispatch('ABORT_ALL');
+
+      // destroy view
+      view._destroy();
+
+      // stop listening to resize
+      window.removeEventListener('resize', resizeHandler);
+
+      // stop listening to the visiblitychange event
+      document.addEventListener('visibilitychange', visibilityHandler);
+
+      // dispatch destroy
+      store.dispatch('DID_DESTROY');
+    },
+
+    /**
+     * Inserts the plugin before the target element
+     */
+    insertBefore: element => insertBefore(view.element, element),
+
+    /**
+     * Inserts the plugin after the target element
+     */
+    insertAfter: element => insertAfter(view.element, element),
+
+    /**
+     * Appends the plugin to the target element
+     */
+    appendTo: element => element.appendChild(view.element),
+
+    /**
+     * Replaces an element with the app
+     */
+    replaceElement: element => {
+      // insert the app before the element
+      insertBefore(view.element, element);
+
+      // remove the original element
+      element.parentNode.removeChild(element);
+
+      // remember original element
+      originalElement = element;
+    },
+
+    /**
+     * Restores the original element
+     */
+    restoreElement: () => {
+      if (!originalElement) {
+        return; // no element to restore
+      }
+
+      // restore original element
+      insertAfter(originalElement, view.element);
+
+      // remove our element
+      view.element.parentNode.removeChild(view.element);
+
+      // remove reference
+      originalElement = null;
+    },
+
+    /**
+     * Returns true if the app root is attached to given element
+     * @param element
+     */
+    isAttachedTo: element =>
+      view.element === element || originalElement === element,
+
+    /**
+     * Returns the root element
+     */
+    element: {
+      get: () => view.element
+    },
+
+    /**
+     * Returns the current pond status
+     */
+    status: {
+      get: () => store.query('GET_STATUS')
     }
-  );
+  };
 
   // Done!
   store.dispatch('DID_INIT');
@@ -8126,13 +8144,19 @@ const createApp$1 = (initialOptions = {}) => {
 
 const createAppObject = (customOptions = {}) => {
   // default options
-  const defaultOptions$$1 = {};
-  forin(getOptions$1(), (key, value) => {
-    defaultOptions$$1[key] = value[0];
+  const defaultOptions = {};
+  forin(getOptions(), (key, value) => {
+    defaultOptions[key] = value[0];
   });
 
   // set app options
-  const app = createApp$1(Object.assign({}, defaultOptions$$1, customOptions));
+  const app = createApp({
+    // default options
+    ...defaultOptions,
+
+    // custom options
+    ...customOptions
+  });
 
   // return the plugin instance
   return app;
@@ -8253,7 +8277,9 @@ const createAppAtElement = (element, options = {}) => {
   applyFilters('SET_ATTRIBUTE_TO_OPTION_MAP', attributeMapping);
 
   // create final options object by setting options object and then overriding options supplied on element
-  const mergedOptions = Object.assign({}, options);
+  const mergedOptions = {
+    ...options
+  };
 
   const attributeOptions = getAttributesAsObject(
     element.nodeName === 'FIELDSET'
@@ -8277,12 +8303,14 @@ const createAppAtElement = (element, options = {}) => {
   // if parent is a fieldset, get files from parent by selecting all input fields that are not file upload fields
   // these will then be automatically set to the initial files
   mergedOptions.files = (options.files || []).concat(
-    [...element.querySelectorAll('input:not([type=file])')].map(input => ({
-      source: input.value,
-      options: {
-        type: input.dataset.type
-      }
-    }))
+    Array.from(element.querySelectorAll('input:not([type=file])')).map(
+      input => ({
+        source: input.value,
+        options: {
+          type: input.dataset.type
+        }
+      })
+    )
   );
 
   // build plugin
@@ -8290,7 +8318,7 @@ const createAppAtElement = (element, options = {}) => {
 
   // add already selected files
   if (element.files) {
-    [...element.files].forEach(file => {
+    Array.from(element.files).forEach(file => {
       app.addFile(file);
     });
   }
@@ -8303,7 +8331,7 @@ const createAppAtElement = (element, options = {}) => {
 };
 
 // if an element is passed, we create the instance at that element, if not, we just create an up object
-const createApp = (...args) =>
+const createApp$1 = (...args) =>
   isNode(args[0]) ? createAppAtElement(...args) : createAppObject(...args);
 
 const PRIVATE_METHODS = ['fire', '_read', '_write'];
@@ -8471,17 +8499,17 @@ const name = 'filepond';
  * Public Plugin methods
  */
 const fn = () => {};
-let Status = {};
+let Status$1 = {};
 let FileStatus = {};
-let FileOrigin = {};
+let FileOrigin$1 = {};
 let OptionTypes = {};
-let create = fn;
+let create$e = fn;
 let destroy = fn;
 let parse = fn;
 let find = fn;
 let registerPlugin = fn;
-let getOptions = fn;
-let setOptions = fn;
+let getOptions$1 = fn;
+let setOptions$1 = fn;
 
 // if not supported, no API
 if (supported()) {
@@ -8502,12 +8530,12 @@ if (supported()) {
       new CustomEvent('FilePond:loaded', {
         detail: {
           supported,
-          create,
+          create: create$e,
           destroy,
           parse,
           find,
           registerPlugin,
-          setOptions
+          setOptions: setOptions$1
         }
       })
     );
@@ -8525,20 +8553,20 @@ if (supported()) {
 
   // updates the OptionTypes object based on the current options
   const updateOptionTypes = () =>
-    forin(getOptions$1(), (key, value) => {
+    forin(getOptions(), (key, value) => {
       OptionTypes[key] = value[1];
     });
 
-  Status = Object.assign({}, Status$1);
-  FileOrigin = Object.assign({}, FileOrigin$1);
-  FileStatus = Object.assign({}, ItemStatus);
+  Status$1 = { ...Status };
+  FileOrigin$1 = { ...FileOrigin };
+  FileStatus = { ...ItemStatus };
 
   OptionTypes = {};
   updateOptionTypes();
 
   // create method, creates apps and adds them to the app array
-  create = (...args) => {
-    const app = createApp(...args);
+  create$e = (...args) => {
+    const app = createApp$1(...args);
     app.on('destroy', destroy);
     state.apps.push(app);
     return createAppAPI(app);
@@ -8564,7 +8592,7 @@ if (supported()) {
   // parses the given context for plugins (does not include the context element itself)
   parse = context => {
     // get all possible hooks
-    const matchedHooks = [...context.querySelectorAll(`.${name}`)];
+    const matchedHooks = Array.from(context.querySelectorAll(`.${name}`));
 
     // filter out already active hooks
     const newHooks = matchedHooks.filter(
@@ -8572,7 +8600,7 @@ if (supported()) {
     );
 
     // create new instance for each hook
-    return newHooks.map(hook => create(hook));
+    return newHooks.map(hook => create$e(hook));
   };
 
   // returns an app based on the given element hook
@@ -8593,15 +8621,15 @@ if (supported()) {
     updateOptionTypes();
   };
 
-  getOptions = () => {
+  getOptions$1 = () => {
     const opts = {};
-    forin(getOptions$1(), (key, value) => {
+    forin(getOptions(), (key, value) => {
       opts[key] = value[0];
     });
     return opts;
   };
 
-  setOptions = opts => {
+  setOptions$1 = opts => {
     if (isObject(opts)) {
       // update existing plugins
       state.apps.forEach(app => {
@@ -8609,25 +8637,25 @@ if (supported()) {
       });
 
       // override defaults
-      setOptions$1(opts);
+      setOptions(opts);
     }
 
     // return new options
-    return getOptions();
+    return getOptions$1();
   };
 }
 
 export {
-  supported,
-  Status,
+  FileOrigin$1 as FileOrigin,
   FileStatus,
-  FileOrigin,
   OptionTypes,
-  create,
+  Status$1 as Status,
+  create$e as create,
   destroy,
-  parse,
   find,
+  getOptions$1 as getOptions,
+  parse,
   registerPlugin,
-  getOptions,
-  setOptions
+  setOptions$1 as setOptions,
+  supported
 };

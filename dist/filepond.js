@@ -1,16 +1,17 @@
-/*
- * FilePond 4.3.3
- * Licensed under MIT, https://opensource.org/licenses/MIT
- * Please visit https://pqina.nl/filepond for details.
+/*!
+ * FilePond 4.3.4
+ * Licensed under MIT, https://opensource.org/licenses/MIT/
+ * Please visit https://pqina.nl/filepond/ for details.
  */
 
 /* eslint-disable */
+
 (function(global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined'
     ? factory(exports)
     : typeof define === 'function' && define.amd
-      ? define(['exports'], factory)
-      : factory((global.FilePond = {}));
+    ? define(['exports'], factory)
+    : ((global = global || self), factory((global.FilePond = {})));
 })(this, function(exports) {
   'use strict';
 
@@ -23,7 +24,6 @@
       arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
     var actions =
       arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
-
     // internal state
     var state = Object.assign({}, initialState);
 
@@ -59,7 +59,6 @@
       queue.forEach(function(_ref) {
         var type = _ref.type,
           data = _ref.data;
-
         dispatch(type, data);
       });
     };
@@ -72,6 +71,7 @@
           type: type,
           data: data
         });
+
         return;
       }
 
@@ -89,17 +89,15 @@
 
     var query = function query(str) {
       var _queryHandles;
-
       for (
         var _len = arguments.length,
-          args = Array(_len > 1 ? _len - 1 : 0),
+          args = new Array(_len > 1 ? _len - 1 : 0),
           _key = 1;
         _key < _len;
         _key++
       ) {
         args[_key - 1] = arguments[_key];
       }
-
       return queryHandles[str]
         ? (_queryHandles = queryHandles)[str].apply(_queryHandles, args)
         : null;
@@ -159,80 +157,10 @@
   var attr = function attr(node, name) {
     var value =
       arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-
     if (value === null) {
       return node.getAttribute(name) || node.hasAttribute(name);
     }
     node.setAttribute(name, value);
-  };
-
-  var _typeof =
-    typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
-      ? function(obj) {
-          return typeof obj;
-        }
-      : function(obj) {
-          return obj &&
-            typeof Symbol === 'function' &&
-            obj.constructor === Symbol &&
-            obj !== Symbol.prototype
-            ? 'symbol'
-            : typeof obj;
-        };
-
-  var slicedToArray = (function() {
-    function sliceIterator(arr, i) {
-      var _arr = [];
-      var _n = true;
-      var _d = false;
-      var _e = undefined;
-
-      try {
-        for (
-          var _i = arr[Symbol.iterator](), _s;
-          !(_n = (_s = _i.next()).done);
-          _n = true
-        ) {
-          _arr.push(_s.value);
-
-          if (i && _arr.length === i) break;
-        }
-      } catch (err) {
-        _d = true;
-        _e = err;
-      } finally {
-        try {
-          if (!_n && _i['return']) _i['return']();
-        } finally {
-          if (_d) throw _e;
-        }
-      }
-
-      return _arr;
-    }
-
-    return function(arr, i) {
-      if (Array.isArray(arr)) {
-        return arr;
-      } else if (Symbol.iterator in Object(arr)) {
-        return sliceIterator(arr, i);
-      } else {
-        throw new TypeError(
-          'Invalid attempt to destructure non-iterable instance'
-        );
-      }
-    };
-  })();
-
-  var toConsumableArray = function(arr) {
-    if (Array.isArray(arr)) {
-      for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++)
-        arr2[i] = arr[i];
-
-      return arr2;
-    } else {
-      return Array.from(arr);
-    }
   };
 
   var ns = 'http://www.w3.org/2000/svg';
@@ -245,11 +173,7 @@
   var createElement = function createElement(tag, className) {
     var attributes =
       arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-
-    if (
-      (typeof className === 'undefined' ? 'undefined' : _typeof(className)) ===
-      'object'
-    ) {
+    if (typeof className === 'object') {
       attributes = className;
       className = null;
     }
@@ -400,7 +324,6 @@
   var thereYet = function thereYet(position, destination, velocity) {
     var errorMargin =
       arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0.001;
-
     return (
       Math.abs(position - destination) < errorMargin &&
       Math.abs(velocity) < errorMargin
@@ -419,12 +342,11 @@
             ? arguments[0]
             : {},
         _ref$stiffness = _ref.stiffness,
-        stiffness = _ref$stiffness === undefined ? 0.5 : _ref$stiffness,
+        stiffness = _ref$stiffness === void 0 ? 0.5 : _ref$stiffness,
         _ref$damping = _ref.damping,
-        damping = _ref$damping === undefined ? 0.75 : _ref$damping,
+        damping = _ref$damping === void 0 ? 0.75 : _ref$damping,
         _ref$mass = _ref.mass,
-        mass = _ref$mass === undefined ? 10 : _ref$mass;
-
+        mass = _ref$mass === void 0 ? 10 : _ref$mass;
       var target = null;
       var position = null;
       var velocity = 0;
@@ -515,11 +437,13 @@
             return target;
           }
         },
+
         resting: {
           get: function get() {
             return resting;
           }
         },
+
         onupdate: function onupdate(value) {},
         oncomplete: function oncomplete(value) {}
       });
@@ -527,6 +451,9 @@
       return api;
     };
 
+  var easeLinear = function easeLinear(t) {
+    return t;
+  };
   var easeInOutQuad = function easeInOutQuad(t) {
     return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
   };
@@ -540,15 +467,14 @@
             ? arguments[0]
             : {},
         _ref$duration = _ref.duration,
-        duration = _ref$duration === undefined ? 500 : _ref$duration,
+        duration = _ref$duration === void 0 ? 500 : _ref$duration,
         _ref$easing = _ref.easing,
-        easing = _ref$easing === undefined ? easeInOutQuad : _ref$easing,
+        easing = _ref$easing === void 0 ? easeInOutQuad : _ref$easing,
         _ref$delay = _ref.delay,
-        delay = _ref$delay === undefined ? 0 : _ref$delay;
-
+        delay = _ref$delay === void 0 ? 0 : _ref$delay;
       var start = null;
-      var t = void 0;
-      var p = void 0;
+      var t;
+      var p;
       var resting = true;
       var reverse = false;
       var target = null;
@@ -611,11 +537,13 @@
             start = null;
           }
         },
+
         resting: {
           get: function get() {
             return resting;
           }
         },
+
         onupdate: function onupdate(value) {},
         oncomplete: function oncomplete(value) {}
       });
@@ -629,24 +557,20 @@
   };
 
   /*
- { type: 'spring', stiffness: .5, damping: .75, mass: 10 };
- { translation: { type: 'spring', ... }, ... }
- { translation: { x: { type: 'spring', ... } } }
-*/
+                       { type: 'spring', stiffness: .5, damping: .75, mass: 10 };
+                       { translation: { type: 'spring', ... }, ... }
+                       { translation: { x: { type: 'spring', ... } } }
+                      */
   var createAnimator = function createAnimator(definition, category, property) {
     // default is single definition
     // we check if transform is set, if so, we check if property is set
     var def =
-      definition[category] &&
-      _typeof(definition[category][property]) === 'object'
+      definition[category] && typeof definition[category][property] === 'object'
         ? definition[category][property]
         : definition[category] || definition;
 
     var type = typeof def === 'string' ? def : def.type;
-    var props =
-      (typeof def === 'undefined' ? 'undefined' : _typeof(def)) === 'object'
-        ? Object.assign({}, def)
-        : {};
+    var props = typeof def === 'object' ? Object.assign({}, def) : {};
 
     return animator[type] ? animator[type](props) : null;
   };
@@ -654,7 +578,6 @@
   var addGetSet = function addGetSet(keys, obj, props) {
     var overwrite =
       arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
-
     obj = Array.isArray(obj) ? obj : [obj];
     obj.forEach(function(o) {
       keys.forEach(function(key) {
@@ -666,9 +589,7 @@
           return (props[key] = value);
         };
 
-        if (
-          (typeof key === 'undefined' ? 'undefined' : _typeof(key)) === 'object'
-        ) {
+        if (typeof key === 'object') {
           name = key.key;
           getter = key.getter || getter;
           setter = key.setter || setter;
@@ -698,8 +619,8 @@
     var mixinConfig = _ref.mixinConfig,
       viewProps = _ref.viewProps,
       viewInternalAPI = _ref.viewInternalAPI,
-      viewExternalAPI = _ref.viewExternalAPI;
-
+      viewExternalAPI = _ref.viewExternalAPI,
+      viewState = _ref.viewState;
     // initial properties
     var initialProps = Object.assign({}, viewProps);
 
@@ -780,7 +701,6 @@
       viewExternalAPI = _ref.viewExternalAPI,
       viewState = _ref.viewState,
       view = _ref.view;
-
     var events = [];
 
     var add = addEvent(view.element);
@@ -791,6 +711,7 @@
         type: type,
         fn: fn
       });
+
       add(type, fn);
     };
 
@@ -801,6 +722,7 @@
         }),
         1
       );
+
       remove(type, fn);
     };
 
@@ -823,7 +745,6 @@
     var mixinConfig = _ref.mixinConfig,
       viewProps = _ref.viewProps,
       viewExternalAPI = _ref.viewExternalAPI;
-
     addGetSet(mixinConfig, viewExternalAPI, viewProps);
   };
 
@@ -832,7 +753,7 @@
   // set initial state based on props in viewProps
   // apply as transforms each frame
 
-  var defaults$1 = {
+  var defaults = {
     opacity: 1,
     scaleX: 1,
     scaleY: 1,
@@ -851,7 +772,6 @@
       viewInternalAPI = _ref.viewInternalAPI,
       viewExternalAPI = _ref.viewExternalAPI,
       view = _ref.view;
-
     // initial props
     var initialProps = Object.assign({}, viewProps);
 
@@ -865,6 +785,7 @@
     var getOffset = function getOffset() {
       return [viewProps['translateX'] || 0, viewProps['translateY'] || 0];
     };
+
     var getScale = function getScale() {
       return [viewProps['scaleX'] || 0, viewProps['scaleY'] || 0];
     };
@@ -880,7 +801,7 @@
     mixinConfig.forEach(function(key) {
       viewProps[key] =
         typeof initialProps[key] === 'undefined'
-          ? defaults$1[key]
+          ? defaults[key]
           : initialProps[key];
     });
 
@@ -1076,40 +997,39 @@
             ? arguments[0]
             : {},
         _ref$tag = _ref.tag,
-        tag = _ref$tag === undefined ? 'div' : _ref$tag,
+        tag = _ref$tag === void 0 ? 'div' : _ref$tag,
         _ref$name = _ref.name,
-        name = _ref$name === undefined ? null : _ref$name,
+        name = _ref$name === void 0 ? null : _ref$name,
         _ref$attributes = _ref.attributes,
-        attributes = _ref$attributes === undefined ? {} : _ref$attributes,
+        attributes = _ref$attributes === void 0 ? {} : _ref$attributes,
         _ref$read = _ref.read,
-        read = _ref$read === undefined ? function() {} : _ref$read,
+        read = _ref$read === void 0 ? function() {} : _ref$read,
         _ref$write = _ref.write,
-        write = _ref$write === undefined ? function() {} : _ref$write,
+        write = _ref$write === void 0 ? function() {} : _ref$write,
         _ref$create = _ref.create,
-        create = _ref$create === undefined ? function() {} : _ref$create,
+        create = _ref$create === void 0 ? function() {} : _ref$create,
         _ref$destroy = _ref.destroy,
-        destroy = _ref$destroy === undefined ? function() {} : _ref$destroy,
+        destroy = _ref$destroy === void 0 ? function() {} : _ref$destroy,
         _ref$filterFrameActio = _ref.filterFrameActionsForChild,
         filterFrameActionsForChild =
-          _ref$filterFrameActio === undefined
+          _ref$filterFrameActio === void 0
             ? function(child, actions) {
                 return actions;
               }
             : _ref$filterFrameActio,
         _ref$didCreateView = _ref.didCreateView,
         didCreateView =
-          _ref$didCreateView === undefined ? function() {} : _ref$didCreateView,
+          _ref$didCreateView === void 0 ? function() {} : _ref$didCreateView,
         _ref$didWriteView = _ref.didWriteView,
         didWriteView =
-          _ref$didWriteView === undefined ? function() {} : _ref$didWriteView,
+          _ref$didWriteView === void 0 ? function() {} : _ref$didWriteView,
         _ref$ignoreRect = _ref.ignoreRect,
-        ignoreRect = _ref$ignoreRect === undefined ? false : _ref$ignoreRect,
+        ignoreRect = _ref$ignoreRect === void 0 ? false : _ref$ignoreRect,
         _ref$ignoreRectUpdate = _ref.ignoreRectUpdate,
         ignoreRectUpdate =
-          _ref$ignoreRectUpdate === undefined ? false : _ref$ignoreRectUpdate,
+          _ref$ignoreRectUpdate === void 0 ? false : _ref$ignoreRectUpdate,
         _ref$mixins = _ref.mixins,
-        mixins = _ref$mixins === undefined ? [] : _ref$mixins;
-
+        mixins = _ref$mixins === void 0 ? [] : _ref$mixins;
       return function(
         // each view requires reference to store
         store
@@ -1118,7 +1038,6 @@
           arguments.length > 1 && arguments[1] !== undefined
             ? arguments[1]
             : {};
-
         // root element should not be changed
         var element = createElement(tag, 'filepond--' + name, attributes);
 
@@ -1162,7 +1081,7 @@
           return element;
         };
         var getChildViews = function getChildViews() {
-          return [].concat(childViews);
+          return childViews.concat();
         };
         var getReference = function getReference() {
           return ref;
@@ -1224,6 +1143,7 @@
               timestamp: ts,
               shouldOptimize: shouldOptimize
             });
+
             if (writerResting === false) {
               resting = false;
             }
@@ -1250,6 +1170,7 @@
                 filterFrameActionsForChild(child, frameActions),
                 shouldOptimize
               );
+
               if (!childResting) {
                 resting = false;
               }
@@ -1312,9 +1233,11 @@
           element: {
             get: getElement
           },
+
           style: {
             get: getStyle
           },
+
           childViews: {
             get: getChildViews
           }
@@ -1369,17 +1292,21 @@
           element: {
             get: getElement
           },
+
           childViews: {
             get: getChildViews
           },
+
           rect: {
             get: getRect
           },
+
           resting: {
             get: function get() {
               return isResting;
             }
           },
+
           isRectIgnored: function isRectIgnored() {
             return ignoreRect;
           },
@@ -1487,7 +1414,7 @@
       }
 
       // align next frame
-      last = ts - delta % interval;
+      last = ts - (delta % interval);
 
       // update view
       painter.readers.forEach(function(read) {
@@ -1512,10 +1439,9 @@
       var root = _ref.root,
         props = _ref.props,
         _ref$actions = _ref.actions,
-        actions = _ref$actions === undefined ? [] : _ref$actions,
+        actions = _ref$actions === void 0 ? [] : _ref$actions,
         timestamp = _ref.timestamp,
         shouldOptimize = _ref.shouldOptimize;
-
       actions
         .filter(function(action) {
           return routes[action.type];
@@ -1529,6 +1455,7 @@
             shouldOptimize: shouldOptimize
           });
         });
+
       if (fn) {
         fn({
           root: root,
@@ -1568,10 +1495,9 @@
     return '' + value;
   };
 
-  var toArray$1 = function toArray(value) {
+  var toArray = function toArray(value) {
     var splitter =
       arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ',';
-
     if (isEmpty(value)) {
       return [];
     }
@@ -1601,7 +1527,9 @@
   var toNumber = function toNumber(value) {
     return isNumber(value)
       ? value
-      : isString(value) ? toString(value).replace(/[a-z]+/gi, '') : 0;
+      : isString(value)
+      ? toString(value).replace(/[a-z]+/gi, '')
+      : 0;
   };
 
   var toInt = function toInt(value) {
@@ -1737,10 +1665,7 @@
   };
 
   var isObject = function isObject(value) {
-    return (
-      (typeof value === 'undefined' ? 'undefined' : _typeof(value)) ===
-        'object' && value !== null
-    );
+    return typeof value === 'object' && value !== null;
   };
 
   var isAPI = function isAPI(value) {
@@ -1775,7 +1700,7 @@
       return 'api';
     }
 
-    return typeof value === 'undefined' ? 'undefined' : _typeof(value);
+    return typeof value;
   };
 
   var replaceSingleQuotes = function replaceSingleQuotes(str) {
@@ -1789,7 +1714,7 @@
   };
 
   var conversionTable = {
-    array: toArray$1,
+    array: toArray,
     boolean: toBoolean,
     int: function int(value) {
       return getType(value) === 'bytes' ? toBytes(value) : toInt(value);
@@ -1928,8 +1853,7 @@
         obj['SET_' + name] = function(action) {
           try {
             state.options[key] = action.value;
-          } catch (e) {}
-          // nope, failed
+          } catch (e) {} // nope, failed
 
           // we successfully set the value of this option
           dispatch('DID_SET_' + name, { value: state.options[key] });
@@ -1983,14 +1907,13 @@
       fire: function fire(event) {
         for (
           var _len = arguments.length,
-            args = Array(_len > 1 ? _len - 1 : 0),
+            args = new Array(_len > 1 ? _len - 1 : 0),
             _key = 1;
           _key < _len;
           _key++
         ) {
           args[_key - 1] = arguments[_key];
         }
-
         listeners
           .filter(function(listener) {
             return listener.event === event;
@@ -2000,7 +1923,7 @@
           })
           .forEach(function(cb) {
             setTimeout(function() {
-              cb.apply(undefined, args);
+              cb.apply(void 0, args);
             }, 0);
           });
       },
@@ -2012,7 +1935,7 @@
           event: event,
           cb: function cb() {
             off(event, _cb);
-            _cb.apply(undefined, arguments);
+            _cb.apply(void 0, arguments);
           }
         });
       },
@@ -2180,11 +2103,11 @@
     return Object.assign(defaultOptions, additionalOptions);
   };
 
-  var getOptions$1 = function getOptions() {
+  var getOptions = function getOptions() {
     return Object.assign({}, defaultOptions);
   };
 
-  var setOptions$1 = function setOptions(opts) {
+  var setOptions = function setOptions(opts) {
     forin(opts, function(key, value) {
       // key does not exist, so this option cannot be set
       if (!defaultOptions[key]) {
@@ -2295,18 +2218,22 @@
       '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M11.586 13l-2.293 2.293a1 1 0 0 0 1.414 1.414L13 14.414l2.293 2.293a1 1 0 0 0 1.414-1.414L14.414 13l2.293-2.293a1 1 0 0 0-1.414-1.414L13 11.586l-2.293-2.293a1 1 0 0 0-1.414 1.414L11.586 13z" fill="currentColor" fill-rule="nonzero"/></svg>',
       Type.STRING
     ],
+
     iconProcess: [
       '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M14 10.414v3.585a1 1 0 0 1-2 0v-3.585l-1.293 1.293a1 1 0 0 1-1.414-1.415l3-3a1 1 0 0 1 1.414 0l3 3a1 1 0 0 1-1.414 1.415L14 10.414zM9 18a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2H9z" fill="currentColor" fill-rule="evenodd"/></svg>',
       Type.STRING
     ],
+
     iconRetry: [
       '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M10.81 9.185l-.038.02A4.997 4.997 0 0 0 8 13.683a5 5 0 0 0 5 5 5 5 0 0 0 5-5 1 1 0 0 1 2 0A7 7 0 1 1 9.722 7.496l-.842-.21a.999.999 0 1 1 .484-1.94l3.23.806c.535.133.86.675.73 1.21l-.804 3.233a.997.997 0 0 1-1.21.73.997.997 0 0 1-.73-1.21l.23-.928v-.002z" fill="currentColor" fill-rule="nonzero"/></svg>',
       Type.STRING
     ],
+
     iconUndo: [
       '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M9.185 10.81l.02-.038A4.997 4.997 0 0 1 13.683 8a5 5 0 0 1 5 5 5 5 0 0 1-5 5 1 1 0 0 0 0 2A7 7 0 1 0 7.496 9.722l-.21-.842a.999.999 0 1 0-1.94.484l.806 3.23c.133.535.675.86 1.21.73l3.233-.803a.997.997 0 0 0 .73-1.21.997.997 0 0 0-1.21-.73l-.928.23-.002-.001z" fill="currentColor" fill-rule="nonzero"/></svg>',
       Type.STRING
     ],
+
     iconDone: [
       '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M18.293 9.293a1 1 0 0 1 1.414 1.414l-7.002 7a1 1 0 0 1-1.414 0l-3.998-4a1 1 0 1 1 1.414-1.414L12 15.586l6.294-6.293z" fill="currentColor" fill-rule="nonzero"/></svg>',
       Type.STRING
@@ -2359,9 +2286,7 @@
     }
 
     // if query is item, get the id
-    if (
-      (typeof query === 'undefined' ? 'undefined' : _typeof(query)) === 'object'
-    ) {
+    if (typeof query === 'object') {
       query = query.id;
     }
 
@@ -2380,12 +2305,8 @@
       return aspectRatio;
     }
     if (/:/.test(aspectRatio)) {
-      var _aspectRatio$split = aspectRatio.split(':'),
-        _aspectRatio$split2 = slicedToArray(_aspectRatio$split, 2),
-        w = _aspectRatio$split2[0],
-        h = _aspectRatio$split2[1];
-
-      return h / w;
+      var parts = aspectRatio.split(':');
+      return parts[1] / parts[0];
     }
     return parseFloat(aspectRatio);
   };
@@ -2396,7 +2317,7 @@
     });
   };
 
-  var Status$1 = {
+  var Status = {
     EMPTY: 0,
     IDLE: 1, // waiting
     ERROR: 2, // a file is in error state
@@ -2431,12 +2352,11 @@
     return {
       GET_STATUS: function GET_STATUS() {
         var items = getActiveItems(state.items);
-
-        var EMPTY = Status$1.EMPTY,
-          ERROR = Status$1.ERROR,
-          BUSY = Status$1.BUSY,
-          IDLE = Status$1.IDLE,
-          READY = Status$1.READY;
+        var EMPTY = Status.EMPTY,
+          ERROR = Status.ERROR,
+          BUSY = Status.BUSY,
+          IDLE = Status.IDLE,
+          READY = Status.READY;
 
         if (items.length === 0) return EMPTY;
 
@@ -2663,7 +2583,6 @@
       arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
     var extension =
       arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-
     var file =
       typeof type === 'string'
         ? blob.slice(0, blob.size, type)
@@ -2796,7 +2715,6 @@
     var _iteratorNormalCompletion = true;
     var _didIteratorError = false;
     var _iteratorError = undefined;
-
     try {
       for (
         var _iterator = rows[Symbol.iterator](), _step;
@@ -2828,7 +2746,7 @@
       _iteratorError = err;
     } finally {
       try {
-        if (!_iteratorNormalCompletion && _iterator.return) {
+        if (!_iteratorNormalCompletion && _iterator.return != null) {
           _iterator.return();
         }
       } finally {
@@ -2893,6 +2811,7 @@
           body: "Can't load URL",
           code: 400
         });
+
         return;
       }
 
@@ -3132,8 +3051,7 @@
   var createFetchFunction = function createFetchFunction() {
     var apiUrl =
       arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-    var action = arguments[1];
-
+    var action = arguments.length > 1 ? arguments[1] : undefined;
     // custom handler (should also handle file, load, error, progress and abort)
     if (typeof action === 'function') {
       return action;
@@ -3218,31 +3136,29 @@
   };
 
   /*
-function signature:
-  (file, metadata, load, error, progress, abort) => {
-    return {
-    abort:() => {}
-  }
-}
-*/
+                                                     function signature:
+                                                       (file, metadata, load, error, progress, abort) => {
+                                                         return {
+                                                         abort:() => {}
+                                                       }
+                                                     }
+                                                     */
   var createProcessorFunction = function createProcessorFunction() {
     var apiUrl =
       arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-    var action = arguments[1];
-    var name = arguments[2];
-
+    var action = arguments.length > 1 ? arguments[1] : undefined;
+    var name = arguments.length > 2 ? arguments[2] : undefined;
     // custom handler (should also handle file, load, error, progress and abort)
     if (typeof action === 'function') {
       return function() {
         for (
-          var _len = arguments.length, params = Array(_len), _key = 0;
+          var _len = arguments.length, params = new Array(_len), _key = 0;
           _key < _len;
           _key++
         ) {
           params[_key] = arguments[_key];
         }
-
-        return action.apply(undefined, [name].concat(params));
+        return action.apply(void 0, [name].concat(params));
       };
     }
 
@@ -3328,14 +3244,13 @@ function signature:
   };
 
   /*
- function signature:
- (uniqueFileId, load, error) => { }
- */
+                                                      function signature:
+                                                      (uniqueFileId, load, error) => { }
+                                                      */
   var createRevertFunction = function createRevertFunction() {
     var apiUrl =
       arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-    var action = arguments[1];
-
+    var action = arguments.length > 1 ? arguments[1] : undefined;
     // is custom implementation
     if (typeof action === 'function') {
       return action;
@@ -3408,11 +3323,12 @@ function signature:
   ) {
     var duration =
       arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1000;
+    var offset =
+      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 0;
     var tickMin =
       arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 25;
     var tickMax =
       arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 250;
-
     var timeout = null;
     var start = Date.now();
 
@@ -3660,7 +3576,7 @@ function signature:
     };
   };
 
-  var FileOrigin$1 = {
+  var FileOrigin = {
     INPUT: 1,
     LIMBO: 2,
     LOCAL: 3
@@ -3688,7 +3604,6 @@ function signature:
       arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
     var file =
       arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-
     // unique id for this item, is used to identify the item across views
     var id = getUniqueId();
 
@@ -3736,17 +3651,16 @@ function signature:
 
     // fire event unless the item has been archived
     var fire = function fire(event) {
+      if (state.released) return;
       for (
         var _len = arguments.length,
-          params = Array(_len > 1 ? _len - 1 : 0),
+          params = new Array(_len > 1 ? _len - 1 : 0),
           _key = 1;
         _key < _len;
         _key++
       ) {
         params[_key - 1] = arguments[_key];
       }
-
-      if (state.released) return;
       api.fire.apply(api, [event].concat(params));
     };
 
@@ -3795,7 +3709,7 @@ function signature:
 
         // if has received source, we done
         if (meta.source) {
-          origin = FileOrigin$1.LIMBO;
+          origin = FileOrigin.LIMBO;
           state.serverFileReference = meta.source;
           state.status = ItemStatus.PROCESSING_COMPLETE;
         }
@@ -3835,7 +3749,7 @@ function signature:
           state.file = isFile(result) ? result : state.file;
 
           // file received
-          if (origin === FileOrigin$1.LIMBO && state.serverFileReference) {
+          if (origin === FileOrigin.LIMBO && state.serverFileReference) {
             setStatus(ItemStatus.PROCESSING_COMPLETE);
           } else {
             setStatus(ItemStatus.IDLE);
@@ -4034,7 +3948,7 @@ function signature:
     };
 
     // exposed methods
-    var _setMetadata = function _setMetadata(key, value, silent) {
+    var _setMetadata = function setMetadata(key, value, silent) {
       var keys = key.split('.');
       var root = keys[0];
       var last = keys.pop();
@@ -4132,6 +4046,7 @@ function signature:
         process: process,
         revert: revert
       },
+
       on(),
       {
         release: function release() {
@@ -4262,7 +4177,7 @@ function signature:
 
   var dynamicLabel = function dynamicLabel(label) {
     return function() {
-      return isFunction(label) ? label.apply(undefined, arguments) : label;
+      return isFunction(label) ? label.apply(void 0, arguments) : label;
     };
   };
 
@@ -4280,20 +4195,19 @@ function signature:
   var optionalPromise = function optionalPromise(fn) {
     for (
       var _len = arguments.length,
-        params = Array(_len > 1 ? _len - 1 : 0),
+        params = new Array(_len > 1 ? _len - 1 : 0),
         _key = 1;
       _key < _len;
       _key++
     ) {
       params[_key - 1] = arguments[_key];
     }
-
     return new Promise(function(resolve) {
       if (!fn) {
         return resolve(true);
       }
 
-      var result = fn.apply(undefined, params);
+      var result = fn.apply(void 0, params);
 
       if (result == null) {
         return resolve(true);
@@ -4327,16 +4241,17 @@ function signature:
             : {},
         query = _ref.query,
         _ref$success = _ref.success,
-        success = _ref$success === undefined ? function() {} : _ref$success,
+        success = _ref$success === void 0 ? function() {} : _ref$success,
         _ref$failure = _ref.failure,
-        failure = _ref$failure === undefined ? function() {} : _ref$failure;
-
+        failure = _ref$failure === void 0 ? function() {} : _ref$failure;
       var item = getItemByQuery(state.items, query);
       if (!item) {
         failure({
           error: createResponse('error', 0, 'Item not found'),
+
           file: null
         });
+
         return;
       }
       itemHandler(item, success, failure);
@@ -4360,7 +4275,7 @@ function signature:
        */
       DID_SET_FILES: function DID_SET_FILES(_ref2) {
         var _ref2$value = _ref2.value,
-          value = _ref2$value === undefined ? [] : _ref2$value;
+          value = _ref2$value === void 0 ? [] : _ref2$value;
 
         // map values to file objects
         var files = value.map(function(file) {
@@ -4408,7 +4323,8 @@ function signature:
       },
 
       DID_UPDATE_ITEM_METADATA: function DID_UPDATE_ITEM_METADATA(_ref3) {
-        var id = _ref3.id;
+        var id = _ref3.id,
+          change = _ref3.change;
 
         var item = getItemById(state.items, id);
 
@@ -4480,7 +4396,6 @@ function signature:
 
       SORT: function SORT(_ref4) {
         var compare = _ref4.compare;
-
         sortItems(state, compare);
       },
 
@@ -4489,9 +4404,9 @@ function signature:
           index = _ref5.index,
           interactionMethod = _ref5.interactionMethod,
           _ref5$success = _ref5.success,
-          success = _ref5$success === undefined ? function() {} : _ref5$success,
+          success = _ref5$success === void 0 ? function() {} : _ref5$success,
           _ref5$failure = _ref5.failure,
-          failure = _ref5$failure === undefined ? function() {} : _ref5$failure;
+          failure = _ref5$failure === void 0 ? function() {} : _ref5$failure;
 
         var currentIndex = index;
 
@@ -4535,21 +4450,23 @@ function signature:
       ADD_ITEM: function ADD_ITEM(_ref6) {
         var source = _ref6.source,
           _ref6$index = _ref6.index,
-          index = _ref6$index === undefined ? -1 : _ref6$index,
+          index = _ref6$index === void 0 ? -1 : _ref6$index,
           interactionMethod = _ref6.interactionMethod,
           _ref6$success = _ref6.success,
-          success = _ref6$success === undefined ? function() {} : _ref6$success,
+          success = _ref6$success === void 0 ? function() {} : _ref6$success,
           _ref6$failure = _ref6.failure,
-          failure = _ref6$failure === undefined ? function() {} : _ref6$failure,
+          failure = _ref6$failure === void 0 ? function() {} : _ref6$failure,
           _ref6$options = _ref6.options,
-          options = _ref6$options === undefined ? {} : _ref6$options;
+          options = _ref6$options === void 0 ? {} : _ref6$options;
 
         // if no source supplied
         if (isEmpty(source)) {
           failure({
             error: createResponse('error', 0, 'No source'),
+
             file: null
           });
+
           return;
         }
 
@@ -4625,10 +4542,10 @@ function signature:
         // where did the file originate
         var origin =
           options.type === 'local'
-            ? FileOrigin$1.LOCAL
+            ? FileOrigin.LOCAL
             : options.type === 'limbo'
-              ? FileOrigin$1.LIMBO
-              : FileOrigin$1.INPUT;
+            ? FileOrigin.LIMBO
+            : FileOrigin.INPUT;
 
         // create a new blank item
         var item = createItem(
@@ -4636,7 +4553,7 @@ function signature:
           origin,
 
           // an input file never has a server file reference
-          origin === FileOrigin$1.INPUT ? null : source,
+          origin === FileOrigin.INPUT ? null : source,
 
           // file mock data, if defined
           options.file
@@ -4750,6 +4667,7 @@ function signature:
               dispatch('REMOVE_ITEM', {
                 query: id
               });
+
               return;
             }
 
@@ -4879,7 +4797,6 @@ function signature:
         listUpdated(dispatch, state);
 
         // start loading the source
-
         var _ref7 = state.options.server || {},
           url = _ref7.url,
           load = _ref7.load,
@@ -4891,15 +4808,15 @@ function signature:
 
           // this creates a function that loads the file based on the type of file (string, base64, blob, file) and location of file (local, remote, limbo)
           createFileLoader(
-            origin === FileOrigin$1.INPUT
+            origin === FileOrigin.INPUT
               ? // input
                 isString(source) && isExternalURL(source)
                 ? createFetchFunction(url, fetch) // remote url
                 : fetchLocal // local url
               : // limbo or local
-                origin === FileOrigin$1.LIMBO
-                ? createFetchFunction(url, restore) // limbo
-                : createFetchFunction(url, load) // local
+              origin === FileOrigin.LIMBO
+              ? createFetchFunction(url, restore) // limbo
+              : createFetchFunction(url, load) // local
           ),
 
           // called when the file is loaded so it can be piped through the filters
@@ -4944,7 +4861,6 @@ function signature:
           source = data.source;
 
         // sort items in list
-
         var itemInsertLocation = query('GET_ITEM_INSERT_LOCATION');
         if (isFunction(itemInsertLocation) && source) {
           sortItems(state, itemInsertLocation);
@@ -4954,8 +4870,7 @@ function signature:
         dispatch('DID_LOAD_ITEM', {
           id: item.id,
           error: null,
-          serverFileReference:
-            item.origin === FileOrigin$1.INPUT ? null : source
+          serverFileReference: item.origin === FileOrigin.INPUT ? null : source
         });
 
         // item has been successfully loaded and added to the
@@ -4963,18 +4878,19 @@ function signature:
         success(createItemAPI(item));
 
         // if this is a local server file we need to show a different state
-        if (item.origin === FileOrigin$1.LOCAL) {
+        if (item.origin === FileOrigin.LOCAL) {
           dispatch('DID_LOAD_LOCAL_ITEM', { id: item.id });
           return;
         }
 
         // if is a temp server file we prevent async upload call here (as the file is already on the server)
-        if (item.origin === FileOrigin$1.LIMBO) {
+        if (item.origin === FileOrigin.LIMBO) {
           dispatch('DID_COMPLETE_ITEM_PROCESSING', {
             id: item.id,
             error: null,
             serverFileReference: source
           });
+
           return;
         }
 
@@ -5123,6 +5039,7 @@ function signature:
               state.options.name
             )
           ),
+
           // called when the file is about to be processed so it can be piped through the transform filters
           function(file, success, error) {
             // allow plugins to alter the file data
@@ -5181,7 +5098,7 @@ function signature:
         // if this is a local file and the server.remove function has been configured, send source there so dev can remove file from server
         var server = state.options.server;
         if (
-          item.origin === FileOrigin$1.LOCAL &&
+          item.origin === FileOrigin.LOCAL &&
           server &&
           isFunction(server.remove)
         ) {
@@ -5286,7 +5203,6 @@ function signature:
 
       SET_OPTIONS: function SET_OPTIONS(_ref10) {
         var options = _ref10.options;
-
         forin(options, function(key, value) {
           dispatch('SET_' + fromCamels(key, '_').toUpperCase(), {
             value: value
@@ -5320,7 +5236,7 @@ function signature:
     radius,
     angleInDegrees
   ) {
-    var angleInRadians = (angleInDegrees % 360 - 90) * Math.PI / 180.0;
+    var angleInRadians = (((angleInDegrees % 360) - 90) * Math.PI) / 180.0;
     return {
       x: centerX + radius * Math.cos(angleInRadians),
       y: centerY + radius * Math.sin(angleInRadians)
@@ -5370,10 +5286,9 @@ function signature:
     );
   };
 
-  var create$7 = function create(_ref) {
+  var create = function create(_ref) {
     var root = _ref.root,
       props = _ref.props;
-
     // start at 0
     props.spin = false;
     props.progress = 0;
@@ -5385,6 +5300,7 @@ function signature:
       'stroke-width': 2,
       'stroke-linecap': 'round'
     });
+
     svg.appendChild(root.ref.path);
 
     root.ref.svg = svg;
@@ -5392,7 +5308,7 @@ function signature:
     root.appendChild(svg);
   };
 
-  var write$5 = function write(_ref2) {
+  var write = function write(_ref2) {
     var root = _ref2.root,
       props = _ref2.props;
 
@@ -5448,8 +5364,8 @@ function signature:
     name: 'progress-indicator',
     ignoreRectUpdate: true,
     ignoreRect: true,
-    create: create$7,
-    write: write$5,
+    create: create,
+    write: write,
     mixins: {
       apis: ['progress', 'spin', 'align'],
       styles: ['opacity'],
@@ -5465,21 +5381,19 @@ function signature:
     }
   });
 
-  var create$8 = function create(_ref) {
+  var create$1 = function create(_ref) {
     var root = _ref.root,
       props = _ref.props;
-
     root.element.title = props.label;
     root.element.innerHTML = props.icon || '';
 
     props.isDisabled = false;
   };
 
-  var write$6 = function write(_ref2) {
+  var write$1 = function write(_ref2) {
     var root = _ref2.root,
       props = _ref2.props;
     var isDisabled = props.isDisabled;
-
     var shouldDisable = root.query('GET_DISABLED') || props.opacity === 0;
 
     if (shouldDisable && !isDisabled) {
@@ -5496,6 +5410,7 @@ function signature:
     attributes: {
       type: 'button'
     },
+
     ignoreRect: true,
     ignoreRectUpdate: true,
     name: 'file-action-button',
@@ -5509,16 +5424,17 @@ function signature:
         translateY: 'spring',
         opacity: { type: 'tween', duration: 250 }
       },
+
       listeners: true
     },
-    create: create$8,
-    write: write$6
+
+    create: create$1,
+    write: write$1
   });
 
   var toNaturalFileSize = function toNaturalFileSize(bytes) {
     var decimalSeparator =
       arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '.';
-
     // nope, no negative byte sizes
     bytes = Math.round(Math.abs(bytes));
 
@@ -5559,10 +5475,9 @@ function signature:
       .join(separator);
   };
 
-  var create$9 = function create(_ref) {
+  var create$2 = function create(_ref) {
     var root = _ref.root,
       props = _ref.props;
-
     // filename
     var fileName = createElement$1('span');
     fileName.className = 'filepond--file-info-main';
@@ -5587,11 +5502,11 @@ function signature:
   var updateFile = function updateFile(_ref2) {
     var root = _ref2.root,
       props = _ref2.props;
-
     text(
       root.ref.fileSize,
       toNaturalFileSize(root.query('GET_ITEM_SIZE', props.id))
     );
+
     text(
       root.ref.fileName,
       formatFilename(root.query('GET_ITEM_NAME', props.id))
@@ -5601,7 +5516,6 @@ function signature:
   var updateFileSizeOnError = function updateFileSizeOnError(_ref3) {
     var root = _ref3.root,
       props = _ref3.props;
-
     // if size is available don't fallback to unknown size message
     if (isInt(root.query('GET_ITEM_SIZE', props.id))) {
       return;
@@ -5620,10 +5534,11 @@ function signature:
       DID_THROW_ITEM_LOAD_ERROR: updateFileSizeOnError,
       DID_THROW_ITEM_INVALID: updateFileSizeOnError
     }),
+
     didCreateView: function didCreateView(root) {
       applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
     },
-    create: create$9,
+    create: create$2,
     mixins: {
       styles: ['translateX', 'translateY'],
       animations: {
@@ -5637,9 +5552,9 @@ function signature:
     return Math.round(value * 100);
   };
 
-  var create$10 = function create(_ref) {
-    var root = _ref.root;
-
+  var create$3 = function create(_ref) {
+    var root = _ref.root,
+      props = _ref.props;
     // main status
     var main = createElement$1('span');
     main.className = 'filepond--file-status-main';
@@ -5658,7 +5573,6 @@ function signature:
   var didSetItemLoadProgress = function didSetItemLoadProgress(_ref2) {
     var root = _ref2.root,
       action = _ref2.action;
-
     var title =
       action.progress === null
         ? root.query('GET_LABEL_FILE_LOADING')
@@ -5666,6 +5580,7 @@ function signature:
           ' ' +
           toPercentage(action.progress) +
           '%';
+
     text(root.ref.main, title);
     text(root.ref.sub, root.query('GET_LABEL_TAP_TO_CANCEL'));
   };
@@ -5673,7 +5588,6 @@ function signature:
   var didSetItemProcessProgress = function didSetItemProcessProgress(_ref3) {
     var root = _ref3.root,
       action = _ref3.action;
-
     var title =
       action.progress === null
         ? root.query('GET_LABEL_FILE_PROCESSING')
@@ -5681,34 +5595,31 @@ function signature:
           ' ' +
           toPercentage(action.progress) +
           '%';
+
     text(root.ref.main, title);
     text(root.ref.sub, root.query('GET_LABEL_TAP_TO_CANCEL'));
   };
 
   var didRequestItemProcessing = function didRequestItemProcessing(_ref4) {
     var root = _ref4.root;
-
     text(root.ref.main, root.query('GET_LABEL_FILE_PROCESSING'));
     text(root.ref.sub, root.query('GET_LABEL_TAP_TO_CANCEL'));
   };
 
   var didAbortItemProcessing = function didAbortItemProcessing(_ref5) {
     var root = _ref5.root;
-
     text(root.ref.main, root.query('GET_LABEL_FILE_PROCESSING_ABORTED'));
     text(root.ref.sub, root.query('GET_LABEL_TAP_TO_RETRY'));
   };
 
-  var didCompleteItemProcessing$1 = function didCompleteItemProcessing(_ref6) {
+  var didCompleteItemProcessing = function didCompleteItemProcessing(_ref6) {
     var root = _ref6.root;
-
     text(root.ref.main, root.query('GET_LABEL_FILE_PROCESSING_COMPLETE'));
     text(root.ref.sub, root.query('GET_LABEL_TAP_TO_UNDO'));
   };
 
   var clear = function clear(_ref7) {
     var root = _ref7.root;
-
     text(root.ref.main, '');
     text(root.ref.sub, '');
   };
@@ -5716,7 +5627,6 @@ function signature:
   var error = function error(_ref8) {
     var root = _ref8.root,
       action = _ref8.action;
-
     text(root.ref.main, action.status.main);
     text(root.ref.sub, action.status.sub);
   };
@@ -5730,7 +5640,7 @@ function signature:
       DID_REVERT_ITEM_PROCESSING: clear,
       DID_REQUEST_ITEM_PROCESSING: didRequestItemProcessing,
       DID_ABORT_ITEM_PROCESSING: didAbortItemProcessing,
-      DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing$1,
+      DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing,
       DID_UPDATE_ITEM_PROCESS_PROGRESS: didSetItemProcessProgress,
       DID_UPDATE_ITEM_LOAD_PROGRESS: didSetItemLoadProgress,
       DID_THROW_ITEM_LOAD_ERROR: error,
@@ -5739,10 +5649,11 @@ function signature:
       DID_THROW_ITEM_PROCESSING_REVERT_ERROR: error,
       DID_THROW_ITEM_REMOVE_ERROR: error
     }),
+
     didCreateView: function didCreateView(root) {
       applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
     },
-    create: create$10,
+    create: create$3,
     mixins: {
       styles: ['translateX', 'translateY', 'opacity'],
       animations: {
@@ -5887,6 +5798,7 @@ function signature:
       loadProgressIndicator: { opacity: 1 },
       status: { opacity: 1 }
     },
+
     DID_THROW_ITEM_LOAD_ERROR: {
       buttonRetryItemLoad: { opacity: 1 },
       buttonRemoveItem: { opacity: 1 },
@@ -5919,6 +5831,7 @@ function signature:
       info: { translateX: calculateFileInfoOffset },
       status: { translateX: calculateFileInfoOffset }
     },
+
     DID_START_ITEM_PROCESSING: ProcessingStyle,
     DID_REQUEST_ITEM_PROCESSING: ProcessingStyle,
     DID_UPDATE_ITEM_PROCESS_PROGRESS: ProcessingStyle,
@@ -5927,23 +5840,27 @@ function signature:
       info: { opacity: 1 },
       status: { opacity: 1 }
     },
+
     DID_THROW_ITEM_PROCESSING_ERROR: {
       buttonRemoveItem: { opacity: 1 },
       buttonRetryItemProcessing: { opacity: 1 },
       status: { opacity: 1 },
       info: { translateX: calculateFileInfoOffset }
     },
+
     DID_THROW_ITEM_PROCESSING_REVERT_ERROR: {
       buttonRevertItemProcessing: { opacity: 1 },
       status: { opacity: 1 },
       info: { opacity: 1 }
     },
+
     DID_ABORT_ITEM_PROCESSING: {
       buttonRemoveItem: { opacity: 1 },
       buttonProcessItem: { opacity: 1 },
       info: { translateX: calculateFileInfoOffset },
       status: { opacity: 1 }
     },
+
     DID_REVERT_ITEM_PROCESSING: IdleStyle
   };
 
@@ -5951,7 +5868,6 @@ function signature:
   var processingCompleteIndicatorView = createView({
     create: function create(_ref) {
       var root = _ref.root;
-
       root.element.innerHTML = root.query('GET_ICON_DONE');
     },
     name: 'processing-complete-indicator',
@@ -5969,13 +5885,12 @@ function signature:
   /**
    * Creates the file view
    */
-  var create$6 = function create(_ref2) {
+  var create$4 = function create(_ref2) {
     var root = _ref2.root,
       props = _ref2.props;
     var id = props.id;
 
     // allow reverting upload
-
     var allowRevert = root.query('GET_ALLOW_REVERT');
 
     // is instant uploading, need this to determine the icon of the undo button
@@ -6064,6 +5979,7 @@ function signature:
         align: root.query('GET_STYLE_LOAD_INDICATOR_POSITION')
       })
     );
+
     loadIndicatorView.element.classList.add('filepond--load-indicator');
     root.ref.loadProgressIndicator = loadIndicatorView;
 
@@ -6073,21 +5989,22 @@ function signature:
         align: root.query('GET_STYLE_PROGRESS_INDICATOR_POSITION')
       })
     );
+
     progressIndicatorView.element.classList.add('filepond--process-indicator');
     root.ref.processProgressIndicator = progressIndicatorView;
   };
 
-  var write$4 = function write(_ref3) {
+  var write$2 = function write(_ref3) {
     var root = _ref3.root,
       actions = _ref3.actions,
       props = _ref3.props;
 
     // route actions
-    route$4({ root: root, actions: actions, props: props });
+    route({ root: root, actions: actions, props: props });
 
     // select last state change action
-    var action = []
-      .concat(toConsumableArray(actions))
+    var action = actions
+      .concat()
       .filter(function(action) {
         return /^DID_/.test(action.type);
       })
@@ -6120,13 +6037,12 @@ function signature:
     });
   };
 
-  var route$4 = createRoute({
+  var route = createRoute({
     DID_SET_LABEL_BUTTON_ABORT_ITEM_PROCESSING: function DID_SET_LABEL_BUTTON_ABORT_ITEM_PROCESSING(
       _ref4
     ) {
       var root = _ref4.root,
         action = _ref4.action;
-
       root.ref.buttonAbortItemProcessing.label = action.value;
     },
     DID_SET_LABEL_BUTTON_ABORT_ITEM_LOAD: function DID_SET_LABEL_BUTTON_ABORT_ITEM_LOAD(
@@ -6134,7 +6050,6 @@ function signature:
     ) {
       var root = _ref5.root,
         action = _ref5.action;
-
       root.ref.buttonAbortItemLoad.label = action.value;
     },
     DID_SET_LABEL_BUTTON_ABORT_ITEM_REMOVAL: function DID_SET_LABEL_BUTTON_ABORT_ITEM_REMOVAL(
@@ -6142,24 +6057,20 @@ function signature:
     ) {
       var root = _ref6.root,
         action = _ref6.action;
-
       root.ref.buttonAbortItemRemoval.label = action.value;
     },
     DID_REQUEST_ITEM_PROCESSING: function DID_REQUEST_ITEM_PROCESSING(_ref7) {
       var root = _ref7.root;
-
       root.ref.processProgressIndicator.spin = true;
       root.ref.processProgressIndicator.progress = 0;
     },
     DID_START_ITEM_LOAD: function DID_START_ITEM_LOAD(_ref8) {
       var root = _ref8.root;
-
       root.ref.loadProgressIndicator.spin = true;
       root.ref.loadProgressIndicator.progress = 0;
     },
     DID_START_ITEM_REMOVE: function DID_START_ITEM_REMOVE(_ref9) {
       var root = _ref9.root;
-
       root.ref.processProgressIndicator.spin = true;
       root.ref.processProgressIndicator.progress = 0;
     },
@@ -6168,7 +6079,6 @@ function signature:
     ) {
       var root = _ref10.root,
         action = _ref10.action;
-
       root.ref.loadProgressIndicator.spin = false;
       root.ref.loadProgressIndicator.progress = action.progress;
     },
@@ -6177,15 +6087,14 @@ function signature:
     ) {
       var root = _ref11.root,
         action = _ref11.action;
-
       root.ref.processProgressIndicator.spin = false;
       root.ref.processProgressIndicator.progress = action.progress;
     }
   });
 
   var file = createView({
-    create: create$6,
-    write: write$4,
+    create: create$4,
+    write: write$2,
     didCreateView: function didCreateView(root) {
       applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
     },
@@ -6219,7 +6128,6 @@ function signature:
 
   var didSetDisabled = function didSetDisabled(_ref2) {
     var root = _ref2.root;
-
     root.ref.data.disabled = root.query('GET_DISABLED');
   };
 
@@ -6230,7 +6138,6 @@ function signature:
     var root = _ref3.root,
       action = _ref3.action,
       props = _ref3.props;
-
     root.ref.data.value = action.serverFileReference;
 
     // updates the legend of the fieldset so screenreaders can better group buttons
@@ -6242,20 +6149,18 @@ function signature:
 
   var didRemoveItem = function didRemoveItem(_ref4) {
     var root = _ref4.root;
-
     root.ref.data.removeAttribute('value');
   };
 
-  var didCompleteItemProcessing = function didCompleteItemProcessing(_ref5) {
+  var didCompleteItemProcessing$1 = function didCompleteItemProcessing(_ref5) {
     var root = _ref5.root,
       action = _ref5.action;
-
     root.ref.data.value = action.serverFileReference;
   };
 
   var didRevertItemProcessing = function didRevertItemProcessing(_ref6) {
-    var root = _ref6.root;
-
+    var root = _ref6.root,
+      action = _ref6.action;
     root.ref.data.removeAttribute('value');
   };
 
@@ -6266,9 +6171,10 @@ function signature:
       DID_SET_DISABLED: didSetDisabled,
       DID_LOAD_ITEM: didLoadItem,
       DID_REMOVE_ITEM: didRemoveItem,
-      DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing,
+      DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing$1,
       DID_REVERT_ITEM_PROCESSING: didRevertItemProcessing
     }),
+
     didCreateView: function didCreateView(root) {
       applyFilters('CREATE_VIEW', Object.assign({}, root, { view: root }));
     },
@@ -6278,36 +6184,41 @@ function signature:
 
   var PANEL_SPRING_PROPS = { type: 'spring', damping: 0.6, mass: 7 };
 
-  var create$11 = function create(_ref) {
+  var create$6 = function create(_ref) {
     var root = _ref.root,
       props = _ref.props;
-
     [
       {
         name: 'top'
       },
+
       {
         name: 'center',
         props: {
           translateY: null,
           scaleY: null
         },
+
         mixins: {
           animations: {
             scaleY: PANEL_SPRING_PROPS
           },
+
           styles: ['translateY', 'scaleY']
         }
       },
+
       {
         name: 'bottom',
         props: {
           translateY: null
         },
+
         mixins: {
           animations: {
             translateY: PANEL_SPRING_PROPS
           },
+
           styles: ['translateY']
         }
       }
@@ -6332,7 +6243,7 @@ function signature:
     root.ref[section.name] = root.appendChildView(view);
   };
 
-  var write$7 = function write(_ref2) {
+  var write$3 = function write(_ref2) {
     var root = _ref2.root,
       props = _ref2.props;
 
@@ -6368,8 +6279,8 @@ function signature:
 
   var panel = createView({
     name: 'panel',
-    write: write$7,
-    create: create$11,
+    write: write$3,
+    create: create$6,
     ignoreRect: true,
     mixins: {
       apis: ['height', 'scalable']
@@ -6388,7 +6299,7 @@ function signature:
   /**
    * Creates the file view
    */
-  var create$4 = function create(_ref) {
+  var create$7 = function create(_ref) {
     var root = _ref.root,
       props = _ref.props;
 
@@ -6436,17 +6347,16 @@ function signature:
     DID_REVERT_ITEM_PROCESSING: 'idle'
   };
 
-  var route$3 = createRoute({
+  var route$1 = createRoute({
     DID_UPDATE_PANEL_HEIGHT: function DID_UPDATE_PANEL_HEIGHT(_ref2) {
       var root = _ref2.root,
         action = _ref2.action;
       var height = action.height;
-
       root.height = height;
     }
   });
 
-  var write$3 = function write(_ref3) {
+  var write$4 = function write(_ref3) {
     var root = _ref3.root,
       actions = _ref3.actions,
       props = _ref3.props,
@@ -6457,7 +6367,7 @@ function signature:
       root.query('GET_ITEM_PANEL_ASPECT_RATIO') ||
       root.query('GET_PANEL_ASPECT_RATIO');
     if (!aspectRatio) {
-      route$3({ root: root, actions: actions, props: props });
+      route$1({ root: root, actions: actions, props: props });
       if (!root.height) {
         root.height = root.ref.container.rect.element.height;
       }
@@ -6473,8 +6383,8 @@ function signature:
     root.ref.panel.height = root.height;
 
     // select last state change action
-    var action = []
-      .concat(toConsumableArray(actions))
+    var action = actions
+      .concat()
       .filter(function(action) {
         return /^DID_/.test(action.type);
       })
@@ -6494,12 +6404,11 @@ function signature:
   };
 
   var item = createView({
-    create: create$4,
-    write: write$3,
+    create: create$7,
+    write: write$4,
     destroy: function destroy(_ref4) {
       var root = _ref4.root,
         props = _ref4.props;
-
       root.element.removeEventListener('click', root.ref.handleClick);
       root.dispatch('RELEASE_ITEM', { query: props.id });
     },
@@ -6515,6 +6424,7 @@ function signature:
         'opacity',
         'height'
       ],
+
       animations: {
         scaleX: ITEM_SCALE_SPRING,
         scaleY: ITEM_SCALE_SPRING,
@@ -6590,9 +6500,9 @@ function signature:
     return l;
   };
 
-  var create$3 = function create(_ref) {
-    var root = _ref.root;
-
+  var create$8 = function create(_ref) {
+    var root = _ref.root,
+      props = _ref.props;
     // need to set role to list as otherwise it won't be read as a list by VoiceOver
     attr(root.element, 'role', 'list');
 
@@ -6639,54 +6549,55 @@ function signature:
           interactionMethod: interactionMethod
         }
       ),
+
       index
     );
   };
 
-  var moveItem = function moveItem(item$$1, x, y) {
+  var moveItem = function moveItem(item, x, y) {
     var vx =
       arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
     var vy =
       arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 1;
 
-    item$$1.translateX = x;
-    item$$1.translateY = y;
+    item.translateX = x;
+    item.translateY = y;
 
-    if (Date.now() > item$$1.spawnDate) {
+    if (Date.now() > item.spawnDate) {
       // reveal element
-      if (item$$1.opacity === 0) {
-        introItemView(item$$1, x, y, vx, vy);
+      if (item.opacity === 0) {
+        introItemView(item, x, y, vx, vy);
       }
 
       // make sure is default scale every frame
-      item$$1.scaleX = 1;
-      item$$1.scaleY = 1;
-      item$$1.opacity = 1;
+      item.scaleX = 1;
+      item.scaleY = 1;
+      item.opacity = 1;
     }
   };
 
-  var introItemView = function introItemView(item$$1, x, y, vx, vy) {
-    if (item$$1.interactionMethod === InteractionMethod.NONE) {
-      item$$1.translateX = null;
-      item$$1.translateX = x;
-      item$$1.translateY = null;
-      item$$1.translateY = y;
-    } else if (item$$1.interactionMethod === InteractionMethod.DROP) {
-      item$$1.translateX = null;
-      item$$1.translateX = x - vx * 20;
+  var introItemView = function introItemView(item, x, y, vx, vy) {
+    if (item.interactionMethod === InteractionMethod.NONE) {
+      item.translateX = null;
+      item.translateX = x;
+      item.translateY = null;
+      item.translateY = y;
+    } else if (item.interactionMethod === InteractionMethod.DROP) {
+      item.translateX = null;
+      item.translateX = x - vx * 20;
 
-      item$$1.translateY = null;
-      item$$1.translateY = y - vy * 10;
+      item.translateY = null;
+      item.translateY = y - vy * 10;
 
-      item$$1.scaleX = 0.8;
-      item$$1.scaleY = 0.8;
-    } else if (item$$1.interactionMethod === InteractionMethod.BROWSE) {
-      item$$1.translateY = null;
-      item$$1.translateY = y - 30;
-    } else if (item$$1.interactionMethod === InteractionMethod.API) {
-      item$$1.translateX = null;
-      item$$1.translateX = x - 30;
-      item$$1.translateY = null;
+      item.scaleX = 0.8;
+      item.scaleY = 0.8;
+    } else if (item.interactionMethod === InteractionMethod.BROWSE) {
+      item.translateY = null;
+      item.translateY = y - 30;
+    } else if (item.interactionMethod === InteractionMethod.API) {
+      item.translateX = null;
+      item.translateX = x - 30;
+      item.translateY = null;
     }
   };
 
@@ -6701,7 +6612,6 @@ function signature:
     var id = action.id;
 
     // get the view matching the given id
-
     var view = root.childViews.find(function(child) {
       return child.id === id;
     });
@@ -6734,7 +6644,7 @@ function signature:
    * @param actions
    * @param props
    */
-  var write$2 = function write(_ref4) {
+  var write$5 = function write(_ref4) {
     var root = _ref4.root,
       props = _ref4.props,
       actions = _ref4.actions,
@@ -6742,11 +6652,9 @@ function signature:
 
     // route actions
     route$2({ root: root, props: props, actions: actions });
-
     var dragCoordinates = props.dragCoordinates;
 
     // get index
-
     var dragIndex = dragCoordinates
       ? getItemIndexByPosition(root, dragCoordinates)
       : null;
@@ -6762,13 +6670,13 @@ function signature:
     // sort based on current active items
     var children = root
       .query('GET_ACTIVE_ITEMS')
-      .map(function(item$$1) {
+      .map(function(item) {
         return visibleChildren.find(function(child) {
-          return child.id === item$$1.id;
+          return child.id === item.id;
         });
       })
-      .filter(function(item$$1) {
-        return item$$1;
+      .filter(function(item) {
+        return item;
       });
 
     // add index is used to reserve the dropped/added item index till the actual item is rendered
@@ -6827,8 +6735,9 @@ function signature:
 
         offsetY += visualHeight;
       });
-    } else {
-      // grid
+    }
+    // grid
+    else {
       var prevX = 0;
       var prevY = 0;
 
@@ -6890,13 +6799,12 @@ function signature:
   };
 
   var list = createView({
-    create: create$3,
-    write: write$2,
+    create: create$8,
+    write: write$5,
     tag: 'ul',
     name: 'list',
     didWriteView: function didWriteView(_ref5) {
       var root = _ref5.root;
-
       root.childViews
         .filter(function(view) {
           return view.markedForRemoval && view.opacity === 0 && view.resting;
@@ -6912,10 +6820,9 @@ function signature:
     }
   });
 
-  var create$2 = function create(_ref) {
+  var create$9 = function create(_ref) {
     var root = _ref.root,
       props = _ref.props;
-
     root.ref.list = root.appendChildView(root.createChildView(list));
     props.dragCoordinates = null;
     props.overflowing = false;
@@ -6925,7 +6832,6 @@ function signature:
     var root = _ref2.root,
       props = _ref2.props,
       action = _ref2.action;
-
     if (!root.query('GET_ITEM_INSERT_LOCATION_FREEDOM')) return;
     props.dragCoordinates = {
       left: action.position.scopeLeft - root.ref.list.rect.element.left,
@@ -6939,22 +6845,21 @@ function signature:
 
   var clearDragCoordinates = function clearDragCoordinates(_ref3) {
     var props = _ref3.props;
-
     props.dragCoordinates = null;
   };
 
-  var route$1 = createRoute({
+  var route$3 = createRoute({
     DID_DRAG: storeDragCoordinates,
     DID_END_DRAG: clearDragCoordinates
   });
 
-  var write$1 = function write(_ref4) {
+  var write$6 = function write(_ref4) {
     var root = _ref4.root,
       props = _ref4.props,
       actions = _ref4.actions;
 
     // route actions
-    route$1({ root: root, props: props, actions: actions });
+    route$3({ root: root, props: props, actions: actions });
 
     // current drag position
     root.ref.list.dragCoordinates = props.dragCoordinates;
@@ -6980,8 +6885,8 @@ function signature:
   };
 
   var listScroller = createView({
-    create: create$2,
-    write: write$1,
+    create: create$9,
+    write: write$6,
     name: 'list-scroller',
     mixins: {
       apis: ['overflow', 'dragCoordinates'],
@@ -6995,7 +6900,6 @@ function signature:
   var attrToggle = function attrToggle(element, name, state) {
     var enabledValue =
       arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '';
-
     if (state) {
       attr(element, name, enabledValue);
     } else {
@@ -7032,7 +6936,7 @@ function signature:
     }
   };
 
-  var create$12 = function create(_ref) {
+  var create$a = function create(_ref) {
     var root = _ref.root,
       props = _ref.props;
 
@@ -7055,7 +6959,7 @@ function signature:
       }
 
       // extract files
-      var files = [].concat(toConsumableArray(root.element.files));
+      var files = Array.from(root.element.files);
 
       // we add a little delay so the OS file select window can move out of the way before we add our file
       setTimeout(function() {
@@ -7072,7 +6976,6 @@ function signature:
   var setAcceptedFileTypes = function setAcceptedFileTypes(_ref2) {
     var root = _ref2.root,
       action = _ref2.action;
-
     attrToggle(
       root.element,
       'accept',
@@ -7084,13 +6987,12 @@ function signature:
   var toggleAllowMultiple = function toggleAllowMultiple(_ref3) {
     var root = _ref3.root,
       action = _ref3.action;
-
     attrToggle(root.element, 'multiple', action.value);
   };
 
   var toggleDisabled = function toggleDisabled(_ref4) {
-    var root = _ref4.root;
-
+    var root = _ref4.root,
+      action = _ref4.action;
     var isDisabled = root.query('GET_DISABLED');
     var doesAllowBrowse = root.query('GET_ALLOW_BROWSE');
     var disableField = isDisabled || !doesAllowBrowse;
@@ -7100,12 +7002,12 @@ function signature:
   var toggleRequired = function toggleRequired(_ref5) {
     var root = _ref5.root,
       action = _ref5.action;
-
     // want to remove required, always possible
     if (!action.value) {
       attrToggle(root.element, 'required', false);
-    } else if (root.query('GET_TOTAL_ITEMS') === 0) {
-      // if want to make required, only possible when zero items
+    }
+    // if want to make required, only possible when zero items
+    else if (root.query('GET_TOTAL_ITEMS') === 0) {
       attrToggle(root.element, 'required', true);
     }
   };
@@ -7113,7 +7015,6 @@ function signature:
   var setCaptureMethod = function setCaptureMethod(_ref6) {
     var root = _ref6.root,
       action = _ref6.action;
-
     attrToggle(
       root.element,
       'capture',
@@ -7126,7 +7027,6 @@ function signature:
     var root = _ref7.root;
     var element = root.element;
     // always remove the required attribute when more than zero items
-
     if (root.query('GET_TOTAL_ITEMS') > 0) {
       attrToggle(element, 'required', false);
       attrToggle(element, 'name', false);
@@ -7149,7 +7049,6 @@ function signature:
 
   var updateFieldValidityStatus = function updateFieldValidityStatus(_ref8) {
     var root = _ref8.root;
-
     var shouldCheckValidity = root.query('GET_CHECK_VALIDITY');
     if (!shouldCheckValidity) return;
     root.element.setCustomValidity(root.query('GET_LABEL_INVALID_FIELD'));
@@ -7163,10 +7062,10 @@ function signature:
     attributes: {
       type: 'file'
     },
-    create: create$12,
+
+    create: create$a,
     destroy: function destroy(_ref9) {
       var root = _ref9.root;
-
       root.element.removeEventListener('change', root.ref.handleChange);
     },
     write: createRoute({
@@ -7188,7 +7087,7 @@ function signature:
     SPACE: 32
   };
 
-  var create$13 = function create(_ref) {
+  var create$b = function create(_ref) {
     var root = _ref.root,
       props = _ref.props;
 
@@ -7243,15 +7142,15 @@ function signature:
   var dropLabel = createView({
     name: 'drop-label',
     ignoreRect: true,
-    create: create$13,
+    create: create$b,
     write: createRoute({
       DID_SET_LABEL_IDLE: function DID_SET_LABEL_IDLE(_ref2) {
         var root = _ref2.root,
           action = _ref2.action;
-
         updateLabelValue(root.ref.label, action.value);
       }
     }),
+
     mixins: {
       styles: ['opacity', 'translateX', 'translateY'],
       animations: {
@@ -7279,7 +7178,6 @@ function signature:
 
   var addBlob = function addBlob(_ref) {
     var root = _ref.root;
-
     var centerX = root.rect.element.width * 0.5;
     var centerY = root.rect.element.height * 0.5;
 
@@ -7297,7 +7195,6 @@ function signature:
   var moveBlob = function moveBlob(_ref2) {
     var root = _ref2.root,
       action = _ref2.action;
-
     if (!root.ref.blob) {
       addBlob({ root: root });
       return;
@@ -7312,7 +7209,6 @@ function signature:
 
   var hideBlob = function hideBlob(_ref3) {
     var root = _ref3.root;
-
     if (!root.ref.blob) {
       return;
     }
@@ -7321,7 +7217,6 @@ function signature:
 
   var explodeBlob = function explodeBlob(_ref4) {
     var root = _ref4.root;
-
     if (!root.ref.blob) {
       return;
     }
@@ -7330,22 +7225,20 @@ function signature:
     root.ref.blob.opacity = 0;
   };
 
-  var write$8 = function write(_ref5) {
+  var write$7 = function write(_ref5) {
     var root = _ref5.root,
       props = _ref5.props,
       actions = _ref5.actions;
+    route$4({ root: root, props: props, actions: actions });
+    var blob = root.ref.blob;
 
-    route$5({ root: root, props: props, actions: actions });
-
-    var blob$$1 = root.ref.blob;
-
-    if (actions.length === 0 && blob$$1 && blob$$1.opacity === 0) {
-      root.removeChildView(blob$$1);
+    if (actions.length === 0 && blob && blob.opacity === 0) {
+      root.removeChildView(blob);
       root.ref.blob = null;
     }
   };
 
-  var route$5 = createRoute({
+  var route$4 = createRoute({
     DID_DRAG: moveBlob,
     DID_DROP: explodeBlob,
     DID_END_DRAG: hideBlob
@@ -7355,7 +7248,7 @@ function signature:
     ignoreRect: true,
     ignoreRectUpdate: true,
     name: 'drip',
-    write: write$8
+    write: write$7
   });
 
   var getRootNode = function getRootNode(element) {
@@ -7364,6 +7257,7 @@ function signature:
 
   var images = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'tiff'];
   var text$1 = ['css', 'csv', 'html', 'txt'];
+  var apps = ['rtf', 'pdf', 'json'];
   var map = {
     zip: 'zip|compressed',
     epub: 'application/epub+zip'
@@ -7372,14 +7266,15 @@ function signature:
   var guesstimateMimeType = function guesstimateMimeType() {
     var extension =
       arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-
     extension = extension.toLowerCase();
     if (images.includes(extension)) {
       return (
         'image/' +
         (extension === 'jpg'
           ? 'jpeg'
-          : extension === 'svg' ? 'svg+xml' : extension)
+          : extension === 'svg'
+          ? 'svg+xml'
+          : extension)
       );
     }
     if (text$1.includes(extension)) {
@@ -7412,7 +7307,7 @@ function signature:
     return new Promise(function(resolve, reject) {
       // get the transfer items as promises
       var promisedFiles = (dataTransfer.items
-        ? [].concat(toConsumableArray(dataTransfer.items))
+        ? Array.from(dataTransfer.items)
         : []
       )
         // only keep file system items (files and directories)
@@ -7430,11 +7325,7 @@ function signature:
         // TODO: test for directories (should not be allowed)
         // Use FileReader, problem is that the files property gets lost in the process
 
-        resolve(
-          dataTransfer.files
-            ? [].concat(toConsumableArray(dataTransfer.files))
-            : []
-        );
+        resolve(dataTransfer.files ? Array.from(dataTransfer.files) : []);
         return;
       }
 
@@ -7443,7 +7334,7 @@ function signature:
         // flatten groups
         var files = [];
         returendFileGroups.forEach(function(group) {
-          files.push.apply(files, toConsumableArray(group));
+          files.push.apply(files, group);
         });
 
         // done (filter out empty files)!
@@ -7741,7 +7632,6 @@ function signature:
             allowdrop = client.allowdrop;
 
           // by default we can drop
-
           setDropEffect(dataTransfer, 'copy');
 
           // allow transfer of these items
@@ -7852,7 +7742,6 @@ function signature:
       requiresDropOnElement = options.requiresDropOnElement;
 
     // create a dnd client
-
     var client = createDragNDropClient(
       scope,
       catchesDropsOnPage ? document.documentElement : scope,
@@ -7982,10 +7871,9 @@ function signature:
   /**
    * Creates the file view
    */
-  var create$14 = function create(_ref) {
+  var create$c = function create(_ref) {
     var root = _ref.root,
       props = _ref.props;
-
     root.element.id = 'filepond--assistant-' + props.id;
     attr(root.element, 'role', 'status');
     attr(root.element, 'aria-live', 'polite');
@@ -8034,7 +7922,6 @@ function signature:
   var itemAdded = function itemAdded(_ref2) {
     var root = _ref2.root,
       action = _ref2.action;
-
     if (!isUsingFilePond(root)) {
       return;
     }
@@ -8050,6 +7937,7 @@ function signature:
         filenames.join(', '),
         root.query('GET_LABEL_FILE_ADDED')
       );
+
       filenames.length = 0;
     }, 750);
   };
@@ -8057,7 +7945,6 @@ function signature:
   var itemRemoved = function itemRemoved(_ref3) {
     var root = _ref3.root,
       action = _ref3.action;
-
     if (!isUsingFilePond(root)) {
       return;
     }
@@ -8069,7 +7956,6 @@ function signature:
   var itemProcessed = function itemProcessed(_ref4) {
     var root = _ref4.root,
       action = _ref4.action;
-
     // will also notify the user when FilePond is not being used, as the user might be occupied with other activities while uploading a file
 
     var item = root.query('GET_ITEM', action.id);
@@ -8082,7 +7968,6 @@ function signature:
   var itemProcessedUndo = function itemProcessedUndo(_ref5) {
     var root = _ref5.root,
       action = _ref5.action;
-
     var item = root.query('GET_ITEM', action.id);
     var filename = item.filename;
     var label = root.query('GET_LABEL_FILE_PROCESSING_ABORTED');
@@ -8093,7 +7978,6 @@ function signature:
   var itemError = function itemError(_ref6) {
     var root = _ref6.root,
       action = _ref6.action;
-
     var item = root.query('GET_ITEM', action.id);
     var filename = item.filename;
 
@@ -8103,7 +7987,7 @@ function signature:
   };
 
   var assistant = createView({
-    create: create$14,
+    create: create$c,
     ignoreRect: true,
     ignoreRectUpdate: true,
     write: createRoute({
@@ -8119,6 +8003,7 @@ function signature:
       DID_THROW_ITEM_INVALID: itemError,
       DID_THROW_ITEM_PROCESSING_ERROR: itemError
     }),
+
     tag: 'span',
     name: 'assistant'
   });
@@ -8136,26 +8021,24 @@ function signature:
       arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 16;
     var immidiateOnly =
       arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
-
     var last = Date.now();
     var timeout = null;
 
     return function() {
       for (
-        var _len = arguments.length, args = Array(_len), _key = 0;
+        var _len = arguments.length, args = new Array(_len), _key = 0;
         _key < _len;
         _key++
       ) {
         args[_key] = arguments[_key];
       }
-
       clearTimeout(timeout);
 
       var dist = Date.now() - last;
 
       var fn = function fn() {
         last = Date.now();
-        func.apply(undefined, args);
+        func.apply(void 0, args);
       };
 
       if (dist < interval) {
@@ -8174,7 +8057,7 @@ function signature:
 
   var MAX_FILES_LIMIT = 1000000;
 
-  var create$1 = function create(_ref) {
+  var create$d = function create(_ref) {
     var root = _ref.root,
       props = _ref.props;
 
@@ -8236,7 +8119,6 @@ function signature:
       .map(function(_ref2) {
         var name = _ref2.name,
           value = _ref2.value;
-
         root.element.dataset[name] = value;
       });
 
@@ -8250,7 +8132,7 @@ function signature:
     root.ref.updateHistory = [];
   };
 
-  var write = function write(_ref3) {
+  var write$8 = function write(_ref3) {
     var root = _ref3.root,
       props = _ref3.props,
       actions = _ref3.actions;
@@ -8271,7 +8153,7 @@ function signature:
     }
 
     // route actions
-    route({ root: root, props: props, actions: actions });
+    route$5({ root: root, props: props, actions: actions });
 
     // apply style properties
     actions
@@ -8284,7 +8166,6 @@ function signature:
       .map(function(_ref4) {
         var type = _ref4.type,
           data = _ref4.data;
-
         var name = toCamels(type.substr(8).toLowerCase(), '_');
         root.element.dataset[name] = data.value;
         root.invalidateLayout();
@@ -8295,10 +8176,9 @@ function signature:
       hopper = _root$ref.hopper,
       label = _root$ref.label,
       list = _root$ref.list,
-      panel$$1 = _root$ref.panel;
+      panel = _root$ref.panel;
 
     // sets correct state to hopper scope
-
     if (hopper) {
       hopper.updateHopperState();
     }
@@ -8392,8 +8272,8 @@ function signature:
       }
 
       // fix height of panel so it adheres to aspect ratio
-      panel$$1.scalable = false;
-      panel$$1.height = height;
+      panel.scalable = false;
+      panel.height = height;
 
       // available height for list
       var listAvailableHeight =
@@ -8417,7 +8297,7 @@ function signature:
       // fixed height
 
       // fix height of panel
-      panel$$1.scalable = false;
+      panel.scalable = false;
 
       // available height for list
       var _listAvailableHeight =
@@ -8443,8 +8323,8 @@ function signature:
       // not a fixed height panel
       var isCappedHeight = visualHeight >= bounds.cappedHeight;
       var panelHeight = Math.min(bounds.cappedHeight, visualHeight);
-      panel$$1.scalable = true;
-      panel$$1.height = isCappedHeight
+      panel.scalable = true;
+      panel.height = isCappedHeight
         ? panelHeight
         : panelHeight - listItemMargin.top - listItemMargin.bottom;
 
@@ -8479,8 +8359,8 @@ function signature:
       // not a fixed height panel
       var itemMargin =
         totalItems > 0 ? listItemMargin.top + listItemMargin.bottom : 0;
-      panel$$1.scalable = true;
-      panel$$1.height = Math.max(labelHeight, visualHeight - itemMargin);
+      panel.scalable = true;
+      panel.height = Math.max(labelHeight, visualHeight - itemMargin);
 
       // set container bounds (so pushes siblings downwards)
       root.height = Math.max(labelHeight, boundsHeight - itemMargin);
@@ -8542,8 +8422,9 @@ function signature:
         bounds += height;
         visual += height * item.opacity;
       });
-    } else {
-      // grid
+    }
+    // grid
+    else {
       bounds = Math.ceil(verticalItemCount / itemsPerRow) * itemHeight;
       visual = bounds;
     }
@@ -8588,6 +8469,7 @@ function signature:
         source: items,
         error: createResponse('warning', 0, 'Max files')
       });
+
       return true;
     }
 
@@ -8697,6 +8579,7 @@ function signature:
             }
           })
         ),
+
         0
       );
     } else if (!enabled && root.ref.browser) {
@@ -8729,21 +8612,18 @@ function signature:
   /**
    * Route actions
    */
-  var route = createRoute({
+  var route$5 = createRoute({
     DID_SET_ALLOW_BROWSE: function DID_SET_ALLOW_BROWSE(_ref5) {
       var root = _ref5.root,
         props = _ref5.props;
-
       toggleBrowse(root, props);
     },
     DID_SET_ALLOW_DROP: function DID_SET_ALLOW_DROP(_ref6) {
       var root = _ref6.root;
-
       toggleDrop(root);
     },
     DID_SET_ALLOW_PASTE: function DID_SET_ALLOW_PASTE(_ref7) {
       var root = _ref7.root;
-
       togglePaste(root);
     },
     DID_SET_DISABLED: function DID_SET_DISABLED(_ref8) {
@@ -8767,16 +8647,14 @@ function signature:
     name: 'root',
     read: function read(_ref9) {
       var root = _ref9.root;
-
       if (root.ref.measure) {
         root.ref.measureHeight = root.ref.measure.offsetHeight;
       }
     },
-    create: create$1,
-    write: write,
+    create: create$d,
+    write: write$8,
     destroy: function destroy(_ref10) {
       var root = _ref10.root;
-
       if (root.ref.paster) {
         root.ref.paster.destroy();
       }
@@ -8789,29 +8667,26 @@ function signature:
     }
   });
 
-  // defaults
-  // view
   // creates the app
-  var createApp$1 = function createApp() {
+  var createApp = function createApp() {
     var initialOptions =
       arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
     // let element
     var originalElement = null;
 
     // get default options
-    var defaultOptions$$1 = getOptions$1();
+    var defaultOptions = getOptions();
 
     // create the data store, this will contain all our app info
     var store = createStore(
       // initial state (should be serializable)
-      createInitialState(defaultOptions$$1),
+      createInitialState(defaultOptions),
 
       // queries
-      [queries, createOptionQueries(defaultOptions$$1)],
+      [queries, createOptionQueries(defaultOptions)],
 
       // action handlers
-      [actions, createOptionActions(defaultOptions$$1)]
+      [actions, createOptionActions(defaultOptions)]
     );
 
     // set initial options
@@ -8900,7 +8775,7 @@ function signature:
         if (isHidden) return;
 
         // get all actions from store
-        var actions$$1 = store
+        var actions = store
           .processActionQueue()
 
           // filter out set actions (these will automatically trigger DID_SET)
@@ -8909,13 +8784,13 @@ function signature:
           });
 
         // if was idling and no actions stop here
-        if (isResting && !actions$$1.length) return;
+        if (isResting && !actions.length) return;
 
         // some actions might trigger events
-        routeActionsToEvents(actions$$1);
+        routeActionsToEvents(actions);
 
         // update the view
-        isResting = view._write(ts, actions$$1, isResizingHorizontally);
+        isResting = view._write(ts, actions, isResizingHorizontally);
 
         // will clean up all archived items
         removeReleasedItems(store.query('GET_ITEMS'));
@@ -9058,16 +8933,16 @@ function signature:
       // oninit = () => {}
       var handler = store.query('GET_ON' + event.type.toUpperCase());
       if (handler) {
-        handler.apply(undefined, params);
+        handler.apply(void 0, params);
       }
     };
 
-    var routeActionsToEvents = function routeActionsToEvents(actions$$1) {
-      if (!actions$$1.length) {
+    var routeActionsToEvents = function routeActionsToEvents(actions) {
+      if (!actions.length) {
         return;
       }
 
-      actions$$1.forEach(function(action) {
+      actions.forEach(function(action) {
         if (!eventRoutes[action.type]) {
           return;
         }
@@ -9116,28 +8991,25 @@ function signature:
 
     var addFiles = function addFiles() {
       for (
-        var _len = arguments.length, args = Array(_len), _key = 0;
+        var _len = arguments.length, args = new Array(_len), _key = 0;
         _key < _len;
         _key++
       ) {
         args[_key] = arguments[_key];
       }
-
       return new Promise(function(resolve, reject) {
         var sources = [];
         var options = {};
 
         // user passed a sources array
         if (isArray(args[0])) {
-          sources.push.apply(sources, toConsumableArray(args[0]));
+          sources.push.apply(sources, args[0]);
           Object.assign(options, args[1] || {});
         } else {
           // user passed sources as arguments, last one might be options object
           var lastArgument = args[args.length - 1];
           if (
-            (typeof lastArgument === 'undefined'
-              ? 'undefined'
-              : _typeof(lastArgument)) === 'object' &&
+            typeof lastArgument === 'object' &&
             !(lastArgument instanceof Blob)
           ) {
             Object.assign(options, args.pop());
@@ -9177,15 +9049,14 @@ function signature:
 
     var processFiles = function processFiles() {
       for (
-        var _len2 = arguments.length, args = Array(_len2), _key2 = 0;
+        var _len2 = arguments.length, args = new Array(_len2), _key2 = 0;
         _key2 < _len2;
         _key2++
       ) {
         args[_key2] = arguments[_key2];
       }
-
-      var queries$$1 = Array.isArray(args[0]) ? args[0] : args;
-      if (!queries$$1.length) {
+      var queries = Array.isArray(args[0]) ? args[0] : args;
+      if (!queries.length) {
         var files = getFiles().filter(function(item) {
           return (
             item.status !== ItemStatus.PROCESSING &&
@@ -9193,32 +9064,34 @@ function signature:
             item.status !== ItemStatus.PROCESSING_REVERT_ERROR
           );
         });
+
         return Promise.all(files.map(processFile));
       }
-      return Promise.all(queries$$1.map(processFile));
+      return Promise.all(queries.map(processFile));
     };
 
     var removeFiles = function removeFiles() {
       for (
-        var _len3 = arguments.length, args = Array(_len3), _key3 = 0;
+        var _len3 = arguments.length, args = new Array(_len3), _key3 = 0;
         _key3 < _len3;
         _key3++
       ) {
         args[_key3] = arguments[_key3];
       }
-
-      var queries$$1 = Array.isArray(args[0]) ? args[0] : args;
+      var queries = Array.isArray(args[0]) ? args[0] : args;
       var files = getFiles();
 
-      if (!queries$$1.length) {
+      if (!queries.length) {
         return Promise.all(files.map(removeFile));
       }
 
       // when removing by index the indexes shift after each file removal so we need to convert indexes to ids
-      var mappedQueries = queries$$1
+      var mappedQueries = queries
         .map(function(query) {
           return isNumber(query)
-            ? files[query] ? files[query].id : null
+            ? files[query]
+              ? files[query].id
+              : null
             : query;
         })
         .filter(function(query) {
@@ -9230,9 +9103,12 @@ function signature:
 
     var exports = Object.assign(
       {},
+
       on(),
+
       readWriteApi,
-      createOptionAPI(store, defaultOptions$$1),
+
+      createOptionAPI(store, defaultOptions),
       {
         /**
          * Override options defined in options object
@@ -9332,14 +9208,14 @@ function signature:
         /**
          * Inserts the plugin before the target element
          */
-        insertBefore: function insertBefore$$1(element) {
+        insertBefore: function insertBefore$1(element) {
           return insertBefore(view.element, element);
         },
 
         /**
          * Inserts the plugin after the target element
          */
-        insertAfter: function insertAfter$$1(element) {
+        insertAfter: function insertAfter$1(element) {
           return insertAfter(view.element, element);
         },
 
@@ -9394,7 +9270,7 @@ function signature:
          * Returns the root element
          */
         element: {
-          get: function get$$1() {
+          get: function get() {
             return view.element;
           }
         },
@@ -9403,7 +9279,7 @@ function signature:
          * Returns the current pond status
          */
         status: {
-          get: function get$$1() {
+          get: function get() {
             return store.query('GET_STATUS');
           }
         }
@@ -9420,15 +9296,22 @@ function signature:
   var createAppObject = function createAppObject() {
     var customOptions =
       arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-
     // default options
-    var defaultOptions$$1 = {};
-    forin(getOptions$1(), function(key, value) {
-      defaultOptions$$1[key] = value[0];
+    var defaultOptions = {};
+    forin(getOptions(), function(key, value) {
+      defaultOptions[key] = value[0];
     });
 
     // set app options
-    var app = createApp$1(Object.assign({}, defaultOptions$$1, customOptions));
+    var app = createApp(
+      Object.assign(
+        {},
+
+        defaultOptions,
+
+        customOptions
+      )
+    );
 
     // return the plugin instance
     return app;
@@ -9494,7 +9377,6 @@ function signature:
   var getAttributesAsObject = function getAttributesAsObject(node) {
     var attributeMapping =
       arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-
     // turn attributes into object
     var attributes = [];
     forin(node.attributes, function(index) {
@@ -9537,15 +9419,19 @@ function signature:
           '^process': {
             group: 'process'
           },
+
           '^revert': {
             group: 'revert'
           },
+
           '^fetch': {
             group: 'fetch'
           },
+
           '^restore': {
             group: 'restore'
           },
+
           '^load': {
             group: 'load'
           }
@@ -9585,18 +9471,16 @@ function signature:
     // if parent is a fieldset, get files from parent by selecting all input fields that are not file upload fields
     // these will then be automatically set to the initial files
     mergedOptions.files = (options.files || []).concat(
-      []
-        .concat(
-          toConsumableArray(element.querySelectorAll('input:not([type=file])'))
-        )
-        .map(function(input) {
+      Array.from(element.querySelectorAll('input:not([type=file])')).map(
+        function(input) {
           return {
             source: input.value,
             options: {
               type: input.dataset.type
             }
           };
-        })
+        }
+      )
     );
 
     // build plugin
@@ -9604,7 +9488,7 @@ function signature:
 
     // add already selected files
     if (element.files) {
-      [].concat(toConsumableArray(element.files)).forEach(function(file) {
+      Array.from(element.files).forEach(function(file) {
         app.addFile(file);
       });
     }
@@ -9617,10 +9501,10 @@ function signature:
   };
 
   // if an element is passed, we create the instance at that element, if not, we just create an up object
-  var createApp = function createApp() {
+  var createApp$1 = function createApp() {
     return isNode(arguments.length <= 0 ? undefined : arguments[0])
-      ? createAppAtElement.apply(undefined, arguments)
-      : createAppObject.apply(undefined, arguments);
+      ? createAppAtElement.apply(void 0, arguments)
+      : createAppObject.apply(void 0, arguments);
   };
 
   var PRIVATE_METHODS = ['fire', '_read', '_write'];
@@ -9648,6 +9532,7 @@ function signature:
     var workerBlob = new Blob(['(', fn.toString(), ')()'], {
       type: 'application/javascript'
     });
+
     var workerURL = URL.createObjectURL(workerBlob);
     var worker = new Worker(workerURL);
 
@@ -9667,6 +9552,7 @@ function signature:
             id: id,
             message: message
           },
+
           transferList
         );
       },
@@ -9741,6 +9627,7 @@ function signature:
         text: text,
         getNumericAspectRatioFromString: getNumericAspectRatioFromString
       },
+
       views: {
         fileActionButton: fileActionButton
       }
@@ -9871,13 +9758,13 @@ function signature:
 
     // updates the OptionTypes object based on the current options
     var updateOptionTypes = function updateOptionTypes() {
-      return forin(getOptions$1(), function(key, value) {
+      return forin(getOptions(), function(key, value) {
         exports.OptionTypes[key] = value[1];
       });
     };
 
-    exports.Status = Object.assign({}, Status$1);
-    exports.FileOrigin = Object.assign({}, FileOrigin$1);
+    exports.Status = Object.assign({}, Status);
+    exports.FileOrigin = Object.assign({}, FileOrigin);
     exports.FileStatus = Object.assign({}, ItemStatus);
 
     exports.OptionTypes = {};
@@ -9885,7 +9772,7 @@ function signature:
 
     // create method, creates apps and adds them to the app array
     exports.create = function create() {
-      var app = createApp.apply(undefined, arguments);
+      var app = createApp$1.apply(void 0, arguments);
       app.on('destroy', exports.destroy);
       state.apps.push(app);
       return createAppAPI(app);
@@ -9913,9 +9800,7 @@ function signature:
     // parses the given context for plugins (does not include the context element itself)
     exports.parse = function parse(context) {
       // get all possible hooks
-      var matchedHooks = [].concat(
-        toConsumableArray(context.querySelectorAll('.' + name))
-      );
+      var matchedHooks = Array.from(context.querySelectorAll('.' + name));
 
       // filter out already active hooks
       var newHooks = matchedHooks.filter(function(newHook) {
@@ -9944,7 +9829,7 @@ function signature:
     // adds a plugin extension
     exports.registerPlugin = function registerPlugin() {
       for (
-        var _len = arguments.length, plugins = Array(_len), _key = 0;
+        var _len = arguments.length, plugins = new Array(_len), _key = 0;
         _key < _len;
         _key++
       ) {
@@ -9958,15 +9843,15 @@ function signature:
       updateOptionTypes();
     };
 
-    exports.getOptions = function getOptions$$1() {
+    exports.getOptions = function getOptions$1() {
       var opts = {};
-      forin(getOptions$1(), function(key, value) {
+      forin(getOptions(), function(key, value) {
         opts[key] = value[0];
       });
       return opts;
     };
 
-    exports.setOptions = function setOptions$$1(opts) {
+    exports.setOptions = function setOptions$1(opts) {
       if (isObject(opts)) {
         // update existing plugins
         state.apps.forEach(function(app) {
@@ -9974,7 +9859,7 @@ function signature:
         });
 
         // override defaults
-        setOptions$1(opts);
+        setOptions(opts);
       }
 
       // return new options

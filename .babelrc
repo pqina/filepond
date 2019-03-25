@@ -10,6 +10,20 @@
         ["@babel/plugin-proposal-object-rest-spread", {
             "loose": true, 
             "useBuiltIns": true
+        }],
+        ["@babel/plugin-transform-template-literals", {
+            "loose": true
         }]
-    ]
+    ],
+    "env": {
+        "test": {
+            "presets": [
+                ["@babel/preset-env", {
+                    "targets": {
+                        "node": "current"
+                    }
+                }]
+            ],
+        }
+    }
 }

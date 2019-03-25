@@ -120,6 +120,12 @@ Or get it from a CDN:
 [Getting started with FilePond](https://pqina.nl/filepond/docs/patterns/getting-started/)
 
 
+## Test
+
+```
+npm run test
+```
+
 ## Build
 
 ```

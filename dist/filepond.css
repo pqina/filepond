@@ -1,7 +1,7 @@
-/*
- * FilePond 4.3.3
- * Licensed under MIT, https://opensource.org/licenses/MIT
- * Please visit https://pqina.nl/filepond for details.
+/*!
+ * FilePond 4.3.4
+ * Licensed under MIT, https://opensource.org/licenses/MIT/
+ * Please visit https://pqina.nl/filepond/ for details.
  */
 
 /* eslint-disable */
@@ -65,11 +65,8 @@
   top: 0;
   margin: 0;
   color: #4f4f4f;
-  display: -ms-flexbox;
   display: flex;
-  -ms-flex-pack: center;
   justify-content: center;
-  -ms-flex-align: center;
   align-items: center;
   height: 0px;
   -webkit-user-select: none;
@@ -96,6 +93,7 @@
 
 .filepond--label-action {
   text-decoration: underline;
+  -webkit-text-decoration-skip: ink;
   text-decoration-skip-ink: auto;
   -webkit-text-decoration-color: #a7a4a4;
   text-decoration-color: #a7a4a4;
@@ -153,13 +151,9 @@
 
 .filepond--file-info {
   position: static;
-  display: -ms-flexbox;
   display: flex;
-  -ms-flex-direction: column;
   flex-direction: column;
-  -ms-flex-align: start;
   align-items: flex-start;
-  -ms-flex: 1;
   flex: 1;
   margin: 0 0.5em 0 0;
   min-width: 0;
@@ -193,15 +187,10 @@
 
 .filepond--file-status {
   position: static;
-  display: -ms-flexbox;
   display: flex;
-  -ms-flex-direction: column;
   flex-direction: column;
-  -ms-flex-align: end;
   align-items: flex-end;
-  -ms-flex-positive: 0;
   flex-grow: 0;
-  -ms-flex-negative: 0;
   flex-shrink: 0;
   margin: 0;
   min-width: 2.25em;
@@ -250,10 +239,8 @@
 
 .filepond--file {
   position: static;
-  display: -ms-flexbox;
   display: flex;
   height: 100%;
-  -ms-flex-align: start;
   align-items: flex-start;
   padding: 0.5625em 0.5625em;
   color: #fff;
@@ -608,11 +595,8 @@
 .filepond--root[data-style-panel-layout~='integrated'] .filepond--drop-label {
   bottom: 0;
   height: auto;
-  display: -ms-flexbox;
   display: flex;
-  -ms-flex-pack: center;
   justify-content: center;
-  -ms-flex-align: center;
   align-items: center;
   z-index: 7;
 }
