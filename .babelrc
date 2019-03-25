@@ -1,4 +1,5 @@
 {
+    "retainLines": true,
     "presets": [
         ["@babel/preset-env", {
             "exclude": ["transform-typeof-symbol"],
