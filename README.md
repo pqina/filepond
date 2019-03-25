@@ -147,13 +147,6 @@ FilePond uses [BrowserStack](https://www.browserstack.com/) for compatibility te
 
 [<img src="https://github.com/pqina/filepond-github-assets/blob/master/browserstack-logo.svg" height="32" alt="BrowserStack"/>](https://www.browserstack.com/)
 
-
-## Contributing
-
-Currently only the build targets of FilePond are on GitHub which makes contributing difficult. I'm aware that this is not ideal. There are concrete plans to add the source and build scripts, but due to a busy schedule this hasn't happened yet.
-https://github.com/pqina/filepond/issues/62
-
-
 ## License
 
 **Please don't remove or change the disclaimers in the source files**
