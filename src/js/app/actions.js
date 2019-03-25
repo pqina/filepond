@@ -799,7 +799,7 @@ export const actions = (dispatch, query, state) => ({
             getItemById(state.items, id).archive();
 
             // tell the view the item has been removed
-            dispatch('DID_REMOVE_ITEM', { id, item });
+            dispatch('DID_REMOVE_ITEM', { error:null, id, item });
 
             // now the list has been modified
             listUpdated(dispatch, state);

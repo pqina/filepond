@@ -4377,7 +4377,7 @@ const actions = (dispatch, query, state) => ({
       getItemById(state.items, id).archive();
 
       // tell the view the item has been removed
-      dispatch('DID_REMOVE_ITEM', { id, item });
+      dispatch('DID_REMOVE_ITEM', { error: null, id, item });
 
       // now the list has been modified
       listUpdated(dispatch, state);
@@ -7772,6 +7772,11 @@ const createApp = (initialOptions = {}) => {
     DID_THROW_ITEM_INVALID: [createEvent('error'), createEvent('addfile')],
 
     DID_THROW_ITEM_LOAD_ERROR: [createEvent('error'), createEvent('addfile')],
+
+    DID_THROW_ITEM_REMOVE_ERROR: [
+      createEvent('error'),
+      createEvent('removefile')
+    ],
 
     DID_PREPARE_OUTPUT: createEvent('preparefile'),
 

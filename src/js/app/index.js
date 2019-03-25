@@ -226,6 +226,11 @@ export const createApp = (initialOptions = {}) => {
             createEvent('addfile')
         ],
 
+        DID_THROW_ITEM_REMOVE_ERROR: [
+            createEvent('error'),
+            createEvent('removefile')
+        ],
+
         DID_PREPARE_OUTPUT: createEvent('preparefile'),
 
         DID_START_ITEM_PROCESSING: createEvent('processfilestart'),

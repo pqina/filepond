@@ -1,4 +1,4 @@
-import { create, OptionTypes } from '../index.js';
+import { create, OptionTypes, FileStatus } from '../index.js';
 
 describe('adding files', () => {
 
@@ -99,15 +99,22 @@ describe('adding files', () => {
         pond.getFile().abortProcessing();
     });
 
-    // test('onprocessfilerevert', done => {
-    // });
-
     test('onprocessfile', done => {
         createPond();
         pond.onprocessfile = () => {
             done();
         }
         pond.files = [data];
+    });
+
+    test('onprocessfiles', done => {
+        createPond();
+        pond.onprocessfiles = () => {
+            const result = pond.getFiles().every(file => file.status === FileStatus.PROCESSING_COMPLETE)
+            expect(result).toBe(true);
+            done();
+        }
+        pond.files = [data, data];
     });
 
 });

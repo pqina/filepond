@@ -2,8 +2,9 @@
 
 ## 4.3.4
 
-- Add source code
-- Add build scripts
+- Add source code.
+- Add build scripts.
+- Fix `onremovefile` callback not receiving an error object similar to `onaddfile`.
 
 
 ## 4.3.3
