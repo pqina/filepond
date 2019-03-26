@@ -81,6 +81,7 @@ const create = ({ root, props }) => {
     }, 250);
 
     // history of updates
+    root.ref.previousAspectRatio = null;
     root.ref.updateHistory = [];
 };
 
@@ -185,6 +186,12 @@ const write = ({ root, props, actions }) => {
         const width = root.rect.element.width;
         const height = width * aspectRatio;
 
+        // clear history if aspect ratio has changed
+        if (aspectRatio !== root.ref.previousAspectRatio) {
+            root.ref.previousAspectRatio = aspectRatio;
+            root.ref.updateHistory = [];
+        }
+        
         // remember this width
         const history = root.ref.updateHistory;
         history.push(width);

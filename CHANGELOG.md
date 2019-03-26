@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.3.5
+
+- Fix issue where changing the `stylePanelAspectRatio` would not update the container size.
+
+
 ## 4.3.4
 
 - Add source code.

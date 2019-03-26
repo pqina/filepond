@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.3.4
+ * FilePond 4.3.5
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -7074,6 +7074,7 @@ const create$d = ({ root, props }) => {
   }, 250);
 
   // history of updates
+  root.ref.previousAspectRatio = null;
   root.ref.updateHistory = [];
 };
 
@@ -7178,6 +7179,12 @@ const write$8 = ({ root, props, actions }) => {
     // calculate height based on width
     const width = root.rect.element.width;
     const height = width * aspectRatio;
+
+    // clear history if aspect ratio has changed
+    if (aspectRatio !== root.ref.previousAspectRatio) {
+      root.ref.previousAspectRatio = aspectRatio;
+      root.ref.updateHistory = [];
+    }
 
     // remember this width
     const history = root.ref.updateHistory;
