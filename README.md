@@ -124,9 +124,9 @@ Or get it from a CDN:
 
 At the moment test coverage is not great, it's around 65%. To accept pull requests the tests need to be better, any help to improve them is very much appreciated.
 
-Tests are based on Jest and can be run with `npm run test`. 
+Tests are based on Jest and can be run with `npm run test`
 
-To build the library run `npm run build`.
+To build the library run `npm run build`
 
 
 ## Publications
