@@ -1,8 +1,8 @@
 Hello fellow developer!
 
-🧠 If you have a question, please ask it here https://stackoverflow.com/questions/ask?tags=filepond
+🧠 If you have a question, please ask it on StackOverflow -> https://stackoverflow.com/questions/ask?tags=filepond
 
-🐜 If you've found a bug, please use the template below to report it.
+🐜 If you think you have found a bug, please use the template below to report it.
 
 
 **The more details you provide, the more inclined others are to help you out and the faster the issue is resolved.**
