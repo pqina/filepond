@@ -2,8 +2,6 @@ Hello fellow developer!
 
 🧠 If you have a question, please ask it here https://stackoverflow.com/questions/ask?tags=filepond
 
-💡 If you're missing a feature, please submit an issue.
-
 🐜 If you've found a bug, please use the template below to report it.
 
 
