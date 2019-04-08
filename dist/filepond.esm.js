@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.3.5
+ * FilePond 4.3.6
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -3622,8 +3622,12 @@ const actions = (dispatch, query, state) => ({
    */
   ABORT_ALL: () => {
     getActiveItems(state.items).forEach(item => {
-      item.abortLoad();
-      item.abortProcessing();
+      if (item.status === ItemStatus.LOADING) {
+        item.abortLoad();
+      }
+      if (item.status === ItemStatus.PROCESSING) {
+        item.abortProcessing();
+      }
     });
   },
 

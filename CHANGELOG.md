@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.3.6
+
+- Fix problem where the `abortAll` call triggered when destroying FilePond would inadvertently trigger the `server.remove` end point for each local file.
+
+
 ## 4.3.5
 
 - Fix issue where changing the `stylePanelAspectRatio` would not update the container size.
