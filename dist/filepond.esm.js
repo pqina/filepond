@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.3.6
+ * FilePond 4.3.7
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1688,7 +1688,8 @@ const PRIVATE = [
   'archived',
   'release',
   'released',
-  'requestProcessing'
+  'requestProcessing',
+  'freeze'
 ];
 
 const createItemAPI = item => {
@@ -3081,6 +3082,9 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     // is archived
     archived: false,
 
+    // if is frozen, no longer fires events
+    frozen: false,
+
     // removed from view
     released: false,
 
@@ -3116,7 +3120,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
   // fire event unless the item has been archived
   const fire = (event, ...params) => {
-    if (state.released) return;
+    if (state.released || state.frozen) return;
     api.fire(event, ...params);
   };
 
@@ -3461,6 +3465,8 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
     ...on(),
 
+    freeze: () => (state.frozen = true),
+
     release: () => (state.released = true),
     released: { get: () => state.released },
 
@@ -3622,12 +3628,9 @@ const actions = (dispatch, query, state) => ({
    */
   ABORT_ALL: () => {
     getActiveItems(state.items).forEach(item => {
-      if (item.status === ItemStatus.LOADING) {
-        item.abortLoad();
-      }
-      if (item.status === ItemStatus.PROCESSING) {
-        item.abortProcessing();
-      }
+      item.freeze();
+      item.abortLoad();
+      item.abortProcessing();
     });
   },
 

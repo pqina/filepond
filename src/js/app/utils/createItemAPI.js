@@ -14,7 +14,8 @@ const PRIVATE = [
     'archived',
     'release',
     'released',
-    'requestProcessing'
+    'requestProcessing',
+    'freeze'
 ];
 
 export const createItemAPI = item => {

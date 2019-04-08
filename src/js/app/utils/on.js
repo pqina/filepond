@@ -6,8 +6,7 @@ export const on = () => {
         arrayRemove(
             listeners,
             listeners.findIndex(
-                listener =>
-                    listener.event === event && (listener.cb === cb || !cb)
+                listener => listener.event === event && (listener.cb === cb || !cb)
             )
         );
     };

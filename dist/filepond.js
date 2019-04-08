@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.3.6
+ * FilePond 4.3.7
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1975,7 +1975,8 @@
     'archived',
     'release',
     'released',
-    'requestProcessing'
+    'requestProcessing',
+    'freeze'
   ];
 
   var createItemAPI = function createItemAPI(item) {
@@ -3614,6 +3615,9 @@
       // is archived
       archived: false,
 
+      // if is frozen, no longer fires events
+      frozen: false,
+
       // removed from view
       released: false,
 
@@ -3651,7 +3655,7 @@
 
     // fire event unless the item has been archived
     var fire = function fire(event) {
-      if (state.released) return;
+      if (state.released || state.frozen) return;
       for (
         var _len = arguments.length,
           params = new Array(_len > 1 ? _len - 1 : 0),
@@ -4049,6 +4053,10 @@
 
       on(),
       {
+        freeze: function freeze() {
+          return (state.frozen = true);
+        },
+
         release: function release() {
           return (state.released = true);
         },
@@ -4265,12 +4273,9 @@
        */
       ABORT_ALL: function ABORT_ALL() {
         getActiveItems(state.items).forEach(function(item) {
-          if (item.status === ItemStatus.LOADING) {
-            item.abortLoad();
-          }
-          if (item.status === ItemStatus.PROCESSING) {
-            item.abortProcessing();
-          }
+          item.freeze();
+          item.abortLoad();
+          item.abortProcessing();
         });
       },
 

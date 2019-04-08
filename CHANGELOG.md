@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.3.7
+
+- Attempt #2 at fixing the issue of release `4.3.6`.
+
+
 ## 4.3.6
 
 - Fix problem where the `abortAll` call triggered when destroying FilePond would inadvertently trigger the `server.remove` end point for each local file.

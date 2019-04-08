@@ -22,6 +22,9 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         // is archived
         archived: false,
 
+        // if is frozen, no longer fires events
+        frozen: false,
+
         // removed from view
         released: false,
 
@@ -57,7 +60,7 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
 
     // fire event unless the item has been archived
     const fire = (event, ...params) => {
-        if (state.released) return;
+        if (state.released || state.frozen) return;
         api.fire(event, ...params);
     }
 
@@ -414,6 +417,8 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         revert,
 
         ...on(),
+
+        freeze: () => state.frozen = true,
 
         release: () => state.released = true,
         released: { get: () => state.released },

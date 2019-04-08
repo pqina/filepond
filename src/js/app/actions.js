@@ -87,12 +87,9 @@ export const actions = (dispatch, query, state) => ({
      */
     ABORT_ALL: () => {
         getActiveItems(state.items).forEach(item => {
-            if (item.status === ItemStatus.LOADING) {
-                item.abortLoad();
-            }
-            if (item.status === ItemStatus.PROCESSING) {
-                item.abortProcessing();
-            }
+            item.freeze();
+            item.abortLoad();
+            item.abortProcessing();
         });
     },
 
