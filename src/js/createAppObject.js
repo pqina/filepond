@@ -1,7 +1,6 @@
 import { createApp } from './app/index';
 import { getOptions } from './app/options';
 import { forin } from './utils/forin';
-import { Type } from './app/enum/Type';
 
 export const createAppObject = (customOptions = {}) => {
     // default options

@@ -1,6 +1,7 @@
 export const Type = {
     BOOLEAN: 'boolean',
     INT: 'int',
+    NUMBER: 'number',
     STRING: 'string',
     ARRAY: 'array',
     OBJECT: 'object',

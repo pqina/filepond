@@ -21,9 +21,11 @@ const conversionTable = {
     array: toArray,
     boolean: toBoolean,
     int: value => getType(value) === 'bytes' ? toBytes(value) : toInt(value),
+    number: toFloat,
     float: toFloat,
     bytes: toBytes,
     string: value => isFunction(value) ? value : toString(value),
+    function: value => toFunctionReference(value),
     serverapi: toServerAPI,
     object: value => {
         try {
@@ -32,8 +34,7 @@ const conversionTable = {
         catch(e) {
             return null;
         }
-    },
-    function: value => toFunctionReference(value)
+    }
 };
 
 export const convertTo = (value, type) => conversionTable[type](value);
