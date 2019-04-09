@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.3.6
+ * FilePond 4.3.7
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -116,6 +116,18 @@
   border: none;
   outline: none;
   will-change: transform, opacity;
+}
+.filepond--file-action-button.filepond--file-action-button span {
+  position: absolute;
+  overflow: hidden;
+  height: 1px;
+  width: 1px;
+  padding: 0;
+  border: 0;
+  clip: rect(1px, 1px, 1px, 1px);
+  -webkit-clip-path: inset(50%);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 .filepond--file-action-button.filepond--file-action-button svg {
   width: 100%;

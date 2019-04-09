@@ -1482,9 +1482,11 @@ const conversionTable = {
   array: toArray,
   boolean: toBoolean,
   int: value => (getType(value) === 'bytes' ? toBytes(value) : toInt(value)),
+  number: toFloat,
   float: toFloat,
   bytes: toBytes,
   string: value => (isFunction(value) ? value : toString(value)),
+  function: value => toFunctionReference(value),
   serverapi: toServerAPI,
   object: value => {
     try {
@@ -1492,8 +1494,7 @@ const conversionTable = {
     } catch (e) {
       return null;
     }
-  },
-  function: value => toFunctionReference(value)
+  }
 };
 
 const convertTo = (value, type) => conversionTable[type](value);
@@ -1737,6 +1738,7 @@ const getThousandsSeparator = () => {
 const Type = {
   BOOLEAN: 'boolean',
   INT: 'int',
+  NUMBER: 'number',
   STRING: 'string',
   ARRAY: 'array',
   OBJECT: 'object',
@@ -4650,8 +4652,7 @@ const progressIndicator = createView({
 });
 
 const create$1 = ({ root, props }) => {
-  root.element.title = props.label;
-  root.element.innerHTML = props.icon || '';
+  root.element.innerHTML = (props.icon || '') + `<span>${props.label}</span>`;
 
   props.isDisabled = false;
 };
@@ -6149,7 +6150,7 @@ const create$b = ({ root, props }) => {
   // use for labeling file input (aria-labelledby on file input)
   attr(label, 'id', `filepond--drop-label-${props.id}`);
 
-  // hide the label from screenreaders, the input element has an aria-label
+  // hide the label for screenreaders, the input element will read the contents of the label when it's focussed. If we don't set aria-hidden the screenreader will also navigate the contents of the label separately from the input.
   attr(label, 'aria-hidden', 'true');
 
   // handle keys

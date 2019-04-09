@@ -1719,10 +1719,14 @@
     int: function int(value) {
       return getType(value) === 'bytes' ? toBytes(value) : toInt(value);
     },
+    number: toFloat,
     float: toFloat,
     bytes: toBytes,
     string: function string(value) {
       return isFunction(value) ? value : toString(value);
+    },
+    function: function _function(value) {
+      return toFunctionReference(value);
     },
     serverapi: toServerAPI,
     object: function object(value) {
@@ -1731,9 +1735,6 @@
       } catch (e) {
         return null;
       }
-    },
-    function: function _function(value) {
-      return toFunctionReference(value);
     }
   };
 
@@ -2028,6 +2029,7 @@
   var Type = {
     BOOLEAN: 'boolean',
     INT: 'int',
+    NUMBER: 'number',
     STRING: 'string',
     ARRAY: 'array',
     OBJECT: 'object',
@@ -5393,8 +5395,8 @@
   var create$1 = function create(_ref) {
     var root = _ref.root,
       props = _ref.props;
-    root.element.title = props.label;
-    root.element.innerHTML = props.icon || '';
+    root.element.innerHTML =
+      (props.icon || '') + ('<span>' + props.label + '</span>');
 
     props.isDisabled = false;
   };
@@ -7107,7 +7109,7 @@
     // use for labeling file input (aria-labelledby on file input)
     attr(label, 'id', 'filepond--drop-label-' + props.id);
 
-    // hide the label from screenreaders, the input element has an aria-label
+    // hide the label for screenreaders, the input element will read the contents of the label when it's focussed. If we don't set aria-hidden the screenreader will also navigate the contents of the label separately from the input.
     attr(label, 'aria-hidden', 'true');
 
     // handle keys

@@ -2,8 +2,7 @@ import { createView } from '../frame/index';
 import { attr } from '../../utils/attr';
 
 const create = ({ root, props }) => {
-    root.element.title = props.label;
-    root.element.innerHTML = props.icon || '';
+    root.element.innerHTML = (props.icon || '') + `<span>${props.label}</span>`;
 
     props.isDisabled = false;
 };

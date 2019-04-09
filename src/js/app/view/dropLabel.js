@@ -12,7 +12,7 @@ const create = ({ root, props }) => {
     // use for labeling file input (aria-labelledby on file input)
     attr(label, 'id', `filepond--drop-label-${props.id}`);
 
-    // hide the label from screenreaders, the input element has an aria-label
+    // hide the label for screenreaders, the input element will read the contents of the label when it's focussed. If we don't set aria-hidden the screenreader will also navigate the contents of the label separately from the input.
     attr(label, 'aria-hidden', 'true');
 
     // handle keys
