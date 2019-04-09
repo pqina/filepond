@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.3.8
+
+- Improve accessibility of buttons by moving label from `title` to inner hidden `<span>`.
+
+
 ## 4.3.7
 
 - Attempt #2 at fixing the issue of release `4.3.6`.
