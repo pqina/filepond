@@ -516,6 +516,7 @@ const toggleBrowse =  (root, props) => {
     }
     else if (!enabled && root.ref.browser) {
         root.removeChildView(root.ref.browser);
+        root.ref.browser = null;
     }
 }
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.3.9
+
+- Fix problem where enabling FilePond after being `disabled` would not allow browsing for files.
+
+
 ## 4.3.8
 
 - Improve accessibility of buttons by moving label from `title` to inner hidden `<span>`.

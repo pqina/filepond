@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.3.8
+ * FilePond 4.3.9
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -8602,6 +8602,7 @@
       );
     } else if (!enabled && root.ref.browser) {
       root.removeChildView(root.ref.browser);
+      root.ref.browser = null;
     }
   };
 
