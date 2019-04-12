@@ -153,6 +153,7 @@ export const defaultOptions = {
     onupdatefiles: [null, Type.FUNCTION],
 
     // hooks
+    beforeDropFile: [null, Type.FUNCTION],
     beforeAddFile: [null, Type.FUNCTION],
     beforeRemoveFile: [null, Type.FUNCTION],
 

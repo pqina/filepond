@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.3.9
+ * FilePond 4.4.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -2261,6 +2261,7 @@
     onupdatefiles: [null, Type.FUNCTION],
 
     // hooks
+    beforeDropFile: [null, Type.FUNCTION],
     beforeAddFile: [null, Type.FUNCTION],
     beforeRemoveFile: [null, Type.FUNCTION],
 
@@ -8520,15 +8521,24 @@
           // these files don't fit so stop here
           if (exceedsMaxFiles(root, items)) return false;
 
+          // allow quick validation of dropped items
+          var beforeDropFile =
+            root.query('GET_BEFORE_DROP_FILE') ||
+            function() {
+              return true;
+            };
+
           // all items should be validated by all filters as valid
           var dropValidation = root.query('GET_DROP_VALIDATION');
           return dropValidation
             ? items.every(function(item) {
-                return applyFilters('ALLOW_HOPPER_ITEM', item, {
-                  query: root.query
-                }).every(function(result) {
-                  return result === true;
-                });
+                return (
+                  applyFilters('ALLOW_HOPPER_ITEM', item, {
+                    query: root.query
+                  }).every(function(result) {
+                    return result === true;
+                  }) && beforeDropFile(item)
+                );
               })
             : true;
         },
@@ -8994,14 +9004,13 @@
       var options =
         arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       return new Promise(function(resolve, reject) {
-        store.dispatch('ADD_ITEM', {
-          interactionMethod: InteractionMethod.API,
-          source: source,
-          index: options.index,
-          success: resolve,
-          failure: reject,
-          options: options
-        });
+        addFiles([{ source: source, options: options }], {
+          index: options.index
+        })
+          .then(function(items) {
+            return resolve(items && items[0]);
+          })
+          .catch(reject);
       });
     };
 

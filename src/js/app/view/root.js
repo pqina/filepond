@@ -433,15 +433,19 @@ const toggleDrop = (root) => {
         const hopper = createHopper(
             root.element,
             items => {
-                
+
                 // these files don't fit so stop here
                 if (exceedsMaxFiles(root, items)) return false;
 
+                // allow quick validation of dropped items
+                const beforeDropFile = root.query('GET_BEFORE_DROP_FILE') || (() => true);
+
                 // all items should be validated by all filters as valid
                 const dropValidation = root.query('GET_DROP_VALIDATION');
-                return dropValidation ? items.every(item =>
-                    applyFilters('ALLOW_HOPPER_ITEM', item, { query: root.query })
-                        .every(result => result === true)
+                return dropValidation ? items.every(
+                    item => applyFilters('ALLOW_HOPPER_ITEM', item, { query: root.query }).every(result => result === true)
+                    &&
+                    beforeDropFile(item)
                 ) : true;
             },
             {

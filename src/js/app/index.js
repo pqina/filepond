@@ -323,17 +323,11 @@ export const createApp = (initialOptions = {}) => {
 
     const getFile = query => store.query('GET_ACTIVE_ITEM', query);
 
-    const addFile = (source, options = {}) =>
-        new Promise((resolve, reject) => {
-            store.dispatch('ADD_ITEM', {
-                interactionMethod: InteractionMethod.API,
-                source,
-                index: options.index,
-                success: resolve,
-                failure: reject,
-                options
-            });
-        });
+    const addFile = (source, options = {}) => new Promise((resolve, reject) => {
+        addFiles([{source, options}], { index: options.index })
+            .then(items => resolve(items && items[0]))
+            .catch(reject)
+    });
 
     const removeFile = query => {
         // request item removal

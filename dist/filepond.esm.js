@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.3.9
+ * FilePond 4.4.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1939,6 +1939,7 @@ const defaultOptions = {
   onupdatefiles: [null, Type.FUNCTION],
 
   // hooks
+  beforeDropFile: [null, Type.FUNCTION],
   beforeAddFile: [null, Type.FUNCTION],
   beforeRemoveFile: [null, Type.FUNCTION],
 
@@ -7443,13 +7444,18 @@ const toggleDrop = root => {
         // these files don't fit so stop here
         if (exceedsMaxFiles(root, items)) return false;
 
+        // allow quick validation of dropped items
+        const beforeDropFile =
+          root.query('GET_BEFORE_DROP_FILE') || (() => true);
+
         // all items should be validated by all filters as valid
         const dropValidation = root.query('GET_DROP_VALIDATION');
         return dropValidation
-          ? items.every(item =>
-              applyFilters('ALLOW_HOPPER_ITEM', item, {
-                query: root.query
-              }).every(result => result === true)
+          ? items.every(
+              item =>
+                applyFilters('ALLOW_HOPPER_ITEM', item, {
+                  query: root.query
+                }).every(result => result === true) && beforeDropFile(item)
             )
           : true;
       },
@@ -7887,14 +7893,9 @@ const createApp = (initialOptions = {}) => {
 
   const addFile = (source, options = {}) =>
     new Promise((resolve, reject) => {
-      store.dispatch('ADD_ITEM', {
-        interactionMethod: InteractionMethod.API,
-        source,
-        index: options.index,
-        success: resolve,
-        failure: reject,
-        options
-      });
+      addFiles([{ source, options }], { index: options.index })
+        .then(items => resolve(items && items[0]))
+        .catch(reject);
     });
 
   const removeFile = query => {

@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.4.0
+
+- Fix issue where `addFile` did not respect `itemInsertLocation` setting.
+- Add the `beforeDropFile` hook which can be used to validate a dropped item before it's added, make sure `dropValidation` is set to `true` as well.
+
+
 ## 4.3.9
 
 - Fix problem where enabling FilePond after being `disabled` would not allow browsing for files.
