@@ -23,8 +23,9 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 
 [Learn more about FilePond](https://pqina.nl/filepond/)
 
+---
 
-### Looking for a great Image Editor?
+### Also need Image Editing?
 
 **Doka.js** might be just what you're looking for. It's a Modern JavaScript Image Editor, Doka supports setting **crop aspect ratios**, **resizing**, **rotating**, **cropping**, and **flipping** images. Above all, it integrates beautifully with FilePond.
 
@@ -32,8 +33,9 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 
 <img src="https://github.com/pqina/filepond-github-assets/blob/master/doka.gif?raw=true" width="478" alt=""/>
 
+---
 
-### Plugins
+### FilePond Plugins
 
 *   [File encode](https://github.com/pqina/filepond-plugin-file-encode)
 *   [File rename](https://github.com/pqina/filepond-plugin-file-rename)
