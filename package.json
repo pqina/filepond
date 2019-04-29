@@ -1,6 +1,6 @@
 {
     "name": "filepond",
-    "version": "4.4.0",
+    "version": "4.4.1",
     "description": "FilePond, Where files go to stretch their bits.",
     "license": "MIT",
     "author": {
@@ -42,14 +42,14 @@
         "styles:nano": "cat src/css/* | npx node-sass | npx postcss --no-map --use autoprefixer --use cssnano | node banner-cli.js FilePond > dist/filepond.min.css"
     },
     "devDependencies": {
-        "@babel/core": "^7.4.0",
+        "@babel/core": "^7.4.4",
         "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
         "@babel/plugin-transform-template-literals": "^7.2.0",
-        "@babel/preset-env": "^7.4.2",
+        "@babel/preset-env": "^7.4.4",
         "autoprefixer": "^9.5.0",
-        "babel-jest": "^24.5.0",
+        "babel-jest": "^24.7.1",
         "cssnano": "^4.1.10",
-        "jest": "^24.5.0",
+        "jest": "^24.7.1",
         "node-sass": "^4.11.0",
         "postcss-cli": "^6.1.2",
         "prettier": "^1.16.4",

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.0
+ * FilePond 4.4.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -2688,8 +2688,18 @@
   };
 
   var getFileNameFromHeader = function getFileNameFromHeader(header) {
-    var matches = header.match(/(?:filename="(.+)")|(?:filename=(.+))/) || [];
-    return matches[1] || matches[2];
+    // test if is content disposition header, if not => null
+    if (!/^content-disposition:/i.test(header)) return null;
+
+    // get filename parts
+    var matches = header
+      .split(/filename=|filename\*=.+''/)
+      .splice(1)
+      .map(function(name) {
+        return name.trim().replace(/^["']|[;"']{0,2}$/g, '');
+      });
+
+    return matches.length ? matches[matches.length - 1] : null;
   };
 
   var getFileSizeFromHeader = function getFileSizeFromHeader(header) {

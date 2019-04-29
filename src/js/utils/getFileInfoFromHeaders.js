@@ -1,6 +1,14 @@
-const getFileNameFromHeader = header => {
-    const matches = header.match(/(?:filename="(.+)")|(?:filename=(.+))/) || [];
-    return matches[1] || matches[2];
+export const getFileNameFromHeader = header => {
+
+    // test if is content disposition header, if not => null
+    if (!/^content-disposition:/i.test(header)) return null;
+
+    // get filename parts
+    const matches = header.split(/filename=|filename\*=.+''/)
+        .splice(1)
+        .map(name => name.trim().replace(/^["']|[;"']{0,2}$/g, ''));
+    
+    return matches.length ? matches[matches.length-1] : null;
 }
 
 const getFileSizeFromHeader = header => {
