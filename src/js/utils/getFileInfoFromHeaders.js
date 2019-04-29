@@ -1,14 +1,15 @@
 export const getFileNameFromHeader = header => {
 
-    // test if is content disposition header, if not => null
+    // test if is content disposition header, if not exit
     if (!/^content-disposition:/i.test(header)) return null;
 
     // get filename parts
     const matches = header.split(/filename=|filename\*=.+''/)
         .splice(1)
-        .map(name => name.trim().replace(/^["']|[;"']{0,2}$/g, ''));
+        .map(name => name.trim().replace(/^["']|[;"']{0,2}$/g, ''))
+        .filter(name => name.length)
     
-    return matches.length ? matches[matches.length-1] : null;
+    return matches.length ? decodeURI(matches[matches.length-1]) : null;
 }
 
 const getFileSizeFromHeader = header => {

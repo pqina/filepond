@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.4.2
+
+- Fix issue where UTF-8 encoded filename was not parsed correctly.
+
+
 ## 4.4.1
 
 - Fix issue where `Content-Disposition` header filename was not parsed correctly.
