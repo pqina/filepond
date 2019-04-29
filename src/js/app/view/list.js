@@ -53,6 +53,8 @@ const addItemView = ({ root, action }) => {
 
 const moveItem = (item, x, y, vx = 0, vy = 1) => {
 
+    if (item.isDragging) return;
+
     item.translateX = x;
     item.translateY = y;
 

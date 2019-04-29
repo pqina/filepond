@@ -17,7 +17,14 @@
         const inputElement = document.querySelector('input[type="file"]');
 
         // Create the FilePond instance
-        const pond = FilePond.create(inputElement);
+        const pond = FilePond.create(inputElement, {
+            allowMultiple: true,
+            files: [
+                'a.png',
+                'b.png',
+                'c.png',
+            ]
+        });
     </script>
 
 </body>

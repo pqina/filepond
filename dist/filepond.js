@@ -6318,6 +6318,24 @@
 
   var ITEM_SCALE_SPRING = 'spring';
 
+  var StateMap = {
+    DID_START_ITEM_LOAD: 'busy',
+    DID_UPDATE_ITEM_LOAD_PROGRESS: 'loading',
+    DID_THROW_ITEM_INVALID: 'load-invalid',
+    DID_THROW_ITEM_LOAD_ERROR: 'load-error',
+    DID_LOAD_ITEM: 'idle',
+    DID_THROW_ITEM_REMOVE_ERROR: 'remove-error',
+    DID_START_ITEM_REMOVE: 'busy',
+    DID_START_ITEM_PROCESSING: 'busy',
+    DID_REQUEST_ITEM_PROCESSING: 'busy',
+    DID_UPDATE_ITEM_PROCESS_PROGRESS: 'processing',
+    DID_COMPLETE_ITEM_PROCESSING: 'processing-complete',
+    DID_THROW_ITEM_PROCESSING_ERROR: 'processing-error',
+    DID_THROW_ITEM_PROCESSING_REVERT_ERROR: 'processing-revert-error',
+    DID_ABORT_ITEM_PROCESSING: 'cancelled',
+    DID_REVERT_ITEM_PROCESSING: 'idle'
+  };
+
   /**
    * Creates the file view
    */
@@ -6349,95 +6367,153 @@
 
     // by default not marked for removal
     props.markedForRemoval = false;
-  };
 
-  var StateMap = {
-    DID_START_ITEM_LOAD: 'busy',
-    DID_UPDATE_ITEM_LOAD_PROGRESS: 'loading',
-    DID_THROW_ITEM_INVALID: 'load-invalid',
-    DID_THROW_ITEM_LOAD_ERROR: 'load-error',
-    DID_LOAD_ITEM: 'idle',
-    DID_THROW_ITEM_REMOVE_ERROR: 'remove-error',
-    DID_START_ITEM_REMOVE: 'busy',
-    DID_START_ITEM_PROCESSING: 'busy',
-    DID_REQUEST_ITEM_PROCESSING: 'busy',
-    DID_UPDATE_ITEM_PROCESS_PROGRESS: 'processing',
-    DID_COMPLETE_ITEM_PROCESSING: 'processing-complete',
-    DID_THROW_ITEM_PROCESSING_ERROR: 'processing-error',
-    DID_THROW_ITEM_PROCESSING_REVERT_ERROR: 'processing-revert-error',
-    DID_ABORT_ITEM_PROCESSING: 'cancelled',
-    DID_REVERT_ITEM_PROCESSING: 'idle'
+    // is the item currently being dragged
+    props.isDragging = false;
+
+    var grab = function grab(e) {
+      var origin = {
+        x: e.pageX,
+        y: e.pageY
+      };
+
+      root.dispatch('DID_GRAB_ITEM', { id: props.id, offset: origin });
+
+      var drag = function drag(e) {
+        root.dispatch('DID_DRAG_ITEM', {
+          id: props.id,
+          offset: {
+            x: e.pageX - origin.x,
+            y: e.pageY - origin.y
+          }
+        });
+      };
+
+      var drop = function drop() {
+        root.dispatch('DID_DROP_ITEM', {
+          id: props.id,
+          offset: {
+            x: e.pageX - origin.x,
+            y: e.pageY - origin.y
+          }
+        });
+
+        window.removeEventListener('mousemove', drag);
+        window.removeEventListener('mouseup', drop);
+      };
+
+      window.addEventListener('mousemove', drag);
+      window.addEventListener('mouseup', drop);
+    };
+
+    root.element.addEventListener('mousedown', grab);
   };
 
   var route$1 = createRoute({
     DID_UPDATE_PANEL_HEIGHT: function DID_UPDATE_PANEL_HEIGHT(_ref2) {
       var root = _ref2.root,
         action = _ref2.action;
-      var height = action.height;
-      root.height = height;
+      root.height = action.height;
     }
   });
 
-  var write$4 = function write(_ref3) {
-    var root = _ref3.root,
-      actions = _ref3.actions,
-      props = _ref3.props,
-      shouldOptimize = _ref3.shouldOptimize;
+  var write$4 = createRoute(
+    {
+      DID_GRAB_ITEM: function DID_GRAB_ITEM(_ref3) {
+        var root = _ref3.root,
+          action = _ref3.action,
+          props = _ref3.props;
+        // set is dragging to true so the position of the item is no longer updated in the list  view
+        props.isDragging = true;
 
-    // route actions
-    var aspectRatio =
-      root.query('GET_ITEM_PANEL_ASPECT_RATIO') ||
-      root.query('GET_PANEL_ASPECT_RATIO');
-    if (!aspectRatio) {
-      route$1({ root: root, actions: actions, props: props });
-      if (!root.height) {
-        root.height = root.ref.container.rect.element.height;
+        // remember the item offset at the start of dragging so we can correctly position the item while dragging
+        root.ref.offsetX = root.translateX;
+        root.ref.offsetY = root.translateY;
+      },
+      DID_DRAG_ITEM: function DID_DRAG_ITEM(_ref4) {
+        var root = _ref4.root,
+          action = _ref4.action,
+          props = _ref4.props;
+        // we use the original offset and the action offset to calculate the new drag position
+        root.translateX = root.ref.offsetX + action.offset.x;
+        root.translateY = root.ref.offsetY + action.offset.y;
+      },
+      DID_DROP_ITEM: function DID_DROP_ITEM(_ref5) {
+        var root = _ref5.root,
+          action = _ref5.action,
+          props = _ref5.props;
+        // item is dropped, the list view may now position it
+        props.isDragging = false;
       }
-    } else if (!shouldOptimize) {
-      root.height = root.rect.element.width * aspectRatio;
+    },
+    function(_ref6) {
+      var root = _ref6.root,
+        actions = _ref6.actions,
+        props = _ref6.props,
+        shouldOptimize = _ref6.shouldOptimize;
+
+      // route actions
+      var aspectRatio =
+        root.query('GET_ITEM_PANEL_ASPECT_RATIO') ||
+        root.query('GET_PANEL_ASPECT_RATIO');
+      if (!aspectRatio) {
+        route$1({ root: root, actions: actions, props: props });
+        if (!root.height) {
+          root.height = root.ref.container.rect.element.height;
+        }
+      } else if (!shouldOptimize) {
+        root.height = root.rect.element.width * aspectRatio;
+      }
+
+      // sync panel height with item height
+      if (shouldOptimize) {
+        root.ref.panel.height = null;
+      }
+
+      root.ref.panel.height = root.height;
+
+      // select last state change action
+      var action = actions
+        .concat()
+        .filter(function(action) {
+          return /^DID_/.test(action.type);
+        })
+        .reverse()
+        .find(function(action) {
+          return StateMap[action.type];
+        });
+
+      // no need to set same state twice
+      if (!action || (action && action.type === props.currentState)) return;
+
+      // set current state
+      props.currentState = action.type;
+
+      // set state
+      root.element.dataset.filepondItemState =
+        StateMap[props.currentState] || '';
     }
-
-    // sync panel height with item height
-    if (shouldOptimize) {
-      root.ref.panel.height = null;
-    }
-
-    root.ref.panel.height = root.height;
-
-    // select last state change action
-    var action = actions
-      .concat()
-      .filter(function(action) {
-        return /^DID_/.test(action.type);
-      })
-      .reverse()
-      .find(function(action) {
-        return StateMap[action.type];
-      });
-
-    // no need to set same state twice
-    if (!action || (action && action.type === props.currentState)) return;
-
-    // set current state
-    props.currentState = action.type;
-
-    // set state
-    root.element.dataset.filepondItemState = StateMap[props.currentState] || '';
-  };
+  );
 
   var item = createView({
     create: create$7,
     write: write$4,
-    destroy: function destroy(_ref4) {
-      var root = _ref4.root,
-        props = _ref4.props;
+    destroy: function destroy(_ref7) {
+      var root = _ref7.root,
+        props = _ref7.props;
       root.element.removeEventListener('click', root.ref.handleClick);
       root.dispatch('RELEASE_ITEM', { query: props.id });
     },
     tag: 'li',
     name: 'item',
     mixins: {
-      apis: ['id', 'interactionMethod', 'markedForRemoval', 'spawnDate'],
+      apis: [
+        'id',
+        'interactionMethod',
+        'markedForRemoval',
+        'isDragging',
+        'spawnDate'
+      ],
       styles: [
         'translateX',
         'translateY',
@@ -6581,6 +6657,8 @@
       arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0;
     var vy =
       arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 1;
+
+    if (item.isDragging) return;
 
     item.translateX = x;
     item.translateY = y;
