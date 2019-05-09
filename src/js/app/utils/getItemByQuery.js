@@ -1,5 +1,4 @@
 import { isEmpty } from '../../utils/isEmpty';
-import { isString } from '../../utils/isString';
 import { isInt } from '../../utils/isInt';
 
 export const getItemByQuery = (items, query) => {

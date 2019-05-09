@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.4.3
+
+- Fix issue where processing the queue didn't work correctly when files were removed while being in the queue.
+
+
 ## 4.4.2
 
 - Fix issue where UTF-8 encoded filename was not parsed correctly.

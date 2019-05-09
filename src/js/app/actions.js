@@ -706,7 +706,7 @@ export const actions = (dispatch, query, state) => ({
 
             // queue for later processing
             state.processingQueue.push({
-                item,
+                id: item.id,
                 success,
                 failure
             });
@@ -721,12 +721,23 @@ export const actions = (dispatch, query, state) => ({
         const processNext = () => {
 
             // process queueud items
-            const queued = state.processingQueue.shift();
+            const queueEntry = state.processingQueue.shift();
+
+            // no items left
+            if (!queueEntry) return;
+
+            // get item reference
+            const { id, success, failure } = queueEntry;
+            const itemReference = getItemByQuery(state.items, id);
+
+            // if item was archived while in queue, jump to next
+            if (!itemReference || itemReference.archived) {
+                processNext();
+                return;
+            }
 
             // process queued item
-            if (queued) {
-                dispatch('PROCESS_ITEM', { query: queued.item, success: queued.success, failure: queued.failure }, true);
-            }
+            dispatch('PROCESS_ITEM', { query: id, success, failure }, true);
         }
 
         // we done function

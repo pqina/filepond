@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.2
+ * FilePond 4.4.3
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -5005,7 +5005,7 @@
         if (totalCurrentUploads === maxParallelUploads) {
           // queue for later processing
           state.processingQueue.push({
-            item: item,
+            id: item.id,
             success: success,
             failure: failure
           });
@@ -5019,20 +5019,29 @@
 
         var processNext = function processNext() {
           // process queueud items
-          var queued = state.processingQueue.shift();
+          var queueEntry = state.processingQueue.shift();
+
+          // no items left
+          if (!queueEntry) return;
+
+          // get item reference
+          var id = queueEntry.id,
+            success = queueEntry.success,
+            failure = queueEntry.failure;
+          var itemReference = getItemByQuery(state.items, id);
+
+          // if item was archived while in queue, jump to next
+          if (!itemReference || itemReference.archived) {
+            processNext();
+            return;
+          }
 
           // process queued item
-          if (queued) {
-            dispatch(
-              'PROCESS_ITEM',
-              {
-                query: queued.item,
-                success: queued.success,
-                failure: queued.failure
-              },
-              true
-            );
-          }
+          dispatch(
+            'PROCESS_ITEM',
+            { query: id, success: success, failure: failure },
+            true
+          );
         };
 
         // we done function
