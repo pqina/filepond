@@ -87,6 +87,21 @@ const create = ({ root, props }) => {
 
 const write = ({ root, props, actions }) => {
 
+    // route actions
+    route({ root, props, actions });
+
+    // apply style properties
+    actions
+        .filter(action => /^DID_SET_STYLE_/.test(action.type))
+        .filter(action => !isEmpty(action.data.value))
+        .map(({ type, data }) => {
+            const name = toCamels(type.substr(8).toLowerCase(), '_');
+            root.element.dataset[name] = data.value;
+            root.invalidateLayout();
+        });
+
+    if (root.rect.element.hidden) return;
+
     if (root.rect.element.width !== root.ref.widthPrevious) {
         root.ref.widthPrevious = root.rect.element.width;
         root.ref.widthUpdated();
@@ -101,19 +116,6 @@ const write = ({ root, props, actions }) => {
         root.element.removeChild(root.ref.measure);
         root.ref.measure = null;
     }
-
-    // route actions
-    route({ root, props, actions });
-
-    // apply style properties
-    actions
-        .filter(action => /^DID_SET_STYLE_/.test(action.type))
-        .filter(action => !isEmpty(action.data.value))
-        .map(({ type, data }) => {
-            const name = toCamels(type.substr(8).toLowerCase(), '_');
-            root.element.dataset[name] = data.value;
-            root.invalidateLayout();
-        });
 
     // get quick references to various high level parts of the upload tool
     const { hopper, label, list, panel } = root.ref;
@@ -561,11 +563,9 @@ const route = createRoute({
         togglePaste(root);
     },
     DID_SET_DISABLED: ({ root, props }) => {
-
         toggleDrop(root);
         togglePaste(root);
         toggleBrowse(root, props);
-
         const isDisabled = root.query('GET_DISABLED');
         if (isDisabled) {
             root.element.dataset.disabled = 'disabled'

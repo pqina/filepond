@@ -4964,9 +4964,10 @@ forin(Buttons, key => {
   ButtonKeys.push(key);
 });
 
-const calculateFileInfoOffset = root =>
-  root.ref.buttonRemoveItem.rect.element.width +
-  root.ref.buttonRemoveItem.rect.element.left;
+const calculateFileInfoOffset = root => {
+  const buttonRect = root.ref.buttonRemoveItem.rect.element;
+  return buttonRect.hidden ? null : buttonRect.width + buttonRect.left;
+};
 
 // Force on full pixels so text stays crips
 const calculateFileVerticalCenterOffset = root =>
@@ -5194,6 +5195,9 @@ const create$4 = ({ root, props }) => {
   );
   progressIndicatorView.element.classList.add('filepond--process-indicator');
   root.ref.processProgressIndicator = progressIndicatorView;
+
+  // current active styles
+  root.ref.activeStyles = [];
 };
 
 const write$2 = ({ root, actions, props }) => {
@@ -5207,27 +5211,30 @@ const write$2 = ({ root, actions, props }) => {
     .reverse()
     .find(action => StyleMap[action.type]);
 
-  // no need to set same state twice
-  if (!action || (action && action.type === root.ref.currentAction)) {
-    return;
+  // a new action happened, let's get the matching styles
+  if (action) {
+    // define new active styles
+    root.ref.activeStyles = [];
+
+    const stylesToApply = StyleMap[action.type];
+    forin(DefaultStyle, (name, defaultStyles) => {
+      // get reference to control
+      const control = root.ref[name];
+
+      // loop over all styles for this control
+      forin(defaultStyles, (key, defaultValue) => {
+        const value =
+          stylesToApply[name] && typeof stylesToApply[name][key] !== 'undefined'
+            ? stylesToApply[name][key]
+            : defaultValue;
+        root.ref.activeStyles.push({ control, key, value });
+      });
+    });
   }
 
-  // set current state
-  root.ref.currentAction = action.type;
-  const newStyles = StyleMap[root.ref.currentAction];
-
-  forin(DefaultStyle, (name, defaultStyles) => {
-    // get reference to control
-    const control = root.ref[name];
-
-    // loop over all styles for this control
-    forin(defaultStyles, (key, defaultValue) => {
-      const value =
-        newStyles[name] && typeof newStyles[name][key] !== 'undefined'
-          ? newStyles[name][key]
-          : defaultValue;
-      control[key] = typeof value === 'function' ? value(root) : value;
-    });
+  // apply active styles to element
+  root.ref.activeStyles.forEach(({ control, key, value }) => {
+    control[key] = typeof value === 'function' ? value(root) : value;
   });
 };
 
@@ -5280,7 +5287,7 @@ const create$5 = ({ root, props }) => {
   root.ref.fileName = createElement$1('legend');
   root.appendChild(root.ref.fileName);
 
-  // file view
+  // file appended
   root.ref.file = root.appendChildView(
     root.createChildView(file, { id: props.id })
   );
@@ -5319,7 +5326,7 @@ const didCompleteItemProcessing$1 = ({ root, action }) => {
   root.ref.data.value = action.serverFileReference;
 };
 
-const didRevertItemProcessing = ({ root, action }) => {
+const didRevertItemProcessing = ({ root }) => {
   root.ref.data.removeAttribute('value');
 };
 
@@ -5401,9 +5408,7 @@ const write$3 = ({ root, props }) => {
   }
 
   // no height, can't set
-  if (!props.height) {
-    return;
-  }
+  if (!props.height) return;
 
   // get child rects
   const topRect = root.ref.top.rect.element;
@@ -5465,7 +5470,7 @@ const create$7 = ({ root, props }) => {
   );
 
   // default start height
-  root.ref.panel.height = 0;
+  root.ref.panel.height = null;
 
   // by default not marked for removal
   props.markedForRemoval = false;
@@ -5497,13 +5502,29 @@ const route$1 = createRoute({
 });
 
 const write$4 = ({ root, actions, props, shouldOptimize }) => {
+  // select last state change action
+  let action = actions
+    .concat()
+    .filter(action => /^DID_/.test(action.type))
+    .reverse()
+    .find(action => StateMap[action.type]);
+
+  // no need to set same state twice
+  if (action && action.type !== props.currentState) {
+    // set current state
+    props.currentState = action.type;
+
+    // set state
+    root.element.dataset.filepondItemState = StateMap[props.currentState] || '';
+  }
+
   // route actions
   const aspectRatio =
     root.query('GET_ITEM_PANEL_ASPECT_RATIO') ||
     root.query('GET_PANEL_ASPECT_RATIO');
   if (!aspectRatio) {
     route$1({ root, actions, props });
-    if (!root.height) {
+    if (!root.height && root.ref.container.rect.element.height > 0) {
       root.height = root.ref.container.rect.element.height;
     }
   } else if (!shouldOptimize) {
@@ -5516,22 +5537,6 @@ const write$4 = ({ root, actions, props, shouldOptimize }) => {
   }
 
   root.ref.panel.height = root.height;
-
-  // select last state change action
-  let action = actions
-    .concat()
-    .filter(action => /^DID_/.test(action.type))
-    .reverse()
-    .find(action => StateMap[action.type]);
-
-  // no need to set same state twice
-  if (!action || (action && action.type === props.currentState)) return;
-
-  // set current state
-  props.currentState = action.type;
-
-  // set state
-  root.element.dataset.filepondItemState = StateMap[props.currentState] || '';
 };
 
 const item = createView({
@@ -5625,7 +5630,7 @@ const getItemIndexByPosition = (view, positionInView) => {
   return l;
 };
 
-const create$8 = ({ root, props }) => {
+const create$8 = ({ root }) => {
   // need to set role to list as otherwise it won't be read as a list by VoiceOver
   attr(root.element, 'role', 'list');
 
@@ -5769,7 +5774,7 @@ const write$5 = ({ root, props, actions, shouldOptimize }) => {
 
   // only draw children that have dimensions
   const visibleChildren = root.childViews.filter(
-    child => child.rect.outer.height
+    child => child.rect.element.height
   );
 
   // sort based on current active items
@@ -7100,6 +7105,21 @@ const create$d = ({ root, props }) => {
 };
 
 const write$8 = ({ root, props, actions }) => {
+  // route actions
+  route$5({ root, props, actions });
+
+  // apply style properties
+  actions
+    .filter(action => /^DID_SET_STYLE_/.test(action.type))
+    .filter(action => !isEmpty(action.data.value))
+    .map(({ type, data }) => {
+      const name = toCamels(type.substr(8).toLowerCase(), '_');
+      root.element.dataset[name] = data.value;
+      root.invalidateLayout();
+    });
+
+  if (root.rect.element.hidden) return;
+
   if (root.rect.element.width !== root.ref.widthPrevious) {
     root.ref.widthPrevious = root.rect.element.width;
     root.ref.widthUpdated();
@@ -7114,19 +7134,6 @@ const write$8 = ({ root, props, actions }) => {
     root.element.removeChild(root.ref.measure);
     root.ref.measure = null;
   }
-
-  // route actions
-  route$5({ root, props, actions });
-
-  // apply style properties
-  actions
-    .filter(action => /^DID_SET_STYLE_/.test(action.type))
-    .filter(action => !isEmpty(action.data.value))
-    .map(({ type, data }) => {
-      const name = toCamels(type.substr(8).toLowerCase(), '_');
-      root.element.dataset[name] = data.value;
-      root.invalidateLayout();
-    });
 
   // get quick references to various high level parts of the upload tool
   const { hopper, label, list, panel } = root.ref;
@@ -7581,7 +7588,6 @@ const route$5 = createRoute({
     toggleDrop(root);
     togglePaste(root);
     toggleBrowse(root, props);
-
     const isDisabled = root.query('GET_DISABLED');
     if (isDisabled) {
       root.element.dataset.disabled = 'disabled';
@@ -7700,13 +7706,18 @@ const createApp = (initialOptions = {}) => {
         }
       }
 
+      if (isHidden && isResting) {
+        // test if is no longer hidden
+        isResting = view.element.offsetParent === null;
+      }
+
       // if resting, no need to read as numbers will still all be correct
       if (isResting) return;
 
       // read view data
       view._read();
 
-      // if root is hidden
+      // if is hidden we need to know so we exit rest mode when revealed
       isHidden = view.rect.element.hidden;
     },
 
@@ -7715,9 +7726,6 @@ const createApp = (initialOptions = {}) => {
      * @private
      */
     _write: ts => {
-      // don't do anything while hidden
-      if (isHidden) return;
-
       // get all actions from store
       const actions = store
         .processActionQueue()

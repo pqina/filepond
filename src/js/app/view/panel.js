@@ -66,9 +66,7 @@ const write = ({ root, props }) => {
     }
     
     // no height, can't set
-    if (!props.height) {
-        return;
-    }
+    if (!props.height) return;
 
     // get child rects
     const topRect = root.ref.top.rect.element;

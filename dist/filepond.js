@@ -5759,10 +5759,8 @@
   });
 
   var calculateFileInfoOffset = function calculateFileInfoOffset(root) {
-    return (
-      root.ref.buttonRemoveItem.rect.element.width +
-      root.ref.buttonRemoveItem.rect.element.left
-    );
+    var buttonRect = root.ref.buttonRemoveItem.rect.element;
+    return buttonRect.hidden ? null : buttonRect.width + buttonRect.left;
   };
 
   // Force on full pixels so text stays crips
@@ -6026,6 +6024,9 @@
 
     progressIndicatorView.element.classList.add('filepond--process-indicator');
     root.ref.processProgressIndicator = progressIndicatorView;
+
+    // current active styles
+    root.ref.activeStyles = [];
   };
 
   var write$2 = function write(_ref3) {
@@ -6047,80 +6048,92 @@
         return StyleMap[action.type];
       });
 
-    // no need to set same state twice
-    if (!action || (action && action.type === root.ref.currentAction)) {
-      return;
+    // a new action happened, let's get the matching styles
+    if (action) {
+      // define new active styles
+      root.ref.activeStyles = [];
+
+      var stylesToApply = StyleMap[action.type];
+      forin(DefaultStyle, function(name, defaultStyles) {
+        // get reference to control
+        var control = root.ref[name];
+
+        // loop over all styles for this control
+        forin(defaultStyles, function(key, defaultValue) {
+          var value =
+            stylesToApply[name] &&
+            typeof stylesToApply[name][key] !== 'undefined'
+              ? stylesToApply[name][key]
+              : defaultValue;
+          root.ref.activeStyles.push({
+            control: control,
+            key: key,
+            value: value
+          });
+        });
+      });
     }
 
-    // set current state
-    root.ref.currentAction = action.type;
-    var newStyles = StyleMap[root.ref.currentAction];
+    // apply active styles to element
+    root.ref.activeStyles.forEach(function(_ref4) {
+      var control = _ref4.control,
+        key = _ref4.key,
+        value = _ref4.value;
 
-    forin(DefaultStyle, function(name, defaultStyles) {
-      // get reference to control
-      var control = root.ref[name];
-
-      // loop over all styles for this control
-      forin(defaultStyles, function(key, defaultValue) {
-        var value =
-          newStyles[name] && typeof newStyles[name][key] !== 'undefined'
-            ? newStyles[name][key]
-            : defaultValue;
-        control[key] = typeof value === 'function' ? value(root) : value;
-      });
+      control[key] = typeof value === 'function' ? value(root) : value;
     });
   };
 
   var route = createRoute({
     DID_SET_LABEL_BUTTON_ABORT_ITEM_PROCESSING: function DID_SET_LABEL_BUTTON_ABORT_ITEM_PROCESSING(
-      _ref4
-    ) {
-      var root = _ref4.root,
-        action = _ref4.action;
-      root.ref.buttonAbortItemProcessing.label = action.value;
-    },
-    DID_SET_LABEL_BUTTON_ABORT_ITEM_LOAD: function DID_SET_LABEL_BUTTON_ABORT_ITEM_LOAD(
       _ref5
     ) {
       var root = _ref5.root,
         action = _ref5.action;
-      root.ref.buttonAbortItemLoad.label = action.value;
+      root.ref.buttonAbortItemProcessing.label = action.value;
     },
-    DID_SET_LABEL_BUTTON_ABORT_ITEM_REMOVAL: function DID_SET_LABEL_BUTTON_ABORT_ITEM_REMOVAL(
+    DID_SET_LABEL_BUTTON_ABORT_ITEM_LOAD: function DID_SET_LABEL_BUTTON_ABORT_ITEM_LOAD(
       _ref6
     ) {
       var root = _ref6.root,
         action = _ref6.action;
+      root.ref.buttonAbortItemLoad.label = action.value;
+    },
+    DID_SET_LABEL_BUTTON_ABORT_ITEM_REMOVAL: function DID_SET_LABEL_BUTTON_ABORT_ITEM_REMOVAL(
+      _ref7
+    ) {
+      var root = _ref7.root,
+        action = _ref7.action;
       root.ref.buttonAbortItemRemoval.label = action.value;
     },
-    DID_REQUEST_ITEM_PROCESSING: function DID_REQUEST_ITEM_PROCESSING(_ref7) {
-      var root = _ref7.root;
+    DID_REQUEST_ITEM_PROCESSING: function DID_REQUEST_ITEM_PROCESSING(_ref8) {
+      var root = _ref8.root;
       root.ref.processProgressIndicator.spin = true;
       root.ref.processProgressIndicator.progress = 0;
     },
-    DID_START_ITEM_LOAD: function DID_START_ITEM_LOAD(_ref8) {
-      var root = _ref8.root;
+    DID_START_ITEM_LOAD: function DID_START_ITEM_LOAD(_ref9) {
+      var root = _ref9.root;
       root.ref.loadProgressIndicator.spin = true;
       root.ref.loadProgressIndicator.progress = 0;
     },
-    DID_START_ITEM_REMOVE: function DID_START_ITEM_REMOVE(_ref9) {
-      var root = _ref9.root;
+    DID_START_ITEM_REMOVE: function DID_START_ITEM_REMOVE(_ref10) {
+      var root = _ref10.root;
       root.ref.processProgressIndicator.spin = true;
       root.ref.processProgressIndicator.progress = 0;
     },
     DID_UPDATE_ITEM_LOAD_PROGRESS: function DID_UPDATE_ITEM_LOAD_PROGRESS(
-      _ref10
-    ) {
-      var root = _ref10.root,
-        action = _ref10.action;
-      root.ref.loadProgressIndicator.spin = false;
-      root.ref.loadProgressIndicator.progress = action.progress;
-    },
-    DID_UPDATE_ITEM_PROCESS_PROGRESS: function DID_UPDATE_ITEM_PROCESS_PROGRESS(
       _ref11
     ) {
       var root = _ref11.root,
         action = _ref11.action;
+      root.ref.loadProgressIndicator.spin = false;
+      root.ref.loadProgressIndicator.progress = action.progress;
+    },
+    DID_UPDATE_ITEM_PROCESS_PROGRESS: function DID_UPDATE_ITEM_PROCESS_PROGRESS(
+      _ref12
+    ) {
+      var root = _ref12.root,
+        action = _ref12.action;
       root.ref.processProgressIndicator.spin = false;
       root.ref.processProgressIndicator.progress = action.progress;
     }
@@ -6146,7 +6159,7 @@
     root.ref.fileName = createElement$1('legend');
     root.appendChild(root.ref.fileName);
 
-    // file view
+    // file appended
     root.ref.file = root.appendChildView(
       root.createChildView(file, { id: props.id })
     );
@@ -6193,8 +6206,7 @@
   };
 
   var didRevertItemProcessing = function didRevertItemProcessing(_ref6) {
-    var root = _ref6.root,
-      action = _ref6.action;
+    var root = _ref6.root;
     root.ref.data.removeAttribute('value');
   };
 
@@ -6288,9 +6300,7 @@
     }
 
     // no height, can't set
-    if (!props.height) {
-      return;
-    }
+    if (!props.height) return;
 
     // get child rects
     var topRect = root.ref.top.rect.element;
@@ -6357,7 +6367,7 @@
     );
 
     // default start height
-    root.ref.panel.height = 0;
+    root.ref.panel.height = null;
 
     // by default not marked for removal
     props.markedForRemoval = false;
@@ -6396,26 +6406,6 @@
       props = _ref3.props,
       shouldOptimize = _ref3.shouldOptimize;
 
-    // route actions
-    var aspectRatio =
-      root.query('GET_ITEM_PANEL_ASPECT_RATIO') ||
-      root.query('GET_PANEL_ASPECT_RATIO');
-    if (!aspectRatio) {
-      route$1({ root: root, actions: actions, props: props });
-      if (!root.height) {
-        root.height = root.ref.container.rect.element.height;
-      }
-    } else if (!shouldOptimize) {
-      root.height = root.rect.element.width * aspectRatio;
-    }
-
-    // sync panel height with item height
-    if (shouldOptimize) {
-      root.ref.panel.height = null;
-    }
-
-    root.ref.panel.height = root.height;
-
     // select last state change action
     var action = actions
       .concat()
@@ -6428,13 +6418,34 @@
       });
 
     // no need to set same state twice
-    if (!action || (action && action.type === props.currentState)) return;
+    if (action && action.type !== props.currentState) {
+      // set current state
+      props.currentState = action.type;
 
-    // set current state
-    props.currentState = action.type;
+      // set state
+      root.element.dataset.filepondItemState =
+        StateMap[props.currentState] || '';
+    }
 
-    // set state
-    root.element.dataset.filepondItemState = StateMap[props.currentState] || '';
+    // route actions
+    var aspectRatio =
+      root.query('GET_ITEM_PANEL_ASPECT_RATIO') ||
+      root.query('GET_PANEL_ASPECT_RATIO');
+    if (!aspectRatio) {
+      route$1({ root: root, actions: actions, props: props });
+      if (!root.height && root.ref.container.rect.element.height > 0) {
+        root.height = root.ref.container.rect.element.height;
+      }
+    } else if (!shouldOptimize) {
+      root.height = root.rect.element.width * aspectRatio;
+    }
+
+    // sync panel height with item height
+    if (shouldOptimize) {
+      root.ref.panel.height = null;
+    }
+
+    root.ref.panel.height = root.height;
   };
 
   var item = createView({
@@ -6535,8 +6546,7 @@
   };
 
   var create$8 = function create(_ref) {
-    var root = _ref.root,
-      props = _ref.props;
+    var root = _ref.root;
     // need to set role to list as otherwise it won't be read as a list by VoiceOver
     attr(root.element, 'role', 'list');
 
@@ -6698,7 +6708,7 @@
 
     // only draw children that have dimensions
     var visibleChildren = root.childViews.filter(function(child) {
-      return child.rect.outer.height;
+      return child.rect.element.height;
     });
 
     // sort based on current active items
@@ -8172,21 +8182,6 @@
       props = _ref3.props,
       actions = _ref3.actions;
 
-    if (root.rect.element.width !== root.ref.widthPrevious) {
-      root.ref.widthPrevious = root.rect.element.width;
-      root.ref.widthUpdated();
-    }
-
-    // get box bounds, we do this only once
-    var bounds = root.ref.bounds;
-    if (!bounds) {
-      bounds = root.ref.bounds = calculateRootBoundingBoxHeight(root);
-
-      // destroy measure element
-      root.element.removeChild(root.ref.measure);
-      root.ref.measure = null;
-    }
-
     // route actions
     route$5({ root: root, props: props, actions: actions });
 
@@ -8205,6 +8200,23 @@
         root.element.dataset[name] = data.value;
         root.invalidateLayout();
       });
+
+    if (root.rect.element.hidden) return;
+
+    if (root.rect.element.width !== root.ref.widthPrevious) {
+      root.ref.widthPrevious = root.rect.element.width;
+      root.ref.widthUpdated();
+    }
+
+    // get box bounds, we do this only once
+    var bounds = root.ref.bounds;
+    if (!bounds) {
+      bounds = root.ref.bounds = calculateRootBoundingBoxHeight(root);
+
+      // destroy measure element
+      root.element.removeChild(root.ref.measure);
+      root.ref.measure = null;
+    }
 
     // get quick references to various high level parts of the upload tool
     var _root$ref = root.ref,
@@ -8680,11 +8692,9 @@
     DID_SET_DISABLED: function DID_SET_DISABLED(_ref8) {
       var root = _ref8.root,
         props = _ref8.props;
-
       toggleDrop(root);
       togglePaste(root);
       toggleBrowse(root, props);
-
       var isDisabled = root.query('GET_DISABLED');
       if (isDisabled) {
         root.element.dataset.disabled = 'disabled';
@@ -8807,13 +8817,18 @@
           }
         }
 
+        if (isHidden && isResting) {
+          // test if is no longer hidden
+          isResting = view.element.offsetParent === null;
+        }
+
         // if resting, no need to read as numbers will still all be correct
         if (isResting) return;
 
         // read view data
         view._read();
 
-        // if root is hidden
+        // if is hidden we need to know so we exit rest mode when revealed
         isHidden = view.rect.element.hidden;
       },
 
@@ -8822,9 +8837,6 @@
        * @private
        */
       _write: function _write(ts) {
-        // don't do anything while hidden
-        if (isHidden) return;
-
         // get all actions from store
         var actions = store
           .processActionQueue()

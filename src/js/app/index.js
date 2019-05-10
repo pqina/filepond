@@ -109,13 +109,18 @@ export const createApp = (initialOptions = {}) => {
                 }
             }
 
+            if (isHidden && isResting) {
+                // test if is no longer hidden
+                isResting = view.element.offsetParent === null;
+            }
+
             // if resting, no need to read as numbers will still all be correct
             if (isResting) return;
 
             // read view data
             view._read();
-    
-            // if root is hidden
+
+            // if is hidden we need to know so we exit rest mode when revealed
             isHidden = view.rect.element.hidden;
         },
 
@@ -124,9 +129,6 @@ export const createApp = (initialOptions = {}) => {
          * @private
          */
         _write: ts => {
-
-            // don't do anything while hidden
-            if (isHidden) return;
 
             // get all actions from store
             const actions = store

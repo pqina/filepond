@@ -14,7 +14,7 @@ const create = ({ root, props }) => {
     root.ref.fileName = createElement('legend');
     root.appendChild(root.ref.fileName);
 
-    // file view
+    // file appended
     root.ref.file = root.appendChildView(
         root.createChildView(file, { id: props.id })
     );
@@ -53,7 +53,7 @@ const didCompleteItemProcessing = ({ root, action }) => {
     root.ref.data.value = action.serverFileReference;
 };
 
-const didRevertItemProcessing = ({ root, action }) => {
+const didRevertItemProcessing = ({ root }) => {
     root.ref.data.removeAttribute('value');
 };
 
