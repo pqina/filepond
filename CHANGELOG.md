@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.4.4
+
+- Fix issue where FilePond would not render when hidden, resulting in missing input elements and events not firing.
+
+
 ## 4.4.3
 
 - Fix issue where processing the queue didn't work correctly when files were removed while being in the queue.
