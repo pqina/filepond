@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.4.5
+
+- Fix issue where FilePond event loop would freeze when tab was inactive.
+
+
 ## 4.4.4
 
 - Fix issue where FilePond would not render when hidden, resulting in missing input elements and events not firing.

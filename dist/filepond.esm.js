@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.4
+ * FilePond 4.4.5
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1209,11 +1209,30 @@ const createPainter = (read, write, fps = 60) => {
 
   const interval = 1000 / fps;
   let last = null;
-  let frame = null;
+  let id = null;
+  let requestTick = null;
+  let cancelTick = null;
+
+  const setTimerType = () => {
+    if (document.hidden) {
+      requestTick = () =>
+        window.setTimeout(() => tick(performance.now()), interval);
+      cancelTick = () => window.clearTimeout(id);
+    } else {
+      requestTick = () => window.requestAnimationFrame(tick);
+      cancelTick = () => window.cancelAnimationFrame(id);
+    }
+  };
+
+  document.addEventListener('visibilitychange', () => {
+    if (cancelTick) cancelTick();
+    setTimerType();
+    tick(performance.now());
+  });
 
   const tick = ts => {
     // queue next tick
-    frame = window.requestAnimationFrame(tick);
+    id = requestTick(tick);
 
     // limit fps
     if (!last) {
@@ -1235,11 +1254,12 @@ const createPainter = (read, write, fps = 60) => {
     painter.writers.forEach(write => write(ts));
   };
 
+  setTimerType();
   tick(performance.now());
 
   return {
     pause: () => {
-      window.cancelAnimationFrame(frame);
+      cancelTick(id);
     }
   };
 };

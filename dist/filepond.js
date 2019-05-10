@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.4
+ * FilePond 4.4.5
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1395,11 +1395,39 @@
 
     var interval = 1000 / fps;
     var last = null;
-    var frame = null;
+    var id = null;
+    var requestTick = null;
+    var cancelTick = null;
+
+    var setTimerType = function setTimerType() {
+      if (document.hidden) {
+        requestTick = function requestTick() {
+          return window.setTimeout(function() {
+            return tick(performance.now());
+          }, interval);
+        };
+        cancelTick = function cancelTick() {
+          return window.clearTimeout(id);
+        };
+      } else {
+        requestTick = function requestTick() {
+          return window.requestAnimationFrame(tick);
+        };
+        cancelTick = function cancelTick() {
+          return window.cancelAnimationFrame(id);
+        };
+      }
+    };
+
+    document.addEventListener('visibilitychange', function() {
+      if (cancelTick) cancelTick();
+      setTimerType();
+      tick(performance.now());
+    });
 
     var tick = function tick(ts) {
       // queue next tick
-      frame = window.requestAnimationFrame(tick);
+      id = requestTick(tick);
 
       // limit fps
       if (!last) {
@@ -1425,11 +1453,12 @@
       });
     };
 
+    setTimerType();
     tick(performance.now());
 
     return {
       pause: function pause() {
-        window.cancelAnimationFrame(frame);
+        cancelTick(id);
       }
     };
   };
