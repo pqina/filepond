@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.4.6
+
+- Fix issue where `processFiles` would re-process `local` server images.
+
+
 ## 4.4.5
 
 - Fix issue where FilePond event loop would freeze when tab was inactive.

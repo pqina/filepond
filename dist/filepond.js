@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.5
+ * FilePond 4.4.6
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -2035,6 +2035,12 @@
     LOAD_ERROR: 8
   };
 
+  var FileOrigin = {
+    INPUT: 1,
+    LIMBO: 2,
+    LOCAL: 3
+  };
+
   var getNonNumeric = function getNonNumeric(str) {
     return /[^0-9]+/.exec(str);
   };
@@ -3620,12 +3626,6 @@
       size: data[1],
       type: data[2]
     };
-  };
-
-  var FileOrigin = {
-    INPUT: 1,
-    LIMBO: 2,
-    LOCAL: 3
   };
 
   var isFile = function isFile(value) {
@@ -9155,6 +9155,10 @@
       if (!queries.length) {
         var files = getFiles().filter(function(item) {
           return (
+            !(
+              item.status === ItemStatus.IDLE &&
+              item.origin === FileOrigin.LOCAL
+            ) &&
             item.status !== ItemStatus.PROCESSING &&
             item.status !== ItemStatus.PROCESSING_COMPLETE &&
             item.status !== ItemStatus.PROCESSING_REVERT_ERROR

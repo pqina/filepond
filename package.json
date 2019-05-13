@@ -1,6 +1,6 @@
 {
     "name": "filepond",
-    "version": "4.4.5",
+    "version": "4.4.6",
     "description": "FilePond, Where files go to stretch their bits.",
     "license": "MIT",
     "author": {
@@ -53,7 +53,7 @@
         "node-sass": "^4.11.0",
         "postcss-cli": "^6.1.2",
         "prettier": "^1.16.4",
-        "rollup": "^1.7.0",
+        "rollup": "^1.11.3",
         "rollup-plugin-babel": "^4.3.2",
         "rollup-plugin-commonjs": "^9.2.1",
         "rollup-plugin-license": "^0.8.1",

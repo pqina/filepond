@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.5
+ * FilePond 4.4.6
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1739,6 +1739,12 @@ const ItemStatus = {
   LOAD_ERROR: 8
 };
 
+const FileOrigin = {
+  INPUT: 1,
+  LIMBO: 2,
+  LOCAL: 3
+};
+
 const getNonNumeric = str => /[^0-9]+/.exec(str);
 
 const getDecimalSeparator = () => getNonNumeric((1.1).toLocaleString())[0];
@@ -3081,12 +3087,6 @@ const createFileStub = source => {
     size: data[1],
     type: data[2]
   };
-};
-
-const FileOrigin = {
-  INPUT: 1,
-  LIMBO: 2,
-  LOCAL: 3
 };
 
 const isFile = value =>
@@ -7998,6 +7998,9 @@ const createApp = (initialOptions = {}) => {
     if (!queries.length) {
       const files = getFiles().filter(
         item =>
+          !(
+            item.status === ItemStatus.IDLE && item.origin === FileOrigin.LOCAL
+          ) &&
           item.status !== ItemStatus.PROCESSING &&
           item.status !== ItemStatus.PROCESSING_COMPLETE &&
           item.status !== ItemStatus.PROCESSING_REVERT_ERROR

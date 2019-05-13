@@ -14,6 +14,7 @@ import { isNumber } from '../utils/isNumber';
 import { createItemAPI } from './utils/createItemAPI';
 import { removeReleasedItems } from './utils/removeReleasedItems';
 import { ItemStatus } from './enum/ItemStatus';
+import { FileOrigin } from './enum/FileOrigin';
 
 // defaults
 import { getOptions } from './options';
@@ -393,6 +394,7 @@ export const createApp = (initialOptions = {}) => {
         const queries = Array.isArray(args[0]) ? args[0] : args;
         if (!queries.length) {
             const files = getFiles().filter(item => 
+                !(item.status === ItemStatus.IDLE && item.origin === FileOrigin.LOCAL) &&
                 item.status !== ItemStatus.PROCESSING &&
                 item.status !== ItemStatus.PROCESSING_COMPLETE &&
                 item.status !== ItemStatus.PROCESSING_REVERT_ERROR
