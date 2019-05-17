@@ -7581,7 +7581,6 @@ const togglePaste = root => {
     root.ref.paster.onload = items => {
       root.dispatch('ADD_ITEMS', {
         items,
-        index: getDragIndex(root.ref.list, position),
         interactionMethod: InteractionMethod.PASTE
       });
     };

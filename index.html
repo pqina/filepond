@@ -17,7 +17,9 @@
         const inputElement = document.querySelector('input[type="file"]');
 
         // Create the FilePond instance
-        const pond = FilePond.create(inputElement);
+        const pond = FilePond.create(inputElement, {
+            allowPaste: true
+        });
     </script>
 
 </body>

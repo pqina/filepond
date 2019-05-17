@@ -8691,7 +8691,6 @@
       root.ref.paster.onload = function(items) {
         root.dispatch('ADD_ITEMS', {
           items: items,
-          index: getDragIndex(root.ref.list, position),
           interactionMethod: InteractionMethod.PASTE
         });
       };
