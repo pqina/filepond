@@ -16,6 +16,7 @@ import { toCamels } from '../../utils/toCamels';
 import { createElement } from '../../utils/createElement';
 import { createResponse } from '../../utils/createResponse';
 import { debounce } from '../../utils/debounce';
+import { isFile } from '../../utils/isFile';
 
 const MAX_FILES_LIMIT = 1000000;
 
@@ -451,6 +452,15 @@ const toggleDrop = (root) => {
                 ) : true;
             },
             {
+                filterItems: items => {
+                    const ignoredFiles = root.query('GET_IGNORED_FILES');
+                    return items.filter(item => {
+                        if (isFile(item)) {
+                            return !ignoredFiles.includes(item.name.toLowerCase())
+                        }
+                        return true;
+                    })
+                },
                 catchesDropsOnPage: root.query('GET_DROP_ON_PAGE'),
                 requiresDropOnElement: root.query('GET_DROP_ON_ELEMENT')
             }
@@ -538,7 +548,7 @@ const togglePaste = (root) => {
         root.ref.paster.onload = items => {
             root.dispatch('ADD_ITEMS', {
                 items,
-                index: getDragIndex(root.ref.list, position),
+                index: -1,
                 interactionMethod: InteractionMethod.PASTE
             });
         };

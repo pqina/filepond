@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.6
+ * FilePond 4.4.7
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -3629,7 +3629,7 @@
   };
 
   var isFile = function isFile(value) {
-    return value instanceof File || (value instanceof Blob && value.name);
+    return !!(value instanceof File || (value instanceof Blob && value.name));
   };
 
   var deepCloneObject = function deepCloneObject(src) {
@@ -7812,7 +7812,14 @@
 
     // shortcuts
     var catchesDropsOnPage = options.catchesDropsOnPage,
-      requiresDropOnElement = options.requiresDropOnElement;
+      requiresDropOnElement = options.requiresDropOnElement,
+      _options$filterItems = options.filterItems,
+      filterItems =
+        _options$filterItems === void 0
+          ? function(items) {
+              return items;
+            }
+          : _options$filterItems;
 
     // create a dnd client
     var client = createDragNDropClient(
@@ -7829,18 +7836,20 @@
     client.allowdrop = function(items) {
       // TODO: if we can, throw error to indicate the items cannot by dropped
 
-      return validateItems(items);
+      return validateItems(filterItems(items));
     };
 
     client.ondrop = function(position, items) {
-      if (!validateItems(items)) {
+      var filteredItems = filterItems(items);
+
+      if (!validateItems(filteredItems)) {
         api.ondragend(position);
         return;
       }
 
       currentState = 'drag-drop';
 
-      api.onload(items, position);
+      api.onload(filteredItems, position);
     };
 
     client.ondrag = function(position) {
@@ -8606,6 +8615,15 @@
             : true;
         },
         {
+          filterItems: function filterItems(items) {
+            var ignoredFiles = root.query('GET_IGNORED_FILES');
+            return items.filter(function(item) {
+              if (isFile(item)) {
+                return !ignoredFiles.includes(item.name.toLowerCase());
+              }
+              return true;
+            });
+          },
           catchesDropsOnPage: root.query('GET_DROP_ON_PAGE'),
           requiresDropOnElement: root.query('GET_DROP_ON_ELEMENT')
         }
@@ -8691,7 +8709,7 @@
       root.ref.paster.onload = function(items) {
         root.dispatch('ADD_ITEMS', {
           items: items,
-          index: getDragIndex(root.ref.list, position),
+          index: -1,
           interactionMethod: InteractionMethod.PASTE
         });
       };

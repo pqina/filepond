@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.6
+ * FilePond 4.4.7
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -3090,7 +3090,7 @@ const createFileStub = source => {
 };
 
 const isFile = value =>
-  value instanceof File || (value instanceof Blob && value.name);
+  !!(value instanceof File || (value instanceof Blob && value.name));
 
 const deepCloneObject = src => {
   if (!isObject(src)) return src;
@@ -6774,7 +6774,11 @@ const createHopper = (scope, validateItems, options) => {
   scope.classList.add('filepond--hopper');
 
   // shortcuts
-  const { catchesDropsOnPage, requiresDropOnElement } = options;
+  const {
+    catchesDropsOnPage,
+    requiresDropOnElement,
+    filterItems = items => items
+  } = options;
 
   // create a dnd client
   const client = createDragNDropClient(
@@ -6791,18 +6795,20 @@ const createHopper = (scope, validateItems, options) => {
   client.allowdrop = items => {
     // TODO: if we can, throw error to indicate the items cannot by dropped
 
-    return validateItems(items);
+    return validateItems(filterItems(items));
   };
 
   client.ondrop = (position, items) => {
-    if (!validateItems(items)) {
+    const filteredItems = filterItems(items);
+
+    if (!validateItems(filteredItems)) {
       api.ondragend(position);
       return;
     }
 
     currentState = 'drag-drop';
 
-    api.onload(items, position);
+    api.onload(filteredItems, position);
   };
 
   client.ondrag = position => {
@@ -7499,6 +7505,15 @@ const toggleDrop = root => {
           : true;
       },
       {
+        filterItems: items => {
+          const ignoredFiles = root.query('GET_IGNORED_FILES');
+          return items.filter(item => {
+            if (isFile(item)) {
+              return !ignoredFiles.includes(item.name.toLowerCase());
+            }
+            return true;
+          });
+        },
         catchesDropsOnPage: root.query('GET_DROP_ON_PAGE'),
         requiresDropOnElement: root.query('GET_DROP_ON_ELEMENT')
       }
@@ -7581,7 +7596,7 @@ const togglePaste = root => {
     root.ref.paster.onload = items => {
       root.dispatch('ADD_ITEMS', {
         items,
-        index: getDragIndex(root.ref.list, position),
+        index: -1,
         interactionMethod: InteractionMethod.PASTE
       });
     };

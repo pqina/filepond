@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.4.7
+
+- Fix issue where pasting a file would throw an error.
+- Fix issue where ignored files would be counted as files when dropping a folder.
+
+
 ## 4.4.6
 
 - Fix issue where `processFiles` would re-process `local` server images.

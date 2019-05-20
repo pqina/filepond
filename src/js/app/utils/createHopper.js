@@ -5,7 +5,7 @@ export const createHopper = (scope, validateItems, options) => {
     scope.classList.add('filepond--hopper');
 
     // shortcuts
-    const { catchesDropsOnPage, requiresDropOnElement } = options;
+    const { catchesDropsOnPage, requiresDropOnElement, filterItems = items => items } = options;
 
     // create a dnd client
     const client = createDragNDropClient(
@@ -22,19 +22,21 @@ export const createHopper = (scope, validateItems, options) => {
     client.allowdrop = items => {
         // TODO: if we can, throw error to indicate the items cannot by dropped
 
-        return validateItems(items);
+        return validateItems(filterItems(items));
     };
 
     client.ondrop = (position, items) => {
+
+        const filteredItems = filterItems(items);
         
-        if (!validateItems(items)) {
+        if (!validateItems(filteredItems)) {
             api.ondragend(position);
             return;
         }
 
         currentState = 'drag-drop';
 
-        api.onload(items, position);
+        api.onload(filteredItems, position);
     };
 
     client.ondrag = position => {
