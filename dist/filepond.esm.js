@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.7
+ * FilePond 4.4.8
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1574,6 +1574,9 @@ const createInitialState = options => ({
 
   // timeout used for calling update items
   listUpdateTimeout: null,
+
+  // timeout used for stacking metadata updates
+  itemUpdateTimeout: null,
 
   // queue of items waiting to be processed
   processingQueue: [],
@@ -3438,15 +3441,15 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     keys.forEach(key => (data = data[key]));
 
     // compare old value against new value, if they're the same, we're not updating
-    if (JSON.stringify(data[last]) === JSON.stringify(value)) {
-      return;
-    }
+    if (JSON.stringify(data[last]) === JSON.stringify(value)) return;
 
     // update value
     data[last] = value;
 
+    // don't fire update
     if (silent) return;
 
+    // fire update
     fire('metadata-update', {
       key: root,
       value: metadata[root]
@@ -3711,72 +3714,76 @@ const actions = (dispatch, query, state) => ({
     });
   },
 
-  DID_UPDATE_ITEM_METADATA: ({ id, change }) => {
-    const item = getItemById(state.items, id);
+  DID_UPDATE_ITEM_METADATA: ({ id }) => {
+    // if is called multiple times in close succession we combined all calls together to save resources
+    clearTimeout(state.itemUpdateTimeout);
+    state.itemUpdateTimeout = setTimeout(() => {
+      const item = getItemById(state.items, id);
 
-    // only revert and attempt to upload when we're uploading to a server
-    if (!query('IS_ASYNC')) {
-      // should we update the output data
-      applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query }).then(
-        shouldPrepareOutput => {
-          if (!shouldPrepareOutput) {
-            return;
+      // only revert and attempt to upload when we're uploading to a server
+      if (!query('IS_ASYNC')) {
+        // should we update the output data
+        applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query }).then(
+          shouldPrepareOutput => {
+            if (!shouldPrepareOutput) {
+              return;
+            }
+            dispatch(
+              'REQUEST_PREPARE_OUTPUT',
+              {
+                query: id,
+                item,
+                ready: file => {
+                  dispatch('DID_PREPARE_OUTPUT', { id, file });
+                }
+              },
+              true
+            );
           }
-          dispatch(
-            'REQUEST_PREPARE_OUTPUT',
-            {
-              query: id,
-              item,
-              ready: file => {
-                dispatch('DID_PREPARE_OUTPUT', { id, file });
-              }
-            },
-            true
-          );
-        }
-      );
+        );
 
-      return;
-    }
+        return;
+      }
 
-    // for async scenarios
-    const upload = () => {
-      // we push this forward a bit so the interface is updated correctly
-      setTimeout(() => {
-        dispatch('REQUEST_ITEM_PROCESSING', { query: id });
-      }, 32);
-    };
+      // for async scenarios
+      const upload = () => {
+        // we push this forward a bit so the interface is updated correctly
+        setTimeout(() => {
+          dispatch('REQUEST_ITEM_PROCESSING', { query: id });
+        }, 32);
+      };
 
-    const revert = doUpload => {
-      item
-        .revert(
-          createRevertFunction(
-            state.options.server.url,
-            state.options.server.revert
-          ),
-          query('GET_FORCE_REVERT')
-        )
-        .then(doUpload ? upload : () => {})
-        .catch(() => {});
-    };
+      const revert = doUpload => {
+        item
+          .revert(
+            createRevertFunction(
+              state.options.server.url,
+              state.options.server.revert
+            ),
+            query('GET_FORCE_REVERT')
+          )
+          .then(doUpload ? upload : () => {})
+          .catch(() => {});
+      };
 
-    const abort = doUpload => {
-      item.abortProcessing().then(doUpload ? upload : () => {});
-    };
+      const abort = doUpload => {
+        item.abortProcessing().then(doUpload ? upload : () => {});
+      };
 
-    // if we should re-upload the file immidiately
-    if (item.status === ItemStatus.PROCESSING_COMPLETE) {
-      return revert(state.options.instantUpload);
-    }
+      // if we should re-upload the file immidiately
+      if (item.status === ItemStatus.PROCESSING_COMPLETE) {
+        return revert(state.options.instantUpload);
+      }
 
-    // if currently uploading, cancel upload
-    if (item.status === ItemStatus.PROCESSING) {
-      return abort(state.options.instantUpload);
-    }
+      // if currently uploading, cancel upload
+      if (item.status === ItemStatus.PROCESSING) {
+        return abort(state.options.instantUpload);
+      }
 
-    if (state.options.instantUpload) {
-      upload();
-    }
+      if (state.options.instantUpload) {
+        upload();
+      }
+    }, 0);
   },
 
   SORT: ({ compare }) => {
@@ -7122,6 +7129,7 @@ const create$d = ({ root, props }) => {
   // determine if width changed
   root.ref.widthPrevious = null;
   root.ref.widthUpdated = debounce(() => {
+    root.ref.updateHistory = [];
     root.dispatch('DID_RESIZE_ROOT');
   }, 250);
 

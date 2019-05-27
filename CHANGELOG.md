@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.4.8
+
+- Fix issue where multiple calls to `setMetadata` would result in multiple successive calls to prepare file.
+- Fix issue where drop area aspect ratio would not update correctly on resize.
+
+
 ## 4.4.7
 
 - Fix issue where pasting a file would throw an error.

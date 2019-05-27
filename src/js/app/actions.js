@@ -133,64 +133,70 @@ export const actions = (dispatch, query, state) => ({
 
     },
 
-    DID_UPDATE_ITEM_METADATA: ({ id, change }) => {
+    DID_UPDATE_ITEM_METADATA: ({ id }) => {
 
-        const item = getItemById(state.items, id);
+        // if is called multiple times in close succession we combined all calls together to save resources
+        clearTimeout(state.itemUpdateTimeout);
+        state.itemUpdateTimeout = setTimeout(() => {
 
-        // only revert and attempt to upload when we're uploading to a server
-        if (!query('IS_ASYNC')) {
+            const item = getItemById(state.items, id);
 
-            // should we update the output data
-            applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query })
-            .then(shouldPrepareOutput => {
-                if (!shouldPrepareOutput) {
-                    return;
-                }
-                dispatch('REQUEST_PREPARE_OUTPUT', {
-                    query: id,
-                    item,
-                    ready: (file) => {
-                        dispatch('DID_PREPARE_OUTPUT', { id, file });
+            // only revert and attempt to upload when we're uploading to a server
+            if (!query('IS_ASYNC')) {
+    
+                // should we update the output data
+                applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query })
+                .then(shouldPrepareOutput => {
+                    if (!shouldPrepareOutput) {
+                        return;
                     }
-                }, true);
-            });
+                    dispatch('REQUEST_PREPARE_OUTPUT', {
+                        query: id,
+                        item,
+                        ready: (file) => {
+                            dispatch('DID_PREPARE_OUTPUT', { id, file });
+                        }
+                    }, true);
+                });
+    
+                return;
+            }
+    
+            // for async scenarios
+            const upload = () => {
+                // we push this forward a bit so the interface is updated correctly
+                setTimeout(() => {
+                    dispatch('REQUEST_ITEM_PROCESSING', { query: id })
+                }, 32);
+            }
+    
+            const revert = (doUpload) => {
+                item.revert(createRevertFunction(state.options.server.url, state.options.server.revert), query('GET_FORCE_REVERT'))
+                .then(doUpload ? upload : () => {})
+                .catch(() => {})
+            }
+    
+            const abort = (doUpload) => {
+                item.abortProcessing()
+                .then(doUpload ? upload : () => {});
+            }
+    
+            // if we should re-upload the file immidiately
+            if (item.status === ItemStatus.PROCESSING_COMPLETE) {
+                return revert(state.options.instantUpload);
+            }
+            
+            // if currently uploading, cancel upload
+            if (item.status === ItemStatus.PROCESSING) {
+                return abort(state.options.instantUpload);
+            }
+    
+            if (state.options.instantUpload) {
+                upload();
+            }
+            
+        }, 0);
 
-            return;
-        }
-
-        // for async scenarios
-        const upload = () => {
-            // we push this forward a bit so the interface is updated correctly
-            setTimeout(() => {
-                dispatch('REQUEST_ITEM_PROCESSING', { query: id })
-            }, 32);
-        }
-
-        const revert = (doUpload) => {
-            item.revert(createRevertFunction(state.options.server.url, state.options.server.revert), query('GET_FORCE_REVERT'))
-            .then(doUpload ? upload : () => {})
-            .catch(() => {})
-        }
-
-        const abort = (doUpload) => {
-            item.abortProcessing()
-            .then(doUpload ? upload : () => {});
-        }
-
-        // if we should re-upload the file immidiately
-        if (item.status === ItemStatus.PROCESSING_COMPLETE) {
-            return revert(state.options.instantUpload);
-        }
-        
-        // if currently uploading, cancel upload
-        if (item.status === ItemStatus.PROCESSING) {
-            return abort(state.options.instantUpload);
-        }
-
-        if (state.options.instantUpload) {
-            upload();
-        }
-        
     },
 
     SORT: ({ compare }) => {

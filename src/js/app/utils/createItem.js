@@ -361,15 +361,15 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         keys.forEach(key => data = data[key]);
 
         // compare old value against new value, if they're the same, we're not updating
-        if (JSON.stringify(data[last]) === JSON.stringify(value)) {
-            return;
-        }
+        if (JSON.stringify(data[last]) === JSON.stringify(value)) return;
 
         // update value
         data[last] = value;
 
+        // don't fire update
         if (silent) return;
 
+        // fire update
         fire('metadata-update', {
             key: root,
             value: metadata[root]

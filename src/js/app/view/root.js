@@ -78,6 +78,7 @@ const create = ({ root, props }) => {
     // determine if width changed
     root.ref.widthPrevious = null;
     root.ref.widthUpdated = debounce(() => {
+        root.ref.updateHistory = [];
         root.dispatch('DID_RESIZE_ROOT');
     }, 250);
 
@@ -216,7 +217,6 @@ const write = ({ root, props, actions }) => {
                 }
             }
         }
-
 
         // fix height of panel so it adheres to aspect ratio
         panel.scalable = false;

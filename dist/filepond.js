@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.7
+ * FilePond 4.4.8
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1837,6 +1837,9 @@
 
       // timeout used for calling update items
       listUpdateTimeout: null,
+
+      // timeout used for stacking metadata updates
+      itemUpdateTimeout: null,
 
       // queue of items waiting to be processed
       processingQueue: [],
@@ -4007,15 +4010,15 @@
       });
 
       // compare old value against new value, if they're the same, we're not updating
-      if (JSON.stringify(data[last]) === JSON.stringify(value)) {
-        return;
-      }
+      if (JSON.stringify(data[last]) === JSON.stringify(value)) return;
 
       // update value
       data[last] = value;
 
+      // don't fire update
       if (silent) return;
 
+      // fire update
       fire('metadata-update', {
         key: root,
         value: metadata[root]
@@ -4377,75 +4380,78 @@
       },
 
       DID_UPDATE_ITEM_METADATA: function DID_UPDATE_ITEM_METADATA(_ref3) {
-        var id = _ref3.id,
-          change = _ref3.change;
+        var id = _ref3.id;
 
-        var item = getItemById(state.items, id);
+        // if is called multiple times in close succession we combined all calls together to save resources
+        clearTimeout(state.itemUpdateTimeout);
+        state.itemUpdateTimeout = setTimeout(function() {
+          var item = getItemById(state.items, id);
 
-        // only revert and attempt to upload when we're uploading to a server
-        if (!query('IS_ASYNC')) {
-          // should we update the output data
-          applyFilterChain('SHOULD_PREPARE_OUTPUT', false, {
-            item: item,
-            query: query
-          }).then(function(shouldPrepareOutput) {
-            if (!shouldPrepareOutput) {
-              return;
-            }
-            dispatch(
-              'REQUEST_PREPARE_OUTPUT',
-              {
-                query: id,
-                item: item,
-                ready: function ready(file) {
-                  dispatch('DID_PREPARE_OUTPUT', { id: id, file: file });
-                }
-              },
-              true
-            );
-          });
+          // only revert and attempt to upload when we're uploading to a server
+          if (!query('IS_ASYNC')) {
+            // should we update the output data
+            applyFilterChain('SHOULD_PREPARE_OUTPUT', false, {
+              item: item,
+              query: query
+            }).then(function(shouldPrepareOutput) {
+              if (!shouldPrepareOutput) {
+                return;
+              }
+              dispatch(
+                'REQUEST_PREPARE_OUTPUT',
+                {
+                  query: id,
+                  item: item,
+                  ready: function ready(file) {
+                    dispatch('DID_PREPARE_OUTPUT', { id: id, file: file });
+                  }
+                },
+                true
+              );
+            });
 
-          return;
-        }
+            return;
+          }
 
-        // for async scenarios
-        var upload = function upload() {
-          // we push this forward a bit so the interface is updated correctly
-          setTimeout(function() {
-            dispatch('REQUEST_ITEM_PROCESSING', { query: id });
-          }, 32);
-        };
+          // for async scenarios
+          var upload = function upload() {
+            // we push this forward a bit so the interface is updated correctly
+            setTimeout(function() {
+              dispatch('REQUEST_ITEM_PROCESSING', { query: id });
+            }, 32);
+          };
 
-        var revert = function revert(doUpload) {
-          item
-            .revert(
-              createRevertFunction(
-                state.options.server.url,
-                state.options.server.revert
-              ),
-              query('GET_FORCE_REVERT')
-            )
-            .then(doUpload ? upload : function() {})
-            .catch(function() {});
-        };
+          var revert = function revert(doUpload) {
+            item
+              .revert(
+                createRevertFunction(
+                  state.options.server.url,
+                  state.options.server.revert
+                ),
+                query('GET_FORCE_REVERT')
+              )
+              .then(doUpload ? upload : function() {})
+              .catch(function() {});
+          };
 
-        var abort = function abort(doUpload) {
-          item.abortProcessing().then(doUpload ? upload : function() {});
-        };
+          var abort = function abort(doUpload) {
+            item.abortProcessing().then(doUpload ? upload : function() {});
+          };
 
-        // if we should re-upload the file immidiately
-        if (item.status === ItemStatus.PROCESSING_COMPLETE) {
-          return revert(state.options.instantUpload);
-        }
+          // if we should re-upload the file immidiately
+          if (item.status === ItemStatus.PROCESSING_COMPLETE) {
+            return revert(state.options.instantUpload);
+          }
 
-        // if currently uploading, cancel upload
-        if (item.status === ItemStatus.PROCESSING) {
-          return abort(state.options.instantUpload);
-        }
+          // if currently uploading, cancel upload
+          if (item.status === ItemStatus.PROCESSING) {
+            return abort(state.options.instantUpload);
+          }
 
-        if (state.options.instantUpload) {
-          upload();
-        }
+          if (state.options.instantUpload) {
+            upload();
+          }
+        }, 0);
       },
 
       SORT: function SORT(_ref4) {
@@ -8207,6 +8213,7 @@
     // determine if width changed
     root.ref.widthPrevious = null;
     root.ref.widthUpdated = debounce(function() {
+      root.ref.updateHistory = [];
       root.dispatch('DID_RESIZE_ROOT');
     }, 250);
 
