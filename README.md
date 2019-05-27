@@ -47,6 +47,7 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 *   [Image size validation](https://github.com/pqina/filepond-plugin-image-validate-size)
 *   [Image preview](https://github.com/pqina/filepond-plugin-image-preview)
 *   [Image crop](https://github.com/pqina/filepond-plugin-image-crop)
+*   [Image filter](https://github.com/pqina/filepond-plugin-image-filter)
 *   [Image resize](https://github.com/pqina/filepond-plugin-image-resize)
 *   [Image transform](https://github.com/pqina/filepond-plugin-image-transform)
 *   [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
