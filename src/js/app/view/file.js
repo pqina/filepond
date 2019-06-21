@@ -31,6 +31,13 @@ const Buttons = {
         className: 'filepond--action-remove-item',
         align: 'BUTTON_REMOVE_ITEM_POSITION' // left
     },
+    DownloadItem: {
+        label: 'GET_LABEL_BUTTON_DOWNLOAD_ITEM',
+        action: 'REQUEST_DOWNLOAD_ITEM',
+        icon: 'GET_ICON_DOWNLOAD',
+        className: 'filepond--action-download-item',
+        align: 'BUTTON_DOWNLOAD_ITEM_POSITION' // left
+    },
     ProcessItem: {
         label: 'GET_LABEL_BUTTON_PROCESS_ITEM',
         action: 'REQUEST_ITEM_PROCESSING',
@@ -67,8 +74,15 @@ forin(Buttons, key => {
 });
 
 const calculateFileInfoOffset = root => {
-    const buttonRect = root.ref.buttonRemoveItem.rect.element;
-    return buttonRect.hidden ? null : buttonRect.width + buttonRect.left;
+    let offset = calculateDownloadOffset(root);
+    const downloadButtonRect = root.ref.buttonDownloadItem.rect.element;
+    offset += downloadButtonRect.hidden ? null : downloadButtonRect.width + downloadButtonRect.left;
+    return offset;
+}
+
+const calculateDownloadOffset = root => {
+    const removeButtonRect = root.ref.buttonRemoveItem.rect.element;
+    return removeButtonRect.hidden ? null : removeButtonRect.width + removeButtonRect.left;
 }
 
 // Force on full pixels so text stays crips
@@ -83,6 +97,7 @@ const DefaultStyle = {
     buttonAbortItemLoad: { opacity: 0 },
     buttonRetryItemLoad: { opacity: 0 },
     buttonRemoveItem: { opacity: 0 },
+    buttonDownloadItem: { opacity: 0, translateX: calculateDownloadOffset },
     buttonProcessItem: { opacity: 0 },
     buttonAbortItemProcessing: { opacity: 0 },
     buttonRetryItemProcessing: { opacity: 0 },
@@ -96,6 +111,7 @@ const DefaultStyle = {
 
 const IdleStyle = {
     buttonRemoveItem: { opacity: 1 },
+    buttonDownloadItem: { opacity: 1, translateX: calculateDownloadOffset},
     buttonProcessItem: { opacity: 1 },
     info: { translateX: calculateFileInfoOffset },
     status: { translateX: calculateFileInfoOffset }
@@ -142,6 +158,7 @@ const StyleMap = {
     DID_LOAD_ITEM: IdleStyle,
     DID_LOAD_LOCAL_ITEM: {
         buttonRemoveItem: { opacity: 1 },
+        buttonDownloadItem: { opacity: 1, translateX: calculateDownloadOffset },
         info: { translateX: calculateFileInfoOffset },
         status: { translateX: calculateFileInfoOffset }
     },
@@ -208,10 +225,18 @@ const create = ({ root, props }) => {
     // is async set up
     const isAsync = root.query('IS_ASYNC');
 
+    // is download allowed
+    const allowDownload = root.query('GET_ALLOW_DOWNLOAD');
+
     // enabled buttons array
     const enabledButtons = isAsync
         ? ButtonKeys.concat()
         : ButtonKeys.filter(key => !/Process/.test(key));
+
+    // remove download button if not allowed
+    if (!allowDownload) {
+        enabledButtons.splice(enabledButtons.indexOf('DownloadItem'), 1);
+    }
 
     // remove last button (revert) if not allowed
     if (isAsync && !allowRevert) {

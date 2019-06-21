@@ -802,6 +802,20 @@ export const actions = (dispatch, query, state) => ({
             });
     }),
 
+    REQUEST_DOWNLOAD_ITEM: getItemByQueryFromState(state, (item) => {
+        // create a temporary hyperlink to force the browser to download the file
+        const a = document.createElement("a");
+        const url = window.URL.createObjectURL(item.file);
+        document.body.appendChild(a);
+        a.style = "display: none";
+        a.href = url;
+        a.download = item.file.name;
+        a.click();
+
+        window.URL.revokeObjectURL(url);
+        a.remove();
+    }),
+
     RELEASE_ITEM: getItemByQueryFromState(state, (item) => {
         item.release();
     }),

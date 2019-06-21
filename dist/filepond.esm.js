@@ -1865,6 +1865,7 @@ const defaultOptions = {
   allowMultiple: [false, Type.BOOLEAN], // Allow multiple files (disabled by default, as multiple attribute is also required on input to allow multiple)
   allowReplace: [true, Type.BOOLEAN], // Allow dropping a file on other file to replace it (only works when multiple is set to false)
   allowRevert: [true, Type.BOOLEAN], // Allows user to revert file upload
+  allowDownload: [true, Type.BOOLEAN], // Allows user to download already uploaded files
 
   // Revert mode
   forceRevert: [false, Type.BOOLEAN], // Set to 'force' to require the file to be reverted before removal
@@ -1920,6 +1921,7 @@ const defaultOptions = {
   labelTapToUndo: ['tap to undo', Type.STRING],
 
   labelButtonRemoveItem: ['Remove', Type.STRING],
+  labelButtonDownloadItem: ['Download', Type.STRING],
   labelButtonAbortItemLoad: ['Abort', Type.STRING],
   labelButtonRetryItemLoad: ['Retry', Type.STRING],
   labelButtonAbortItemProcessing: ['Cancel', Type.STRING],
@@ -1927,9 +1929,13 @@ const defaultOptions = {
   labelButtonRetryItemProcessing: ['Retry', Type.STRING],
   labelButtonProcessItem: ['Upload', Type.STRING],
 
-  // make sure width and height plus viewpox are even numbers so icons are nicely centered
+  // make sure width and height plus viewport are even numbers so icons are nicely centered
   iconRemove: [
     '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M11.586 13l-2.293 2.293a1 1 0 0 0 1.414 1.414L13 14.414l2.293 2.293a1 1 0 0 0 1.414-1.414L14.414 13l2.293-2.293a1 1 0 0 0-1.414-1.414L13 11.586l-2.293-2.293a1 1 0 0 0-1.414 1.414L11.586 13z" fill="currentColor" fill-rule="nonzero"/></svg>',
+    Type.STRING
+  ],
+  iconDownload: [
+    '<svg width="26" height="26" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M 3.5 5 L 3.5 1 L 6.5 1 L 6.5 5 L 9 5 L 5 9 L 1 5 Z M 3.5 5 " fill="currentColor" fill-rule="nonzero" transform="translate(5, 5)"/></svg>',
     Type.STRING
   ],
   iconProcess: [
@@ -1977,6 +1983,7 @@ const defaultOptions = {
   stylePanelAspectRatio: [null, Type.STRING], // null or '3:2' or 1
   styleItemPanelAspectRatio: [null, Type.STRING],
   styleButtonRemoveItemPosition: ['left', Type.STRING],
+  styleButtonDownloadItemPosition: ['left', Type.STRING],
   styleButtonProcessItemPosition: ['right', Type.STRING],
   styleLoadIndicatorPosition: ['right', Type.STRING],
   styleProgressIndicatorPosition: ['right', Type.STRING],
@@ -4413,6 +4420,20 @@ const actions = (dispatch, query, state) => ({
     );
   }),
 
+  REQUEST_DOWNLOAD_ITEM: getItemByQueryFromState(state, item => {
+    // create a temporary hyperlink to force the browser to download the file
+    const a = document.createElement('a');
+    const url = window.URL.createObjectURL(item.file);
+    document.body.appendChild(a);
+    a.style = 'display: none';
+    a.href = url;
+    a.download = item.file.name;
+    a.click();
+
+    window.URL.revokeObjectURL(url);
+    a.remove();
+  }),
+
   RELEASE_ITEM: getItemByQueryFromState(state, item => {
     item.release();
   }),
@@ -4956,6 +4977,13 @@ const Buttons = {
     className: 'filepond--action-remove-item',
     align: 'BUTTON_REMOVE_ITEM_POSITION' // left
   },
+  DownloadItem: {
+    label: 'GET_LABEL_BUTTON_DOWNLOAD_ITEM',
+    action: 'REQUEST_DOWNLOAD_ITEM',
+    icon: 'GET_ICON_DOWNLOAD',
+    className: 'filepond--action-download-item',
+    align: 'BUTTON_DOWNLOAD_ITEM_POSITION' // left
+  },
   ProcessItem: {
     label: 'GET_LABEL_BUTTON_PROCESS_ITEM',
     action: 'REQUEST_ITEM_PROCESSING',
@@ -4992,8 +5020,19 @@ forin(Buttons, key => {
 });
 
 const calculateFileInfoOffset = root => {
-  const buttonRect = root.ref.buttonRemoveItem.rect.element;
-  return buttonRect.hidden ? null : buttonRect.width + buttonRect.left;
+  let offset = calculateDownloadOffset(root);
+  const downloadButtonRect = root.ref.buttonDownloadItem.rect.element;
+  offset += downloadButtonRect.hidden
+    ? null
+    : downloadButtonRect.width + downloadButtonRect.left;
+  return offset;
+};
+
+const calculateDownloadOffset = root => {
+  const removeButtonRect = root.ref.buttonRemoveItem.rect.element;
+  return removeButtonRect.hidden
+    ? null
+    : removeButtonRect.width + removeButtonRect.left;
 };
 
 // Force on full pixels so text stays crips
@@ -5013,6 +5052,7 @@ const DefaultStyle = {
   buttonAbortItemLoad: { opacity: 0 },
   buttonRetryItemLoad: { opacity: 0 },
   buttonRemoveItem: { opacity: 0 },
+  buttonDownloadItem: { opacity: 0, translateX: calculateDownloadOffset },
   buttonProcessItem: { opacity: 0 },
   buttonAbortItemProcessing: { opacity: 0 },
   buttonRetryItemProcessing: { opacity: 0 },
@@ -5026,6 +5066,7 @@ const DefaultStyle = {
 
 const IdleStyle = {
   buttonRemoveItem: { opacity: 1 },
+  buttonDownloadItem: { opacity: 1, translateX: calculateDownloadOffset },
   buttonProcessItem: { opacity: 1 },
   info: { translateX: calculateFileInfoOffset },
   status: { translateX: calculateFileInfoOffset }
@@ -5072,6 +5113,7 @@ const StyleMap = {
   DID_LOAD_ITEM: IdleStyle,
   DID_LOAD_LOCAL_ITEM: {
     buttonRemoveItem: { opacity: 1 },
+    buttonDownloadItem: { opacity: 1, translateX: calculateDownloadOffset },
     info: { translateX: calculateFileInfoOffset },
     status: { translateX: calculateFileInfoOffset }
   },
@@ -5135,10 +5177,18 @@ const create$4 = ({ root, props }) => {
   // is async set up
   const isAsync = root.query('IS_ASYNC');
 
+  // is download allowed
+  const allowDownload = root.query('GET_ALLOW_DOWNLOAD');
+
   // enabled buttons array
   const enabledButtons = isAsync
     ? ButtonKeys.concat()
     : ButtonKeys.filter(key => !/Process/.test(key));
+
+  // remove download button if not allowed
+  if (!allowDownload) {
+    enabledButtons.splice(enabledButtons.indexOf('DownloadItem'), 1);
+  }
 
   // remove last button (revert) if not allowed
   if (isAsync && !allowRevert) {
