@@ -5833,8 +5833,9 @@
 
   var calculateDownloadOffset = function calculateDownloadOffset(root) {
     var removeButtonRect = root.ref.buttonRemoveItem.rect.element;
-    return removeButtonRect.hidden
-      ? null
+    var revertButtonRect = root.ref.buttonRevertItemProcessing.rect.element;
+    return root.query('IS_ASYNC')
+      ? -Math.abs(revertButtonRect.width + removeButtonRect.left)
       : removeButtonRect.width + removeButtonRect.left;
   };
 
@@ -5937,7 +5938,11 @@
     DID_LOAD_ITEM: IdleStyle,
     DID_LOAD_LOCAL_ITEM: {
       buttonRemoveItem: { opacity: 1 },
-      buttonDownloadItem: { opacity: 1, translateX: calculateDownloadOffset },
+      buttonDownloadItem: {
+        opacity: 1,
+        align: getRemoveIndicatorAligment,
+        translateX: calculateDownloadOffset
+      },
       info: { translateX: calculateFileInfoOffset },
       status: { translateX: calculateFileInfoOffset }
     },
@@ -5947,8 +5952,9 @@
     DID_UPDATE_ITEM_PROCESS_PROGRESS: ProcessingStyle,
     DID_COMPLETE_ITEM_PROCESSING: {
       buttonRevertItemProcessing: { opacity: 1 },
+      buttonDownloadItem: { opacity: 1, translateX: calculateDownloadOffset },
       info: { opacity: 1 },
-      status: { opacity: 1 }
+      status: { opacity: 1, translateX: calculateDownloadOffset }
     },
 
     DID_THROW_ITEM_PROCESSING_ERROR: {
@@ -6038,6 +6044,9 @@
     if (instantUpload && allowRevert) {
       Buttons['RevertItemProcessing'].label = 'GET_LABEL_BUTTON_REMOVE_ITEM';
       Buttons['RevertItemProcessing'].icon = 'GET_ICON_REMOVE';
+    }
+    if (isAsync) {
+      Buttons['DownloadItem'].align = 'BUTTON_PROCESS_ITEM_POSITION'; //put download button aside of processing button
     }
 
     // create the button views
