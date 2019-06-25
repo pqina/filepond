@@ -53,7 +53,7 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 *   [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
 *   [Image overlay](https://github.com/nielsboogaard/filepond-plugin-image-overlay) (third-party)
 *   [Media preview](https://github.com/nielsboogaard/filepond-plugin-media-preview) (third-party)
-*   [File download](https://github.com/nielsboogaard/filepond-plugin-download) (third-party)
+*   [File download](https://github.com/nielsboogaard/filepond-plugin-file-download) (third-party)
 
 
 ### Adapters
