@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.9
+ * FilePond 4.4.10
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -4018,6 +4018,7 @@ const actions = (dispatch, query, state) => ({
         error: error.status,
         status: error.status
       });
+      failure({ error: error.status, file: createItemAPI(item) });
     });
 
     item.on('load-abort', () => {
