@@ -51,7 +51,10 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 *   [Image resize](https://github.com/pqina/filepond-plugin-image-resize)
 *   [Image transform](https://github.com/pqina/filepond-plugin-image-transform)
 *   [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
+*   [Image overlay](https://github.com/nielsboogaard/filepond-plugin-image-overlay) (third-party)
 *   [Media preview](https://github.com/nielsboogaard/filepond-plugin-media-preview) (third-party)
+*   [Get file](https://github.com/nielsboogaard/filepond-plugin-get-file) (third-party)
+
 
 ### Adapters
 
