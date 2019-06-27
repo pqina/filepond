@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.4.10
+
+- Fix issue where Promise returned by `addFile` would not be rejected if file failed to load.
+
+
+## 4.4.9
+
+- Fix security issues with dependencies.
+
+
 ## 4.4.8
 
 - Fix issue where multiple calls to `setMetadata` would result in multiple successive calls to prepare file.
