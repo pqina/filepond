@@ -18,10 +18,9 @@ export const createFileLoader = fetchFn => {
 
     const getProgress = () => state.progress;
     const abort = () => {
-        if (!state.request) {
-            return;
+        if (state.request && state.request.abort) {
+            state.request.abort();
         }
-        state.request.abort();
     };
 
     // load source
