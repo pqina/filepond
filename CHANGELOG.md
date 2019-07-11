@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.4.11
+
+- Fix problem with abort statement in file loader logic.
+
+
 ## 4.4.10
 
 - Fix issue where Promise returned by `addFile` would not be rejected if file failed to load.

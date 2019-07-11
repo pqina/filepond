@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.10
+ * FilePond 4.4.11
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -2829,10 +2829,9 @@
       return state.progress;
     };
     var abort = function abort() {
-      if (!state.request) {
-        return;
+      if (state.request && state.request.abort) {
+        state.request.abort();
       }
-      state.request.abort();
     };
 
     // load source
