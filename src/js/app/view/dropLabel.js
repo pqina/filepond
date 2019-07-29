@@ -16,7 +16,7 @@ const create = ({ root, props }) => {
     attr(label, 'aria-hidden', 'true');
 
     // handle keys
-    label.addEventListener('keydown', e => {
+    const handleKeydown = e => {
         const isActivationKey = e.keyCode === Key.ENTER || e.keyCode === Key.SPACE;
         if (!isActivationKey) return;
         // stops from triggering the element a second time
@@ -24,10 +24,10 @@ const create = ({ root, props }) => {
 
         // click link (will then in turn activate file input)
         root.ref.label.click();
-    });
+    }
+    label.addEventListener('keydown', handleKeydown);
 
-    root.element.addEventListener('click', e => {
-
+    const handleClick = e => {
         const isLabelClick = e.target === label || label.contains(e.target);
 
         // don't want to click twice
@@ -35,7 +35,14 @@ const create = ({ root, props }) => {
 
         // click link (will then in turn activate file input)
         root.ref.label.click();
-    });
+    }
+    root.element.addEventListener('click', handleClick);
+    
+    // TODO: call this destroy method when the parent is destroyed.
+    label.destroy = () => {
+        label.removeEventListener('keydown', handleKeydown);
+        root.element.removeEventListener('click', handleKeydown);
+    }
 
     // update
     updateLabelValue(label, props.caption);

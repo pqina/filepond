@@ -603,6 +603,11 @@ export const root = createView({
         if (root.ref.hopper) {
             root.ref.hopper.destroy();
         }
+        /* TODO: destroy the 'dropLabel'
+        if (root.ref.label) {
+            root.ref.label.destroy();
+        }
+        */
     },
     mixins: {
         styles: ['height']

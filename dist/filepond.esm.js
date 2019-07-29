@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.11
+ * FilePond 4.4.12
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1224,11 +1224,17 @@ const createPainter = (read, write, fps = 60) => {
     }
   };
 
-  document.addEventListener('visibilitychange', () => {
+  const handleVisibilityChange = () => {
     if (cancelTick) cancelTick();
     setTimerType();
     tick(performance.now());
-  });
+  };
+
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+
+  const destroy = () => {
+    document.removeEventListener('visibilitychange', handleVisibilityChange);
+  };
 
   const tick = ts => {
     // queue next tick
@@ -1260,6 +1266,9 @@ const createPainter = (read, write, fps = 60) => {
   return {
     pause: () => {
       cancelTick(id);
+    },
+    destroy: () => {
+      destroy();
     }
   };
 };
@@ -6199,7 +6208,7 @@ const create$b = ({ root, props }) => {
   attr(label, 'aria-hidden', 'true');
 
   // handle keys
-  label.addEventListener('keydown', e => {
+  const handleKeydown = e => {
     const isActivationKey = e.keyCode === Key.ENTER || e.keyCode === Key.SPACE;
     if (!isActivationKey) return;
     // stops from triggering the element a second time
@@ -6207,9 +6216,10 @@ const create$b = ({ root, props }) => {
 
     // click link (will then in turn activate file input)
     root.ref.label.click();
-  });
+  };
+  label.addEventListener('keydown', handleKeydown);
 
-  root.element.addEventListener('click', e => {
+  const handleClick = e => {
     const isLabelClick = e.target === label || label.contains(e.target);
 
     // don't want to click twice
@@ -6217,7 +6227,14 @@ const create$b = ({ root, props }) => {
 
     // click link (will then in turn activate file input)
     root.ref.label.click();
-  });
+  };
+  root.element.addEventListener('click', handleClick);
+
+  // TODO: call this destroy method when the parent is destroyed.
+  label.destroy = () => {
+    label.removeEventListener('keydown', handleKeydown);
+    root.element.removeEventListener('click', handleKeydown);
+  };
 
   // update
   updateLabelValue(label, props.caption);
@@ -7656,6 +7673,11 @@ const root = createView({
     if (root.ref.hopper) {
       root.ref.hopper.destroy();
     }
+    /* TODO: destroy the 'dropLabel'
+        if (root.ref.label) {
+            root.ref.label.destroy();
+        }
+        */
   },
   mixins: {
     styles: ['height']
@@ -8148,7 +8170,7 @@ const createApp = (initialOptions = {}) => {
       window.removeEventListener('resize', resizeHandler);
 
       // stop listening to the visiblitychange event
-      document.addEventListener('visibilitychange', visibilityHandler);
+      document.removeEventListener('visibilitychange', visibilityHandler);
 
       // dispatch destroy
       store.dispatch('DID_DESTROY');
@@ -8602,7 +8624,7 @@ let setOptions$1 = fn;
 // if not supported, no API
 if (supported()) {
   // start painter and fire load event
-  createPainter(
+  const painter = createPainter(
     () => {
       state.apps.forEach(app => app._read());
     },
@@ -8663,6 +8685,7 @@ if (supported()) {
   // destroys apps and removes them from the app array
   destroy = hook => {
     // returns true if the app was destroyed successfully
+    painter.destroy();
     const indexToRemove = state.apps.findIndex(app => app.isAttachedTo(hook));
     if (indexToRemove >= 0) {
       // remove from apps

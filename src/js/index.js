@@ -71,7 +71,7 @@ export let setOptions = fn;
 if (supported()) {
 
     // start painter and fire load event
-    createPainter(
+    const painter = createPainter(
         () => {
             state.apps.forEach(app => app._read());
         },
@@ -132,6 +132,7 @@ if (supported()) {
     // destroys apps and removes them from the app array
     destroy = hook => {
         // returns true if the app was destroyed successfully
+        painter.destroy()
         const indexToRemove = state.apps.findIndex(app => app.isAttachedTo(hook));
         if (indexToRemove >= 0) {
             

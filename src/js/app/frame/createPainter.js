@@ -33,11 +33,17 @@ export const createPainter = (read, write, fps = 60) => {
         }
     }
 
-    document.addEventListener('visibilitychange', () => {
+    const handleVisibilityChange = () => {
         if (cancelTick) cancelTick();
         setTimerType();
         tick(performance.now());
-    });
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    const destroy = () => {
+        document.removeEventListener('visibilitychange', handleVisibilityChange);
+    }
 
     const tick = ts => {
 
@@ -70,6 +76,9 @@ export const createPainter = (read, write, fps = 60) => {
     return {
         pause: () => {
             cancelTick(id);
+        },
+        destroy: () => {
+            destroy();
         }
     };
 };

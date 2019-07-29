@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.11
+ * FilePond 4.4.12
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1419,11 +1419,17 @@
       }
     };
 
-    document.addEventListener('visibilitychange', function() {
+    var handleVisibilityChange = function handleVisibilityChange() {
       if (cancelTick) cancelTick();
       setTimerType();
       tick(performance.now());
-    });
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    var _destroy = function destroy() {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
 
     var tick = function tick(ts) {
       // queue next tick
@@ -1459,6 +1465,9 @@
     return {
       pause: function pause() {
         cancelTick(id);
+      },
+      destroy: function destroy() {
+        _destroy();
       }
     };
   };
@@ -7182,7 +7191,7 @@
     attr(label, 'aria-hidden', 'true');
 
     // handle keys
-    label.addEventListener('keydown', function(e) {
+    var handleKeydown = function handleKeydown(e) {
       var isActivationKey = e.keyCode === Key.ENTER || e.keyCode === Key.SPACE;
       if (!isActivationKey) return;
       // stops from triggering the element a second time
@@ -7190,9 +7199,10 @@
 
       // click link (will then in turn activate file input)
       root.ref.label.click();
-    });
+    };
+    label.addEventListener('keydown', handleKeydown);
 
-    root.element.addEventListener('click', function(e) {
+    var handleClick = function handleClick(e) {
       var isLabelClick = e.target === label || label.contains(e.target);
 
       // don't want to click twice
@@ -7200,7 +7210,14 @@
 
       // click link (will then in turn activate file input)
       root.ref.label.click();
-    });
+    };
+    root.element.addEventListener('click', handleClick);
+
+    // TODO: call this destroy method when the parent is destroyed.
+    label.destroy = function() {
+      label.removeEventListener('keydown', handleKeydown);
+      root.element.removeEventListener('click', handleKeydown);
+    };
 
     // update
     updateLabelValue(label, props.caption);
@@ -8777,6 +8794,11 @@
       if (root.ref.hopper) {
         root.ref.hopper.destroy();
       }
+      /* TODO: destroy the 'dropLabel'
+          if (root.ref.label) {
+              root.ref.label.destroy();
+          }
+          */
     },
     mixins: {
       styles: ['height']
@@ -9325,7 +9347,7 @@
           window.removeEventListener('resize', resizeHandler);
 
           // stop listening to the visiblitychange event
-          document.addEventListener('visibilitychange', visibilityHandler);
+          document.removeEventListener('visibilitychange', visibilityHandler);
 
           // dispatch destroy
           store.dispatch('DID_DESTROY');
@@ -9839,7 +9861,7 @@
   // if not supported, no API
   if (supported()) {
     // start painter and fire load event
-    createPainter(
+    var painter = createPainter(
       function() {
         state.apps.forEach(function(app) {
           return app._read();
@@ -9907,6 +9929,7 @@
     // destroys apps and removes them from the app array
     exports.destroy = function destroy(hook) {
       // returns true if the app was destroyed successfully
+      painter.destroy();
       var indexToRemove = state.apps.findIndex(function(app) {
         return app.isAttachedTo(hook);
       });
