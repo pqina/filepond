@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.11
+ * FilePond 4.4.12
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -6199,7 +6199,7 @@ const create$b = ({ root, props }) => {
   attr(label, 'aria-hidden', 'true');
 
   // handle keys
-  label.addEventListener('keydown', e => {
+  root.ref.handleKeyDown = e => {
     const isActivationKey = e.keyCode === Key.ENTER || e.keyCode === Key.SPACE;
     if (!isActivationKey) return;
     // stops from triggering the element a second time
@@ -6207,9 +6207,9 @@ const create$b = ({ root, props }) => {
 
     // click link (will then in turn activate file input)
     root.ref.label.click();
-  });
+  };
 
-  root.element.addEventListener('click', e => {
+  root.ref.handleClick = e => {
     const isLabelClick = e.target === label || label.contains(e.target);
 
     // don't want to click twice
@@ -6217,7 +6217,11 @@ const create$b = ({ root, props }) => {
 
     // click link (will then in turn activate file input)
     root.ref.label.click();
-  });
+  };
+
+  // attach events
+  label.addEventListener('keydown', root.ref.handleKeyDown);
+  root.element.addEventListener('click', root.ref.handleClick);
 
   // update
   updateLabelValue(label, props.caption);
@@ -6240,6 +6244,10 @@ const dropLabel = createView({
   name: 'drop-label',
   ignoreRect: true,
   create: create$b,
+  destroy: ({ root }) => {
+    root.ref.label.addEventListener('keydown', root.ref.handleKeyDown);
+    root.element.removeEventListener('click', root.ref.handleClick);
+  },
   write: createRoute({
     DID_SET_LABEL_IDLE: ({ root, action }) => {
       updateLabelValue(root.ref.label, action.value);
@@ -8148,7 +8156,7 @@ const createApp = (initialOptions = {}) => {
       window.removeEventListener('resize', resizeHandler);
 
       // stop listening to the visiblitychange event
-      document.addEventListener('visibilitychange', visibilityHandler);
+      document.removeEventListener('visibilitychange', visibilityHandler);
 
       // dispatch destroy
       store.dispatch('DID_DESTROY');

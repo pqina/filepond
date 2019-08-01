@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.11
+ * FilePond 4.4.12
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -7182,7 +7182,7 @@
     attr(label, 'aria-hidden', 'true');
 
     // handle keys
-    label.addEventListener('keydown', function(e) {
+    root.ref.handleKeyDown = function(e) {
       var isActivationKey = e.keyCode === Key.ENTER || e.keyCode === Key.SPACE;
       if (!isActivationKey) return;
       // stops from triggering the element a second time
@@ -7190,9 +7190,9 @@
 
       // click link (will then in turn activate file input)
       root.ref.label.click();
-    });
+    };
 
-    root.element.addEventListener('click', function(e) {
+    root.ref.handleClick = function(e) {
       var isLabelClick = e.target === label || label.contains(e.target);
 
       // don't want to click twice
@@ -7200,7 +7200,11 @@
 
       // click link (will then in turn activate file input)
       root.ref.label.click();
-    });
+    };
+
+    // attach events
+    label.addEventListener('keydown', root.ref.handleKeyDown);
+    root.element.addEventListener('click', root.ref.handleClick);
 
     // update
     updateLabelValue(label, props.caption);
@@ -7223,10 +7227,15 @@
     name: 'drop-label',
     ignoreRect: true,
     create: create$b,
+    destroy: function destroy(_ref2) {
+      var root = _ref2.root;
+      root.ref.label.addEventListener('keydown', root.ref.handleKeyDown);
+      root.element.removeEventListener('click', root.ref.handleClick);
+    },
     write: createRoute({
-      DID_SET_LABEL_IDLE: function DID_SET_LABEL_IDLE(_ref2) {
-        var root = _ref2.root,
-          action = _ref2.action;
+      DID_SET_LABEL_IDLE: function DID_SET_LABEL_IDLE(_ref3) {
+        var root = _ref3.root,
+          action = _ref3.action;
         updateLabelValue(root.ref.label, action.value);
       }
     }),
@@ -9325,7 +9334,7 @@
           window.removeEventListener('resize', resizeHandler);
 
           // stop listening to the visiblitychange event
-          document.addEventListener('visibilitychange', visibilityHandler);
+          document.removeEventListener('visibilitychange', visibilityHandler);
 
           // dispatch destroy
           store.dispatch('DID_DESTROY');

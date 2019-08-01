@@ -16,7 +16,7 @@ const create = ({ root, props }) => {
     attr(label, 'aria-hidden', 'true');
 
     // handle keys
-    label.addEventListener('keydown', e => {
+    root.ref.handleKeyDown = e => {
         const isActivationKey = e.keyCode === Key.ENTER || e.keyCode === Key.SPACE;
         if (!isActivationKey) return;
         // stops from triggering the element a second time
@@ -24,9 +24,9 @@ const create = ({ root, props }) => {
 
         // click link (will then in turn activate file input)
         root.ref.label.click();
-    });
+    };
 
-    root.element.addEventListener('click', e => {
+    root.ref.handleClick = e => {
 
         const isLabelClick = e.target === label || label.contains(e.target);
 
@@ -35,7 +35,11 @@ const create = ({ root, props }) => {
 
         // click link (will then in turn activate file input)
         root.ref.label.click();
-    });
+    };
+
+    // attach events
+    label.addEventListener('keydown', root.ref.handleKeyDown);
+    root.element.addEventListener('click', root.ref.handleClick);
 
     // update
     updateLabelValue(label, props.caption);
@@ -58,6 +62,10 @@ export const dropLabel = createView({
     name: 'drop-label',
     ignoreRect: true,
     create,
+    destroy: ({ root }) => {
+        root.ref.label.addEventListener('keydown', root.ref.handleKeyDown);
+        root.element.removeEventListener('click', root.ref.handleClick);
+    },
     write: createRoute({
         DID_SET_LABEL_IDLE: ({ root, action }) => {
             updateLabelValue(root.ref.label, action.value);

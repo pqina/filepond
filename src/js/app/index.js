@@ -517,7 +517,7 @@ export const createApp = (initialOptions = {}) => {
             window.removeEventListener('resize', resizeHandler);
 
             // stop listening to the visiblitychange event
-            document.addEventListener('visibilitychange', visibilityHandler);
+            document.removeEventListener('visibilitychange', visibilityHandler);
 
             // dispatch destroy
             store.dispatch('DID_DESTROY');
