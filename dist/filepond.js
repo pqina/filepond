@@ -113,7 +113,7 @@
 
     var queryHandles = {};
     queries.forEach(function(query) {
-      queryHandles = Object.assign({}, query(state), queryHandles);
+      queryHandles = Object.assign({}, query(state), {}, queryHandles);
     });
 
     var actionHandlers = {};
@@ -121,6 +121,7 @@
       actionHandlers = Object.assign(
         {},
         action(dispatch, query, state),
+        {},
         actionHandlers
       );
     });
@@ -9240,8 +9241,10 @@
       {},
 
       on(),
+      {},
 
       readWriteApi,
+      {},
 
       createOptionAPI(store, defaultOptions),
       {
@@ -9443,6 +9446,7 @@
         {},
 
         defaultOptions,
+        {},
 
         customOptions
       )
