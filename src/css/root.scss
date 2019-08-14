@@ -33,9 +33,12 @@
 
     // correct box sizing, line-height and positioning on child elements
     * {
-        font-size: inherit;
         box-sizing: inherit;
         line-height: inherit;
+    }
+
+    *:not(text) {
+        font-size: inherit;
     }
 
     // block everything

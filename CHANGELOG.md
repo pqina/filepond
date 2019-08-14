@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.4.13
+
+- Fix problem with CSS overriding image preview markup text size.
+
+
+## 4.4.12
+
+- Fix memory leak.
+
+
 ## 4.4.11
 
 - Fix problem with abort statement in file loader logic.
