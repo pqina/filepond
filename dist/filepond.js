@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.13
+ * FilePond 4.5.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1628,18 +1628,34 @@
 
     api.url = isString(outline) ? outline : outline.url || '';
     api.timeout = outline.timeout ? parseInt(outline.timeout, 10) : 0;
+    api.headers = outline.headers ? outline.headers : {};
 
     forin(methods, function(key) {
-      api[key] = createAction(key, outline[key], methods[key], api.timeout);
+      api[key] = createAction(
+        key,
+        outline[key],
+        methods[key],
+        api.timeout,
+        api.headers
+      );
     });
 
     // special treatment for remove
     api.remove = outline.remove || null;
 
+    // remove generic headers from api object
+    delete api.headers;
+
     return api;
   };
 
-  var createAction = function createAction(name, outline, method, timeout) {
+  var createAction = function createAction(
+    name,
+    outline,
+    method,
+    timeout,
+    headers
+  ) {
     // is explicitely set to null so disable
     if (outline === null) {
       return null;
@@ -1654,7 +1670,7 @@
     var action = {
       url: method === 'GET' ? '?' + name + '=' : '',
       method: method,
-      headers: {},
+      headers: headers,
       withCredentials: false,
       timeout: timeout,
       onload: null,

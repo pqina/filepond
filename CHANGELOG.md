@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.5.0
+
+- Add option to set server end point headers on a generic level so they're applied to all end points using `server.headers`.
+
+
 ## 4.4.13
 
 - Fix problem with CSS overriding image preview markup text size.

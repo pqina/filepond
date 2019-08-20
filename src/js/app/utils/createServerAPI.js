@@ -15,18 +15,22 @@ export const createServerAPI = outline => {
 
     api.url = isString(outline) ? outline : outline.url || '';
     api.timeout = outline.timeout ? parseInt(outline.timeout, 10) : 0;
+    api.headers = outline.headers ? outline.headers : {};
 
     forin(methods, key => {
-        api[key] = createAction(key, outline[key], methods[key], api.timeout);
+        api[key] = createAction(key, outline[key], methods[key], api.timeout, api.headers);
     });
 
     // special treatment for remove
     api.remove = outline.remove || null;
 
+    // remove generic headers from api object
+    delete api.headers;
+
     return api;
 };
 
-const createAction = (name, outline, method, timeout) => {
+const createAction = (name, outline, method, timeout, headers) => {
     // is explicitely set to null so disable
     if (outline === null) {
         return null;
@@ -41,7 +45,7 @@ const createAction = (name, outline, method, timeout) => {
     const action = {
         url: method === 'GET' ? `?${name}=` : '',
         method,
-        headers: {},
+        headers,
         withCredentials: false,
         timeout,
         onload: null,
