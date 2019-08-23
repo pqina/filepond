@@ -1,5 +1,7 @@
 # <img src="https://github.com/pqina/filepond-github-assets/blob/master/logo.svg" height="44" alt="FilePond"/>
 
+[English](https://github.com/pqina/filepond)|[中文](https://github.com/HelloGitHub-Team/Article/blob/master/contents/JavaScript/FilePond/content.md)
+
 A JavaScript library that can upload anything you throw at it, optimizes images for faster uploads, and offers a great, accessible, silky smooth user experience.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/pqina/filepond/blob/master/LICENSE)
