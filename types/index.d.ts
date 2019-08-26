@@ -309,19 +309,21 @@ interface FilePondCallbackProps {
     /** Made progress loading a file */
     onaddfileprogress?: (file: File, progress: number) => void;
     /** If no error, file has been successfully loaded */
-    onaddfile?: (file: File, error: FilePondErrorDescription) => void;
+    onaddfile?: (file: File, error?: FilePondErrorDescription) => void;
     /** Started processing a file */
     onprocessfilestart?: (file: File) => void;
     /** Made progress processing a file */
     onprocessfileprogress?: (file: File, progress: number) => void;
     /** Aborted processing of a file */
     onprocessfileabort?: (file: File) => void;
-    /** Processing of a file has been undone */
-    onprocessfileundo?: (file: File) => void;
+    /** Processing of a file has been reverted */
+    onprocessfilerevert?: (file: File) => void;
     /** If no error, Processing of a file has been completed */
-    onprocessfile?: (file: File, error: FilePondErrorDescription) => void;
+    onprocessfile?: (file: File, error?: FilePondErrorDescription) => void;
+    /** Called when all files in the list have been processed */
+    onprocessfiles?: () => void;
     /** File has been removed. */
-    onremovefile?: (file: File) => void;
+    onremovefile?: (file: File, error?: FilePondErrorDescription) => void;
     /**
      * File has been transformed by the transform plugin or
      * another plugin subscribing to the prepare_output filter.
@@ -330,6 +332,8 @@ interface FilePondCallbackProps {
     onpreparefile?: (file: File, output: any) => void;
     /** A file has been added or removed, receives a list of file items */
     onupdatefiles?: (fileItems: File[]) => void;
+    /* Called when a file is clicked or tapped **/
+    onactivatefile?: (file: File) => void;
 }
 
 interface FilePondHookProps {
