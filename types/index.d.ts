@@ -1,8 +1,9 @@
-//Type definitions for Filepond <https://github.com/pqina/filepond>
-//Based on definitions by Zach Posten for React-Filepond <https://github.com/zposten>
-//Updated by Hawxy <https://github.com/Hawxy>
-// TypeScript Version: 3.5.2
+// Type definitions for Filepond <https://github.com/pqina/filepond>
+// Based on definitions by Zach Posten for React-Filepond <https://github.com/zposten>
+// Updated by Hawxy <https://github.com/Hawxy>
+// TypeScript Version: 3.5
 
+export {};
 
 type FilePondOrigin =
     | 'input' // Added by user
@@ -10,28 +11,31 @@ type FilePondOrigin =
     | 'local' // Existing server file
     ;
 
-export interface FileProps {
-    src: string;
-    name?: string;
-    size?: number;
-    type?: string;
-    origin?: FilePondOrigin;
-    metadata?: {[key: string]: any};
+export enum FileStatus {
+    INIT = 1,
+    IDLE = 2,
+    PROCESSING_QUEUED = 9,
+    PROCESSING = 3,
+    PROCESSING_COMPLETE = 5,
+    PROCESSING_ERROR = 6,
+    PROCESSING_REVERT_ERROR = 10,
+    LOADING = 7,
+    LOAD_ERROR = 8
 }
 
 type ActualFileObject = Blob & {readonly lastModified: number; readonly name: string};
 
 export class File {
-    file: ActualFileObject;
-    fileSize: number;
-    fileType: string;
-    filename: string;
-    fileExtension: string;
-    filenameWithoutExtension: string;
     id: string;
     serverId: string;
-    status: number;
-    archived: boolean;
+    origin: FilePondOrigin;  
+    status: FileStatus;  
+    file: ActualFileObject;
+    fileExtension: string;
+    fileSize: number;
+    fileType: string;
+    filename: string;   
+    filenameWithoutExtension: string; 
 
     /** Aborts loading of this file */
     abortLoad: () => void;
@@ -329,7 +333,9 @@ interface FilePondCallbackProps {
 }
 
 interface FilePondHookProps {
-    beforeRemoveFile?: (file: File) => boolean;
+    beforeDropFile?: (file: File) => boolean;
+    beforeAddFile?: (item: File) => false | Promise<boolean>
+    beforeRemoveFile?: (item: File) => false | Promise<boolean>;
 }
 
 interface FilePondBaseProps {
@@ -361,12 +367,10 @@ interface FilePondBaseProps {
     /** Require the file to be reverted before removal */
     forceRevert?: boolean;
 
-
     /** The maximum number of files that filepond pond can handle */
     maxFiles?: number;
     /** Enables custom validity messages */
     checkValidity?: boolean;
-
 
     /** The maximum number of files that can be uploaded in parallel */
     maxParallelUploads?: number;
@@ -385,12 +389,12 @@ export interface FilePondProps extends
 
 export class FilePond {
     setOptions: (options: FilePondProps) => void;
-    addFile: (source: File) => void;
-    addFiles: (source: File[]) => void;
-    removeFile: (query: string) => void;
+    addFile: (source: File, option?: {index: number}) => Promise<File[]>;
+    addFiles: (source: File[], option?: {index: number}) => Promise<File[]>;
+    removeFile: (query?: string | number) => void;
     removeFiles: () => void;
-    processFile: (query: string) => void;
-    processFiles: () => void;
+    processFile: (query?: string | number) => Promise<File>;
+    processFiles: () => Promise<File[]>;
     getFile: () => File;
     getFiles: () => File[];
     browse: () => void;
