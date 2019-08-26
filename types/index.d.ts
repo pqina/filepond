@@ -1,4 +1,3 @@
-// Type definitions for Filepond <https://github.com/pqina/filepond>
 // Based on definitions by Zach Posten for React-Filepond <https://github.com/zposten>
 // Updated by Hawxy <https://github.com/Hawxy>
 // TypeScript Version: 3.5
@@ -338,7 +337,7 @@ interface FilePondCallbackProps {
 
 interface FilePondHookProps {
     beforeDropFile?: (file: File) => boolean;
-    beforeAddFile?: (item: File) => false | Promise<boolean>
+    beforeAddFile?: (item: File) => false | Promise<boolean>;
     beforeRemoveFile?: (item: File) => false | Promise<boolean>;
 }
 
@@ -393,8 +392,8 @@ export interface FilePondProps extends
 
 export class FilePond {
     setOptions: (options: FilePondProps) => void;
-    addFile: (source: File, option?: {index: number}) => Promise<File[]>;
-    addFiles: (source: File[], option?: {index: number}) => Promise<File[]>;
+    addFile: (source: File, options?: {index: number}) => Promise<File[]>;
+    addFiles: (source: File[], options?: {index: number}) => Promise<File[]>;
     removeFile: (query?: string | number) => void;
     removeFiles: () => void;
     processFile: (query?: string | number) => Promise<File>;
