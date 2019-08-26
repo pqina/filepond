@@ -405,7 +405,7 @@ export class FilePond {
 }
 
 /** Creates a new FilePond instance */
-export function create(element?: any, options?: FilePondProps): void;
+export function create(element?: any, options?: FilePondProps): FilePond;
 /** Destroys the FilePond instance attached to the supplied element */
 export function destroy(element: any): void;
 /** Returns the FilePond instance attached to the supplied element */
