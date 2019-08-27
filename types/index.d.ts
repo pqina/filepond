@@ -188,8 +188,20 @@ type FetchServerConfigFunction = (
     headers: (headersString: string) => void,
 ) => void;
 
+interface FilePondInitialFile {
+    source: string;
+    options: {
+        type: 'input' | 'limbo' | 'local';
+        file?: {
+            name?: string;
+            size?: number;
+            type?: string;
+        };
+        metadata?: {[key: string]: any};
+    };
+}
+
 interface FilePondServerConfigProps {
-    instantUpload?: boolean;
     server?: string | {
         url?: string
         timeout?: number
@@ -199,6 +211,8 @@ interface FilePondServerConfigProps {
         load?: string | ServerUrl | LoadServerConfigFunction;
         fetch?: string | ServerUrl | FetchServerConfigFunction;
     };
+    instantUpload?: boolean;
+    files?: FilePondInitialFile[] | ActualFileObject[] | Blob[] | string[];
 }
 
 interface FilePondDragDropProps {
@@ -288,24 +302,6 @@ interface FilePondSvgIconProps {
     iconRetry?: string;
      /** The icon used for undo actions */
     iconUndo?: string;
-}
-
-interface FilePondInitialFile {
-    source: string;
-    options: {
-        type: 'input' | 'limbo' | 'local';
-        file?: {
-            name?: string;
-            size?: number;
-            type?: string;
-        };
-        metadata?: {[key: string]: any};
-    };
-}
-
-interface FilePondFileProps {
-    /** Array of initial files */
-    files?: FilePondInitialFile[] | ActualFileObject[] | Blob[] | string[];
 }
 
 interface FilePondErrorDescription {
@@ -434,7 +430,6 @@ export interface FilePondOptionProps extends
     FilePondCallbackProps,
     FilePondHookProps,
     FilePondStyleProps,
-    FilePondFileProps,
     FilePondBaseProps {}
 
 export class FilePond {
@@ -466,6 +461,7 @@ export class FilePond {
     dropValidation: false;
     ignoredFiles: string[];
 
+    instantUpload: boolean;
     server: string | {
         url?: string
         timeout?: number
@@ -474,8 +470,7 @@ export class FilePond {
         restore?: string | ServerUrl | RestoreServerConfigFunction;
         load?: string | ServerUrl | LoadServerConfigFunction;
         fetch?: string | ServerUrl | FetchServerConfigFunction;
-    } | null;
-    instantUpload: boolean;
+    } | null;   
     files: FilePondInitialFile[] | ActualFileObject[] | Blob[] | string[];
 
     /**
