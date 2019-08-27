@@ -22,12 +22,26 @@ export enum FileStatus {
     LOAD_ERROR = 8
 }
 
-type ActualFileObject = Blob & {readonly lastModified: number; readonly name: string};
+export enum Status {
+    EMPTY = 0,
+    IDLE = 1,
+    ERROR = 2,
+    BUSY = 3,
+    READY = 4
+}
+
+export enum FileOrigin {
+    INPUT = 1,
+    LIMBO = 2,
+    LOCAL = 3
+}
+
+type ActualFileObject = Blob & {readonly lastModified: number; readonly name: string; readonly size: number; readonly type: string};
 
 export class File {
     id: string;
     serverId: string;
-    origin: FilePondOrigin;  
+    origin: FileOrigin;  
     status: FileStatus;  
     file: ActualFileObject;
     fileExtension: string;
@@ -363,6 +377,8 @@ interface FilePondFileProps {
     files?: FilePondMockFileProps[]
 }
 
+type CaptureAttribute = "camera" | "microphone" | "camcorder";
+
 interface FilePondBaseProps {
     id?: string;
     name?: string;
@@ -372,7 +388,7 @@ interface FilePondBaseProps {
     /** Sets the required attribute to the output field */
     required?: boolean;
     /** Sets the given value to the capture attribute */
-    captureMethod?: "camera" | "microphone" | "camcorder";
+    captureMethod?: CaptureAttribute
 
     /** Enable or disable drag n’ drop */
     allowDrop?: boolean;
@@ -397,12 +413,16 @@ interface FilePondBaseProps {
     /** Enables custom validity messages */
     checkValidity?: boolean;
 
+    itemInsertLocationFreedom?: boolean;
+    itemInsertLocation?: 'before' | 'after' | ((a: File, b: File) => number);
+    itemInsertInterval?: number
+
     /** The maximum number of files that can be uploaded in parallel */
     maxParallelUploads?: number;
     acceptedFileTypes?: string[];
 }
 
-export interface FilePondProps extends
+export interface FilePondOptionProps extends
     FilePondDragDropProps,
     FilePondServerConfigProps,
     FilePondLabelProps,
@@ -413,9 +433,31 @@ export interface FilePondProps extends
     FilePondBaseProps {}
 
 export class FilePond {
-    setOptions: (options: FilePondProps) => void;
-    addFile: (source: File, options?: {index: number}) => Promise<File[]>;
-    addFiles: (source: File[], options?: {index: number}) => Promise<File[]>;
+    readonly element: Element | undefined;
+    readonly status: Status;
+
+    name: string;
+    className: string | undefined;
+    required: boolean;
+    disabled: boolean;
+    captureMethod: CaptureAttribute | undefined;
+    allowDrop: boolean;
+    allowBrowse: boolean;
+    allowPaste: boolean;
+    allowMultiple: boolean;
+    allowReplace: boolean;
+    allowRevert: boolean;
+    forceRevert: boolean;
+    maxFiles: number | undefined;
+    maxParallelUploads: number | undefined;
+    checkValidity: boolean;
+    itemInsertLocation: 'before' | 'after' | ((a: File, b: File) => number);
+    itemInsertInterval: number;
+
+
+    setOptions: (options: FilePondOptionProps) => void;
+    addFile: (source: ActualFileObject | Blob | string, options?: {index: number}) => Promise<File[]>;
+    addFiles: (source: ActualFileObject[] | Blob[] | string[], options?: {index: number}) => Promise<File[]>;
     removeFile: (query?: string | number) => void;
     removeFiles: () => void;
     processFile: (query?: string | number) => Promise<File>;
@@ -423,7 +465,7 @@ export class FilePond {
     getFile: () => File;
     getFiles: () => File[];
     browse: () => void;
-    sort: (compare: () => void) => void;
+    sort: (compare: (a: File, b: File) => number) => void;
     destroy: () => void;
 
     /** Inserts the FilePond instance after the supplied element */
@@ -442,7 +484,7 @@ export class FilePond {
 }
 
 /** Creates a new FilePond instance */
-export function create(element?: Element, options?: FilePondProps): FilePond;
+export function create(element?: Element, options?: FilePondOptionProps): FilePond;
 /** Destroys the FilePond instance attached to the supplied element */
 export function destroy(element: Element): void;
 /** Returns the FilePond instance attached to the supplied element */
@@ -455,8 +497,8 @@ export function parse(context: Element): void;
 /** Registers a FilePond plugin for later use */
 export function registerPlugin(...plugins: any[]): void;
 /** Sets page level default options for all FilePond instances */
-export function setOptions(options: FilePondProps): void;
+export function setOptions(options: FilePondOptionProps): void;
 /** Returns the current default options */
-export function getOptions(): FilePondProps;
+export function getOptions(): FilePondOptionProps;
 /** Determines whether or not the browser supports FilePond */
 export function supported(): boolean;
