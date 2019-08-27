@@ -272,9 +272,13 @@ interface FilePondLabelProps {
 }
 
 interface FilePondSvgIconProps {
+    /** The icon used for remove actions */
     iconRemove?: string;
+    /** The icon used for process actions */
     iconProcess?: string;
+    /** The icon used for retry actions */
     iconRetry?: string;
+     /** The icon used for undo actions */
     iconUndo?: string;
 }
 
@@ -419,20 +423,35 @@ export class FilePond {
     getFile: () => File;
     getFiles: () => File[];
     browse: () => void;
-    context: () => void;
+    sort: (compare: () => void) => void;
+    destroy: () => void;
+
+    /** Inserts the FilePond instance after the supplied element */
+    insertAfter: (element: Element) => void;
+    /** Inserts the FilePond instance before the supplied element */
+    insertBefore: (element: Element) => void;
+    /** Appends FilePond to the given element  */
+    appendTo: (element: Element) => void;
+    /** Returns true if the current instance is attached to the supplied element */
+    isAttachedTo: (element: Element) => void;
+    /** Replaces the supplied element with FilePond */
+    replaceElement: (element: Element) => void;
+    /** If FilePond replaced the original element, this restores the original element to its original glory */
+    restoreElement: (element: Element) => void;
+
 }
 
 /** Creates a new FilePond instance */
-export function create(element?: any, options?: FilePondProps): FilePond;
+export function create(element?: Element, options?: FilePondProps): FilePond;
 /** Destroys the FilePond instance attached to the supplied element */
-export function destroy(element: any): void;
+export function destroy(element: Element): void;
 /** Returns the FilePond instance attached to the supplied element */
-export function find(element: any): FilePond;
+export function find(element: Element): FilePond;
 /**
  * Parses a given section of the DOM tree for elements with class
  * .filepond and turns them into FilePond elements.
  */
-export function parse(context: any): void;
+export function parse(context: Element): void;
 /** Registers a FilePond plugin for later use */
 export function registerPlugin(...plugins: any[]): void;
 /** Sets page level default options for all FilePond instances */
