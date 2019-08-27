@@ -55,16 +55,17 @@ const blob = new Blob([JSON.stringify(data, null, 2)], {
     type: 'application/json'
 });
 
-pond.addFile(blob)
-
-const fl = new FileList();
-const file = fl.item(0);
+pond.addFile(blob);
+const file = new File(["aaaa"], "something")
 if(file) {
   pond.addFile(file);
 }
 
-
 pond.addFile('data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==')
+
+pond.addFile('./my-file.jpg').then(file => {
+  pond.removeFile(file);
+});
 
 
 // $ExpectType Status

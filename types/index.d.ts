@@ -290,6 +290,24 @@ interface FilePondSvgIconProps {
     iconUndo?: string;
 }
 
+interface FilePondMockFileProps {
+    source: string,
+    options: {
+        type: 'input' | 'limbo' | 'local',
+        file?: {
+            name?: string,
+            size?: number,
+            type?: string
+        },
+        metadata?: {[key: string]: any};
+    }
+}
+
+interface FilePondFileProps {
+    /** Array of initial files */
+    files?: FilePondMockFileProps[] | ActualFileObject[] | Blob[] | string[];
+}
+
 interface FilePondErrorDescription {
     main: string;
     sub: string;
@@ -353,22 +371,14 @@ interface FilePondHookProps {
     beforeRemoveFile?: (item: File) => boolean | Promise<boolean>;
 }
 
-interface FilePondMockFileProps {
-    source: string,
-    options: {
-        type: | 'input' | 'limbo' | 'local',
-        file?: {
-            name?: string,
-            size?: number,
-            type?: string
-        },
-        metadata?: {[key: string]: any};
-    }
-}
-
-interface FilePondFileProps {
-    /** Array of initial files */
-    files?: FilePondMockFileProps[]
+interface FilePondStyleProps {
+    stylePanelLayout?: 'integrated' | 'compact' | 'circle';
+    stylePanelAspectRatio?: '3:2' | '1';
+    styleItemPanelAspectRatio?: string;
+    styleButtonRemoveItemPosition?: string;
+    styleButtonProcessItemPosition?: string;
+    styleLoadIndicatorPosition?: string;
+    styleProgressIndicatorPosition?: string;
 }
 
 type CaptureAttribute = "camera" | "microphone" | "camcorder";
@@ -423,18 +433,19 @@ export interface FilePondOptionProps extends
     FilePondSvgIconProps,
     FilePondCallbackProps,
     FilePondHookProps,
+    FilePondStyleProps,
     FilePondFileProps,
     FilePondBaseProps {}
 
 export class FilePond {
-    readonly element: Element | undefined;
+    readonly element: Element | null;
     readonly status: Status;
 
     name: string;
-    className: string | undefined;
+    className: string | null;
     required: boolean;
     disabled: boolean;
-    captureMethod: CaptureAttribute | undefined;
+    captureMethod: CaptureAttribute | null;
     allowDrop: boolean;
     allowBrowse: boolean;
     allowPaste: boolean;
@@ -442,19 +453,19 @@ export class FilePond {
     allowReplace: boolean;
     allowRevert: boolean;
     forceRevert: boolean;
-    maxFiles: number | undefined;
-    maxParallelUploads: number | undefined;
+    maxFiles: number | null;
+    maxParallelUploads: number | null;
     checkValidity: boolean;
     itemInsertLocation: 'before' | 'after' | ((a: File, b: File) => number);
     itemInsertInterval: number;
 
 
     setOptions: (options: FilePondOptionProps) => void;
-    addFile: (source: ActualFileObject | Blob | string, options?: {index: number}) => Promise<File[]>;
+    addFile: (source: ActualFileObject | Blob | string, options?: {index: number}) => Promise<File>;
     addFiles: (source: ActualFileObject[] | Blob[] | string[], options?: {index: number}) => Promise<File[]>;
-    removeFile: (query?: string | number) => void;
+    removeFile: (query?: File | string | number) => void;
     removeFiles: () => void;
-    processFile: (query?: string | number) => Promise<File>;
+    processFile: (query?: File | string | number) => Promise<File>;
     processFiles: () => Promise<File[]>;
     getFile: () => File;
     getFiles: () => File[];
