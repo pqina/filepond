@@ -35,14 +35,14 @@ type ActualFileObject = Blob & {readonly lastModified: number; readonly name: st
 export class File {
     id: string;
     serverId: string;
-    origin: FileOrigin;  
-    status: FileStatus;  
+    origin: FileOrigin;
+    status: FileStatus;
     file: ActualFileObject;
     fileExtension: string;
     fileSize: number;
     fileType: string;
-    filename: string;   
-    filenameWithoutExtension: string; 
+    filename: string;
+    filenameWithoutExtension: string;
 
     /** Aborts loading of this file */
     abortLoad: () => void;
@@ -57,7 +57,6 @@ export class File {
     /** Add additional metadata to the file */
     setMetadata: (key: string, value: any) => void;
 }
-
 
 interface ServerUrl {
     url: string;
@@ -82,7 +81,6 @@ interface ServerUrl {
      */
     ondata?: (data: any) => any;
 }
-
 
 type ProgressServerConfigFunction = (
     /**
@@ -193,6 +191,8 @@ type FetchServerConfigFunction = (
 interface FilePondServerConfigProps {
     instantUpload?: boolean;
     server?: string | {
+        url?: string
+        timeout?: number
         process?: string | ServerUrl | ProcessServerConfigFunction;
         revert?: string | ServerUrl | RevertServerConfigFunction;
         restore?: string | ServerUrl | RestoreServerConfigFunction;
@@ -290,22 +290,22 @@ interface FilePondSvgIconProps {
     iconUndo?: string;
 }
 
-interface FilePondMockFileProps {
-    source: string,
+type FilePondInitialFile = {
+    source: string;
     options: {
-        type: 'input' | 'limbo' | 'local',
+        type: 'input' | 'limbo' | 'local';
         file?: {
-            name?: string,
-            size?: number,
-            type?: string
-        },
+            name?: string;
+            size?: number;
+            type?: string;
+        };
         metadata?: {[key: string]: any};
-    }
+    };
 }
 
 interface FilePondFileProps {
     /** Array of initial files */
-    files?: FilePondMockFileProps[] | ActualFileObject[] | Blob[] | string[];
+    files?: FilePondInitialFile[] | ActualFileObject[] | Blob[] | string[];
 }
 
 interface FilePondErrorDescription {
@@ -392,7 +392,7 @@ interface FilePondBaseProps {
     /** Sets the required attribute to the output field */
     required?: boolean;
     /** Sets the given value to the capture attribute */
-    captureMethod?: CaptureAttribute
+    captureMethod?: CaptureAttribute;
 
     /** Enable or disable drag n’ drop */
     allowDrop?: boolean;
@@ -419,7 +419,7 @@ interface FilePondBaseProps {
 
     itemInsertLocationFreedom?: boolean;
     itemInsertLocation?: 'before' | 'after' | ((a: File, b: File) => number);
-    itemInsertInterval?: number
+    itemInsertInterval?: number;
 
     /** The maximum number of files that can be uploaded in parallel */
     maxParallelUploads?: number;
@@ -456,9 +456,152 @@ export class FilePond {
     maxFiles: number | null;
     maxParallelUploads: number | null;
     checkValidity: boolean;
+
+    itemInsertLocationFreedom: boolean;
     itemInsertLocation: 'before' | 'after' | ((a: File, b: File) => number);
     itemInsertInterval: number;
 
+    dropOnPage: boolean;
+    dropOnElement: boolean;
+    dropValidation: false;
+    ignoredFiles: string[];
+
+    server: string | {
+        url?: string
+        timeout?: number
+        process?: string | ServerUrl | ProcessServerConfigFunction;
+        revert?: string | ServerUrl | RevertServerConfigFunction;
+        restore?: string | ServerUrl | RestoreServerConfigFunction;
+        load?: string | ServerUrl | LoadServerConfigFunction;
+        fetch?: string | ServerUrl | FetchServerConfigFunction;
+    } | null;
+    instantUpload: boolean;
+    files: FilePondInitialFile[] | ActualFileObject[] | Blob[] | string[];
+
+    /**
+     * The decimal separator used to render numbers.
+     * By default this is determined automatically.
+     */
+    labelDecimalSeparator: string;
+    /**
+     * The thousands separator used to render numbers.
+     * By default this is determined automatically.
+     */
+    labelThousandsSeparator: string;
+    /**
+     * Default label shown to indicate this is a drop area.
+     * FilePond will automatically bind browse file events to
+     * the element with CSS class .filepond--label-action
+     */
+    labelIdle: string;
+    /** Label shown when the field contains invalid files and is validated by the parent form */
+    labelInvalidField: string;
+    /** Label used while waiting for file size information */
+    labelFileWaitingForSize: string;
+    /** Label used when no file size information was received */
+    labelFileSizeNotAvailable: string;
+    /** Label used while loading a file */
+    labelFileLoading: string;
+    /** Label used when file load failed */
+    labelFileLoadError: string;
+    /** Label used when uploading a file */
+    labelFileProcessing: string;
+    /** Label used when file upload has completed */
+    labelFileProcessingComplete: string;
+    /** Label used when upload was cancelled */
+    labelFileProcessingAborted: string;
+    /** Label used when something went wrong during file upload */
+    labelFileProcessingError: string;
+    /** Label used when something went wrong during reverting the file upload */
+    labelFileProcessingRevertError: string;
+    /** Label used when something went during during removing the file upload */
+    labelFileRemoveError: string;
+    /** Label used to indicate to the user that an action can be cancelled. */
+    labelTapToCancel: string;
+    /** Label used to indicate to the user that an action can be retried. */
+    labelTapToRetry: string;
+    /** Label used to indicate to the user that an action can be undone. */
+    labelTapToUndo: string;
+    /** Label used for remove button */
+    labelButtonRemoveItem: string;
+    /** Label used for abort load button */
+    labelButtonAbortItemLoad: string;
+    /** Label used for retry load button */
+    labelButtonRetryItemLoad: string;
+    /** Label used for abort upload button */
+    labelButtonAbortItemProcessing: string;
+    /** Label used for undo upload button */
+    labelButtonUndoItemProcessing: string;
+    /** Label used for retry upload button */
+    labelButtonRetryItemProcessing: string;
+    /** Label used for upload button */
+    labelButtonProcessItem: string;
+
+    /** The icon used for remove actions */
+    iconRemove: string;
+    /** The icon used for process actions */
+    iconProcess: string;
+    /** The icon used for retry actions */
+    iconRetry: string;
+    /** The icon used for undo actions */
+    iconUndo: string;
+
+    /** FilePond instance has been created and is ready. */
+    oninit?: () => void;
+    /**
+     * FilePond instance throws a warning. For instance
+     * when the maximum amount of files has been reached.
+     * Optionally receives file if error is related to a
+     * file object
+     */
+    onwarning?: (error: any, file?: File, status?: any) => void;
+    /**
+     * FilePond instance throws an error. Optionally receives
+     * file if error is related to a file object.
+     */
+    onerror?: (file?: File, error?: FilePondErrorDescription, status?: any) => void;
+    /** Started file load */
+    onaddfilestart?: (file: File) => void;
+    /** Made progress loading a file */
+    onaddfileprogress?: (file: File, progress: number) => void;
+    /** If no error, file has been successfully loaded */
+    onaddfile?: (file: File, error?: FilePondErrorDescription) => void;
+    /** Started processing a file */
+    onprocessfilestart?: (file: File) => void;
+    /** Made progress processing a file */
+    onprocessfileprogress?: (file: File, progress: number) => void;
+    /** Aborted processing of a file */
+    onprocessfileabort?: (file: File) => void;
+    /** Processing of a file has been reverted */
+    onprocessfilerevert?: (file: File) => void;
+    /** If no error, Processing of a file has been completed */
+    onprocessfile?: (file: File, error?: FilePondErrorDescription) => void;
+    /** Called when all files in the list have been processed */
+    onprocessfiles?: () => void;
+    /** File has been removed. */
+    onremovefile?: (file: File, error?: FilePondErrorDescription) => void;
+    /**
+     * File has been transformed by the transform plugin or
+     * another plugin subscribing to the prepare_output filter.
+     * It receives the file item and the output data.
+     */
+    onpreparefile?: (file: File, output: any) => void;
+    /** A file has been added or removed, receives a list of file items */
+    onupdatefiles?: (fileItems: File[]) => void;
+    /* Called when a file is clicked or tapped **/
+    onactivatefile?: (file: File) => void;
+
+    beforeDropFile?: (file: File) => boolean;
+    beforeAddFile?: (item: File) => boolean | Promise<boolean>;
+    beforeRemoveFile?: (item: File) => boolean | Promise<boolean>;
+
+    stylePanelLayout: 'integrated' | 'compact' | 'circle';
+    stylePanelAspectRatio: '3:2' | '1';
+    styleItemPanelAspectRatio: string;
+    styleButtonRemoveItemPosition: string;
+    styleButtonProcessItemPosition: string;
+    styleLoadIndicatorPosition: string;
+    styleProgressIndicatorPosition: string;
 
     setOptions: (options: FilePondOptionProps) => void;
     addFile: (source: ActualFileObject | Blob | string, options?: {index: number}) => Promise<File>;
@@ -486,6 +629,11 @@ export class FilePond {
     /** If FilePond replaced the original element, this restores the original element to its original glory */
     restoreElement: (element: Element) => void;
 
+    addEventListener: (event: string, fn: (...args: any[]) => void) => void;
+    on: (event: string, fn: (...args: any[]) => void) => void;
+    onOnce: (event: string, fn: (...args: any[]) => void) => void;
+    off: (event: string, fn: (...args: any[]) => void ) => void;
+    
 }
 
 /** Creates a new FilePond instance */

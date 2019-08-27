@@ -50,23 +50,30 @@ pond.itemInsertLocation = (a, b) => {
   return 0;
 }
 
+pond.addEventListener('FilePond:addfile', e => {
+  console.log(e.detail);
+})
+
 const data = { hello: 'world' };
 const blob = new Blob([JSON.stringify(data, null, 2)], {
     type: 'application/json'
 });
-
 pond.addFile(blob);
+
 const file = new File(["aaaa"], "something")
-if(file) {
-  pond.addFile(file);
-}
-
+pond.addFile(file);
 pond.addFile('data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==')
-
 pond.addFile('./my-file.jpg').then(file => {
   pond.removeFile(file);
 });
 
+pond.on('addfile', (error, file) => {
+  if (error) {
+      console.log('Oh no');
+      return;
+  }
+  console.log('File added', file);
+});
 
 // $ExpectType Status
 let status = pond.status
