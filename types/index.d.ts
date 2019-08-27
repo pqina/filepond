@@ -337,8 +337,26 @@ interface FilePondCallbackProps {
 
 interface FilePondHookProps {
     beforeDropFile?: (file: File) => boolean;
-    beforeAddFile?: (item: File) => false | Promise<boolean>;
-    beforeRemoveFile?: (item: File) => false | Promise<boolean>;
+    beforeAddFile?: (item: File) => boolean | Promise<boolean>;
+    beforeRemoveFile?: (item: File) => boolean | Promise<boolean>;
+}
+
+interface FilePondMockFileProps {
+    source: string,
+    options: {
+        type: FilePondOrigin,
+        file?: {
+            name?: string,
+            size?: number,
+            type?: string
+        },
+        metadata?: {[key: string]: any};
+    }
+}
+
+interface FilePondFileProps {
+    /** Array of initial files */
+    files?: FilePondMockFileProps[]
 }
 
 interface FilePondBaseProps {
@@ -378,7 +396,6 @@ interface FilePondBaseProps {
     /** The maximum number of files that can be uploaded in parallel */
     maxParallelUploads?: number;
     acceptedFileTypes?: string[];
-    metadata?: {[key: string]: any};
 }
 
 export interface FilePondProps extends
@@ -388,6 +405,7 @@ export interface FilePondProps extends
     FilePondSvgIconProps,
     FilePondCallbackProps,
     FilePondHookProps,
+    FilePondFileProps,
     FilePondBaseProps {}
 
 export class FilePond {
