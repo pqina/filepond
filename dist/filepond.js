@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.5.0
+ * FilePond 4.5.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -7393,17 +7393,22 @@
     dataTransfer
   ) {
     return new Promise(function(resolve, reject) {
-      // try to get links from transfer, if found, we'll exit immidiately
-      // as only one link can be dragged at once
+      // try to get links from transfer, if found we'll exit immidiately (unless a file is in the dataTransfer as well, this is because Firefox could represent the file as a URL and a file object at the same time)
       var links = getLinks(dataTransfer);
-      if (links.length) {
-        resolve(links);
-        return;
+      if (links.length && !hasFiles(dataTransfer)) {
+        return resolve(links);
       }
-
       // try to get files from the transfer
       getFiles(dataTransfer).then(resolve);
     });
+  };
+
+  /**
+   * Test if datatransfer has files
+   */
+  var hasFiles = function hasFiles(dataTransfer) {
+    if (dataTransfer.files) return dataTransfer.files.length > 0;
+    return false;
   };
 
   /**
