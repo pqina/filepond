@@ -4,12 +4,6 @@
 
 export {};
 
-type FilePondOrigin =
-    | 'input' // Added by user
-    | 'limbo' // Temporary server file
-    | 'local' // Existing server file
-    ;
-
 export enum FileStatus {
     INIT = 1,
     IDLE = 2,
@@ -362,7 +356,7 @@ interface FilePondHookProps {
 interface FilePondMockFileProps {
     source: string,
     options: {
-        type: FilePondOrigin,
+        type: | 'input' | 'limbo' | 'local',
         file?: {
             name?: string,
             size?: number,
