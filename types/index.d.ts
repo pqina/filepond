@@ -141,7 +141,7 @@ type RestoreServerConfigFunction = (
     progress: ProgressServerConfigFunction,
     /** Let FilePond know the request has been cancelled */
     abort: () => void,
-    /*
+    /**
      * Can call the headers method to supply FilePond with early response header string
      * https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/getAllResponseHeaders
      */
@@ -161,9 +161,9 @@ type LoadServerConfigFunction = (
     progress: ProgressServerConfigFunction,
     /** Let FilePond know the request has been cancelled */
     abort: () => void,
-    /*
+    /**
      * Can call the headers method to supply FilePond with early response header string
-     * https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/getAllResponseHeaders
+     * https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/getAllResponseHeaders>
      */
     headers: (headersString: string) => void,
 ) => void;
@@ -181,7 +181,7 @@ type FetchServerConfigFunction = (
     progress: ProgressServerConfigFunction,
     /** Let FilePond know the request has been cancelled */
     abort: () => void,
-    /*
+    /**
      * Can call the headers method to supply FilePond with early response header string
      * https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/getAllResponseHeaders
      */
@@ -290,7 +290,7 @@ interface FilePondSvgIconProps {
     iconUndo?: string;
 }
 
-type FilePondInitialFile = {
+interface FilePondInitialFile {
     source: string;
     options: {
         type: 'input' | 'limbo' | 'local';
@@ -632,8 +632,7 @@ export class FilePond {
     addEventListener: (event: string, fn: (...args: any[]) => void) => void;
     on: (event: string, fn: (...args: any[]) => void) => void;
     onOnce: (event: string, fn: (...args: any[]) => void) => void;
-    off: (event: string, fn: (...args: any[]) => void ) => void;
-    
+    off: (event: string, fn: (...args: any[]) => void) => void;  
 }
 
 /** Creates a new FilePond instance */
