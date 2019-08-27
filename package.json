@@ -30,9 +30,10 @@
         "Android >= 4.4"
     ],
     "files": [
-        "dist"
+        "dist",
+        "types/*.d.ts"
     ],
-    "types": "types",
+    "types": "types/index.d.ts",
     "scripts": {
         "test": "npx jest",
         "start": "npx rollup -c -w",
