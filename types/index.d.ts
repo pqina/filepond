@@ -38,7 +38,7 @@ export class File {
     /** Returns the server id of the file */
     serverId: string;
     /** Returns the origin of the file*/
-    origin: FileOrigin;
+    origin: 'input' | 'limbo' | 'local';
     /** Returns the current status of the file */
     status: FileStatus;
     /** Returns the File object */
@@ -199,14 +199,18 @@ type FetchServerConfigFunction = (
 ) => void;
 
 interface FilePondInitialFile {
+    /** The server file reference */
     source: string;
     options: {
+        /** Origin of file being added */
         type: 'input' | 'limbo' | 'local';
+        /** Mock file information */
         file?: {
             name?: string;
             size?: number;
             type?: string;
         };
+        /** File initial metadata */
         metadata?: {[key: string]: any};
     };
 }
