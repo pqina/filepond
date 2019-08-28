@@ -471,18 +471,65 @@ interface FilePondCallbackProps {
 }
 
 interface FilePondHookProps {
-    beforeDropFile?: (file: File) => boolean;
+    /**
+     * FilePond is about to allow this item to be dropped, it can be a URL or a File object.
+     * 
+     * Return `true` or `false` depending on if you want to allow the item to be dropped.
+     */
+    beforeDropFile?: (file: File | string) => boolean;
+    /**
+     * FilePond is about to add this file. 
+     * 
+     * Return `false` to prevent adding it, or return a `Promise` and resolve with `true` or `false`.
+     */
     beforeAddFile?: (item: File) => boolean | Promise<boolean>;
+    /**
+     * FilePond is about to remove this file. 
+     * 
+     * Return `false` to prevent adding it, or return a `Promise` and resolve with `true` or `false`.
+     */
     beforeRemoveFile?: (item: File) => boolean | Promise<boolean>;
 }
 
 interface FilePondStyleProps {
+    /** 
+     * Set a different layout render mode.
+     * @default null
+     */
     stylePanelLayout?: 'integrated' | 'compact' | 'circle';
-    stylePanelAspectRatio?: '3:2' | '1';
+    /**
+     * Set a forced aspect ratio for the FilePond drop area.
+     * 
+     * Accepts human readable aspect ratios like `1:1` or numeric aspect ratios like `0.75`.
+     * @default null
+     */
+    stylePanelAspectRatio?: string;
+    /**
+     * Set a forced aspect ratio for the file items. 
+     * 
+     * Useful when rendering cropped or fixed aspect ratio images in grid view.
+     * @default null
+     */
     styleItemPanelAspectRatio?: string;
+    /** 
+     * The position of the remove item button
+     * @default 'left'
+     */
     styleButtonRemoveItemPosition?: string;
+    /**
+     * The position of the remove item button.
+     * @default 'right' 
+     */
     styleButtonProcessItemPosition?: string;
+    /**
+     * The position of the load indicator
+     * @default 'right'
+     */
     styleLoadIndicatorPosition?: string;
+    /**
+     * The position of the progress indicator
+     * @default 'right'
+     */
     styleProgressIndicatorPosition?: string;
 }
 
