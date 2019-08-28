@@ -33,15 +33,25 @@ export enum FileOrigin {
 type ActualFileObject = Blob & {readonly lastModified: number; readonly name: string; readonly size: number; readonly type: string};
 
 export class File {
+    /** Returns the ID of the file */
     id: string;
+    /** Returns the server id of the file */
     serverId: string;
+    /** Returns the origin of the file*/
     origin: FileOrigin;
+    /** Returns the current status of the file */
     status: FileStatus;
+    /** Returns the File object */
     file: ActualFileObject;
+    /** Returns the file extensions */
     fileExtension: string;
+    /** Returns the size of the file */
     fileSize: number;
+    /** Returns the type of the file */
     fileType: string;
+    /** Returns the full name of the file */
     filename: string;
+    /** Returns the name of the file without extension */
     filenameWithoutExtension: string;
 
     /** Aborts loading of this file */
@@ -202,6 +212,11 @@ interface FilePondInitialFile {
 }
 
 interface FilePondServerConfigProps {
+    /** 
+     * Server API Configuration.
+     * See: https://pqina.nl/filepond/docs/patterns/api/server
+     * @default null
+     */
     server?: string | {
         url?: string
         timeout?: number
@@ -211,23 +226,39 @@ interface FilePondServerConfigProps {
         load?: string | ServerUrl | LoadServerConfigFunction;
         fetch?: string | ServerUrl | FetchServerConfigFunction;
     };
+    /** 
+     * Immediately upload new files to the server
+     * @default true
+     */
     instantUpload?: boolean;
+    /**
+     * A list of file locations that should be loaded immediately.
+     * See: https://pqina.nl/filepond/docs/patterns/api/filepond-object/#setting-initial-files
+     * @default []
+     */
     files?: FilePondInitialFile[] | ActualFileObject[] | Blob[] | string[];
 }
 
 interface FilePondDragDropProps {
-    /** FilePond will catch all files dropped on the webpage */
+    /** 
+     * FilePond will catch all files dropped on the webpage.
+     * @default false
+     */
     dropOnPage?: boolean;
-    /** Require drop on the FilePond element itself to catch the file. */
+    /** Require drop on the FilePond element itself to catch the file.
+     * @default true
+    */
     dropOnElement?: boolean;
     /**
      * When enabled, files are validated before they are dropped.
      * A file is not added when it’s invalid.
+     * @default false
      */
     dropValidation?: boolean;
     /**
      * Ignored file names when handling dropped directories.
      * Dropping directories is not supported on all browsers.
+     * @default ['.ds_store', 'thumbs.db', 'desktop.ini']
      */
     ignoredFiles?: string[];
 }
@@ -236,71 +267,149 @@ interface FilePondLabelProps {
     /**
      * The decimal separator used to render numbers.
      * By default this is determined automatically.
+     * @default 'auto'
      */
     labelDecimalSeparator?: string;
     /**
      * The thousands separator used to render numbers.
      * By default this is determined automatically.
+     * @default 'auto'
      */
     labelThousandsSeparator?: string;
     /**
      * Default label shown to indicate this is a drop area.
      * FilePond will automatically bind browse file events to
-     * the element with CSS class .filepond--label-action
+     * the element with CSS class .filepond--label-action.
+     * @default 'Drag & Drop your files or <span class="filepond--label-action"> Browse </span>'
      */
     labelIdle?: string;
-    /** Label shown when the field contains invalid files and is validated by the parent form */
+    /** 
+     * Label shown when the field contains invalid files and is validated by the parent form.
+     * @default 'Field contains invalid files'
+     */
     labelInvalidField?: string;
-    /** Label used while waiting for file size information */
+    /** 
+     * Label used while waiting for file size information.
+     * @default 'Waiting for size'
+     */
     labelFileWaitingForSize?: string;
-    /** Label used when no file size information was received */
+    /** 
+     * Label used when no file size information was received.
+     * @default 'Size not available'
+     */
     labelFileSizeNotAvailable?: string;
-    /** Label used while loading a file */
+    /** 
+     * Label used while loading a file.
+     * @default 'Loading'
+     */
     labelFileLoading?: string;
-    /** Label used when file load failed */
+    /** 
+     * Label used when file load failed.
+     * @default 'Error during load'
+     */
     labelFileLoadError?: string;
-    /** Label used when uploading a file */
+    /** 
+     * Label used when uploading a file.
+     * @default 'Uploading'
+     */
     labelFileProcessing?: string;
-    /** Label used when file upload has completed */
+    /** 
+     * Label used when file upload has completed.
+     * @default 'Upload complete'
+     */
     labelFileProcessingComplete?: string;
-    /** Label used when upload was cancelled */
+    /** 
+     * Label used when upload was cancelled.
+     * @default 'Upload cancelled'
+     */
     labelFileProcessingAborted?: string;
-    /** Label used when something went wrong during file upload */
+    /** 
+     * Label used when something went wrong during file upload.
+     * @default 'Error during upload'
+     */
     labelFileProcessingError?: string;
-    /** Label used when something went wrong during reverting the file upload */
+    /** 
+     * Label used when something went wrong during reverting the file upload.
+     * @default 'Error during revert'
+     */
     labelFileProcessingRevertError?: string;
-    /** Label used when something went during during removing the file upload */
+    /** 
+     * Label used when something went during during removing the file upload.
+     * @default 'Error during remove'
+     */
     labelFileRemoveError?: string;
-    /** Label used to indicate to the user that an action can be cancelled. */
+    /** 
+     * Label used to indicate to the user that an action can be cancelled.
+     * @default 'tap to cancel'
+     */
     labelTapToCancel?: string;
-    /** Label used to indicate to the user that an action can be retried. */
+    /** 
+     * Label used to indicate to the user that an action can be retried.
+     * @default 'tap to retry'
+     */
     labelTapToRetry?: string;
-    /** Label used to indicate to the user that an action can be undone. */
+    /** 
+     * Label used to indicate to the user that an action can be undone.
+     * @default 'tap to undo'
+     */
     labelTapToUndo?: string;
-    /** Label used for remove button */
+    /** 
+     * Label used for remove button.
+     * @default 'Remove'
+     */
     labelButtonRemoveItem?: string;
-    /** Label used for abort load button */
+    /** 
+     * Label used for abort load button.
+     * @default 'Abort'
+     */
     labelButtonAbortItemLoad?: string;
-    /** Label used for retry load button */
+    /** 
+     * Label used for retry load.
+     * @default 'Retry'
+     */
     labelButtonRetryItemLoad?: string;
-    /** Label used for abort upload button */
+    /** 
+     * Label used for abort upload button.
+     * @default 'Cancel'
+     */
     labelButtonAbortItemProcessing?: string;
-    /** Label used for undo upload button */
+    /** 
+     * Label used for undo upload button.
+     * @default 'Undo'
+     */
     labelButtonUndoItemProcessing?: string;
-    /** Label used for retry upload button */
+    /** 
+     * Label used for retry upload button.
+     * @default 'Retry'
+     */
     labelButtonRetryItemProcessing?: string;
-    /** Label used for upload button */
+    /** 
+     * Label used for upload button.
+     * @default 'Upload'
+     */
     labelButtonProcessItem?: string;
 }
 
 interface FilePondSvgIconProps {
-    /** The icon used for remove actions */
+    /** 
+     * The icon used for remove actions.
+     * @default '<svg></svg>'
+     */
     iconRemove?: string;
-    /** The icon used for process actions */
+    /** 
+     * The icon used for process actions.
+     * @default '<svg></svg>'
+     */
     iconProcess?: string;
-    /** The icon used for retry actions */
+    /** 
+     * The icon used for retry actions.
+     * @default '<svg></svg>'
+     */
     iconRetry?: string;
-     /** The icon used for undo actions */
+     /** 
+      * The icon used for undo actions.
+      * @default '<svg></svg>'
+      */
     iconUndo?: string;
 }
 
@@ -649,3 +758,5 @@ export function setOptions(options: FilePondOptionProps): void;
 export function getOptions(): FilePondOptionProps;
 /** Determines whether or not the browser supports FilePond */
 export function supported(): boolean;
+/** Returns an object describing all the available options and their types, useful for writing FilePond adapters */
+export const OptionTypes: object;
