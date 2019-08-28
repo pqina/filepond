@@ -742,12 +742,12 @@ export class FilePond {
     /* Called when a file is clicked or tapped **/
     onactivatefile?: (file: File) => void;
 
-    beforeDropFile?: (file: File) => boolean;
+    beforeDropFile?: (file: File | string) => boolean;
     beforeAddFile?: (item: File) => boolean | Promise<boolean>;
     beforeRemoveFile?: (item: File) => boolean | Promise<boolean>;
 
     stylePanelLayout: 'integrated' | 'compact' | 'circle';
-    stylePanelAspectRatio: '3:2' | '1';
+    stylePanelAspectRatio: string;
     styleItemPanelAspectRatio: string;
     styleButtonRemoveItemPosition: string;
     styleButtonProcessItemPosition: string;
