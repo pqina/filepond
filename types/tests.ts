@@ -50,6 +50,44 @@ pond.itemInsertLocation = (a, b) => {
   return 0;
 }
 
+FilePond.setOptions({
+  allowDrop: false,
+  allowReplace: false,
+  instantUpload: false,
+  server: {
+      url: 'http://192.168.33.10',
+      process: './process.php',
+      revert: './revert.php',
+      restore: './restore.php?id=',
+      fetch: './fetch.php?data='
+  }
+});
+
+FilePond.setOptions({
+  server: {
+      url: 'http://192.168.0.100',
+      timeout: 7000,
+      process: {
+          url: './process',
+          method: 'POST',
+          headers: {
+              'x-customheader': 'Hello World'
+          },
+          withCredentials: false,
+          onload: (response) => response.key,
+          onerror: (response) => response.data,
+          ondata: (formData) => {
+              formData.append('Hello', 'World');
+              return formData;
+          }
+      },
+      revert: './revert',
+      restore: './restore/',
+      load: './load/',
+      fetch: './fetch/'
+  }
+});
+
 pond.addEventListener('FilePond:addfile', e => {
   console.log(e.detail);
 })

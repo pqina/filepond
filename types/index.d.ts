@@ -79,17 +79,17 @@ interface ServerUrl {
      * Called when server response is received, useful for getting
      * the unique file id from the server response.
      */
-    onload?: () => any;
+    onload?: (response: any) => void;
     /**
      * Called when server error is received, receives the response
      * body, useful to select the relevant error data.
      */
-    onerror?: (responseBody: any) => any;
+    onerror?: (responseBody: any) => void;
     /**
      * Called with the formdata object right before it is sent,
      * return extended formdata object to make changes.
      */
-    ondata?: (data: any) => any;
+    ondata?: (data: FormData) => FormData;
 }
 
 type ProgressServerConfigFunction = (
