@@ -2,7 +2,7 @@
 // Updated by Hawxy <https://github.com/Hawxy>
 // TypeScript Version: 3.5
 
-export {};
+export { };
 
 export enum FileStatus {
     INIT = 1,
@@ -30,7 +30,7 @@ export enum FileOrigin {
     LOCAL = 3
 }
 
-type ActualFileObject = Blob & {readonly lastModified: number; readonly name: string; readonly size: number; readonly type: string};
+type ActualFileObject = Blob & { readonly lastModified: number; readonly name: string; readonly size: number; readonly type: string };
 
 export class File {
     /** Returns the ID of the file. */
@@ -72,7 +72,7 @@ interface ServerUrl {
     url: string;
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
     withCredentials?: boolean;
-    headers?: {[key: string]: string|boolean|number};
+    headers?: { [key: string]: string | boolean | number };
     timeout?: number;
 
     /**
@@ -99,9 +99,9 @@ type ProgressServerConfigFunction = (
      * false switches the FilePond loading indicator to infinite mode.
      */
     isLengthComputable: boolean,
-    /** The amount of data currently transferred .*/
+    /** The amount of data currently transferred. */
     loadedDataAmount: number,
-    /** The total amount of data to be transferred.*/
+    /** The total amount of data to be transferred. */
     totalDataAmount: number,
 ) => void;
 
@@ -110,14 +110,14 @@ type ProcessServerConfigFunction = (
     fieldName: string,
     /** The actual file object to send. */
     file: ActualFileObject,
-    metadata: {[key: string]: any},
+    metadata: { [key: string]: any },
     /**
      * Should call the load method when done and pass the returned server file id.
      * This server file id is then used later on when reverting or restoring a file
      * so that your server knows which file to return without exposing that info
      * to the client.
      */
-    load: (p: string | {[key: string]: any}) => void,
+    load: (p: string | { [key: string]: any }) => void,
     /** Can call the error method is something went wrong, should exit after. */
     error: (errorText: string) => void,
     /**
@@ -169,7 +169,7 @@ type LoadServerConfigFunction = (
      * Setting computable to false switches the loading indicator to infinite mode.
      */
     progress: ProgressServerConfigFunction,
-    /** Let FilePond know the request has been cancelled.*/
+    /** Let FilePond know the request has been cancelled. */
     abort: () => void,
     /**
      * Can call the headers method to supply FilePond with early response header string.
@@ -211,12 +211,12 @@ interface FilePondInitialFile {
             type?: string;
         };
         /** File initial metadata. */
-        metadata?: {[key: string]: any};
+        metadata?: { [key: string]: any };
     };
 }
 
 interface FilePondServerConfigProps {
-    /** 
+    /**
      * Server API Configuration.
      * See: https://pqina.nl/filepond/docs/patterns/api/server
      * @default null
@@ -230,7 +230,7 @@ interface FilePondServerConfigProps {
         load?: string | ServerUrl | LoadServerConfigFunction;
         fetch?: string | ServerUrl | FetchServerConfigFunction;
     };
-    /** 
+    /**
      * Immediately upload new files to the server.
      * @default true
      */
@@ -244,14 +244,15 @@ interface FilePondServerConfigProps {
 }
 
 interface FilePondDragDropProps {
-    /** 
+    /**
      * FilePond will catch all files dropped on the webpage.
      * @default false
      */
     dropOnPage?: boolean;
-    /** Require drop on the FilePond element itself to catch the file.
+    /** 
+     * Require drop on the FilePond element itself to catch the file.
      * @default true
-    */
+     */
     dropOnElement?: boolean;
     /**
      * When enabled, files are validated before they are dropped.
@@ -287,107 +288,107 @@ interface FilePondLabelProps {
      * @default 'Drag & Drop your files or <span class="filepond--label-action"> Browse </span>'
      */
     labelIdle?: string;
-    /** 
+    /**
      * Label shown when the field contains invalid files and is validated by the parent form.
      * @default 'Field contains invalid files'
      */
     labelInvalidField?: string;
-    /** 
+    /**
      * Label used while waiting for file size information.
      * @default 'Waiting for size'
      */
     labelFileWaitingForSize?: string;
-    /** 
+    /**
      * Label used when no file size information was received.
      * @default 'Size not available'
      */
     labelFileSizeNotAvailable?: string;
-    /** 
+    /**
      * Label used while loading a file.
      * @default 'Loading'
      */
     labelFileLoading?: string;
-    /** 
+    /**
      * Label used when file load failed.
      * @default 'Error during load'
      */
     labelFileLoadError?: string;
-    /** 
+    /**
      * Label used when uploading a file.
      * @default 'Uploading'
      */
     labelFileProcessing?: string;
-    /** 
+    /**
      * Label used when file upload has completed.
      * @default 'Upload complete'
      */
     labelFileProcessingComplete?: string;
-    /** 
+    /**
      * Label used when upload was cancelled.
      * @default 'Upload cancelled'
      */
     labelFileProcessingAborted?: string;
-    /** 
+    /**
      * Label used when something went wrong during file upload.
      * @default 'Error during upload'
      */
     labelFileProcessingError?: string;
-    /** 
+    /**
      * Label used when something went wrong during reverting the file upload.
      * @default 'Error during revert'
      */
     labelFileProcessingRevertError?: string;
-    /** 
+    /**
      * Label used when something went during during removing the file upload.
      * @default 'Error during remove'
      */
     labelFileRemoveError?: string;
-    /** 
+    /**
      * Label used to indicate to the user that an action can be cancelled.
      * @default 'tap to cancel'
      */
     labelTapToCancel?: string;
-    /** 
+    /**
      * Label used to indicate to the user that an action can be retried.
      * @default 'tap to retry'
      */
     labelTapToRetry?: string;
-    /** 
+    /**
      * Label used to indicate to the user that an action can be undone.
      * @default 'tap to undo'
      */
     labelTapToUndo?: string;
-    /** 
+    /**
      * Label used for remove button.
      * @default 'Remove'
      */
     labelButtonRemoveItem?: string;
-    /** 
+    /**
      * Label used for abort load button.
      * @default 'Abort'
      */
     labelButtonAbortItemLoad?: string;
-    /** 
+    /**
      * Label used for retry load.
      * @default 'Retry'
      */
     labelButtonRetryItemLoad?: string;
-    /** 
+    /**
      * Label used for abort upload button.
      * @default 'Cancel'
      */
     labelButtonAbortItemProcessing?: string;
-    /** 
+    /**
      * Label used for undo upload button.
      * @default 'Undo'
      */
     labelButtonUndoItemProcessing?: string;
-    /** 
+    /**
      * Label used for retry upload button.
      * @default 'Retry'
      */
     labelButtonRetryItemProcessing?: string;
-    /** 
+    /**
      * Label used for upload button.
      * @default 'Upload'
      */
@@ -395,25 +396,25 @@ interface FilePondLabelProps {
 }
 
 interface FilePondSvgIconProps {
-    /** 
+    /**
      * The icon used for remove actions.
      * @default '<svg></svg>'
      */
     iconRemove?: string;
-    /** 
+    /**
      * The icon used for process actions.
      * @default '<svg></svg>'
      */
     iconProcess?: string;
-    /** 
+    /**
      * The icon used for retry actions.
      * @default '<svg></svg>'
      */
     iconRetry?: string;
-     /** 
-      * The icon used for undo actions.
-      * @default '<svg></svg>'
-      */
+    /**
+     * The icon used for undo actions.
+     * @default '<svg></svg>'
+     */
     iconUndo?: string;
 }
 
@@ -549,7 +550,7 @@ interface FilePondBaseProps {
      * The input field name to use.
      * @default 'filepond'
      */
-    name?: string;  
+    name?: string;
     /** 
      * Class Name to put on wrapper.
      * @default null
@@ -650,35 +651,35 @@ export interface FilePondOptionProps extends
     FilePondCallbackProps,
     FilePondHookProps,
     FilePondStyleProps,
-    FilePondBaseProps {}
+    FilePondBaseProps { }
 
-type FilePondEventPrefixed = 'FilePond:init' 
-| 'FilePond:warning' 
-| 'FilePond:error' 
-| 'FilePond:addfilestart' 
-| 'FilePond:addfileprogress' 
-| 'FilePond:addfile'
-| 'FilePond:processfilestart' 
-| 'FilePond:processfileprogress' 
-| 'FilePond:processfileabort' 
-| 'FilePond:processfilerevert' 
-| 'FilePond:processfile' 
-| 'FilePond:removefile' 
-| 'FilePond:updatefiles'
+type FilePondEventPrefixed = 'FilePond:init'
+    | 'FilePond:warning'
+    | 'FilePond:error'
+    | 'FilePond:addfilestart'
+    | 'FilePond:addfileprogress'
+    | 'FilePond:addfile'
+    | 'FilePond:processfilestart'
+    | 'FilePond:processfileprogress'
+    | 'FilePond:processfileabort'
+    | 'FilePond:processfilerevert'
+    | 'FilePond:processfile'
+    | 'FilePond:removefile'
+    | 'FilePond:updatefiles';
 
-type FilePondEvent = 'init' 
-| 'warning' 
-| 'error' 
-| 'addfilestart' 
-| 'addfileprogress' 
-| 'addfile' 
-| 'processfilestart' 
-| 'processfileprogress' 
-| 'processfileabort'
-| 'processfilerevert'
-| 'processfile'
-| 'removefile'
-| 'updatefiles'
+type FilePondEvent = 'init'
+    | 'warning'
+    | 'error'
+    | 'addfilestart'
+    | 'addfileprogress'
+    | 'addfile'
+    | 'processfilestart'
+    | 'processfileprogress'
+    | 'processfileabort'
+    | 'processfilerevert'
+    | 'processfile'
+    | 'removefile'
+    | 'updatefiles';
 
 export class FilePond {
     /**
@@ -700,7 +701,7 @@ export class FilePond {
      * The input field name to use.
      * @default 'filepond'
      */
-    name: string;  
+    name: string;
     /** 
      * Class Name to put on wrapper.
      * @default null
@@ -790,16 +791,17 @@ export class FilePond {
      * The maximum number of files that can be uploaded in parallel.
      * @default null
      */
-    maxParallelUploads: number | null;   
+    maxParallelUploads: number | null;
 
     /** 
      * FilePond will catch all files dropped on the webpage.
      * @default false
      */
     dropOnPage: boolean;
-    /** Require drop on the FilePond element itself to catch the file.
+    /** 
+     * Require drop on the FilePond element itself to catch the file.
      * @default true
-    */
+     */
     dropOnElement: boolean;
     /**
      * When enabled, files are validated before they are dropped.
@@ -982,10 +984,10 @@ export class FilePond {
      * @default '<svg></svg>'
      */
     iconRetry: string;
-     /** 
-      * The icon used for undo actions.
-      * @default '<svg></svg>'
-      */
+    /** 
+     * The icon used for undo actions.
+     * @default '<svg></svg>'
+     */
     iconUndo: string;
 
     /** FilePond instance has been created and is ready. */
@@ -1098,12 +1100,12 @@ export class FilePond {
      * Adds a file.
      * @param options.index The index that the file should be added at.
      */
-    addFile: (source: ActualFileObject | Blob | string, options?: {index: number}) => Promise<File>;
+    addFile: (source: ActualFileObject | Blob | string, options?: { index: number }) => Promise<File>;
     /** 
      * Adds multiple files.
      * @param options.index The index that the files should be added at.
      */
-    addFiles: (source: ActualFileObject[] | Blob[] | string[], options?: {index: number}) => Promise<File[]>;
+    addFiles: (source: ActualFileObject[] | Blob[] | string[], options?: { index: number }) => Promise<File[]>;
     /** 
      * Removes a file. If no parameter is provided, removes the first file in the list.
      * @param query The file reference, id, or index.
@@ -1167,18 +1169,18 @@ export class FilePond {
      * @param fn Event handler, signature is identical to the callback method
      */
     on: (event: FilePondEvent, fn: (...args: any[]) => void) => void;
-     /** 
+    /** 
      * Listen to an event once and remove the handler.
      * @param event Name of the event
      * @param fn Event handler, signature is identical to the callback method
      */
     onOnce: (event: FilePondEvent, fn: (...args: any[]) => void) => void;
-     /** 
+    /** 
      * Stop listening to an event.
      * @param event Name of the event
      * @param fn Event handler, signature is identical to the callback method
      */
-    off: (event: FilePondEvent, fn: (...args: any[]) => void) => void;  
+    off: (event: FilePondEvent, fn: (...args: any[]) => void) => void;
 }
 
 /** Creates a new FilePond instance. */
