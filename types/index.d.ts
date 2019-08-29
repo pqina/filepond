@@ -540,46 +540,106 @@ interface FilePondStyleProps {
 type CaptureAttribute = "camera" | "microphone" | "camcorder";
 
 interface FilePondBaseProps {
+    /** 
+     * The ID to add to the root element
+     * @default null
+     */
     id?: string;
-    name?: string;
-    disabled?: boolean;
-    /** Class Name to put on wrapper */
+    /**
+     * The input field name to use
+     * @default 'filepond'
+     */
+    name?: string;  
+    /** 
+     * Class Name to put on wrapper 
+     * @default null
+     */
     className?: string;
-    /** Sets the required attribute to the output field */
+    /** 
+     * Sets the required attribute to the output field
+     * @default false
+     */
     required?: boolean;
-    /** Sets the given value to the capture attribute */
+    /**
+     * Sets the disabled attribute to the output field
+     * @default false
+     */
+    disabled?: boolean;
+    /** 
+     * Sets the given value to the capture attribute
+     * @default null
+     */
     captureMethod?: CaptureAttribute;
 
-    /** Enable or disable drag n’ drop */
+    /** 
+     * Enable or disable drag n’ drop
+     * @default true
+     */
     allowDrop?: boolean;
-    /** Enable or disable file browser */
+    /** 
+     * Enable or disable file browser
+     * @default true
+     */
     allowBrowse?: boolean;
     /**
      * Enable or disable pasting of files. Pasting files is not
      * supported on all browsers.
+     * @default true
      */
     allowPaste?: boolean;
-    /** Enable or disable adding multiple files */
+    /** 
+     * Enable or disable adding multiple files
+     * @default false
+     */
     allowMultiple?: boolean;
-    /** Allow drop to replace a file, only works when allowMultiple is false */
+    /** 
+     * Allow drop to replace a file, only works when allowMultiple is false
+     * @default true
+     */
     allowReplace?: boolean;
-    /** Allows the user to undo file upload */
+    /** 
+     * Allows the user to revert file upload
+     * @default true
+     */
     allowRevert?: boolean;
-    /** Require the file to be reverted before removal */
+    /** 
+     * Require the file to be successfully reverted before continuing
+     * @default false
+     */
     forceRevert?: boolean;
 
-    /** The maximum number of files that filepond pond can handle */
+    /** 
+     * The maximum number of files that filepond pond can handle
+     * @default null
+     */
     maxFiles?: number;
-    /** Enables custom validity messages */
+    /** 
+     * Enables custom validity messages
+     * @default false
+     */
     checkValidity?: boolean;
 
+    /**
+     * Set to false to always add items to beginning or end of list
+     * @default true
+     */
     itemInsertLocationFreedom?: boolean;
+    /**
+     * Default index in list to add items that have been dropped at the top of the list
+     * @default 'before'
+     */
     itemInsertLocation?: 'before' | 'after' | ((a: File, b: File) => number);
+    /**
+     * The interval to use before showing each item being added to the list
+     * @default 75
+     */
     itemInsertInterval?: number;
 
-    /** The maximum number of files that can be uploaded in parallel */
+    /** 
+     * The maximum number of files that can be uploaded in parallel
+     * @default null
+     */
     maxParallelUploads?: number;
-    acceptedFileTypes?: string[];
 }
 
 export interface FilePondOptionProps extends
@@ -593,36 +653,146 @@ export interface FilePondOptionProps extends
     FilePondBaseProps {}
 
 export class FilePond {
+    /**
+     * The root element of the Filepond instance
+     */
     readonly element: Element | null;
+    /**
+     * Returns the current status of the FilePond instance
+     * @default Status.EMPTY
+     */
     readonly status: Status;
 
-    name: string;
+    /** 
+     * The ID to add to the root element
+     * @default null
+     */
+    id: string | null;
+    /**
+     * The input field name to use
+     * @default 'filepond'
+     */
+    name: string;  
+    /** 
+     * Class Name to put on wrapper 
+     * @default null
+     */
     className: string | null;
+    /** 
+     * Sets the required attribute to the output field
+     * @default false
+     */
     required: boolean;
+    /**
+     * Sets the disabled attribute to the output field
+     * @default false
+     */
     disabled: boolean;
+    /** 
+     * Sets the given value to the capture attribute
+     * @default null
+     */
     captureMethod: CaptureAttribute | null;
+
+    /** 
+     * Enable or disable drag n’ drop
+     * @default true
+     */
     allowDrop: boolean;
+    /** 
+     * Enable or disable file browser
+     * @default true
+     */
     allowBrowse: boolean;
+    /**
+     * Enable or disable pasting of files. Pasting files is not
+     * supported on all browsers.
+     * @default true
+     */
     allowPaste: boolean;
+    /** 
+     * Enable or disable adding multiple files
+     * @default false
+     */
     allowMultiple: boolean;
+    /** 
+     * Allow drop to replace a file, only works when allowMultiple is false
+     * @default true
+     */
     allowReplace: boolean;
+    /** 
+     * Allows the user to revert file upload
+     * @default true
+     */
     allowRevert: boolean;
+    /** 
+     * Require the file to be successfully reverted before continuing
+     * @default false
+     */
     forceRevert: boolean;
+
+    /** 
+     * The maximum number of files that filepond pond can handle
+     * @default null
+     */
     maxFiles: number | null;
-    maxParallelUploads: number | null;
+    /** 
+     * Enables custom validity messages
+     * @default false
+     */
     checkValidity: boolean;
 
+    /**
+     * Set to false to always add items to beginning or end of list
+     * @default true
+     */
     itemInsertLocationFreedom: boolean;
+    /**
+     * Default index in list to add items that have been dropped at the top of the list
+     * @default 'before'
+     */
     itemInsertLocation: 'before' | 'after' | ((a: File, b: File) => number);
+    /**
+     * The interval to use before showing each item being added to the list
+     * @default 75
+     */
     itemInsertInterval: number;
 
+    /** 
+     * The maximum number of files that can be uploaded in parallel
+     * @default null
+     */
+    maxParallelUploads: number | null;   
+
+    /** 
+     * FilePond will catch all files dropped on the webpage.
+     * @default false
+     */
     dropOnPage: boolean;
+    /** Require drop on the FilePond element itself to catch the file.
+     * @default true
+    */
     dropOnElement: boolean;
-    dropValidation: false;
+    /**
+     * When enabled, files are validated before they are dropped.
+     * A file is not added when it’s invalid.
+     * @default false
+     */
+    dropValidation: boolean;
+    /**
+     * Ignored file names when handling dropped directories.
+     * Dropping directories is not supported on all browsers.
+     * @default ['.ds_store', 'thumbs.db', 'desktop.ini']
+     */
     ignoredFiles: string[];
 
-    instantUpload: boolean;
-    server: string | {
+
+    /** 
+     * Server API Configuration.
+     * See: https://pqina.nl/filepond/docs/patterns/api/server
+     * @default null
+     */
+    server?: string | {
         url?: string
         timeout?: number
         process?: string | ServerUrl | ProcessServerConfigFunction;
@@ -630,75 +800,163 @@ export class FilePond {
         restore?: string | ServerUrl | RestoreServerConfigFunction;
         load?: string | ServerUrl | LoadServerConfigFunction;
         fetch?: string | ServerUrl | FetchServerConfigFunction;
-    } | null;   
-    files: FilePondInitialFile[] | ActualFileObject[] | Blob[] | string[];
+    } | null;
+    /** 
+     * Immediately upload new files to the server
+     * @default true
+     */
+    instantUpload?: boolean;
+    /**
+     * A list of file locations that should be loaded immediately.
+     * See: https://pqina.nl/filepond/docs/patterns/api/filepond-object/#setting-initial-files
+     * @default []
+     */
+    files?: FilePondInitialFile[] | ActualFileObject[] | Blob[] | string[];
 
     /**
      * The decimal separator used to render numbers.
      * By default this is determined automatically.
+     * @default 'auto'
      */
     labelDecimalSeparator: string;
     /**
      * The thousands separator used to render numbers.
      * By default this is determined automatically.
+     * @default 'auto'
      */
     labelThousandsSeparator: string;
     /**
      * Default label shown to indicate this is a drop area.
      * FilePond will automatically bind browse file events to
-     * the element with CSS class .filepond--label-action
+     * the element with CSS class .filepond--label-action.
+     * @default 'Drag & Drop your files or <span class="filepond--label-action"> Browse </span>'
      */
     labelIdle: string;
-    /** Label shown when the field contains invalid files and is validated by the parent form */
+    /** 
+     * Label shown when the field contains invalid files and is validated by the parent form.
+     * @default 'Field contains invalid files'
+     */
     labelInvalidField: string;
-    /** Label used while waiting for file size information */
+    /** 
+     * Label used while waiting for file size information.
+     * @default 'Waiting for size'
+     */
     labelFileWaitingForSize: string;
-    /** Label used when no file size information was received */
+    /** 
+     * Label used when no file size information was received.
+     * @default 'Size not available'
+     */
     labelFileSizeNotAvailable: string;
-    /** Label used while loading a file */
+    /** 
+     * Label used while loading a file.
+     * @default 'Loading'
+     */
     labelFileLoading: string;
-    /** Label used when file load failed */
+    /** 
+     * Label used when file load failed.
+     * @default 'Error during load'
+     */
     labelFileLoadError: string;
-    /** Label used when uploading a file */
+    /** 
+     * Label used when uploading a file.
+     * @default 'Uploading'
+     */
     labelFileProcessing: string;
-    /** Label used when file upload has completed */
+    /** 
+     * Label used when file upload has completed.
+     * @default 'Upload complete'
+     */
     labelFileProcessingComplete: string;
-    /** Label used when upload was cancelled */
+    /** 
+     * Label used when upload was cancelled.
+     * @default 'Upload cancelled'
+     */
     labelFileProcessingAborted: string;
-    /** Label used when something went wrong during file upload */
+    /** 
+     * Label used when something went wrong during file upload.
+     * @default 'Error during upload'
+     */
     labelFileProcessingError: string;
-    /** Label used when something went wrong during reverting the file upload */
+    /** 
+     * Label used when something went wrong during reverting the file upload.
+     * @default 'Error during revert'
+     */
     labelFileProcessingRevertError: string;
-    /** Label used when something went during during removing the file upload */
+    /** 
+     * Label used when something went during during removing the file upload.
+     * @default 'Error during remove'
+     */
     labelFileRemoveError: string;
-    /** Label used to indicate to the user that an action can be cancelled. */
+    /** 
+     * Label used to indicate to the user that an action can be cancelled.
+     * @default 'tap to cancel'
+     */
     labelTapToCancel: string;
-    /** Label used to indicate to the user that an action can be retried. */
+    /** 
+     * Label used to indicate to the user that an action can be retried.
+     * @default 'tap to retry'
+     */
     labelTapToRetry: string;
-    /** Label used to indicate to the user that an action can be undone. */
+    /** 
+     * Label used to indicate to the user that an action can be undone.
+     * @default 'tap to undo'
+     */
     labelTapToUndo: string;
-    /** Label used for remove button */
+    /** 
+     * Label used for remove button.
+     * @default 'Remove'
+     */
     labelButtonRemoveItem: string;
-    /** Label used for abort load button */
+    /** 
+     * Label used for abort load button.
+     * @default 'Abort'
+     */
     labelButtonAbortItemLoad: string;
-    /** Label used for retry load button */
+    /** 
+     * Label used for retry load.
+     * @default 'Retry'
+     */
     labelButtonRetryItemLoad: string;
-    /** Label used for abort upload button */
+    /** 
+     * Label used for abort upload button.
+     * @default 'Cancel'
+     */
     labelButtonAbortItemProcessing: string;
-    /** Label used for undo upload button */
+    /** 
+     * Label used for undo upload button.
+     * @default 'Undo'
+     */
     labelButtonUndoItemProcessing: string;
-    /** Label used for retry upload button */
+    /** 
+     * Label used for retry upload button.
+     * @default 'Retry'
+     */
     labelButtonRetryItemProcessing: string;
-    /** Label used for upload button */
+    /** 
+     * Label used for upload button.
+     * @default 'Upload'
+     */
     labelButtonProcessItem: string;
 
-    /** The icon used for remove actions */
+    /** 
+     * The icon used for remove actions.
+     * @default '<svg></svg>'
+     */
     iconRemove: string;
-    /** The icon used for process actions */
+    /** 
+     * The icon used for process actions.
+     * @default '<svg></svg>'
+     */
     iconProcess: string;
-    /** The icon used for retry actions */
+    /** 
+     * The icon used for retry actions.
+     * @default '<svg></svg>'
+     */
     iconRetry: string;
-    /** The icon used for undo actions */
+     /** 
+      * The icon used for undo actions.
+      * @default '<svg></svg>'
+      */
     iconUndo: string;
 
     /** FilePond instance has been created and is ready. */
@@ -746,16 +1004,63 @@ export class FilePond {
     /* Called when a file is clicked or tapped **/
     onactivatefile?: (file: File) => void;
 
+    /**
+     * FilePond is about to allow this item to be dropped, it can be a URL or a File object.
+     * 
+     * Return `true` or `false` depending on if you want to allow the item to be dropped.
+     */
     beforeDropFile?: (file: File | string) => boolean;
+    /**
+     * FilePond is about to add this file. 
+     * 
+     * Return `false` to prevent adding it, or return a `Promise` and resolve with `true` or `false`.
+     */
     beforeAddFile?: (item: File) => boolean | Promise<boolean>;
+    /**
+     * FilePond is about to remove this file. 
+     * 
+     * Return `false` to prevent adding it, or return a `Promise` and resolve with `true` or `false`.
+     */
     beforeRemoveFile?: (item: File) => boolean | Promise<boolean>;
 
-    stylePanelLayout: 'integrated' | 'compact' | 'circle';
-    stylePanelAspectRatio: string;
-    styleItemPanelAspectRatio: string;
+    /** 
+     * Set a different layout render mode.
+     * @default null
+     */
+    stylePanelLayout: 'integrated' | 'compact' | 'circle' | null;
+    /**
+     * Set a forced aspect ratio for the FilePond drop area.
+     * 
+     * Accepts human readable aspect ratios like `1:1` or numeric aspect ratios like `0.75`.
+     * @default null
+     */
+    stylePanelAspectRatio: string | null;
+    /**
+     * Set a forced aspect ratio for the file items. 
+     * 
+     * Useful when rendering cropped or fixed aspect ratio images in grid view.
+     * @default null
+     */
+    styleItemPanelAspectRatio: string | null;
+    /** 
+     * The position of the remove item button
+     * @default 'left'
+     */
     styleButtonRemoveItemPosition: string;
+    /**
+     * The position of the remove item button.
+     * @default 'right' 
+     */
     styleButtonProcessItemPosition: string;
+    /**
+     * The position of the load indicator
+     * @default 'right'
+     */
     styleLoadIndicatorPosition: string;
+    /**
+     * The position of the progress indicator
+     * @default 'right'
+     */
     styleProgressIndicatorPosition: string;
 
     setOptions: (options: FilePondOptionProps) => void;
