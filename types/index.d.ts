@@ -33,25 +33,25 @@ export enum FileOrigin {
 type ActualFileObject = Blob & {readonly lastModified: number; readonly name: string; readonly size: number; readonly type: string};
 
 export class File {
-    /** Returns the ID of the file */
+    /** Returns the ID of the file. */
     id: string;
-    /** Returns the server id of the file */
+    /** Returns the server id of the file. */
     serverId: string;
-    /** Returns the origin of the file*/
+    /** Returns the origin of the file. */
     origin: 'input' | 'limbo' | 'local';
-    /** Returns the current status of the file */
+    /** Returns the current status of the file. */
     status: FileStatus;
-    /** Returns the File object */
+    /** Returns the File object. */
     file: ActualFileObject;
-    /** Returns the file extensions */
+    /** Returns the file extensions. */
     fileExtension: string;
-    /** Returns the size of the file */
+    /** Returns the size of the file. */
     fileSize: number;
-    /** Returns the type of the file */
+    /** Returns the type of the file. */
     fileType: string;
-    /** Returns the full name of the file */
+    /** Returns the full name of the file. */
     filename: string;
-    /** Returns the name of the file without extension */
+    /** Returns the name of the file without extension. */
     filenameWithoutExtension: string;
 
     /** Aborts loading of this file */
@@ -77,17 +77,17 @@ interface ServerUrl {
 
     /**
      * Called when server response is received, useful for getting
-     * the unique file id from the server response
+     * the unique file id from the server response.
      */
     onload?: () => any;
     /**
      * Called when server error is received, receives the response
-     * body, useful to select the relevant error data
+     * body, useful to select the relevant error data.
      */
     onerror?: (responseBody: any) => any;
     /**
      * Called with the formdata object right before it is sent,
-     * return extended formdata object to make changes
+     * return extended formdata object to make changes.
      */
     ondata?: (data: any) => any;
 }
@@ -99,16 +99,16 @@ type ProgressServerConfigFunction = (
      * false switches the FilePond loading indicator to infinite mode.
      */
     isLengthComputable: boolean,
-    /** The amount of data currently transferred */
+    /** The amount of data currently transferred .*/
     loadedDataAmount: number,
-    /** The total amount of data to be transferred */
+    /** The total amount of data to be transferred.*/
     totalDataAmount: number,
 ) => void;
 
 type ProcessServerConfigFunction = (
-    /** The name of the input field */
+    /** The name of the input field. */
     fieldName: string,
-    /** The actual file object to send */
+    /** The actual file object to send. */
     file: ActualFileObject,
     metadata: {[key: string]: any},
     /**
@@ -118,41 +118,41 @@ type ProcessServerConfigFunction = (
      * to the client.
      */
     load: (p: string | {[key: string]: any}) => void,
-    /** Can call the error method is something went wrong, should exit after */
+    /** Can call the error method is something went wrong, should exit after. */
     error: (errorText: string) => void,
     /**
-     * Should call the progress method to update the progress to 100% before calling load()
-     * Setting computable to false switches the loading indicator to infinite mode
+     * Should call the progress method to update the progress to 100% before calling load().
+     * Setting computable to false switches the loading indicator to infinite mode.
      */
     progress: ProgressServerConfigFunction,
-    /** Let FilePond know the request has been cancelled */
+    /** Let FilePond know the request has been cancelled. */
     abort: () => void
 ) => void;
 
 type RevertServerConfigFunction = (
-    /** Server file id of the file to restore */
+    /** Server file id of the file to restore. */
     uniqueFieldId: any,
-    /** Should call the load method when done */
+    /** Should call the load method when done. */
     load: () => void,
-    /** Can call the error method is something went wrong, should exit after */
+    /** Can call the error method is something went wrong, should exit after. */
     error: (errorText: string) => void,
 ) => void;
 
 type RestoreServerConfigFunction = (
     uniqueFileId: any,
-    /** Should call the load method with a file object or blob when done */
+    /** Should call the load method with a file object or blob when done. */
     load: (file: ActualFileObject) => void,
-    /** Can call the error method is something went wrong, should exit after */
+    /** Can call the error method is something went wrong, should exit after. */
     error: (errorText: string) => void,
     /**
-     * Should call the progress method to update the progress to 100% before calling load()
-     * Setting computable to false switches the loading indicator to infinite mode
+     * Should call the progress method to update the progress to 100% before calling load().
+     * Setting computable to false switches the loading indicator to infinite mode.
      */
     progress: ProgressServerConfigFunction,
-    /** Let FilePond know the request has been cancelled */
+    /** Let FilePond know the request has been cancelled. */
     abort: () => void,
     /**
-     * Can call the headers method to supply FilePond with early response header string
+     * Can call the headers method to supply FilePond with early response header string.
      * https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/getAllResponseHeaders
      */
     headers: (headersString: string) => void,
@@ -160,19 +160,19 @@ type RestoreServerConfigFunction = (
 
 type LoadServerConfigFunction = (
     source: any,
-    /** Should call the load method with a file object or blob when done */
+    /** Should call the load method with a file object or blob when done. */
     load: (file: ActualFileObject) => void,
-    /** Can call the error method is something went wrong, should exit after */
+    /** Can call the error method is something went wrong, should exit after. */
     error: (errorText: string) => void,
     /**
-     * Should call the progress method to update the progress to 100% before calling load()
-     * Setting computable to false switches the loading indicator to infinite mode
+     * Should call the progress method to update the progress to 100% before calling load().
+     * Setting computable to false switches the loading indicator to infinite mode.
      */
     progress: ProgressServerConfigFunction,
-    /** Let FilePond know the request has been cancelled */
+    /** Let FilePond know the request has been cancelled.*/
     abort: () => void,
     /**
-     * Can call the headers method to supply FilePond with early response header string
+     * Can call the headers method to supply FilePond with early response header string.
      * https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/getAllResponseHeaders>
      */
     headers: (headersString: string) => void,
@@ -180,37 +180,37 @@ type LoadServerConfigFunction = (
 
 type FetchServerConfigFunction = (
     url: string,
-    /** Should call the load method with a file object or blob when done */
+    /** Should call the load method with a file object or blob when done. */
     load: (file: ActualFileObject) => void,
-    /** Can call the error method is something went wrong, should exit after */
+    /** Can call the error method is something went wrong, should exit after. */
     error: (errorText: string) => void,
     /**
-     * Should call the progress method to update the progress to 100% before calling load()
-     * Setting computable to false switches the loading indicator to infinite mode
+     * Should call the progress method to update the progress to 100% before calling load().
+     * Setting computable to false switches the loading indicator to infinite mode.
      */
     progress: ProgressServerConfigFunction,
-    /** Let FilePond know the request has been cancelled */
+    /** Let FilePond know the request has been cancelled. */
     abort: () => void,
     /**
-     * Can call the headers method to supply FilePond with early response header string
+     * Can call the headers method to supply FilePond with early response header string.
      * https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/getAllResponseHeaders
      */
     headers: (headersString: string) => void,
 ) => void;
 
 interface FilePondInitialFile {
-    /** The server file reference */
+    /** The server file reference. */
     source: string;
     options: {
-        /** Origin of file being added */
+        /** Origin of file being added. */
         type: 'input' | 'limbo' | 'local';
-        /** Mock file information */
+        /** Mock file information. */
         file?: {
             name?: string;
             size?: number;
             type?: string;
         };
-        /** File initial metadata */
+        /** File initial metadata. */
         metadata?: {[key: string]: any};
     };
 }
@@ -231,7 +231,7 @@ interface FilePondServerConfigProps {
         fetch?: string | ServerUrl | FetchServerConfigFunction;
     };
     /** 
-     * Immediately upload new files to the server
+     * Immediately upload new files to the server.
      * @default true
      */
     instantUpload?: boolean;
@@ -434,7 +434,7 @@ interface FilePondCallbackProps {
      * FilePond instance throws a warning. For instance
      * when the maximum amount of files has been reached.
      * Optionally receives file if error is related to a
-     * file object
+     * file object.
      */
     onwarning?: (error: any, file?: File, status?: any) => void;
     /**
@@ -442,23 +442,23 @@ interface FilePondCallbackProps {
      * file if error is related to a file object.
      */
     onerror?: (file?: File, error?: FilePondErrorDescription, status?: any) => void;
-    /** Started file load */
+    /** Started file load. */
     onaddfilestart?: (file: File) => void;
-    /** Made progress loading a file */
+    /** Made progress loading a file. */
     onaddfileprogress?: (file: File, progress: number) => void;
-    /** If no error, file has been successfully loaded */
+    /** If no error, file has been successfully loaded. */
     onaddfile?: (file: File, error?: FilePondErrorDescription) => void;
-    /** Started processing a file */
+    /** Started processing a file. */
     onprocessfilestart?: (file: File) => void;
-    /** Made progress processing a file */
+    /** Made progress processing a file. */
     onprocessfileprogress?: (file: File, progress: number) => void;
-    /** Aborted processing of a file */
+    /** Aborted processing of a file. */
     onprocessfileabort?: (file: File) => void;
-    /** Processing of a file has been reverted */
+    /** Processing of a file has been reverted. */
     onprocessfilerevert?: (file: File) => void;
-    /** If no error, Processing of a file has been completed */
+    /** If no error, Processing of a file has been completed. */
     onprocessfile?: (file: File, error?: FilePondErrorDescription) => void;
-    /** Called when all files in the list have been processed */
+    /** Called when all files in the list have been processed. */
     onprocessfiles?: () => void;
     /** File has been removed. */
     onremovefile?: (file: File, error?: FilePondErrorDescription) => void;
@@ -468,9 +468,9 @@ interface FilePondCallbackProps {
      * It receives the file item and the output data.
      */
     onpreparefile?: (file: File, output: any) => void;
-    /** A file has been added or removed, receives a list of file items */
+    /** A file has been added or removed, receives a list of file items. */
     onupdatefiles?: (fileItems: File[]) => void;
-    /* Called when a file is clicked or tapped **/
+    /* Called when a file is clicked or tapped. **/
     onactivatefile?: (file: File) => void;
 }
 
@@ -516,7 +516,7 @@ interface FilePondStyleProps {
      */
     styleItemPanelAspectRatio?: string;
     /** 
-     * The position of the remove item button
+     * The position of the remove item button.
      * @default 'left'
      */
     styleButtonRemoveItemPosition?: string;
@@ -526,12 +526,12 @@ interface FilePondStyleProps {
      */
     styleButtonProcessItemPosition?: string;
     /**
-     * The position of the load indicator
+     * The position of the load indicator.
      * @default 'right'
      */
     styleLoadIndicatorPosition?: string;
     /**
-     * The position of the progress indicator
+     * The position of the progress indicator.
      * @default 'right'
      */
     styleProgressIndicatorPosition?: string;
@@ -541,43 +541,43 @@ type CaptureAttribute = "camera" | "microphone" | "camcorder";
 
 interface FilePondBaseProps {
     /** 
-     * The ID to add to the root element
+     * The ID to add to the root element.
      * @default null
      */
     id?: string;
     /**
-     * The input field name to use
+     * The input field name to use.
      * @default 'filepond'
      */
     name?: string;  
     /** 
-     * Class Name to put on wrapper 
+     * Class Name to put on wrapper.
      * @default null
      */
     className?: string;
     /** 
-     * Sets the required attribute to the output field
+     * Sets the required attribute to the output field.
      * @default false
      */
     required?: boolean;
     /**
-     * Sets the disabled attribute to the output field
+     * Sets the disabled attribute to the output field.
      * @default false
      */
     disabled?: boolean;
     /** 
-     * Sets the given value to the capture attribute
+     * Sets the given value to the capture attribute.
      * @default null
      */
     captureMethod?: CaptureAttribute;
 
     /** 
-     * Enable or disable drag n’ drop
+     * Enable or disable drag n’ drop.
      * @default true
      */
     allowDrop?: boolean;
     /** 
-     * Enable or disable file browser
+     * Enable or disable file browser.
      * @default true
      */
     allowBrowse?: boolean;
@@ -588,55 +588,55 @@ interface FilePondBaseProps {
      */
     allowPaste?: boolean;
     /** 
-     * Enable or disable adding multiple files
+     * Enable or disable adding multiple files.
      * @default false
      */
     allowMultiple?: boolean;
     /** 
-     * Allow drop to replace a file, only works when allowMultiple is false
+     * Allow drop to replace a file, only works when allowMultiple is false.
      * @default true
      */
     allowReplace?: boolean;
     /** 
-     * Allows the user to revert file upload
+     * Allows the user to revert file upload.
      * @default true
      */
     allowRevert?: boolean;
     /** 
-     * Require the file to be successfully reverted before continuing
+     * Require the file to be successfully reverted before continuing.
      * @default false
      */
     forceRevert?: boolean;
 
     /** 
-     * The maximum number of files that filepond pond can handle
+     * The maximum number of files that filepond pond can handle.
      * @default null
      */
     maxFiles?: number;
     /** 
-     * Enables custom validity messages
+     * Enables custom validity messages.
      * @default false
      */
     checkValidity?: boolean;
 
     /**
-     * Set to false to always add items to beginning or end of list
+     * Set to false to always add items to beginning or end of list.
      * @default true
      */
     itemInsertLocationFreedom?: boolean;
     /**
-     * Default index in list to add items that have been dropped at the top of the list
+     * Default index in list to add items that have been dropped at the top of the list.
      * @default 'before'
      */
     itemInsertLocation?: 'before' | 'after' | ((a: File, b: File) => number);
     /**
-     * The interval to use before showing each item being added to the list
+     * The interval to use before showing each item being added to the list.
      * @default 75
      */
     itemInsertInterval?: number;
 
     /** 
-     * The maximum number of files that can be uploaded in parallel
+     * The maximum number of files that can be uploaded in parallel.
      * @default null
      */
     maxParallelUploads?: number;
@@ -652,55 +652,83 @@ export interface FilePondOptionProps extends
     FilePondStyleProps,
     FilePondBaseProps {}
 
+type FilePondEventPrefixed = 'FilePond:init' 
+| 'FilePond:warning' 
+| 'FilePond:error' 
+| 'FilePond:addfilestart' 
+| 'FilePond:addfileprogress' 
+| 'FilePond:addfile'
+| 'FilePond:processfilestart' 
+| 'FilePond:processfileprogress' 
+| 'FilePond:processfileabort' 
+| 'FilePond:processfilerevert' 
+| 'FilePond:processfile' 
+| 'FilePond:removefile' 
+| 'FilePond:updatefiles'
+
+type FilePondEvent = 'init' 
+| 'warning' 
+| 'error' 
+| 'addfilestart' 
+| 'addfileprogress' 
+| 'addfile' 
+| 'processfilestart' 
+| 'processfileprogress' 
+| 'processfileabort'
+| 'processfilerevert'
+| 'processfile'
+| 'removefile'
+| 'updatefiles'
+
 export class FilePond {
     /**
-     * The root element of the Filepond instance
+     * The root element of the Filepond instance.
      */
     readonly element: Element | null;
     /**
-     * Returns the current status of the FilePond instance
+     * Returns the current status of the FilePond instance.
      * @default Status.EMPTY
      */
     readonly status: Status;
 
     /** 
-     * The ID to add to the root element
+     * The ID to add to the root element.
      * @default null
      */
     id: string | null;
     /**
-     * The input field name to use
+     * The input field name to use.
      * @default 'filepond'
      */
     name: string;  
     /** 
-     * Class Name to put on wrapper 
+     * Class Name to put on wrapper.
      * @default null
      */
     className: string | null;
     /** 
-     * Sets the required attribute to the output field
+     * Sets the required attribute to the output field.
      * @default false
      */
     required: boolean;
     /**
-     * Sets the disabled attribute to the output field
+     * Sets the disabled attribute to the output field.
      * @default false
      */
     disabled: boolean;
     /** 
-     * Sets the given value to the capture attribute
+     * Sets the given value to the capture attribute.
      * @default null
      */
     captureMethod: CaptureAttribute | null;
 
     /** 
-     * Enable or disable drag n’ drop
+     * Enable or disable drag n’ drop.
      * @default true
      */
     allowDrop: boolean;
     /** 
-     * Enable or disable file browser
+     * Enable or disable file browser.
      * @default true
      */
     allowBrowse: boolean;
@@ -711,55 +739,55 @@ export class FilePond {
      */
     allowPaste: boolean;
     /** 
-     * Enable or disable adding multiple files
+     * Enable or disable adding multiple files.
      * @default false
      */
     allowMultiple: boolean;
     /** 
-     * Allow drop to replace a file, only works when allowMultiple is false
+     * Allow drop to replace a file, only works when allowMultiple is false.
      * @default true
      */
     allowReplace: boolean;
     /** 
-     * Allows the user to revert file upload
+     * Allows the user to revert file upload.
      * @default true
      */
     allowRevert: boolean;
     /** 
-     * Require the file to be successfully reverted before continuing
+     * Require the file to be successfully reverted before continuing.
      * @default false
      */
     forceRevert: boolean;
 
     /** 
-     * The maximum number of files that filepond pond can handle
+     * The maximum number of files that filepond pond can handle.
      * @default null
      */
     maxFiles: number | null;
     /** 
-     * Enables custom validity messages
+     * Enables custom validity messages.
      * @default false
      */
     checkValidity: boolean;
 
     /**
-     * Set to false to always add items to beginning or end of list
+     * Set to false to always add items to beginning or end of list.
      * @default true
      */
     itemInsertLocationFreedom: boolean;
     /**
-     * Default index in list to add items that have been dropped at the top of the list
+     * Default index in list to add items that have been dropped at the top of the list.
      * @default 'before'
      */
     itemInsertLocation: 'before' | 'after' | ((a: File, b: File) => number);
     /**
-     * The interval to use before showing each item being added to the list
+     * The interval to use before showing each item being added to the list.
      * @default 75
      */
     itemInsertInterval: number;
 
     /** 
-     * The maximum number of files that can be uploaded in parallel
+     * The maximum number of files that can be uploaded in parallel.
      * @default null
      */
     maxParallelUploads: number | null;   
@@ -801,8 +829,9 @@ export class FilePond {
         load?: string | ServerUrl | LoadServerConfigFunction;
         fetch?: string | ServerUrl | FetchServerConfigFunction;
     } | null;
+
     /** 
-     * Immediately upload new files to the server
+     * Immediately upload new files to the server.
      * @default true
      */
     instantUpload?: boolean;
@@ -965,7 +994,7 @@ export class FilePond {
      * FilePond instance throws a warning. For instance
      * when the maximum amount of files has been reached.
      * Optionally receives file if error is related to a
-     * file object
+     * file object.
      */
     onwarning?: (error: any, file?: File, status?: any) => void;
     /**
@@ -973,23 +1002,23 @@ export class FilePond {
      * file if error is related to a file object.
      */
     onerror?: (file?: File, error?: FilePondErrorDescription, status?: any) => void;
-    /** Started file load */
+    /** Started file load. */
     onaddfilestart?: (file: File) => void;
-    /** Made progress loading a file */
+    /** Made progress loading a file. */
     onaddfileprogress?: (file: File, progress: number) => void;
-    /** If no error, file has been successfully loaded */
+    /** If no error, file has been successfully loaded. */
     onaddfile?: (file: File, error?: FilePondErrorDescription) => void;
-    /** Started processing a file */
+    /** Started processing a file. */
     onprocessfilestart?: (file: File) => void;
-    /** Made progress processing a file */
+    /** Made progress processing a file. */
     onprocessfileprogress?: (file: File, progress: number) => void;
-    /** Aborted processing of a file */
+    /** Aborted processing of a file. */
     onprocessfileabort?: (file: File) => void;
-    /** Processing of a file has been reverted */
+    /** Processing of a file has been reverted. */
     onprocessfilerevert?: (file: File) => void;
-    /** If no error, Processing of a file has been completed */
+    /** If no error, Processing of a file has been completed. */
     onprocessfile?: (file: File, error?: FilePondErrorDescription) => void;
-    /** Called when all files in the list have been processed */
+    /** Called when all files in the list have been processed. */
     onprocessfiles?: () => void;
     /** File has been removed. */
     onremovefile?: (file: File, error?: FilePondErrorDescription) => void;
@@ -999,9 +1028,9 @@ export class FilePond {
      * It receives the file item and the output data.
      */
     onpreparefile?: (file: File, output: any) => void;
-    /** A file has been added or removed, receives a list of file items */
+    /** A file has been added or removed, receives a list of file items. */
     onupdatefiles?: (fileItems: File[]) => void;
-    /* Called when a file is clicked or tapped **/
+    /* Called when a file is clicked or tapped. **/
     onactivatefile?: (file: File) => void;
 
     /**
@@ -1043,7 +1072,7 @@ export class FilePond {
      */
     styleItemPanelAspectRatio: string | null;
     /** 
-     * The position of the remove item button
+     * The position of the remove item button.
      * @default 'left'
      */
     styleButtonRemoveItemPosition: string;
@@ -1053,66 +1082,123 @@ export class FilePond {
      */
     styleButtonProcessItemPosition: string;
     /**
-     * The position of the load indicator
+     * The position of the load indicator.
      * @default 'right'
      */
     styleLoadIndicatorPosition: string;
     /**
-     * The position of the progress indicator
+     * The position of the progress indicator.
      * @default 'right'
      */
     styleProgressIndicatorPosition: string;
 
+    /** Override multiple options at once. */
     setOptions: (options: FilePondOptionProps) => void;
+    /** 
+     * Adds a file.
+     * @param options.index The index that the file should be added at.
+     */
     addFile: (source: ActualFileObject | Blob | string, options?: {index: number}) => Promise<File>;
+    /** 
+     * Adds multiple files.
+     * @param options.index The index that the files should be added at.
+     */
     addFiles: (source: ActualFileObject[] | Blob[] | string[], options?: {index: number}) => Promise<File[]>;
+    /** 
+     * Removes a file. If no parameter is provided, removes the first file in the list.
+     * @param query The file reference, id, or index.
+     */
     removeFile: (query?: File | string | number) => void;
+    /** Removes all files. */
     removeFiles: () => void;
+    /** 
+     * Processes a file. If no parameter is provided, processes the first file in the list.
+     * @param query The file reference, id, or index
+     */
     processFile: (query?: File | string | number) => Promise<File>;
-    processFiles: () => Promise<File[]>;
-    getFile: () => File;
+    /**
+     * Processes multiple files. If no parameter is provided, processes all files.
+     * @param query The file reference(s), id(s), or index(es)
+     */
+    processFiles: (query?: File[] | string[] | number[]) => Promise<File[]>;
+    /** 
+     * Returns a file. If no parameter is provided, returns the first file in the list.
+     * @param query The file id, or index
+     */
+    getFile: (query?: string | number) => File;
+    /** Returns all files. */
     getFiles: () => File[];
+    /**
+     * Manually trigger the browse files panel.
+     * 
+     * Only works if the call originates from the user.
+     */
     browse: () => void;
+    /**
+     * Sort the items in the files list.
+     * @param compare The comparison function
+     */
     sort: (compare: (a: File, b: File) => number) => void;
+    /** Destroys this FilePond instance. */
     destroy: () => void;
 
-    /** Inserts the FilePond instance after the supplied element */
+    /** Inserts the FilePond instance after the supplied element. */
     insertAfter: (element: Element) => void;
-    /** Inserts the FilePond instance before the supplied element */
+    /** Inserts the FilePond instance before the supplied element. */
     insertBefore: (element: Element) => void;
-    /** Appends FilePond to the given element  */
+    /** Appends FilePond to the given element.  */
     appendTo: (element: Element) => void;
-    /** Returns true if the current instance is attached to the supplied element */
+    /** Returns true if the current instance is attached to the supplied element. */
     isAttachedTo: (element: Element) => void;
-    /** Replaces the supplied element with FilePond */
+    /** Replaces the supplied element with FilePond. */
     replaceElement: (element: Element) => void;
-    /** If FilePond replaced the original element, this restores the original element to its original glory */
+    /** If FilePond replaced the original element, this restores the original element to its original glory. */
     restoreElement: (element: Element) => void;
 
-    addEventListener: (event: string, fn: (...args: any[]) => void) => void;
-    on: (event: string, fn: (...args: any[]) => void) => void;
-    onOnce: (event: string, fn: (...args: any[]) => void) => void;
-    off: (event: string, fn: (...args: any[]) => void) => void;  
+    /** 
+     * Adds an event listener to the given event.
+     * @param event Name of the event, prefixed with `Filepond:`
+     * @param fn Event handler
+     */
+    addEventListener: (event: FilePondEventPrefixed, fn: (e: any) => void) => void;
+    /** 
+     * Listen to an event.
+     * @param event Name of the event
+     * @param fn Event handler, signature is identical to the callback method
+     */
+    on: (event: FilePondEvent, fn: (...args: any[]) => void) => void;
+     /** 
+     * Listen to an event once and remove the handler.
+     * @param event Name of the event
+     * @param fn Event handler, signature is identical to the callback method
+     */
+    onOnce: (event: FilePondEvent, fn: (...args: any[]) => void) => void;
+     /** 
+     * Stop listening to an event.
+     * @param event Name of the event
+     * @param fn Event handler, signature is identical to the callback method
+     */
+    off: (event: FilePondEvent, fn: (...args: any[]) => void) => void;  
 }
 
-/** Creates a new FilePond instance */
+/** Creates a new FilePond instance. */
 export function create(element?: Element, options?: FilePondOptionProps): FilePond;
-/** Destroys the FilePond instance attached to the supplied element */
+/** Destroys the FilePond instance attached to the supplied element. */
 export function destroy(element: Element): void;
-/** Returns the FilePond instance attached to the supplied element */
+/** Returns the FilePond instance attached to the supplied element. */
 export function find(element: Element): FilePond;
 /**
  * Parses a given section of the DOM tree for elements with class
  * .filepond and turns them into FilePond elements.
  */
 export function parse(context: Element): void;
-/** Registers a FilePond plugin for later use */
+/** Registers a FilePond plugin for later use. */
 export function registerPlugin(...plugins: any[]): void;
-/** Sets page level default options for all FilePond instances */
+/** Sets page level default options for all FilePond instances. */
 export function setOptions(options: FilePondOptionProps): void;
-/** Returns the current default options */
+/** Returns the current default options. */
 export function getOptions(): FilePondOptionProps;
-/** Determines whether or not the browser supports FilePond */
+/** Determines whether or not the browser supports FilePond. */
 export function supported(): boolean;
-/** Returns an object describing all the available options and their types, useful for writing FilePond adapters */
+/** Returns an object describing all the available options and their types, useful for writing FilePond adapters. */
 export const OptionTypes: object;
