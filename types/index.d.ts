@@ -79,12 +79,12 @@ interface ServerUrl {
      * Called when server response is received, useful for getting
      * the unique file id from the server response.
      */
-    onload?: (response: any) => void;
+    onload?: (response: any) => number | string;
     /**
      * Called when server error is received, receives the response
      * body, useful to select the relevant error data.
      */
-    onerror?: (responseBody: any) => void;
+    onerror?: (responseBody: any) => any;
     /**
      * Called with the formdata object right before it is sent,
      * return extended formdata object to make changes.
@@ -252,7 +252,7 @@ interface FilePondServerConfigProps {
      * See: https://pqina.nl/filepond/docs/patterns/api/filepond-object/#setting-initial-files
      * @default []
      */
-    files?: FilePondInitialFile[] | ActualFileObject[] | Blob[] | string[];
+    files?: (FilePondInitialFile | ActualFileObject | Blob | string)[];
 }
 
 interface FilePondDragDropProps {
@@ -435,11 +435,6 @@ interface FilePondErrorDescription {
     sub: string;
 }
 
-/**
- * Note that in my testing, callbacks that include an error prop
- * always give the error as the second prop, with the file as
- * the first prop.    This is contradictory to the current docs.
- */
 interface FilePondCallbackProps {
     /** FilePond instance has been created and is ready. */
     oninit?: () => void;
@@ -454,13 +449,13 @@ interface FilePondCallbackProps {
      * FilePond instance throws an error. Optionally receives
      * file if error is related to a file object.
      */
-    onerror?: (file?: File, error?: FilePondErrorDescription, status?: any) => void;
+    onerror?: (error: FilePondErrorDescription, file?: File, status?: any) => void;
     /** Started file load. */
     onaddfilestart?: (file: File) => void;
     /** Made progress loading a file. */
     onaddfileprogress?: (file: File, progress: number) => void;
     /** If no error, file has been successfully loaded. */
-    onaddfile?: (file: File, error?: FilePondErrorDescription) => void;
+    onaddfile?: (error: FilePondErrorDescription | null, file: File) => void;
     /** Started processing a file. */
     onprocessfilestart?: (file: File) => void;
     /** Made progress processing a file. */
@@ -470,11 +465,11 @@ interface FilePondCallbackProps {
     /** Processing of a file has been reverted. */
     onprocessfilerevert?: (file: File) => void;
     /** If no error, Processing of a file has been completed. */
-    onprocessfile?: (file: File, error?: FilePondErrorDescription) => void;
+    onprocessfile?: (error: FilePondErrorDescription | null, file: File) => void;
     /** Called when all files in the list have been processed. */
     onprocessfiles?: () => void;
     /** File has been removed. */
-    onremovefile?: (file: File, error?: FilePondErrorDescription) => void;
+    onremovefile?: (error: FilePondErrorDescription | null, file: File) => void;
     /**
      * File has been transformed by the transform plugin or
      * another plugin subscribing to the prepare_output filter.
@@ -482,7 +477,7 @@ interface FilePondCallbackProps {
      */
     onpreparefile?: (file: File, output: any) => void;
     /** A file has been added or removed, receives a list of file items. */
-    onupdatefiles?: (fileItems: File[]) => void;
+    onupdatefiles?: (files: File[]) => void;
     /* Called when a file is clicked or tapped. **/
     onactivatefile?: (file: File) => void;
 }
@@ -856,7 +851,7 @@ export class FilePond {
      * See: https://pqina.nl/filepond/docs/patterns/api/filepond-object/#setting-initial-files
      * @default []
      */
-    files?: FilePondInitialFile[] | ActualFileObject[] | Blob[] | string[];
+    files?: (FilePondInitialFile | ActualFileObject | Blob | string)[];
 
     /**
      * The decimal separator used to render numbers.
