@@ -15,6 +15,49 @@ const pond = FilePond.create(undefined, {
       return {
         abort: () => {abort();}
       }
+    },
+    revert: (uniqueFileId, load, error) => { 
+      error('oh my goodness');    
+      load();
+    },
+    load: (source, load, error, progress, abort, headers) => {
+      error('oh my goodness');
+      headers("headersString");
+      progress(true, 0, 1024);
+      load(new File(["aaaa"], "something"));
+      return {
+        abort: () => {        
+          abort();
+        }
+      };
+    },
+    fetch: (url, load, error, progress, abort, headers) => { 
+      error('oh my goodness');     
+      headers("");    
+      progress(true, 0, 1024);
+      load(new File(["aaaa"], "something"));     
+      return {
+          abort: () => {           
+            abort();
+          }
+      };
+    },
+    restore: (uniqueFileId, load, error, progress, abort, headers) => { 
+      error('oh my goodness');    
+      headers("");    
+      progress(true, 0, 1024);    
+      load(new File(["aaaa"], "something"));
+     
+      return {
+          abort: () => {
+
+              abort();
+          }
+      };
+    },
+    remove: (source, load, error) => { 
+      error('oh my goodness');
+      load();
     }
   },
   itemInsertLocation: (a, b) => {
@@ -50,6 +93,8 @@ pond.itemInsertLocation = (a, b) => {
   return 0;
 }
 
+
+
 FilePond.setOptions({
   allowDrop: false,
   allowReplace: false,
@@ -84,7 +129,16 @@ FilePond.setOptions({
       revert: './revert',
       restore: './restore/',
       load: './load/',
-      fetch: './fetch/'
+      fetch: './fetch/',
+      remove: null
+  }
+});
+
+FilePond.setOptions({
+  server: {
+      process: './process',
+      fetch: null,
+      revert: null
   }
 });
 
@@ -112,13 +166,3 @@ pond.on('addfile', (error, file) => {
   }
   console.log('File added', file);
 });
-
-// $ExpectType Status
-let status = pond.status
-
-
-
-
-
-
-

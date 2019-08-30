@@ -118,7 +118,7 @@ type ProcessServerConfigFunction = (
      * to the client.
      */
     load: (p: string | { [key: string]: any }) => void,
-    /** Can call the error method is something went wrong, should exit after. */
+    /** Call if something goes wrong, will exit after. */
     error: (errorText: string) => void,
     /**
      * Should call the progress method to update the progress to 100% before calling load().
@@ -134,15 +134,16 @@ type RevertServerConfigFunction = (
     uniqueFieldId: any,
     /** Should call the load method when done. */
     load: () => void,
-    /** Can call the error method is something went wrong, should exit after. */
-    error: (errorText: string) => void,
+    /** Call if something goes wrong, will exit after. */
+    error: (errorText: string) => void
 ) => void;
 
 type RestoreServerConfigFunction = (
+    /** Server file id of the file to restore. */
     uniqueFileId: any,
     /** Should call the load method with a file object or blob when done. */
     load: (file: ActualFileObject) => void,
-    /** Can call the error method is something went wrong, should exit after. */
+    /** Call if something goes wrong, will exit after. */
     error: (errorText: string) => void,
     /**
      * Should call the progress method to update the progress to 100% before calling load().
@@ -155,14 +156,14 @@ type RestoreServerConfigFunction = (
      * Can call the headers method to supply FilePond with early response header string.
      * https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/getAllResponseHeaders
      */
-    headers: (headersString: string) => void,
+    headers: (headersString: string) => void
 ) => void;
 
 type LoadServerConfigFunction = (
     source: any,
     /** Should call the load method with a file object or blob when done. */
     load: (file: ActualFileObject) => void,
-    /** Can call the error method is something went wrong, should exit after. */
+    /** Call if something goes wrong, will exit after. */
     error: (errorText: string) => void,
     /**
      * Should call the progress method to update the progress to 100% before calling load().
@@ -175,14 +176,14 @@ type LoadServerConfigFunction = (
      * Can call the headers method to supply FilePond with early response header string.
      * https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/getAllResponseHeaders>
      */
-    headers: (headersString: string) => void,
+    headers: (headersString: string) => void
 ) => void;
 
 type FetchServerConfigFunction = (
     url: string,
     /** Should call the load method with a file object or blob when done. */
     load: (file: ActualFileObject) => void,
-    /** Can call the error method is something went wrong, should exit after. */
+    /** Call if something goes wrong, will exit after. */
     error: (errorText: string) => void,
     /**
      * Should call the progress method to update the progress to 100% before calling load().
@@ -195,7 +196,16 @@ type FetchServerConfigFunction = (
      * Can call the headers method to supply FilePond with early response header string.
      * https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest/getAllResponseHeaders
      */
-    headers: (headersString: string) => void,
+    headers: (headersString: string) => void
+) => void;
+
+type RemoveServerConfigFunction = (
+    /** Local file source */
+    source: any,
+    /** Call when done */
+    load: () => void,
+    /** Call if something goes wrong, will exit after. */
+    error: (errorText: string) => void
 ) => void;
 
 interface FilePondInitialFile {
@@ -224,11 +234,12 @@ interface FilePondServerConfigProps {
     server?: string | {
         url?: string
         timeout?: number
-        process?: string | ServerUrl | ProcessServerConfigFunction;
-        revert?: string | ServerUrl | RevertServerConfigFunction;
-        restore?: string | ServerUrl | RestoreServerConfigFunction;
-        load?: string | ServerUrl | LoadServerConfigFunction;
-        fetch?: string | ServerUrl | FetchServerConfigFunction;
+        process?: string | ServerUrl | ProcessServerConfigFunction | null;
+        revert?: string | ServerUrl | RevertServerConfigFunction | null;
+        restore?: string | ServerUrl | RestoreServerConfigFunction | null;
+        load?: string | ServerUrl | LoadServerConfigFunction | null;
+        fetch?: string | ServerUrl | FetchServerConfigFunction | null;
+        remove?: RemoveServerConfigFunction | null;
     };
     /**
      * Immediately upload new files to the server.
@@ -825,11 +836,12 @@ export class FilePond {
     server?: string | {
         url?: string
         timeout?: number
-        process?: string | ServerUrl | ProcessServerConfigFunction;
-        revert?: string | ServerUrl | RevertServerConfigFunction;
-        restore?: string | ServerUrl | RestoreServerConfigFunction;
-        load?: string | ServerUrl | LoadServerConfigFunction;
-        fetch?: string | ServerUrl | FetchServerConfigFunction;
+        process?: string | ServerUrl | ProcessServerConfigFunction | null;
+        revert?: string | ServerUrl | RevertServerConfigFunction | null;
+        restore?: string | ServerUrl | RestoreServerConfigFunction | null;
+        load?: string | ServerUrl | LoadServerConfigFunction | null;
+        fetch?: string | ServerUrl | FetchServerConfigFunction | null;
+        remove: RemoveServerConfigFunction | null;
     } | null;
 
     /** 
