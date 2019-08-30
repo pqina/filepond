@@ -234,6 +234,7 @@ interface FilePondServerConfigProps {
     server?: string | {
         url?: string
         timeout?: number
+        headers?: { [key: string]: string | boolean | number };
         process?: string | ServerUrl | ProcessServerConfigFunction | null;
         revert?: string | ServerUrl | RevertServerConfigFunction | null;
         restore?: string | ServerUrl | RestoreServerConfigFunction | null;
@@ -836,12 +837,13 @@ export class FilePond {
     server?: string | {
         url?: string
         timeout?: number
+        headers?: { [key: string]: string | boolean | number } | null;
         process?: string | ServerUrl | ProcessServerConfigFunction | null;
         revert?: string | ServerUrl | RevertServerConfigFunction | null;
         restore?: string | ServerUrl | RestoreServerConfigFunction | null;
         load?: string | ServerUrl | LoadServerConfigFunction | null;
         fetch?: string | ServerUrl | FetchServerConfigFunction | null;
-        remove: RemoveServerConfigFunction | null;
+        remove?: RemoveServerConfigFunction | null;
     } | null;
 
     /** 

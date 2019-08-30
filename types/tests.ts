@@ -142,6 +142,18 @@ FilePond.setOptions({
   }
 });
 
+pond.server = {
+  headers: {
+      foo: 'bar'
+  },
+  revert: {
+      url: "",
+      headers: {
+          foo: 'baz'
+      }
+  }
+}
+
 pond.addEventListener('FilePond:addfile', e => {
   console.log(e.detail);
 })
