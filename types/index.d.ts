@@ -435,7 +435,8 @@ interface FilePondErrorDescription {
     sub: string;
 }
 
-interface FilePondCallbackProps {
+/** Exposed for type filtering in downstream packages, please ignore. */
+export interface FilePondCallbackProps {
     /** FilePond instance has been created and is ready. */
     oninit?: () => void;
     /**
