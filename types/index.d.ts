@@ -252,7 +252,7 @@ interface FilePondServerConfigProps {
      * See: https://pqina.nl/filepond/docs/patterns/api/filepond-object/#setting-initial-files
      * @default []
      */
-    files?: (FilePondInitialFile | ActualFileObject | Blob | string)[];
+    files?: Array<FilePondInitialFile | ActualFileObject | Blob | string>;
 }
 
 interface FilePondDragDropProps {
@@ -851,7 +851,7 @@ export class FilePond {
      * See: https://pqina.nl/filepond/docs/patterns/api/filepond-object/#setting-initial-files
      * @default []
      */
-    files?: (FilePondInitialFile | ActualFileObject | Blob | string)[];
+    files?: Array<FilePondInitialFile | ActualFileObject | Blob | string>;
 
     /**
      * The decimal separator used to render numbers.
