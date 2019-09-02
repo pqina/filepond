@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.6.0
+
+- Add TypeScript declarations
+
+
 ## 4.5.2
 
 - If `Blob` has `name` attribute use name attribute instead of URL for file name.
