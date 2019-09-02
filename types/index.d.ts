@@ -162,7 +162,7 @@ type RestoreServerConfigFunction = (
 type LoadServerConfigFunction = (
     source: any,
     /** Should call the load method with a file object or blob when done. */
-    load: (file: ActualFileObject) => void,
+    load: (file: ActualFileObject | Blob) => void,
     /** Call if something goes wrong, will exit after. */
     error: (errorText: string) => void,
     /**
@@ -182,7 +182,7 @@ type LoadServerConfigFunction = (
 type FetchServerConfigFunction = (
     url: string,
     /** Should call the load method with a file object or blob when done. */
-    load: (file: ActualFileObject) => void,
+    load: (file: ActualFileObject | Blob) => void,
     /** Call if something goes wrong, will exit after. */
     error: (errorText: string) => void,
     /**
