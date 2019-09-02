@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.5.1
+ * FilePond 4.5.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -2901,7 +2901,10 @@
 
           // turn blob response into a file
           if (response instanceof Blob) {
-            response = getFileFromBlob(response, getFilenameFromURL(url));
+            response = getFileFromBlob(
+              response,
+              response.name || getFilenameFromURL(url)
+            );
           }
 
           api.fire('load', response instanceof Blob ? response : response.body);

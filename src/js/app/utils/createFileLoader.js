@@ -75,7 +75,7 @@ export const createFileLoader = fetchFn => {
                 if (response instanceof Blob) {
                     response = getFileFromBlob(
                         response, 
-                        getFilenameFromURL(url)
+                        response.name || getFilenameFromURL(url)
                     );
                 }
 

@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.5.2
+
+- If `Blob` has `name` attribute use name attribute instead of URL for file name.
+
+
+## 4.5.1
+
+- Fix issue where drag-drop from Firefox download list would not add file to drop area
+
+
 ## 4.5.0
 
 - Add option to set server end point headers on a generic level so they're applied to all end points using `server.headers`.
