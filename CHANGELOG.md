@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.6.1
+
+- Add missing Blob type to TypeScript server config
+
+
 ## 4.6.0
 
 - Add TypeScript declarations
