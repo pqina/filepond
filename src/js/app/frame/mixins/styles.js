@@ -191,7 +191,22 @@ const applyStyles = (
         styles.length !== elementCurrentStyle.length ||
         styles !== elementCurrentStyle
     ) {
-        element.setAttribute('style', styles);
+        // Reset the styles
+        ['transform-origin', 'transform', 'opacity', 'visibility',
+            'pointer-events', 'width', 'height'].forEach(function(prop) {
+            element.style[prop] = ''
+        })
+        // Set each of the style props directly to avoid having to use inline css
+        let elStyles = styles.split(';');
+        for (let i in elStyles) {
+            let style = elStyles[i]
+            if (style) {
+                let propval = style.split(':');
+                let prop = propval[0];
+                let val = propval[1];
+                element.style[prop] = val;
+            }
+        }
         // store current styles so we can compare them to new styles later on
         // _not_ getting the style attribute is faster
         element.elementCurrentStyle = styles;

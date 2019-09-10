@@ -944,7 +944,29 @@
       styles.length !== elementCurrentStyle.length ||
       styles !== elementCurrentStyle
     ) {
-      element.setAttribute('style', styles);
+      // Reset the styles
+      [
+        'transform-origin',
+        'transform',
+        'opacity',
+        'visibility',
+        'pointer-events',
+        'width',
+        'height'
+      ].forEach(function(prop) {
+        element.style[prop] = '';
+      });
+      // Set each of the style props directly to avoid having to use inline css
+      var elStyles = styles.split(';');
+      for (var i in elStyles) {
+        var style = elStyles[i];
+        if (style) {
+          var propval = style.split(':');
+          var prop = propval[0];
+          var val = propval[1];
+          element.style[prop] = val;
+        }
+      }
       // store current styles so we can compare them to new styles later on
       // _not_ getting the style attribute is faster
       element.elementCurrentStyle = styles;
