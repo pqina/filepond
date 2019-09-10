@@ -2,7 +2,7 @@
 
 ## 4.7.0
 
-- Add support for [chunked uploads](https://pqina.nl/filepond/docs/patterns/api/server/#process-chunks).
+- Add support for [chunked uploads](https://pqina.nl/filepond/docs/patterns/api/server/#process-chunks). Thanks to Ryan Olson (@ams-ryanolson) Arctic Media for donating the funds to build this.
 
 
 ## 4.6.1
