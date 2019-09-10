@@ -801,22 +801,49 @@ export class FilePond {
      */
     maxParallelUploads: number | null;
 
+    /**
+     * Enable or disable chunked uploads
+     * @default false
+     */
+    chunkUploads: boolean;
+
+    /**
+     * Force use of chunk uploads even for files smaller than chunk size
+     * @default false
+     */
+    chunkForce: boolean;
+
+    /**
+     * Size of chunks (5MB default)
+     * @default 5000000
+     */
+    chunkSize: number | string;
+
+    /**
+     * Amount of times to retry upload of a chunk when it fails
+     * @default [500, 1000, 3000]
+     */
+    chunkRetryDelays: number[];
+
     /** 
      * FilePond will catch all files dropped on the webpage.
      * @default false
      */
     dropOnPage: boolean;
+    
     /** 
      * Require drop on the FilePond element itself to catch the file.
      * @default true
      */
     dropOnElement: boolean;
+
     /**
      * When enabled, files are validated before they are dropped.
      * A file is not added when it’s invalid.
      * @default false
      */
     dropValidation: boolean;
+
     /**
      * Ignored file names when handling dropped directories.
      * Dropping directories is not supported on all browsers.
