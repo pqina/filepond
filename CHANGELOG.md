@@ -1,13 +1,18 @@
 # Changelog
 
+## 4.7.0
+
+- Add support for [chunked uploads](https://pqina.nl/filepond/docs/patterns/api/server/#process-chunks).
+
+
 ## 4.6.1
 
-- Add missing Blob type to TypeScript server config
+- Add missing Blob type to TypeScript server config.
 
 
 ## 4.6.0
 
-- Add TypeScript declarations
+- Add TypeScript declarations.
 
 
 ## 4.5.2
