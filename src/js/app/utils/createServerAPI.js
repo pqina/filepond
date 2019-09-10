@@ -4,6 +4,7 @@ import { forin } from '../../utils/forin';
 
 const methods = {
     process: 'POST',
+    patch: 'PATCH',
     revert: 'DELETE',
     fetch: 'GET',
     restore: 'GET',
@@ -43,7 +44,7 @@ const createAction = (name, outline, method, timeout, headers) => {
 
     // build action object
     const action = {
-        url: method === 'GET' ? `?${name}=` : '',
+        url: method === 'GET' || method === 'PATCH' ? `?${name}=` : '',
         method,
         headers,
         withCredentials: false,

@@ -1379,6 +1379,7 @@ const toFunctionReference = string => {
 
 const methods = {
   process: 'POST',
+  patch: 'PATCH',
   revert: 'DELETE',
   fetch: 'GET',
   restore: 'GET',
@@ -1424,7 +1425,7 @@ const createAction = (name, outline, method, timeout, headers) => {
 
   // build action object
   const action = {
-    url: method === 'GET' ? `?${name}=` : '',
+    url: method === 'GET' || method === 'PATCH' ? `?${name}=` : '',
     method,
     headers,
     withCredentials: false,
@@ -1898,6 +1899,12 @@ const defaultOptions = {
   instantUpload: [true, Type.BOOLEAN], // Should upload files immidiately on drop
   maxParallelUploads: [2, Type.INT], // Maximum files to upload in parallel
 
+  // Chunks
+  chunkUploads: [false, Type.BOOLEAN], // Enable chunked uploads
+  chunkForce: [false, Type.BOOLEAN], // Force use of chunk uploads even for files smaller than chunk size
+  chunkSize: [5000000, Type.INT], // Size of chunks (5MB default)
+  chunkRetryDelays: [[500, 1000, 3000], Type.Array], // Amount of times to retry upload of a chunk when it fails
+
   // The server api end points to use for uploading (see docs)
   server: [null, Type.SERVER_API],
 
@@ -2074,9 +2081,9 @@ const queries = state => ({
 
   GET_ACTIVE_ITEM: query => getItemByQuery(getActiveItems(state.items), query),
 
-  GET_ACTIVE_ITEMS: query => getActiveItems(state.items),
+  GET_ACTIVE_ITEMS: () => getActiveItems(state.items),
 
-  GET_ITEMS: query => state.items,
+  GET_ITEMS: () => state.items,
 
   GET_ITEM_NAME: query => {
     const item = getItemByQuery(state.items, query);
@@ -2720,66 +2727,87 @@ const createFetchFunction = (apiUrl = '', action) => {
   };
 };
 
+const ChunkStatus = {
+  QUEUED: 0,
+  COMPLETE: 1,
+  PROCESSING: 2,
+  ERROR: 3,
+  WAITING: 4
+};
+
 /*
 function signature:
-  (file, metadata, load, error, progress, abort) => {
+  (file, metadata, load, error, progress, abort, transfer, options) => {
     return {
     abort:() => {}
   }
 }
 */
-const createProcessorFunction = (apiUrl = '', action, name) => {
-  // custom handler (should also handle file, load, error, progress and abort)
-  if (typeof action === 'function') {
-    return (...params) => action(name, ...params);
-  }
 
-  // no action supplied
-  if (!action || !isString(action.url)) {
-    return null;
-  }
+// apiUrl, action, name, file, metadata, load, error, progress, abort, transfer, options
+const processFileChunked = (
+  apiUrl,
+  action,
+  name,
+  file,
+  metadata,
+  load,
+  error,
+  progress,
+  abort,
+  transfer,
+  options
+) => {
+  // all chunks
+  const chunks = [];
+  const { chunkTransferId, chunkServer, chunkSize, chunkRetryDelays } = options;
 
-  // internal handler
-  return (file, metadata, load, error, progress, abort) => {
-    // set onload hanlder
-    const ondata = action.ondata || (fd => fd);
-    const onload = action.onload || (res => res);
-    const onerror = action.onerror || (res => null);
+  // default state
+  const state = {
+    serverId: chunkTransferId,
+    aborted: false
+  };
 
-    // no file received
-    if (!file) return;
+  // set onload handlers
+  const ondata = action.ondata || (fd => fd);
+  const onload =
+    action.onload ||
+    ((xhr, method) =>
+      method === 'HEAD'
+        ? xhr.getResponseHeader('Upload-Offset')
+        : xhr.response);
+  const onerror = action.onerror || (res => null);
 
-    // create formdata object
-    var formData = new FormData();
+  // create server hook
+  const requestTransferId = cb => {
+    const formData = new FormData();
 
     // add metadata under same name
-    if (isObject(metadata)) {
-      formData.append(name, JSON.stringify(metadata));
-    }
+    if (isObject(metadata)) formData.append(name, JSON.stringify(metadata));
 
-    // Turn into an array of objects so no matter what the input, we can handle it the same way
-    (file instanceof Blob ? [{ name: null, file }] : file).forEach(item => {
-      formData.append(
-        name,
-        item.file,
-        item.name === null ? item.file.name : `${item.name}${item.file.name}`
-      );
-    });
+    const headers =
+      typeof action.headers === 'function'
+        ? action.headers(file, metadata)
+        : {
+            ...action.headers,
+            'Upload-Length': file.size
+          };
 
-    // send request object
-    const request = sendRequest(ondata(formData), apiUrl + action.url, action);
-    request.onload = xhr => {
-      load(
-        createResponse(
-          'load',
-          xhr.status,
-          onload(xhr.response),
-          xhr.getAllResponseHeaders()
-        )
-      );
+    const requestParams = {
+      ...action,
+      headers
     };
 
-    request.onerror = xhr => {
+    // send request object
+    const request = sendRequest(
+      ondata(formData),
+      apiUrl + action.url,
+      requestParams
+    );
+
+    request.onload = xhr => cb(onload(xhr, requestParams.method));
+
+    request.onerror = xhr =>
       error(
         createResponse(
           'error',
@@ -2788,15 +2816,360 @@ const createProcessorFunction = (apiUrl = '', action, name) => {
           xhr.getAllResponseHeaders()
         )
       );
-    };
 
     request.ontimeout = createTimeoutResponse(error);
-    request.onprogress = progress;
-    request.onabort = abort;
-
-    // should return request
-    return request;
   };
+
+  const requestTransferOffset = cb => {
+    const requestUrl = apiUrl + chunkServer.url + state.serverId;
+
+    const headers =
+      typeof action.headers === 'function'
+        ? action.headers(state.serverId)
+        : {
+            ...action.headers
+          };
+
+    const requestParams = {
+      headers,
+      method: 'HEAD'
+    };
+
+    const request = sendRequest(null, requestUrl, requestParams);
+
+    request.onload = xhr => cb(onload(xhr, requestParams.method));
+
+    request.onerror = xhr =>
+      error(
+        createResponse(
+          'error',
+          xhr.status,
+          onerror(xhr.response) || xhr.statusText,
+          xhr.getAllResponseHeaders()
+        )
+      );
+
+    request.ontimeout = createTimeoutResponse(error);
+  };
+
+  // create chunks
+  const lastChunkIndex = Math.floor(file.size / chunkSize);
+  for (let i = 0; i <= lastChunkIndex; i++) {
+    const offset = i * chunkSize;
+    const data = file.slice(
+      offset,
+      offset + chunkSize,
+      'application/offset+octet-stream'
+    );
+    chunks[i] = {
+      index: i,
+      size: data.size,
+      offset,
+      data,
+      file,
+      progress: 0,
+      retries: [...chunkRetryDelays],
+      status: ChunkStatus.QUEUED,
+      error: null,
+      request: null,
+      timeout: null
+    };
+  }
+
+  const completeProcessingChunks = () => load(state.serverId);
+
+  const canProcessChunk = chunk =>
+    chunk.status === ChunkStatus.QUEUED || chunk.status === ChunkStatus.ERROR;
+
+  const processChunk = chunk => {
+    // processing is paused, wait here
+    if (state.aborted) return;
+
+    // get next chunk to process
+    chunk = chunk || chunks.find(canProcessChunk);
+
+    // no more chunks to process
+    if (!chunk) {
+      // all done?
+      if (chunks.every(chunk => chunk.status === ChunkStatus.COMPLETE)) {
+        completeProcessingChunks();
+      }
+
+      // no chunk to handle
+      return;
+    }
+
+    // now processing this chunk
+    chunk.status = ChunkStatus.PROCESSING;
+    chunk.progress = null;
+
+    // allow parsing of formdata
+    const ondata = chunkServer.ondata || (fd => fd);
+    const onerror = chunkServer.onerror || (res => null);
+
+    // send request object
+    const requestUrl = apiUrl + chunkServer.url + state.serverId;
+
+    const headers =
+      typeof chunkServer.headers === 'function'
+        ? chunkServer.headers(chunk)
+        : {
+            ...chunkServer.headers,
+            'Content-Type': 'application/offset+octet-stream',
+            'Upload-Offset': chunk.offset,
+            'Upload-Length': file.size,
+            'Upload-Name': file.name
+          };
+
+    const request = (chunk.request = sendRequest(
+      ondata(chunk.data),
+      requestUrl,
+      {
+        ...chunkServer,
+        headers
+      }
+    ));
+
+    request.onload = () => {
+      // done!
+      chunk.status = ChunkStatus.COMPLETE;
+
+      // remove request reference
+      chunk.request = null;
+
+      // start processing more chunks
+      processChunks();
+    };
+
+    request.onprogress = (lengthComputable, loaded, total) => {
+      chunk.progress = lengthComputable ? loaded : null;
+      updateTotalProgress();
+    };
+
+    request.onerror = xhr => {
+      chunk.status = ChunkStatus.ERROR;
+      chunk.request = null;
+      chunk.error = onerror(xhr.response) || xhr.statusText;
+      if (!retryProcessChunk(chunk)) {
+        error(
+          createResponse(
+            'error',
+            xhr.status,
+            onerror(xhr.response) || xhr.statusText,
+            xhr.getAllResponseHeaders()
+          )
+        );
+      }
+    };
+
+    request.ontimeout = xhr => {
+      chunk.status = ChunkStatus.ERROR;
+      chunk.request = null;
+      if (!retryProcessChunk(chunk)) {
+        createTimeoutResponse(error)(xhr);
+      }
+    };
+
+    request.onabort = () => {
+      chunk.status = ChunkStatus.QUEUED;
+      chunk.request = null;
+      abort();
+    };
+  };
+
+  const retryProcessChunk = chunk => {
+    // no more retries left
+    if (chunk.retries.length === 0) return false;
+
+    // new retry
+    chunk.status = ChunkStatus.WAITING;
+    clearTimeout(chunk.timeout);
+    chunk.timeout = setTimeout(() => {
+      processChunk(chunk);
+    }, chunk.retries.shift());
+
+    // we're going to retry
+    return true;
+  };
+
+  const updateTotalProgress = () => {
+    // calculate total progress fraction
+    const totalBytesTransfered = chunks.reduce((p, chunk) => {
+      if (p === null || chunk.progress === null) return null;
+      return p + chunk.progress;
+    }, 0);
+
+    // can't compute progress
+    if (totalBytesTransfered === null) return progress(false, 0, 0);
+
+    // calculate progress values
+    const totalSize = chunks.reduce((total, chunk) => total + chunk.size, 0);
+
+    // can update progress indicator
+    progress(true, totalBytesTransfered, totalSize);
+  };
+
+  // process new chunks
+  const processChunks = () => {
+    const totalProcessing = chunks.filter(
+      chunk => chunk.status === ChunkStatus.PROCESSING
+    ).length;
+    if (totalProcessing >= 1) return;
+    processChunk();
+  };
+
+  const abortChunks = () => {
+    chunks.forEach(chunk => {
+      clearTimeout(chunk.timeout);
+      if (chunk.request) {
+        chunk.request.abort();
+      }
+    });
+  };
+
+  // let's go!
+  if (!state.serverId) {
+    requestTransferId(serverId => {
+      // stop here if aborted, might have happened in between request and callback
+      if (state.aborted) return;
+
+      // pass back to item so we can use it if something goes wrong
+      transfer(serverId);
+
+      // store internally
+      state.serverId = serverId;
+      processChunks();
+    });
+  } else {
+    requestTransferOffset(offset => {
+      // stop here if aborted, might have happened in between request and callback
+      if (state.aborted) return;
+
+      // mark chunks with lower offset as complete
+      chunks
+        .filter(chunk => chunk.offset < offset)
+        .forEach(chunk => {
+          chunk.status = ChunkStatus.COMPLETE;
+          chunk.progress = chunk.size;
+        });
+
+      // continue processing
+      processChunks();
+    });
+  }
+
+  return {
+    abort: () => {
+      state.aborted = true;
+      abortChunks();
+    }
+  };
+};
+
+/*
+function signature:
+  (file, metadata, load, error, progress, abort) => {
+    return {
+    abort:() => {}
+  }
+}
+*/
+const createFileProcessorFunction = (apiUrl, action, name, options) => (
+  file,
+  metadata,
+  load,
+  error,
+  progress,
+  abort,
+  transfer
+) => {
+  // no file received
+  if (!file) return;
+
+  // if was passed a file, and we can chunk it, exit here
+  const canChunkUpload = options.chunkUploads;
+  const shouldChunkUpload = canChunkUpload && file.size > options.chunkSize;
+  const willChunkUpload =
+    canChunkUpload && (shouldChunkUpload || options.chunkForce);
+  if (file instanceof Blob && willChunkUpload)
+    return processFileChunked(
+      apiUrl,
+      action,
+      name,
+      file,
+      metadata,
+      load,
+      error,
+      progress,
+      abort,
+      transfer,
+      options
+    );
+
+  // set handlers
+  const ondata = action.ondata || (fd => fd);
+  const onload = action.onload || (res => res);
+  const onerror = action.onerror || (res => null);
+
+  // create formdata object
+  var formData = new FormData();
+
+  // add metadata under same name
+  if (isObject(metadata)) {
+    formData.append(name, JSON.stringify(metadata));
+  }
+
+  // Turn into an array of objects so no matter what the input, we can handle it the same way
+  (file instanceof Blob ? [{ name: null, file }] : file).forEach(item => {
+    formData.append(
+      name,
+      item.file,
+      item.name === null ? item.file.name : `${item.name}${item.file.name}`
+    );
+  });
+
+  // send request object
+  const request = sendRequest(ondata(formData), apiUrl + action.url, action);
+  request.onload = xhr => {
+    load(
+      createResponse(
+        'load',
+        xhr.status,
+        onload(xhr.response),
+        xhr.getAllResponseHeaders()
+      )
+    );
+  };
+
+  request.onerror = xhr => {
+    error(
+      createResponse(
+        'error',
+        xhr.status,
+        onerror(xhr.response) || xhr.statusText,
+        xhr.getAllResponseHeaders()
+      )
+    );
+  };
+
+  request.ontimeout = createTimeoutResponse(error);
+  request.onprogress = progress;
+  request.onabort = abort;
+
+  // should return request
+  return request;
+};
+
+const createProcessorFunction = (apiUrl = '', action, name, options) => {
+  // custom handler (should also handle file, load, error, progress and abort)
+  if (typeof action === 'function')
+    return (...params) => action(name, ...params, options);
+
+  // no action supplied
+  if (!action || !isString(action.url)) return null;
+
+  // internal handler
+  return createFileProcessorFunction(apiUrl, action, name, options);
 };
 
 /*
@@ -2921,7 +3294,6 @@ const createFileProcessor = processFn => {
 
     const completeFn = () => {
       state.complete = true;
-
       api.fire('load-perceived', state.response.body);
     };
 
@@ -2963,7 +3335,7 @@ const createFileProcessor = processFn => {
       // the metadata to send along
       metadata,
 
-      // callbacks (load, error, progress, abort)
+      // callbacks (load, error, progress, abort, transfer)
       // load expects the body to be a server id if
       // you want to make use of revert
       response => {
@@ -3031,6 +3403,11 @@ const createFileProcessor = processFn => {
 
         // fire the abort event so we can switch visuals
         api.fire('abort', state.response ? state.response.body : null);
+      },
+
+      // register the id for this transfer
+      transferId => {
+        api.fire('transfer', transferId);
       }
     );
   };
@@ -3143,6 +3520,12 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
 
     // id of file on server
     serverFileReference,
+
+    // id of file transfer on server
+    transferId: null,
+
+    // is aborted
+    processingAborted: false,
 
     // current item status
     status: serverFileReference
@@ -3306,6 +3689,12 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
   // logic to process a file
   //
   const process = (processor, onprocess) => {
+    // processing was aborted
+    if (state.processingAborted) {
+      state.processingAborted = false;
+      return;
+    }
+
     // now processing
     setStatus(ItemStatus.PROCESSING);
 
@@ -3323,7 +3712,14 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     // setup processor
     processor.on('load', serverFileReference => {
       // need this id to be able to revert the upload
+      state.transferId = null;
       state.serverFileReference = serverFileReference;
+    });
+
+    // register transfer id
+    processor.on('transfer', transferId => {
+      // need this id to be able to revert the upload
+      state.transferId = transferId;
     });
 
     processor.on('load-perceived', serverFileReference => {
@@ -3331,6 +3727,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       state.activeProcessor = null;
 
       // need this id to be able to rever the upload
+      state.transferId = null;
       state.serverFileReference = serverFileReference;
 
       setStatus(ItemStatus.PROCESSING_COMPLETE);
@@ -3351,6 +3748,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
       state.activeProcessor = null;
 
       // if file was uploaded but processing was cancelled during perceived processor time store file reference
+      state.transferId = null;
       state.serverFileReference = serverFileReference;
 
       setStatus(ItemStatus.IDLE);
@@ -3376,7 +3774,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     };
 
     // something went wrong during transform phase
-    const error = result => {};
+    const error = console.error;
 
     // start processing the file
     onprocess(state.file, success, error);
@@ -3386,12 +3784,15 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
   };
 
   const requestProcessing = () => {
+    state.processingAborted = false;
     setStatus(ItemStatus.PROCESSING_QUEUED);
   };
 
   const abortProcessing = () =>
     new Promise(resolve => {
       if (!state.activeProcessor) {
+        state.processingAborted = true;
+
         setStatus(ItemStatus.IDLE);
         fire('process-abort');
 
@@ -3474,6 +3875,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     id: { get: () => id },
     origin: { get: () => origin },
     serverId: { get: () => state.serverFileReference },
+    transferId: { get: () => state.transferId },
     status: { get: () => state.status },
     filename: { get: () => state.file.name },
     filenameWithoutExtension: {
@@ -4389,12 +4791,21 @@ const actions = (dispatch, query, state) => ({
     });
 
     // start file processing
+    const options = state.options;
     item.process(
       createFileProcessor(
         createProcessorFunction(
-          state.options.server.url,
-          state.options.server.process,
-          state.options.name
+          options.server.url,
+          options.server.process,
+          options.name,
+          {
+            chunkTransferId: item.transferId,
+            chunkServer: options.server.patch,
+            chunkUploads: options.chunkUploads,
+            chunkForce: options.chunkForce,
+            chunkSize: options.chunkSize,
+            chunkRetryDelays: options.chunkRetryDelays
+          }
         )
       ),
       // called when the file is about to be processed so it can be piped through the transform filters

@@ -75,6 +75,12 @@ export const defaultOptions = {
     // Upload related
     instantUpload: [true, Type.BOOLEAN], // Should upload files immidiately on drop
     maxParallelUploads: [2, Type.INT], // Maximum files to upload in parallel
+    
+    // Chunks
+    chunkUploads: [false, Type.BOOLEAN], // Enable chunked uploads
+    chunkForce: [false, Type.BOOLEAN], // Force use of chunk uploads even for files smaller than chunk size
+    chunkSize: [5000000, Type.INT], // Size of chunks (5MB default)
+    chunkRetryDelays: [[500, 1000, 3000], Type.Array], // Amount of times to retry upload of a chunk when it fails
 
     // The server api end points to use for uploading (see docs)
     server: [null, Type.SERVER_API],

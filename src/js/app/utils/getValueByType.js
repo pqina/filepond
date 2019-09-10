@@ -1,8 +1,8 @@
-
 import { convertTo } from './convertTo';
 import { getType } from './getType';
 
 export const getValueByType = (newValue, defaultValue, valueType) => {
+
     // can always assign default value
     if (newValue === defaultValue) {
         return newValue;

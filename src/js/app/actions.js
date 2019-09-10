@@ -766,12 +766,21 @@ export const actions = (dispatch, query, state) => ({
         });
 
         // start file processing
+        const options = state.options;
         item.process(
             createFileProcessor(
                 createProcessorFunction(
-                    state.options.server.url,
-                    state.options.server.process,
-                    state.options.name
+                    options.server.url,
+                    options.server.process,
+                    options.name,
+                    {
+                        chunkTransferId: item.transferId,
+                        chunkServer: options.server.patch,
+                        chunkUploads: options.chunkUploads,
+                        chunkForce: options.chunkForce,
+                        chunkSize: options.chunkSize,
+                        chunkRetryDelays: options.chunkRetryDelays,
+                    }
                 )
             ),
             // called when the file is about to be processed so it can be piped through the transform filters
@@ -860,7 +869,7 @@ export const actions = (dispatch, query, state) => ({
     }),
 
     ABORT_ITEM_PROCESSING: getItemByQueryFromState(state, item => {
-        
+
         // test if is already processed
         if (item.serverId) {
             dispatch('REVERT_ITEM_PROCESSING', { id: item.id });
