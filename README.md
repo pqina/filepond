@@ -16,9 +16,9 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 
 *   Accepts **directories**, **files**, blobs, local URLs, **remote URLs** and Data URIs.
 *   **Drop files**, select on filesystem, **copy and paste files**, or add files using the API.
-*   **Async uploading** with AJAX, or encode files as base64 data and send along form post.
+*   **Async uploads** with AJAX, supports **chunk uploads**, can encode files as base64 data and send along form post.
 *   **Accessible**, tested with AT software like VoiceOver and JAWS, **navigable by Keyboard**.
-*   **Image optimization**, automatic image resizing, **cropping**, and **fixes EXIF orientation**.
+*   **Image optimization**, automatic image resizing, **cropping**, filtering, and **fixes EXIF orientation**.
 *   **Responsive**, automatically scales to available space, is functional on both **mobile and desktop devices**.
 
 [Learn more about FilePond](https://pqina.nl/filepond/)
