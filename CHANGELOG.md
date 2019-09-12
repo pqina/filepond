@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.7.1
+
+- Fix problem where directories with over 100 files weren't read correctly.
+
+
 ## 4.7.0
 
 - Add support for [chunked uploads](https://pqina.nl/filepond/docs/patterns/api/server/#process-chunks). Thanks to Ryan Olson (@ams-ryanolson) Arctic Media for donating the funds to build this.

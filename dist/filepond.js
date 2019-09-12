@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.7.0
+ * FilePond 4.7.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -9573,20 +9573,22 @@
       }
 
       // done!
-      Promise.all(promisedFiles).then(function(returendFileGroups) {
-        // flatten groups
-        var files = [];
-        returendFileGroups.forEach(function(group) {
-          files.push.apply(files, group);
-        });
+      Promise.all(promisedFiles)
+        .then(function(returnedFileGroups) {
+          // flatten groups
+          var files = [];
+          returnedFileGroups.forEach(function(group) {
+            files.push.apply(files, group);
+          });
 
-        // done (filter out empty files)!
-        resolve(
-          files.filter(function(file) {
-            return file;
-          })
-        );
-      });
+          // done (filter out empty files)!
+          resolve(
+            files.filter(function(file) {
+              return file;
+            })
+          );
+        })
+        .catch(console.error);
     });
   };
 
@@ -9603,7 +9605,9 @@
   var getFilesFromItem = function getFilesFromItem(item) {
     return new Promise(function(resolve, reject) {
       if (isDirectoryEntry(item)) {
-        getFilesInDirectory(getAsEntry(item)).then(resolve);
+        getFilesInDirectory(getAsEntry(item))
+          .then(resolve)
+          .catch(reject);
         return;
       }
 
@@ -9616,29 +9620,53 @@
       var files = [];
 
       // the total entries to read
-      var totalFilesFound = 0;
+      var dirCounter = 0;
+      var fileCounter = 0;
+
+      var resolveIfDone = function resolveIfDone() {
+        if (fileCounter === 0 && dirCounter === 0) {
+          resolve(files);
+        }
+      };
 
       // the recursive function
       var readEntries = function readEntries(dirEntry) {
-        var directoryReader = dirEntry.createReader();
-        directoryReader.readEntries(function(entries) {
-          entries.forEach(function(entry) {
-            // recursively read more directories
-            if (entry.isDirectory) {
-              readEntries(entry);
-            } else {
-              // read as file
-              totalFilesFound++;
-              entry.file(function(file) {
-                files.push(correctMissingFileType(file));
+        dirCounter++;
 
-                if (totalFilesFound === files.length) {
-                  resolve(files);
-                }
-              });
+        var directoryReader = dirEntry.createReader();
+
+        // directories are returned in batches, we need to process all batches before we're done
+        var readBatch = function readBatch() {
+          directoryReader.readEntries(function(entries) {
+            if (entries.length === 0) {
+              dirCounter--;
+              resolveIfDone();
+              return;
             }
-          });
-        });
+
+            entries.forEach(function(entry) {
+              // recursively read more directories
+              if (entry.isDirectory) {
+                readEntries(entry);
+              } else {
+                // read as file
+                fileCounter++;
+
+                entry.file(function(file) {
+                  files.push(correctMissingFileType(file));
+                  fileCounter--;
+                  resolveIfDone();
+                });
+              }
+            });
+
+            // try to get next batch of files
+            readBatch();
+          }, reject);
+        };
+
+        // read first batch of files
+        readBatch();
       };
 
       // go!

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.7.0
+ * FilePond 4.7.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -6845,16 +6845,18 @@ const getFiles = dataTransfer =>
     }
 
     // done!
-    Promise.all(promisedFiles).then(returendFileGroups => {
-      // flatten groups
-      const files = [];
-      returendFileGroups.forEach(group => {
-        files.push.apply(files, group);
-      });
+    Promise.all(promisedFiles)
+      .then(returnedFileGroups => {
+        // flatten groups
+        const files = [];
+        returnedFileGroups.forEach(group => {
+          files.push.apply(files, group);
+        });
 
-      // done (filter out empty files)!
-      resolve(files.filter(file => file));
-    });
+        // done (filter out empty files)!
+        resolve(files.filter(file => file));
+      })
+      .catch(console.error);
   });
 
 const isFileSystemItem = item => {
@@ -6870,7 +6872,9 @@ const isFileSystemItem = item => {
 const getFilesFromItem = item =>
   new Promise((resolve, reject) => {
     if (isDirectoryEntry(item)) {
-      getFilesInDirectory(getAsEntry(item)).then(resolve);
+      getFilesInDirectory(getAsEntry(item))
+        .then(resolve)
+        .catch(reject);
       return;
     }
 
@@ -6882,29 +6886,53 @@ const getFilesInDirectory = entry =>
     const files = [];
 
     // the total entries to read
-    let totalFilesFound = 0;
+    let dirCounter = 0;
+    let fileCounter = 0;
+
+    const resolveIfDone = () => {
+      if (fileCounter === 0 && dirCounter === 0) {
+        resolve(files);
+      }
+    };
 
     // the recursive function
     const readEntries = dirEntry => {
-      const directoryReader = dirEntry.createReader();
-      directoryReader.readEntries(entries => {
-        entries.forEach(entry => {
-          // recursively read more directories
-          if (entry.isDirectory) {
-            readEntries(entry);
-          } else {
-            // read as file
-            totalFilesFound++;
-            entry.file(file => {
-              files.push(correctMissingFileType(file));
+      dirCounter++;
 
-              if (totalFilesFound === files.length) {
-                resolve(files);
-              }
-            });
+      const directoryReader = dirEntry.createReader();
+
+      // directories are returned in batches, we need to process all batches before we're done
+      const readBatch = () => {
+        directoryReader.readEntries(entries => {
+          if (entries.length === 0) {
+            dirCounter--;
+            resolveIfDone();
+            return;
           }
-        });
-      });
+
+          entries.forEach(entry => {
+            // recursively read more directories
+            if (entry.isDirectory) {
+              readEntries(entry);
+            } else {
+              // read as file
+              fileCounter++;
+
+              entry.file(file => {
+                files.push(correctMissingFileType(file));
+                fileCounter--;
+                resolveIfDone();
+              });
+            }
+          });
+
+          // try to get next batch of files
+          readBatch();
+        }, reject);
+      };
+
+      // read first batch of files
+      readBatch();
     };
 
     // go!
