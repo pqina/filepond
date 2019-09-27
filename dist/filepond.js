@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.7.1
+ * FilePond 4.7.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -9969,19 +9969,13 @@
 
           client.state = null;
 
-          var allowsTransfer = allowdrop(items);
+          // if we're filtering on element we need to be over the element to drop
+          if (filterElement && !isEventTarget(e, element)) return;
 
           // no transfer for this client
-          if (!allowsTransfer) {
-            onexit(eventPosition(e));
-            return;
-          }
+          if (!allowdrop(items)) return onexit(eventPosition(e));
 
-          // if we're filtering on element we need to be over the element to drop
-          if (filterElement && !isEventTarget(e, element)) {
-            return;
-          }
-
+          // we can drop these items on this client
           ondrop(eventPosition(e), items);
         });
       });
@@ -10945,7 +10939,8 @@
       if (isDisabled) {
         root.element.dataset.disabled = 'disabled';
       } else {
-        delete root.element.dataset.disabled;
+        // delete root.element.dataset.disabled; <= this does not work on iOS 10
+        root.element.removeAttribute('data-disabled');
       }
     }
   });
