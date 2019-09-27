@@ -581,9 +581,9 @@ const route = createRoute({
             root.element.dataset.disabled = 'disabled'
         }
         else {
-            delete root.element.dataset.disabled;
+            // delete root.element.dataset.disabled; <= this does not work on iOS 10
+            root.element.removeAttribute('data-disabled');
         }
-        
     }
 });
 
