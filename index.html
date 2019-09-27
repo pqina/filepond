@@ -8,10 +8,7 @@
 </head>
 <body>
 
-    <style>body {max-width:320px;}</style>
-    <input type="file" multiple class="foo"/>
-
-    <input type="file" multiple class="bar"/>
+    <input type="file"/>
 
     <script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"></script>
     <script src="https://unpkg.com/filepond-polyfill"></script>
@@ -19,30 +16,10 @@
     
     <script>
         // Get a reference to the file input element
-        var inputElement = document.querySelector('.foo');
+        var inputElement = document.querySelector('input[type="file"]');
 
         // Create the FilePond instance
-        var pondA = FilePond.create(inputElement, {
-            dropOnPage: true,
-            dropOnElement: true,
-            maxFiles: 2,
-            onwarning: err => {
-                console.log('foo: error', err)
-            }
-        });
-
-        // Get a reference to the file input element
-        var inputElement2 = document.querySelector('.bar');
-
-        // Create the FilePond instance
-        var pondB = FilePond.create(inputElement2, {
-            dropOnPage: true,
-            dropOnElement: true,
-            maxFiles: 3,
-            onwarning: err => {
-                console.log('bar: error', err)
-            }
-        });
+        var pond = FilePond.create(inputElement);
     </script>
 
 </body>

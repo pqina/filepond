@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.7.2
+
+- Fix issue where iOS 10 would throw an error when calling `delete` on a dataset property
+- Fix issue with `onwarning` being called on incorrect element
+
+
 ## 4.7.1
 
 - Fix problem where directories with over 100 files weren't read correctly.
