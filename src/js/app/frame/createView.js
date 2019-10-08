@@ -321,5 +321,5 @@ export const createView =
             didCreateView(internalAPI);
 
             // expose public api
-            return createObject(externalAPIDefinition, props);
+            return createObject(externalAPIDefinition);
         };

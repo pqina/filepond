@@ -1,6 +1,5 @@
 const images = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'tiff'];
 const text = ['css', 'csv', 'html', 'txt'];
-const apps = ['rtf', 'pdf', 'json'];
 const map = {
     zip: 'zip|compressed',
     epub: 'application/epub+zip'
