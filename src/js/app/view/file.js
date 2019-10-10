@@ -66,9 +66,10 @@ forin(Buttons, key => {
     ButtonKeys.push(key);
 });
 
-const calculateFileInfoOffset = root =>
-    root.ref.buttonRemoveItem.rect.element.width +
-    root.ref.buttonRemoveItem.rect.element.left;
+const calculateFileInfoOffset = root => {
+    const buttonRect = root.ref.buttonRemoveItem.rect.element;
+    return buttonRect.hidden ? null : buttonRect.width + buttonRect.left;
+}
 
 // Force on full pixels so text stays crips
 const calculateFileVerticalCenterOffset = root => Math.floor(root.ref.buttonRemoveItem.rect.element.height / 4)
@@ -287,6 +288,9 @@ const create = ({ root, props }) => {
     }));
     progressIndicatorView.element.classList.add('filepond--process-indicator');
     root.ref.processProgressIndicator = progressIndicatorView;
+
+    // current active styles
+    root.ref.activeStyles = [];
 };
 
 const write = ({ root, actions, props }) => {
@@ -300,27 +304,34 @@ const write = ({ root, actions, props }) => {
         .reverse()
         .find(action => StyleMap[action.type]);
 
-    // no need to set same state twice
-    if (!action || (action && action.type === root.ref.currentAction)) {
-        return;
+    // a new action happened, let's get the matching styles
+    if (action) {
+
+        // define new active styles
+        root.ref.activeStyles = [];
+
+        const stylesToApply = StyleMap[action.type];
+        forin(DefaultStyle, (name, defaultStyles) => {
+
+            // get reference to control
+            const control = root.ref[name];
+
+            // loop over all styles for this control
+            forin(defaultStyles, (key, defaultValue) => {
+                const value =
+                stylesToApply[name] && typeof stylesToApply[name][key] !== 'undefined'
+                        ? stylesToApply[name][key]
+                        : defaultValue;
+                root.ref.activeStyles.push({ control, key, value });
+            });
+            
+        });
     }
 
-    // set current state
-    root.ref.currentAction = action.type;
-    const newStyles = StyleMap[root.ref.currentAction];
-
-    forin(DefaultStyle, (name, defaultStyles) => {
-        // get reference to control
-        const control = root.ref[name];
-
-        // loop over all styles for this control
-        forin(defaultStyles, (key, defaultValue) => {
-            const value =
-                newStyles[name] && typeof newStyles[name][key] !== 'undefined'
-                    ? newStyles[name][key]
-                    : defaultValue;
-            control[key] = typeof value === 'function' ? value(root) : value;
-        });
+    // apply active styles to element
+    root.ref.activeStyles.forEach(({ control, key, value }) => {
+        
+        control[key] = typeof value === 'function' ? value(root) : value;
     });
 };
 

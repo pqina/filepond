@@ -1,6 +1,6 @@
 {
     "name": "filepond",
-    "version": "4.4.1",
+    "version": "4.7.2",
     "description": "FilePond, Where files go to stretch their bits.",
     "license": "MIT",
     "author": {
@@ -30,8 +30,10 @@
         "Android >= 4.4"
     ],
     "files": [
-        "dist"
+        "dist",
+        "types/*.d.ts"
     ],
+    "types": "types/index.d.ts",
     "scripts": {
         "test": "npx jest",
         "start": "npx rollup -c -w",
@@ -39,26 +41,29 @@
         "scripts": "npx rollup -c",
         "styles": "npm run styles:pretty && npm run styles:nano",
         "styles:pretty": "cat src/css/* | npx node-sass | npx postcss --no-map --use autoprefixer | npx prettier --single-quote --parser css | node banner-cli.js FilePond > dist/filepond.css",
-        "styles:nano": "cat src/css/* | npx node-sass | npx postcss --no-map --use autoprefixer --use cssnano | node banner-cli.js FilePond > dist/filepond.min.css"
+        "styles:nano": "cat src/css/* | npx node-sass | npx postcss --no-map --use autoprefixer --use cssnano | node banner-cli.js FilePond > dist/filepond.min.css",
+        "dtslint": "dtslint types"
     },
     "devDependencies": {
-        "@babel/core": "^7.4.4",
-        "@babel/plugin-proposal-object-rest-spread": "^7.4.0",
-        "@babel/plugin-transform-template-literals": "^7.2.0",
-        "@babel/preset-env": "^7.4.4",
-        "autoprefixer": "^9.5.0",
-        "babel-jest": "^24.7.1",
+        "@babel/core": "^7.5.5",
+        "@babel/plugin-proposal-object-rest-spread": "^7.5.5",
+        "@babel/plugin-transform-template-literals": "^7.4.4",
+        "@babel/preset-env": "^7.5.5",
+        "autoprefixer": "^9.6.1",
+        "babel-jest": "^24.8.0",
         "cssnano": "^4.1.10",
-        "jest": "^24.7.1",
-        "node-sass": "^4.11.0",
-        "postcss-cli": "^6.1.2",
-        "prettier": "^1.16.4",
-        "rollup": "^1.7.0",
-        "rollup-plugin-babel": "^4.3.2",
-        "rollup-plugin-commonjs": "^9.2.1",
+        "dtslint": "^0.9.3",
+        "jest": "^24.8.0",
+        "node-sass": "^4.12.0",
+        "postcss-cli": "^6.1.3",
+        "prettier": "^1.18.2",
+        "rollup": "^1.17.0",
+        "rollup-plugin-babel": "^4.3.3",
+        "rollup-plugin-commonjs": "^9.3.4",
         "rollup-plugin-license": "^0.8.1",
-        "rollup-plugin-node-resolve": "^4.0.1",
+        "rollup-plugin-node-resolve": "^4.2.4",
         "rollup-plugin-prettier": "^0.6.0",
-        "rollup-plugin-terser": "^4.0.4"
+        "rollup-plugin-terser": "^4.0.4",
+        "typescript": "^3.6.2"
     }
 }

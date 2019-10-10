@@ -4,6 +4,7 @@ import { isNull } from '../../utils/isNull';
 import { isAPI } from './isAPI';
 
 export const getType = value => {
+    
     if (isArray(value)) {
         return 'array';
     }

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.4.1
+ * FilePond 4.7.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -820,9 +820,11 @@
   contain: layout style size;
 }
 .filepond--root * {
-  font-size: inherit;
   box-sizing: inherit;
   line-height: inherit;
+}
+.filepond--root *:not(text) {
+  font-size: inherit;
 }
 .filepond--root[data-disabled] {
   pointer-events: none;

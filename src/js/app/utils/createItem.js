@@ -37,6 +37,12 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         // id of file on server
         serverFileReference,
 
+        // id of file transfer on server
+        transferId: null,
+
+        // is aborted
+        processingAborted: false,
+
         // current item status
         status: serverFileReference
             ? ItemStatus.PROCESSING_COMPLETE
@@ -207,6 +213,12 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
     //
     const process = (processor, onprocess) => {
 
+        // processing was aborted
+        if (state.processingAborted) {
+            state.processingAborted = false; 
+            return;
+        }
+
         // now processing
         setStatus(ItemStatus.PROCESSING);
 
@@ -225,7 +237,16 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         processor.on('load', serverFileReference => {
 
             // need this id to be able to revert the upload
+            state.transferId = null;
             state.serverFileReference = serverFileReference;
+
+        });
+
+        // register transfer id
+        processor.on('transfer', transferId => {
+
+            // need this id to be able to revert the upload
+            state.transferId = transferId;
 
         });
 
@@ -234,6 +255,7 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
             state.activeProcessor = null;
 
             // need this id to be able to rever the upload
+            state.transferId = null;
             state.serverFileReference = serverFileReference;
 
             setStatus(ItemStatus.PROCESSING_COMPLETE);
@@ -254,6 +276,7 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
             state.activeProcessor = null;
 
             // if file was uploaded but processing was cancelled during perceived processor time store file reference
+            state.transferId = null;
             state.serverFileReference = serverFileReference;
 
             setStatus(ItemStatus.IDLE);
@@ -280,7 +303,7 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         };
 
         // something went wrong during transform phase
-        const error = result => {};
+        const error = console.error;
 
         // start processing the file
         onprocess(state.file, success, error);
@@ -290,12 +313,15 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
     };
 
     const requestProcessing = () => {
+        state.processingAborted = false;
         setStatus(ItemStatus.PROCESSING_QUEUED);
     }
 
     const abortProcessing = () => new Promise((resolve) => {
-
+        
         if (!state.activeProcessor) {
+
+            state.processingAborted = true;
 
             setStatus(ItemStatus.IDLE);
             fire('process-abort');
@@ -361,15 +387,15 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         keys.forEach(key => data = data[key]);
 
         // compare old value against new value, if they're the same, we're not updating
-        if (JSON.stringify(data[last]) === JSON.stringify(value)) {
-            return;
-        }
+        if (JSON.stringify(data[last]) === JSON.stringify(value)) return;
 
         // update value
         data[last] = value;
 
+        // don't fire update
         if (silent) return;
 
+        // fire update
         fire('metadata-update', {
             key: root,
             value: metadata[root]
@@ -382,6 +408,7 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         id: { get: () => id },
         origin: { get:() => origin },
         serverId: { get: () => state.serverFileReference },
+        transferId: { get: () => state.transferId },
         status: { get: () => state.status },
         filename: { get: () => state.file.name },
         filenameWithoutExtension: { get: () => getFilenameWithoutExtension(state.file.name) },

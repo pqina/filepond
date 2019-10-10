@@ -17,7 +17,7 @@ export const createFileProcessor = processFn => {
     };
 
     const process = (file, metadata) => {
-
+        
         const progressFn = () => {
             // we've not yet started the real download, stop here
             // the request might not go through, for instance, there might be some server trouble
@@ -32,7 +32,6 @@ export const createFileProcessor = processFn => {
 
         const completeFn = () => {
             state.complete = true;
-
             api.fire('load-perceived', state.response.body);
         };
 
@@ -74,7 +73,7 @@ export const createFileProcessor = processFn => {
             // the metadata to send along
             metadata,
 
-            // callbacks (load, error, progress, abort)
+            // callbacks (load, error, progress, abort, transfer)
             // load expects the body to be a server id if
             // you want to make use of revert
             response => {
@@ -139,12 +138,17 @@ export const createFileProcessor = processFn => {
 
                 // fire the abort event so we can switch visuals
                 api.fire('abort', state.response ? state.response.body : null);
+            },
+
+            // register the id for this transfer
+            (transferId) => {
+                api.fire('transfer', transferId);
             }
         );
     };
 
     const abort = () => {
-        
+
         // no request running, can't abort
         if (!state.request) return;
 
@@ -175,6 +179,7 @@ export const createFileProcessor = processFn => {
             ? Math.min(state.progress, state.perceivedProgress)
             : null;
     const getDuration = () => Math.min(state.duration, state.perceivedDuration);
+
 
     const api = {
         ...on(),

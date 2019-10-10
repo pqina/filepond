@@ -16,9 +16,9 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 
 *   Accepts **directories**, **files**, blobs, local URLs, **remote URLs** and Data URIs.
 *   **Drop files**, select on filesystem, **copy and paste files**, or add files using the API.
-*   **Async uploading** with AJAX, or encode files as base64 data and send along form post.
+*   **Async uploads** with AJAX, supports **chunk uploads**, can encode files as base64 data and send along form post.
 *   **Accessible**, tested with AT software like VoiceOver and JAWS, **navigable by Keyboard**.
-*   **Image optimization**, automatic image resizing, **cropping**, and **fixes EXIF orientation**.
+*   **Image optimization**, automatic image resizing, **cropping**, filtering, and **fixes EXIF orientation**.
 *   **Responsive**, automatically scales to available space, is functional on both **mobile and desktop devices**.
 
 [Learn more about FilePond](https://pqina.nl/filepond/)
@@ -27,9 +27,9 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 
 ### Also need Image Editing?
 
-**Doka.js** might be just what you're looking for. It's a Modern JavaScript Image Editor, Doka supports setting **crop aspect ratios**, **resizing**, **rotating**, **cropping**, and **flipping** images. Above all, it integrates beautifully with FilePond.
+**Doka.js** might just be what you're looking for. It's a Modern JavaScript Image Editor, Doka supports setting **crop aspect ratios**, **resizing**, **rotating**, **cropping**, and **flipping** images. Above all, it integrates beautifully with FilePond.
 
-[Learn more about Doka](https://pqina.nl/doka/)
+[Learn more about Doka](https://pqina.nl/doka/?ref=github)
 
 <img src="https://github.com/pqina/filepond-github-assets/blob/master/doka.gif?raw=true" width="478" alt=""/>
 
@@ -47,9 +47,13 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 *   [Image size validation](https://github.com/pqina/filepond-plugin-image-validate-size)
 *   [Image preview](https://github.com/pqina/filepond-plugin-image-preview)
 *   [Image crop](https://github.com/pqina/filepond-plugin-image-crop)
+*   [Image filter](https://github.com/pqina/filepond-plugin-image-filter)
 *   [Image resize](https://github.com/pqina/filepond-plugin-image-resize)
 *   [Image transform](https://github.com/pqina/filepond-plugin-image-transform)
 *   [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
+*   [Image overlay](https://github.com/nielsboogaard/filepond-plugin-image-overlay) (third-party)
+*   [Media preview](https://github.com/nielsboogaard/filepond-plugin-media-preview) (third-party)
+*   [Get file](https://github.com/nielsboogaard/filepond-plugin-get-file) (third-party)
 
 
 ### Adapters
@@ -58,15 +62,15 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 *   [Vue](https://github.com/pqina/vue-filepond)
 *   [jQuery](https://github.com/pqina/jquery-filepond)
 *   [Angular](https://github.com/pqina/ngx-filepond)
-*   [Angular 1](https://github.com/johnnyasantoss/angularjs-filepond)
-*   [Ember](https://github.com/alexdiliberto/ember-filepond)
+*   [Angular 1](https://github.com/johnnyasantoss/angularjs-filepond) (third-party)
+*   [Ember](https://github.com/alexdiliberto/ember-filepond) (third-party)
 
 
 ### Backend
 
 *   [PHP](https://github.com/pqina/filepond-boilerplate-php)
-*   [Django](https://github.com/ImperialCollegeLondon/django-drf-filepond) 
-*   [Laravel](https://github.com/Sopamo/laravel-filepond)
+*   [Django](https://github.com/ImperialCollegeLondon/django-drf-filepond)  (third-party)
+*   [Laravel](https://github.com/Sopamo/laravel-filepond) (third-party)
 
 
 ## Quick Start
@@ -133,14 +137,21 @@ Tests are based on Jest and can be run with `npm run test`
 To build the library run `npm run build`
 
 
+## Sponsors
+
+Thanks go out to Ryan Olson (@ams-ryanolson) Arctic Media for donating the funds to build the chunked uploading feature.
+
+
 ## Publications
 
-*   [Smooth file uploading with React and FilePond](https://itnext.io/uploading-files-with-react-and-filepond-f8a798308557)
-*   [5 interesting technical challenges I faced while building FilePond](https://itnext.io/filepond-frontend-trickery-a3073c934c77)
-*   [Image uploads with Laravel and FilePond](https://devdojo.com/episode/image-uploads-with-laravel-and-filepond)
-*   [Integrating FilePond with Ember](https://alexdiliberto.com/ember-filepond/latest/)
-*   [FilePond launch day post-mortem](https://pqina.nl/blog/filepond-launch-day-post-mortem)
-*   [FilePond on ProductHunt](https://www.producthunt.com/posts/filepond-js)
+* [Generating Image Thumbnails in the Browser using JavaScript and FilePond](https://dev.to/pqina/generating-image-thumbnails-in-the-browser-using-javascript-and-filepond-10b8)
+* [How to upload files with Vue and FilePond](https://dev.to/pqina/how-to-upload-files-with-vue-and-filepond-1m02)
+* [Smooth file uploading with React and FilePond](https://itnext.io/uploading-files-with-react-and-filepond-f8a798308557)
+* [5 interesting technical challenges I faced while building FilePond](https://itnext.io/filepond-frontend-trickery-a3073c934c77)
+* [Image uploads with Laravel and FilePond](https://devdojo.com/episode/image-uploads-with-laravel-and-filepond)
+* [Integrating FilePond with Ember](https://alexdiliberto.com/ember-filepond/latest/)
+* [FilePond launch day post-mortem](https://pqina.nl/blog/filepond-launch-day-post-mortem)
+* [FilePond on ProductHunt](https://www.producthunt.com/posts/filepond-js)
 
 
 ### Browser Compatibility
@@ -150,6 +161,7 @@ FilePond is compatible with a wide range of desktop and mobile browsers, the old
 FilePond uses [BrowserStack](https://www.browserstack.com/) for compatibility testing.
 
 [<img src="https://github.com/pqina/filepond-github-assets/blob/master/browserstack-logo.svg" height="32" alt="BrowserStack"/>](https://www.browserstack.com/)
+
 
 ## License
 

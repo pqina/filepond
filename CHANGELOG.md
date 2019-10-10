@@ -1,5 +1,108 @@
 # Changelog
 
+## 4.7.2
+
+- Fix issue where iOS 10 would throw an error when calling `delete` on a dataset property
+- Fix issue with `onwarning` being called on incorrect element
+
+
+## 4.7.1
+
+- Fix problem where directories with over 100 files weren't read correctly.
+
+
+## 4.7.0
+
+- Add support for [chunked uploads](https://pqina.nl/filepond/docs/patterns/api/server/#process-chunks). Thanks to Ryan Olson (@ams-ryanolson) Arctic Media for donating the funds to build this.
+
+
+## 4.6.1
+
+- Add missing Blob type to TypeScript server config.
+
+
+## 4.6.0
+
+- Add TypeScript declarations.
+
+
+## 4.5.2
+
+- If `Blob` has `name` attribute use name attribute instead of URL for file name.
+
+
+## 4.5.1
+
+- Fix issue where drag-drop from Firefox download list would not add file to drop area
+
+
+## 4.5.0
+
+- Add option to set server end point headers on a generic level so they're applied to all end points using `server.headers`.
+
+
+## 4.4.13
+
+- Fix problem with CSS overriding image preview markup text size.
+
+
+## 4.4.12
+
+- Fix memory leak.
+
+
+## 4.4.11
+
+- Fix problem with abort statement in file loader logic.
+
+
+## 4.4.10
+
+- Fix issue where Promise returned by `addFile` would not be rejected if file failed to load.
+
+
+## 4.4.9
+
+- Fix security issues with dependencies.
+
+
+## 4.4.8
+
+- Fix issue where multiple calls to `setMetadata` would result in multiple successive calls to prepare file.
+- Fix issue where drop area aspect ratio would not update correctly on resize.
+
+
+## 4.4.7
+
+- Fix issue where pasting a file would throw an error.
+- Fix issue where ignored files would be counted as files when dropping a folder.
+
+
+## 4.4.6
+
+- Fix issue where `processFiles` would re-process `local` server images.
+
+
+## 4.4.5
+
+- Fix issue where FilePond event loop would freeze when tab was inactive.
+
+
+## 4.4.4
+
+- Fix issue where FilePond would not render when hidden, resulting in missing input elements and events not firing.
+
+
+## 4.4.3
+
+- Fix issue where processing the queue didn't work correctly when files were removed while being in the queue.
+
+
+## 4.4.2
+
+- Fix issue where UTF-8 encoded filename was not parsed correctly.
+
+
 ## 4.4.1
 
 - Fix issue where `Content-Disposition` header filename was not parsed correctly.

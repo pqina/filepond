@@ -133,64 +133,70 @@ export const actions = (dispatch, query, state) => ({
 
     },
 
-    DID_UPDATE_ITEM_METADATA: ({ id, change }) => {
+    DID_UPDATE_ITEM_METADATA: ({ id }) => {
 
-        const item = getItemById(state.items, id);
+        // if is called multiple times in close succession we combined all calls together to save resources
+        clearTimeout(state.itemUpdateTimeout);
+        state.itemUpdateTimeout = setTimeout(() => {
 
-        // only revert and attempt to upload when we're uploading to a server
-        if (!query('IS_ASYNC')) {
+            const item = getItemById(state.items, id);
 
-            // should we update the output data
-            applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query })
-            .then(shouldPrepareOutput => {
-                if (!shouldPrepareOutput) {
-                    return;
-                }
-                dispatch('REQUEST_PREPARE_OUTPUT', {
-                    query: id,
-                    item,
-                    ready: (file) => {
-                        dispatch('DID_PREPARE_OUTPUT', { id, file });
+            // only revert and attempt to upload when we're uploading to a server
+            if (!query('IS_ASYNC')) {
+    
+                // should we update the output data
+                applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query })
+                .then(shouldPrepareOutput => {
+                    if (!shouldPrepareOutput) {
+                        return;
                     }
-                }, true);
-            });
+                    dispatch('REQUEST_PREPARE_OUTPUT', {
+                        query: id,
+                        item,
+                        ready: (file) => {
+                            dispatch('DID_PREPARE_OUTPUT', { id, file });
+                        }
+                    }, true);
+                });
+    
+                return;
+            }
+    
+            // for async scenarios
+            const upload = () => {
+                // we push this forward a bit so the interface is updated correctly
+                setTimeout(() => {
+                    dispatch('REQUEST_ITEM_PROCESSING', { query: id })
+                }, 32);
+            }
+    
+            const revert = (doUpload) => {
+                item.revert(createRevertFunction(state.options.server.url, state.options.server.revert), query('GET_FORCE_REVERT'))
+                .then(doUpload ? upload : () => {})
+                .catch(() => {})
+            }
+    
+            const abort = (doUpload) => {
+                item.abortProcessing()
+                .then(doUpload ? upload : () => {});
+            }
+    
+            // if we should re-upload the file immidiately
+            if (item.status === ItemStatus.PROCESSING_COMPLETE) {
+                return revert(state.options.instantUpload);
+            }
+            
+            // if currently uploading, cancel upload
+            if (item.status === ItemStatus.PROCESSING) {
+                return abort(state.options.instantUpload);
+            }
+    
+            if (state.options.instantUpload) {
+                upload();
+            }
+            
+        }, 0);
 
-            return;
-        }
-
-        // for async scenarios
-        const upload = () => {
-            // we push this forward a bit so the interface is updated correctly
-            setTimeout(() => {
-                dispatch('REQUEST_ITEM_PROCESSING', { query: id })
-            }, 32);
-        }
-
-        const revert = (doUpload) => {
-            item.revert(createRevertFunction(state.options.server.url, state.options.server.revert), query('GET_FORCE_REVERT'))
-            .then(doUpload ? upload : () => {})
-            .catch(() => {})
-        }
-
-        const abort = (doUpload) => {
-            item.abortProcessing()
-            .then(doUpload ? upload : () => {});
-        }
-
-        // if we should re-upload the file immidiately
-        if (item.status === ItemStatus.PROCESSING_COMPLETE) {
-            return revert(state.options.instantUpload);
-        }
-        
-        // if currently uploading, cancel upload
-        if (item.status === ItemStatus.PROCESSING) {
-            return abort(state.options.instantUpload);
-        }
-
-        if (state.options.instantUpload) {
-            upload();
-        }
-        
     },
 
     SORT: ({ compare }) => {
@@ -409,6 +415,7 @@ export const actions = (dispatch, query, state) => ({
                 error: error.status,
                 status: error.status
             });
+            failure({ error: error.status, file: createItemAPI(item) });
         });
 
         item.on('load-abort', () => {
@@ -706,7 +713,7 @@ export const actions = (dispatch, query, state) => ({
 
             // queue for later processing
             state.processingQueue.push({
-                item,
+                id: item.id,
                 success,
                 failure
             });
@@ -721,12 +728,23 @@ export const actions = (dispatch, query, state) => ({
         const processNext = () => {
 
             // process queueud items
-            const queued = state.processingQueue.shift();
+            const queueEntry = state.processingQueue.shift();
+
+            // no items left
+            if (!queueEntry) return;
+
+            // get item reference
+            const { id, success, failure } = queueEntry;
+            const itemReference = getItemByQuery(state.items, id);
+
+            // if item was archived while in queue, jump to next
+            if (!itemReference || itemReference.archived) {
+                processNext();
+                return;
+            }
 
             // process queued item
-            if (queued) {
-                dispatch('PROCESS_ITEM', { query: queued.item, success: queued.success, failure: queued.failure }, true);
-            }
+            dispatch('PROCESS_ITEM', { query: id, success, failure }, true);
         }
 
         // we done function
@@ -748,12 +766,21 @@ export const actions = (dispatch, query, state) => ({
         });
 
         // start file processing
+        const options = state.options;
         item.process(
             createFileProcessor(
                 createProcessorFunction(
-                    state.options.server.url,
-                    state.options.server.process,
-                    state.options.name
+                    options.server.url,
+                    options.server.process,
+                    options.name,
+                    {
+                        chunkTransferId: item.transferId,
+                        chunkServer: options.server.patch,
+                        chunkUploads: options.chunkUploads,
+                        chunkForce: options.chunkForce,
+                        chunkSize: options.chunkSize,
+                        chunkRetryDelays: options.chunkRetryDelays,
+                    }
                 )
             ),
             // called when the file is about to be processed so it can be piped through the transform filters
@@ -842,7 +869,7 @@ export const actions = (dispatch, query, state) => ({
     }),
 
     ABORT_ITEM_PROCESSING: getItemByQueryFromState(state, item => {
-        
+
         // test if is already processed
         if (item.serverId) {
             dispatch('REVERT_ITEM_PROCESSING', { id: item.id });

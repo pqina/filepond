@@ -14,6 +14,7 @@ import { isNumber } from '../utils/isNumber';
 import { createItemAPI } from './utils/createItemAPI';
 import { removeReleasedItems } from './utils/removeReleasedItems';
 import { ItemStatus } from './enum/ItemStatus';
+import { FileOrigin } from './enum/FileOrigin';
 
 // defaults
 import { getOptions } from './options';
@@ -109,13 +110,18 @@ export const createApp = (initialOptions = {}) => {
                 }
             }
 
+            if (isHidden && isResting) {
+                // test if is no longer hidden
+                isResting = view.element.offsetParent === null;
+            }
+
             // if resting, no need to read as numbers will still all be correct
             if (isResting) return;
 
             // read view data
             view._read();
-    
-            // if root is hidden
+
+            // if is hidden we need to know so we exit rest mode when revealed
             isHidden = view.rect.element.hidden;
         },
 
@@ -124,9 +130,6 @@ export const createApp = (initialOptions = {}) => {
          * @private
          */
         _write: ts => {
-
-            // don't do anything while hidden
-            if (isHidden) return;
 
             // get all actions from store
             const actions = store
@@ -391,6 +394,7 @@ export const createApp = (initialOptions = {}) => {
         const queries = Array.isArray(args[0]) ? args[0] : args;
         if (!queries.length) {
             const files = getFiles().filter(item => 
+                !(item.status === ItemStatus.IDLE && item.origin === FileOrigin.LOCAL) &&
                 item.status !== ItemStatus.PROCESSING &&
                 item.status !== ItemStatus.PROCESSING_COMPLETE &&
                 item.status !== ItemStatus.PROCESSING_REVERT_ERROR
@@ -513,7 +517,7 @@ export const createApp = (initialOptions = {}) => {
             window.removeEventListener('resize', resizeHandler);
 
             // stop listening to the visiblitychange event
-            document.addEventListener('visibilitychange', visibilityHandler);
+            document.removeEventListener('visibilitychange', visibilityHandler);
 
             // dispatch destroy
             store.dispatch('DID_DESTROY');

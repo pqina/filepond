@@ -236,19 +236,13 @@ const drop = (root, clients) => e => {
 
             client.state = null;
 
-            const allowsTransfer = allowdrop(items);
+            // if we're filtering on element we need to be over the element to drop
+            if (filterElement && !isEventTarget(e, element)) return;
 
             // no transfer for this client
-            if (!allowsTransfer) {
-                onexit(eventPosition(e));
-                return;
-            }
+            if (!allowdrop(items)) return onexit(eventPosition(e));
 
-            // if we're filtering on element we need to be over the element to drop
-            if (filterElement && !isEventTarget(e, element)) {
-                return;
-            }
-
+            // we can drop these items on this client
             ondrop(eventPosition(e), items);
         });
     });

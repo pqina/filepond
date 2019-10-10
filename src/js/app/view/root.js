@@ -16,6 +16,7 @@ import { toCamels } from '../../utils/toCamels';
 import { createElement } from '../../utils/createElement';
 import { createResponse } from '../../utils/createResponse';
 import { debounce } from '../../utils/debounce';
+import { isFile } from '../../utils/isFile';
 
 const MAX_FILES_LIMIT = 1000000;
 
@@ -77,6 +78,7 @@ const create = ({ root, props }) => {
     // determine if width changed
     root.ref.widthPrevious = null;
     root.ref.widthUpdated = debounce(() => {
+        root.ref.updateHistory = [];
         root.dispatch('DID_RESIZE_ROOT');
     }, 250);
 
@@ -86,6 +88,21 @@ const create = ({ root, props }) => {
 };
 
 const write = ({ root, props, actions }) => {
+
+    // route actions
+    route({ root, props, actions });
+
+    // apply style properties
+    actions
+        .filter(action => /^DID_SET_STYLE_/.test(action.type))
+        .filter(action => !isEmpty(action.data.value))
+        .map(({ type, data }) => {
+            const name = toCamels(type.substr(8).toLowerCase(), '_');
+            root.element.dataset[name] = data.value;
+            root.invalidateLayout();
+        });
+
+    if (root.rect.element.hidden) return;
 
     if (root.rect.element.width !== root.ref.widthPrevious) {
         root.ref.widthPrevious = root.rect.element.width;
@@ -101,19 +118,6 @@ const write = ({ root, props, actions }) => {
         root.element.removeChild(root.ref.measure);
         root.ref.measure = null;
     }
-
-    // route actions
-    route({ root, props, actions });
-
-    // apply style properties
-    actions
-        .filter(action => /^DID_SET_STYLE_/.test(action.type))
-        .filter(action => !isEmpty(action.data.value))
-        .map(({ type, data }) => {
-            const name = toCamels(type.substr(8).toLowerCase(), '_');
-            root.element.dataset[name] = data.value;
-            root.invalidateLayout();
-        });
 
     // get quick references to various high level parts of the upload tool
     const { hopper, label, list, panel } = root.ref;
@@ -213,7 +217,6 @@ const write = ({ root, props, actions }) => {
                 }
             }
         }
-
 
         // fix height of panel so it adheres to aspect ratio
         panel.scalable = false;
@@ -449,6 +452,15 @@ const toggleDrop = (root) => {
                 ) : true;
             },
             {
+                filterItems: items => {
+                    const ignoredFiles = root.query('GET_IGNORED_FILES');
+                    return items.filter(item => {
+                        if (isFile(item)) {
+                            return !ignoredFiles.includes(item.name.toLowerCase())
+                        }
+                        return true;
+                    })
+                },
                 catchesDropsOnPage: root.query('GET_DROP_ON_PAGE'),
                 requiresDropOnElement: root.query('GET_DROP_ON_ELEMENT')
             }
@@ -536,7 +548,7 @@ const togglePaste = (root) => {
         root.ref.paster.onload = items => {
             root.dispatch('ADD_ITEMS', {
                 items,
-                index: getDragIndex(root.ref.list, position),
+                index: -1,
                 interactionMethod: InteractionMethod.PASTE
             });
         };
@@ -561,19 +573,17 @@ const route = createRoute({
         togglePaste(root);
     },
     DID_SET_DISABLED: ({ root, props }) => {
-
         toggleDrop(root);
         togglePaste(root);
         toggleBrowse(root, props);
-
         const isDisabled = root.query('GET_DISABLED');
         if (isDisabled) {
             root.element.dataset.disabled = 'disabled'
         }
         else {
-            delete root.element.dataset.disabled;
+            // delete root.element.dataset.disabled; <= this does not work on iOS 10
+            root.element.removeAttribute('data-disabled');
         }
-        
     }
 });
 

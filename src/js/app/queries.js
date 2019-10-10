@@ -37,9 +37,9 @@ export const queries = state => ({
 
     GET_ACTIVE_ITEM: query => getItemByQuery(getActiveItems(state.items), query),
 
-    GET_ACTIVE_ITEMS: query => getActiveItems(state.items),
+    GET_ACTIVE_ITEMS: () => getActiveItems(state.items),
 
-    GET_ITEMS: query => state.items,
+    GET_ITEMS: () => state.items,
 
     GET_ITEM_NAME: query => {
         const item = getItemByQuery(state.items, query);

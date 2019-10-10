@@ -53,7 +53,7 @@ const create = ({ root, props }) => {
     );
 
     // default start height
-    root.ref.panel.height = 0;
+    root.ref.panel.height = null;
 
     // by default not marked for removal
     props.markedForRemoval = false;
@@ -130,11 +130,27 @@ const write = createRoute({
     }
 }, ({ root, actions, props, shouldOptimize }) => {
 
+    // select last state change action
+    let action = actions.concat()
+        .filter(action => /^DID_/.test(action.type))
+        .reverse()
+        .find(action => StateMap[action.type]);
+
+    // no need to set same state twice
+    if (action && action.type !== props.currentState) {
+            
+        // set current state
+        props.currentState = action.type;
+
+        // set state
+        root.element.dataset.filepondItemState = StateMap[props.currentState] || '';
+    }
+
     // route actions
     const aspectRatio = root.query('GET_ITEM_PANEL_ASPECT_RATIO') || root.query('GET_PANEL_ASPECT_RATIO');
     if (!aspectRatio) {
         route({ root, actions, props });
-        if (!root.height) {
+        if (!root.height && root.ref.container.rect.element.height > 0) {
             root.height = root.ref.container.rect.element.height;
         }
     }
@@ -146,23 +162,22 @@ const write = createRoute({
     if (shouldOptimize) {
         root.ref.panel.height = null;
     }
-    
+
     root.ref.panel.height = root.height;
+    // // select last state change action
+    // let action = actions.concat()
+    //     .filter(action => /^DID_/.test(action.type))
+    //     .reverse()
+    //     .find(action => StateMap[action.type]);
 
-    // select last state change action
-    let action = actions.concat()
-        .filter(action => /^DID_/.test(action.type))
-        .reverse()
-        .find(action => StateMap[action.type]);
-
-    // no need to set same state twice
-    if (!action || (action && action.type === props.currentState)) return;
+    // // no need to set same state twice
+    // if (!action || (action && action.type === props.currentState)) return;
     
-    // set current state
-    props.currentState = action.type;
+    // // set current state
+    // props.currentState = action.type;
 
-    // set state
-    root.element.dataset.filepondItemState = StateMap[props.currentState] || '';
+    // // set state
+    // root.element.dataset.filepondItemState = StateMap[props.currentState] || '';
 });
 
 export const item = createView({

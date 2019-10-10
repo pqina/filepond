@@ -4,7 +4,7 @@ import { item } from './item';
 import { attr } from '../../utils/attr';
 import { getItemIndexByPosition } from '../utils/getItemIndexByPosition';
 
-const create = ({ root, props }) => {
+const create = ({ root }) => {
     // need to set role to list as otherwise it won't be read as a list by VoiceOver
     attr(root.element, 'role', 'list');
 
@@ -152,7 +152,7 @@ const write = ({ root, props, actions, shouldOptimize }) => {
 
     // route actions
     route({ root, props, actions });
-    
+
     const { dragCoordinates } = props;
 
     // get index
@@ -162,8 +162,8 @@ const write = ({ root, props, actions, shouldOptimize }) => {
     const horizontalSpace = root.rect.element.width;
     
     // only draw children that have dimensions
-    const visibleChildren = root.childViews.filter(child => child.rect.outer.height);
-
+    const visibleChildren = root.childViews.filter(child => child.rect.element.height);
+    
     // sort based on current active items
     const children = root.query('GET_ACTIVE_ITEMS').map(item => visibleChildren.find(child => child.id === item.id)).filter(item => item);
 

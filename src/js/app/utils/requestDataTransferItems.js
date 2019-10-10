@@ -3,23 +3,30 @@ import { getExtensionFromFilename } from '../../utils/getExtensionFromFilename';
 
 export const requestDataTransferItems = dataTransfer =>
     new Promise((resolve, reject) => {
-        // try to get links from transfer, if found, we'll exit immidiately
-        // as only one link can be dragged at once
+        // try to get links from transfer, if found we'll exit immidiately (unless a file is in the dataTransfer as well, this is because Firefox could represent the file as a URL and a file object at the same time)
         const links = getLinks(dataTransfer);
-        if (links.length) {
-            resolve(links);
-            return;
+        if (links.length && !hasFiles(dataTransfer)) {
+            return resolve(links);
         }
-
         // try to get files from the transfer
         getFiles(dataTransfer).then(resolve);
     });
+
+/**
+ * Test if datatransfer has files
+ */
+const hasFiles = (dataTransfer) => {
+    if (dataTransfer.files) return dataTransfer.files.length > 0;
+    return false;
+}
+
 
 /**
  * Extracts files from a DataTransfer object
  */
 const getFiles = dataTransfer =>
     new Promise((resolve, reject) => {
+
         // get the transfer items as promises
         const promisedFiles = (dataTransfer.items
             ? Array.from(dataTransfer.items)
@@ -42,16 +49,18 @@ const getFiles = dataTransfer =>
         }
 
         // done!
-        Promise.all(promisedFiles).then(returendFileGroups => {
-            // flatten groups
-            const files = [];
-            returendFileGroups.forEach(group => {
-                files.push.apply(files, group);
-            });
+        Promise.all(promisedFiles)
+            .then(returnedFileGroups => {
+                // flatten groups
+                const files = [];
+                returnedFileGroups.forEach(group => {
+                    files.push.apply(files, group);
+                });
 
-            // done (filter out empty files)!
-            resolve(files.filter(file => file));
-        });
+                // done (filter out empty files)!
+                resolve(files.filter(file => file));
+            })
+            .catch(console.error);
     });
 
 const isFileSystemItem = item => {
@@ -66,8 +75,11 @@ const isFileSystemItem = item => {
 
 const getFilesFromItem = item =>
     new Promise((resolve, reject) => {
+
         if (isDirectoryEntry(item)) {
-            getFilesInDirectory(getAsEntry(item)).then(resolve);
+            getFilesInDirectory(getAsEntry(item))
+                .then(resolve)
+                .catch(reject)
             return;
         }
 
@@ -76,34 +88,66 @@ const getFilesFromItem = item =>
 
 const getFilesInDirectory = entry =>
     new Promise((resolve, reject) => {
+
         const files = [];
 
         // the total entries to read
-        let totalFilesFound = 0;
+        let dirCounter = 0;
+        let fileCounter = 0;
+
+        const resolveIfDone = () => {
+            if (fileCounter === 0 && dirCounter === 0) {
+                resolve(files);
+            }
+        }
 
         // the recursive function
         const readEntries = dirEntry => {
+
+            dirCounter++;
+
             const directoryReader = dirEntry.createReader();
-            directoryReader.readEntries(entries => {
-                entries.forEach(entry => {
-                    
-                    // recursively read more directories
-                    if (entry.isDirectory) {
-                        readEntries(entry);
-                    } else {
-                        // read as file
-                        totalFilesFound++;
-                        entry.file(file => {
 
-                            files.push(correctMissingFileType(file));
+            // directories are returned in batches, we need to process all batches before we're done
+            const readBatch = () => {
 
-                            if (totalFilesFound === files.length) {
-                                resolve(files);
-                            }
-                        });
+                directoryReader.readEntries(entries => {
+
+                    if (entries.length === 0) {
+                        dirCounter--;
+                        resolveIfDone();
+                        return;
                     }
-                });
-            });
+
+                    entries.forEach(entry => {
+    
+                        // recursively read more directories
+                        if (entry.isDirectory) {
+                            readEntries(entry);
+                        }
+                        else {
+
+                            // read as file
+                            fileCounter++;
+
+                            entry.file(file => {
+                                files.push(correctMissingFileType(file));
+                                fileCounter--;
+                                resolveIfDone();
+                            });
+
+                        }
+                    });
+
+                    // try to get next batch of files
+                    readBatch();
+
+                }, reject);
+
+            }
+
+            // read first batch of files
+            readBatch();
         };
 
         // go!
@@ -120,8 +164,7 @@ const correctMissingFileType = (file) => {
     return file;
 }
 
-const isDirectoryEntry = item =>
-    isEntry(item) && (getAsEntry(item) || {}).isDirectory;
+const isDirectoryEntry = item => isEntry(item) && (getAsEntry(item) || {}).isDirectory;
 
 const isEntry = item => 'webkitGetAsEntry' in item;
 
