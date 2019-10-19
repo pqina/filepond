@@ -7440,7 +7440,12 @@
   };
 
   var text = function text(node, value) {
-    var textNode = node.childNodes[0];
+    var textNode = null;
+    node.childNodes.forEach(function(el) {
+      if (el.tagName === undefined) {
+        textNode = el;
+      }
+    });
     if (!textNode) {
       textNode = document.createTextNode(value);
       node.appendChild(textNode);

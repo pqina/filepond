@@ -1,5 +1,10 @@
 export const text = (node, value) => {
-    let textNode = node.childNodes[0];
+    let textNode = null;
+    node.childNodes.forEach((el) => {
+      if(el.tagName === undefined){
+        textNode = el
+      }
+    })
     if (!textNode) {
         textNode = document.createTextNode(value);
         node.appendChild(textNode);
