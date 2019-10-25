@@ -830,7 +830,8 @@ const applyStyles = (
     styles.length !== elementCurrentStyle.length ||
     styles !== elementCurrentStyle
   ) {
-    element.setAttribute('style', styles);
+    //element.setAttribute('style', styles);
+    element.style.cssText = styles;
     // store current styles so we can compare them to new styles later on
     // _not_ getting the style attribute is faster
     element.elementCurrentStyle = styles;
