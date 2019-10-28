@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.7.3
+
+- Switch from `setAttribute` to `cssText` for layout changes resulting in better performance and CSP compatibility. [#400](https://github.com/pqina/filepond/pull/400)
+
+
 ## 4.7.2
 
 - Fix issue where iOS 10 would throw an error when calling `delete` on a dataset property

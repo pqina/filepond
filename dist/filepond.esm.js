@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.7.2
+ * FilePond 4.7.3
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -830,9 +830,9 @@ const applyStyles = (
     styles.length !== elementCurrentStyle.length ||
     styles !== elementCurrentStyle
   ) {
-    element.setAttribute('style', styles);
+    element.style.cssText = styles;
     // store current styles so we can compare them to new styles later on
-    // _not_ getting the style attribute is faster
+    // _not_ getting the style value is faster
     element.elementCurrentStyle = styles;
   }
 };
@@ -1187,7 +1187,7 @@ const createView =
     didCreateView(internalAPI);
 
     // expose public api
-    return createObject(externalAPIDefinition, props);
+    return createObject(externalAPIDefinition);
   };
 
 const createPainter = (read, write, fps = 60) => {
@@ -6775,7 +6775,6 @@ const getRootNode = element =>
 
 const images = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'tiff'];
 const text$1 = ['css', 'csv', 'html', 'txt'];
-const apps = ['rtf', 'pdf', 'json'];
 const map = {
   zip: 'zip|compressed',
   epub: 'application/epub+zip'
