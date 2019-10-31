@@ -8,7 +8,6 @@ const create = ({ root, props }) => {
     root.element.id = `filepond--assistant-${props.id}`;
     attr(root.element, 'role', 'status');
     attr(root.element, 'aria-live', 'polite');
-    attr(root.element, 'aria-relevant', 'additions');
 };
 
 let addFilesNotificationTimeout = null;
@@ -112,7 +111,7 @@ export const assistant = createView({
 
         DID_ABORT_ITEM_PROCESSING: itemProcessedUndo,
         DID_REVERT_ITEM_PROCESSING: itemProcessedUndo,
-        
+
         DID_THROW_ITEM_REMOVE_ERROR: itemError,
         DID_THROW_ITEM_LOAD_ERROR: itemError,
         DID_THROW_ITEM_INVALID: itemError,

@@ -7379,7 +7379,6 @@ const create$c = ({ root, props }) => {
   root.element.id = `filepond--assistant-${props.id}`;
   attr(root.element, 'role', 'status');
   attr(root.element, 'aria-live', 'polite');
-  attr(root.element, 'aria-relevant', 'additions');
 };
 
 let addFilesNotificationTimeout = null;
