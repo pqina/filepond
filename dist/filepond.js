@@ -10150,7 +10150,6 @@
     root.element.id = 'filepond--assistant-' + props.id;
     attr(root.element, 'role', 'status');
     attr(root.element, 'aria-live', 'polite');
-    attr(root.element, 'aria-relevant', 'additions');
   };
 
   var addFilesNotificationTimeout = null;
