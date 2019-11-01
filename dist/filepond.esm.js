@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.7.3
+ * FilePond 4.7.4
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -2629,7 +2629,8 @@ const sendRequest = (data, url, options) => {
 
   // add headers
   Object.keys(options.headers).forEach(key => {
-    xhr.setRequestHeader(key, options.headers[key]);
+    const value = unescape(encodeURIComponent(options.headers[key]));
+    xhr.setRequestHeader(key, value);
   });
 
   // set type of response

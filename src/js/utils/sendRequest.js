@@ -109,7 +109,8 @@ export const sendRequest = (data, url, options) => {
 
     // add headers
     Object.keys(options.headers).forEach(key => {
-        xhr.setRequestHeader(key, options.headers[key]);
+        const value = unescape(encodeURIComponent(options.headers[key]));
+        xhr.setRequestHeader(key, value);
     });
 
     // set type of response

@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.7.4
+
+- UTF-8 encode request headers to prevent issues with weird characters.
+
+
 ## 4.7.3
 
 - Switch from `setAttribute` to `cssText` for layout changes resulting in better performance and CSP compatibility. [#400](https://github.com/pqina/filepond/pull/400)
