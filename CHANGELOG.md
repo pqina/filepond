@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.8.0
+
+- Add `prepareFile` and `prepareFiles` methods to the FilePond instance, use to request output files of the current items in the files list.
+
+
 ## 4.7.4
 
 - UTF-8 encode request headers to prevent issues with weird characters.

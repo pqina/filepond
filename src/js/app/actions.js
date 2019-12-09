@@ -153,7 +153,7 @@ export const actions = (dispatch, query, state) => ({
                     dispatch('REQUEST_PREPARE_OUTPUT', {
                         query: id,
                         item,
-                        ready: (file) => {
+                        success: (file) => {
                             dispatch('DID_PREPARE_OUTPUT', { id, file });
                         }
                     }, true);
@@ -479,7 +479,7 @@ export const actions = (dispatch, query, state) => ({
                         dispatch('REQUEST_PREPARE_OUTPUT', {
                             query: id,
                             item,
-                            ready: (file) => {
+                            success: (file) => {
                                 dispatch('DID_PREPARE_OUTPUT', { id, file });
                                 loadComplete();
                             }
@@ -587,28 +587,38 @@ export const actions = (dispatch, query, state) => ({
         );
     },
 
-    REQUEST_PREPARE_OUTPUT: ({ item, ready }) => {
+    REQUEST_PREPARE_OUTPUT: ({ item, success, failure = () => {} }) => {
+
+        // error response if item archived
+        const err = {
+            error: createResponse(
+                'error', 
+                0, 
+                'Item not found'
+            ),
+            file: null
+        };
 
         // don't handle archived items, an item could have been archived (load aborted) while waiting to be prepared
-        if (item.archived) return;
+        if (item.archived) return failure(err);
         
         // allow plugins to alter the file data
         applyFilterChain('PREPARE_OUTPUT', item.file, { query, item })
-        .then((result) => {
+        .then(result => {
             applyFilterChain('COMPLETE_PREPARE_OUTPUT', result, { query, item })
             .then(result => {
 
                 // don't handle archived items, an item could have been archived (load aborted) while being prepared
-                if (item.archived) return;
+                if (item.archived) return failure(err);
                 
                 // we done!
-                ready(result);
+                success(result);
             });
         });
             
     },
 
-    COMPLETE_LOAD_ITEM:  ({item, data}) => {
+    COMPLETE_LOAD_ITEM: ({item, data}) => {
         
         const {
             success,
@@ -658,6 +668,21 @@ export const actions = (dispatch, query, state) => ({
     RETRY_ITEM_LOAD: getItemByQueryFromState(state, item => {
         // try loading the source one more time
         item.retryLoad();
+    }),
+
+    REQUEST_ITEM_PREPARE: getItemByQueryFromState(state,  (item, success, failure) => {
+        dispatch('REQUEST_PREPARE_OUTPUT', {
+            query: item.id,
+            item,
+            success: (file) => {
+                dispatch('DID_PREPARE_OUTPUT', { id: item.id, file });
+                success({
+                    file: item,
+                    output: file
+                });
+            },
+            failure
+        }, true);
     }),
 
     REQUEST_ITEM_PROCESSING: getItemByQueryFromState(state,  (item, success, failure) => {
