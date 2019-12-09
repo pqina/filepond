@@ -136,11 +136,6 @@ Tests are based on Jest and can be run with `npm run test`
 To build the library run `npm run build`
 
 
-## Sponsors
-
-Thanks go out to Ryan Olson (@ams-ryanolson) Arctic Media for donating the funds to build the chunked uploading feature.
-
-
 ## Publications
 
 * [Generating Image Thumbnails in the Browser using JavaScript and FilePond](https://dev.to/pqina/generating-image-thumbnails-in-the-browser-using-javascript-and-filepond-10b8)
