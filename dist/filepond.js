@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.8.0
+ * FilePond 4.8.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -229,6 +229,16 @@
       return view;
     };
   };
+
+  var testElement = createElement('svg');
+  var getChildCount =
+    'children' in testElement
+      ? function(el) {
+          return el.children.length;
+        }
+      : function(el) {
+          return el.childNodes.length;
+        };
 
   var getViewRect = function getViewRect(
     elementRect,
@@ -1361,7 +1371,7 @@
         });
 
         // append created child views to root node
-        var childCount = element.children.length; // need to know the current child count so appending happens in correct order
+        var childCount = getChildCount(element); // need to know the current child count so appending happens in correct order
         childViews.forEach(function(child, index) {
           internalAPI.appendChild(child.element, childCount + index);
         });

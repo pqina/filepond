@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.8.1
+
+- Fix IE issue where adding markup would not work.
+
+
 ## 4.8.0
 
 - Add `prepareFile` and `prepareFiles` methods to the FilePond instance, use to request output files of the current items in the files list.

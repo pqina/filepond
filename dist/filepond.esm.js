@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.8.0
+ * FilePond 4.8.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -187,6 +187,12 @@ const removeChildView = (parent, childViews) => view => {
 
   return view;
 };
+
+const testElement = createElement('svg');
+const getChildCount =
+  'children' in testElement
+    ? el => el.children.length
+    : el => el.childNodes.length;
 
 const getViewRect = (elementRect, childViews, offset, scale) => {
   const left = offset[0] || elementRect.left;
@@ -1178,7 +1184,7 @@ const createView =
     });
 
     // append created child views to root node
-    const childCount = element.children.length; // need to know the current child count so appending happens in correct order
+    const childCount = getChildCount(element); // need to know the current child count so appending happens in correct order
     childViews.forEach((child, index) => {
       internalAPI.appendChild(child.element, childCount + index);
     });
