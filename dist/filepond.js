@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.8.1
+ * FilePond 4.8.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -230,7 +230,16 @@
     };
   };
 
-  var testElement = createElement('svg');
+  var IS_BROWSER = (function() {
+    return (
+      typeof window !== 'undefined' && typeof window.document !== 'undefined'
+    );
+  })();
+  var isBrowser = function isBrowser() {
+    return IS_BROWSER;
+  };
+
+  var testElement = isBrowser() ? createElement('svg') : {};
   var getChildCount =
     'children' in testElement
       ? function(el) {
@@ -12053,11 +12062,6 @@
   var hasTiming = function hasTiming() {
     return 'performance' in window;
   }; // iOS 8.x
-  var isBrowser = function isBrowser() {
-    return (
-      typeof window !== 'undefined' && typeof window.document !== 'undefined'
-    );
-  };
 
   var supported = (function() {
     // Runs immidiately and then remembers result for subsequent calls

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.8.1
+ * FilePond 4.8.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -188,7 +188,11 @@ const removeChildView = (parent, childViews) => view => {
   return view;
 };
 
-const testElement = createElement('svg');
+const IS_BROWSER = (() =>
+  typeof window !== 'undefined' && typeof window.document !== 'undefined')();
+const isBrowser = () => IS_BROWSER;
+
+const testElement = isBrowser() ? createElement('svg') : {};
 const getChildCount =
   'children' in testElement
     ? el => el.children.length
@@ -9076,8 +9080,6 @@ const hasCreateObjectURL = () =>
   'URL' in window && 'createObjectURL' in window.URL;
 const hasVisibility = () => 'visibilityState' in document;
 const hasTiming = () => 'performance' in window; // iOS 8.x
-const isBrowser = () =>
-  typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
 const supported = (() => {
   // Runs immidiately and then remembers result for subsequent calls

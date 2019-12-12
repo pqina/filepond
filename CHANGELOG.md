@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.8.2
+
+- Fix problem with 4.8.1 fix not working with SSR.
+
+
 ## 4.8.1
 
 - Fix IE issue where adding markup would not work.
