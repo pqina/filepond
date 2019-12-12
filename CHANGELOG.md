@@ -1,5 +1,30 @@
 # Changelog
 
+## 4.8.2
+
+- Fix problem with 4.8.1 fix not working with SSR.
+
+
+## 4.8.1
+
+- Fix IE issue where adding markup would not work.
+
+
+## 4.8.0
+
+- Add `prepareFile` and `prepareFiles` methods to the FilePond instance, use to request output files of the current items in the files list.
+
+
+## 4.7.4
+
+- UTF-8 encode request headers to prevent issues with weird characters.
+
+
+## 4.7.3
+
+- Switch from `setAttribute` to `cssText` for layout changes resulting in better performance and CSP compatibility. [#400](https://github.com/pqina/filepond/pull/400)
+
+
 ## 4.7.2
 
 - Fix issue where iOS 10 would throw an error when calling `delete` on a dataset property

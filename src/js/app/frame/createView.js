@@ -3,6 +3,7 @@ import { createElement } from './utils/createElement';
 import { appendChild } from './utils/appendChild';
 import { appendChildView } from './utils/appendChildView';
 import { removeChildView } from './utils/removeChildView';
+import { getChildCount } from './utils/getChildCount';
 import { getViewRect } from './utils/getViewRect';
 import { Mixins } from './mixins/index';
 import { updateRect } from './utils/updateRect';
@@ -312,7 +313,7 @@ export const createView =
             });
 
             // append created child views to root node
-            const childCount = element.children.length; // need to know the current child count so appending happens in correct order
+            const childCount = getChildCount(element); // need to know the current child count so appending happens in correct order
             childViews.forEach((child, index) => {
                 internalAPI.appendChild(child.element, childCount + index);
             });

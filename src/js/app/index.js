@@ -326,6 +326,18 @@ export const createApp = (initialOptions = {}) => {
 
     const getFile = query => store.query('GET_ACTIVE_ITEM', query);
 
+    const prepareFile = query => new Promise((resolve, reject) => {
+        store.dispatch('REQUEST_ITEM_PREPARE', {
+            query,
+            success: (item) => {
+                resolve(item)
+            },
+            failure: (error) => {
+                reject(error)
+            },
+        });
+    });
+
     const addFile = (source, options = {}) => new Promise((resolve, reject) => {
         addFiles([{source, options}], { index: options.index })
             .then(items => resolve(items && items[0]))
@@ -377,18 +389,23 @@ export const createApp = (initialOptions = {}) => {
 
     const getFiles = () => store.query('GET_ACTIVE_ITEMS');
 
-    const processFile = query =>
-        new Promise((resolve, reject) => {
-            store.dispatch('REQUEST_ITEM_PROCESSING', {
-                query,
-                success: (item) => {
-                    resolve(item)
-                },
-                failure: (error) => {
-                    reject(error)
-                },
-            });
+    const processFile = query => new Promise((resolve, reject) => {
+        store.dispatch('REQUEST_ITEM_PROCESSING', {
+            query,
+            success: (item) => {
+                resolve(item)
+            },
+            failure: (error) => {
+                reject(error)
+            },
         });
+    });
+
+    const prepareFiles = (...args) => {
+        const queries = Array.isArray(args[0]) ? args[0] : args;
+        const items = queries.length ? queries : getFiles();
+        return Promise.all(items.map(prepareFile));
+    };
 
     const processFiles = (...args) => {
         const queries = Array.isArray(args[0]) ? args[0] : args;
@@ -462,6 +479,13 @@ export const createApp = (initialOptions = {}) => {
          */
         processFile,
 
+
+        /**
+         * Request prepare output for file with given name
+         * @param query { string, number, null  }
+         */
+        prepareFile,
+
         /**
          * Removes a file by its name
          * @param query { string, number, null  }
@@ -482,6 +506,11 @@ export const createApp = (initialOptions = {}) => {
          * Clears all files from the files list
          */
         removeFiles,
+
+        /**
+         * Starts preparing output of all files
+         */
+        prepareFiles,
 
         /**
          * Sort list of files

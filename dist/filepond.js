@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.7.2
+ * FilePond 4.8.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -229,6 +229,25 @@
       return view;
     };
   };
+
+  var IS_BROWSER = (function() {
+    return (
+      typeof window !== 'undefined' && typeof window.document !== 'undefined'
+    );
+  })();
+  var isBrowser = function isBrowser() {
+    return IS_BROWSER;
+  };
+
+  var testElement = isBrowser() ? createElement('svg') : {};
+  var getChildCount =
+    'children' in testElement
+      ? function(el) {
+          return el.children.length;
+        }
+      : function(el) {
+          return el.childNodes.length;
+        };
 
   var getViewRect = function getViewRect(
     elementRect,
@@ -944,9 +963,9 @@
       styles.length !== elementCurrentStyle.length ||
       styles !== elementCurrentStyle
     ) {
-      element.setAttribute('style', styles);
+      element.style.cssText = styles;
       // store current styles so we can compare them to new styles later on
-      // _not_ getting the style attribute is faster
+      // _not_ getting the style value is faster
       element.elementCurrentStyle = styles;
     }
   };
@@ -1361,7 +1380,7 @@
         });
 
         // append created child views to root node
-        var childCount = element.children.length; // need to know the current child count so appending happens in correct order
+        var childCount = getChildCount(element); // need to know the current child count so appending happens in correct order
         childViews.forEach(function(child, index) {
           internalAPI.appendChild(child.element, childCount + index);
         });
@@ -3095,7 +3114,8 @@
 
     // add headers
     Object.keys(options.headers).forEach(function(key) {
-      xhr.setRequestHeader(key, options.headers[key]);
+      var value = unescape(encodeURIComponent(options.headers[key]));
+      xhr.setRequestHeader(key, value);
     });
 
     // set type of response
@@ -6541,7 +6561,7 @@
                 {
                   query: id,
                   item: item,
-                  ready: function ready(file) {
+                  success: function success(file) {
                     dispatch('DID_PREPARE_OUTPUT', { id: id, file: file });
                   }
                 },
@@ -6904,7 +6924,7 @@
                   {
                     query: id,
                     item: item,
-                    ready: function ready(file) {
+                    success: function success(file) {
                       dispatch('DID_PREPARE_OUTPUT', { id: id, file: file });
                       loadComplete();
                     }
@@ -7032,10 +7052,19 @@
 
       REQUEST_PREPARE_OUTPUT: function REQUEST_PREPARE_OUTPUT(_ref8) {
         var item = _ref8.item,
-          ready = _ref8.ready;
+          success = _ref8.success,
+          _ref8$failure = _ref8.failure,
+          failure = _ref8$failure === void 0 ? function() {} : _ref8$failure;
+
+        // error response if item archived
+        var err = {
+          error: createResponse('error', 0, 'Item not found'),
+
+          file: null
+        };
 
         // don't handle archived items, an item could have been archived (load aborted) while waiting to be prepared
-        if (item.archived) return;
+        if (item.archived) return failure(err);
 
         // allow plugins to alter the file data
         applyFilterChain('PREPARE_OUTPUT', item.file, {
@@ -7047,10 +7076,10 @@
             item: item
           }).then(function(result) {
             // don't handle archived items, an item could have been archived (load aborted) while being prepared
-            if (item.archived) return;
+            if (item.archived) return failure(err);
 
             // we done!
-            ready(result);
+            success(result);
           });
         });
       },
@@ -7104,6 +7133,29 @@
       RETRY_ITEM_LOAD: getItemByQueryFromState(state, function(item) {
         // try loading the source one more time
         item.retryLoad();
+      }),
+
+      REQUEST_ITEM_PREPARE: getItemByQueryFromState(state, function(
+        item,
+        _success,
+        failure
+      ) {
+        dispatch(
+          'REQUEST_PREPARE_OUTPUT',
+          {
+            query: item.id,
+            item: item,
+            success: function success(file) {
+              dispatch('DID_PREPARE_OUTPUT', { id: item.id, file: file });
+              _success({
+                file: item,
+                output: file
+              });
+            },
+            failure: failure
+          },
+          true
+        );
       }),
 
       REQUEST_ITEM_PROCESSING: getItemByQueryFromState(state, function(
@@ -11365,6 +11417,20 @@
       return store.query('GET_ACTIVE_ITEM', query);
     };
 
+    var prepareFile = function prepareFile(query) {
+      return new Promise(function(resolve, reject) {
+        store.dispatch('REQUEST_ITEM_PREPARE', {
+          query: query,
+          success: function success(item) {
+            resolve(item);
+          },
+          failure: function failure(error) {
+            reject(error);
+          }
+        });
+      });
+    };
+
     var addFile = function addFile(source) {
       var options =
         arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
@@ -11445,13 +11511,26 @@
       });
     };
 
-    var processFiles = function processFiles() {
+    var prepareFiles = function prepareFiles() {
       for (
         var _len2 = arguments.length, args = new Array(_len2), _key2 = 0;
         _key2 < _len2;
         _key2++
       ) {
         args[_key2] = arguments[_key2];
+      }
+      var queries = Array.isArray(args[0]) ? args[0] : args;
+      var items = queries.length ? queries : getFiles();
+      return Promise.all(items.map(prepareFile));
+    };
+
+    var processFiles = function processFiles() {
+      for (
+        var _len3 = arguments.length, args = new Array(_len3), _key3 = 0;
+        _key3 < _len3;
+        _key3++
+      ) {
+        args[_key3] = arguments[_key3];
       }
       var queries = Array.isArray(args[0]) ? args[0] : args;
       if (!queries.length) {
@@ -11474,11 +11553,11 @@
 
     var removeFiles = function removeFiles() {
       for (
-        var _len3 = arguments.length, args = new Array(_len3), _key3 = 0;
-        _key3 < _len3;
-        _key3++
+        var _len4 = arguments.length, args = new Array(_len4), _key4 = 0;
+        _key4 < _len4;
+        _key4++
       ) {
-        args[_key3] = arguments[_key3];
+        args[_key4] = arguments[_key4];
       }
       var queries = Array.isArray(args[0]) ? args[0] : args;
       var files = getFiles();
@@ -11547,6 +11626,12 @@
         processFile: processFile,
 
         /**
+         * Request prepare output for file with given name
+         * @param query { string, number, null  }
+         */
+        prepareFile: prepareFile,
+
+        /**
          * Removes a file by its name
          * @param query { string, number, null  }
          */
@@ -11566,6 +11651,11 @@
          * Clears all files from the files list
          */
         removeFiles: removeFiles,
+
+        /**
+         * Starts preparing output of all files
+         */
+        prepareFiles: prepareFiles,
 
         /**
          * Sort list of files
@@ -12063,11 +12153,6 @@
   var hasTiming = function hasTiming() {
     return 'performance' in window;
   }; // iOS 8.x
-  var isBrowser = function isBrowser() {
-    return (
-      typeof window !== 'undefined' && typeof window.document !== 'undefined'
-    );
-  };
 
   var supported = (function() {
     // Runs immidiately and then remembers result for subsequent calls

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.7.2
+ * FilePond 4.8.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -187,6 +187,16 @@ const removeChildView = (parent, childViews) => view => {
 
   return view;
 };
+
+const IS_BROWSER = (() =>
+  typeof window !== 'undefined' && typeof window.document !== 'undefined')();
+const isBrowser = () => IS_BROWSER;
+
+const testElement = isBrowser() ? createElement('svg') : {};
+const getChildCount =
+  'children' in testElement
+    ? el => el.children.length
+    : el => el.childNodes.length;
 
 const getViewRect = (elementRect, childViews, offset, scale) => {
   const left = offset[0] || elementRect.left;
@@ -830,9 +840,9 @@ const applyStyles = (
     styles.length !== elementCurrentStyle.length ||
     styles !== elementCurrentStyle
   ) {
-    element.setAttribute('style', styles);
+    element.style.cssText = styles;
     // store current styles so we can compare them to new styles later on
-    // _not_ getting the style attribute is faster
+    // _not_ getting the style value is faster
     element.elementCurrentStyle = styles;
   }
 };
@@ -1178,7 +1188,7 @@ const createView =
     });
 
     // append created child views to root node
-    const childCount = element.children.length; // need to know the current child count so appending happens in correct order
+    const childCount = getChildCount(element); // need to know the current child count so appending happens in correct order
     childViews.forEach((child, index) => {
       internalAPI.appendChild(child.element, childCount + index);
     });
@@ -2629,7 +2639,8 @@ const sendRequest = (data, url, options) => {
 
   // add headers
   Object.keys(options.headers).forEach(key => {
-    xhr.setRequestHeader(key, options.headers[key]);
+    const value = unescape(encodeURIComponent(options.headers[key]));
+    xhr.setRequestHeader(key, value);
   });
 
   // set type of response
@@ -4147,7 +4158,7 @@ const actions = (dispatch, query, state) => ({
               {
                 query: id,
                 item,
-                ready: file => {
+                success: file => {
                   dispatch('DID_PREPARE_OUTPUT', { id, file });
                 }
               },
@@ -4490,7 +4501,7 @@ const actions = (dispatch, query, state) => ({
                 {
                   query: id,
                   item,
-                  ready: file => {
+                  success: file => {
                     dispatch('DID_PREPARE_OUTPUT', { id, file });
                     loadComplete();
                   }
@@ -4603,9 +4614,15 @@ const actions = (dispatch, query, state) => ({
     );
   },
 
-  REQUEST_PREPARE_OUTPUT: ({ item, ready }) => {
+  REQUEST_PREPARE_OUTPUT: ({ item, success, failure = () => {} }) => {
+    // error response if item archived
+    const err = {
+      error: createResponse('error', 0, 'Item not found'),
+      file: null
+    };
+
     // don't handle archived items, an item could have been archived (load aborted) while waiting to be prepared
-    if (item.archived) return;
+    if (item.archived) return failure(err);
 
     // allow plugins to alter the file data
     applyFilterChain('PREPARE_OUTPUT', item.file, { query, item }).then(
@@ -4615,10 +4632,10 @@ const actions = (dispatch, query, state) => ({
           item
         }).then(result => {
           // don't handle archived items, an item could have been archived (load aborted) while being prepared
-          if (item.archived) return;
+          if (item.archived) return failure(err);
 
           // we done!
-          ready(result);
+          success(result);
         });
       }
     );
@@ -4670,6 +4687,28 @@ const actions = (dispatch, query, state) => ({
     // try loading the source one more time
     item.retryLoad();
   }),
+
+  REQUEST_ITEM_PREPARE: getItemByQueryFromState(
+    state,
+    (item, success, failure) => {
+      dispatch(
+        'REQUEST_PREPARE_OUTPUT',
+        {
+          query: item.id,
+          item,
+          success: file => {
+            dispatch('DID_PREPARE_OUTPUT', { id: item.id, file });
+            success({
+              file: item,
+              output: file
+            });
+          },
+          failure
+        },
+        true
+      );
+    }
+  ),
 
   REQUEST_ITEM_PROCESSING: getItemByQueryFromState(
     state,
@@ -8496,6 +8535,19 @@ const createApp = (initialOptions = {}) => {
 
   const getFile = query => store.query('GET_ACTIVE_ITEM', query);
 
+  const prepareFile = query =>
+    new Promise((resolve, reject) => {
+      store.dispatch('REQUEST_ITEM_PREPARE', {
+        query,
+        success: item => {
+          resolve(item);
+        },
+        failure: error => {
+          reject(error);
+        }
+      });
+    });
+
   const addFile = (source, options = {}) =>
     new Promise((resolve, reject) => {
       addFiles([{ source, options }], { index: options.index })
@@ -8557,6 +8609,12 @@ const createApp = (initialOptions = {}) => {
         }
       });
     });
+
+  const prepareFiles = (...args) => {
+    const queries = Array.isArray(args[0]) ? args[0] : args;
+    const items = queries.length ? queries : getFiles();
+    return Promise.all(items.map(prepareFile));
+  };
 
   const processFiles = (...args) => {
     const queries = Array.isArray(args[0]) ? args[0] : args;
@@ -8636,6 +8694,12 @@ const createApp = (initialOptions = {}) => {
     processFile,
 
     /**
+     * Request prepare output for file with given name
+     * @param query { string, number, null  }
+     */
+    prepareFile,
+
+    /**
      * Removes a file by its name
      * @param query { string, number, null  }
      */
@@ -8655,6 +8719,11 @@ const createApp = (initialOptions = {}) => {
      * Clears all files from the files list
      */
     removeFiles,
+
+    /**
+     * Starts preparing output of all files
+     */
+    prepareFiles,
 
     /**
      * Sort list of files
@@ -9094,8 +9163,6 @@ const hasCreateObjectURL = () =>
   'URL' in window && 'createObjectURL' in window.URL;
 const hasVisibility = () => 'visibilityState' in document;
 const hasTiming = () => 'performance' in window; // iOS 8.x
-const isBrowser = () =>
-  typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
 const supported = (() => {
   // Runs immidiately and then remembers result for subsequent calls

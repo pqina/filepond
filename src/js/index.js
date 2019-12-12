@@ -8,6 +8,7 @@ import { forin } from './utils/forin';
 import { ItemStatus } from './app/enum/ItemStatus';
 import { Status as StatusEnum } from './app/enum/Status';
 import { FileOrigin as FileOriginEnum } from './app/enum/FileOrigin';
+import { isBrowser } from './utils/isBrowser';
 
 // feature detection used by supported() method
 const isOperaMini = () => Object.prototype.toString.call(window.operamini) === '[object OperaMini]';
@@ -16,7 +17,6 @@ const hasBlobSlice = () => 'slice' in Blob.prototype;
 const hasCreateObjectURL = () => 'URL' in window && 'createObjectURL' in window.URL;
 const hasVisibility = () => 'visibilityState' in document;
 const hasTiming = () => 'performance' in window; // iOS 8.x
-const isBrowser = () => typeof window !== 'undefined' && typeof window.document !== 'undefined';
 
 export const supported = (() => {
 
