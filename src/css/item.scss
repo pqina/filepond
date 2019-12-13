@@ -27,6 +27,7 @@
     }
 
     &[data-drag-state] {
+        cursor: grab;
         > .filepond--panel {
             transition: box-shadow .125s ease-in-out;
             box-shadow: 0 0 0 rgba(0, 0, 0, 0);

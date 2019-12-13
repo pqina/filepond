@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.9.1
+ * FilePond 4.9.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -509,6 +509,10 @@
 .filepond--item > .filepond--file-wrapper,
 .filepond--item > .filepond--panel {
   transition: opacity 0.15s ease-out;
+}
+.filepond--item[data-drag-state] {
+  cursor: -webkit-grab;
+  cursor: grab;
 }
 .filepond--item[data-drag-state] > .filepond--panel {
   transition: box-shadow 0.125s ease-in-out;

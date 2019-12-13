@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.9.1
+ * FilePond 4.9.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -5995,6 +5995,9 @@ const create$7 = ({ root, props }) => {
 
   // if not allowed to reorder file items, exit here
   if (!root.query('GET_ALLOW_REORDER')) return;
+
+  // set to idle so shows grab cursor
+  root.element.dataset.dragState = 'idle';
 
   const grab = e => {
     if (!e.isPrimary) return;

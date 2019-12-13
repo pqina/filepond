@@ -61,6 +61,9 @@ const create = ({ root, props }) => {
     // if not allowed to reorder file items, exit here
     if (!root.query('GET_ALLOW_REORDER')) return;
 
+    // set to idle so shows grab cursor
+    root.element.dataset.dragState = 'idle';
+
     const grab = e => {
 
         if (!e.isPrimary) return;
