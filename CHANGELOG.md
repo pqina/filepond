@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.9.1
+
+- Fix issue where Chrome on Android would launch pull-to-refresh when trying to drag a file item.
+
+
 ## 4.9.0
 
 - Add drag to reorder file items, enable by setting `allowReorder` to `true`.

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.9.0
+ * FilePond 4.9.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -7816,7 +7816,10 @@ const create$d = ({ root, props }) => {
   root.ref.updateHistory = [];
 
   // prevent scrolling and zooming on iOS (only if supports pointer events, for then we can enable reorder)
-  if (root.query('GET_ALLOW_REORDER') && 'onpointerdown' in window && isIOS()) {
+  const canHover = window.matchMedia('(pointer: fine) and (hover: hover)')
+    .matches;
+  const hasPointerEvents = 'PointerEvent' in window;
+  if (root.query('GET_ALLOW_REORDER') && hasPointerEvents && !canHover) {
     root.element.addEventListener('touchmove', prevent, { passive: false });
     root.element.addEventListener('gesturestart', prevent);
   }
