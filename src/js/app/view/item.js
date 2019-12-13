@@ -183,21 +183,6 @@ const write = createRoute({
     }
 
     root.ref.panel.height = root.height;
-
-    // // select last state change action
-    // let action = actions.concat()
-    //     .filter(action => /^DID_/.test(action.type))
-    //     .reverse()
-    //     .find(action => StateMap[action.type]);
-
-    // // no need to set same state twice
-    // if (!action || (action && action.type === props.currentState)) return;
-    
-    // // set current state
-    // props.currentState = action.type;
-
-    // // set state
-    // root.element.dataset.filepondItemState = StateMap[props.currentState] || '';
 });
 
 export const item = createView({
