@@ -6042,6 +6042,8 @@ const write$4 = createRoute(
     },
     DID_DRAG_ITEM: ({ root, action, props }) => {
       // we use the original offset and the action offset to calculate the new drag position
+      root.translateX = null;
+      root.translateY = null;
       root.translateX = root.ref.offsetX + action.offset.x;
       root.translateY = root.ref.offsetY + action.offset.y;
     },
@@ -6087,6 +6089,7 @@ const write$4 = createRoute(
     }
 
     root.ref.panel.height = root.height;
+
     // // select last state change action
     // let action = actions.concat()
     //     .filter(action => /^DID_/.test(action.type))

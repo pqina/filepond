@@ -9,22 +9,33 @@
 <body>
 
     <input type="file"/>
+
+    <script>
+    [
+        {supported: 'Symbol' in window, fill: 'https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.15/browser-polyfill.min.js'},
+        {supported: 'Promise' in window, fill: 'https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js'},
+        {supported: 'fetch' in window, fill: 'https://cdn.jsdelivr.net/npm/fetch-polyfill@0.8.2/fetch.min.js'},
+        {supported: 'CustomEvent' in window && 'log10' in Math && 'sign' in Math &&  'assign' in Object &&  'from' in Array &&
+                    ['find', 'findIndex', 'some', 'includes'].reduce(function(previous, prop) { return (prop in Array.prototype) ? previous : false; }, true), fill: 'https://unpkg.com/filepond-polyfill/dist/filepond-polyfill.js'}
+    ].forEach(function(p) {
+        if (p.supported) return;
+        document.write('<script src="' + p.fill + '"><\/script>');
+    });
+    </script>
     
     <script src="./dist/filepond.js"></script>
     
     <script>
+        
         // Get a reference to the file input element
         const inputElement = document.querySelector('input[type="file"]');
 
         // Create the FilePond instance
         const pond = FilePond.create(inputElement, {
             allowMultiple: true,
-            files: [
-                'a.png',
-                'b.png',
-                'c.png',
-            ]
+            allowReorder: true
         });
+
     </script>
 
 </body>

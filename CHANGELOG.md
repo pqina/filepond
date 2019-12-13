@@ -1,5 +1,14 @@
 # Changelog
 
+## 4.9.0
+
+- Add drag to reorder file items, enable by setting `allowReorder` to `true`.
+  - Only works in single column mode (for now). 
+  - It also works when the list of files is showing a scrollbar, but dragging + scrolling isn't working correctly at the moment.
+  - Limited to [browsers supporting Pointer events](https://caniuse.com/#feat=pointer).
+- Add `moveFile(query, index)` method. Use to move a file to a different index in the file items array.
+
+
 ## 4.8.2
 
 - Fix problem with 4.8.1 fix not working with SSR.

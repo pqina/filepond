@@ -53,6 +53,7 @@ export const defaultOptions = {
     allowMultiple: [false, Type.BOOLEAN], // Allow multiple files (disabled by default, as multiple attribute is also required on input to allow multiple)
     allowReplace: [true, Type.BOOLEAN], // Allow dropping a file on other file to replace it (only works when multiple is set to false)
     allowRevert: [true, Type.BOOLEAN], // Allows user to revert file upload
+    allowReorder: [false, Type.BOOLEAN], // Allow reordering of files
 
     // Revert mode
     forceRevert: [false, Type.BOOLEAN], // Set to 'force' to require the file to be reverted before removal

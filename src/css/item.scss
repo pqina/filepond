@@ -20,6 +20,29 @@
         }
     }
     
+    // drag related
+    > .filepond--file-wrapper,
+    > .filepond--panel {
+        transition: opacity .15s ease-out;
+    }
+
+    &[data-drag-state] {
+        > .filepond--panel {
+            transition: box-shadow .125s ease-in-out;
+            box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+        }
+    }
+
+    &[data-drag-state='drag'] {
+        cursor: grabbing;
+        > .filepond--panel {
+            box-shadow: 0 .125em .3125em rgba(0, 0, 0, .325);
+        }
+    }
+
+    &[data-drag-state]:not([data-drag-state='idle']) {
+        z-index: 2;
+    }
 }
 
 // states

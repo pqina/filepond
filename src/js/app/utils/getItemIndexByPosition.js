@@ -1,9 +1,9 @@
-export const getItemIndexByPosition = (view, positionInView) => {
+export const getItemIndexByPosition = (view, children, positionInView) => {
 
     if (!positionInView) return;
 
     const horizontalSpace = view.rect.element.width;
-    const children = view.childViews;
+    // const children = view.childViews;
     const l = children.length;
     let last = null;
 

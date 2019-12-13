@@ -612,6 +612,11 @@ interface FilePondBaseProps {
      */
     allowRevert?: boolean;
     /** 
+     * Allows the user to reorder the file items
+     * @default false
+     */
+    allowReorder?: boolean;
+    /** 
      * Require the file to be successfully reverted before continuing.
      * @default false
      */

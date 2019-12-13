@@ -2229,6 +2229,7 @@
     allowMultiple: [false, Type.BOOLEAN], // Allow multiple files (disabled by default, as multiple attribute is also required on input to allow multiple)
     allowReplace: [true, Type.BOOLEAN], // Allow dropping a file on other file to replace it (only works when multiple is set to false)
     allowRevert: [true, Type.BOOLEAN], // Allows user to revert file upload
+    allowReorder: [false, Type.BOOLEAN], // Allow reordering of files
 
     // Revert mode
     forceRevert: [false, Type.BOOLEAN], // Set to 'force' to require the file to be reverted before removal
@@ -6613,19 +6614,30 @@
         }, 0);
       },
 
-      SORT: function SORT(_ref4) {
-        var compare = _ref4.compare;
+      MOVE_ITEM: function MOVE_ITEM(_ref4) {
+        var query = _ref4.query,
+          index = _ref4.index;
+        var item = getItemByQuery(state.items, query);
+        if (!item) return;
+        var currentIndex = state.items.indexOf(item);
+        index = limit(index, 0, state.items.length - 1);
+        if (currentIndex === index) return;
+        state.items.splice(index, 0, state.items.splice(currentIndex, 1)[0]);
+      },
+
+      SORT: function SORT(_ref5) {
+        var compare = _ref5.compare;
         sortItems(state, compare);
       },
 
-      ADD_ITEMS: function ADD_ITEMS(_ref5) {
-        var items = _ref5.items,
-          index = _ref5.index,
-          interactionMethod = _ref5.interactionMethod,
-          _ref5$success = _ref5.success,
-          success = _ref5$success === void 0 ? function() {} : _ref5$success,
-          _ref5$failure = _ref5.failure,
-          failure = _ref5$failure === void 0 ? function() {} : _ref5$failure;
+      ADD_ITEMS: function ADD_ITEMS(_ref6) {
+        var items = _ref6.items,
+          index = _ref6.index,
+          interactionMethod = _ref6.interactionMethod,
+          _ref6$success = _ref6.success,
+          success = _ref6$success === void 0 ? function() {} : _ref6$success,
+          _ref6$failure = _ref6.failure,
+          failure = _ref6$failure === void 0 ? function() {} : _ref6$failure;
 
         var currentIndex = index;
 
@@ -6666,17 +6678,17 @@
        * @param index
        * @param interactionMethod
        */
-      ADD_ITEM: function ADD_ITEM(_ref6) {
-        var source = _ref6.source,
-          _ref6$index = _ref6.index,
-          index = _ref6$index === void 0 ? -1 : _ref6$index,
-          interactionMethod = _ref6.interactionMethod,
-          _ref6$success = _ref6.success,
-          success = _ref6$success === void 0 ? function() {} : _ref6$success,
-          _ref6$failure = _ref6.failure,
-          failure = _ref6$failure === void 0 ? function() {} : _ref6$failure,
-          _ref6$options = _ref6.options,
-          options = _ref6$options === void 0 ? {} : _ref6$options;
+      ADD_ITEM: function ADD_ITEM(_ref7) {
+        var source = _ref7.source,
+          _ref7$index = _ref7.index,
+          index = _ref7$index === void 0 ? -1 : _ref7$index,
+          interactionMethod = _ref7.interactionMethod,
+          _ref7$success = _ref7.success,
+          success = _ref7$success === void 0 ? function() {} : _ref7$success,
+          _ref7$failure = _ref7.failure,
+          failure = _ref7$failure === void 0 ? function() {} : _ref7$failure,
+          _ref7$options = _ref7.options,
+          options = _ref7$options === void 0 ? {} : _ref7$options;
 
         // if no source supplied
         if (isEmpty(source)) {
@@ -7018,11 +7030,11 @@
         listUpdated(dispatch, state);
 
         // start loading the source
-        var _ref7 = state.options.server || {},
-          url = _ref7.url,
-          load = _ref7.load,
-          restore = _ref7.restore,
-          fetch = _ref7.fetch;
+        var _ref8 = state.options.server || {},
+          url = _ref8.url,
+          load = _ref8.load,
+          restore = _ref8.restore,
+          fetch = _ref8.fetch;
 
         item.load(
           source,
@@ -7050,11 +7062,11 @@
         );
       },
 
-      REQUEST_PREPARE_OUTPUT: function REQUEST_PREPARE_OUTPUT(_ref8) {
-        var item = _ref8.item,
-          success = _ref8.success,
-          _ref8$failure = _ref8.failure,
-          failure = _ref8$failure === void 0 ? function() {} : _ref8$failure;
+      REQUEST_PREPARE_OUTPUT: function REQUEST_PREPARE_OUTPUT(_ref9) {
+        var item = _ref9.item,
+          success = _ref9.success,
+          _ref9$failure = _ref9.failure,
+          failure = _ref9$failure === void 0 ? function() {} : _ref9$failure;
 
         // error response if item archived
         var err = {
@@ -7084,9 +7096,9 @@
         });
       },
 
-      COMPLETE_LOAD_ITEM: function COMPLETE_LOAD_ITEM(_ref9) {
-        var item = _ref9.item,
-          data = _ref9.data;
+      COMPLETE_LOAD_ITEM: function COMPLETE_LOAD_ITEM(_ref10) {
+        var item = _ref10.item,
+          data = _ref10.data;
         var success = data.success,
           source = data.source;
 
@@ -7472,8 +7484,8 @@
           .catch(function() {});
       }),
 
-      SET_OPTIONS: function SET_OPTIONS(_ref10) {
-        var options = _ref10.options;
+      SET_OPTIONS: function SET_OPTIONS(_ref11) {
+        var options = _ref11.options;
         forin(options, function(key, value) {
           dispatch('SET_' + fromCamels(key, '_').toUpperCase(), {
             value: value
@@ -8627,45 +8639,63 @@
     // by default not marked for removal
     props.markedForRemoval = false;
 
-    // is the item currently being dragged
-    props.isDragging = false;
+    // if not allowed to reorder file items, exit here
+    if (!root.query('GET_ALLOW_REORDER')) return;
 
     var grab = function grab(e) {
+      if (!e.isPrimary) return;
+
       var origin = {
         x: e.pageX,
         y: e.pageY
       };
 
-      root.dispatch('DID_GRAB_ITEM', { id: props.id, offset: origin });
+      props.dragOrigin = {
+        x: root.translateX,
+        y: root.translateY
+      };
+
+      props.dragCenter = {
+        x: e.offsetX,
+        y: e.offsetY
+      };
+
+      root.dispatch('DID_GRAB_ITEM', { id: props.id });
 
       var drag = function drag(e) {
-        root.dispatch('DID_DRAG_ITEM', {
-          id: props.id,
-          offset: {
-            x: e.pageX - origin.x,
-            y: e.pageY - origin.y
-          }
-        });
+        if (!e.isPrimary) return;
+
+        e.stopPropagation();
+        e.preventDefault();
+
+        props.dragOffset = {
+          x: e.pageX - origin.x,
+          y: e.pageY - origin.y
+        };
+
+        root.dispatch('DID_DRAG_ITEM', { id: props.id });
       };
 
-      var drop = function drop() {
-        root.dispatch('DID_DROP_ITEM', {
-          id: props.id,
-          offset: {
-            x: e.pageX - origin.x,
-            y: e.pageY - origin.y
-          }
-        });
+      var drop = function drop(e) {
+        if (!e.isPrimary) return;
 
-        window.removeEventListener('mousemove', drag);
-        window.removeEventListener('mouseup', drop);
+        document.removeEventListener('pointermove', drag);
+        document.removeEventListener('pointerup', drop);
+
+        props.dragOffset = {
+          x: e.pageX - origin.x,
+          y: e.pageY - origin.y
+        };
+
+        root.dispatch('DID_DROP_ITEM', { id: props.id });
       };
 
-      window.addEventListener('mousemove', drag);
-      window.addEventListener('mouseup', drop);
+      document.addEventListener('pointermove', drag);
+      document.addEventListener('pointerup', drop);
     };
 
-    root.element.addEventListener('mousedown', grab);
+    // addEvent(root.element, 'pointerdown', grab);
+    root.element.addEventListener('pointerdown', grab);
   };
 
   var route$1 = createRoute({
@@ -8680,29 +8710,22 @@
     {
       DID_GRAB_ITEM: function DID_GRAB_ITEM(_ref3) {
         var root = _ref3.root,
-          action = _ref3.action,
           props = _ref3.props;
-        // set is dragging to true so the position of the item is no longer updated in the list  view
-        props.isDragging = true;
-
-        // remember the item offset at the start of dragging so we can correctly position the item while dragging
-        root.ref.offsetX = root.translateX;
-        root.ref.offsetY = root.translateY;
+        props.dragOrigin = {
+          x: root.translateX,
+          y: root.translateY
+        };
       },
       DID_DRAG_ITEM: function DID_DRAG_ITEM(_ref4) {
-        var root = _ref4.root,
-          action = _ref4.action,
-          props = _ref4.props;
-        // we use the original offset and the action offset to calculate the new drag position
-        root.translateX = root.ref.offsetX + action.offset.x;
-        root.translateY = root.ref.offsetY + action.offset.y;
+        var root = _ref4.root;
+        root.element.dataset.dragState = 'drag';
       },
       DID_DROP_ITEM: function DID_DROP_ITEM(_ref5) {
         var root = _ref5.root,
-          action = _ref5.action,
           props = _ref5.props;
-        // item is dropped, the list view may now position it
-        props.isDragging = false;
+        props.dragOffset = null;
+        props.dragOrigin = null;
+        root.element.dataset.dragState = 'drop';
       }
     },
     function(_ref6) {
@@ -8710,6 +8733,12 @@
         actions = _ref6.actions,
         props = _ref6.props,
         shouldOptimize = _ref6.shouldOptimize;
+
+      if (root.element.dataset.dragState === 'drop') {
+        if (root.scaleX <= 1) {
+          root.element.dataset.dragState = 'idle';
+        }
+      }
 
       // select last state change action
       var action = actions
@@ -8751,6 +8780,7 @@
       }
 
       root.ref.panel.height = root.height;
+
       // // select last state change action
       // let action = actions.concat()
       //     .filter(action => /^DID_/.test(action.type))
@@ -8784,8 +8814,10 @@
         'id',
         'interactionMethod',
         'markedForRemoval',
-        'isDragging',
-        'spawnDate'
+        'spawnDate',
+        'dragCenter',
+        'dragOrigin',
+        'dragOffset'
       ],
       styles: [
         'translateX',
@@ -8808,12 +8840,13 @@
 
   var getItemIndexByPosition = function getItemIndexByPosition(
     view,
+    children,
     positionInView
   ) {
     if (!positionInView) return;
 
     var horizontalSpace = view.rect.element.width;
-    var children = view.childViews;
+    // const children = view.childViews;
     var l = children.length;
     var last = null;
 
@@ -8930,21 +8963,29 @@
     var vy =
       arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 1;
 
-    if (item.isDragging) return;
+    // set to null to remove animation while dragging
+    if (item.dragOffset) {
+      item.translateX = null;
+      item.translateY = null;
+      item.translateX = item.dragOrigin.x + item.dragOffset.x;
+      item.translateY = item.dragOrigin.y + item.dragOffset.y;
+      item.scaleX = 1.025;
+      item.scaleY = 1.025;
+    } else {
+      item.translateX = x;
+      item.translateY = y;
 
-    item.translateX = x;
-    item.translateY = y;
+      if (Date.now() > item.spawnDate) {
+        // reveal element
+        if (item.opacity === 0) {
+          introItemView(item, x, y, vx, vy);
+        }
 
-    if (Date.now() > item.spawnDate) {
-      // reveal element
-      if (item.opacity === 0) {
-        introItemView(item, x, y, vx, vy);
+        // make sure is default scale every frame
+        item.scaleX = 1;
+        item.scaleY = 1;
+        item.opacity = 1;
       }
-
-      // make sure is default scale every frame
-      item.scaleX = 1;
-      item.scaleY = 1;
-      item.opacity = 1;
     }
   };
 
@@ -9002,12 +9043,84 @@
     view.markedForRemoval = true;
   };
 
+  var getItemHeight = function getItemHeight(child) {
+    return (
+      child.rect.element.height +
+      child.rect.element.marginBottom * 0.5 +
+      child.rect.element.marginTop * 0.5
+    );
+  };
+
+  var dragItem = function dragItem(_ref4) {
+    var root = _ref4.root,
+      action = _ref4.action,
+      props = _ref4.props;
+    var id = action.id;
+
+    // get the view matching the given id
+    var view = root.childViews.find(function(child) {
+      return child.id === id;
+    });
+
+    // if no view found, exit
+    if (!view) return;
+
+    var dragPosition = {
+      x: 0,
+      y: view.dragOrigin.y + view.dragOffset.y + view.dragCenter.y
+
+      // find new index
+    };
+    var items = root.query('GET_ACTIVE_ITEMS');
+    var visibleChildren = root.childViews.filter(function(child) {
+      return child.rect.element.height;
+    });
+    var children = items.map(function(item) {
+      return visibleChildren.find(function(childView) {
+        return childView.id === item.id;
+      });
+    });
+
+    var l = children.length;
+    var targetIndex = l;
+
+    var childHeight = 0;
+    var childBottom = 0;
+    var childTop = 0;
+
+    var currentIndex = children.findIndex(function(child) {
+      return child === view;
+    });
+    var dragHeight = getItemHeight(view);
+
+    for (var i = 0; i < l; i++) {
+      childHeight = getItemHeight(children[i]);
+      childTop = childBottom;
+      childBottom = childTop + childHeight;
+
+      if (dragPosition.y < childBottom) {
+        if (currentIndex > i) {
+          if (dragPosition.y < childTop + dragHeight) {
+            targetIndex = i;
+            break;
+          }
+          continue;
+        }
+        targetIndex = i;
+        break;
+      }
+    }
+
+    root.dispatch('MOVE_ITEM', { query: view, index: targetIndex });
+  };
+
   /**
    * Setup action routes
    */
   var route$2 = createRoute({
     DID_ADD_ITEM: addItemView,
-    DID_REMOVE_ITEM: removeItemView
+    DID_REMOVE_ITEM: removeItemView,
+    DID_DRAG_ITEM: dragItem
   });
 
   /**
@@ -9016,20 +9129,15 @@
    * @param actions
    * @param props
    */
-  var write$5 = function write(_ref4) {
-    var root = _ref4.root,
-      props = _ref4.props,
-      actions = _ref4.actions,
-      shouldOptimize = _ref4.shouldOptimize;
+  var write$5 = function write(_ref5) {
+    var root = _ref5.root,
+      props = _ref5.props,
+      actions = _ref5.actions,
+      shouldOptimize = _ref5.shouldOptimize;
 
     // route actions
     route$2({ root: root, props: props, actions: actions });
     var dragCoordinates = props.dragCoordinates;
-
-    // get index
-    var dragIndex = dragCoordinates
-      ? getItemIndexByPosition(root, dragCoordinates)
-      : null;
 
     // available space on horizontal axis
     var horizontalSpace = root.rect.element.width;
@@ -9050,6 +9158,11 @@
       .filter(function(item) {
         return item;
       });
+
+    // get index
+    var dragIndex = dragCoordinates
+      ? getItemIndexByPosition(root, children, dragCoordinates)
+      : null;
 
     // add index is used to reserve the dropped/added item index till the actual item is rendered
     var addIndex = root.ref.addIndex || null;
@@ -9175,8 +9288,8 @@
     write: write$5,
     tag: 'ul',
     name: 'list',
-    didWriteView: function didWriteView(_ref5) {
-      var root = _ref5.root;
+    didWriteView: function didWriteView(_ref6) {
+      var root = _ref6.root;
       root.childViews
         .filter(function(view) {
           return view.markedForRemoval && view.opacity === 0 && view.resting;
@@ -9188,7 +9301,7 @@
     },
     filterFrameActionsForChild: filterSetItemActions,
     mixins: {
-      apis: ['dragCoordinates']
+      apis: ['dragCoordinates', 'listScrollTop']
     }
   });
 
@@ -9235,6 +9348,7 @@
 
     // current drag position
     root.ref.list.dragCoordinates = props.dragCoordinates;
+    root.ref.list.listScrollTop = root.rect.element.scrollTop;
 
     // if currently overflowing but no longer received overflow
     if (props.overflowing && !props.overflow) {
@@ -10471,7 +10585,20 @@
     };
   };
 
+  var testResult = null;
+  var isIOS = function isIOS() {
+    if (testResult === null) {
+      testResult =
+        /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    }
+    return testResult;
+  };
+
   var MAX_FILES_LIMIT = 1000000;
+
+  var prevent = function prevent(e) {
+    return e.preventDefault();
+  };
 
   var create$d = function create(_ref) {
     var root = _ref.root,
@@ -10548,6 +10675,16 @@
     // history of updates
     root.ref.previousAspectRatio = null;
     root.ref.updateHistory = [];
+
+    // prevent scrolling and zooming on iOS (only if supports pointer events, for then we can enable reorder)
+    if (
+      root.query('GET_ALLOW_REORDER') &&
+      'onpointerdown' in window &&
+      isIOS()
+    ) {
+      root.element.addEventListener('touchmove', prevent, { passive: false });
+      root.element.addEventListener('gesturestart', prevent);
+    }
   };
 
   var write$8 = function write(_ref3) {
@@ -10813,7 +10950,19 @@
     // get file list reference
     var scrollList = root.ref.list;
     var itemList = scrollList.childViews[0];
-    var children = itemList.childViews;
+    var visibleChildren = itemList.childViews.filter(function(child) {
+      return child.rect.element.height;
+    });
+    var children = root
+      .query('GET_ACTIVE_ITEMS')
+      .map(function(item) {
+        return visibleChildren.find(function(child) {
+          return child.id === item.id;
+        });
+      })
+      .filter(function(item) {
+        return item;
+      });
 
     // no children, done!
     if (children.length === 0) return { visual: visual, bounds: bounds };
@@ -10821,6 +10970,7 @@
     var horizontalSpace = itemList.rect.element.width;
     var dragIndex = getItemIndexByPosition(
       itemList,
+      children,
       scrollList.dragCoordinates
     );
 
@@ -10902,9 +11052,9 @@
     return false;
   };
 
-  var getDragIndex = function getDragIndex(list, position) {
+  var getDragIndex = function getDragIndex(list, children, position) {
     var itemList = list.childViews[0];
-    return getItemIndexByPosition(itemList, {
+    return getItemIndexByPosition(itemList, children, {
       left: position.scopeLeft - itemList.rect.element.left,
       top:
         position.scopeTop -
@@ -10965,9 +11115,26 @@
       );
 
       hopper.onload = function(items, position) {
+        // get item children elements and sort based on list sort
+        var list = root.ref.list.childViews[0];
+        var visibleChildren = list.childViews.filter(function(child) {
+          return child.rect.element.height;
+        });
+        var children = root
+          .query('GET_ACTIVE_ITEMS')
+          .map(function(item) {
+            return visibleChildren.find(function(child) {
+              return child.id === item.id;
+            });
+          })
+          .filter(function(item) {
+            return item;
+          });
+
+        // go
         root.dispatch('ADD_ITEMS', {
           items: items,
-          index: getDragIndex(root.ref.list, position),
+          index: getDragIndex(root.ref.list, children, position),
           interactionMethod: InteractionMethod.DROP
         });
 
@@ -11105,6 +11272,8 @@
       if (root.ref.hopper) {
         root.ref.hopper.destroy();
       }
+      root.element.removeEventListener('touchmove', prevent);
+      root.element.removeEventListener('gesturestart', prevent);
     },
     mixins: {
       styles: ['height']
@@ -11636,6 +11805,13 @@
          * @param query { string, number, null  }
          */
         removeFile: removeFile,
+
+        /**
+         * Moves a file to a new location in the files list
+         */
+        moveFile: function moveFile(query, index) {
+          return store.dispatch('MOVE_ITEM', { query: query, index: index });
+        },
 
         /**
          * Returns all files (wrapped in public api)

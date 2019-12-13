@@ -17,8 +17,12 @@ import { createElement } from '../../utils/createElement';
 import { createResponse } from '../../utils/createResponse';
 import { debounce } from '../../utils/debounce';
 import { isFile } from '../../utils/isFile';
+import { isIOS } from '../../utils/isIOS';
 
 const MAX_FILES_LIMIT = 1000000;
+
+
+const prevent = e => e.preventDefault();
 
 const create = ({ root, props }) => {
 
@@ -85,6 +89,12 @@ const create = ({ root, props }) => {
     // history of updates
     root.ref.previousAspectRatio = null;
     root.ref.updateHistory = [];
+
+    // prevent scrolling and zooming on iOS (only if supports pointer events, for then we can enable reorder)
+    if (root.query('GET_ALLOW_REORDER') && 'onpointerdown' in window && isIOS()) {
+        root.element.addEventListener('touchmove', prevent, { passive: false });
+        root.element.addEventListener('gesturestart', prevent);
+    }
 };
 
 const write = ({ root, props, actions }) => {
@@ -329,13 +339,14 @@ const calculateListHeight = (root) => {
     // get file list reference
     const scrollList = root.ref.list;
     const itemList = scrollList.childViews[0];
-    const children = itemList.childViews;
-
+    const visibleChildren = itemList.childViews.filter(child => child.rect.element.height);
+    const children = root.query('GET_ACTIVE_ITEMS').map(item => visibleChildren.find(child => child.id === item.id)).filter(item => item);
+   
     // no children, done!
     if (children.length === 0) return { visual, bounds };
 
     const horizontalSpace = itemList.rect.element.width;
-    const dragIndex = getItemIndexByPosition(itemList, scrollList.dragCoordinates);
+    const dragIndex = getItemIndexByPosition(itemList, children, scrollList.dragCoordinates);
 
     const childRect = children[0].rect.element;
 
@@ -377,7 +388,6 @@ const calculateRootBoundingBoxHeight = (root) => {
         cappedHeight,
         fixedHeight
     };
-
 };
 
 const exceedsMaxFiles = (root, items) => {
@@ -417,9 +427,9 @@ const exceedsMaxFiles = (root, items) => {
     return false;
 }
 
-const getDragIndex = (list, position) => {
+const getDragIndex = (list, children, position) => {
     const itemList = list.childViews[0];
-    return getItemIndexByPosition(itemList, {
+    return getItemIndexByPosition(itemList, children, {
         left: position.scopeLeft - itemList.rect.element.left,
         top: position.scopeTop - (list.rect.outer.top + list.rect.element.marginTop + list.rect.element.scrollTop)
     });
@@ -468,9 +478,15 @@ const toggleDrop = (root) => {
 
         hopper.onload = (items, position) => {
 
+            // get item children elements and sort based on list sort
+            const list = root.ref.list.childViews[0];
+            const visibleChildren = list.childViews.filter(child => child.rect.element.height);
+            const children = root.query('GET_ACTIVE_ITEMS').map(item => visibleChildren.find(child => child.id === item.id)).filter(item => item);
+            
+            // go
             root.dispatch('ADD_ITEMS', {
                 items,
-                index: getDragIndex(root.ref.list, position),
+                index: getDragIndex(root.ref.list, children, position),
                 interactionMethod: InteractionMethod.DROP
             });
             
@@ -603,6 +619,8 @@ export const root = createView({
         if (root.ref.hopper) {
             root.ref.hopper.destroy();
         }
+        root.element.removeEventListener('touchmove', prevent);
+        root.element.removeEventListener('gesturestart', prevent);
     },
     mixins: {
         styles: ['height']

@@ -24,6 +24,7 @@ import { isFile } from '../utils/isFile';
 import { dynamicLabel } from './utils/dynamicLabel';
 import { getActiveItems } from './utils/getActiveItems';
 import { isFunction } from '../utils/isFunction';
+import { limit } from '../utils/limit';
 
 const isMockItem = (item) => !isFile(item.file);
 
@@ -197,6 +198,15 @@ export const actions = (dispatch, query, state) => ({
             
         }, 0);
 
+    },
+
+    MOVE_ITEM: ({ query, index }) => {
+        const item = getItemByQuery(state.items, query);
+        if (!item) return;
+        const currentIndex = state.items.indexOf(item);
+        index = limit(index, 0, state.items.length - 1);
+        if (currentIndex === index) return;
+        state.items.splice(index, 0, state.items.splice(currentIndex, 1)[0]);
     },
 
     SORT: ({ compare }) => {

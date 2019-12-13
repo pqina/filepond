@@ -58,50 +58,66 @@ const create = ({ root, props }) => {
     // by default not marked for removal
     props.markedForRemoval = false;
 
-    // is the item currently being dragged
-    props.isDragging = false;
-
-
-
-
-
-
-
-
-
+    // if not allowed to reorder file items, exit here
+    if (!root.query('GET_ALLOW_REORDER')) return;
 
     const grab = e => {
+
+        if (!e.isPrimary) return;
 
         const origin = {
             x: e.pageX,
             y: e.pageY
         };
 
-        root.dispatch('DID_GRAB_ITEM', { id: props.id, offset: origin });
+        props.dragOrigin = {
+            x: root.translateX,
+            y: root.translateY
+        }
+
+        props.dragCenter = {
+            x: e.offsetX,
+            y: e.offsetY
+        }
+
+        root.dispatch('DID_GRAB_ITEM', { id: props.id });
 
         const drag = e => {
-            root.dispatch('DID_DRAG_ITEM', { id: props.id, offset: {
+
+            if (!e.isPrimary) return;
+
+            e.stopPropagation();
+            e.preventDefault();
+
+            props.dragOffset = {
                 x: e.pageX - origin.x,
                 y: e.pageY - origin.y
-            }});
+            };
+
+            root.dispatch('DID_DRAG_ITEM', { id: props.id });
         };
     
-        const drop = () => {
-    
-            root.dispatch('DID_DROP_ITEM', { id: props.id, offset: {
+        const drop = e => {
+
+            if (!e.isPrimary) return;
+
+            document.removeEventListener('pointermove', drag);
+            document.removeEventListener('pointerup', drop);
+
+            props.dragOffset = {
                 x: e.pageX - origin.x,
                 y: e.pageY - origin.y
-            }});
-    
-            window.removeEventListener('mousemove', drag);
-            window.removeEventListener('mouseup', drop);
+            };
+
+            root.dispatch('DID_DROP_ITEM', { id: props.id });
         };
     
-        window.addEventListener('mousemove', drag);
-        window.addEventListener('mouseup', drop);
+        document.addEventListener('pointermove', drag);
+        document.addEventListener('pointerup', drop);
     }
 
-    root.element.addEventListener('mousedown', grab);
+    // addEvent(root.element, 'pointerdown', grab);
+    root.element.addEventListener('pointerdown', grab);
 };
 
 const route = createRoute({
@@ -111,24 +127,27 @@ const route = createRoute({
 });
 
 const write = createRoute({
-    DID_GRAB_ITEM: ({ root, action, props }) => {
-        // set is dragging to true so the position of the item is no longer updated in the list  view
-        props.isDragging = true;
-
-        // remember the item offset at the start of dragging so we can correctly position the item while dragging
-        root.ref.offsetX = root.translateX;
-        root.ref.offsetY = root.translateY;
+    DID_GRAB_ITEM: ({ root, props }) => {
+        props.dragOrigin = {
+            x: root.translateX,
+            y: root.translateY
+        }
     },
-    DID_DRAG_ITEM: ({ root, action, props }) => {
-        // we use the original offset and the action offset to calculate the new drag position
-        root.translateX = root.ref.offsetX + action.offset.x;
-        root.translateY = root.ref.offsetY + action.offset.y;
+    DID_DRAG_ITEM: ({ root }) => {
+        root.element.dataset.dragState = 'drag';
     },
-    DID_DROP_ITEM: ({ root, action, props }) => {
-        // item is dropped, the list view may now position it
-        props.isDragging = false;
+    DID_DROP_ITEM: ({ root, props }) => {
+        props.dragOffset = null;
+        props.dragOrigin = null;
+        root.element.dataset.dragState = 'drop';
     }
 }, ({ root, actions, props, shouldOptimize }) => {
+
+    if (root.element.dataset.dragState === 'drop') {
+        if (root.scaleX <= 1) {
+            root.element.dataset.dragState = 'idle';
+        }
+    }
 
     // select last state change action
     let action = actions.concat()
@@ -164,6 +183,7 @@ const write = createRoute({
     }
 
     root.ref.panel.height = root.height;
+
     // // select last state change action
     // let action = actions.concat()
     //     .filter(action => /^DID_/.test(action.type))
@@ -190,7 +210,7 @@ export const item = createView({
     tag: 'li',
     name: 'item',
     mixins: {
-        apis: ['id', 'interactionMethod', 'markedForRemoval', 'isDragging', 'spawnDate'],
+        apis: ['id', 'interactionMethod', 'markedForRemoval', 'spawnDate', 'dragCenter', 'dragOrigin', 'dragOffset'],
         styles: [
             'translateX',
             'translateY',

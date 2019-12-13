@@ -493,6 +493,11 @@ export const createApp = (initialOptions = {}) => {
         removeFile,
 
         /**
+         * Moves a file to a new location in the files list
+         */
+        moveFile: (query, index) => store.dispatch('MOVE_ITEM', { query, index }),
+
+        /**
          * Returns all files (wrapped in public api)
          */
         getFiles,

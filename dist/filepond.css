@@ -506,6 +506,24 @@
 .filepond--item > .filepond--panel .filepond--panel-bottom {
   box-shadow: 0 0.0625em 0.125em -0.0625em rgba(0, 0, 0, 0.25);
 }
+.filepond--item > .filepond--file-wrapper,
+.filepond--item > .filepond--panel {
+  transition: opacity 0.15s ease-out;
+}
+.filepond--item[data-drag-state] > .filepond--panel {
+  transition: box-shadow 0.125s ease-in-out;
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+.filepond--item[data-drag-state='drag'] {
+  cursor: -webkit-grabbing;
+  cursor: grabbing;
+}
+.filepond--item[data-drag-state='drag'] > .filepond--panel {
+  box-shadow: 0 0.125em 0.3125em rgba(0, 0, 0, 0.325);
+}
+.filepond--item[data-drag-state]:not([data-drag-state='idle']) {
+  z-index: 2;
+}
 
 .filepond--item-panel {
   background-color: #64605e;

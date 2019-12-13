@@ -53,24 +53,34 @@ const addItemView = ({ root, action }) => {
 
 const moveItem = (item, x, y, vx = 0, vy = 1) => {
 
-    if (item.isDragging) return;
-
-    item.translateX = x;
-    item.translateY = y;
-
-    if (Date.now() > item.spawnDate) {
-
-        // reveal element
-        if (item.opacity === 0) {
-            introItemView(item, x, y, vx, vy);
-        }
-
-        // make sure is default scale every frame
-        item.scaleX = 1;
-        item.scaleY = 1;
-        item.opacity = 1;
-        
+    // set to null to remove animation while dragging
+    if (item.dragOffset) {
+        item.translateX = null;
+        item.translateY = null;
+        item.translateX = item.dragOrigin.x + item.dragOffset.x;
+        item.translateY = item.dragOrigin.y + item.dragOffset.y;
+        item.scaleX = 1.025;
+        item.scaleY = 1.025;
     }
+    else {
+        item.translateX = x;
+        item.translateY = y;
+
+        if (Date.now() > item.spawnDate) {
+
+            // reveal element
+            if (item.opacity === 0) {
+                introItemView(item, x, y, vx, vy);
+            }
+
+            // make sure is default scale every frame
+            item.scaleX = 1;
+            item.scaleY = 1;
+            item.opacity = 1;
+            
+        }
+    }
+
 }
 
 const introItemView = (item, x, y, vx, vy) => {
@@ -132,14 +142,69 @@ const removeItemView = ({ root, action }) => {
     view.markedForRemoval = true;
 };
 
+const getItemHeight = child => child.rect.element.height + (child.rect.element.marginBottom * .5) + (child.rect.element.marginTop * .5); 
+
+const dragItem = ({ root, action, props }) => {
+    
+    const { id } = action;
+
+    // get the view matching the given id
+    const view = root.childViews.find(child => child.id === id);
+
+    // if no view found, exit
+    if (!view) return;
+
+    const dragPosition = {
+        x: 0,
+        y: view.dragOrigin.y + view.dragOffset.y + view.dragCenter.y
+    }
+    
+    // find new index
+    const items = root.query('GET_ACTIVE_ITEMS');
+    const visibleChildren = root.childViews.filter(child => child.rect.element.height);
+    const children = items.map(item => visibleChildren.find(childView => childView.id === item.id));
+    
+    const l = children.length;
+    let targetIndex = l;
+
+    let childHeight = 0;
+    let childBottom = 0;
+    let childTop = 0;
+
+    let currentIndex = children.findIndex(child => child === view);
+    let dragHeight = getItemHeight(view);
+
+    for (let i=0; i<l; i++) {
+
+        childHeight = getItemHeight(children[i]);
+        childTop = childBottom;
+        childBottom = childTop + childHeight;
+        
+        if (dragPosition.y < childBottom) {
+            if (currentIndex > i) {
+                if (dragPosition.y < childTop + dragHeight) {
+                    targetIndex = i;
+                    break;
+                }
+                continue;
+            }
+            targetIndex = i;
+            break;
+        }
+        
+    }
+
+    root.dispatch('MOVE_ITEM', { query: view, index: targetIndex })
+};
+
 /**
  * Setup action routes
  */
 const route = createRoute({
     DID_ADD_ITEM: addItemView,
-    DID_REMOVE_ITEM: removeItemView
+    DID_REMOVE_ITEM: removeItemView,
+    DID_DRAG_ITEM: dragItem
 });
-
 
 
 /**
@@ -149,14 +214,11 @@ const route = createRoute({
  * @param props
  */
 const write = ({ root, props, actions, shouldOptimize }) => {
-
+    
     // route actions
     route({ root, props, actions });
 
     const { dragCoordinates } = props;
-
-    // get index
-    const dragIndex = dragCoordinates ? getItemIndexByPosition(root, dragCoordinates) : null;
 
     // available space on horizontal axis
     const horizontalSpace = root.rect.element.width;
@@ -167,6 +229,9 @@ const write = ({ root, props, actions, shouldOptimize }) => {
     // sort based on current active items
     const children = root.query('GET_ACTIVE_ITEMS').map(item => visibleChildren.find(child => child.id === item.id)).filter(item => item);
 
+    // get index
+    const dragIndex = dragCoordinates ? getItemIndexByPosition(root, children, dragCoordinates) : null;
+    
     // add index is used to reserve the dropped/added item index till the actual item is rendered
     const addIndex = root.ref.addIndex || null;
 
