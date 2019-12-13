@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.8.2
+ * FilePond 4.9.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -8780,21 +8780,6 @@
       }
 
       root.ref.panel.height = root.height;
-
-      // // select last state change action
-      // let action = actions.concat()
-      //     .filter(action => /^DID_/.test(action.type))
-      //     .reverse()
-      //     .find(action => StateMap[action.type]);
-
-      // // no need to set same state twice
-      // if (!action || (action && action.type === props.currentState)) return;
-
-      // // set current state
-      // props.currentState = action.type;
-
-      // // set state
-      // root.element.dataset.filepondItemState = StateMap[props.currentState] || '';
     }
   );
 
@@ -9301,7 +9286,7 @@
     },
     filterFrameActionsForChild: filterSetItemActions,
     mixins: {
-      apis: ['dragCoordinates', 'listScrollTop']
+      apis: ['dragCoordinates']
     }
   });
 
@@ -9348,7 +9333,6 @@
 
     // current drag position
     root.ref.list.dragCoordinates = props.dragCoordinates;
-    root.ref.list.listScrollTop = root.rect.element.scrollTop;
 
     // if currently overflowing but no longer received overflow
     if (props.overflowing && !props.overflow) {

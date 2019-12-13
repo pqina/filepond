@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.8.2
+ * FilePond 4.9.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1886,6 +1886,7 @@ const defaultOptions = {
   allowMultiple: [false, Type.BOOLEAN], // Allow multiple files (disabled by default, as multiple attribute is also required on input to allow multiple)
   allowReplace: [true, Type.BOOLEAN], // Allow dropping a file on other file to replace it (only works when multiple is set to false)
   allowRevert: [true, Type.BOOLEAN], // Allows user to revert file upload
+  allowReorder: [false, Type.BOOLEAN], // Allow reordering of files
 
   // Revert mode
   forceRevert: [false, Type.BOOLEAN], // Set to 'force' to require the file to be reverted before removal
@@ -4211,6 +4212,15 @@ const actions = (dispatch, query, state) => ({
     }, 0);
   },
 
+  MOVE_ITEM: ({ query, index }) => {
+    const item = getItemByQuery(state.items, query);
+    if (!item) return;
+    const currentIndex = state.items.indexOf(item);
+    index = limit(index, 0, state.items.length - 1);
+    if (currentIndex === index) return;
+    state.items.splice(index, 0, state.items.splice(currentIndex, 1)[0]);
+  },
+
   SORT: ({ compare }) => {
     sortItems(state, compare);
   },
@@ -5983,45 +5993,63 @@ const create$7 = ({ root, props }) => {
   // by default not marked for removal
   props.markedForRemoval = false;
 
-  // is the item currently being dragged
-  props.isDragging = false;
+  // if not allowed to reorder file items, exit here
+  if (!root.query('GET_ALLOW_REORDER')) return;
 
   const grab = e => {
+    if (!e.isPrimary) return;
+
     const origin = {
       x: e.pageX,
       y: e.pageY
     };
 
-    root.dispatch('DID_GRAB_ITEM', { id: props.id, offset: origin });
+    props.dragOrigin = {
+      x: root.translateX,
+      y: root.translateY
+    };
+
+    props.dragCenter = {
+      x: e.offsetX,
+      y: e.offsetY
+    };
+
+    root.dispatch('DID_GRAB_ITEM', { id: props.id });
 
     const drag = e => {
-      root.dispatch('DID_DRAG_ITEM', {
-        id: props.id,
-        offset: {
-          x: e.pageX - origin.x,
-          y: e.pageY - origin.y
-        }
-      });
+      if (!e.isPrimary) return;
+
+      e.stopPropagation();
+      e.preventDefault();
+
+      props.dragOffset = {
+        x: e.pageX - origin.x,
+        y: e.pageY - origin.y
+      };
+
+      root.dispatch('DID_DRAG_ITEM', { id: props.id });
     };
 
-    const drop = () => {
-      root.dispatch('DID_DROP_ITEM', {
-        id: props.id,
-        offset: {
-          x: e.pageX - origin.x,
-          y: e.pageY - origin.y
-        }
-      });
+    const drop = e => {
+      if (!e.isPrimary) return;
 
-      window.removeEventListener('mousemove', drag);
-      window.removeEventListener('mouseup', drop);
+      document.removeEventListener('pointermove', drag);
+      document.removeEventListener('pointerup', drop);
+
+      props.dragOffset = {
+        x: e.pageX - origin.x,
+        y: e.pageY - origin.y
+      };
+
+      root.dispatch('DID_DROP_ITEM', { id: props.id });
     };
 
-    window.addEventListener('mousemove', drag);
-    window.addEventListener('mouseup', drop);
+    document.addEventListener('pointermove', drag);
+    document.addEventListener('pointerup', drop);
   };
 
-  root.element.addEventListener('mousedown', grab);
+  // addEvent(root.element, 'pointerdown', grab);
+  root.element.addEventListener('pointerdown', grab);
 };
 
 const route$1 = createRoute({
@@ -6032,27 +6060,28 @@ const route$1 = createRoute({
 
 const write$4 = createRoute(
   {
-    DID_GRAB_ITEM: ({ root, action, props }) => {
-      // set is dragging to true so the position of the item is no longer updated in the list  view
-      props.isDragging = true;
-
-      // remember the item offset at the start of dragging so we can correctly position the item while dragging
-      root.ref.offsetX = root.translateX;
-      root.ref.offsetY = root.translateY;
+    DID_GRAB_ITEM: ({ root, props }) => {
+      props.dragOrigin = {
+        x: root.translateX,
+        y: root.translateY
+      };
     },
-    DID_DRAG_ITEM: ({ root, action, props }) => {
-      // we use the original offset and the action offset to calculate the new drag position
-      root.translateX = null;
-      root.translateY = null;
-      root.translateX = root.ref.offsetX + action.offset.x;
-      root.translateY = root.ref.offsetY + action.offset.y;
+    DID_DRAG_ITEM: ({ root }) => {
+      root.element.dataset.dragState = 'drag';
     },
-    DID_DROP_ITEM: ({ root, action, props }) => {
-      // item is dropped, the list view may now position it
-      props.isDragging = false;
+    DID_DROP_ITEM: ({ root, props }) => {
+      props.dragOffset = null;
+      props.dragOrigin = null;
+      root.element.dataset.dragState = 'drop';
     }
   },
   ({ root, actions, props, shouldOptimize }) => {
+    if (root.element.dataset.dragState === 'drop') {
+      if (root.scaleX <= 1) {
+        root.element.dataset.dragState = 'idle';
+      }
+    }
+
     // select last state change action
     let action = actions
       .concat()
@@ -6089,21 +6118,6 @@ const write$4 = createRoute(
     }
 
     root.ref.panel.height = root.height;
-
-    // // select last state change action
-    // let action = actions.concat()
-    //     .filter(action => /^DID_/.test(action.type))
-    //     .reverse()
-    //     .find(action => StateMap[action.type]);
-
-    // // no need to set same state twice
-    // if (!action || (action && action.type === props.currentState)) return;
-
-    // // set current state
-    // props.currentState = action.type;
-
-    // // set state
-    // root.element.dataset.filepondItemState = StateMap[props.currentState] || '';
   }
 );
 
@@ -6121,8 +6135,10 @@ const item = createView({
       'id',
       'interactionMethod',
       'markedForRemoval',
-      'isDragging',
-      'spawnDate'
+      'spawnDate',
+      'dragCenter',
+      'dragOrigin',
+      'dragOffset'
     ],
     styles: [
       'translateX',
@@ -6142,11 +6158,11 @@ const item = createView({
   }
 });
 
-const getItemIndexByPosition = (view, positionInView) => {
+const getItemIndexByPosition = (view, children, positionInView) => {
   if (!positionInView) return;
 
   const horizontalSpace = view.rect.element.width;
-  const children = view.childViews;
+  // const children = view.childViews;
   const l = children.length;
   let last = null;
 
@@ -6252,21 +6268,29 @@ const addItemView = ({ root, action }) => {
 };
 
 const moveItem = (item, x, y, vx = 0, vy = 1) => {
-  if (item.isDragging) return;
+  // set to null to remove animation while dragging
+  if (item.dragOffset) {
+    item.translateX = null;
+    item.translateY = null;
+    item.translateX = item.dragOrigin.x + item.dragOffset.x;
+    item.translateY = item.dragOrigin.y + item.dragOffset.y;
+    item.scaleX = 1.025;
+    item.scaleY = 1.025;
+  } else {
+    item.translateX = x;
+    item.translateY = y;
 
-  item.translateX = x;
-  item.translateY = y;
+    if (Date.now() > item.spawnDate) {
+      // reveal element
+      if (item.opacity === 0) {
+        introItemView(item, x, y, vx, vy);
+      }
 
-  if (Date.now() > item.spawnDate) {
-    // reveal element
-    if (item.opacity === 0) {
-      introItemView(item, x, y, vx, vy);
+      // make sure is default scale every frame
+      item.scaleX = 1;
+      item.scaleY = 1;
+      item.opacity = 1;
     }
-
-    // make sure is default scale every frame
-    item.scaleX = 1;
-    item.scaleY = 1;
-    item.opacity = 1;
   }
 };
 
@@ -6320,12 +6344,72 @@ const removeItemView = ({ root, action }) => {
   view.markedForRemoval = true;
 };
 
+const getItemHeight = child =>
+  child.rect.element.height +
+  child.rect.element.marginBottom * 0.5 +
+  child.rect.element.marginTop * 0.5;
+
+const dragItem = ({ root, action, props }) => {
+  const { id } = action;
+
+  // get the view matching the given id
+  const view = root.childViews.find(child => child.id === id);
+
+  // if no view found, exit
+  if (!view) return;
+
+  const dragPosition = {
+    x: 0,
+    y: view.dragOrigin.y + view.dragOffset.y + view.dragCenter.y
+  };
+
+  // find new index
+  const items = root.query('GET_ACTIVE_ITEMS');
+  const visibleChildren = root.childViews.filter(
+    child => child.rect.element.height
+  );
+  const children = items.map(item =>
+    visibleChildren.find(childView => childView.id === item.id)
+  );
+
+  const l = children.length;
+  let targetIndex = l;
+
+  let childHeight = 0;
+  let childBottom = 0;
+  let childTop = 0;
+
+  let currentIndex = children.findIndex(child => child === view);
+  let dragHeight = getItemHeight(view);
+
+  for (let i = 0; i < l; i++) {
+    childHeight = getItemHeight(children[i]);
+    childTop = childBottom;
+    childBottom = childTop + childHeight;
+
+    if (dragPosition.y < childBottom) {
+      if (currentIndex > i) {
+        if (dragPosition.y < childTop + dragHeight) {
+          targetIndex = i;
+          break;
+        }
+        continue;
+      }
+      targetIndex = i;
+      break;
+    }
+  }
+
+  root.dispatch('MOVE_ITEM', { query: view, index: targetIndex });
+};
+
 /**
  * Setup action routes
  */
 const route$2 = createRoute({
   DID_ADD_ITEM: addItemView,
-  DID_REMOVE_ITEM: removeItemView
+  DID_REMOVE_ITEM: removeItemView,
+  DID_DRAG_ITEM: dragItem
 });
 
 /**
@@ -6340,11 +6424,6 @@ const write$5 = ({ root, props, actions, shouldOptimize }) => {
 
   const { dragCoordinates } = props;
 
-  // get index
-  const dragIndex = dragCoordinates
-    ? getItemIndexByPosition(root, dragCoordinates)
-    : null;
-
   // available space on horizontal axis
   const horizontalSpace = root.rect.element.width;
 
@@ -6358,6 +6437,11 @@ const write$5 = ({ root, props, actions, shouldOptimize }) => {
     .query('GET_ACTIVE_ITEMS')
     .map(item => visibleChildren.find(child => child.id === item.id))
     .filter(item => item);
+
+  // get index
+  const dragIndex = dragCoordinates
+    ? getItemIndexByPosition(root, children, dragCoordinates)
+    : null;
 
   // add index is used to reserve the dropped/added item index till the actual item is rendered
   const addIndex = root.ref.addIndex || null;
@@ -7651,7 +7735,18 @@ const debounce = (func, interval = 16, immidiateOnly = true) => {
   };
 };
 
+let testResult = null;
+const isIOS = () => {
+  if (testResult === null) {
+    testResult =
+      /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  }
+  return testResult;
+};
+
 const MAX_FILES_LIMIT = 1000000;
+
+const prevent = e => e.preventDefault();
 
 const create$d = ({ root, props }) => {
   // Add id
@@ -7719,6 +7814,12 @@ const create$d = ({ root, props }) => {
   // history of updates
   root.ref.previousAspectRatio = null;
   root.ref.updateHistory = [];
+
+  // prevent scrolling and zooming on iOS (only if supports pointer events, for then we can enable reorder)
+  if (root.query('GET_ALLOW_REORDER') && 'onpointerdown' in window && isIOS()) {
+    root.element.addEventListener('touchmove', prevent, { passive: false });
+    root.element.addEventListener('gesturestart', prevent);
+  }
 };
 
 const write$8 = ({ root, props, actions }) => {
@@ -7968,7 +8069,13 @@ const calculateListHeight = root => {
   // get file list reference
   const scrollList = root.ref.list;
   const itemList = scrollList.childViews[0];
-  const children = itemList.childViews;
+  const visibleChildren = itemList.childViews.filter(
+    child => child.rect.element.height
+  );
+  const children = root
+    .query('GET_ACTIVE_ITEMS')
+    .map(item => visibleChildren.find(child => child.id === item.id))
+    .filter(item => item);
 
   // no children, done!
   if (children.length === 0) return { visual, bounds };
@@ -7976,6 +8083,7 @@ const calculateListHeight = root => {
   const horizontalSpace = itemList.rect.element.width;
   const dragIndex = getItemIndexByPosition(
     itemList,
+    children,
     scrollList.dragCoordinates
   );
 
@@ -8054,9 +8162,9 @@ const exceedsMaxFiles = (root, items) => {
   return false;
 };
 
-const getDragIndex = (list, position) => {
+const getDragIndex = (list, children, position) => {
   const itemList = list.childViews[0];
-  return getItemIndexByPosition(itemList, {
+  return getItemIndexByPosition(itemList, children, {
     left: position.scopeLeft - itemList.rect.element.left,
     top:
       position.scopeTop -
@@ -8111,9 +8219,20 @@ const toggleDrop = root => {
     );
 
     hopper.onload = (items, position) => {
+      // get item children elements and sort based on list sort
+      const list = root.ref.list.childViews[0];
+      const visibleChildren = list.childViews.filter(
+        child => child.rect.element.height
+      );
+      const children = root
+        .query('GET_ACTIVE_ITEMS')
+        .map(item => visibleChildren.find(child => child.id === item.id))
+        .filter(item => item);
+
+      // go
       root.dispatch('ADD_ITEMS', {
         items,
-        index: getDragIndex(root.ref.list, position),
+        index: getDragIndex(root.ref.list, children, position),
         interactionMethod: InteractionMethod.DROP
       });
 
@@ -8240,6 +8359,8 @@ const root = createView({
     if (root.ref.hopper) {
       root.ref.hopper.destroy();
     }
+    root.element.removeEventListener('touchmove', prevent);
+    root.element.removeEventListener('gesturestart', prevent);
   },
   mixins: {
     styles: ['height']
@@ -8707,6 +8828,11 @@ const createApp = (initialOptions = {}) => {
      * @param query { string, number, null  }
      */
     removeFile,
+
+    /**
+     * Moves a file to a new location in the files list
+     */
+    moveFile: (query, index) => store.dispatch('MOVE_ITEM', { query, index }),
 
     /**
      * Returns all files (wrapped in public api)
