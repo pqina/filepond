@@ -1149,6 +1149,12 @@ export class FilePond {
      */
     addFiles: (source: ActualFileObject[] | Blob[] | string[], options?: { index: number }) => Promise<File[]>;
     /** 
+     * Moves a file. Select file with query and supply target index. 
+     * @param query The file reference, id, or index.
+     * @param index The index to move the file to.
+     */
+    moveFile: (query: File | string | number, index: number) => void;
+    /** 
      * Removes a file. If no parameter is provided, removes the first file in the list.
      * @param query The file reference, id, or index.
      */
