@@ -9039,14 +9039,22 @@
     );
   };
 
+  var getItemWidth = function getItemWidth(child) {
+    return (
+        child.rect.element.width +
+        child.rect.element.marginLeft * 0.5 +
+        child.rect.element.marginRight * 0.5
+    );
+  };
+
   var dragItem = function dragItem(_ref4) {
     var root = _ref4.root,
-      action = _ref4.action,
-      props = _ref4.props;
+        action = _ref4.action,
+        props = _ref4.props;
     var id = action.id;
 
     // get the view matching the given id
-    var view = root.childViews.find(function(child) {
+    var view = root.childViews.find(function (child) {
       return child.id === id;
     });
 
@@ -9054,52 +9062,25 @@
     if (!view) return;
 
     var dragPosition = {
-      x: 0,
+      x: view.dragOrigin.x + view.dragOffset.x + view.dragCenter.x,
       y: view.dragOrigin.y + view.dragOffset.y + view.dragCenter.y
 
       // find new index
     };
-    var items = root.query('GET_ACTIVE_ITEMS');
-    var visibleChildren = root.childViews.filter(function(child) {
-      return child.rect.element.height;
-    });
-    var children = items.map(function(item) {
-      return visibleChildren.find(function(childView) {
-        return childView.id === item.id;
-      });
-    });
 
-    var l = children.length;
-    var targetIndex = l;
-
-    var childHeight = 0;
-    var childBottom = 0;
-    var childTop = 0;
-
-    var currentIndex = children.findIndex(function(child) {
-      return child === view;
-    });
     var dragHeight = getItemHeight(view);
+    var dragWidth = getItemWidth(view);
 
-    for (var i = 0; i < l; i++) {
-      childHeight = getItemHeight(children[i]);
-      childTop = childBottom;
-      childBottom = childTop + childHeight;
-
-      if (dragPosition.y < childBottom) {
-        if (currentIndex > i) {
-          if (dragPosition.y < childTop + dragHeight) {
-            targetIndex = i;
-            break;
-          }
-          continue;
-        }
-        targetIndex = i;
-        break;
+    var cols = Math.floor(root.rect.outer.width / getItemWidth(view));
+    var location = {
+      y: Math.floor(dragPosition.y / dragHeight),
+      x: Math.floor(dragPosition.x / dragWidth),
+      getIndex: function() {
+        return this.y * cols + this.x;
       }
-    }
+    };
 
-    root.dispatch('MOVE_ITEM', { query: view, index: targetIndex });
+    root.dispatch('MOVE_ITEM', { query: view, index: location.getIndex() });
   };
 
   /**
