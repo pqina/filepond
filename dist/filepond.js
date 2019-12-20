@@ -4186,6 +4186,22 @@
         : void 0
     });
   }
+  
+  var preDragItemIndices = {
+    itemlist: [],
+    update: function (items) {
+      this.itemlist = [];
+      for (var i = 0; i < items.length; i++) {
+        this.itemlist.push(items[i].id);
+      }
+    },
+    updateByIndex: function(id, index) {
+      this.itemlist.splice(index, 0, id);
+    },
+    indexById: function(id) {
+      return this.itemlist.indexOf(id);
+    }
+  };
 
   function _applyDecoratedDescriptor(
     target,
@@ -6820,6 +6836,9 @@
         // get a quick reference to the item id
         var id = item.id;
 
+        // update preDragItemIndices
+        preDragItemIndices.updateByIndex(id, index);
+
         // observe item events
         item.on('load-init', function() {
           dispatch('DID_START_ITEM_LOAD', { id: id });
@@ -8690,6 +8709,8 @@
           y: e.pageY - origin.y
         };
 
+        preDragItemIndices.update(root.query('GET_ACTIVE_ITEMS'));
+        
         root.dispatch('DID_DROP_ITEM', { id: props.id });
       };
 
@@ -8826,6 +8847,27 @@
     }
   });
 
+  var dropAreaDimensions = {
+    height: 0,
+    width: 0,
+    get getHeight() {
+      return this.height;
+    },
+    set setHeight(val) {
+      if (this.height === 0 || val === 0) this.height = val;
+    },
+    get getWidth() {
+      return this.width;
+    },
+    set setWidth(val) {
+      if (this.width === 0 || val === 0) this.width = val;
+    },
+    setDimensions: function(height, width){
+      if(this.height === 0 || height === 0) this.height = height;
+      if(this.width === 0 || width === 0) this.width = width;
+    }
+  };
+
   var getItemIndexByPosition = function getItemIndexByPosition(
     view,
     children,
@@ -8913,6 +8955,8 @@
       interactionMethod = action.interactionMethod;
 
     root.ref.addIndex = index;
+    
+    dropAreaDimensions.setDimensions(0,0);
 
     var now = Date.now();
     var spawnDate = now;
@@ -9058,6 +9102,13 @@
       return child.id === id;
     });
 
+    if (!preDragItemIndices.itemlist.length) {
+      preDragItemIndices.update(root.childViews);
+    }
+
+    var numItems = root.childViews.length;
+    var oldIndex = preDragItemIndices.indexById(id);
+
     // if no view found, exit
     if (!view) return;
 
@@ -9072,11 +9123,22 @@
     var dragWidth = getItemWidth(view);
 
     var cols = Math.floor(root.rect.outer.width / getItemWidth(view));
+    if (cols > numItems) cols = numItems;
+    var rows = Math.floor(numItems / cols + 1);
+
+    dropAreaDimensions.setHeight = dragHeight * rows;
+    dropAreaDimensions.setWidth = dragWidth * cols;
+    
     var location = {
       y: Math.floor(dragPosition.y / dragHeight),
       x: Math.floor(dragPosition.x / dragWidth),
-      getIndex: function() {
-        return this.y * cols + this.x;
+      getIndex: function () {
+        var newIndex = this.y * cols + this.x;
+        if (dragPosition.y > dropAreaDimensions.getHeight ||
+            dragPosition.y < 0 ||
+            dragPosition.x > dropAreaDimensions.getWidth ||
+            dragPosition.x < 0) return oldIndex;
+        return newIndex;
       }
     };
 
