@@ -10601,7 +10601,9 @@
     var className = root.query('GET_CLASS_NAME');
     if (className) {
       className.split(' ').forEach(function(name) {
-        root.element.classList.add(name);
+        if ( name != '') {
+          root.element.classList.add(name);
+        }
       });
     }
 
