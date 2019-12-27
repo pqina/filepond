@@ -17,10 +17,8 @@ import { createElement } from '../../utils/createElement';
 import { createResponse } from '../../utils/createResponse';
 import { debounce } from '../../utils/debounce';
 import { isFile } from '../../utils/isFile';
-import { isIOS } from '../../utils/isIOS';
 
 const MAX_FILES_LIMIT = 1000000;
-
 
 const prevent = e => e.preventDefault();
 
@@ -35,7 +33,7 @@ const create = ({ root, props }) => {
     // Add className
     const className = root.query('GET_CLASS_NAME');
     if (className) {
-        className.split(' ').forEach(name => {
+        className.split(' ').filter(name => name.length).forEach(name => {
             root.element.classList.add(name);
         });
     }

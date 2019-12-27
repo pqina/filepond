@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.9.3
+
+- Fix problem where ending the class attribute on a space would throw an error.
+
+
 ## 4.9.2
 
 - Add `grab` cursor to items so there's and indicator that items are grabbable.

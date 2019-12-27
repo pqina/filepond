@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.9.2
+ * FilePond 4.9.3
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -10572,15 +10572,6 @@
     };
   };
 
-  var testResult = null;
-  var isIOS = function isIOS() {
-    if (testResult === null) {
-      testResult =
-        /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    }
-    return testResult;
-  };
-
   var MAX_FILES_LIMIT = 1000000;
 
   var prevent = function prevent(e) {
@@ -10600,9 +10591,14 @@
     // Add className
     var className = root.query('GET_CLASS_NAME');
     if (className) {
-      className.split(' ').forEach(function(name) {
-        root.element.classList.add(name);
-      });
+      className
+        .split(' ')
+        .filter(function(name) {
+          return name.length;
+        })
+        .forEach(function(name) {
+          root.element.classList.add(name);
+        });
     }
 
     // Field label

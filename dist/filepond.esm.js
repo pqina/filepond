@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.9.2
+ * FilePond 4.9.3
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -7738,15 +7738,6 @@ const debounce = (func, interval = 16, immidiateOnly = true) => {
   };
 };
 
-let testResult = null;
-const isIOS = () => {
-  if (testResult === null) {
-    testResult =
-      /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-  }
-  return testResult;
-};
-
 const MAX_FILES_LIMIT = 1000000;
 
 const prevent = e => e.preventDefault();
@@ -7761,9 +7752,12 @@ const create$d = ({ root, props }) => {
   // Add className
   const className = root.query('GET_CLASS_NAME');
   if (className) {
-    className.split(' ').forEach(name => {
-      root.element.classList.add(name);
-    });
+    className
+      .split(' ')
+      .filter(name => name.length)
+      .forEach(name => {
+        root.element.classList.add(name);
+      });
   }
 
   // Field label
