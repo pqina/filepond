@@ -316,6 +316,16 @@ interface FilePondLabelProps {
      */
     labelFileSizeNotAvailable?: string;
     /**
+     * Label used when showing the number of files and there is only one.
+     * @default 'file in list'
+     */
+    labelFileCountSingular?: string;
+    /**
+     * Label used when showing the number of files and there is more than one.
+     * @default 'files in list'
+     */
+    labelFileCountPlural?: string;
+    /**
      * Label used while loading a file.
      * @default 'Loading'
      */
@@ -920,6 +930,16 @@ export class FilePond {
      * @default 'Size not available'
      */
     labelFileSizeNotAvailable: string;
+    /**
+     * Label used when showing the number of files and there is only one.
+     * @default 'file in list'
+     */
+    labelFileCountSingular: string;
+    /**
+     * Label used when showing the number of files and there is more than one.
+     * @default 'files in list'
+     */
+    labelFileCountPlural: string;
     /** 
      * Label used while loading a file.
      * @default 'Loading'
