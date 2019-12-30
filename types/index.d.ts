@@ -331,10 +331,20 @@ interface FilePondLabelProps {
      */
     labelFileLoading?: string;
     /**
+     * Label used when file is added (assistive only).
+     * @default 'Added'
+     */
+    labelFileAdded?: string;
+    /**
      * Label used when file load failed.
      * @default 'Error during load'
      */
     labelFileLoadError?: string;
+    /**
+     * Label used when file is removed (assistive only).
+     * @default 'Removed'
+     */
+    labelFileRemoved?: string;
     /**
      * Label used when uploading a file.
      * @default 'Uploading'
