@@ -5,6 +5,7 @@ import { getFileInfoFromHeaders } from '../../utils/getFileInfoFromHeaders';
 import { getFilenameFromURL } from '../../utils/getFilenameFromURL';
 import { getFileFromBlob } from '../../utils/getFileFromBlob';
 import { isString } from '../../utils/isString';
+import { buildURL } from './buildURL';
 
 export const createFetchFunction = (apiUrl = '', action) => {
     // custom handler (should also handle file, load, error, progress and abort)
@@ -25,7 +26,7 @@ export const createFetchFunction = (apiUrl = '', action) => {
     return (url, load, error, progress, abort, headers) => {
         
         // do local or remote request based on if the url is external
-        const request = sendRequest(url, apiUrl + action.url, {
+        const request = sendRequest(url, buildURL(apiUrl, action.url), {
             ...action,
             responseType: 'blob'
         });

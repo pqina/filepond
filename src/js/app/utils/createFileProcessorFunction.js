@@ -2,6 +2,7 @@ import { sendRequest } from '../../utils/sendRequest';
 import { createResponse } from '../../utils/createResponse';
 import { createTimeoutResponse } from '../../utils/createDefaultResponse';
 import { isObject } from '../../utils/isObject';
+import { buildURL } from './buildURL';
 
 import { processFileChunked } from './processFileChunked';
 
@@ -41,7 +42,7 @@ export const createFileProcessorFunction = (apiUrl, action, name, options) => (f
     });
 
     // send request object
-    const request = sendRequest(ondata(formData), apiUrl + action.url, action);
+    const request = sendRequest(ondata(formData), buildURL(apiUrl, action.url), action);
     request.onload = (xhr) => {
         load(
             createResponse(

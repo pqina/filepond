@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.9.3
+ * FilePond 4.9.4
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -3150,6 +3150,24 @@
     };
   };
 
+  var hasQS = function hasQS(str) {
+    return /\?/.test(str);
+  };
+  var buildURL = function buildURL() {
+    var url = '';
+    for (
+      var _len = arguments.length, parts = new Array(_len), _key = 0;
+      _key < _len;
+      _key++
+    ) {
+      parts[_key] = arguments[_key];
+    }
+    parts.forEach(function(part) {
+      url += hasQS(url) && hasQS(part) ? part.replace(/\?/, '&') : part;
+    });
+    return url;
+  };
+
   var createFetchFunction = function createFetchFunction() {
     var apiUrl =
       arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
@@ -3181,7 +3199,7 @@
       // do local or remote request based on if the url is external
       var request = sendRequest(
         url,
-        apiUrl + action.url,
+        buildURL(apiUrl, action.url),
         Object.assign({}, action, {
           responseType: 'blob'
         })
@@ -5000,7 +5018,7 @@
       // send request object
       var request = sendRequest(
         ondata(formData),
-        apiUrl + action.url,
+        buildURL(apiUrl, action.url),
         requestParams
       );
 
@@ -5023,7 +5041,7 @@
     };
 
     var requestTransferOffset = function requestTransferOffset(cb) {
-      var requestUrl = apiUrl + chunkServer.url + state.serverId;
+      var requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
 
       var headers =
         typeof action.headers === 'function'
@@ -5129,7 +5147,7 @@
         };
 
       // send request object
-      var requestUrl = apiUrl + chunkServer.url + state.serverId;
+      var requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
 
       var headers =
         typeof chunkServer.headers === 'function'
@@ -5366,7 +5384,11 @@
       );
 
       // send request object
-      var request = sendRequest(ondata(formData), apiUrl + action.url, action);
+      var request = sendRequest(
+        ondata(formData),
+        buildURL(apiUrl, action.url),
+        action
+      );
       request.onload = function(xhr) {
         load(
           createResponse(

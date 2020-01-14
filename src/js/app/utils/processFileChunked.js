@@ -2,6 +2,7 @@ import { sendRequest } from '../../utils/sendRequest';
 import { createResponse } from '../../utils/createResponse';
 import { createTimeoutResponse } from '../../utils/createDefaultResponse';
 import { isObject } from '../../utils/isObject';
+import { buildURL } from './buildURL';
 import { ChunkStatus } from '../enum/ChunkStatus';
 
 /*
@@ -50,7 +51,7 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
         };
 
         // send request object
-        const request = sendRequest(ondata(formData), apiUrl + action.url, requestParams);
+        const request = sendRequest(ondata(formData), buildURL(apiUrl, action.url), requestParams);
 
         request.onload = (xhr) => cb(onload(xhr, requestParams.method));
 
@@ -68,7 +69,7 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
 
     const requestTransferOffset = cb => {
 
-        const requestUrl = apiUrl + chunkServer.url + state.serverId;
+        const requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
         
         const headers = typeof action.headers === 'function' ? action.headers(state.serverId) : {
             ...action.headers
@@ -148,7 +149,7 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
         const onerror = chunkServer.onerror || (res => null);
 
         // send request object
-        const requestUrl = apiUrl + chunkServer.url + state.serverId;
+        const requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
 
         const headers = typeof chunkServer.headers === 'function' ? chunkServer.headers(chunk) : {
             ...chunkServer.headers,

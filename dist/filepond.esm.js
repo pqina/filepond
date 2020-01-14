@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.9.3
+ * FilePond 4.9.4
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -2671,6 +2671,15 @@ const createTimeoutResponse = cb => xhr => {
   cb(createResponse('error', 0, 'Timeout', xhr.getAllResponseHeaders()));
 };
 
+const hasQS = str => /\?/.test(str);
+const buildURL = (...parts) => {
+  let url = '';
+  parts.forEach(part => {
+    url += hasQS(url) && hasQS(part) ? part.replace(/\?/, '&') : part;
+  });
+  return url;
+};
+
 const createFetchFunction = (apiUrl = '', action) => {
   // custom handler (should also handle file, load, error, progress and abort)
   if (typeof action === 'function') {
@@ -2689,7 +2698,7 @@ const createFetchFunction = (apiUrl = '', action) => {
   // internal handler
   return (url, load, error, progress, abort, headers) => {
     // do local or remote request based on if the url is external
-    const request = sendRequest(url, apiUrl + action.url, {
+    const request = sendRequest(url, buildURL(apiUrl, action.url), {
       ...action,
       responseType: 'blob'
     });
@@ -2813,7 +2822,7 @@ const processFileChunked = (
     // send request object
     const request = sendRequest(
       ondata(formData),
-      apiUrl + action.url,
+      buildURL(apiUrl, action.url),
       requestParams
     );
 
@@ -2833,7 +2842,7 @@ const processFileChunked = (
   };
 
   const requestTransferOffset = cb => {
-    const requestUrl = apiUrl + chunkServer.url + state.serverId;
+    const requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
 
     const headers =
       typeof action.headers === 'function'
@@ -2920,7 +2929,7 @@ const processFileChunked = (
     const onerror = chunkServer.onerror || (res => null);
 
     // send request object
-    const requestUrl = apiUrl + chunkServer.url + state.serverId;
+    const requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
 
     const headers =
       typeof chunkServer.headers === 'function'
@@ -3141,7 +3150,11 @@ const createFileProcessorFunction = (apiUrl, action, name, options) => (
   });
 
   // send request object
-  const request = sendRequest(ondata(formData), apiUrl + action.url, action);
+  const request = sendRequest(
+    ondata(formData),
+    buildURL(apiUrl, action.url),
+    action
+  );
   request.onload = xhr => {
     load(
       createResponse(
