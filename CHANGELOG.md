@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.9.4
+
+- Fix problem with API querystring containing multiple quetionmarks.
+
+
 ## 4.9.3
 
 - Fix problem where ending the class attribute on a space would throw an error.
