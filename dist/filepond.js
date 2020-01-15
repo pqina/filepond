@@ -4186,22 +4186,6 @@
         : void 0
     });
   }
-  
-  var preDragItemIndices = {
-    itemlist: [],
-    update: function (items) {
-      this.itemlist = [];
-      for (var i = 0; i < items.length; i++) {
-        this.itemlist.push(items[i].id);
-      }
-    },
-    updateByIndex: function(id, index) {
-      this.itemlist.splice(index, 0, id);
-    },
-    indexById: function(id) {
-      return this.itemlist.indexOf(id);
-    }
-  };
 
   function _applyDecoratedDescriptor(
     target,
@@ -6836,9 +6820,6 @@
         // get a quick reference to the item id
         var id = item.id;
 
-        // update preDragItemIndices
-        preDragItemIndices.updateByIndex(id, index);
-
         // observe item events
         item.on('load-init', function() {
           dispatch('DID_START_ITEM_LOAD', { id: id });
@@ -8599,6 +8580,23 @@
     }
   });
 
+  var preDragItemIndices = {
+    itemList: [],
+    update: function update(items) {
+      var _this = this;
+      this.itemList = [];
+      items.map(function(item) {
+        _this.itemList.push(item.id);
+      });
+    },
+    updateByIndex: function updateByIndex(id, index) {
+      this.itemList.splice(index, 0, id);
+    },
+    indexById: function indexById(id) {
+      return this.itemList.indexOf(id);
+    }
+  };
+
   var ITEM_TRANSLATE_SPRING = {
     type: 'spring',
     stiffness: 0.75,
@@ -8709,10 +8707,10 @@
           y: e.pageY - origin.y
         };
 
-        preDragItemIndices.update(root.query('GET_ACTIVE_ITEMS'));
-        
         root.dispatch('DID_DROP_ITEM', { id: props.id });
       };
+
+      preDragItemIndices.update(root.query('GET_ACTIVE_ITEMS'));
 
       document.addEventListener('pointermove', drag);
       document.addEventListener('pointerup', drop);
@@ -8847,27 +8845,6 @@
     }
   });
 
-  var dropAreaDimensions = {
-    height: 0,
-    width: 0,
-    get getHeight() {
-      return this.height;
-    },
-    set setHeight(val) {
-      if (this.height === 0 || val === 0) this.height = val;
-    },
-    get getWidth() {
-      return this.width;
-    },
-    set setWidth(val) {
-      if (this.width === 0 || val === 0) this.width = val;
-    },
-    setDimensions: function(height, width){
-      if(this.height === 0 || height === 0) this.height = height;
-      if(this.width === 0 || width === 0) this.width = width;
-    }
-  };
-
   var getItemIndexByPosition = function getItemIndexByPosition(
     view,
     children,
@@ -8934,6 +8911,27 @@
     return l;
   };
 
+  var dropAreaDimensions = {
+    height: 0,
+    width: 0,
+    get getHeight() {
+      return this.height;
+    },
+    set setHeight(val) {
+      if (this.height === 0 || val === 0) this.height = val;
+    },
+    get getWidth() {
+      return this.width;
+    },
+    set setWidth(val) {
+      if (this.width === 0 || val === 0) this.width = val;
+    },
+    setDimensions: function setDimensions(height, width) {
+      if (this.height === 0 || height === 0) this.height = height;
+      if (this.width === 0 || width === 0) this.width = width;
+    }
+  };
+
   var create$8 = function create(_ref) {
     var root = _ref.root;
     // need to set role to list as otherwise it won't be read as a list by VoiceOver
@@ -8955,8 +8953,6 @@
       interactionMethod = action.interactionMethod;
 
     root.ref.addIndex = index;
-    
-    dropAreaDimensions.setDimensions(0,0);
 
     var now = Date.now();
     var spawnDate = now;
@@ -9082,27 +9078,26 @@
       child.rect.element.marginTop * 0.5
     );
   };
-
   var getItemWidth = function getItemWidth(child) {
     return (
-        child.rect.element.width +
-        child.rect.element.marginLeft * 0.5 +
-        child.rect.element.marginRight * 0.5
+      child.rect.element.width +
+      child.rect.element.marginLeft * 0.5 +
+      child.rect.element.marginRight * 0.5
     );
   };
 
   var dragItem = function dragItem(_ref4) {
     var root = _ref4.root,
-        action = _ref4.action,
-        props = _ref4.props;
+      action = _ref4.action,
+      props = _ref4.props;
     var id = action.id;
 
     // get the view matching the given id
-    var view = root.childViews.find(function (child) {
+    var view = root.childViews.find(function(child) {
       return child.id === id;
     });
 
-    if (!preDragItemIndices.itemlist.length) {
+    if (!preDragItemIndices.itemList.length) {
       preDragItemIndices.update(root.childViews);
     }
 
@@ -9116,32 +9111,77 @@
       x: view.dragOrigin.x + view.dragOffset.x + view.dragCenter.x,
       y: view.dragOrigin.y + view.dragOffset.y + view.dragCenter.y
 
-      // find new index
+      // get drag area dimensions
     };
-
     var dragHeight = getItemHeight(view);
     var dragWidth = getItemWidth(view);
 
-    var cols = Math.floor(root.rect.outer.width / getItemWidth(view));
-    if (cols > numItems) cols = numItems;
+    // get rows and columns (There will always be at least one row and one column if a file is present)
+    var cols = Math.floor(root.rect.outer.width / dragWidth);
+    if (cols > numItems) cols = (_readOnlyError('cols'), numItems);
+    // rows are used to find when we have left the preview area bounding box
     var rows = Math.floor(numItems / cols + 1);
 
     dropAreaDimensions.setHeight = dragHeight * rows;
     dropAreaDimensions.setWidth = dragWidth * cols;
-    
+
+    // get new index of dragged item
     var location = {
       y: Math.floor(dragPosition.y / dragHeight),
       x: Math.floor(dragPosition.x / dragWidth),
-      getIndex: function () {
+      getIndex: function getIndex() {
         var newIndex = this.y * cols + this.x;
-        if (dragPosition.y > dropAreaDimensions.getHeight ||
+        if (cols > 1) {
+          if (
+            dragPosition.y > dropAreaDimensions.getHeight ||
             dragPosition.y < 0 ||
             dragPosition.x > dropAreaDimensions.getWidth ||
-            dragPosition.x < 0) return oldIndex;
+            dragPosition.x < 0
+          )
+            return oldIndex;
+        } else if (
+          dragPosition.x > dropAreaDimensions.getWidth ||
+          dragPosition.x < 0
+        )
+          return oldIndex;
         return newIndex;
       }
-    };
 
+      // find new index
+      // const items = root.query('GET_ACTIVE_ITEMS');
+      // const visibleChildren = root.childViews.filter(child => child.rect.element.height);
+      // const children = items.map(item => visibleChildren.find(childView => childView.id === item.id));
+
+      // const l = children.length;
+      // let targetIndex = l;
+
+      // let childHeight = 0;
+      // let childBottom = 0;
+      // let childTop = 0;
+
+      // let currentIndex = children.findIndex(child => child === view);
+      // let dragHeight = getItemHeight(view);
+
+      // for (let i=0; i<l; i++) {
+
+      //     childHeight = getItemHeight(children[i]);
+      //     childTop = childBottom;
+      //     childBottom = childTop + childHeight;
+
+      //     if (dragPosition.y < childBottom) {
+      //         if (currentIndex > i) {
+      //             if (dragPosition.y < childTop + dragHeight) {
+      //                 targetIndex = i;
+      //                 break;
+      //             }
+      //             continue;
+      //         }
+      //         targetIndex = i;
+      //         break;
+      //     }
+
+      // }
+    };
     root.dispatch('MOVE_ITEM', { query: view, index: location.getIndex() });
   };
 
