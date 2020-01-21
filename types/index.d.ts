@@ -451,8 +451,9 @@ interface FilePondSvgIconProps {
 }
 
 interface FilePondErrorDescription {
-    main: string;
-    sub: string;
+    type: string;
+    code: number;
+    body: string;
 }
 
 /** Exposed for type filtering in downstream packages, please ignore. */
