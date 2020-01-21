@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.9.4
+ * FilePond 4.9.5
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */

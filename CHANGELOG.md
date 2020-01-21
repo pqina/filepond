@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.9.5
+
+- Fix issue with error format in TypeScript types
+
+
 ## 4.9.4
 
 - Fix problem with API querystring containing multiple questionmarks.
