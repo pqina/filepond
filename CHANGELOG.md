@@ -2,7 +2,7 @@
 
 ## 4.9.4
 
-- Fix problem with API querystring containing multiple quetionmarks.
+- Fix problem with API querystring containing multiple questionmarks.
 
 
 ## 4.9.3
