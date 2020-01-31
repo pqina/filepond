@@ -30,13 +30,15 @@ export enum FileOrigin {
     LOCAL = 3
 }
 
-type ActualFileObject = Blob & { readonly lastModified: number; readonly name: string; readonly size: number; readonly type: string };
+type ActualFileObject = Blob & { readonly lastModified: number; readonly name: string; };
 
 export class File {
     /** Returns the ID of the file. */
     id: string;
     /** Returns the server id of the file. */
     serverId: string;
+    /** Returns the source of the file. */
+    source: ActualFileObject | string;
     /** Returns the origin of the file. */
     origin: 'input' | 'limbo' | 'local';
     /** Returns the current status of the file. */
