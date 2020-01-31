@@ -213,7 +213,7 @@ interface FilePondInitialFile {
     source: string;
     options: {
         /** Origin of file being added. */
-        type: FileOrigin;
+        type: 'input' | 'limbo' | 'local';
         /** Mock file information. */
         file?: {
             name?: string;
