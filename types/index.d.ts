@@ -38,7 +38,7 @@ export class File {
     /** Returns the server id of the file. */
     serverId: string;
     /** Returns the origin of the file. */
-    origin: 'input' | 'limbo' | 'local';
+    origin: FileOrigin;
     /** Returns the current status of the file. */
     status: FileStatus;
     /** Returns the File object. */
@@ -213,7 +213,7 @@ interface FilePondInitialFile {
     source: string;
     options: {
         /** Origin of file being added. */
-        type: 'input' | 'limbo' | 'local';
+        type: FileOrigin;
         /** Mock file information. */
         file?: {
             name?: string;
