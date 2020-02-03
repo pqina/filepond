@@ -40,7 +40,7 @@ export class File {
     /** Returns the source of the file. */
     source: ActualFileObject | string;
     /** Returns the origin of the file. */
-    origin: 'input' | 'limbo' | 'local';
+    origin: FileOrigin;
     /** Returns the current status of the file. */
     status: FileStatus;
     /** Returns the File object. */
