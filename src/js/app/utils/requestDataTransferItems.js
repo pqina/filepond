@@ -41,9 +41,9 @@ const getFiles = dataTransfer =>
 
         // if is empty, see if we can extract some info from the files property as a fallback
         if (!promisedFiles.length) {
+            
             // TODO: test for directories (should not be allowed)
             // Use FileReader, problem is that the files property gets lost in the process
-
             resolve(dataTransfer.files ? Array.from(dataTransfer.files) : []);
             return;
         }
@@ -51,6 +51,7 @@ const getFiles = dataTransfer =>
         // done!
         Promise.all(promisedFiles)
             .then(returnedFileGroups => {
+
                 // flatten groups
                 const files = [];
                 returnedFileGroups.forEach(group => {
@@ -58,7 +59,10 @@ const getFiles = dataTransfer =>
                 });
 
                 // done (filter out empty files)!
-                resolve(files.filter(file => file));
+                resolve(files.filter(file => file).map(file => {
+                    if (!file._relativePath) file._relativePath = file.webkitRelativePath
+                    return file;
+                }));
             })
             .catch(console.error);
     });
@@ -131,7 +135,9 @@ const getFilesInDirectory = entry =>
                             fileCounter++;
 
                             entry.file(file => {
-                                files.push(correctMissingFileType(file));
+                                const correctedFile = correctMissingFileType(file);
+                                if (entry.fullPath) correctedFile._relativePath = entry.fullPath;
+                                files.push(correctedFile);
                                 fileCounter--;
                                 resolveIfDone();
                             });
@@ -169,6 +175,7 @@ const isDirectoryEntry = item => isEntry(item) && (getAsEntry(item) || {}).isDir
 const isEntry = item => 'webkitGetAsEntry' in item;
 
 const getAsEntry = item => item.webkitGetAsEntry();
+
 
 /**
  * Extracts links from a DataTransfer object

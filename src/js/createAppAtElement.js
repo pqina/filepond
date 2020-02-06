@@ -11,6 +11,7 @@ export const createAppAtElement = (element, options = {}) => {
         '^class$': 'className',
         '^multiple$': 'allowMultiple',
         '^capture$': 'captureMethod',
+        '^webkitdirectory$': 'allowDirectoriesOnly',
 
         // group under single property
         '^server': {

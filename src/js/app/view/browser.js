@@ -23,8 +23,11 @@ const create = ({ root, props }) => {
             return;
         }
 
-        // extract files
-        const files = Array.from(root.element.files);
+        // extract files and move value of webkitRelativePath path to _relativePath
+        const files = Array.from(root.element.files).map(file => {
+            file._relativePath = file.webkitRelativePath;
+            return file;
+        });
 
         // we add a little delay so the OS file select window can move out of the way before we add our file
         setTimeout(() => {
@@ -35,6 +38,7 @@ const create = ({ root, props }) => {
             resetFileInput(root.element);
         }, 250);
     }
+
     root.element.addEventListener('change', root.ref.handleChange);
 };
 
@@ -49,6 +53,10 @@ const setAcceptedFileTypes = ({ root, action }) => {
 
 const toggleAllowMultiple = ({ root, action }) => {
     attrToggle(root.element, 'multiple', action.value);
+};
+
+const toggleDirectoryFilter = ({ root, action }) => {
+    attrToggle(root.element, 'webkitdirectory', action.value);
 };
 
 const toggleDisabled = ({ root, action }) => {
@@ -128,6 +136,7 @@ export const browser = createView({
 
         DID_SET_DISABLED: toggleDisabled,
         DID_SET_ALLOW_BROWSE: toggleDisabled,
+        DID_SET_ALLOW_DIRECTORIES_ONLY: toggleDirectoryFilter,
         DID_SET_ALLOW_MULTIPLE: toggleAllowMultiple,
         DID_SET_ACCEPTED_FILE_TYPES: setAcceptedFileTypes,
         DID_SET_CAPTURE_METHOD: setCaptureMethod,

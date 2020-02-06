@@ -223,7 +223,7 @@ const drop = (root, clients) => e => {
     e.preventDefault();
 
     const dataTransfer = e.dataTransfer;
-    
+
     requestDataTransferItems(dataTransfer).then(items => {
         clients.forEach(client => {
             const {

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.9.5
+ * FilePond 4.10.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -2230,6 +2230,7 @@
     allowReplace: [true, Type.BOOLEAN], // Allow dropping a file on other file to replace it (only works when multiple is set to false)
     allowRevert: [true, Type.BOOLEAN], // Allows user to revert file upload
     allowReorder: [false, Type.BOOLEAN], // Allow reordering of files
+    allowDirectoriesOnly: [false, Type.BOOLEAN], // Allow only selecting directories with browse (no support for filtering dnd at this point)
 
     // Revert mode
     forceRevert: [false, Type.BOOLEAN], // Set to 'force' to require the file to be reverted before removal
@@ -9453,8 +9454,11 @@
         return;
       }
 
-      // extract files
-      var files = Array.from(root.element.files);
+      // extract files and move value of webkitRelativePath path to _relativePath
+      var files = Array.from(root.element.files).map(function(file) {
+        file._relativePath = file.webkitRelativePath;
+        return file;
+      });
 
       // we add a little delay so the OS file select window can move out of the way before we add our file
       setTimeout(function() {
@@ -9465,6 +9469,7 @@
         resetFileInput(root.element);
       }, 250);
     };
+
     root.element.addEventListener('change', root.ref.handleChange);
   };
 
@@ -9485,18 +9490,24 @@
     attrToggle(root.element, 'multiple', action.value);
   };
 
-  var toggleDisabled = function toggleDisabled(_ref4) {
+  var toggleDirectoryFilter = function toggleDirectoryFilter(_ref4) {
     var root = _ref4.root,
       action = _ref4.action;
+    attrToggle(root.element, 'webkitdirectory', action.value);
+  };
+
+  var toggleDisabled = function toggleDisabled(_ref5) {
+    var root = _ref5.root,
+      action = _ref5.action;
     var isDisabled = root.query('GET_DISABLED');
     var doesAllowBrowse = root.query('GET_ALLOW_BROWSE');
     var disableField = isDisabled || !doesAllowBrowse;
     attrToggle(root.element, 'disabled', disableField);
   };
 
-  var toggleRequired = function toggleRequired(_ref5) {
-    var root = _ref5.root,
-      action = _ref5.action;
+  var toggleRequired = function toggleRequired(_ref6) {
+    var root = _ref6.root,
+      action = _ref6.action;
     // want to remove required, always possible
     if (!action.value) {
       attrToggle(root.element, 'required', false);
@@ -9507,9 +9518,9 @@
     }
   };
 
-  var setCaptureMethod = function setCaptureMethod(_ref6) {
-    var root = _ref6.root,
-      action = _ref6.action;
+  var setCaptureMethod = function setCaptureMethod(_ref7) {
+    var root = _ref7.root,
+      action = _ref7.action;
     attrToggle(
       root.element,
       'capture',
@@ -9518,8 +9529,8 @@
     );
   };
 
-  var updateRequiredStatus = function updateRequiredStatus(_ref7) {
-    var root = _ref7.root;
+  var updateRequiredStatus = function updateRequiredStatus(_ref8) {
+    var root = _ref8.root;
     var element = root.element;
     // always remove the required attribute when more than zero items
     if (root.query('GET_TOTAL_ITEMS') > 0) {
@@ -9542,8 +9553,8 @@
     }
   };
 
-  var updateFieldValidityStatus = function updateFieldValidityStatus(_ref8) {
-    var root = _ref8.root;
+  var updateFieldValidityStatus = function updateFieldValidityStatus(_ref9) {
+    var root = _ref9.root;
     var shouldCheckValidity = root.query('GET_CHECK_VALIDITY');
     if (!shouldCheckValidity) return;
     root.element.setCustomValidity(root.query('GET_LABEL_INVALID_FIELD'));
@@ -9559,8 +9570,8 @@
     },
 
     create: create$a,
-    destroy: function destroy(_ref9) {
-      var root = _ref9.root;
+    destroy: function destroy(_ref10) {
+      var root = _ref10.root;
       root.element.removeEventListener('change', root.ref.handleChange);
     },
     write: createRoute({
@@ -9570,6 +9581,7 @@
 
       DID_SET_DISABLED: toggleDisabled,
       DID_SET_ALLOW_BROWSE: toggleDisabled,
+      DID_SET_ALLOW_DIRECTORIES_ONLY: toggleDirectoryFilter,
       DID_SET_ALLOW_MULTIPLE: toggleAllowMultiple,
       DID_SET_ACCEPTED_FILE_TYPES: setAcceptedFileTypes,
       DID_SET_CAPTURE_METHOD: setCaptureMethod,
@@ -9832,7 +9844,6 @@
       if (!promisedFiles.length) {
         // TODO: test for directories (should not be allowed)
         // Use FileReader, problem is that the files property gets lost in the process
-
         resolve(dataTransfer.files ? Array.from(dataTransfer.files) : []);
         return;
       }
@@ -9848,9 +9859,15 @@
 
           // done (filter out empty files)!
           resolve(
-            files.filter(function(file) {
-              return file;
-            })
+            files
+              .filter(function(file) {
+                return file;
+              })
+              .map(function(file) {
+                if (!file._relativePath)
+                  file._relativePath = file.webkitRelativePath;
+                return file;
+              })
           );
         })
         .catch(console.error);
@@ -9918,7 +9935,10 @@
                 fileCounter++;
 
                 entry.file(function(file) {
-                  files.push(correctMissingFileType(file));
+                  var correctedFile = correctMissingFileType(file);
+                  if (entry.fullPath)
+                    correctedFile._relativePath = entry.fullPath;
+                  files.push(correctedFile);
                   fileCounter--;
                   resolveIfDone();
                 });
@@ -12086,6 +12106,7 @@
       '^class$': 'className',
       '^multiple$': 'allowMultiple',
       '^capture$': 'captureMethod',
+      '^webkitdirectory$': 'allowDirectoriesOnly',
 
       // group under single property
       '^server': {
