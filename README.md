@@ -26,7 +26,7 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 
 ### Also need Image Editing?
 
-**Doka.js** might just be what you're looking for. It's a Modern JavaScript Image Editor, Doka supports setting **crop aspect ratios**, **resizing**, **rotating**, **cropping**, and **flipping** images. Above all, it integrates beautifully with FilePond.
+**Doka.js** is what you're looking for. It's a Modern JavaScript Image Editor, Doka supports setting **crop aspect ratios**, **resizing**, **rotating**, **cropping**, and **flipping** images. Above all, it integrates beautifully with FilePond.
 
 [Learn more about Doka](https://pqina.nl/doka/?ref=github)
 
