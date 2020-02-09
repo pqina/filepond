@@ -207,7 +207,6 @@ export const actions = (dispatch, query, state) => ({
         index = limit(index, 0, state.items.length - 1);
         if (currentIndex === index) return;
         state.items.splice(index, 0, state.items.splice(currentIndex, 1)[0]);
-        dispatch('DID_REORDER_ITEMS', { items: getActiveItems(state.items) });
     },
 
     SORT: ({ compare }) => {

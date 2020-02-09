@@ -704,7 +704,7 @@ type FilePondEventPrefixed = 'FilePond:init'
     | 'FilePond:processfile'
     | 'FilePond:removefile'
     | 'FilePond:updatefiles'
-    | 'FilePond:reorderedfiles';
+    | 'FilePond:reorderfiles';
 
 type FilePondEvent = 'init'
     | 'warning'
@@ -719,7 +719,7 @@ type FilePondEvent = 'init'
     | 'processfile'
     | 'removefile'
     | 'updatefiles'
-    | 'reorderedfiles';
+    | 'reorderfiles';
 
 export class FilePond {
     /**
