@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.10.0
+ * FilePond 4.11.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -2342,6 +2342,7 @@
     onremovefile: [null, Type.FUNCTION],
     onpreparefile: [null, Type.FUNCTION],
     onupdatefiles: [null, Type.FUNCTION],
+    onreorderfiles: [null, Type.FUNCTION],
 
     // hooks
     beforeDropFile: [null, Type.FUNCTION],
@@ -9118,7 +9119,7 @@
     });
 
     var l = children.length;
-    var targetIndex = l;
+    var targetIndex = l - 1;
 
     var childHeight = 0;
     var childBottom = 0;
@@ -9148,6 +9149,13 @@
     }
 
     root.dispatch('MOVE_ITEM', { query: view, index: targetIndex });
+
+    // if the index of the item changed, dispatch reorder action
+    if (currentIndex !== targetIndex) {
+      root.dispatch('DID_REORDER_ITEMS', {
+        items: root.query('GET_ACTIVE_ITEMS')
+      });
+    }
   };
 
   /**
@@ -11555,7 +11563,9 @@
 
       DID_UPDATE_ITEMS: createEvent('updatefiles'),
 
-      DID_ACTIVATE_ITEM: createEvent('activatefile')
+      DID_ACTIVATE_ITEM: createEvent('activatefile'),
+
+      DID_REORDER_ITEMS: createEvent('reorderfiles')
     };
 
     var exposeEvent = function exposeEvent(event) {

@@ -3,6 +3,7 @@
 ## 4.11.0
 
 - Add `relativePath` property to file item.
+- Add `onreorderfiles` callback.
 - Fix issue where unkown type was `"null"` instead of an empty string.
 - Fix issue where `onactivatefile` was fired on drag end.
 

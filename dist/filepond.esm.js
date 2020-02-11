@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.10.0
+ * FilePond 4.11.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1995,6 +1995,7 @@ const defaultOptions = {
   onremovefile: [null, Type.FUNCTION],
   onpreparefile: [null, Type.FUNCTION],
   onupdatefiles: [null, Type.FUNCTION],
+  onreorderfiles: [null, Type.FUNCTION],
 
   // hooks
   beforeDropFile: [null, Type.FUNCTION],
@@ -6412,7 +6413,7 @@ const dragItem = ({ root, action, props }) => {
   );
 
   const l = children.length;
-  let targetIndex = l;
+  let targetIndex = l - 1;
 
   let childHeight = 0;
   let childBottom = 0;
@@ -6440,6 +6441,13 @@ const dragItem = ({ root, action, props }) => {
   }
 
   root.dispatch('MOVE_ITEM', { query: view, index: targetIndex });
+
+  // if the index of the item changed, dispatch reorder action
+  if (currentIndex !== targetIndex) {
+    root.dispatch('DID_REORDER_ITEMS', {
+      items: root.query('GET_ACTIVE_ITEMS')
+    });
+  }
 };
 
 /**
@@ -8642,7 +8650,9 @@ const createApp = (initialOptions = {}) => {
 
     DID_UPDATE_ITEMS: createEvent('updatefiles'),
 
-    DID_ACTIVATE_ITEM: createEvent('activatefile')
+    DID_ACTIVATE_ITEM: createEvent('activatefile'),
+
+    DID_REORDER_ITEMS: createEvent('reorderfiles')
   };
 
   const exposeEvent = event => {

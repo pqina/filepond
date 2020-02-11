@@ -33,13 +33,7 @@
         // Create the FilePond instance
         const pond = FilePond.create(inputElement, {
             allowMultiple: true,
-            allowReorder: true,
-            onactivatefile: () => {
-                console.log('hi!');
-            },
-            onaddfile: (err, item) => {
-                console.log(item.relativePath);
-            }
+            allowReorder: true
         });
 
     </script>

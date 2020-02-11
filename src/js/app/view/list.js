@@ -165,7 +165,7 @@ const dragItem = ({ root, action, props }) => {
     const children = items.map(item => visibleChildren.find(childView => childView.id === item.id));
     
     const l = children.length;
-    let targetIndex = l;
+    let targetIndex = l - 1;
 
     let childHeight = 0;
     let childBottom = 0;
@@ -193,12 +193,12 @@ const dragItem = ({ root, action, props }) => {
         }
         
     }
-
+    
     root.dispatch('MOVE_ITEM', { query: view, index: targetIndex });
-
+    
     // if the index of the item changed, dispatch reorder action
     if (currentIndex !== targetIndex) {
-      root.dispatch('DID_REORDER_ITEMS', { items: root.query('GET_ACTIVE_ITEMS') });
+        root.dispatch('DID_REORDER_ITEMS', { items: root.query('GET_ACTIVE_ITEMS') });
     }
 };
 
