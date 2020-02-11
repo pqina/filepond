@@ -504,6 +504,8 @@ export interface FilePondCallbackProps {
     onupdatefiles?: (files: File[]) => void;
     /* Called when a file is clicked or tapped. **/
     onactivatefile?: (file: File) => void;
+    /** Called when the files have been reordered */
+    onreorderfiles?: (files: File[]) => void;
 }
 
 interface FilePondHookProps {
@@ -701,7 +703,8 @@ type FilePondEventPrefixed = 'FilePond:init'
     | 'FilePond:processfilerevert'
     | 'FilePond:processfile'
     | 'FilePond:removefile'
-    | 'FilePond:updatefiles';
+    | 'FilePond:updatefiles'
+    | 'FilePond:reorderfiles';
 
 type FilePondEvent = 'init'
     | 'warning'
@@ -715,7 +718,8 @@ type FilePondEvent = 'init'
     | 'processfilerevert'
     | 'processfile'
     | 'removefile'
-    | 'updatefiles';
+    | 'updatefiles'
+    | 'reorderfiles';
 
 export class FilePond {
     /**
@@ -1119,6 +1123,8 @@ export class FilePond {
     onupdatefiles?: (fileItems: File[]) => void;
     /* Called when a file is clicked or tapped. **/
     onactivatefile?: (file: File) => void;
+    /** Called when the files have been reordered */
+    onreorderfiles?: (files: File[]) => void;
 
     /**
      * FilePond is about to allow this item to be dropped, it can be a URL or a File object.

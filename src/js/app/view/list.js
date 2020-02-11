@@ -194,7 +194,12 @@ const dragItem = ({ root, action, props }) => {
         
     }
 
-    root.dispatch('MOVE_ITEM', { query: view, index: targetIndex })
+    root.dispatch('MOVE_ITEM', { query: view, index: targetIndex });
+
+    // if the index of the item changed, dispatch reorder action
+    if (currentIndex !== targetIndex) {
+      root.dispatch('DID_REORDER_ITEMS', { items: root.query('GET_ACTIVE_ITEMS') });
+    }
 };
 
 /**

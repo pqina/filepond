@@ -159,6 +159,7 @@ export const defaultOptions = {
     onremovefile: [null, Type.FUNCTION],
     onpreparefile: [null, Type.FUNCTION],
     onupdatefiles: [null, Type.FUNCTION],
+    onreorderfiles: [null, Type.FUNCTION],
 
     // hooks
     beforeDropFile: [null, Type.FUNCTION],
