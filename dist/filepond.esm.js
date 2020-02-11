@@ -2257,6 +2257,9 @@ const getFileFromBlob = (blob, filename, type = null, extension = null) => {
       : blob.slice(0, blob.size, blob.type);
   file.lastModifiedDate = new Date();
 
+  // copy relative path
+  if (blob._relativePath) file._relativePath = blob._relativePath;
+
   // if blob has name property, use as filename if no filename supplied
   if (!isString(filename)) {
     filename = getDateString();
@@ -3911,6 +3914,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     fileType: { get: getFileType },
     fileSize: { get: getFileSize },
     file: { get: getFile },
+    relativePath: { get: () => state.file._relativePath },
 
     source: { get: () => state.source },
 
@@ -5984,7 +5988,7 @@ const StateMap = {
  */
 const create$7 = ({ root, props }) => {
   // select
-  root.ref.handleClick = () =>
+  root.ref.handleClick = e =>
     root.dispatch('DID_ACTIVATE_ITEM', { id: props.id });
 
   // set id
@@ -6016,6 +6020,8 @@ const create$7 = ({ root, props }) => {
   const grab = e => {
     if (!e.isPrimary) return;
 
+    let removedActivateListener = false;
+
     const origin = {
       x: e.pageX,
       y: e.pageY
@@ -6044,6 +6050,15 @@ const create$7 = ({ root, props }) => {
         y: e.pageY - origin.y
       };
 
+      // if dragged stop listening to clicks, will re-add when done dragging
+      const dist =
+        props.dragOffset.x * props.dragOffset.x +
+        props.dragOffset.y * props.dragOffset.y;
+      if (dist > 16 && !removedActivateListener) {
+        removedActivateListener = true;
+        root.element.removeEventListener('click', root.ref.handleClick);
+      }
+
       root.dispatch('DID_DRAG_ITEM', { id: props.id });
     };
 
@@ -6059,13 +6074,20 @@ const create$7 = ({ root, props }) => {
       };
 
       root.dispatch('DID_DROP_ITEM', { id: props.id });
+
+      // start listening to clicks again
+      if (removedActivateListener) {
+        setTimeout(
+          () => root.element.addEventListener('click', root.ref.handleClick),
+          0
+        );
+      }
     };
 
     document.addEventListener('pointermove', drag);
     document.addEventListener('pointerup', drop);
   };
 
-  // addEvent(root.element, 'pointerdown', grab);
   root.element.addEventListener('pointerdown', grab);
 };
 
@@ -7030,7 +7052,8 @@ const guesstimateMimeType = (extension = '') => {
   if (text$1.includes(extension)) {
     return 'text/' + extension;
   }
-  return map[extension] || null;
+
+  return map[extension] || '';
 };
 
 const requestDataTransferItems = dataTransfer =>

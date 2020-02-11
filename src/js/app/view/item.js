@@ -36,7 +36,7 @@ const StateMap = {
 const create = ({ root, props }) => {
 
     // select
-    root.ref.handleClick = () => root.dispatch('DID_ACTIVATE_ITEM', { id: props.id });
+    root.ref.handleClick = e => root.dispatch('DID_ACTIVATE_ITEM', { id: props.id });
 
     // set id
     root.element.id = `filepond--item-${props.id}`;
@@ -68,6 +68,8 @@ const create = ({ root, props }) => {
 
         if (!e.isPrimary) return;
 
+        let removedActivateListener = false;
+
         const origin = {
             x: e.pageX,
             y: e.pageY
@@ -97,6 +99,13 @@ const create = ({ root, props }) => {
                 y: e.pageY - origin.y
             };
 
+            // if dragged stop listening to clicks, will re-add when done dragging
+            const dist = (props.dragOffset.x * props.dragOffset.x) + (props.dragOffset.y * props.dragOffset.y);
+            if (dist > 16 && !removedActivateListener) {
+                removedActivateListener = true;
+                root.element.removeEventListener('click', root.ref.handleClick);
+            }
+
             root.dispatch('DID_DRAG_ITEM', { id: props.id });
         };
     
@@ -113,13 +122,17 @@ const create = ({ root, props }) => {
             };
 
             root.dispatch('DID_DROP_ITEM', { id: props.id });
+
+            // start listening to clicks again
+            if (removedActivateListener) {
+                setTimeout(() => root.element.addEventListener('click', root.ref.handleClick), 0);
+            }
         };
     
         document.addEventListener('pointermove', drag);
         document.addEventListener('pointerup', drop);
     }
 
-    // addEvent(root.element, 'pointerdown', grab);
     root.element.addEventListener('pointerdown', grab);
 };
 

@@ -1,8 +1,20 @@
 # Changelog
 
+## 4.11.0
+
+- Add `relativePath` property to file item.
+- Fix issue where unkown type was `"null"` instead of an empty string.
+- Fix issue where `onactivatefile` was fired on drag end.
+
+
+## 4.10.0
+
+- Copy webkitDirectory property to file object.
+
+
 ## 4.9.5
 
-- Fix issue with error format in TypeScript types
+- Fix issue with error format in TypeScript types.
 
 
 ## 4.9.4

@@ -14,6 +14,9 @@ export const getFileFromBlob = (
             ? blob.slice(0, blob.size, type)
             : blob.slice(0, blob.size, blob.type);
     file.lastModifiedDate = new Date();
+    
+    // copy relative path
+    if (blob._relativePath) file._relativePath = blob._relativePath;
 
     // if blob has name property, use as filename if no filename supplied
     if (!isString(filename)) {

@@ -18,5 +18,6 @@ export const guesstimateMimeType = (extension = '') => {
     if (text.includes(extension)) {
         return 'text/' + extension;
     }
-    return map[extension] || null;
+
+    return map[extension] || '';
 };

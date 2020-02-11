@@ -2676,6 +2676,9 @@
         : blob.slice(0, blob.size, blob.type);
     file.lastModifiedDate = new Date();
 
+    // copy relative path
+    if (blob._relativePath) file._relativePath = blob._relativePath;
+
     // if blob has name property, use as filename if no filename supplied
     if (!isString(filename)) {
       filename = getDateString();
@@ -6248,6 +6251,11 @@
         fileType: { get: getFileType },
         fileSize: { get: getFileSize },
         file: { get: getFile },
+        relativePath: {
+          get: function get() {
+            return state.file._relativePath;
+          }
+        },
 
         source: {
           get: function get() {
@@ -8638,7 +8646,7 @@
       props = _ref.props;
 
     // select
-    root.ref.handleClick = function() {
+    root.ref.handleClick = function(e) {
       return root.dispatch('DID_ACTIVATE_ITEM', { id: props.id });
     };
 
@@ -8671,6 +8679,8 @@
     var grab = function grab(e) {
       if (!e.isPrimary) return;
 
+      var removedActivateListener = false;
+
       var origin = {
         x: e.pageX,
         y: e.pageY
@@ -8699,6 +8709,15 @@
           y: e.pageY - origin.y
         };
 
+        // if dragged stop listening to clicks, will re-add when done dragging
+        var dist =
+          props.dragOffset.x * props.dragOffset.x +
+          props.dragOffset.y * props.dragOffset.y;
+        if (dist > 16 && !removedActivateListener) {
+          removedActivateListener = true;
+          root.element.removeEventListener('click', root.ref.handleClick);
+        }
+
         root.dispatch('DID_DRAG_ITEM', { id: props.id });
       };
 
@@ -8714,13 +8733,19 @@
         };
 
         root.dispatch('DID_DROP_ITEM', { id: props.id });
+
+        // start listening to clicks again
+        if (removedActivateListener) {
+          setTimeout(function() {
+            return root.element.addEventListener('click', root.ref.handleClick);
+          }, 0);
+        }
       };
 
       document.addEventListener('pointermove', drag);
       document.addEventListener('pointerup', drop);
     };
 
-    // addEvent(root.element, 'pointerdown', grab);
     root.element.addEventListener('pointerdown', grab);
   };
 
@@ -9795,7 +9820,8 @@
     if (text$1.includes(extension)) {
       return 'text/' + extension;
     }
-    return map[extension] || null;
+
+    return map[extension] || '';
   };
 
   var requestDataTransferItems = function requestDataTransferItems(

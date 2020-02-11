@@ -416,6 +416,7 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         fileType: { get: getFileType },
         fileSize: { get: getFileSize },
         file: { get: getFile },
+        relativePath: { get: () => state.file._relativePath },
 
         source: { get: () => state.source },
 
