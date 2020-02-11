@@ -252,7 +252,9 @@ export const createApp = (initialOptions = {}) => {
 
         DID_UPDATE_ITEMS: createEvent('updatefiles'),
 
-        DID_ACTIVATE_ITEM: createEvent('activatefile')
+        DID_ACTIVATE_ITEM: createEvent('activatefile'),
+
+        DID_REORDER_ITEMS: createEvent('reorderfiles')
     };
 
     const exposeEvent = event => {
