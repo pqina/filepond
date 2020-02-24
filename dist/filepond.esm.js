@@ -6421,7 +6421,7 @@ const dragItem = ({ root, action, props }) => {
   const dragWidth = getItemWidth(view);
 
   // get rows and columns (There will always be at least one row and one column if a file is present)
-  const cols = Math.floor(root.rect.outer.width / dragWidth);
+  let cols = Math.floor(root.rect.outer.width / dragWidth);
   if (cols > numItems) cols = numItems;
   // rows are used to find when we have left the preview area bounding box
   const rows = Math.floor(numItems / cols + 1);
@@ -6430,64 +6430,57 @@ const dragItem = ({ root, action, props }) => {
   dropAreaDimensions.setWidth = dragWidth * cols;
 
   // get new index of dragged item
-  const location = {
+  var location = {
     y: Math.floor(dragPosition.y / dragHeight),
     x: Math.floor(dragPosition.x / dragWidth),
-    getIndex: function() {
-      const newIndex = this.y * cols + this.x;
-      if (cols > 1) {
-        if (
-          dragPosition.y > dropAreaDimensions.getHeight ||
-          dragPosition.y < 0 ||
-          dragPosition.x > dropAreaDimensions.getWidth ||
-          dragPosition.x < 0
-        )
-          return oldIndex;
-      } else if (
+    getGridIndex: function getGridIndex() {
+      let newIndex = this.y * cols + this.x;
+      if (
+        dragPosition.y > dropAreaDimensions.getHeight ||
+        dragPosition.y < 0 ||
         dragPosition.x > dropAreaDimensions.getWidth ||
         dragPosition.x < 0
       )
         return oldIndex;
       return newIndex;
+    },
+    getColIndex: function getColIndex() {
+      //find new index
+      const items = root.query('GET_ACTIVE_ITEMS');
+      const visibleChildren = root.childViews.filter(
+        child => child.rect.element.height
+      );
+      const children = items.map(item =>
+        visibleChildren.find(childView => childView.id === item.id)
+      );
+      const l = children.length;
+      let idx = l;
+      let childHeight = 0;
+      let childBottom = 0;
+      let childTop = 0;
+      let currentIndex = children.findIndex(child => child === view);
+      let dragHeight = getItemHeight(view);
+      for (let i = 0; i < l; i++) {
+        childHeight = getItemHeight(children[i]);
+        childTop = childBottom;
+        childBottom = childTop + childHeight;
+        if (dragPosition.y < childBottom) {
+          if (currentIndex > i) {
+            if (dragPosition.y < childTop + dragHeight) {
+              idx = i;
+              break;
+            }
+            continue;
+          }
+          idx = i;
+          break;
+        }
+      }
+      return idx;
     }
   };
-
-  // find new index
-  // const items = root.query('GET_ACTIVE_ITEMS');
-  // const visibleChildren = root.childViews.filter(child => child.rect.element.height);
-  // const children = items.map(item => visibleChildren.find(childView => childView.id === item.id));
-
-  // const l = children.length;
-  // let targetIndex = l;
-
-  // let childHeight = 0;
-  // let childBottom = 0;
-  // let childTop = 0;
-
-  // let currentIndex = children.findIndex(child => child === view);
-  // let dragHeight = getItemHeight(view);
-
-  // for (let i=0; i<l; i++) {
-
-  //     childHeight = getItemHeight(children[i]);
-  //     childTop = childBottom;
-  //     childBottom = childTop + childHeight;
-
-  //     if (dragPosition.y < childBottom) {
-  //         if (currentIndex > i) {
-  //             if (dragPosition.y < childTop + dragHeight) {
-  //                 targetIndex = i;
-  //                 break;
-  //             }
-  //             continue;
-  //         }
-  //         targetIndex = i;
-  //         break;
-  //     }
-
-  // }
-
-  root.dispatch('MOVE_ITEM', { query: view, index: location.getIndex() });
+  var index = cols > 1 ? location.getGridIndex() : location.getColIndex();
+  root.dispatch('MOVE_ITEM', { query: view, index: index });
 };
 
 /**
