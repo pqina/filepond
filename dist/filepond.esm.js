@@ -2010,6 +2010,7 @@ const defaultOptions = {
   styleButtonProcessItemPosition: ['right', Type.STRING],
   styleLoadIndicatorPosition: ['right', Type.STRING],
   styleProgressIndicatorPosition: ['right', Type.STRING],
+  styleButtonRemoveItemAlign: [false, Type.BOOLEAN],
 
   // custom initial files array
   files: [[], Type.ARRAY]
@@ -5328,7 +5329,7 @@ const fileInfo = createView({
 
 const toPercentage = value => Math.round(value * 100);
 
-const create$3 = ({ root, props }) => {
+const create$3 = ({ root }) => {
   // main status
   const main = createElement$1('span');
   main.className = 'filepond--file-status-main';
@@ -5535,7 +5536,6 @@ const StyleMap = {
     info: { translateX: calculateFileInfoOffset },
     status: { translateX: calculateFileInfoOffset, opacity: 1 }
   },
-
   DID_START_ITEM_LOAD: {
     buttonAbortItemLoad: { opacity: 1 },
     loadProgressIndicator: { opacity: 1 },
@@ -5547,7 +5547,6 @@ const StyleMap = {
     info: { translateX: calculateFileInfoOffset },
     status: { opacity: 1 }
   },
-
   DID_START_ITEM_REMOVE: {
     processProgressIndicator: { opacity: 1, align: getRemoveIndicatorAligment },
     info: { translateX: calculateFileInfoOffset },
@@ -5627,10 +5626,21 @@ const create$4 = ({ root, props }) => {
   // is async set up
   const isAsync = root.query('IS_ASYNC');
 
+  // should align remove item buttons
+  const alignRemoveItemButton = root.query(
+    'GET_STYLE_BUTTON_REMOVE_ITEM_ALIGN'
+  );
+
   // enabled buttons array
   const enabledButtons = isAsync
     ? ButtonKeys.concat()
     : ButtonKeys.filter(key => !/Process/.test(key));
+
+  // update icon and label for revert button when instant uploading
+  if (instantUpload && allowRevert) {
+    Buttons['RevertItemProcessing'].label = 'GET_LABEL_BUTTON_REMOVE_ITEM';
+    Buttons['RevertItemProcessing'].icon = 'GET_ICON_REMOVE';
+  }
 
   // remove last button (revert) if not allowed
   if (isAsync && !allowRevert) {
@@ -5642,10 +5652,13 @@ const create$4 = ({ root, props }) => {
     map.processingCompleteIndicator = { opacity: 1, scaleX: 1, scaleY: 1 };
   }
 
-  // update icon and label for revert button when instant uploading
-  if (instantUpload && allowRevert) {
-    Buttons['RevertItemProcessing'].label = 'GET_LABEL_BUTTON_REMOVE_ITEM';
-    Buttons['RevertItemProcessing'].icon = 'GET_ICON_REMOVE';
+  // move remove button to right
+  if (alignRemoveItemButton && allowRevert) {
+    Buttons['RevertItemProcessing'].align = 'BUTTON_REMOVE_ITEM_POSITION';
+    const map = StyleMap['DID_COMPLETE_ITEM_PROCESSING'];
+    map.info.translateX = calculateFileInfoOffset;
+    map.status.translateY = calculateFileVerticalCenterOffset;
+    map.processingCompleteIndicator = { opacity: 1, scaleX: 1, scaleY: 1 };
   }
 
   // create the button views
@@ -5680,20 +5693,20 @@ const create$4 = ({ root, props }) => {
     root.ref[`button${key}`] = buttonView;
   });
 
-  // create file info view
-  root.ref.info = root.appendChildView(root.createChildView(fileInfo, { id }));
-
-  // create file status view
-  root.ref.status = root.appendChildView(
-    root.createChildView(fileStatus, { id })
-  );
-
   // checkmark
   root.ref.processingCompleteIndicator = root.appendChildView(
     root.createChildView(processingCompleteIndicatorView)
   );
   root.ref.processingCompleteIndicator.element.dataset.align = root.query(
     `GET_STYLE_BUTTON_PROCESS_ITEM_POSITION`
+  );
+
+  // create file info view
+  root.ref.info = root.appendChildView(root.createChildView(fileInfo, { id }));
+
+  // create file status view
+  root.ref.status = root.appendChildView(
+    root.createChildView(fileStatus, { id })
   );
 
   // add progress indicators

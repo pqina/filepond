@@ -2357,6 +2357,7 @@
     styleButtonProcessItemPosition: ['right', Type.STRING],
     styleLoadIndicatorPosition: ['right', Type.STRING],
     styleProgressIndicatorPosition: ['right', Type.STRING],
+    styleButtonRemoveItemAlign: [false, Type.BOOLEAN],
 
     // custom initial files array
     files: [[], Type.ARRAY]
@@ -7868,8 +7869,8 @@
   };
 
   var create$3 = function create(_ref) {
-    var root = _ref.root,
-      props = _ref.props;
+    var root = _ref.root;
+
     // main status
     var main = createElement$1('span');
     main.className = 'filepond--file-status-main';
@@ -8212,12 +8213,23 @@
     // is async set up
     var isAsync = root.query('IS_ASYNC');
 
+    // should align remove item buttons
+    var alignRemoveItemButton = root.query(
+      'GET_STYLE_BUTTON_REMOVE_ITEM_ALIGN'
+    );
+
     // enabled buttons array
     var enabledButtons = isAsync
       ? ButtonKeys.concat()
       : ButtonKeys.filter(function(key) {
           return !/Process/.test(key);
         });
+
+    // update icon and label for revert button when instant uploading
+    if (instantUpload && allowRevert) {
+      Buttons['RevertItemProcessing'].label = 'GET_LABEL_BUTTON_REMOVE_ITEM';
+      Buttons['RevertItemProcessing'].icon = 'GET_ICON_REMOVE';
+    }
 
     // remove last button (revert) if not allowed
     if (isAsync && !allowRevert) {
@@ -8229,10 +8241,13 @@
       map.processingCompleteIndicator = { opacity: 1, scaleX: 1, scaleY: 1 };
     }
 
-    // update icon and label for revert button when instant uploading
-    if (instantUpload && allowRevert) {
-      Buttons['RevertItemProcessing'].label = 'GET_LABEL_BUTTON_REMOVE_ITEM';
-      Buttons['RevertItemProcessing'].icon = 'GET_ICON_REMOVE';
+    // move remove button to right
+    if (alignRemoveItemButton && allowRevert) {
+      Buttons['RevertItemProcessing'].align = 'BUTTON_REMOVE_ITEM_POSITION';
+      var _map = StyleMap['DID_COMPLETE_ITEM_PROCESSING'];
+      _map.info.translateX = calculateFileInfoOffset;
+      _map.status.translateY = calculateFileVerticalCenterOffset;
+      _map.processingCompleteIndicator = { opacity: 1, scaleX: 1, scaleY: 1 };
     }
 
     // create the button views
@@ -8267,6 +8282,14 @@
       root.ref['button' + key] = buttonView;
     });
 
+    // checkmark
+    root.ref.processingCompleteIndicator = root.appendChildView(
+      root.createChildView(processingCompleteIndicatorView)
+    );
+    root.ref.processingCompleteIndicator.element.dataset.align = root.query(
+      'GET_STYLE_BUTTON_PROCESS_ITEM_POSITION'
+    );
+
     // create file info view
     root.ref.info = root.appendChildView(
       root.createChildView(fileInfo, { id: id })
@@ -8275,14 +8298,6 @@
     // create file status view
     root.ref.status = root.appendChildView(
       root.createChildView(fileStatus, { id: id })
-    );
-
-    // checkmark
-    root.ref.processingCompleteIndicator = root.appendChildView(
-      root.createChildView(processingCompleteIndicatorView)
-    );
-    root.ref.processingCompleteIndicator.element.dataset.align = root.query(
-      'GET_STYLE_BUTTON_PROCESS_ITEM_POSITION'
     );
 
     // add progress indicators
@@ -8360,7 +8375,6 @@
       var control = _ref4.control,
         key = _ref4.key,
         value = _ref4.value;
-
       control[key] = typeof value === 'function' ? value(root) : value;
     });
   };

@@ -174,6 +174,7 @@ export const defaultOptions = {
     styleButtonProcessItemPosition: ['right', Type.STRING],
     styleLoadIndicatorPosition: ['right', Type.STRING],
     styleProgressIndicatorPosition: ['right', Type.STRING],
+    styleButtonRemoveItemAlign: [false, Type.BOOLEAN],
 
     // custom initial files array
     files: [[], Type.ARRAY]

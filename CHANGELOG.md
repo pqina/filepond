@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.12.0
+
+- Add `styleButtonRemoveItemAlign` to align remove button to the left side of the file item.
+- Fix issue where list of files could not be scrolled when FilePond was disabled.
+
+
 ## 4.11.0
 
 - Add `relativePath` property to file item.

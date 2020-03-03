@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.11.0
+ * FilePond 4.12.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -313,19 +313,25 @@
   animation: fall 0.5s 0.125s linear both;
 }
 
-[data-filepond-item-state='processing-complete'] .filepond--file-info-sub,
 [data-filepond-item-state='processing-complete'] .filepond--file-status-sub {
+  opacity: 0.5;
+}
+
+[data-filepond-item-state='processing-complete']
+  .filepond--processing-complete-indicator:not([style*='hidden'])
+  ~ .filepond--file-status
+  .filepond--file-status-sub {
+  opacity: 0;
+}
+
+[data-filepond-item-state='processing-complete'] .filepond--file-info-sub {
   opacity: 0;
 }
 
 [data-filepond-item-state='processing-complete']
   .filepond--action-revert-item-processing
   ~ .filepond--file-info
-  .filepond--file-info-sub,
-[data-filepond-item-state='processing-complete']
-  .filepond--action-revert-item-processing
-  ~ .filepond--file-status
-  .filepond--file-status-sub {
+  .filepond--file-info-sub {
   opacity: 0.5;
 }
 
@@ -849,6 +855,12 @@
   font-size: inherit;
 }
 .filepond--root[data-disabled] {
+  pointer-events: none;
+}
+.filepond--root[data-disabled] .filepond--list-scroller {
+  pointer-events: all;
+}
+.filepond--root[data-disabled] .filepond--list {
   pointer-events: none;
 }
 

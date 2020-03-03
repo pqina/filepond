@@ -44,6 +44,14 @@
     // block everything
     &[data-disabled] {
         pointer-events: none;
+
+        .filepond--list-scroller {
+            pointer-events: all;
+        }
+        
+        .filepond--list {
+            pointer-events: none;
+        }
     }
 }
 

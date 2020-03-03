@@ -82,14 +82,20 @@
     }
 
     // hide details by default, only show when can revert
-    .filepond--file-info-sub,
     .filepond--file-status-sub {
-        opacity:0;
+        opacity: .5;
     }
 
-    .filepond--action-revert-item-processing ~ .filepond--file-info .filepond--file-info-sub,
-    .filepond--action-revert-item-processing ~ .filepond--file-status .filepond--file-status-sub {
-        opacity:.5;
+    .filepond--processing-complete-indicator:not([style*=hidden]) ~ .filepond--file-status .filepond--file-status-sub {
+        opacity: 0;
+    }
+
+    .filepond--file-info-sub {
+        opacity: 0;
+    }
+    
+    .filepond--action-revert-item-processing ~ .filepond--file-info .filepond--file-info-sub {
+        opacity: .5;
     }
 
 }

@@ -4,7 +4,8 @@ import { text } from '../../utils/text';
 import { createElement } from '../../utils/createElement';
 import { applyFilters } from '../../filter';
 
-const create = ({ root, props }) => {
+const create = ({ root }) => {
+
     // main status
     const main = createElement('span');
     main.className = 'filepond--file-status-main';
