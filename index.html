@@ -22,19 +22,25 @@
         document.write('<script src="' + p.fill + '"><\/script>');
     });
     </script>
-    
+
+    <script src="https://unpkg.com/filepond-plugin-file-validate-type/dist/filepond-plugin-file-validate-type.js"></script>
+
     <script src="./dist/filepond.js"></script>
     
     <script>
         
+        FilePond.registerPlugin(FilePondPluginFileValidateType);
+
         // Get a reference to the file input element
         const inputElement = document.querySelector('input[type="file"]');
 
         // Create the FilePond instance
         const pond = FilePond.create(inputElement, {
+            acceptedFileTypes: ['image/png'],
             allowMultiple: true,
             allowReorder: true
         });
+        window.pond = pond;
     </script>
 
 </body>

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.12.1
+ * FilePond 4.12.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -6759,6 +6759,26 @@ const create$a = ({ root, props }) => {
   // set label, we use labelled by as otherwise the screenreader does not read the "browse" text in the label (as it has tabindex: 0)
   attr(root.element, 'aria-labelledby', `filepond--drop-label-${props.id}`);
 
+  // set configurable props
+  setAcceptedFileTypes({
+    root,
+    action: { value: root.query('GET_ACCEPTED_FILE_TYPES') }
+  });
+  toggleAllowMultiple({
+    root,
+    action: { value: root.query('GET_ALLOW_MULTIPLE') }
+  });
+  toggleDirectoryFilter({
+    root,
+    action: { value: root.query('GET_ALLOW_DIRECTORIES_ONLY') }
+  });
+  toggleDisabled({ root });
+  toggleRequired({ root, action: { value: root.query('GET_REQUIRED') } });
+  setCaptureMethod({
+    root,
+    action: { value: root.query('GET_CAPTURE_METHOD') }
+  });
+
   // handle changes to the input field
   root.ref.handleChange = e => {
     if (!root.element.value) {
@@ -6791,6 +6811,7 @@ const setAcceptedFileTypes = ({ root, action }) => {
     !!action.value,
     action.value ? action.value.join(',') : ''
   );
+  console.log(root.element, !!action.value);
 };
 
 const toggleAllowMultiple = ({ root, action }) => {
@@ -6801,7 +6822,7 @@ const toggleDirectoryFilter = ({ root, action }) => {
   attrToggle(root.element, 'webkitdirectory', action.value);
 };
 
-const toggleDisabled = ({ root, action }) => {
+const toggleDisabled = ({ root }) => {
   const isDisabled = root.query('GET_DISABLED');
   const doesAllowBrowse = root.query('GET_ALLOW_BROWSE');
   const disableField = isDisabled || !doesAllowBrowse;

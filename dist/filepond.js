@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.12.1
+ * FilePond 4.12.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -9495,6 +9495,29 @@
     // set label, we use labelled by as otherwise the screenreader does not read the "browse" text in the label (as it has tabindex: 0)
     attr(root.element, 'aria-labelledby', 'filepond--drop-label-' + props.id);
 
+    // set configurable props
+    setAcceptedFileTypes({
+      root: root,
+      action: { value: root.query('GET_ACCEPTED_FILE_TYPES') }
+    });
+    toggleAllowMultiple({
+      root: root,
+      action: { value: root.query('GET_ALLOW_MULTIPLE') }
+    });
+    toggleDirectoryFilter({
+      root: root,
+      action: { value: root.query('GET_ALLOW_DIRECTORIES_ONLY') }
+    });
+    toggleDisabled({ root: root });
+    toggleRequired({
+      root: root,
+      action: { value: root.query('GET_REQUIRED') }
+    });
+    setCaptureMethod({
+      root: root,
+      action: { value: root.query('GET_CAPTURE_METHOD') }
+    });
+
     // handle changes to the input field
     root.ref.handleChange = function(e) {
       if (!root.element.value) {
@@ -9529,6 +9552,8 @@
       !!action.value,
       action.value ? action.value.join(',') : ''
     );
+
+    console.log(root.element, !!action.value);
   };
 
   var toggleAllowMultiple = function toggleAllowMultiple(_ref3) {
@@ -9544,8 +9569,7 @@
   };
 
   var toggleDisabled = function toggleDisabled(_ref5) {
-    var root = _ref5.root,
-      action = _ref5.action;
+    var root = _ref5.root;
     var isDisabled = root.query('GET_DISABLED');
     var doesAllowBrowse = root.query('GET_ALLOW_BROWSE');
     var disableField = isDisabled || !doesAllowBrowse;
