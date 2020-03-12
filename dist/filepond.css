@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.12.0
+ * FilePond 4.12.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -670,6 +670,11 @@
 .filepond--root[data-style-panel-layout~='compact'] .filepond--file-wrapper,
 .filepond--root[data-style-panel-layout~='integrated'] .filepond--file-wrapper {
   height: 100%;
+}
+
+.filepond--root[data-style-panel-layout~='compact'] .filepond--drop-label,
+.filepond--root[data-style-panel-layout~='integrated'] .filepond--drop-label {
+  z-index: 7;
 }
 
 .filepond--root[data-style-panel-layout~='circle'] {

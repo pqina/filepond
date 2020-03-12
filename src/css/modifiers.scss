@@ -54,6 +54,10 @@
             height: 100%;
         }
 
+        .filepond--drop-label {
+            z-index: 7;
+        }
+
     }
     
     &[data-style-panel-layout~='circle'] {

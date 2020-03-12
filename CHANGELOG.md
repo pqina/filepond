@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.12.1
+
+- Fix issue where browse button wasn't clickable when `styleLayoutMode` was set to  `compact`.
+
+
 ## 4.12.0
 
 - Add `styleButtonRemoveItemAlign` to align remove button to the left side of the file item.
