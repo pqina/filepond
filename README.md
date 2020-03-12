@@ -163,7 +163,7 @@ FilePond uses [BrowserStack](https://www.browserstack.com/) for compatibility te
 
 MIT License
 
-Copyright (c) 2019 PQINA | [Rik Schennink](mailto:rik@pqina.nl)
+Copyright (c) 2020 PQINA | [Rik Schennink](mailto:rik@pqina.nl)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
