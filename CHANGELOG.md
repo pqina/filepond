@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.13.0
+
+- Fix issue where hidden file fields were not in the correct order when files were sorted either automatically or manually.
+- Clean up accidental log statement left in 4.12.2 release.
+
+
 ## 4.12.2
 
 - Fix issue with re-enabling FilePond field from disabled state not applying the appropriate fields to the browse input.

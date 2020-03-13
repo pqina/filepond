@@ -19,25 +19,14 @@ const create = ({ root, props }) => {
         root.createChildView(file, { id: props.id })
     );
 
-    // create data container
-    const dataContainer = createElement('input');
-    dataContainer.type = 'hidden';
-    dataContainer.name = root.query('GET_NAME');
-    dataContainer.disabled = root.query('GET_DISABLED');
-    root.ref.data = dataContainer;
-    root.appendChild(dataContainer);
+    // data has moved to data.js
+    root.ref.data = false;
 };
-
-const didSetDisabled = ({ root }) => {
-    root.ref.data.disabled = root.query('GET_DISABLED');
-}
 
 /**
  * Data storage
  */
-const didLoadItem = ({ root, action, props }) => {
-    root.ref.data.value = action.serverFileReference;
-
+const didLoadItem = ({ root, props }) => {
     // updates the legend of the fieldset so screenreaders can better group buttons
     text(
         root.ref.fileName,
@@ -45,27 +34,11 @@ const didLoadItem = ({ root, action, props }) => {
     );
 };
 
-const didRemoveItem = ({ root }) => {
-    root.ref.data.removeAttribute('value');
-};
-
-const didCompleteItemProcessing = ({ root, action }) => {
-    root.ref.data.value = action.serverFileReference;
-};
-
-const didRevertItemProcessing = ({ root }) => {
-    root.ref.data.removeAttribute('value');
-};
-
 export const fileWrapper = createView({
     create,
     ignoreRect: true,
     write: createRoute({
-        DID_SET_DISABLED: didSetDisabled,
-        DID_LOAD_ITEM: didLoadItem,
-        DID_REMOVE_ITEM: didRemoveItem,
-        DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing,
-        DID_REVERT_ITEM_PROCESSING: didRevertItemProcessing
+        DID_LOAD_ITEM: didLoadItem
     }),
     didCreateView: root => {
         applyFilters('CREATE_VIEW', { ...root, view: root });

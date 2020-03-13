@@ -5,6 +5,7 @@ import { panel } from './panel';
 import { browser } from './browser';
 import { dropLabel } from './dropLabel';
 import { drip } from './drip';
+import { data } from './data';
 import { createHopper } from '../utils/createHopper';
 import { createPaster } from '../utils/createPaster';
 import { InteractionMethod } from '../enum/InteractionMethod';
@@ -60,6 +61,11 @@ const create = ({ root, props }) => {
     // Assistant notifies assistive tech when content changes
     root.ref.assistant = root.appendChildView(
         root.createChildView(assistant, { ...props })
+    );
+
+    // Data
+    root.ref.data = root.appendChildView(
+        root.createChildView(data, { ...props })
     );
 
     // Measure (tests if fixed height was set)

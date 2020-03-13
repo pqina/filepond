@@ -6661,6 +6661,9 @@
       SORT: function SORT(_ref5) {
         var compare = _ref5.compare;
         sortItems(state, compare);
+        dispatch('DID_SORT_ITEMS', {
+          items: query('GET_ACTIVE_ITEMS')
+        });
       },
 
       ADD_ITEMS: function ADD_ITEMS(_ref6) {
@@ -7043,6 +7046,8 @@
             error: null,
             serverFileReference: serverFileReference
           });
+
+          dispatch('DID_DEFINE_VALUE', { id: id, value: serverFileReference });
         });
 
         item.on('process-abort', function() {
@@ -7051,6 +7056,7 @@
 
         item.on('process-revert', function() {
           dispatch('DID_REVERT_ITEM_PROCESSING', { id: id });
+          dispatch('DID_DEFINE_VALUE', { id: id, value: null });
         });
 
         // let view know the item has been inserted
@@ -7164,6 +7170,11 @@
             id: item.id,
             error: null,
             serverFileReference: source
+          });
+
+          dispatch('DID_DEFINE_VALUE', {
+            id: item.id,
+            value: source
           });
 
           return;
@@ -8459,29 +8470,16 @@
       root.createChildView(file, { id: props.id })
     );
 
-    // create data container
-    var dataContainer = createElement$1('input');
-    dataContainer.type = 'hidden';
-    dataContainer.name = root.query('GET_NAME');
-    dataContainer.disabled = root.query('GET_DISABLED');
-    root.ref.data = dataContainer;
-    root.appendChild(dataContainer);
-  };
-
-  var didSetDisabled = function didSetDisabled(_ref2) {
-    var root = _ref2.root;
-    root.ref.data.disabled = root.query('GET_DISABLED');
+    // data has moved to data.js
+    root.ref.data = false;
   };
 
   /**
    * Data storage
    */
-  var didLoadItem = function didLoadItem(_ref3) {
-    var root = _ref3.root,
-      action = _ref3.action,
-      props = _ref3.props;
-    root.ref.data.value = action.serverFileReference;
-
+  var didLoadItem = function didLoadItem(_ref2) {
+    var root = _ref2.root,
+      props = _ref2.props;
     // updates the legend of the fieldset so screenreaders can better group buttons
     text(
       root.ref.fileName,
@@ -8489,31 +8487,11 @@
     );
   };
 
-  var didRemoveItem = function didRemoveItem(_ref4) {
-    var root = _ref4.root;
-    root.ref.data.removeAttribute('value');
-  };
-
-  var didCompleteItemProcessing$1 = function didCompleteItemProcessing(_ref5) {
-    var root = _ref5.root,
-      action = _ref5.action;
-    root.ref.data.value = action.serverFileReference;
-  };
-
-  var didRevertItemProcessing = function didRevertItemProcessing(_ref6) {
-    var root = _ref6.root;
-    root.ref.data.removeAttribute('value');
-  };
-
   var fileWrapper = createView({
     create: create$5,
     ignoreRect: true,
     write: createRoute({
-      DID_SET_DISABLED: didSetDisabled,
-      DID_LOAD_ITEM: didLoadItem,
-      DID_REMOVE_ITEM: didRemoveItem,
-      DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing$1,
-      DID_REVERT_ITEM_PROCESSING: didRevertItemProcessing
+      DID_LOAD_ITEM: didLoadItem
     }),
 
     didCreateView: function didCreateView(root) {
@@ -9552,8 +9530,6 @@
       !!action.value,
       action.value ? action.value.join(',') : ''
     );
-
-    console.log(root.element, !!action.value);
   };
 
   var toggleAllowMultiple = function toggleAllowMultiple(_ref3) {
@@ -9836,6 +9812,91 @@
     ignoreRectUpdate: true,
     name: 'drip',
     write: write$7
+  });
+
+  var create$c = function create(_ref) {
+    var root = _ref.root;
+    return (root.ref.fields = {});
+  };
+
+  var getField = function getField(root, id) {
+    return root.ref.fields[id];
+  };
+
+  var syncFieldPositionssWithItems = function syncFieldPositionssWithItems(
+    root
+  ) {
+    root.query('GET_ACTIVE_ITEMS').forEach(function(item) {
+      root.element.appendChild(root.ref.fields[item.id]);
+    });
+  };
+
+  var didReorderItems = function didReorderItems(_ref2) {
+    var root = _ref2.root;
+    return syncFieldPositionssWithItems(root);
+  };
+
+  var didAddItem = function didAddItem(_ref3) {
+    var root = _ref3.root,
+      action = _ref3.action;
+    var dataContainer = createElement$1('input');
+    dataContainer.type = 'hidden';
+    dataContainer.name = root.query('GET_NAME');
+    dataContainer.disabled = root.query('GET_DISABLED');
+    root.appendChild(dataContainer, 0);
+    root.ref.fields[action.id] = dataContainer;
+  };
+
+  var didLoadItem$1 = function didLoadItem(_ref4) {
+    var root = _ref4.root,
+      action = _ref4.action;
+    var field = getField(root, action.id);
+    if (!field || action.serverFileReference === null) return;
+    field.value = action.serverFileReference;
+  };
+
+  var didSetDisabled = function didSetDisabled(_ref5) {
+    var root = _ref5.root;
+    root.element.disabled = root.query('GET_DISABLED');
+  };
+
+  var didRemoveItem = function didRemoveItem(_ref6) {
+    var root = _ref6.root,
+      action = _ref6.action;
+    var field = getField(root, action.id);
+    if (!field) return;
+    field.parentNode.removeChild(field);
+    delete root.ref.fields[action.id];
+  };
+
+  var didDefineValue = function didDefineValue(_ref7) {
+    var root = _ref7.root,
+      action = _ref7.action;
+    var field = getField(root, action.id);
+    if (!field) return;
+    if (action.value === null) {
+      field.removeAttribute('value');
+    } else {
+      field.value = action.value;
+    }
+  };
+
+  var write$8 = createRoute({
+    DID_SET_DISABLED: didSetDisabled,
+    DID_ADD_ITEM: didAddItem,
+    DID_LOAD_ITEM: didLoadItem$1,
+    DID_REMOVE_ITEM: didRemoveItem,
+    DID_DEFINE_VALUE: didDefineValue,
+    DID_REORDER_ITEMS: didReorderItems,
+    DID_SORT_ITEMS: didReorderItems
+  });
+
+  var data = createView({
+    tag: 'fieldset',
+    name: 'data',
+    create: create$c,
+    write: write$8,
+    ignoreRect: true
   });
 
   var getRootNode = function getRootNode(element) {
@@ -10502,7 +10563,7 @@
   /**
    * Creates the file view
    */
-  var create$c = function create(_ref) {
+  var create$d = function create(_ref) {
     var root = _ref.root,
       props = _ref.props;
     root.element.id = 'filepond--assistant-' + props.id;
@@ -10618,7 +10679,7 @@
   };
 
   var assistant = createView({
-    create: create$c,
+    create: create$d,
     ignoreRect: true,
     ignoreRectUpdate: true,
     write: createRoute({
@@ -10692,7 +10753,7 @@
     return e.preventDefault();
   };
 
-  var create$d = function create(_ref) {
+  var create$e = function create(_ref) {
     var root = _ref.root,
       props = _ref.props;
 
@@ -10741,6 +10802,11 @@
       root.createChildView(assistant, Object.assign({}, props))
     );
 
+    // Data
+    root.ref.data = root.appendChildView(
+      root.createChildView(data, Object.assign({}, props))
+    );
+
     // Measure (tests if fixed height was set)
     // DOCTYPE needs to be set for this to work
     root.ref.measure = createElement$1('div');
@@ -10783,7 +10849,7 @@
     }
   };
 
-  var write$8 = function write(_ref3) {
+  var write$9 = function write(_ref3) {
     var root = _ref3.root,
       props = _ref3.props,
       actions = _ref3.actions;
@@ -11358,8 +11424,8 @@
         root.ref.measureHeight = root.ref.measure.offsetHeight;
       }
     },
-    create: create$d,
-    write: write$8,
+    create: create$e,
+    write: write$9,
     destroy: function destroy(_ref10) {
       var root = _ref10.root;
       if (root.ref.paster) {

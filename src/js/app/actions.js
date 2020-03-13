@@ -211,6 +211,9 @@ export const actions = (dispatch, query, state) => ({
 
     SORT: ({ compare }) => {
         sortItems(state, compare);
+        dispatch('DID_SORT_ITEMS', {
+            items: query('GET_ACTIVE_ITEMS')
+        });
     },
 
     ADD_ITEMS: ({ items, index, interactionMethod, success = () => { }, failure = () => { } }) => {
@@ -552,6 +555,7 @@ export const actions = (dispatch, query, state) => ({
                 error: null,
                 serverFileReference
             });
+            dispatch('DID_DEFINE_VALUE', { id, value: serverFileReference });
         });
 
         item.on('process-abort', () => {
@@ -560,6 +564,7 @@ export const actions = (dispatch, query, state) => ({
 
         item.on('process-revert', () => {
             dispatch('DID_REVERT_ITEM_PROCESSING', { id });
+            dispatch('DID_DEFINE_VALUE', { id, value: null })
         });
 
         // let view know the item has been inserted
@@ -664,6 +669,10 @@ export const actions = (dispatch, query, state) => ({
                 id: item.id,
                 error: null,
                 serverFileReference: source
+            });
+            dispatch('DID_DEFINE_VALUE', {
+                id: item.id,
+                value: source
             });
             return;
         }

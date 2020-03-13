@@ -57,7 +57,6 @@ const setAcceptedFileTypes = ({ root, action }) => {
         !!action.value,
         action.value ? action.value.join(',') : ''
     );
-    console.log(root.element, !!action.value);
 };
 
 const toggleAllowMultiple = ({ root, action }) => {

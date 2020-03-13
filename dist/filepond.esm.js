@@ -4243,6 +4243,9 @@ const actions = (dispatch, query, state) => ({
 
   SORT: ({ compare }) => {
     sortItems(state, compare);
+    dispatch('DID_SORT_ITEMS', {
+      items: query('GET_ACTIVE_ITEMS')
+    });
   },
 
   ADD_ITEMS: ({
@@ -4600,6 +4603,7 @@ const actions = (dispatch, query, state) => ({
         error: null,
         serverFileReference
       });
+      dispatch('DID_DEFINE_VALUE', { id, value: serverFileReference });
     });
 
     item.on('process-abort', () => {
@@ -4608,6 +4612,7 @@ const actions = (dispatch, query, state) => ({
 
     item.on('process-revert', () => {
       dispatch('DID_REVERT_ITEM_PROCESSING', { id });
+      dispatch('DID_DEFINE_VALUE', { id, value: null });
     });
 
     // let view know the item has been inserted
@@ -4703,6 +4708,10 @@ const actions = (dispatch, query, state) => ({
         id: item.id,
         error: null,
         serverFileReference: source
+      });
+      dispatch('DID_DEFINE_VALUE', {
+        id: item.id,
+        value: source
       });
       return;
     }
@@ -5824,25 +5833,14 @@ const create$5 = ({ root, props }) => {
     root.createChildView(file, { id: props.id })
   );
 
-  // create data container
-  const dataContainer = createElement$1('input');
-  dataContainer.type = 'hidden';
-  dataContainer.name = root.query('GET_NAME');
-  dataContainer.disabled = root.query('GET_DISABLED');
-  root.ref.data = dataContainer;
-  root.appendChild(dataContainer);
-};
-
-const didSetDisabled = ({ root }) => {
-  root.ref.data.disabled = root.query('GET_DISABLED');
+  // data has moved to data.js
+  root.ref.data = false;
 };
 
 /**
  * Data storage
  */
-const didLoadItem = ({ root, action, props }) => {
-  root.ref.data.value = action.serverFileReference;
-
+const didLoadItem = ({ root, props }) => {
   // updates the legend of the fieldset so screenreaders can better group buttons
   text(
     root.ref.fileName,
@@ -5850,27 +5848,11 @@ const didLoadItem = ({ root, action, props }) => {
   );
 };
 
-const didRemoveItem = ({ root }) => {
-  root.ref.data.removeAttribute('value');
-};
-
-const didCompleteItemProcessing$1 = ({ root, action }) => {
-  root.ref.data.value = action.serverFileReference;
-};
-
-const didRevertItemProcessing = ({ root }) => {
-  root.ref.data.removeAttribute('value');
-};
-
 const fileWrapper = createView({
   create: create$5,
   ignoreRect: true,
   write: createRoute({
-    DID_SET_DISABLED: didSetDisabled,
-    DID_LOAD_ITEM: didLoadItem,
-    DID_REMOVE_ITEM: didRemoveItem,
-    DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing$1,
-    DID_REVERT_ITEM_PROCESSING: didRevertItemProcessing
+    DID_LOAD_ITEM: didLoadItem
   }),
   didCreateView: root => {
     applyFilters('CREATE_VIEW', { ...root, view: root });
@@ -6811,7 +6793,6 @@ const setAcceptedFileTypes = ({ root, action }) => {
     !!action.value,
     action.value ? action.value.join(',') : ''
   );
-  console.log(root.element, !!action.value);
 };
 
 const toggleAllowMultiple = ({ root, action }) => {
@@ -7067,6 +7048,72 @@ const drip = createView({
   ignoreRectUpdate: true,
   name: 'drip',
   write: write$7
+});
+
+const create$c = ({ root }) => (root.ref.fields = {});
+
+const getField = (root, id) => root.ref.fields[id];
+
+const syncFieldPositionssWithItems = root => {
+  root.query('GET_ACTIVE_ITEMS').forEach(item => {
+    root.element.appendChild(root.ref.fields[item.id]);
+  });
+};
+
+const didReorderItems = ({ root }) => syncFieldPositionssWithItems(root);
+
+const didAddItem = ({ root, action }) => {
+  const dataContainer = createElement$1('input');
+  dataContainer.type = 'hidden';
+  dataContainer.name = root.query('GET_NAME');
+  dataContainer.disabled = root.query('GET_DISABLED');
+  root.appendChild(dataContainer, 0);
+  root.ref.fields[action.id] = dataContainer;
+};
+
+const didLoadItem$1 = ({ root, action }) => {
+  const field = getField(root, action.id);
+  if (!field || action.serverFileReference === null) return;
+  field.value = action.serverFileReference;
+};
+
+const didSetDisabled = ({ root }) => {
+  root.element.disabled = root.query('GET_DISABLED');
+};
+
+const didRemoveItem = ({ root, action }) => {
+  const field = getField(root, action.id);
+  if (!field) return;
+  field.parentNode.removeChild(field);
+  delete root.ref.fields[action.id];
+};
+
+const didDefineValue = ({ root, action }) => {
+  const field = getField(root, action.id);
+  if (!field) return;
+  if (action.value === null) {
+    field.removeAttribute('value');
+  } else {
+    field.value = action.value;
+  }
+};
+
+const write$8 = createRoute({
+  DID_SET_DISABLED: didSetDisabled,
+  DID_ADD_ITEM: didAddItem,
+  DID_LOAD_ITEM: didLoadItem$1,
+  DID_REMOVE_ITEM: didRemoveItem,
+  DID_DEFINE_VALUE: didDefineValue,
+  DID_REORDER_ITEMS: didReorderItems,
+  DID_SORT_ITEMS: didReorderItems
+});
+
+const data = createView({
+  tag: 'fieldset',
+  name: 'data',
+  create: create$c,
+  write: write$8,
+  ignoreRect: true
 });
 
 const getRootNode = element =>
@@ -7685,7 +7732,7 @@ const createPaster = () => {
 /**
  * Creates the file view
  */
-const create$c = ({ root, props }) => {
+const create$d = ({ root, props }) => {
   root.element.id = `filepond--assistant-${props.id}`;
   attr(root.element, 'role', 'status');
   attr(root.element, 'aria-live', 'polite');
@@ -7783,7 +7830,7 @@ const itemError = ({ root, action }) => {
 };
 
 const assistant = createView({
-  create: create$c,
+  create: create$d,
   ignoreRect: true,
   ignoreRectUpdate: true,
   write: createRoute({
@@ -7840,7 +7887,7 @@ const MAX_FILES_LIMIT = 1000000;
 
 const prevent = e => e.preventDefault();
 
-const create$d = ({ root, props }) => {
+const create$e = ({ root, props }) => {
   // Add id
   const id = root.query('GET_ID');
   if (id) {
@@ -7882,6 +7929,11 @@ const create$d = ({ root, props }) => {
     root.createChildView(assistant, { ...props })
   );
 
+  // Data
+  root.ref.data = root.appendChildView(
+    root.createChildView(data, { ...props })
+  );
+
   // Measure (tests if fixed height was set)
   // DOCTYPE needs to be set for this to work
   root.ref.measure = createElement$1('div');
@@ -7920,7 +7972,7 @@ const create$d = ({ root, props }) => {
   }
 };
 
-const write$8 = ({ root, props, actions }) => {
+const write$9 = ({ root, props, actions }) => {
   // route actions
   route$5({ root, props, actions });
 
@@ -8448,8 +8500,8 @@ const root = createView({
       root.ref.measureHeight = root.ref.measure.offsetHeight;
     }
   },
-  create: create$d,
-  write: write$8,
+  create: create$e,
+  write: write$9,
   destroy: ({ root }) => {
     if (root.ref.paster) {
       root.ref.paster.destroy();
@@ -9430,7 +9482,7 @@ let Status$1 = {};
 let FileStatus = {};
 let FileOrigin$1 = {};
 let OptionTypes = {};
-let create$e = fn;
+let create$f = fn;
 let destroy = fn;
 let parse = fn;
 let find = fn;
@@ -9457,7 +9509,7 @@ if (supported()) {
       new CustomEvent('FilePond:loaded', {
         detail: {
           supported,
-          create: create$e,
+          create: create$f,
           destroy,
           parse,
           find,
@@ -9492,7 +9544,7 @@ if (supported()) {
   updateOptionTypes();
 
   // create method, creates apps and adds them to the app array
-  create$e = (...args) => {
+  create$f = (...args) => {
     const app = createApp$1(...args);
     app.on('destroy', destroy);
     state.apps.push(app);
@@ -9527,7 +9579,7 @@ if (supported()) {
     );
 
     // create new instance for each hook
-    return newHooks.map(hook => create$e(hook));
+    return newHooks.map(hook => create$f(hook));
   };
 
   // returns an app based on the given element hook
@@ -9577,7 +9629,7 @@ export {
   FileStatus,
   OptionTypes,
   Status$1 as Status,
-  create$e as create,
+  create$f as create,
   destroy,
   find,
   getOptions$1 as getOptions,
