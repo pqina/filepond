@@ -59,7 +59,7 @@ export const createFileProcessorFunction = (apiUrl, action, name, options) => (f
             createResponse(
                 'error',
                 xhr.status,
-                onerror(xhr.response) || xhr.statusText,
+                xhr.response || xhr.statusText,
                 xhr.getAllResponseHeaders()
             )
         );
