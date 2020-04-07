@@ -65,6 +65,7 @@ export const createFileLoader = fetchFn => {
         state.request = fetchFn(
             url,
             response => {
+
                 // update duration
                 state.duration = Date.now() - state.timestamp;
 
@@ -81,7 +82,12 @@ export const createFileLoader = fetchFn => {
 
                 api.fire(
                     'load',
-                    response instanceof Blob ? response : response.body
+                    // if has received blob, we go with blob, if no response, we return null
+                    response instanceof Blob 
+                        ? response 
+                        : response 
+                            ? response.body
+                            : null
                 );
             },
             error => {

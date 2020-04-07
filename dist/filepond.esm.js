@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.13.0
+ * FilePond 4.13.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -2477,7 +2477,11 @@ const createFileLoader = fetchFn => {
           );
         }
 
-        api.fire('load', response instanceof Blob ? response : response.body);
+        api.fire(
+          'load',
+          // if has received blob, we go with blob, if no response, we return null
+          response instanceof Blob ? response : response ? response.body : null
+        );
       },
       error => {
         api.fire(
@@ -2722,7 +2726,9 @@ const createFetchFunction = (apiUrl = '', action) => {
         createResponse(
           'load',
           xhr.status,
-          getFileFromBlob(onload(xhr.response), filename),
+          action.method === 'HEAD'
+            ? null
+            : getFileFromBlob(onload(xhr.response), filename),
           headers
         )
       );

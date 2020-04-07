@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.13.1
+
+- Fix issue where HEAD fetch request would try turn response into zero byte file.
+
+
 ## 4.13.0
 
 - Fix issue where hidden file fields were not in the correct order when files were sorted either automatically or manually.

@@ -44,7 +44,7 @@ export const createFetchFunction = (apiUrl = '', action) => {
                 createResponse(
                     'load',
                     xhr.status,
-                    getFileFromBlob(onload(xhr.response), filename),
+                    action.method === 'HEAD' ? null : getFileFromBlob(onload(xhr.response), filename),
                     headers
                 )
             )
