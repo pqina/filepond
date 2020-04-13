@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.13.1
+ * FilePond 4.13.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -302,11 +302,9 @@ const spring =
       let resting = false;
 
       // updates spring state
-      const interpolate = () => {
+      const interpolate = (ts, skipToEndState) => {
         // in rest, don't animate
-        if (resting) {
-          return;
-        }
+        if (resting) return;
 
         // need at least a target or position to do springy things
         if (!(isNumber(target) && isNumber(position))) {
@@ -328,7 +326,7 @@ const spring =
         velocity *= damping;
 
         // we've arrived if we're near target and our velocity is near zero
-        if (thereYet(position, target, velocity)) {
+        if (thereYet(position, target, velocity) || skipToEndState) {
           position = target;
           velocity = 0;
           resting = true;
@@ -409,30 +407,26 @@ const tween =
       let reverse = false;
       let target = null;
 
-      const interpolate = ts => {
-        if (resting || target === null) {
-          return;
-        }
+      const interpolate = (ts, skipToEndState) => {
+        if (resting || target === null) return;
 
         if (start === null) {
           start = ts;
         }
 
-        if (ts - start < delay) {
-          return;
-        }
+        if (ts - start < delay) return;
 
         t = ts - start - delay;
 
-        if (t < duration) {
-          p = t / duration;
-          api.onupdate((t >= 0 ? easing(reverse ? 1 - p : p) : 0) * target);
-        } else {
+        if (t >= duration || skipToEndState) {
           t = 1;
           p = reverse ? 0 : 1;
           api.onupdate(p * target);
           api.oncomplete(p * target);
           resting = true;
+        } else {
+          p = t / duration;
+          api.onupdate((t >= 0 ? easing(reverse ? 1 - p : p) : 0) * target);
         }
       };
 
@@ -525,8 +519,6 @@ const addGetSet = (keys, obj, props, overwrite = false) => {
   });
 };
 
-const isDefined = value => value != null;
-
 // add to state,
 // add getters and setters to internal and external api (if not set)
 // setup animators
@@ -535,8 +527,7 @@ const animations = ({
   mixinConfig,
   viewProps,
   viewInternalAPI,
-  viewExternalAPI,
-  viewState
+  viewExternalAPI
 }) => {
   // initial properties
   const initialProps = { ...viewProps };
@@ -583,12 +574,11 @@ const animations = ({
   // expose internal write api
   return {
     write: ts => {
+      let skipToEndState = document.hidden;
       let resting = true;
       animations.forEach(animation => {
-        if (!animation.resting) {
-          resting = false;
-        }
-        animation.interpolate(ts);
+        if (!animation.resting) resting = false;
+        animation.interpolate(ts, skipToEndState);
       });
       return resting;
     },
@@ -652,6 +642,8 @@ const listeners = ({
 const apis = ({ mixinConfig, viewProps, viewExternalAPI }) => {
   addGetSet(mixinConfig, viewExternalAPI, viewProps);
 };
+
+const isDefined = value => value != null;
 
 // add to state,
 // add getters and setters to internal and external api (if not set)

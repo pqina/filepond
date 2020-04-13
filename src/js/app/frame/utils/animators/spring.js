@@ -30,12 +30,10 @@ export const spring =
             let resting = false;
 
             // updates spring state
-            const interpolate = () => {
+            const interpolate = (ts, skipToEndState) => {
 
                 // in rest, don't animate
-                if (resting) {
-                    return;
-                }
+                if (resting) return;
 
                 // need at least a target or position to do springy things
                 if (!(isNumber(target) && isNumber(position))) {
@@ -57,7 +55,7 @@ export const spring =
                 velocity *= damping;
 
                 // we've arrived if we're near target and our velocity is near zero
-                if (thereYet(position, target, velocity)) {
+                if (thereYet(position, target, velocity) || skipToEndState) {
                     position = target;
                     velocity = 0;
                     resting = true;

@@ -122,6 +122,7 @@ export const createFileProcessor = processFn => {
 
             // actual processing progress
             (computable, current, total) => {
+                
                 // update actual duration
                 state.duration = Date.now() - state.timestamp;
 

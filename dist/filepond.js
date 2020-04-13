@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.13.1
+ * FilePond 4.13.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -373,11 +373,9 @@
       var resting = false;
 
       // updates spring state
-      var interpolate = function interpolate() {
+      var interpolate = function interpolate(ts, skipToEndState) {
         // in rest, don't animate
-        if (resting) {
-          return;
-        }
+        if (resting) return;
 
         // need at least a target or position to do springy things
         if (!(isNumber(target) && isNumber(position))) {
@@ -399,7 +397,7 @@
         velocity *= damping;
 
         // we've arrived if we're near target and our velocity is near zero
-        if (thereYet(position, target, velocity)) {
+        if (thereYet(position, target, velocity) || skipToEndState) {
           position = target;
           velocity = 0;
           resting = true;
@@ -499,30 +497,26 @@
       var reverse = false;
       var target = null;
 
-      var interpolate = function interpolate(ts) {
-        if (resting || target === null) {
-          return;
-        }
+      var interpolate = function interpolate(ts, skipToEndState) {
+        if (resting || target === null) return;
 
         if (start === null) {
           start = ts;
         }
 
-        if (ts - start < delay) {
-          return;
-        }
+        if (ts - start < delay) return;
 
         t = ts - start - delay;
 
-        if (t < duration) {
-          p = t / duration;
-          api.onupdate((t >= 0 ? easing(reverse ? 1 - p : p) : 0) * target);
-        } else {
+        if (t >= duration || skipToEndState) {
           t = 1;
           p = reverse ? 0 : 1;
           api.onupdate(p * target);
           api.oncomplete(p * target);
           resting = true;
+        } else {
+          p = t / duration;
+          api.onupdate((t >= 0 ? easing(reverse ? 1 - p : p) : 0) * target);
         }
       };
 
@@ -627,10 +621,6 @@
     });
   };
 
-  var isDefined = function isDefined(value) {
-    return value != null;
-  };
-
   // add to state,
   // add getters and setters to internal and external api (if not set)
   // setup animators
@@ -639,8 +629,7 @@
     var mixinConfig = _ref.mixinConfig,
       viewProps = _ref.viewProps,
       viewInternalAPI = _ref.viewInternalAPI,
-      viewExternalAPI = _ref.viewExternalAPI,
-      viewState = _ref.viewState;
+      viewExternalAPI = _ref.viewExternalAPI;
     // initial properties
     var initialProps = Object.assign({}, viewProps);
 
@@ -688,12 +677,11 @@
     // expose internal write api
     return {
       write: function write(ts) {
+        var skipToEndState = document.hidden;
         var resting = true;
         animations.forEach(function(animation) {
-          if (!animation.resting) {
-            resting = false;
-          }
-          animation.interpolate(ts);
+          if (!animation.resting) resting = false;
+          animation.interpolate(ts, skipToEndState);
         });
         return resting;
       },
@@ -766,6 +754,10 @@
       viewProps = _ref.viewProps,
       viewExternalAPI = _ref.viewExternalAPI;
     addGetSet(mixinConfig, viewExternalAPI, viewProps);
+  };
+
+  var isDefined = function isDefined(value) {
+    return value != null;
   };
 
   // add to state,

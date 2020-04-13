@@ -748,7 +748,7 @@ export const actions = (dispatch, query, state) => ({
     }),
 
     PROCESS_ITEM: getItemByQueryFromState(state, (item, success, failure) => {
-        
+
         const maxParallelUploads = query('GET_MAX_PARALLEL_UPLOADS');
         const totalCurrentUploads = query('GET_ITEMS_BY_STATUS', ItemStatus.PROCESSING).length;
 

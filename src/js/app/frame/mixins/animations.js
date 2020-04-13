@@ -1,7 +1,6 @@
 import { createAnimator } from '../utils/createAnimator';
 import { forin } from '../../../utils/forin';
 import { addGetSet } from './utils/addGetSet';
-import { isDefined } from '../../../utils/isDefined';
 
 // add to state,
 // add getters and setters to internal and external api (if not set)
@@ -11,8 +10,7 @@ export const animations = ({
     mixinConfig,
     viewProps,
     viewInternalAPI,
-    viewExternalAPI,
-    viewState
+    viewExternalAPI
 }) => {
     // initial properties
     const initialProps = { ...viewProps };
@@ -60,12 +58,11 @@ export const animations = ({
     // expose internal write api
     return {
         write: ts => {
+            let skipToEndState = document.hidden;
             let resting = true;
             animations.forEach(animation => {
-                if (!animation.resting) {
-                    resting = false;
-                }
-                animation.interpolate(ts);
+                if (!animation.resting) resting = false;
+                animation.interpolate(ts, skipToEndState);
             });
             return resting;
         },

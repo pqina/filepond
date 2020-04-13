@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.13.2
+
+- Fix issue where FilePond running in an inactive tab would be very slow to pick up new files.
+
+
 ## 4.13.1
 
 - Fix issue where HEAD fetch request would try turn response into zero byte file.
