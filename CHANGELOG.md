@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.13.4
+
+- Fix issue where FilePond internal event mechanism would be in slowmotion mode when running in an inactive tab because of `setTimeout` use.
+
+
 ## 4.13.3
 
 - Fix issue where FilePond would excessivly pause in between processing files while running in an inactive tab.

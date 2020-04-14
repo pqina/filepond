@@ -1,5 +1,14 @@
 import { arrayRemove } from '../../utils/arrayRemove';
 
+const fire = (cb) => {
+    if (document.hidden) {
+        Promise.resolve(1).then(cb);
+    }
+    else {
+        setTimeout(cb, 0);
+    }
+}
+
 export const on = () => {
     const listeners = [];
     const off = (event, cb) => {
@@ -15,11 +24,7 @@ export const on = () => {
                 listeners
                     .filter(listener => listener.event === event)
                     .map(listener => listener.cb)
-                    .forEach(cb => {
-                        setTimeout(() => {
-                            cb(...args);
-                        }, 0);
-                    });
+                    .forEach(cb => fire(() => cb(...args)));
         },
         on: (event, cb) => {
             listeners.push({ event, cb });

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.13.3
+ * FilePond 4.13.4
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1659,6 +1659,14 @@ const getUniqueId = () =>
 
 const arrayRemove = (arr, index) => arr.splice(index, 1);
 
+const fire = cb => {
+  if (document.hidden) {
+    Promise.resolve(1).then(cb);
+  } else {
+    setTimeout(cb, 0);
+  }
+};
+
 const on = () => {
   const listeners = [];
   const off = (event, cb) => {
@@ -1674,11 +1682,7 @@ const on = () => {
       listeners
         .filter(listener => listener.event === event)
         .map(listener => listener.cb)
-        .forEach(cb => {
-          setTimeout(() => {
-            cb(...args);
-          }, 0);
-        });
+        .forEach(cb => fire(() => cb(...args)));
     },
     on: (event, cb) => {
       listeners.push({ event, cb });

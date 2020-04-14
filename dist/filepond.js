@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.13.3
+ * FilePond 4.13.4
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1951,6 +1951,14 @@
     return arr.splice(index, 1);
   };
 
+  var _fire = function fire(cb) {
+    if (document.hidden) {
+      Promise.resolve(1).then(cb);
+    } else {
+      setTimeout(cb, 0);
+    }
+  };
+
   var on = function on() {
     var listeners = [];
     var off = function off(event, cb) {
@@ -1980,9 +1988,9 @@
             return listener.cb;
           })
           .forEach(function(cb) {
-            setTimeout(function() {
-              cb.apply(void 0, args);
-            }, 0);
+            return _fire(function() {
+              return cb.apply(void 0, args);
+            });
           });
       },
       on: function on(event, cb) {
