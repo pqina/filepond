@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.13.2
+ * FilePond 4.13.3
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -65,13 +65,9 @@
 
     // adds a new action, calls its handler and
     var dispatch = function dispatch(type, data, isBlocking) {
-      // is blocking action
-      if (isBlocking) {
-        dispatchQueue.push({
-          type: type,
-          data: data
-        });
-
+      // is blocking action (should never block if document is hidden)
+      if (isBlocking && !document.hidden) {
+        dispatchQueue.push({ type: type, data: data });
         return;
       }
 
@@ -5553,7 +5549,7 @@
       }
 
       var progress = runtime / duration;
-      if (progress >= 1) {
+      if (progress >= 1 || document.hidden) {
         cb(1);
         return;
       }
@@ -7230,14 +7226,16 @@
 
         // not ready to be processed
         if (!itemCanBeQueuedForProcessing) {
+          var processNow = function processNow() {
+            return dispatch('REQUEST_ITEM_PROCESSING', {
+              query: item,
+              success: success,
+              failure: failure
+            });
+          };
+
           var process = function process() {
-            setTimeout(function() {
-              dispatch('REQUEST_ITEM_PROCESSING', {
-                query: item,
-                success: success,
-                failure: failure
-              });
-            }, 32);
+            return document.hidden ? processNow() : setTimeout(processNow, 32);
           };
 
           // if already done processing or tried to revert but didn't work, try again

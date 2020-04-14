@@ -11,6 +11,7 @@ export const createPerceivedPerformanceUpdater = (
     const start = Date.now();
 
     const tick = () => {
+
         let runtime = Date.now() - start;
         let delay = getRandomNumber(tickMin, tickMax);
 
@@ -19,7 +20,7 @@ export const createPerceivedPerformanceUpdater = (
         }
 
         let progress = runtime / duration;
-        if (progress >= 1) {
+        if (progress >= 1 || document.hidden) {
             cb(1);
             return;
         }

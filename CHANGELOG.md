@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.13.3
+
+- Fix issue where FilePond would excessivly pause in between processing files while running in an inactive tab.
+
+
 ## 4.13.2
 
 - Fix issue where FilePond running in an inactive tab would be very slow to pick up new files.

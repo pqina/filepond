@@ -39,12 +39,9 @@ export const createStore = (initialState, queries = [], actions = []) => {
     // adds a new action, calls its handler and
     const dispatch = (type, data, isBlocking) => {
 
-        // is blocking action
-        if (isBlocking) {
-            dispatchQueue.push({
-                type,
-                data
-            });
+        // is blocking action (should never block if document is hidden)
+        if (isBlocking && !document.hidden) {
+            dispatchQueue.push({ type, data });
             return;
         }
 

@@ -716,11 +716,9 @@ export const actions = (dispatch, query, state) => ({
         // not ready to be processed
         if (!itemCanBeQueuedForProcessing) {
 
-            const process = () => {
-                setTimeout(() => {
-                    dispatch('REQUEST_ITEM_PROCESSING', { query: item, success, failure });
-                }, 32);
-            }
+            const processNow = () => dispatch('REQUEST_ITEM_PROCESSING', { query: item, success, failure });
+
+            const process = () => document.hidden ? processNow() : setTimeout(processNow, 32);
 
             // if already done processing or tried to revert but didn't work, try again
             if (item.status === ItemStatus.PROCESSING_COMPLETE || item.status === ItemStatus.PROCESSING_REVERT_ERROR) {
@@ -793,6 +791,7 @@ export const actions = (dispatch, query, state) => ({
 
         // we done function
         item.onOnce('process-complete', () => {
+
             success(createItemAPI(item));
             processNext();
 

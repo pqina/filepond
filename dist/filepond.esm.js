@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.13.2
+ * FilePond 4.13.3
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -48,12 +48,9 @@ const createStore = (initialState, queries = [], actions = []) => {
 
   // adds a new action, calls its handler and
   const dispatch = (type, data, isBlocking) => {
-    // is blocking action
-    if (isBlocking) {
-      dispatchQueue.push({
-        type,
-        data
-      });
+    // is blocking action (should never block if document is hidden)
+    if (isBlocking && !document.hidden) {
+      dispatchQueue.push({ type, data });
       return;
     }
 
@@ -3276,7 +3273,7 @@ const createPerceivedPerformanceUpdater = (
     }
 
     let progress = runtime / duration;
-    if (progress >= 1) {
+    if (progress >= 1 || document.hidden) {
       cb(1);
       return;
     }
@@ -4759,15 +4756,15 @@ const actions = (dispatch, query, state) => ({
 
       // not ready to be processed
       if (!itemCanBeQueuedForProcessing) {
-        const process = () => {
-          setTimeout(() => {
-            dispatch('REQUEST_ITEM_PROCESSING', {
-              query: item,
-              success,
-              failure
-            });
-          }, 32);
-        };
+        const processNow = () =>
+          dispatch('REQUEST_ITEM_PROCESSING', {
+            query: item,
+            success,
+            failure
+          });
+
+        const process = () =>
+          document.hidden ? processNow() : setTimeout(processNow, 32);
 
         // if already done processing or tried to revert but didn't work, try again
         if (

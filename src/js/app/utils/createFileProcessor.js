@@ -77,7 +77,7 @@ export const createFileProcessor = processFn => {
             // load expects the body to be a server id if
             // you want to make use of revert
             response => {
-
+                
                 // we put the response in state so we can access
                 // it outside of this method
                 state.response = isObject(response) ? response : {
