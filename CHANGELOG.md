@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.13.5
+
+- Fix trigger of revert handler to `removeFile` API.
+- Fix problem where circular layout wouldn't work on latest Safari.
+
+
 ## 4.13.4
 
 - Fix issue where FilePond internal event mechanism would be in slowmotion mode when running in an inactive tab because of `setTimeout` use.

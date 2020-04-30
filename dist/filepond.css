@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.13.4
+ * FilePond 4.13.5
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -704,6 +704,14 @@
 }
 .filepond--root[data-style-panel-layout~='circle'] .filepond--file-status {
   display: none;
+}
+
+@media not all and (min-resolution: 0.001dpcm) {
+  @supports (-webkit-appearance: none) and (stroke-color: transparent) {
+    .filepond--root[data-style-panel-layout~='circle'] {
+      will-change: transform;
+    }
+  }
 }
 
 .filepond--panel-root {
