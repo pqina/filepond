@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.13.6
+
+- Fix problem where revert wasn't called for user added files.
+
+
 ## 4.13.5
 
 - Fix trigger of revert handler to `removeFile` API.
