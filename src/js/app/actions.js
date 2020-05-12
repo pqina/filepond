@@ -903,7 +903,7 @@ export const actions = (dispatch, query, state) => ({
         }
         else {
             // if is limbo item, need to call revert handler (not calling request_ because that would also trigger beforeRemoveHook)
-            if (item.origin === FileOrigin.LIMBO && item.serverId !== null) {
+            if (item.origin !== FileOrigin.LOCAL && item.serverId !== null) {
                 item.revert(createRevertFunction(state.options.server.url, state.options.server.revert), query('GET_FORCE_REVERT'))
             }
 
