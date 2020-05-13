@@ -1,3 +1,4 @@
+import "./windowMatchMedia.mock";
 import { create, OptionTypes, FileStatus } from '../index.js';
 
 describe('adding files', () => {
