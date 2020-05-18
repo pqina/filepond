@@ -1,6 +1,6 @@
 ---
 name: Questions and help
-about: If you think you need help with something related to FilePond
+about: If you think you need help with something
 title: ''
 labels: 'Question'
 assignees: ''
