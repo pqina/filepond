@@ -901,6 +901,18 @@ export const actions = (dispatch, query, state) => ({
                 }
             );
         }
+        // if chunked uploads are enabled and we're uploading in chunks for this specific file
+        // or if the file isn't big enough for chunked uploads but chunkForce is set then call
+        // revert before removing from the view...
+        else if ((state.options.chunkUploads && (item.file.size > state.options.chunkSize)) ||
+            (state.options.chunkUploads && state.options.chunkForce)) {
+            
+            // Revert partially complete chunked upload (not calling request_ because that would also trigger beforeRemoveHook)
+            item.revert(createRevertFunction(state.options.server.url, state.options.server.revert), query('GET_FORCE_REVERT'));
+                
+            // can now safely remove from view
+            removeFromView();
+        }
         else {
             // if is limbo item, need to call revert handler (not calling request_ because that would also trigger beforeRemoveHook)
             if (item.origin !== FileOrigin.LOCAL && item.serverId !== null) {
