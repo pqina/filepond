@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.13.7
+
+- Fix backwards compatibility problem with `4.13.5` and `4.13.6` where removeFile would revert upload.
+- Add `{ revert: true }` as parameter to `removeFile` and `removeFiles` methods. Where in the previous two fix versions reverting was added to be done automatically this new parameter now needs be set to revert the upload.
+
+
 ## 4.13.6
 
 - Fix problem where revert wasn't called for user added files.

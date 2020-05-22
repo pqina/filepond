@@ -346,9 +346,16 @@ export const createApp = (initialOptions = {}) => {
             .catch(reject)
     });
 
-    const removeFile = query => {
+    const removeFile = (query, options) => {
+
+        // if only passed options
+        if (typeof query === 'object' && !options) {
+            options = query;
+            query = undefined;
+        }
+
         // request item removal
-        store.dispatch('REMOVE_ITEM', { query });
+        store.dispatch('REMOVE_ITEM', { ...options, query });
 
         // see if item has been removed
         return store.query('GET_ACTIVE_ITEM', query) === null;
@@ -424,7 +431,17 @@ export const createApp = (initialOptions = {}) => {
     };
 
     const removeFiles = (...args) => {
+
         const queries = Array.isArray(args[0]) ? args[0] : args;
+
+        let options;
+        if (typeof queries[queries.length - 1] === 'object') {
+            options = queries.pop();
+        }
+        else if (Array.isArray(args[0])) {
+            options = args[1];
+        }
+
         const files = getFiles();
 
         if (!queries.length) {
@@ -436,7 +453,7 @@ export const createApp = (initialOptions = {}) => {
             isNumber(query) ? files[query] ? files[query].id : null : query
         ).filter(query => query);
 
-        return mappedQueries.map(removeFile);
+        return mappedQueries.map(q => removeFile(q, options));
     };
 
     const exports = {

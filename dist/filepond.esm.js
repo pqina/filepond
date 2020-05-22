@@ -4089,7 +4089,8 @@ const sortItems = (state, compare) => {
 const getItemByQueryFromState = (state, itemHandler) => ({
   query,
   success = () => {},
-  failure = () => {}
+  failure = () => {},
+  ...options
 } = {}) => {
   const item = getItemByQuery(state.items, query);
   if (!item) {
@@ -4099,7 +4100,7 @@ const getItemByQueryFromState = (state, itemHandler) => ({
     });
     return;
   }
-  itemHandler(item, success, failure);
+  itemHandler(item, success, failure, options || {});
 };
 
 const actions = (dispatch, query, state) => ({
@@ -4918,63 +4919,72 @@ const actions = (dispatch, query, state) => ({
     item.release();
   }),
 
-  REMOVE_ITEM: getItemByQueryFromState(state, (item, success) => {
-    const removeFromView = () => {
-      // get id reference
-      const id = item.id;
+  REMOVE_ITEM: getItemByQueryFromState(
+    state,
+    (item, success, failure, options) => {
+      const removeFromView = () => {
+        // get id reference
+        const id = item.id;
 
-      // archive the item, this does not remove it from the list
-      getItemById(state.items, id).archive();
+        // archive the item, this does not remove it from the list
+        getItemById(state.items, id).archive();
 
-      // tell the view the item has been removed
-      dispatch('DID_REMOVE_ITEM', { error: null, id, item });
+        // tell the view the item has been removed
+        dispatch('DID_REMOVE_ITEM', { error: null, id, item });
 
-      // now the list has been modified
-      listUpdated(dispatch, state);
+        // now the list has been modified
+        listUpdated(dispatch, state);
 
-      // correctly removed
-      success(createItemAPI(item));
-    };
+        // correctly removed
+        success(createItemAPI(item));
+      };
 
-    // if this is a local file and the server.remove function has been configured, send source there so dev can remove file from server
-    const server = state.options.server;
-    if (
-      item.origin === FileOrigin.LOCAL &&
-      server &&
-      isFunction(server.remove)
-    ) {
-      dispatch('DID_START_ITEM_REMOVE', { id: item.id });
+      console.log('REMOVE_ITEM', options);
 
-      server.remove(
-        item.source,
-        () => removeFromView(),
-        status => {
-          dispatch('DID_THROW_ITEM_REMOVE_ERROR', {
-            id: item.id,
-            error: createResponse('error', 0, status, null),
-            status: {
-              main: dynamicLabel(state.options.labelFileRemoveError)(status),
-              sub: state.options.labelTapToRetry
-            }
-          });
-        }
-      );
-    } else {
-      // if is limbo item, need to call revert handler (not calling request_ because that would also trigger beforeRemoveHook)
-      if (item.origin !== FileOrigin.LOCAL && item.serverId !== null) {
-        item.revert(
-          createRevertFunction(
-            state.options.server.url,
-            state.options.server.revert
-          ),
-          query('GET_FORCE_REVERT')
+      // if this is a local file and the server.remove function has been configured, send source there so dev can remove file from server
+      const server = state.options.server;
+      if (
+        item.origin === FileOrigin.LOCAL &&
+        server &&
+        isFunction(server.remove)
+      ) {
+        dispatch('DID_START_ITEM_REMOVE', { id: item.id });
+
+        server.remove(
+          item.source,
+          () => removeFromView(),
+          status => {
+            dispatch('DID_THROW_ITEM_REMOVE_ERROR', {
+              id: item.id,
+              error: createResponse('error', 0, status, null),
+              status: {
+                main: dynamicLabel(state.options.labelFileRemoveError)(status),
+                sub: state.options.labelTapToRetry
+              }
+            });
+          }
         );
-      }
+      } else {
+        // if is requesting revert and can revert need to call revert handler (not calling request_ because that would also trigger beforeRemoveHook)
+        if (
+          options.revert &&
+          item.origin !== FileOrigin.LOCAL &&
+          item.serverId !== null
+        ) {
+          item.revert(
+            createRevertFunction(
+              state.options.server.url,
+              state.options.server.revert
+            ),
+            query('GET_FORCE_REVERT')
+          );
+        }
 
-      // can now safely remove from view
-      removeFromView();
+        // can now safely remove from view
+        removeFromView();
+      }
     }
-  }),
+  ),
 
   ABORT_ITEM_LOAD: getItemByQueryFromState(state, item => {
     item.abortLoad();
@@ -8842,9 +8852,15 @@ const createApp = (initialOptions = {}) => {
         .catch(reject);
     });
 
-  const removeFile = query => {
+  const removeFile = (query, options) => {
+    // if only passed options
+    if (typeof query === 'object' && !options) {
+      options = query;
+      query = undefined;
+    }
+
     // request item removal
-    store.dispatch('REMOVE_ITEM', { query });
+    store.dispatch('REMOVE_ITEM', { ...options, query });
 
     // see if item has been removed
     return store.query('GET_ACTIVE_ITEM', query) === null;
@@ -8922,6 +8938,14 @@ const createApp = (initialOptions = {}) => {
 
   const removeFiles = (...args) => {
     const queries = Array.isArray(args[0]) ? args[0] : args;
+
+    let options;
+    if (typeof queries[queries.length - 1] === 'object') {
+      options = queries.pop();
+    } else if (Array.isArray(args[0])) {
+      options = args[1];
+    }
+
     const files = getFiles();
 
     if (!queries.length) {
@@ -8935,7 +8959,7 @@ const createApp = (initialOptions = {}) => {
       )
       .filter(query => query);
 
-    return mappedQueries.map(removeFile);
+    return mappedQueries.map(q => removeFile(q, options));
   };
 
   const exports = {

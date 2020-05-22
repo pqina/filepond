@@ -65,7 +65,8 @@ const sortItems = (state, compare) => {
 const getItemByQueryFromState = (state, itemHandler) => ({
     query,
     success = () => { },
-    failure = () => { }
+    failure = () => { },
+    ...options
 } = {}) => {
     const item = getItemByQuery(state.items, query);
     if (!item) {
@@ -79,7 +80,7 @@ const getItemByQueryFromState = (state, itemHandler) => ({
         });
         return;
     }
-    itemHandler(item, success, failure);
+    itemHandler(item, success, failure, options || {});
 };
 
 export const actions = (dispatch, query, state) => ({
@@ -859,7 +860,7 @@ export const actions = (dispatch, query, state) => ({
         item.release();
     }),
 
-    REMOVE_ITEM: getItemByQueryFromState(state, (item, success) => {
+    REMOVE_ITEM: getItemByQueryFromState(state, (item, success, failure, options) => {
 
         const removeFromView = () => {
 
@@ -879,10 +880,11 @@ export const actions = (dispatch, query, state) => ({
             success(createItemAPI(item));
         }
 
+        console.log('REMOVE_ITEM', options);
+
         // if this is a local file and the server.remove function has been configured, send source there so dev can remove file from server
         const server = state.options.server;
-        if (item.origin === FileOrigin.LOCAL && 
-            server && isFunction(server.remove)) {
+        if (item.origin === FileOrigin.LOCAL && server && isFunction(server.remove)) {
             
             dispatch('DID_START_ITEM_REMOVE', { id: item.id });
 
@@ -900,10 +902,11 @@ export const actions = (dispatch, query, state) => ({
                     });
                 }
             );
+
         }
         else {
-            // if is limbo item, need to call revert handler (not calling request_ because that would also trigger beforeRemoveHook)
-            if (item.origin !== FileOrigin.LOCAL && item.serverId !== null) {
+            // if is requesting revert and can revert need to call revert handler (not calling request_ because that would also trigger beforeRemoveHook)
+            if (options.revert && item.origin !== FileOrigin.LOCAL && item.serverId !== null) {
                 item.revert(createRevertFunction(state.options.server.url, state.options.server.revert), query('GET_FORCE_REVERT'))
             }
 
@@ -912,6 +915,7 @@ export const actions = (dispatch, query, state) => ({
         }
 
     }),
+    
 
     ABORT_ITEM_LOAD: getItemByQueryFromState(state, item => {
         item.abortLoad();

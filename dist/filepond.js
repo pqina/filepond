@@ -2527,746 +2527,6 @@
     };
   };
 
-  var hasRoomForItem = function hasRoomForItem(state) {
-    var count = getActiveItems(state.items).length;
-
-    // if cannot have multiple items, to add one item it should currently not contain items
-    if (!state.options.allowMultiple) {
-      return count === 0;
-    }
-
-    // if allows multiple items, we check if a max item count has been set, if not, there's no limit
-    var maxFileCount = state.options.maxFiles;
-    if (maxFileCount === null) {
-      return true;
-    }
-
-    // we check if the current count is smaller than the max count, if so, another file can still be added
-    if (count < maxFileCount) {
-      return true;
-    }
-
-    // no more room for another file
-    return false;
-  };
-
-  var limit = function limit(value, min, max) {
-    return Math.max(Math.min(max, value), min);
-  };
-
-  var arrayInsert = function arrayInsert(arr, index, item) {
-    return arr.splice(index, 0, item);
-  };
-
-  var insertItem = function insertItem(items, item, index) {
-    if (isEmpty(item)) {
-      return null;
-    }
-
-    // if index is undefined, append
-    if (typeof index === 'undefined') {
-      items.push(item);
-      return item;
-    }
-
-    // limit the index to the size of the items array
-    index = limit(index, 0, items.length);
-
-    // add item to array
-    arrayInsert(items, index, item);
-
-    // expose
-    return item;
-  };
-
-  var isBase64DataURI = function isBase64DataURI(str) {
-    return /^\s*data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?(;base64)?,([a-z0-9!$&',()*+;=\-._~:@\/?%\s]*)\s*$/i.test(
-      str
-    );
-  };
-
-  var getFilenameFromURL = function getFilenameFromURL(url) {
-    return url
-      .split('/')
-      .pop()
-      .split('?')
-      .shift();
-  };
-
-  var getExtensionFromFilename = function getExtensionFromFilename(name) {
-    return name.split('.').pop();
-  };
-
-  var guesstimateExtension = function guesstimateExtension(type) {
-    // if no extension supplied, exit here
-    if (typeof type !== 'string') {
-      return '';
-    }
-
-    // get subtype
-    var subtype = type.split('/').pop();
-
-    // is svg subtype
-    if (/svg/.test(subtype)) {
-      return 'svg';
-    }
-
-    if (/zip|compressed/.test(subtype)) {
-      return 'zip';
-    }
-
-    if (/plain/.test(subtype)) {
-      return 'txt';
-    }
-
-    if (/msword/.test(subtype)) {
-      return 'doc';
-    }
-
-    // if is valid subtype
-    if (/[a-z]+/.test(subtype)) {
-      // always use jpg extension
-      if (subtype === 'jpeg') {
-        return 'jpg';
-      }
-
-      // return subtype
-      return subtype;
-    }
-
-    return '';
-  };
-
-  var leftPad = function leftPad(value) {
-    var padding =
-      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-    return (padding + value).slice(-padding.length);
-  };
-
-  var getDateString = function getDateString() {
-    var date =
-      arguments.length > 0 && arguments[0] !== undefined
-        ? arguments[0]
-        : new Date();
-    return (
-      date.getFullYear() +
-      '-' +
-      leftPad(date.getMonth() + 1, '00') +
-      '-' +
-      leftPad(date.getDate(), '00') +
-      '_' +
-      leftPad(date.getHours(), '00') +
-      '-' +
-      leftPad(date.getMinutes(), '00') +
-      '-' +
-      leftPad(date.getSeconds(), '00')
-    );
-  };
-
-  var getFileFromBlob = function getFileFromBlob(blob, filename) {
-    var type =
-      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-    var extension =
-      arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-    var file =
-      typeof type === 'string'
-        ? blob.slice(0, blob.size, type)
-        : blob.slice(0, blob.size, blob.type);
-    file.lastModifiedDate = new Date();
-
-    // copy relative path
-    if (blob._relativePath) file._relativePath = blob._relativePath;
-
-    // if blob has name property, use as filename if no filename supplied
-    if (!isString(filename)) {
-      filename = getDateString();
-    }
-
-    // if filename supplied but no extension and filename has extension
-    if (filename && extension === null && getExtensionFromFilename(filename)) {
-      file.name = filename;
-    } else {
-      extension = extension || guesstimateExtension(file.type);
-      file.name = filename + (extension ? '.' + extension : '');
-    }
-
-    return file;
-  };
-
-  var getBlobBuilder = function getBlobBuilder() {
-    return (window.BlobBuilder =
-      window.BlobBuilder ||
-      window.WebKitBlobBuilder ||
-      window.MozBlobBuilder ||
-      window.MSBlobBuilder);
-  };
-
-  var createBlob = function createBlob(arrayBuffer, mimeType) {
-    var BB = getBlobBuilder();
-
-    if (BB) {
-      var bb = new BB();
-      bb.append(arrayBuffer);
-      return bb.getBlob(mimeType);
-    }
-
-    return new Blob([arrayBuffer], {
-      type: mimeType
-    });
-  };
-
-  var getBlobFromByteStringWithMimeType = function getBlobFromByteStringWithMimeType(
-    byteString,
-    mimeType
-  ) {
-    var ab = new ArrayBuffer(byteString.length);
-    var ia = new Uint8Array(ab);
-
-    for (var i = 0; i < byteString.length; i++) {
-      ia[i] = byteString.charCodeAt(i);
-    }
-
-    return createBlob(ab, mimeType);
-  };
-
-  var getMimeTypeFromBase64DataURI = function getMimeTypeFromBase64DataURI(
-    dataURI
-  ) {
-    return (/^data:(.+);/.exec(dataURI) || [])[1] || null;
-  };
-
-  var getBase64DataFromBase64DataURI = function getBase64DataFromBase64DataURI(
-    dataURI
-  ) {
-    // get data part of string (remove data:image/jpeg...,)
-    var data = dataURI.split(',')[1];
-
-    // remove any whitespace as that causes InvalidCharacterError in IE
-    return data.replace(/\s/g, '');
-  };
-
-  var getByteStringFromBase64DataURI = function getByteStringFromBase64DataURI(
-    dataURI
-  ) {
-    return atob(getBase64DataFromBase64DataURI(dataURI));
-  };
-
-  var getBlobFromBase64DataURI = function getBlobFromBase64DataURI(dataURI) {
-    var mimeType = getMimeTypeFromBase64DataURI(dataURI);
-    var byteString = getByteStringFromBase64DataURI(dataURI);
-
-    return getBlobFromByteStringWithMimeType(byteString, mimeType);
-  };
-
-  var getFileFromBase64DataURI = function getFileFromBase64DataURI(
-    dataURI,
-    filename,
-    extension
-  ) {
-    return getFileFromBlob(
-      getBlobFromBase64DataURI(dataURI),
-      filename,
-      null,
-      extension
-    );
-  };
-
-  var getFileNameFromHeader = function getFileNameFromHeader(header) {
-    // test if is content disposition header, if not exit
-    if (!/^content-disposition:/i.test(header)) return null;
-
-    // get filename parts
-    var matches = header
-      .split(/filename=|filename\*=.+''/)
-      .splice(1)
-      .map(function(name) {
-        return name.trim().replace(/^["']|[;"']{0,2}$/g, '');
-      })
-      .filter(function(name) {
-        return name.length;
-      });
-
-    return matches.length ? decodeURI(matches[matches.length - 1]) : null;
-  };
-
-  var getFileSizeFromHeader = function getFileSizeFromHeader(header) {
-    if (/content-length:/i.test(header)) {
-      var size = header.match(/[0-9]+/)[0];
-      return size ? parseInt(size, 10) : null;
-    }
-    return null;
-  };
-
-  var getTranfserIdFromHeader = function getTranfserIdFromHeader(header) {
-    if (/x-content-transfer-id:/i.test(header)) {
-      var id = (header.split(':')[1] || '').trim();
-      return id || null;
-    }
-    return null;
-  };
-
-  var getFileInfoFromHeaders = function getFileInfoFromHeaders(headers) {
-    var info = {
-      source: null,
-      name: null,
-      size: null
-    };
-
-    var rows = headers.split('\n');
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
-    try {
-      for (
-        var _iterator = rows[Symbol.iterator](), _step;
-        !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
-        _iteratorNormalCompletion = true
-      ) {
-        var header = _step.value;
-
-        var name = getFileNameFromHeader(header);
-        if (name) {
-          info.name = name;
-          continue;
-        }
-
-        var size = getFileSizeFromHeader(header);
-        if (size) {
-          info.size = size;
-          continue;
-        }
-
-        var source = getTranfserIdFromHeader(header);
-        if (source) {
-          info.source = source;
-          continue;
-        }
-      }
-    } catch (err) {
-      _didIteratorError = true;
-      _iteratorError = err;
-    } finally {
-      try {
-        if (!_iteratorNormalCompletion && _iterator.return != null) {
-          _iterator.return();
-        }
-      } finally {
-        if (_didIteratorError) {
-          throw _iteratorError;
-        }
-      }
-    }
-
-    return info;
-  };
-
-  var createFileLoader = function createFileLoader(fetchFn) {
-    var state = {
-      source: null,
-      complete: false,
-      progress: 0,
-      size: null,
-      timestamp: null,
-      duration: 0,
-      request: null
-    };
-
-    var getProgress = function getProgress() {
-      return state.progress;
-    };
-    var abort = function abort() {
-      if (state.request && state.request.abort) {
-        state.request.abort();
-      }
-    };
-
-    // load source
-    var load = function load() {
-      // get quick reference
-      var source = state.source;
-
-      api.fire('init', source);
-
-      // Load Files
-      if (source instanceof File) {
-        api.fire('load', source);
-      } else if (source instanceof Blob) {
-        // Load blobs, set default name to current date
-        api.fire('load', getFileFromBlob(source, source.name));
-      } else if (isBase64DataURI(source)) {
-        // Load base 64, set default name to current date
-        api.fire('load', getFileFromBase64DataURI(source));
-      } else {
-        // Deal as if is external URL, let's load it!
-        loadURL(source);
-      }
-    };
-
-    // loads a url
-    var loadURL = function loadURL(url) {
-      // is remote url and no fetch method supplied
-      if (!fetchFn) {
-        api.fire('error', {
-          type: 'error',
-          body: "Can't load URL",
-          code: 400
-        });
-
-        return;
-      }
-
-      // set request start
-      state.timestamp = Date.now();
-
-      // load file
-      state.request = fetchFn(
-        url,
-        function(response) {
-          // update duration
-          state.duration = Date.now() - state.timestamp;
-
-          // done!
-          state.complete = true;
-
-          // turn blob response into a file
-          if (response instanceof Blob) {
-            response = getFileFromBlob(
-              response,
-              response.name || getFilenameFromURL(url)
-            );
-          }
-
-          api.fire(
-            'load',
-            // if has received blob, we go with blob, if no response, we return null
-            response instanceof Blob
-              ? response
-              : response
-              ? response.body
-              : null
-          );
-        },
-        function(error) {
-          api.fire(
-            'error',
-            typeof error === 'string'
-              ? {
-                  type: 'error',
-                  code: 0,
-                  body: error
-                }
-              : error
-          );
-        },
-        function(computable, current, total) {
-          // collected some meta data already
-          if (total) {
-            state.size = total;
-          }
-
-          // update duration
-          state.duration = Date.now() - state.timestamp;
-
-          // if we can't compute progress, we're not going to fire progress events
-          if (!computable) {
-            state.progress = null;
-            return;
-          }
-
-          // update progress percentage
-          state.progress = current / total;
-
-          // expose
-          api.fire('progress', state.progress);
-        },
-        function() {
-          api.fire('abort');
-        },
-        function(response) {
-          var fileinfo = getFileInfoFromHeaders(
-            typeof response === 'string' ? response : response.headers
-          );
-          api.fire('meta', {
-            size: state.size || fileinfo.size,
-            filename: fileinfo.name,
-            source: fileinfo.source
-          });
-        }
-      );
-    };
-
-    var api = Object.assign({}, on(), {
-      setSource: function setSource(source) {
-        return (state.source = source);
-      },
-      getProgress: getProgress, // file load progress
-      abort: abort, // abort file load
-      load: load // start load
-    });
-
-    return api;
-  };
-
-  var isGet = function isGet(method) {
-    return /GET|HEAD/.test(method);
-  };
-
-  var sendRequest = function sendRequest(data, url, options) {
-    var api = {
-      onheaders: function onheaders() {},
-      onprogress: function onprogress() {},
-      onload: function onload() {},
-      ontimeout: function ontimeout() {},
-      onerror: function onerror() {},
-      onabort: function onabort() {},
-      abort: function abort() {
-        aborted = true;
-        xhr.abort();
-      }
-    };
-
-    // timeout identifier, only used when timeout is defined
-    var aborted = false;
-    var headersReceived = false;
-
-    // set default options
-    options = Object.assign(
-      {
-        method: 'POST',
-        headers: {},
-        withCredentials: false
-      },
-      options
-    );
-
-    // encode url
-    url = encodeURI(url);
-
-    // if method is GET, add any received data to url
-
-    if (isGet(options.method) && data) {
-      url =
-        '' +
-        url +
-        encodeURIComponent(
-          typeof data === 'string' ? data : JSON.stringify(data)
-        );
-    }
-
-    // create request
-    var xhr = new XMLHttpRequest();
-
-    // progress of load
-    var process = isGet(options.method) ? xhr : xhr.upload;
-    process.onprogress = function(e) {
-      // no progress event when aborted ( onprogress is called once after abort() )
-      if (aborted) {
-        return;
-      }
-
-      api.onprogress(e.lengthComputable, e.loaded, e.total);
-    };
-
-    // tries to get header info to the app as fast as possible
-    xhr.onreadystatechange = function() {
-      // not interesting in these states ('unsent' and 'openend' as they don't give us any additional info)
-      if (xhr.readyState < 2) {
-        return;
-      }
-
-      // no server response
-      if (xhr.readyState === 4 && xhr.status === 0) {
-        return;
-      }
-
-      if (headersReceived) {
-        return;
-      }
-
-      headersReceived = true;
-
-      // we've probably received some useful data in response headers
-      api.onheaders(xhr);
-    };
-
-    // load successful
-    xhr.onload = function() {
-      // is classified as valid response
-      if (xhr.status >= 200 && xhr.status < 300) {
-        api.onload(xhr);
-      } else {
-        api.onerror(xhr);
-      }
-    };
-
-    // error during load
-    xhr.onerror = function() {
-      return api.onerror(xhr);
-    };
-
-    // request aborted
-    xhr.onabort = function() {
-      aborted = true;
-      api.onabort();
-    };
-
-    // request timeout
-    xhr.ontimeout = function() {
-      return api.ontimeout(xhr);
-    };
-
-    // open up open up!
-    xhr.open(options.method, url, true);
-
-    // set timeout if defined (do it after open so IE11 plays ball)
-    if (isInt(options.timeout)) {
-      xhr.timeout = options.timeout;
-    }
-
-    // add headers
-    Object.keys(options.headers).forEach(function(key) {
-      var value = unescape(encodeURIComponent(options.headers[key]));
-      xhr.setRequestHeader(key, value);
-    });
-
-    // set type of response
-    if (options.responseType) {
-      xhr.responseType = options.responseType;
-    }
-
-    // set credentials
-    if (options.withCredentials) {
-      xhr.withCredentials = true;
-    }
-
-    // let's send our data
-    xhr.send(data);
-
-    return api;
-  };
-
-  var createResponse = function createResponse(type, code, body, headers) {
-    return {
-      type: type,
-      code: code,
-      body: body,
-      headers: headers
-    };
-  };
-
-  var createTimeoutResponse = function createTimeoutResponse(cb) {
-    return function(xhr) {
-      cb(createResponse('error', 0, 'Timeout', xhr.getAllResponseHeaders()));
-    };
-  };
-
-  var hasQS = function hasQS(str) {
-    return /\?/.test(str);
-  };
-  var buildURL = function buildURL() {
-    var url = '';
-    for (
-      var _len = arguments.length, parts = new Array(_len), _key = 0;
-      _key < _len;
-      _key++
-    ) {
-      parts[_key] = arguments[_key];
-    }
-    parts.forEach(function(part) {
-      url += hasQS(url) && hasQS(part) ? part.replace(/\?/, '&') : part;
-    });
-    return url;
-  };
-
-  var createFetchFunction = function createFetchFunction() {
-    var apiUrl =
-      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-    var action = arguments.length > 1 ? arguments[1] : undefined;
-    // custom handler (should also handle file, load, error, progress and abort)
-    if (typeof action === 'function') {
-      return action;
-    }
-
-    // no action supplied
-    if (!action || !isString(action.url)) {
-      return null;
-    }
-
-    // set onload hanlder
-    var onload =
-      action.onload ||
-      function(res) {
-        return res;
-      };
-    var onerror =
-      action.onerror ||
-      function(res) {
-        return null;
-      };
-
-    // internal handler
-    return function(url, load, error, progress, abort, headers) {
-      // do local or remote request based on if the url is external
-      var request = sendRequest(
-        url,
-        buildURL(apiUrl, action.url),
-        Object.assign({}, action, {
-          responseType: 'blob'
-        })
-      );
-
-      request.onload = function(xhr) {
-        // get headers
-        var headers = xhr.getAllResponseHeaders();
-
-        // get filename
-        var filename =
-          getFileInfoFromHeaders(headers).name || getFilenameFromURL(url);
-
-        // create response
-        load(
-          createResponse(
-            'load',
-            xhr.status,
-            action.method === 'HEAD'
-              ? null
-              : getFileFromBlob(onload(xhr.response), filename),
-            headers
-          )
-        );
-      };
-
-      request.onerror = function(xhr) {
-        error(
-          createResponse(
-            'error',
-            xhr.status,
-            onerror(xhr.response) || xhr.statusText,
-            xhr.getAllResponseHeaders()
-          )
-        );
-      };
-
-      request.onheaders = function(xhr) {
-        headers(
-          createResponse(
-            'headers',
-            xhr.status,
-            null,
-            xhr.getAllResponseHeaders()
-          )
-        );
-      };
-
-      request.ontimeout = createTimeoutResponse(error);
-      request.onprogress = progress;
-      request.onabort = abort;
-
-      // should return request
-      return request;
-    };
-  };
-
   function _typeof(obj) {
     if (typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol') {
       _typeof = function(obj) {
@@ -4946,6 +4206,746 @@
     return _wrapRegExp.apply(this, arguments);
   }
 
+  var hasRoomForItem = function hasRoomForItem(state) {
+    var count = getActiveItems(state.items).length;
+
+    // if cannot have multiple items, to add one item it should currently not contain items
+    if (!state.options.allowMultiple) {
+      return count === 0;
+    }
+
+    // if allows multiple items, we check if a max item count has been set, if not, there's no limit
+    var maxFileCount = state.options.maxFiles;
+    if (maxFileCount === null) {
+      return true;
+    }
+
+    // we check if the current count is smaller than the max count, if so, another file can still be added
+    if (count < maxFileCount) {
+      return true;
+    }
+
+    // no more room for another file
+    return false;
+  };
+
+  var limit = function limit(value, min, max) {
+    return Math.max(Math.min(max, value), min);
+  };
+
+  var arrayInsert = function arrayInsert(arr, index, item) {
+    return arr.splice(index, 0, item);
+  };
+
+  var insertItem = function insertItem(items, item, index) {
+    if (isEmpty(item)) {
+      return null;
+    }
+
+    // if index is undefined, append
+    if (typeof index === 'undefined') {
+      items.push(item);
+      return item;
+    }
+
+    // limit the index to the size of the items array
+    index = limit(index, 0, items.length);
+
+    // add item to array
+    arrayInsert(items, index, item);
+
+    // expose
+    return item;
+  };
+
+  var isBase64DataURI = function isBase64DataURI(str) {
+    return /^\s*data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?(;base64)?,([a-z0-9!$&',()*+;=\-._~:@\/?%\s]*)\s*$/i.test(
+      str
+    );
+  };
+
+  var getFilenameFromURL = function getFilenameFromURL(url) {
+    return url
+      .split('/')
+      .pop()
+      .split('?')
+      .shift();
+  };
+
+  var getExtensionFromFilename = function getExtensionFromFilename(name) {
+    return name.split('.').pop();
+  };
+
+  var guesstimateExtension = function guesstimateExtension(type) {
+    // if no extension supplied, exit here
+    if (typeof type !== 'string') {
+      return '';
+    }
+
+    // get subtype
+    var subtype = type.split('/').pop();
+
+    // is svg subtype
+    if (/svg/.test(subtype)) {
+      return 'svg';
+    }
+
+    if (/zip|compressed/.test(subtype)) {
+      return 'zip';
+    }
+
+    if (/plain/.test(subtype)) {
+      return 'txt';
+    }
+
+    if (/msword/.test(subtype)) {
+      return 'doc';
+    }
+
+    // if is valid subtype
+    if (/[a-z]+/.test(subtype)) {
+      // always use jpg extension
+      if (subtype === 'jpeg') {
+        return 'jpg';
+      }
+
+      // return subtype
+      return subtype;
+    }
+
+    return '';
+  };
+
+  var leftPad = function leftPad(value) {
+    var padding =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+    return (padding + value).slice(-padding.length);
+  };
+
+  var getDateString = function getDateString() {
+    var date =
+      arguments.length > 0 && arguments[0] !== undefined
+        ? arguments[0]
+        : new Date();
+    return (
+      date.getFullYear() +
+      '-' +
+      leftPad(date.getMonth() + 1, '00') +
+      '-' +
+      leftPad(date.getDate(), '00') +
+      '_' +
+      leftPad(date.getHours(), '00') +
+      '-' +
+      leftPad(date.getMinutes(), '00') +
+      '-' +
+      leftPad(date.getSeconds(), '00')
+    );
+  };
+
+  var getFileFromBlob = function getFileFromBlob(blob, filename) {
+    var type =
+      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+    var extension =
+      arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+    var file =
+      typeof type === 'string'
+        ? blob.slice(0, blob.size, type)
+        : blob.slice(0, blob.size, blob.type);
+    file.lastModifiedDate = new Date();
+
+    // copy relative path
+    if (blob._relativePath) file._relativePath = blob._relativePath;
+
+    // if blob has name property, use as filename if no filename supplied
+    if (!isString(filename)) {
+      filename = getDateString();
+    }
+
+    // if filename supplied but no extension and filename has extension
+    if (filename && extension === null && getExtensionFromFilename(filename)) {
+      file.name = filename;
+    } else {
+      extension = extension || guesstimateExtension(file.type);
+      file.name = filename + (extension ? '.' + extension : '');
+    }
+
+    return file;
+  };
+
+  var getBlobBuilder = function getBlobBuilder() {
+    return (window.BlobBuilder =
+      window.BlobBuilder ||
+      window.WebKitBlobBuilder ||
+      window.MozBlobBuilder ||
+      window.MSBlobBuilder);
+  };
+
+  var createBlob = function createBlob(arrayBuffer, mimeType) {
+    var BB = getBlobBuilder();
+
+    if (BB) {
+      var bb = new BB();
+      bb.append(arrayBuffer);
+      return bb.getBlob(mimeType);
+    }
+
+    return new Blob([arrayBuffer], {
+      type: mimeType
+    });
+  };
+
+  var getBlobFromByteStringWithMimeType = function getBlobFromByteStringWithMimeType(
+    byteString,
+    mimeType
+  ) {
+    var ab = new ArrayBuffer(byteString.length);
+    var ia = new Uint8Array(ab);
+
+    for (var i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+
+    return createBlob(ab, mimeType);
+  };
+
+  var getMimeTypeFromBase64DataURI = function getMimeTypeFromBase64DataURI(
+    dataURI
+  ) {
+    return (/^data:(.+);/.exec(dataURI) || [])[1] || null;
+  };
+
+  var getBase64DataFromBase64DataURI = function getBase64DataFromBase64DataURI(
+    dataURI
+  ) {
+    // get data part of string (remove data:image/jpeg...,)
+    var data = dataURI.split(',')[1];
+
+    // remove any whitespace as that causes InvalidCharacterError in IE
+    return data.replace(/\s/g, '');
+  };
+
+  var getByteStringFromBase64DataURI = function getByteStringFromBase64DataURI(
+    dataURI
+  ) {
+    return atob(getBase64DataFromBase64DataURI(dataURI));
+  };
+
+  var getBlobFromBase64DataURI = function getBlobFromBase64DataURI(dataURI) {
+    var mimeType = getMimeTypeFromBase64DataURI(dataURI);
+    var byteString = getByteStringFromBase64DataURI(dataURI);
+
+    return getBlobFromByteStringWithMimeType(byteString, mimeType);
+  };
+
+  var getFileFromBase64DataURI = function getFileFromBase64DataURI(
+    dataURI,
+    filename,
+    extension
+  ) {
+    return getFileFromBlob(
+      getBlobFromBase64DataURI(dataURI),
+      filename,
+      null,
+      extension
+    );
+  };
+
+  var getFileNameFromHeader = function getFileNameFromHeader(header) {
+    // test if is content disposition header, if not exit
+    if (!/^content-disposition:/i.test(header)) return null;
+
+    // get filename parts
+    var matches = header
+      .split(/filename=|filename\*=.+''/)
+      .splice(1)
+      .map(function(name) {
+        return name.trim().replace(/^["']|[;"']{0,2}$/g, '');
+      })
+      .filter(function(name) {
+        return name.length;
+      });
+
+    return matches.length ? decodeURI(matches[matches.length - 1]) : null;
+  };
+
+  var getFileSizeFromHeader = function getFileSizeFromHeader(header) {
+    if (/content-length:/i.test(header)) {
+      var size = header.match(/[0-9]+/)[0];
+      return size ? parseInt(size, 10) : null;
+    }
+    return null;
+  };
+
+  var getTranfserIdFromHeader = function getTranfserIdFromHeader(header) {
+    if (/x-content-transfer-id:/i.test(header)) {
+      var id = (header.split(':')[1] || '').trim();
+      return id || null;
+    }
+    return null;
+  };
+
+  var getFileInfoFromHeaders = function getFileInfoFromHeaders(headers) {
+    var info = {
+      source: null,
+      name: null,
+      size: null
+    };
+
+    var rows = headers.split('\n');
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+    try {
+      for (
+        var _iterator = rows[Symbol.iterator](), _step;
+        !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
+        _iteratorNormalCompletion = true
+      ) {
+        var header = _step.value;
+
+        var name = getFileNameFromHeader(header);
+        if (name) {
+          info.name = name;
+          continue;
+        }
+
+        var size = getFileSizeFromHeader(header);
+        if (size) {
+          info.size = size;
+          continue;
+        }
+
+        var source = getTranfserIdFromHeader(header);
+        if (source) {
+          info.source = source;
+          continue;
+        }
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return != null) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+
+    return info;
+  };
+
+  var createFileLoader = function createFileLoader(fetchFn) {
+    var state = {
+      source: null,
+      complete: false,
+      progress: 0,
+      size: null,
+      timestamp: null,
+      duration: 0,
+      request: null
+    };
+
+    var getProgress = function getProgress() {
+      return state.progress;
+    };
+    var abort = function abort() {
+      if (state.request && state.request.abort) {
+        state.request.abort();
+      }
+    };
+
+    // load source
+    var load = function load() {
+      // get quick reference
+      var source = state.source;
+
+      api.fire('init', source);
+
+      // Load Files
+      if (source instanceof File) {
+        api.fire('load', source);
+      } else if (source instanceof Blob) {
+        // Load blobs, set default name to current date
+        api.fire('load', getFileFromBlob(source, source.name));
+      } else if (isBase64DataURI(source)) {
+        // Load base 64, set default name to current date
+        api.fire('load', getFileFromBase64DataURI(source));
+      } else {
+        // Deal as if is external URL, let's load it!
+        loadURL(source);
+      }
+    };
+
+    // loads a url
+    var loadURL = function loadURL(url) {
+      // is remote url and no fetch method supplied
+      if (!fetchFn) {
+        api.fire('error', {
+          type: 'error',
+          body: "Can't load URL",
+          code: 400
+        });
+
+        return;
+      }
+
+      // set request start
+      state.timestamp = Date.now();
+
+      // load file
+      state.request = fetchFn(
+        url,
+        function(response) {
+          // update duration
+          state.duration = Date.now() - state.timestamp;
+
+          // done!
+          state.complete = true;
+
+          // turn blob response into a file
+          if (response instanceof Blob) {
+            response = getFileFromBlob(
+              response,
+              response.name || getFilenameFromURL(url)
+            );
+          }
+
+          api.fire(
+            'load',
+            // if has received blob, we go with blob, if no response, we return null
+            response instanceof Blob
+              ? response
+              : response
+              ? response.body
+              : null
+          );
+        },
+        function(error) {
+          api.fire(
+            'error',
+            typeof error === 'string'
+              ? {
+                  type: 'error',
+                  code: 0,
+                  body: error
+                }
+              : error
+          );
+        },
+        function(computable, current, total) {
+          // collected some meta data already
+          if (total) {
+            state.size = total;
+          }
+
+          // update duration
+          state.duration = Date.now() - state.timestamp;
+
+          // if we can't compute progress, we're not going to fire progress events
+          if (!computable) {
+            state.progress = null;
+            return;
+          }
+
+          // update progress percentage
+          state.progress = current / total;
+
+          // expose
+          api.fire('progress', state.progress);
+        },
+        function() {
+          api.fire('abort');
+        },
+        function(response) {
+          var fileinfo = getFileInfoFromHeaders(
+            typeof response === 'string' ? response : response.headers
+          );
+          api.fire('meta', {
+            size: state.size || fileinfo.size,
+            filename: fileinfo.name,
+            source: fileinfo.source
+          });
+        }
+      );
+    };
+
+    var api = Object.assign({}, on(), {
+      setSource: function setSource(source) {
+        return (state.source = source);
+      },
+      getProgress: getProgress, // file load progress
+      abort: abort, // abort file load
+      load: load // start load
+    });
+
+    return api;
+  };
+
+  var isGet = function isGet(method) {
+    return /GET|HEAD/.test(method);
+  };
+
+  var sendRequest = function sendRequest(data, url, options) {
+    var api = {
+      onheaders: function onheaders() {},
+      onprogress: function onprogress() {},
+      onload: function onload() {},
+      ontimeout: function ontimeout() {},
+      onerror: function onerror() {},
+      onabort: function onabort() {},
+      abort: function abort() {
+        aborted = true;
+        xhr.abort();
+      }
+    };
+
+    // timeout identifier, only used when timeout is defined
+    var aborted = false;
+    var headersReceived = false;
+
+    // set default options
+    options = Object.assign(
+      {
+        method: 'POST',
+        headers: {},
+        withCredentials: false
+      },
+      options
+    );
+
+    // encode url
+    url = encodeURI(url);
+
+    // if method is GET, add any received data to url
+
+    if (isGet(options.method) && data) {
+      url =
+        '' +
+        url +
+        encodeURIComponent(
+          typeof data === 'string' ? data : JSON.stringify(data)
+        );
+    }
+
+    // create request
+    var xhr = new XMLHttpRequest();
+
+    // progress of load
+    var process = isGet(options.method) ? xhr : xhr.upload;
+    process.onprogress = function(e) {
+      // no progress event when aborted ( onprogress is called once after abort() )
+      if (aborted) {
+        return;
+      }
+
+      api.onprogress(e.lengthComputable, e.loaded, e.total);
+    };
+
+    // tries to get header info to the app as fast as possible
+    xhr.onreadystatechange = function() {
+      // not interesting in these states ('unsent' and 'openend' as they don't give us any additional info)
+      if (xhr.readyState < 2) {
+        return;
+      }
+
+      // no server response
+      if (xhr.readyState === 4 && xhr.status === 0) {
+        return;
+      }
+
+      if (headersReceived) {
+        return;
+      }
+
+      headersReceived = true;
+
+      // we've probably received some useful data in response headers
+      api.onheaders(xhr);
+    };
+
+    // load successful
+    xhr.onload = function() {
+      // is classified as valid response
+      if (xhr.status >= 200 && xhr.status < 300) {
+        api.onload(xhr);
+      } else {
+        api.onerror(xhr);
+      }
+    };
+
+    // error during load
+    xhr.onerror = function() {
+      return api.onerror(xhr);
+    };
+
+    // request aborted
+    xhr.onabort = function() {
+      aborted = true;
+      api.onabort();
+    };
+
+    // request timeout
+    xhr.ontimeout = function() {
+      return api.ontimeout(xhr);
+    };
+
+    // open up open up!
+    xhr.open(options.method, url, true);
+
+    // set timeout if defined (do it after open so IE11 plays ball)
+    if (isInt(options.timeout)) {
+      xhr.timeout = options.timeout;
+    }
+
+    // add headers
+    Object.keys(options.headers).forEach(function(key) {
+      var value = unescape(encodeURIComponent(options.headers[key]));
+      xhr.setRequestHeader(key, value);
+    });
+
+    // set type of response
+    if (options.responseType) {
+      xhr.responseType = options.responseType;
+    }
+
+    // set credentials
+    if (options.withCredentials) {
+      xhr.withCredentials = true;
+    }
+
+    // let's send our data
+    xhr.send(data);
+
+    return api;
+  };
+
+  var createResponse = function createResponse(type, code, body, headers) {
+    return {
+      type: type,
+      code: code,
+      body: body,
+      headers: headers
+    };
+  };
+
+  var createTimeoutResponse = function createTimeoutResponse(cb) {
+    return function(xhr) {
+      cb(createResponse('error', 0, 'Timeout', xhr.getAllResponseHeaders()));
+    };
+  };
+
+  var hasQS = function hasQS(str) {
+    return /\?/.test(str);
+  };
+  var buildURL = function buildURL() {
+    var url = '';
+    for (
+      var _len = arguments.length, parts = new Array(_len), _key = 0;
+      _key < _len;
+      _key++
+    ) {
+      parts[_key] = arguments[_key];
+    }
+    parts.forEach(function(part) {
+      url += hasQS(url) && hasQS(part) ? part.replace(/\?/, '&') : part;
+    });
+    return url;
+  };
+
+  var createFetchFunction = function createFetchFunction() {
+    var apiUrl =
+      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+    var action = arguments.length > 1 ? arguments[1] : undefined;
+    // custom handler (should also handle file, load, error, progress and abort)
+    if (typeof action === 'function') {
+      return action;
+    }
+
+    // no action supplied
+    if (!action || !isString(action.url)) {
+      return null;
+    }
+
+    // set onload hanlder
+    var onload =
+      action.onload ||
+      function(res) {
+        return res;
+      };
+    var onerror =
+      action.onerror ||
+      function(res) {
+        return null;
+      };
+
+    // internal handler
+    return function(url, load, error, progress, abort, headers) {
+      // do local or remote request based on if the url is external
+      var request = sendRequest(
+        url,
+        buildURL(apiUrl, action.url),
+        Object.assign({}, action, {
+          responseType: 'blob'
+        })
+      );
+
+      request.onload = function(xhr) {
+        // get headers
+        var headers = xhr.getAllResponseHeaders();
+
+        // get filename
+        var filename =
+          getFileInfoFromHeaders(headers).name || getFilenameFromURL(url);
+
+        // create response
+        load(
+          createResponse(
+            'load',
+            xhr.status,
+            action.method === 'HEAD'
+              ? null
+              : getFileFromBlob(onload(xhr.response), filename),
+            headers
+          )
+        );
+      };
+
+      request.onerror = function(xhr) {
+        error(
+          createResponse(
+            'error',
+            xhr.status,
+            onerror(xhr.response) || xhr.statusText,
+            xhr.getAllResponseHeaders()
+          )
+        );
+      };
+
+      request.onheaders = function(xhr) {
+        headers(
+          createResponse(
+            'headers',
+            xhr.status,
+            null,
+            xhr.getAllResponseHeaders()
+          )
+        );
+      };
+
+      request.ontimeout = createTimeoutResponse(error);
+      request.onprogress = progress;
+      request.onabort = abort;
+
+      // should return request
+      return request;
+    };
+  };
+
   var ChunkStatus = {
     QUEUED: 0,
     COMPLETE: 1,
@@ -6491,14 +6491,17 @@
   ) {
     return function() {
       var _ref =
-          arguments.length > 0 && arguments[0] !== undefined
-            ? arguments[0]
-            : {},
-        query = _ref.query,
+        arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+      var query = _ref.query,
         _ref$success = _ref.success,
         success = _ref$success === void 0 ? function() {} : _ref$success,
         _ref$failure = _ref.failure,
-        failure = _ref$failure === void 0 ? function() {} : _ref$failure;
+        failure = _ref$failure === void 0 ? function() {} : _ref$failure,
+        options = _objectWithoutProperties(_ref, [
+          'query',
+          'success',
+          'failure'
+        ]);
       var item = getItemByQuery(state.items, query);
       if (!item) {
         failure({
@@ -6509,7 +6512,7 @@
 
         return;
       }
-      itemHandler(item, success, failure);
+      itemHandler(item, success, failure, options || {});
     };
   };
 
@@ -7412,7 +7415,12 @@
         item.release();
       }),
 
-      REMOVE_ITEM: getItemByQueryFromState(state, function(item, success) {
+      REMOVE_ITEM: getItemByQueryFromState(state, function(
+        item,
+        success,
+        failure,
+        options
+      ) {
         var removeFromView = function removeFromView() {
           // get id reference
           var id = item.id;
@@ -7429,6 +7437,8 @@
           // correctly removed
           success(createItemAPI(item));
         };
+
+        console.log('REMOVE_ITEM', options);
 
         // if this is a local file and the server.remove function has been configured, send source there so dev can remove file from server
         var server = state.options.server;
@@ -7458,8 +7468,12 @@
             }
           );
         } else {
-          // if is limbo item, need to call revert handler (not calling request_ because that would also trigger beforeRemoveHook)
-          if (item.origin !== FileOrigin.LOCAL && item.serverId !== null) {
+          // if is requesting revert and can revert need to call revert handler (not calling request_ because that would also trigger beforeRemoveHook)
+          if (
+            options.revert &&
+            item.origin !== FileOrigin.LOCAL &&
+            item.serverId !== null
+          ) {
             item.revert(
               createRevertFunction(
                 state.options.server.url,
@@ -11798,9 +11812,18 @@
       });
     };
 
-    var removeFile = function removeFile(query) {
+    var removeFile = function removeFile(query, options) {
+      // if only passed options
+      if (typeof query === 'object' && !options) {
+        options = query;
+        query = undefined;
+      }
+
       // request item removal
-      store.dispatch('REMOVE_ITEM', { query: query });
+      store.dispatch(
+        'REMOVE_ITEM',
+        Object.assign({}, options, { query: query })
+      );
 
       // see if item has been removed
       return store.query('GET_ACTIVE_ITEM', query) === null;
@@ -11912,7 +11935,16 @@
       ) {
         args[_key4] = arguments[_key4];
       }
+
       var queries = Array.isArray(args[0]) ? args[0] : args;
+
+      var options;
+      if (typeof queries[queries.length - 1] === 'object') {
+        options = queries.pop();
+      } else if (Array.isArray(args[0])) {
+        options = args[1];
+      }
+
       var files = getFiles();
 
       if (!queries.length) {
@@ -11932,7 +11964,9 @@
           return query;
         });
 
-      return mappedQueries.map(removeFile);
+      return mappedQueries.map(function(q) {
+        return removeFile(q, options);
+      });
     };
 
     var exports = Object.assign(
