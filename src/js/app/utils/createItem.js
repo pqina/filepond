@@ -99,7 +99,7 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
             fire('load-init');
         });
 
-        // we'eve received a size indication, let's update the stub
+        // we've received a size indication, let's update the stub
         loader.on('meta', meta => {
 
             // set size of file stub
@@ -226,7 +226,7 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         abortProcessingRequestComplete = null;
 
         // if no file loaded we'll wait for the load event
-        if (!(state.file instanceof Blob)) {
+        if (!isFile(state.file)) {
             api.on('load', () => {
                 process(processor, onprocess);
             });
