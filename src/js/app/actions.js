@@ -880,8 +880,6 @@ export const actions = (dispatch, query, state) => ({
             success(createItemAPI(item));
         }
 
-        console.log('REMOVE_ITEM', options);
-
         // if this is a local file and the server.remove function has been configured, send source there so dev can remove file from server
         const server = state.options.server;
         if (item.origin === FileOrigin.LOCAL && server && isFunction(server.remove)) {
