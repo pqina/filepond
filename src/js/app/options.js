@@ -147,6 +147,7 @@ export const defaultOptions = {
     onwarning: [null, Type.FUNCTION],
     onerror: [null, Type.FUNCTION],
     onactivatefile: [null, Type.FUNCTION],
+    oninitfile: [null, Type.FUNCTION],
     onaddfilestart: [null, Type.FUNCTION],
     onaddfileprogress: [null, Type.FUNCTION],
     onaddfile: [null, Type.FUNCTION],

@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.14.0
+
+- Add `oninitfile`, called when file is first initialised, can be used to immidiately set metadata.
+
+
 ## 4.13.7
 
 - Fix backwards compatibility problem with `4.13.5` and `4.13.6` where removeFile would revert upload.

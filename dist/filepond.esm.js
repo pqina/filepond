@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.13.7
+ * FilePond 4.14.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1659,8 +1659,10 @@ const getUniqueId = () =>
 
 const arrayRemove = (arr, index) => arr.splice(index, 1);
 
-const fire = cb => {
-  if (document.hidden) {
+const run = (cb, sync) => {
+  if (sync) {
+    cb();
+  } else if (document.hidden) {
     Promise.resolve(1).then(cb);
   } else {
     setTimeout(cb, 0);
@@ -1677,12 +1679,18 @@ const on = () => {
       )
     );
   };
+  const fire = (event, args, sync) => {
+    listeners
+      .filter(listener => listener.event === event)
+      .map(listener => listener.cb)
+      .forEach(cb => run(() => cb(...args), sync));
+  };
   return {
+    fireSync: (event, ...args) => {
+      fire(event, args, true);
+    },
     fire: (event, ...args) => {
-      listeners
-        .filter(listener => listener.event === event)
-        .map(listener => listener.cb)
-        .forEach(cb => fire(() => cb(...args)));
+      fire(event, args, false);
     },
     on: (event, cb) => {
       listeners.push({ event, cb });
@@ -1976,6 +1984,7 @@ const defaultOptions = {
   onwarning: [null, Type.FUNCTION],
   onerror: [null, Type.FUNCTION],
   onactivatefile: [null, Type.FUNCTION],
+  oninitfile: [null, Type.FUNCTION],
   onaddfilestart: [null, Type.FUNCTION],
   onaddfileprogress: [null, Type.FUNCTION],
   onaddfile: [null, Type.FUNCTION],
@@ -3597,9 +3606,12 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     // remember the original item source
     state.source = source;
 
+    // source is known
+    api.fireSync('init');
+
     // file stub is already there
     if (state.file) {
-      fire('load-skip');
+      api.fireSync('load-skip');
       return;
     }
 
@@ -4428,6 +4440,10 @@ const actions = (dispatch, query, state) => ({
     const id = item.id;
 
     // observe item events
+    item.on('init', () => {
+      dispatch('DID_INIT_ITEM', { id });
+    });
+
     item.on('load-init', () => {
       dispatch('DID_START_ITEM_LOAD', { id });
     });
@@ -4938,8 +4954,6 @@ const actions = (dispatch, query, state) => ({
         // correctly removed
         success(createItemAPI(item));
       };
-
-      console.log('REMOVE_ITEM', options);
 
       // if this is a local file and the server.remove function has been configured, send source there so dev can remove file from server
       const server = state.options.server;
@@ -8726,6 +8740,7 @@ const createApp = (initialOptions = {}) => {
 
     DID_THROW_MAX_FILES: createEvent('warning'),
 
+    DID_INIT_ITEM: createEvent('initfile'),
     DID_START_ITEM_LOAD: createEvent('addfilestart'),
     DID_UPDATE_ITEM_LOAD_PROGRESS: createEvent('addfileprogress'),
     DID_LOAD_ITEM: createEvent('addfile'),
@@ -8808,21 +8823,22 @@ const createApp = (initialOptions = {}) => {
   };
 
   const routeActionsToEvents = actions => {
-    if (!actions.length) {
-      return;
-    }
-
-    actions.forEach(action => {
-      if (!eventRoutes[action.type]) {
-        return;
-      }
-      const routes = eventRoutes[action.type];
-      (Array.isArray(routes) ? routes : [routes]).forEach(route => {
-        setTimeout(() => {
-          exposeEvent(route(action.data));
-        }, 0);
+    if (!actions.length) return;
+    actions
+      .filter(action => eventRoutes[action.type])
+      .forEach(action => {
+        const routes = eventRoutes[action.type];
+        (Array.isArray(routes) ? routes : [routes]).forEach(route => {
+          // this isn't fantastic, but because of the stacking of settimeouts plugins can handle the did_load before the did_init
+          if (action.type === 'DID_INIT_ITEM') {
+            exposeEvent(route(action.data));
+          } else {
+            setTimeout(() => {
+              exposeEvent(route(action.data));
+            }, 0);
+          }
+        });
       });
-    });
   };
 
   //

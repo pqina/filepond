@@ -380,6 +380,10 @@ export const actions = (dispatch, query, state) => ({
         const id = item.id;
 
         // observe item events
+        item.on('init', () => {
+            dispatch('DID_INIT_ITEM', { id });
+        });
+
         item.on('load-init', () => {
             dispatch('DID_START_ITEM_LOAD', { id });
         });
@@ -879,8 +883,6 @@ export const actions = (dispatch, query, state) => ({
             // correctly removed
             success(createItemAPI(item));
         }
-
-        console.log('REMOVE_ITEM', options);
 
         // if this is a local file and the server.remove function has been configured, send source there so dev can remove file from server
         const server = state.options.server;

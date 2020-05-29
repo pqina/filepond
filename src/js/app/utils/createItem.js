@@ -84,10 +84,13 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
 
         // remember the original item source
         state.source = source;
+
+        // source is known
+        api.fireSync('init');
         
         // file stub is already there
         if (state.file) {
-            fire('load-skip');
+            api.fireSync('load-skip');
             return;
         }
 
@@ -188,7 +191,7 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         state.activeLoader = loader;
 
         // load the source data
-        loader.load();
+        loader.load()
     };
 
     const retryLoad = () => {

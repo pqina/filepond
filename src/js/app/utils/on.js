@@ -1,7 +1,10 @@
 import { arrayRemove } from '../../utils/arrayRemove';
 
-const fire = (cb) => {
-    if (document.hidden) {
+const run = (cb, sync) => {
+    if (sync) {
+        cb();
+    }
+    else if (document.hidden) {
         Promise.resolve(1).then(cb);
     }
     else {
@@ -19,12 +22,18 @@ export const on = () => {
             )
         );
     };
+    const fire = (event, args, sync) => {
+        listeners
+            .filter(listener => listener.event === event)
+            .map(listener => listener.cb)
+            .forEach(cb => run(() => cb(...args), sync));
+    }
     return {
+        fireSync: (event, ...args) => {
+            fire(event, args, true);
+        },
         fire: (event, ...args) => {
-                listeners
-                    .filter(listener => listener.event === event)
-                    .map(listener => listener.cb)
-                    .forEach(cb => fire(() => cb(...args)));
+            fire(event, args, false);
         },
         on: (event, cb) => {
             listeners.push({ event, cb });

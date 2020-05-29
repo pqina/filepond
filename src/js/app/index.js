@@ -215,6 +215,7 @@ export const createApp = (initialOptions = {}) => {
 
         DID_THROW_MAX_FILES: createEvent('warning'),
 
+        DID_INIT_ITEM: createEvent('initfile'),
         DID_START_ITEM_LOAD: createEvent('addfilestart'),
         DID_UPDATE_ITEM_LOAD_PROGRESS: createEvent('addfileprogress'),
         DID_LOAD_ITEM: createEvent('addfile'),
@@ -304,21 +305,23 @@ export const createApp = (initialOptions = {}) => {
     };
 
     const routeActionsToEvents = actions => {
-        if (!actions.length) {
-            return;
-        }
-
-        actions.forEach(action => {
-            if (!eventRoutes[action.type]) {
-                return;
-            }
-            const routes = eventRoutes[action.type];
-            (Array.isArray(routes) ? routes : [routes]).forEach(route => {
-                setTimeout(() => {
-                    exposeEvent(route(action.data));
-                }, 0);
+        if (!actions.length) return;
+        actions
+            .filter(action => eventRoutes[action.type])
+            .forEach(action => {
+                const routes = eventRoutes[action.type];
+                (Array.isArray(routes) ? routes : [routes]).forEach(route => {
+                    // this isn't fantastic, but because of the stacking of settimeouts plugins can handle the did_load before the did_init
+                    if (action.type === 'DID_INIT_ITEM') {
+                        exposeEvent(route(action.data));
+                    }
+                    else {
+                        setTimeout(() => {
+                            exposeEvent(route(action.data));
+                        }, 0);
+                    }
+                });
             });
-        });
     };
 
     //
