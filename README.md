@@ -69,7 +69,8 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 
 *   [PHP](https://github.com/pqina/filepond-boilerplate-php)
 *   [Django](https://github.com/ImperialCollegeLondon/django-drf-filepond)  (third-party)
-*   [Laravel](https://github.com/Sopamo/laravel-filepond) (third-party)
+*   [Laravel `sopamo/laravel-filepond`](https://github.com/Sopamo/laravel-filepond) (third-party)
+*   [Laravel `albert221/laravel-filepond`](https://github.com/Albert221/laravel-filepond) (third-party)
 
 
 ## Quick Start
