@@ -50,9 +50,9 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 *   [Image resize](https://github.com/pqina/filepond-plugin-image-resize)
 *   [Image transform](https://github.com/pqina/filepond-plugin-image-transform)
 *   [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
-*   [Image overlay](https://github.com/nielsboogaard/filepond-plugin-image-overlay) (third-party)
-*   [Media preview](https://github.com/nielsboogaard/filepond-plugin-media-preview) (third-party)
-*   [Get file](https://github.com/nielsboogaard/filepond-plugin-get-file) (third-party)
+*   [Image overlay](https://github.com/nielsboogaard/filepond-plugin-image-overlay) ([nielsboogaard/filepond-plugin-image-overlay](https://github.com/nielsboogaard/filepond-plugin-image-overlay))
+*   [Media preview](https://github.com/nielsboogaard/filepond-plugin-media-preview) ([nielsboogaard/filepond-plugin-media-preview](https://github.com/nielsboogaard/filepond-plugin-media-preview))
+*   [Get file](https://github.com/nielsboogaard/filepond-plugin-get-file) ([nielsboogaard/filepond-plugin-get-file](https://github.com/nielsboogaard/filepond-plugin-get-file))
 
 
 ### Adapters
@@ -61,16 +61,16 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 *   [Vue](https://github.com/pqina/vue-filepond)
 *   [jQuery](https://github.com/pqina/jquery-filepond)
 *   [Angular](https://github.com/pqina/ngx-filepond)
-*   [Angular 1](https://github.com/johnnyasantoss/angularjs-filepond) (third-party)
-*   [Ember](https://github.com/alexdiliberto/ember-filepond) (third-party)
+*   [Angular 1](https://github.com/johnnyasantoss/angularjs-filepond) ([johnnyasantoss/angularjs-filepond](https://github.com/johnnyasantoss/angularjs-filepond))
+*   [Ember](https://github.com/alexdiliberto/ember-filepond) ([alexdiliberto/ember-filepond](https://github.com/alexdiliberto/ember-filepond))
 
 
 ### Backend
 
 *   [PHP](https://github.com/pqina/filepond-boilerplate-php)
-*   [Django](https://github.com/ImperialCollegeLondon/django-drf-filepond)  (third-party)
-*   [Laravel `sopamo/laravel-filepond`](https://github.com/Sopamo/laravel-filepond) (third-party)
-*   [Laravel `albert221/laravel-filepond`](https://github.com/Albert221/laravel-filepond) (third-party)
+*   [Django](https://github.com/ImperialCollegeLondon/django-drf-filepond)  ([ImperialCollegeLondon/django-drf-filepond](https://github.com/ImperialCollegeLondon/django-drf-filepond))
+*   [Laravel](https://github.com/Sopamo/laravel-filepond) ([Sopamo/laravel-filepond](https://github.com/Sopamo/laravel-filepond))
+*   [Laravel](https://github.com/Albert221/laravel-filepond) ([Albert221/laravel-filepond](https://github.com/Albert221/laravel-filepond))
 
 
 ## Quick Start
