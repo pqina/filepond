@@ -156,9 +156,11 @@ export const createFileProcessor = processFn => {
         // stop updater
         state.perceivedPerformanceUpdater.clear();
 
-        // abort actual request
-        state.request.abort();
-
+		// abort actual request
+		if (state.request.abort) {
+       		state.request.abort();
+		}
+		
         // if has response object, we've completed the request
         state.complete = true;
     };
