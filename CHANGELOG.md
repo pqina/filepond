@@ -2,7 +2,7 @@
 
 ## 4.15.0
 
-- Add support for reording items in grid layout.
+- Add support for reording items in grid layout. Thanks @jwsinner ❤︎
 
 
 ## 4.14.0
