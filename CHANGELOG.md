@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.15.1
+
+- Fix issue with abort being called even when not supplied.
+
+
 ## 4.15.0
 
 - Add support for reording items in grid layout. Thanks @jwsinner ❤︎
