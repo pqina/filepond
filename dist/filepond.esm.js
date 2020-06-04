@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.15.0
+ * FilePond 4.15.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -3323,9 +3323,7 @@ const createFileProcessor = processFn => {
       // we've not yet started the real download, stop here
       // the request might not go through, for instance, there might be some server trouble
       // if state.progress is null, the server does not allow computing progress and we show the spinner instead
-      if (state.duration === 0 || state.progress === null) {
-        return;
-      }
+      if (state.duration === 0 || state.progress === null) return;
 
       // as we're now processing, fire the progress event
       api.fire('progress', api.getProgress());
@@ -3459,7 +3457,7 @@ const createFileProcessor = processFn => {
     state.perceivedPerformanceUpdater.clear();
 
     // abort actual request
-    state.request.abort();
+    if (state.request.abort) state.request.abort();
 
     // if has response object, we've completed the request
     state.complete = true;
