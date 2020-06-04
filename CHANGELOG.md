@@ -2,7 +2,7 @@
 
 ## 4.14.0
 
-- Add `oninitfile`, called when file is first initialised, can be used to immidiately set metadata.
+- Add `oninitfile`, called when file is first initialised, can be used to immediately set metadata.
 
 
 ## 4.13.7
