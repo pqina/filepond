@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.14.0
+ * FilePond 4.15.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -8661,6 +8661,23 @@
     }
   });
 
+  var preDragItemIndices = {
+    itemList: [],
+    update: function update(items) {
+      var _this = this;
+      this.itemList = [];
+      items.map(function(item) {
+        _this.itemList.push(item.id);
+      });
+    },
+    updateByIndex: function updateByIndex(id, index) {
+      this.itemList.splice(index, 0, id);
+    },
+    indexById: function indexById(id) {
+      return this.itemList.indexOf(id);
+    }
+  };
+
   var ITEM_TRANSLATE_SPRING = {
     type: 'spring',
     stiffness: 0.75,
@@ -8791,6 +8808,8 @@
           }, 0);
         }
       };
+
+      preDragItemIndices.update(root.query('GET_ACTIVE_ITEMS'));
 
       document.addEventListener('pointermove', drag);
       document.addEventListener('pointerup', drop);
@@ -8990,6 +9009,27 @@
     return l;
   };
 
+  var dropAreaDimensions = {
+    height: 0,
+    width: 0,
+    get getHeight() {
+      return this.height;
+    },
+    set setHeight(val) {
+      if (this.height === 0 || val === 0) this.height = val;
+    },
+    get getWidth() {
+      return this.width;
+    },
+    set setWidth(val) {
+      if (this.width === 0 || val === 0) this.width = val;
+    },
+    setDimensions: function setDimensions(height, width) {
+      if (this.height === 0 || height === 0) this.height = height;
+      if (this.width === 0 || width === 0) this.width = width;
+    }
+  };
+
   var create$8 = function create(_ref) {
     var root = _ref.root;
     // need to set role to list as otherwise it won't be read as a list by VoiceOver
@@ -9136,11 +9176,17 @@
       child.rect.element.marginTop * 0.5
     );
   };
+  var getItemWidth = function getItemWidth(child) {
+    return (
+      child.rect.element.width +
+      child.rect.element.marginLeft * 0.5 +
+      child.rect.element.marginRight * 0.5
+    );
+  };
 
   var dragItem = function dragItem(_ref4) {
     var root = _ref4.root,
-      action = _ref4.action,
-      props = _ref4.props;
+      action = _ref4.action;
     var id = action.id;
 
     // get the view matching the given id
@@ -9148,59 +9194,94 @@
       return child.id === id;
     });
 
+    if (!preDragItemIndices.itemList.length) {
+      preDragItemIndices.update(root.childViews);
+    }
+
+    var numItems = root.childViews.length;
+    var oldIndex = preDragItemIndices.indexById(id);
+
     // if no view found, exit
     if (!view) return;
 
     var dragPosition = {
-      x: 0,
+      x: view.dragOrigin.x + view.dragOffset.x + view.dragCenter.x,
       y: view.dragOrigin.y + view.dragOffset.y + view.dragCenter.y
 
-      // find new index
+      // get drag area dimensions
     };
-    var items = root.query('GET_ACTIVE_ITEMS');
-    var visibleChildren = root.childViews.filter(function(child) {
-      return child.rect.element.height;
-    });
-    var children = items.map(function(item) {
-      return visibleChildren.find(function(childView) {
-        return childView.id === item.id;
-      });
-    });
-
-    var l = children.length;
-    var targetIndex = l - 1;
-
-    var childHeight = 0;
-    var childBottom = 0;
-    var childTop = 0;
-
-    var currentIndex = children.findIndex(function(child) {
-      return child === view;
-    });
     var dragHeight = getItemHeight(view);
+    var dragWidth = getItemWidth(view);
 
-    for (var i = 0; i < l; i++) {
-      childHeight = getItemHeight(children[i]);
-      childTop = childBottom;
-      childBottom = childTop + childHeight;
+    // get rows and columns (There will always be at least one row and one column if a file is present)
+    var cols = Math.floor(root.rect.outer.width / dragWidth);
+    if (cols > numItems) cols = numItems;
 
-      if (dragPosition.y < childBottom) {
-        if (currentIndex > i) {
-          if (dragPosition.y < childTop + dragHeight) {
-            targetIndex = i;
+    // rows are used to find when we have left the preview area bounding box
+    var rows = Math.floor(numItems / cols + 1);
+
+    dropAreaDimensions.setHeight = dragHeight * rows;
+    dropAreaDimensions.setWidth = dragWidth * cols;
+
+    // get new index of dragged item
+    var location = {
+      y: Math.floor(dragPosition.y / dragHeight),
+      x: Math.floor(dragPosition.x / dragWidth),
+      getGridIndex: function getGridIndex() {
+        if (
+          dragPosition.y > dropAreaDimensions.getHeight ||
+          dragPosition.y < 0 ||
+          dragPosition.x > dropAreaDimensions.getWidth ||
+          dragPosition.x < 0
+        )
+          return oldIndex;
+        return this.y * cols + this.x;
+      },
+      getColIndex: function getColIndex() {
+        var items = root.query('GET_ACTIVE_ITEMS');
+        var visibleChildren = root.childViews.filter(function(child) {
+          return child.rect.element.height;
+        });
+        var children = items.map(function(item) {
+          return visibleChildren.find(function(childView) {
+            return childView.id === item.id;
+          });
+        });
+        var currentIndex = children.findIndex(function(child) {
+          return child === view;
+        });
+        var dragHeight = getItemHeight(view);
+        var l = children.length;
+        var idx = l;
+        var childHeight = 0;
+        var childBottom = 0;
+        var childTop = 0;
+        for (var i = 0; i < l; i++) {
+          childHeight = getItemHeight(children[i]);
+          childTop = childBottom;
+          childBottom = childTop + childHeight;
+          if (dragPosition.y < childBottom) {
+            if (currentIndex > i) {
+              if (dragPosition.y < childTop + dragHeight) {
+                idx = i;
+                break;
+              }
+              continue;
+            }
+            idx = i;
             break;
           }
-          continue;
         }
-        targetIndex = i;
-        break;
+        return idx;
       }
-    }
 
-    root.dispatch('MOVE_ITEM', { query: view, index: targetIndex });
+      // get new index
+    };
+    var index = cols > 1 ? location.getGridIndex() : location.getColIndex();
+    root.dispatch('MOVE_ITEM', { query: view, index: index });
 
     // if the index of the item changed, dispatch reorder action
-    if (currentIndex !== targetIndex) {
+    if (oldIndex !== index) {
       root.dispatch('DID_REORDER_ITEMS', {
         items: root.query('GET_ACTIVE_ITEMS')
       });

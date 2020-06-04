@@ -1,6 +1,7 @@
 import { createView, createRoute } from '../frame/index';
 import { fileWrapper } from './fileWrapper';
 import { panel } from './panel';
+import { preDragItemIndices } from '../../utils/preDragItemIndices';
 
 const ITEM_TRANSLATE_SPRING = {
     type: 'spring',
@@ -128,6 +129,8 @@ const create = ({ root, props }) => {
                 setTimeout(() => root.element.addEventListener('click', root.ref.handleClick), 0);
             }
         };
+
+        preDragItemIndices.update(root.query('GET_ACTIVE_ITEMS'));
     
         document.addEventListener('pointermove', drag);
         document.addEventListener('pointerup', drop);

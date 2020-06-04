@@ -3,6 +3,8 @@ import { InteractionMethod } from '../enum/InteractionMethod';
 import { item } from './item';
 import { attr } from '../../utils/attr';
 import { getItemIndexByPosition } from '../utils/getItemIndexByPosition';
+import { preDragItemIndices } from '../../utils/preDragItemIndices';
+import { dropAreaDimensions } from '../utils/dropAreaDimensions';
 
 const create = ({ root }) => {
     // need to set role to list as otherwise it won't be read as a list by VoiceOver
@@ -33,7 +35,7 @@ const addItemView = ({ root, action }) => {
     }
 
     root.ref.lastItemSpanwDate = spawnDate;
-    
+
     root.appendChildView(
         root.createChildView(
             // view type
@@ -77,7 +79,7 @@ const moveItem = (item, x, y, vx = 0, vy = 1) => {
             item.scaleX = 1;
             item.scaleY = 1;
             item.opacity = 1;
-            
+
         }
     }
 
@@ -99,7 +101,7 @@ const introItemView = (item, x, y, vx, vy) => {
 
         item.translateY = null;
         item.translateY = y - (vy * 10);
-    
+
         item.scaleX = .8;
         item.scaleY = .8;
     }
@@ -142,62 +144,93 @@ const removeItemView = ({ root, action }) => {
     view.markedForRemoval = true;
 };
 
-const getItemHeight = child => child.rect.element.height + (child.rect.element.marginBottom * .5) + (child.rect.element.marginTop * .5); 
+const getItemHeight = child => child.rect.element.height + (child.rect.element.marginBottom * .5) + (child.rect.element.marginTop * .5);
+const getItemWidth = child => child.rect.element.width + (child.rect.element.marginLeft * .5) + (child.rect.element.marginRight * .5);
 
-const dragItem = ({ root, action, props }) => {
-    
+const dragItem = ({ root, action }) => {
+
     const { id } = action;
 
     // get the view matching the given id
     const view = root.childViews.find(child => child.id === id);
 
+    if (!preDragItemIndices.itemList.length) {
+        preDragItemIndices.update(root.childViews);
+    }
+
+    const numItems = root.childViews.length;
+    const oldIndex = preDragItemIndices.indexById(id);
+
     // if no view found, exit
     if (!view) return;
 
     const dragPosition = {
-        x: 0,
+        x: view.dragOrigin.x + view.dragOffset.x + view.dragCenter.x,
         y: view.dragOrigin.y + view.dragOffset.y + view.dragCenter.y
     }
-    
-    // find new index
-    const items = root.query('GET_ACTIVE_ITEMS');
-    const visibleChildren = root.childViews.filter(child => child.rect.element.height);
-    const children = items.map(item => visibleChildren.find(childView => childView.id === item.id));
-    
-    const l = children.length;
-    let targetIndex = l - 1;
 
-    let childHeight = 0;
-    let childBottom = 0;
-    let childTop = 0;
+    // get drag area dimensions
+    const dragHeight = getItemHeight(view);
+    const dragWidth = getItemWidth(view);
 
-    let currentIndex = children.findIndex(child => child === view);
-    let dragHeight = getItemHeight(view);
+    // get rows and columns (There will always be at least one row and one column if a file is present)
+    let cols = Math.floor(root.rect.outer.width / dragWidth);
+    if (cols > numItems) cols = numItems;
 
-    for (let i=0; i<l; i++) {
+    // rows are used to find when we have left the preview area bounding box
+    const rows = Math.floor(numItems / cols + 1);
 
-        childHeight = getItemHeight(children[i]);
-        childTop = childBottom;
-        childBottom = childTop + childHeight;
-        
-        if (dragPosition.y < childBottom) {
-            if (currentIndex > i) {
-                if (dragPosition.y < childTop + dragHeight) {
-                    targetIndex = i;
+    dropAreaDimensions.setHeight = dragHeight * rows;
+    dropAreaDimensions.setWidth = dragWidth * cols;
+
+    // get new index of dragged item
+	var location = {
+		y: Math.floor(dragPosition.y / dragHeight),
+		x: Math.floor(dragPosition.x / dragWidth),
+		getGridIndex: function getGridIndex() {
+			if (dragPosition.y > dropAreaDimensions.getHeight ||
+                dragPosition.y < 0 ||
+                dragPosition.x > dropAreaDimensions.getWidth ||
+                dragPosition.x < 0) return oldIndex;
+            return this.y * cols + this.x;
+		},
+		getColIndex: function getColIndex() {
+            const items = root.query('GET_ACTIVE_ITEMS');
+            const visibleChildren = root.childViews.filter(child => child.rect.element.height);
+            const children = items.map(item => visibleChildren.find(childView => childView.id === item.id));
+            const currentIndex = children.findIndex(child => child === view);
+			const dragHeight = getItemHeight(view);
+            const l = children.length;
+			let idx = l;
+            let childHeight = 0;
+			let childBottom = 0;
+			let childTop = 0;
+            for (let i = 0; i < l; i++) {
+                childHeight = getItemHeight(children[i]);
+                childTop = childBottom;
+                childBottom = childTop + childHeight;
+                if (dragPosition.y < childBottom) {
+                    if (currentIndex > i) {
+                        if (dragPosition.y < childTop + dragHeight) {
+                            idx = i;
+                            break;
+                        }
+                        continue;
+                    }
+                    idx = i;
                     break;
                 }
-                continue;
             }
-            targetIndex = i;
-            break;
-        }
-        
+			return idx;
+		}
     }
     
-    root.dispatch('MOVE_ITEM', { query: view, index: targetIndex });
-    
+    // get new index
+	const index = cols > 1 ? location.getGridIndex() : location.getColIndex();
+    root.dispatch('MOVE_ITEM', { query: view, index });
+
     // if the index of the item changed, dispatch reorder action
-    if (currentIndex !== targetIndex) {
+    if (oldIndex !== index) {
         root.dispatch('DID_REORDER_ITEMS', { items: root.query('GET_ACTIVE_ITEMS') });
     }
 };
@@ -219,7 +252,7 @@ const route = createRoute({
  * @param props
  */
 const write = ({ root, props, actions, shouldOptimize }) => {
-    
+
     // route actions
     route({ root, props, actions });
 
@@ -227,16 +260,16 @@ const write = ({ root, props, actions, shouldOptimize }) => {
 
     // available space on horizontal axis
     const horizontalSpace = root.rect.element.width;
-    
+
     // only draw children that have dimensions
     const visibleChildren = root.childViews.filter(child => child.rect.element.height);
-    
+
     // sort based on current active items
     const children = root.query('GET_ACTIVE_ITEMS').map(item => visibleChildren.find(child => child.id === item.id)).filter(item => item);
 
     // get index
     const dragIndex = dragCoordinates ? getItemIndexByPosition(root, children, dragCoordinates) : null;
-    
+
     // add index is used to reserve the dropped/added item index till the actual item is rendered
     const addIndex = root.ref.addIndex || null;
 
@@ -287,7 +320,7 @@ const write = ({ root, props, actions, shouldOptimize }) => {
                 child.translateX = null;
                 child.translateY = null;
             }
-            
+
             if (!child.markedForRemoval) {
                 moveItem(child, 0, offsetY + dragOffset);
             }
@@ -295,7 +328,7 @@ const write = ({ root, props, actions, shouldOptimize }) => {
             let itemHeight = child.rect.element.height + itemVerticalMargin;
 
             let visualHeight = itemHeight * (child.markedForRemoval ? child.opacity : 1);
-            
+
             offsetY += visualHeight;
 
         });
@@ -315,7 +348,7 @@ const write = ({ root, props, actions, shouldOptimize }) => {
             if (index === addIndex) {
                 addIndexOffset += 1;
             }
-            
+
             if (child.markedForRemoval && child.opacity < .5) {
                 removeIndexOffset -= 1;
             }
@@ -340,7 +373,7 @@ const write = ({ root, props, actions, shouldOptimize }) => {
                 child.translateX = null;
                 child.translateY = null;
             }
-    
+
             moveItem(child, offsetX, offsetY, vectorX, vectorY);
         });
     }
@@ -354,7 +387,7 @@ const write = ({ root, props, actions, shouldOptimize }) => {
  */
 const filterSetItemActions = (child, actions) =>
     actions.filter(action => {
-        
+
         // if action has an id, filter out actions that don't have this child id
         if (action.data && action.data.id) {
             return child.id === action.data.id;
@@ -371,11 +404,11 @@ export const list = createView({
     name: 'list',
     didWriteView: ({ root }) => {
         root.childViews
-        .filter(view => view.markedForRemoval && view.opacity === 0 && view.resting)
-        .forEach(view => {
-            view._destroy();
-            root.removeChildView(view);
-        });
+            .filter(view => view.markedForRemoval && view.opacity === 0 && view.resting)
+            .forEach(view => {
+                view._destroy();
+                root.removeChildView(view);
+            });
     },
     filterFrameActionsForChild: filterSetItemActions,
     mixins: {

@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.15.0
+
+- Add support for reording items in grid layout.
+
+
 ## 4.14.0
 
 - Add `oninitfile`, called when file is first initialised, can be used to immediately set metadata.
