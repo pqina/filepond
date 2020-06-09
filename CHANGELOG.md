@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.16.0
+
+- Add `allowSyncAcceptAttribute`, set to `false` to prevent FilePond from setting the file input field `accept` attribute to the value of the `acceptedFileTypes`.
+
+
 ## 4.15.1
 
 - Fix issue with abort being called even when not supplied.

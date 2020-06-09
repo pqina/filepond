@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.15.1
+ * FilePond 4.16.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1879,6 +1879,9 @@ const defaultOptions = {
   // - "camera", "microphone" or "camcorder",
   // - Does not work with multiple on apple devices
   // - If set, acceptedFileTypes must be made to match with media wildcard "image/*", "audio/*" or "video/*"
+
+  // sync `acceptedFileTypes` property with `accept` attribute
+  allowSyncAcceptAttribute: [true, Type.BOOLEAN],
 
   // Feature toggles
   allowDrop: [true, Type.BOOLEAN], // Allow dropping of files
@@ -6898,6 +6901,7 @@ const create$a = ({ root, props }) => {
 };
 
 const setAcceptedFileTypes = ({ root, action }) => {
+  if (!root.query('GET_ALLOW_SYNC_ACCEPT_ATTRIBUTE')) return;
   attrToggle(
     root.element,
     'accept',

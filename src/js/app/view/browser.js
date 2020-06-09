@@ -51,6 +51,7 @@ const create = ({ root, props }) => {
 };
 
 const setAcceptedFileTypes = ({ root, action }) => {
+    if (!root.query('GET_ALLOW_SYNC_ACCEPT_ATTRIBUTE')) return;
     attrToggle(
         root.element,
         'accept',
