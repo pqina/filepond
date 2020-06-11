@@ -5,13 +5,13 @@ const create = ({ root }) => root.ref.fields = {};
 
 const getField = (root, id) => root.ref.fields[id];
 
-const syncFieldPositionssWithItems = (root) => {
+const syncFieldPositionsWithItems = (root) => {
     root.query('GET_ACTIVE_ITEMS').forEach(item => {
         root.element.appendChild(root.ref.fields[item.id]);
     })
 }
 
-const didReorderItems = ({ root }) => syncFieldPositionssWithItems(root)
+const didReorderItems = ({ root }) => syncFieldPositionsWithItems(root)
 
 const didAddItem = ({ root, action }) => {
     const dataContainer = createElement('input');
@@ -48,6 +48,7 @@ const didDefineValue = ({ root, action }) => {
     else {
         field.value = action.value;
     }
+    syncFieldPositionsWithItems(root);
 };
 
 const write = createRoute({

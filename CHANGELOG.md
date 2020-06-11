@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.17.0
+
+- Add `allowProcess`, set to `false` to remove processing button and related abort / retry processing controls.
+- Fix issue where hidden inputs didn't reflect visual order of files in list.
+
+
 ## 4.16.0
 
 - Add `allowSyncAcceptAttribute`, set to `false` to prevent FilePond from setting the file input field `accept` attribute to the value of the `acceptedFileTypes`.

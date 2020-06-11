@@ -71,6 +71,11 @@ const calculateFileInfoOffset = root => {
     return buttonRect.hidden ? null : buttonRect.width + buttonRect.left;
 }
 
+const calculateButtonWidth = root => {
+    const buttonRect = root.ref.buttonAbortItemLoad.rect.element;
+    return buttonRect.width;
+}
+
 // Force on full pixels so text stays crips
 const calculateFileVerticalCenterOffset = root => Math.floor(root.ref.buttonRemoveItem.rect.element.height / 4)
 const calculateFileHorizontalCenterOffset = root =>  Math.floor(root.ref.buttonRemoveItem.rect.element.left / 2);
@@ -129,14 +134,12 @@ const StyleMap = {
         info: { translateX: calculateFileInfoOffset },
         status: { opacity: 0 }
     },
-
     DID_THROW_ITEM_REMOVE_ERROR: {
         processProgressIndicator: { opacity: 0, align: getRemoveIndicatorAligment },
         buttonRemoveItem: { opacity: 1 },
         info: { translateX: calculateFileInfoOffset },
         status: { opacity: 1, translateX: calculateFileInfoOffset }
     },
-
     DID_LOAD_ITEM: IdleStyle,
     DID_LOAD_LOCAL_ITEM: {
         buttonRemoveItem: { opacity: 1 },
@@ -199,6 +202,9 @@ const create = ({ root, props }) => {
 
     // allow reverting upload
     const allowRevert = root.query('GET_ALLOW_REVERT');
+
+    // allow processing upload
+    const allowProcess = root.query('GET_ALLOW_PROCESS');
     
     // is instant uploading, need this to determine the icon of the undo button
     const instantUpload = root.query('GET_INSTANT_UPLOAD');
@@ -210,9 +216,27 @@ const create = ({ root, props }) => {
     const alignRemoveItemButton = root.query('GET_STYLE_BUTTON_REMOVE_ITEM_ALIGN');
 
     // enabled buttons array
-    const enabledButtons = isAsync
-        ? ButtonKeys.concat()
-        : ButtonKeys.filter(key => !/Process/.test(key));
+    let buttonFilter;
+    if (isAsync) {
+        if (allowProcess && !allowRevert) {
+            // only remove revert button
+            buttonFilter = key => !/RevertItemProcessing/.test(key);
+        }
+        else if (!allowProcess && allowRevert) {
+            // only remove process button
+            buttonFilter = key => !/ProcessItem|RetryItemProcessing|AbortItemProcessing/.test(key);
+        }
+        else if (!allowProcess && !allowRevert) {
+            // remove all process buttons
+            buttonFilter = key => !/Process/.test(key);
+        }
+    }
+    else {
+        // no process controls available
+        buttonFilter = key => !/Process/.test(key);
+    }
+    
+    const enabledButtons = buttonFilter ? ButtonKeys.filter(buttonFilter) : ButtonKeys.concat();
 
     // update icon and label for revert button when instant uploading
     if (instantUpload && allowRevert) {
@@ -222,12 +246,19 @@ const create = ({ root, props }) => {
 
     // remove last button (revert) if not allowed
     if (isAsync && !allowRevert) {
-        enabledButtons.splice(-1, 1);
         const map = StyleMap['DID_COMPLETE_ITEM_PROCESSING'];
         map.info.translateX = calculateFileHorizontalCenterOffset;
-        map.info.translateY = calculateFileVerticalCenterOffset; 
+        map.info.translateY = calculateFileVerticalCenterOffset;
         map.status.translateY = calculateFileVerticalCenterOffset;
         map.processingCompleteIndicator = { opacity: 1, scaleX: 1, scaleY: 1 }
+    }
+
+    // should align center
+    if (isAsync && !allowProcess) {
+        ['DID_START_ITEM_PROCESSING', 'DID_REQUEST_ITEM_PROCESSING', 'DID_UPDATE_ITEM_PROCESS_PROGRESS', 'DID_THROW_ITEM_PROCESSING_ERROR'].forEach(key => {
+            StyleMap[key].status.translateY = calculateFileVerticalCenterOffset;
+        })
+        StyleMap['DID_THROW_ITEM_PROCESSING_ERROR'].status.translateX = calculateButtonWidth;
     }
 
     // move remove button to right

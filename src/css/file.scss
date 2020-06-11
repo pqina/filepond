@@ -73,6 +73,27 @@
     }
 }
 
+[data-filepond-item-state~='processing'] {
+    
+    .filepond--file-status-sub {
+        opacity: 0;
+    }
+
+    .filepond--action-abort-item-processing ~ .filepond--file-status .filepond--file-status-sub {
+        opacity: .5;
+    }
+}
+
+[data-filepond-item-state='processing-error'] {
+    
+    .filepond--file-status-sub {
+        opacity: 0;
+    }
+
+    .filepond--action-retry-item-processing ~ .filepond--file-status .filepond--file-status-sub {
+        opacity: .5;
+    }
+}
 
 [data-filepond-item-state='processing-complete'] {
 

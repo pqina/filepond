@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.16.0
+ * FilePond 4.17.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -316,6 +316,28 @@
 [data-filepond-item-state*='invalid'] .filepond--file-info,
 [data-filepond-item-state*='error'] .filepond--file-info {
   margin-right: 2.25em;
+}
+
+[data-filepond-item-state~='processing'] .filepond--file-status-sub {
+  opacity: 0;
+}
+
+[data-filepond-item-state~='processing']
+  .filepond--action-abort-item-processing
+  ~ .filepond--file-status
+  .filepond--file-status-sub {
+  opacity: 0.5;
+}
+
+[data-filepond-item-state='processing-error'] .filepond--file-status-sub {
+  opacity: 0;
+}
+
+[data-filepond-item-state='processing-error']
+  .filepond--action-retry-item-processing
+  ~ .filepond--file-status
+  .filepond--file-status-sub {
+  opacity: 0.5;
 }
 
 [data-filepond-item-state='processing-complete']

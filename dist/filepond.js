@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.16.0
+ * FilePond 4.17.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -3924,6 +3924,7 @@
     allowMultiple: [false, Type.BOOLEAN], // Allow multiple files (disabled by default, as multiple attribute is also required on input to allow multiple)
     allowReplace: [true, Type.BOOLEAN], // Allow dropping a file on other file to replace it (only works when multiple is set to false)
     allowRevert: [true, Type.BOOLEAN], // Allows user to revert file upload
+    allowProcess: [true, Type.BOOLEAN], // Allows user to process a file, when set to false, this removes the file upload button
     allowReorder: [false, Type.BOOLEAN], // Allow reordering of files
     allowDirectoriesOnly: [false, Type.BOOLEAN], // Allow only selecting directories with browse (no support for filtering dnd at this point)
 
@@ -8114,6 +8115,11 @@
     return buttonRect.hidden ? null : buttonRect.width + buttonRect.left;
   };
 
+  var calculateButtonWidth = function calculateButtonWidth(root) {
+    var buttonRect = root.ref.buttonAbortItemLoad.rect.element;
+    return buttonRect.width;
+  };
+
   // Force on full pixels so text stays crips
   var calculateFileVerticalCenterOffset = function calculateFileVerticalCenterOffset(
     root
@@ -8276,6 +8282,9 @@
     // allow reverting upload
     var allowRevert = root.query('GET_ALLOW_REVERT');
 
+    // allow processing upload
+    var allowProcess = root.query('GET_ALLOW_PROCESS');
+
     // is instant uploading, need this to determine the icon of the undo button
     var instantUpload = root.query('GET_INSTANT_UPLOAD');
 
@@ -8288,11 +8297,36 @@
     );
 
     // enabled buttons array
-    var enabledButtons = isAsync
-      ? ButtonKeys.concat()
-      : ButtonKeys.filter(function(key) {
+    var buttonFilter;
+    if (isAsync) {
+      if (allowProcess && !allowRevert) {
+        // only remove revert button
+        buttonFilter = function buttonFilter(key) {
+          return !/RevertItemProcessing/.test(key);
+        };
+      } else if (!allowProcess && allowRevert) {
+        // only remove process button
+        buttonFilter = function buttonFilter(key) {
+          return !/ProcessItem|RetryItemProcessing|AbortItemProcessing/.test(
+            key
+          );
+        };
+      } else if (!allowProcess && !allowRevert) {
+        // remove all process buttons
+        buttonFilter = function buttonFilter(key) {
           return !/Process/.test(key);
-        });
+        };
+      }
+    } else {
+      // no process controls available
+      buttonFilter = function buttonFilter(key) {
+        return !/Process/.test(key);
+      };
+    }
+
+    var enabledButtons = buttonFilter
+      ? ButtonKeys.filter(buttonFilter)
+      : ButtonKeys.concat();
 
     // update icon and label for revert button when instant uploading
     if (instantUpload && allowRevert) {
@@ -8302,12 +8336,26 @@
 
     // remove last button (revert) if not allowed
     if (isAsync && !allowRevert) {
-      enabledButtons.splice(-1, 1);
       var map = StyleMap['DID_COMPLETE_ITEM_PROCESSING'];
       map.info.translateX = calculateFileHorizontalCenterOffset;
       map.info.translateY = calculateFileVerticalCenterOffset;
       map.status.translateY = calculateFileVerticalCenterOffset;
       map.processingCompleteIndicator = { opacity: 1, scaleX: 1, scaleY: 1 };
+    }
+
+    // should align center
+    if (isAsync && !allowProcess) {
+      [
+        'DID_START_ITEM_PROCESSING',
+        'DID_REQUEST_ITEM_PROCESSING',
+        'DID_UPDATE_ITEM_PROCESS_PROGRESS',
+        'DID_THROW_ITEM_PROCESSING_ERROR'
+      ].forEach(function(key) {
+        StyleMap[key].status.translateY = calculateFileVerticalCenterOffset;
+      });
+      StyleMap[
+        'DID_THROW_ITEM_PROCESSING_ERROR'
+      ].status.translateX = calculateButtonWidth;
     }
 
     // move remove button to right
@@ -8696,8 +8744,8 @@
     DID_LOAD_ITEM: 'idle',
     DID_THROW_ITEM_REMOVE_ERROR: 'remove-error',
     DID_START_ITEM_REMOVE: 'busy',
-    DID_START_ITEM_PROCESSING: 'busy',
-    DID_REQUEST_ITEM_PROCESSING: 'busy',
+    DID_START_ITEM_PROCESSING: 'busy processing',
+    DID_REQUEST_ITEM_PROCESSING: 'busy processing',
     DID_UPDATE_ITEM_PROCESS_PROGRESS: 'processing',
     DID_COMPLETE_ITEM_PROCESSING: 'processing-complete',
     DID_THROW_ITEM_PROCESSING_ERROR: 'processing-error',
@@ -9963,9 +10011,7 @@
     return root.ref.fields[id];
   };
 
-  var syncFieldPositionssWithItems = function syncFieldPositionssWithItems(
-    root
-  ) {
+  var syncFieldPositionsWithItems = function syncFieldPositionsWithItems(root) {
     root.query('GET_ACTIVE_ITEMS').forEach(function(item) {
       root.element.appendChild(root.ref.fields[item.id]);
     });
@@ -9973,7 +10019,7 @@
 
   var didReorderItems = function didReorderItems(_ref2) {
     var root = _ref2.root;
-    return syncFieldPositionssWithItems(root);
+    return syncFieldPositionsWithItems(root);
   };
 
   var didAddItem = function didAddItem(_ref3) {
@@ -10019,6 +10065,7 @@
     } else {
       field.value = action.value;
     }
+    syncFieldPositionsWithItems(root);
   };
 
   var write$8 = createRoute({
