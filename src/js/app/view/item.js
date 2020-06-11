@@ -1,7 +1,7 @@
 import { createView, createRoute } from '../frame/index';
 import { fileWrapper } from './fileWrapper';
 import { panel } from './panel';
-import { preDragItemIndices } from '../../utils/preDragItemIndices';
+import { createDragHelper } from '../utils/createDragHelper';
 
 const ITEM_TRANSLATE_SPRING = {
     type: 'spring',
@@ -86,7 +86,9 @@ const create = ({ root, props }) => {
             y: e.offsetY
         }
 
-        root.dispatch('DID_GRAB_ITEM', { id: props.id });
+        const dragState = createDragHelper(root.query('GET_ACTIVE_ITEMS'));
+
+        root.dispatch('DID_GRAB_ITEM', { id: props.id, dragState });
 
         const drag = e => {
 
@@ -107,7 +109,7 @@ const create = ({ root, props }) => {
                 root.element.removeEventListener('click', root.ref.handleClick);
             }
 
-            root.dispatch('DID_DRAG_ITEM', { id: props.id });
+            root.dispatch('DID_DRAG_ITEM', { id: props.id, dragState });
         };
     
         const drop = e => {
@@ -122,7 +124,7 @@ const create = ({ root, props }) => {
                 y: e.pageY - origin.y
             };
 
-            root.dispatch('DID_DROP_ITEM', { id: props.id });
+            root.dispatch('DID_DROP_ITEM', { id: props.id, dragState });
 
             // start listening to clicks again
             if (removedActivateListener) {
@@ -130,8 +132,6 @@ const create = ({ root, props }) => {
             }
         };
 
-        preDragItemIndices.update(root.query('GET_ACTIVE_ITEMS'));
-    
         document.addEventListener('pointermove', drag);
         document.addEventListener('pointerup', drop);
     }

@@ -205,6 +205,12 @@ export const createApp = (initialOptions = {}) => {
             event.progress = data.progress;
         }
 
+        // copy relevant props
+        if (data.hasOwnProperty('origin') && data.hasOwnProperty('target')) {
+            event.origin = data.origin;
+            event.target = data.target;
+        }
+
         return event;
     };
 

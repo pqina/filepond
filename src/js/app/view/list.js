@@ -3,7 +3,6 @@ import { InteractionMethod } from '../enum/InteractionMethod';
 import { item } from './item';
 import { attr } from '../../utils/attr';
 import { getItemIndexByPosition } from '../utils/getItemIndexByPosition';
-import { preDragItemIndices } from '../../utils/preDragItemIndices';
 import { dropAreaDimensions } from '../utils/dropAreaDimensions';
 
 const create = ({ root }) => {
@@ -149,17 +148,16 @@ const getItemWidth = child => child.rect.element.width + (child.rect.element.mar
 
 const dragItem = ({ root, action }) => {
 
-    const { id } = action;
+    const { id, dragState } = action;
+
+    // reference to item
+    const item = root.query('GET_ITEM', { id });
 
     // get the view matching the given id
     const view = root.childViews.find(child => child.id === id);
 
-    if (!preDragItemIndices.itemList.length) {
-        preDragItemIndices.update(root.childViews);
-    }
-
     const numItems = root.childViews.length;
-    const oldIndex = preDragItemIndices.indexById(id);
+    const oldIndex = dragState.getItemIndex(item);
 
     // if no view found, exit
     if (!view) return;
@@ -230,8 +228,15 @@ const dragItem = ({ root, action }) => {
     root.dispatch('MOVE_ITEM', { query: view, index });
 
     // if the index of the item changed, dispatch reorder action
-    if (oldIndex !== index) {
-        root.dispatch('DID_REORDER_ITEMS', { items: root.query('GET_ACTIVE_ITEMS') });
+    const currentIndex = dragState.getIndex();
+
+    if (currentIndex === undefined || currentIndex !== index) {
+        
+        dragState.setIndex(index);
+        
+        if (currentIndex === undefined) return;
+
+        root.dispatch('DID_REORDER_ITEMS', { items: root.query('GET_ACTIVE_ITEMS'), origin: oldIndex, target: index });
     }
 };
 

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.17.0
+ * FilePond 4.17.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -6027,20 +6027,16 @@ const panel = createView({
   }
 });
 
-const preDragItemIndices = {
-  itemList: [],
-  update: function(items) {
-    this.itemList = [];
-    items.map(item => {
-      this.itemList.push(item.id);
-    });
-  },
-  updateByIndex: function(id, index) {
-    this.itemList.splice(index, 0, id);
-  },
-  indexById: function(id) {
-    return this.itemList.indexOf(id);
-  }
+const createDragHelper = items => {
+  const itemIds = items.map(item => item.id);
+  let prevIndex = undefined;
+  return {
+    setIndex: index => {
+      prevIndex = index;
+    },
+    getIndex: () => prevIndex,
+    getItemIndex: item => itemIds.indexOf(item.id)
+  };
 };
 
 const ITEM_TRANSLATE_SPRING = {
@@ -6124,7 +6120,9 @@ const create$7 = ({ root, props }) => {
       y: e.offsetY
     };
 
-    root.dispatch('DID_GRAB_ITEM', { id: props.id });
+    const dragState = createDragHelper(root.query('GET_ACTIVE_ITEMS'));
+
+    root.dispatch('DID_GRAB_ITEM', { id: props.id, dragState });
 
     const drag = e => {
       if (!e.isPrimary) return;
@@ -6146,7 +6144,7 @@ const create$7 = ({ root, props }) => {
         root.element.removeEventListener('click', root.ref.handleClick);
       }
 
-      root.dispatch('DID_DRAG_ITEM', { id: props.id });
+      root.dispatch('DID_DRAG_ITEM', { id: props.id, dragState });
     };
 
     const drop = e => {
@@ -6160,7 +6158,7 @@ const create$7 = ({ root, props }) => {
         y: e.pageY - origin.y
       };
 
-      root.dispatch('DID_DROP_ITEM', { id: props.id });
+      root.dispatch('DID_DROP_ITEM', { id: props.id, dragState });
 
       // start listening to clicks again
       if (removedActivateListener) {
@@ -6170,8 +6168,6 @@ const create$7 = ({ root, props }) => {
         );
       }
     };
-
-    preDragItemIndices.update(root.query('GET_ACTIVE_ITEMS'));
 
     document.addEventListener('pointermove', drag);
     document.addEventListener('pointerup', drop);
@@ -6503,17 +6499,16 @@ const getItemWidth = child =>
   child.rect.element.marginRight * 0.5;
 
 const dragItem = ({ root, action }) => {
-  const { id } = action;
+  const { id, dragState } = action;
+
+  // reference to item
+  const item = root.query('GET_ITEM', { id });
 
   // get the view matching the given id
   const view = root.childViews.find(child => child.id === id);
 
-  if (!preDragItemIndices.itemList.length) {
-    preDragItemIndices.update(root.childViews);
-  }
-
   const numItems = root.childViews.length;
-  const oldIndex = preDragItemIndices.indexById(id);
+  const oldIndex = dragState.getItemIndex(item);
 
   // if no view found, exit
   if (!view) return;
@@ -6591,9 +6586,17 @@ const dragItem = ({ root, action }) => {
   root.dispatch('MOVE_ITEM', { query: view, index });
 
   // if the index of the item changed, dispatch reorder action
-  if (oldIndex !== index) {
+  const currentIndex = dragState.getIndex();
+
+  if (currentIndex === undefined || currentIndex !== index) {
+    dragState.setIndex(index);
+
+    if (currentIndex === undefined) return;
+
     root.dispatch('DID_REORDER_ITEMS', {
-      items: root.query('GET_ACTIVE_ITEMS')
+      items: root.query('GET_ACTIVE_ITEMS'),
+      origin: oldIndex,
+      target: index
     });
   }
 };
@@ -8848,6 +8851,12 @@ const createApp = (initialOptions = {}) => {
     // if this is a progress event add the progress amount
     if (/progress/.test(name)) {
       event.progress = data.progress;
+    }
+
+    // copy relevant props
+    if (data.hasOwnProperty('origin') && data.hasOwnProperty('target')) {
+      event.origin = data.origin;
+      event.target = data.target;
     }
 
     return event;

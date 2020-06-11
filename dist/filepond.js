@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.17.0
+ * FilePond 4.17.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -8710,21 +8710,22 @@
     }
   });
 
-  var preDragItemIndices = {
-    itemList: [],
-    update: function update(items) {
-      var _this = this;
-      this.itemList = [];
-      items.map(function(item) {
-        _this.itemList.push(item.id);
-      });
-    },
-    updateByIndex: function updateByIndex(id, index) {
-      this.itemList.splice(index, 0, id);
-    },
-    indexById: function indexById(id) {
-      return this.itemList.indexOf(id);
-    }
+  var createDragHelper = function createDragHelper(items) {
+    var itemIds = items.map(function(item) {
+      return item.id;
+    });
+    var prevIndex = undefined;
+    return {
+      setIndex: function setIndex(index) {
+        prevIndex = index;
+      },
+      getIndex: function getIndex() {
+        return prevIndex;
+      },
+      getItemIndex: function getItemIndex(item) {
+        return itemIds.indexOf(item.id);
+      }
+    };
   };
 
   var ITEM_TRANSLATE_SPRING = {
@@ -8812,7 +8813,9 @@
         y: e.offsetY
       };
 
-      root.dispatch('DID_GRAB_ITEM', { id: props.id });
+      var dragState = createDragHelper(root.query('GET_ACTIVE_ITEMS'));
+
+      root.dispatch('DID_GRAB_ITEM', { id: props.id, dragState: dragState });
 
       var drag = function drag(e) {
         if (!e.isPrimary) return;
@@ -8834,7 +8837,7 @@
           root.element.removeEventListener('click', root.ref.handleClick);
         }
 
-        root.dispatch('DID_DRAG_ITEM', { id: props.id });
+        root.dispatch('DID_DRAG_ITEM', { id: props.id, dragState: dragState });
       };
 
       var drop = function drop(e) {
@@ -8848,7 +8851,7 @@
           y: e.pageY - origin.y
         };
 
-        root.dispatch('DID_DROP_ITEM', { id: props.id });
+        root.dispatch('DID_DROP_ITEM', { id: props.id, dragState: dragState });
 
         // start listening to clicks again
         if (removedActivateListener) {
@@ -8857,8 +8860,6 @@
           }, 0);
         }
       };
-
-      preDragItemIndices.update(root.query('GET_ACTIVE_ITEMS'));
 
       document.addEventListener('pointermove', drag);
       document.addEventListener('pointerup', drop);
@@ -9236,19 +9237,19 @@
   var dragItem = function dragItem(_ref4) {
     var root = _ref4.root,
       action = _ref4.action;
-    var id = action.id;
+    var id = action.id,
+      dragState = action.dragState;
+
+    // reference to item
+    var item = root.query('GET_ITEM', { id: id });
 
     // get the view matching the given id
     var view = root.childViews.find(function(child) {
       return child.id === id;
     });
 
-    if (!preDragItemIndices.itemList.length) {
-      preDragItemIndices.update(root.childViews);
-    }
-
     var numItems = root.childViews.length;
-    var oldIndex = preDragItemIndices.indexById(id);
+    var oldIndex = dragState.getItemIndex(item);
 
     // if no view found, exit
     if (!view) return;
@@ -9330,9 +9331,17 @@
     root.dispatch('MOVE_ITEM', { query: view, index: index });
 
     // if the index of the item changed, dispatch reorder action
-    if (oldIndex !== index) {
+    var currentIndex = dragState.getIndex();
+
+    if (currentIndex === undefined || currentIndex !== index) {
+      dragState.setIndex(index);
+
+      if (currentIndex === undefined) return;
+
       root.dispatch('DID_REORDER_ITEMS', {
-        items: root.query('GET_ACTIVE_ITEMS')
+        items: root.query('GET_ACTIVE_ITEMS'),
+        origin: oldIndex,
+        target: index
       });
     }
   };
@@ -11810,6 +11819,12 @@
         // if this is a progress event add the progress amount
         if (/progress/.test(name)) {
           event.progress = data.progress;
+        }
+
+        // copy relevant props
+        if (data.hasOwnProperty('origin') && data.hasOwnProperty('target')) {
+          event.origin = data.origin;
+          event.target = data.target;
         }
 
         return event;

@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.17.1
+
+- Fix issue where reorder event was fired on each drag interaction, now only fires when order changes.
+
+
 ## 4.17.0
 
 - Add `allowProcess`, set to `false` to remove processing button and related abort / retry processing controls.
