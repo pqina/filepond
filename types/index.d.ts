@@ -341,7 +341,7 @@ interface FilePondLabelProps {
      * Label used when file load failed.
      * @default 'Error during load'
      */
-    labelFileLoadError?: string;
+    labelFileLoadError?: () => string | string;
     /**
      * Label used when file is removed (assistive only).
      * @default 'Removed'
@@ -366,17 +366,17 @@ interface FilePondLabelProps {
      * Label used when something went wrong during file upload.
      * @default 'Error during upload'
      */
-    labelFileProcessingError?: string;
+    labelFileProcessingError?: () => string | string;
     /**
      * Label used when something went wrong during reverting the file upload.
      * @default 'Error during revert'
      */
-    labelFileProcessingRevertError?: string;
+    labelFileProcessingRevertError?: () => string | string;
     /**
      * Label used when something went during during removing the file upload.
      * @default 'Error during remove'
      */
-    labelFileRemoveError?: string;
+    labelFileRemoveError?: () => string | string;
     /**
      * Label used to indicate to the user that an action can be cancelled.
      * @default 'tap to cancel'
@@ -971,7 +971,7 @@ export class FilePond {
      * Label used when file load failed.
      * @default 'Error during load'
      */
-    labelFileLoadError: string;
+    labelFileLoadError: () => string | string;
     /**
      * Label used when file is removed (assistive only).
      * @default 'Removed'
@@ -996,17 +996,17 @@ export class FilePond {
      * Label used when something went wrong during file upload.
      * @default 'Error during upload'
      */
-    labelFileProcessingError: string;
+    labelFileProcessingError: () => string | string;
     /** 
      * Label used when something went wrong during reverting the file upload.
      * @default 'Error during revert'
      */
-    labelFileProcessingRevertError: string;
+    labelFileProcessingRevertError: () => string | string;
     /** 
      * Label used when something went during during removing the file upload.
      * @default 'Error during remove'
      */
-    labelFileRemoveError: string;
+    labelFileRemoveError: () => string | string;
     /** 
      * Label used to indicate to the user that an action can be cancelled.
      * @default 'tap to cancel'
