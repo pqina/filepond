@@ -371,7 +371,7 @@ interface FilePondLabelProps {
      * Label used when something went wrong during reverting the file upload.
      * @default 'Error during revert'
      */
-    labelFileProcessingRevertError?: (((error: any) => string) | string;
+    labelFileProcessingRevertError?: ((error: any) => string) | string;
     /**
      * Label used when something went during during removing the file upload.
      * @default 'Error during remove'
