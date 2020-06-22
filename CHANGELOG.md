@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.17.2
+
+- Fix issue where order of files wasn't correct when setting initial files.
+
+
 ## 4.17.1
 
 - Fix issue where reorder event was fired on each drag interaction, now only fires when order changes.

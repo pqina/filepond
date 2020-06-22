@@ -10022,6 +10022,7 @@
 
   var syncFieldPositionsWithItems = function syncFieldPositionsWithItems(root) {
     root.query('GET_ACTIVE_ITEMS').forEach(function(item) {
+      if (!root.ref.fields[item.id]) return;
       root.element.appendChild(root.ref.fields[item.id]);
     });
   };
@@ -10038,8 +10039,8 @@
     dataContainer.type = 'hidden';
     dataContainer.name = root.query('GET_NAME');
     dataContainer.disabled = root.query('GET_DISABLED');
-    root.appendChild(dataContainer, 0);
     root.ref.fields[action.id] = dataContainer;
+    syncFieldPositionsWithItems(root);
   };
 
   var didLoadItem$1 = function didLoadItem(_ref4) {

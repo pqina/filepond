@@ -7,6 +7,7 @@ const getField = (root, id) => root.ref.fields[id];
 
 const syncFieldPositionsWithItems = (root) => {
     root.query('GET_ACTIVE_ITEMS').forEach(item => {
+        if (!root.ref.fields[item.id]) return;
         root.element.appendChild(root.ref.fields[item.id]);
     })
 }
@@ -18,8 +19,8 @@ const didAddItem = ({ root, action }) => {
     dataContainer.type = 'hidden';
     dataContainer.name = root.query('GET_NAME');
     dataContainer.disabled = root.query('GET_DISABLED');
-    root.appendChild(dataContainer, 0);
     root.ref.fields[action.id] = dataContainer;
+    syncFieldPositionsWithItems(root);
 }
 
 const didLoadItem = ({ root, action }) => {
