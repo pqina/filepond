@@ -1,8 +1,11 @@
 # Changelog
 
-## 4.17.2
+## 4.18.0
 
+- Add fallback for `fetch` when loading remote URLs, if no custom fetch supplied, will use default request.
+- Add TypeScript dynamic label types.
 - Fix issue where order of files wasn't correct when setting initial files.
+
 
 
 ## 4.17.1

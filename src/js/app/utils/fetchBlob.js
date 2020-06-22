@@ -5,7 +5,7 @@ import { getFileFromBlob } from '../../utils/getFileFromBlob';
 import { getFileInfoFromHeaders } from '../../utils/getFileInfoFromHeaders';
 import { getFilenameFromURL } from '../../utils/getFilenameFromURL';
 
-export const fetchLocal = (url, load, error, progress, abort, headers) => {
+export const fetchBlob = (url, load, error, progress, abort, headers) => {
     const request = sendRequest(null, url, {
         method: 'GET',
         responseType: 'blob'

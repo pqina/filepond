@@ -17,7 +17,7 @@ import { InteractionMethod } from './enum/InteractionMethod';
 import { applyFilterChain, applyFilters } from '../filter';
 import { createItemAPI } from './utils/createItemAPI';
 import { createResponse } from '../utils/createResponse';
-import { fetchLocal } from './utils/fetchLocal';
+import { fetchBlob } from './utils/fetchBlob';
 import { isExternalURL } from '../utils/isExternalURL';
 import { isString } from '../utils/isString';
 import { isFile } from '../utils/isFile';
@@ -586,10 +586,10 @@ export const actions = (dispatch, query, state) => ({
             // this creates a function that loads the file based on the type of file (string, base64, blob, file) and location of file (local, remote, limbo)
             createFileLoader(
                 origin === FileOrigin.INPUT 
-                    // input
+                    // input, if is remote, see if should use custom fetch, else use default fetchBlob
                     ? isString(source) && isExternalURL(source)
-                        ? createFetchFunction(url, fetch) // remote url
-                        : fetchLocal // local url
+                        ? (fetch ? createFetchFunction(url, fetch) : fetchBlob) // remote url
+                        : fetchBlob // try to fetch url
                     // limbo or local
                     : origin === FileOrigin.LIMBO
                         ? createFetchFunction(url, restore) // limbo

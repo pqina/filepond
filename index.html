@@ -33,17 +33,7 @@
         // Create the FilePond instance
         const pond = FilePond.create(inputElement, {
             allowMultiple: true,
-            allowReorder: true,
-            instantUpload: false,
-            server: {
-                load: (source,load) => {
-                    fetch(source).then(res => res.blob()).then(load);
-                }
-            },
-            files: [
-                { source:'index.html', options: { type:'local'} },
-                { source:'banner.js', options: { type:'local'} },
-            ]
+            allowReorder: true
         });
 
         // Easy console access for testing purposes

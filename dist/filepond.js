@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.17.1
+ * FilePond 4.18.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -6378,7 +6378,7 @@
     return items[index] || null;
   };
 
-  var fetchLocal = function fetchLocal(
+  var fetchBlob = function fetchBlob(
     url,
     load,
     error,
@@ -7117,10 +7117,12 @@
           // this creates a function that loads the file based on the type of file (string, base64, blob, file) and location of file (local, remote, limbo)
           createFileLoader(
             origin === FileOrigin.INPUT
-              ? // input
+              ? // input, if is remote, see if should use custom fetch, else use default fetchBlob
                 isString(source) && isExternalURL(source)
-                ? createFetchFunction(url, fetch) // remote url
-                : fetchLocal // local url
+                ? fetch
+                  ? createFetchFunction(url, fetch)
+                  : fetchBlob // remote url
+                : fetchBlob // try to fetch url
               : // limbo or local
               origin === FileOrigin.LIMBO
               ? createFetchFunction(url, restore) // limbo

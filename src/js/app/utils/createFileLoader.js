@@ -47,7 +47,7 @@ export const createFileLoader = fetchFn => {
 
     // loads a url
     const loadURL = url => {
-        
+
         // is remote url and no fetch method supplied
         if (!fetchFn) {
             api.fire('error', {
