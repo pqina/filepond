@@ -1191,7 +1191,7 @@ export class FilePond {
      * Adds a file.
      * @param options.index The index that the file should be added at.
      */
-    addFile: (source: ActualFileObject | Blob | string, options?: { index: number }) => Promise<File>;
+    addFile: (source: ActualFileObject | Blob | string, options?: { index: number, metadata: { [key: string]: any } } | {type: 'local', load: boolean, file: { [key: string]: any }, metadata: { [key: string]: any} }) => Promise<File>;
     /** 
      * Adds multiple files.
      * @param options.index The index that the files should be added at.
