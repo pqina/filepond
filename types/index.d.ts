@@ -1,6 +1,5 @@
 // Based on definitions by Zach Posten for React-Filepond <https://github.com/zposten>
-// Updated by Hawxy <https://github.com/Hawxy>
-// TypeScript Version: 3.5
+// Updated by FilePond Contributors
 
 export { };
 
@@ -30,7 +29,7 @@ export enum FileOrigin {
     LOCAL = 3
 }
 
-type ActualFileObject = Blob & { readonly lastModified: number; readonly name: string; };
+export type ActualFileObject = Blob & { readonly lastModified: number; readonly name: string; };
 
 export class File {
     /** Returns the ID of the file. */
@@ -70,7 +69,7 @@ export class File {
     setMetadata: (key: string, value: any) => void;
 }
 
-interface ServerUrl {
+export interface ServerUrl {
     url: string;
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
     withCredentials?: boolean;
@@ -94,7 +93,7 @@ interface ServerUrl {
     ondata?: (data: FormData) => FormData;
 }
 
-type ProgressServerConfigFunction = (
+export type ProgressServerConfigFunction = (
     /**
      * Flag indicating if the resource has a length that can be calculated.
      * If not, the totalDataAmount has no significant value.  Setting this to
@@ -107,7 +106,7 @@ type ProgressServerConfigFunction = (
     totalDataAmount: number,
 ) => void;
 
-type ProcessServerConfigFunction = (
+export type ProcessServerConfigFunction = (
     /** The name of the input field. */
     fieldName: string,
     /** The actual file object to send. */
@@ -131,7 +130,7 @@ type ProcessServerConfigFunction = (
     abort: () => void
 ) => void;
 
-type RevertServerConfigFunction = (
+export type RevertServerConfigFunction = (
     /** Server file id of the file to restore. */
     uniqueFieldId: any,
     /** Should call the load method when done. */
@@ -140,7 +139,7 @@ type RevertServerConfigFunction = (
     error: (errorText: string) => void
 ) => void;
 
-type RestoreServerConfigFunction = (
+export type RestoreServerConfigFunction = (
     /** Server file id of the file to restore. */
     uniqueFileId: any,
     /** Should call the load method with a file object or blob when done. */
@@ -161,7 +160,7 @@ type RestoreServerConfigFunction = (
     headers: (headersString: string) => void
 ) => void;
 
-type LoadServerConfigFunction = (
+export type LoadServerConfigFunction = (
     source: any,
     /** Should call the load method with a file object or blob when done. */
     load: (file: ActualFileObject | Blob) => void,
@@ -181,7 +180,7 @@ type LoadServerConfigFunction = (
     headers: (headersString: string) => void
 ) => void;
 
-type FetchServerConfigFunction = (
+export type FetchServerConfigFunction = (
     url: string,
     /** Should call the load method with a file object or blob when done. */
     load: (file: ActualFileObject | Blob) => void,
@@ -201,7 +200,7 @@ type FetchServerConfigFunction = (
     headers: (headersString: string) => void
 ) => void;
 
-type RemoveServerConfigFunction = (
+export type RemoveServerConfigFunction = (
     /** Local file source */
     source: any,
     /** Call when done */
@@ -210,7 +209,7 @@ type RemoveServerConfigFunction = (
     error: (errorText: string) => void
 ) => void;
 
-interface FilePondInitialFile {
+export interface FilePondInitialFile {
     /** The server file reference. */
     source: string;
     options: {
@@ -227,7 +226,7 @@ interface FilePondInitialFile {
     };
 }
 
-interface FilePondServerConfigProps {
+export interface FilePondServerConfigProps {
     /**
      * Server API Configuration.
      * See: https://pqina.nl/filepond/docs/patterns/api/server
@@ -257,7 +256,7 @@ interface FilePondServerConfigProps {
     files?: Array<FilePondInitialFile | ActualFileObject | Blob | string>;
 }
 
-interface FilePondDragDropProps {
+export interface FilePondDragDropProps {
     /**
      * FilePond will catch all files dropped on the webpage.
      * @default false
@@ -282,7 +281,7 @@ interface FilePondDragDropProps {
     ignoredFiles?: string[];
 }
 
-interface FilePondLabelProps {
+export interface FilePondLabelProps {
     /**
      * The decimal separator used to render numbers.
      * By default this is determined automatically.
@@ -429,7 +428,7 @@ interface FilePondLabelProps {
     labelButtonProcessItem?: string;
 }
 
-interface FilePondSvgIconProps {
+export interface FilePondSvgIconProps {
     /**
      * The icon used for remove actions.
      * @default '<svg></svg>'
@@ -452,13 +451,12 @@ interface FilePondSvgIconProps {
     iconUndo?: string;
 }
 
-interface FilePondErrorDescription {
+export interface FilePondErrorDescription {
     type: string;
     code: number;
     body: string;
 }
 
-/** Exposed for type filtering in downstream packages, please ignore. */
 export interface FilePondCallbackProps {
     /** FilePond instance has been created and is ready. */
     oninit?: () => void;
@@ -508,7 +506,7 @@ export interface FilePondCallbackProps {
     onreorderfiles?: (files: File[]) => void;
 }
 
-interface FilePondHookProps {
+export interface FilePondHookProps {
     /**
      * FilePond is about to allow this item to be dropped, it can be a URL or a File object.
      * 
@@ -529,7 +527,7 @@ interface FilePondHookProps {
     beforeRemoveFile?: (item: File) => boolean | Promise<boolean>;
 }
 
-interface FilePondStyleProps {
+export interface FilePondStyleProps {
     /** 
      * Set a different layout render mode.
      * @default null
@@ -571,9 +569,9 @@ interface FilePondStyleProps {
     styleProgressIndicatorPosition?: string;
 }
 
-type CaptureAttribute = "camera" | "microphone" | "camcorder";
+export type CaptureAttribute = "camera" | "microphone" | "camcorder";
 
-interface FilePondBaseProps {
+export interface FilePondBaseProps {
     /** 
      * The ID to add to the root element.
      * @default null
@@ -691,7 +689,7 @@ export interface FilePondOptionProps extends
     FilePondStyleProps,
     FilePondBaseProps { }
 
-type FilePondEventPrefixed = 'FilePond:init'
+export type FilePondEventPrefixed = 'FilePond:init'
     | 'FilePond:warning'
     | 'FilePond:error'
     | 'FilePond:addfilestart'
@@ -706,7 +704,7 @@ type FilePondEventPrefixed = 'FilePond:init'
     | 'FilePond:updatefiles'
     | 'FilePond:reorderfiles';
 
-type FilePondEvent = 'init'
+export type FilePondEvent = 'init'
     | 'warning'
     | 'error'
     | 'addfilestart'

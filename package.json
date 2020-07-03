@@ -52,7 +52,7 @@
         "autoprefixer": "^9.6.1",
         "babel-jest": "^24.8.0",
         "cssnano": "^4.1.10",
-        "dtslint": "^0.9.3",
+        "dtslint": "^3.6.12",
         "jest": "^24.8.0",
         "node-sass": "^4.12.0",
         "postcss-cli": "^6.1.3",
@@ -64,6 +64,6 @@
         "rollup-plugin-node-resolve": "^4.2.4",
         "rollup-plugin-prettier": "^0.6.0",
         "rollup-plugin-terser": "^4.0.4",
-        "typescript": "^3.6.2"
+        "typescript": "^3.9.6"
     }
 }
