@@ -719,7 +719,7 @@ export type FilePondEvent = 'init'
     | 'updatefiles'
     | 'reorderfiles';
 
-export class FilePond {
+export class FilePond implements FilePondOptionProps {
     /**
      * The root element of the Filepond instance.
      */
@@ -732,9 +732,9 @@ export class FilePond {
 
     /** 
      * The ID to add to the root element.
-     * @default null
+     * @default undefined
      */
-    id: string | null;
+    id?: string;
     /**
      * The input field name to use.
      * @default 'filepond'
@@ -744,7 +744,7 @@ export class FilePond {
      * Class Name to put on wrapper.
      * @default null
      */
-    className: string | null;
+    className?: string;
     /** 
      * Sets the required attribute to the output field.
      * @default false
@@ -759,7 +759,7 @@ export class FilePond {
      * Sets the given value to the capture attribute.
      * @default null
      */
-    captureMethod: CaptureAttribute | null;
+    captureMethod?: CaptureAttribute;
 
     /** 
      * Enable or disable drag n’ drop.
@@ -800,9 +800,9 @@ export class FilePond {
 
     /** 
      * The maximum number of files that filepond pond can handle.
-     * @default null
+     * @default undefined
      */
-    maxFiles: number | null;
+    maxFiles?: number;
     /** 
      * Enables custom validity messages.
      * @default false
@@ -829,7 +829,7 @@ export class FilePond {
      * The maximum number of files that can be uploaded in parallel.
      * @default null
      */
-    maxParallelUploads: number | null;
+    maxParallelUploads?: number;
 
     /**
      * Enable or disable chunked uploads
@@ -890,14 +890,14 @@ export class FilePond {
     server?: string | {
         url?: string
         timeout?: number
-        headers?: { [key: string]: string | boolean | number } | null;
+        headers?: { [key: string]: string | boolean | number };
         process?: string | ServerUrl | ProcessServerConfigFunction | null;
         revert?: string | ServerUrl | RevertServerConfigFunction | null;
         restore?: string | ServerUrl | RestoreServerConfigFunction | null;
         load?: string | ServerUrl | LoadServerConfigFunction | null;
         fetch?: string | ServerUrl | FetchServerConfigFunction | null;
         remove?: RemoveServerConfigFunction | null;
-    } | null;
+    }
 
     /** 
      * Immediately upload new files to the server.
@@ -1145,23 +1145,23 @@ export class FilePond {
 
     /** 
      * Set a different layout render mode.
-     * @default null
+     * @default undefined
      */
-    stylePanelLayout: 'integrated' | 'compact' | 'circle' | null;
+    stylePanelLayout?: 'integrated' | 'compact' | 'circle';
     /**
      * Set a forced aspect ratio for the FilePond drop area.
      * 
      * Accepts human readable aspect ratios like `1:1` or numeric aspect ratios like `0.75`.
-     * @default null
+     * @default undefined
      */
-    stylePanelAspectRatio: string | null;
+    stylePanelAspectRatio?: string;
     /**
      * Set a forced aspect ratio for the file items. 
      * 
      * Useful when rendering cropped or fixed aspect ratio images in grid view.
-     * @default null
+     * @default undefined
      */
-    styleItemPanelAspectRatio: string | null;
+    styleItemPanelAspectRatio?: string;
     /** 
      * The position of the remove item button.
      * @default 'left'
