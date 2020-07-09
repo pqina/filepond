@@ -228,6 +228,17 @@ export interface FilePondInitialFile {
 
 export interface FilePondServerConfigProps {
     /**
+     * Immediately upload new files to the server.
+     * @default true
+     */
+    instantUpload?: boolean;
+     /** 
+     * The maximum number of files that can be uploaded in parallel.
+     * @default 2
+     */
+    maxParallelUploads?: number;
+
+    /**
      * Server API Configuration.
      * See: https://pqina.nl/filepond/docs/patterns/api/server
      * @default null
@@ -243,11 +254,28 @@ export interface FilePondServerConfigProps {
         fetch?: string | ServerUrl | FetchServerConfigFunction | null;
         remove?: RemoveServerConfigFunction | null;
     };
+  
     /**
-     * Immediately upload new files to the server.
-     * @default true
+     * Enable chunk uploads
+     * @default false 
      */
-    instantUpload?: boolean;
+    chunkUploads?: boolean;
+    /**
+     * Force use of chunk uploads even for files smaller than chunk size
+     * @default false 
+     */
+    chunkForce?: boolean;
+    /**
+     * Size of chunks (5MB default)
+     * @default 5000000
+     */
+    chunkSize?: number;
+    /**
+     * Amount of times to retry upload of a chunk when it fails
+     * @default [500, 1000, 3000]
+     */
+    chunkRetryDelays?: number[];
+
     /**
      * A list of file locations that should be loaded immediately.
      * See: https://pqina.nl/filepond/docs/patterns/api/filepond-object/#setting-initial-files
@@ -255,6 +283,7 @@ export interface FilePondServerConfigProps {
      */
     files?: Array<FilePondInitialFile | ActualFileObject | Blob | string>;
 }
+
 
 export interface FilePondDragDropProps {
     /**
@@ -346,6 +375,11 @@ export interface FilePondLabelProps {
      * @default 'Removed'
      */
     labelFileRemoved?: string;
+      /**
+     * Label used when something went during during removing the file upload.
+     * @default 'Error during remove'
+     */
+    labelFileRemoveError?: ((error: any) => string) | string;
     /**
      * Label used when uploading a file.
      * @default 'Uploading'
@@ -370,12 +404,7 @@ export interface FilePondLabelProps {
      * Label used when something went wrong during reverting the file upload.
      * @default 'Error during revert'
      */
-    labelFileProcessingRevertError?: ((error: any) => string) | string;
-    /**
-     * Label used when something went during during removing the file upload.
-     * @default 'Error during remove'
-     */
-    labelFileRemoveError?: ((error: any) => string) | string;
+    labelFileProcessingRevertError?: ((error: any) => string) | string;  
     /**
      * Label used to indicate to the user that an action can be cancelled.
      * @default 'tap to cancel'
@@ -449,6 +478,11 @@ export interface FilePondSvgIconProps {
      * @default '<svg></svg>'
      */
     iconUndo?: string;
+    /**
+     * The icon used for done.
+     * @default '<svg></svg>'
+     */
+    iconDone?: string;
 }
 
 export interface FilePondErrorDescription {
@@ -532,21 +566,21 @@ export interface FilePondStyleProps {
      * Set a different layout render mode.
      * @default null
      */
-    stylePanelLayout?: 'integrated' | 'compact' | 'circle';
+    stylePanelLayout?: 'integrated' | 'compact' | 'circle' | null;
     /**
      * Set a forced aspect ratio for the FilePond drop area.
      * 
      * Accepts human readable aspect ratios like `1:1` or numeric aspect ratios like `0.75`.
      * @default null
      */
-    stylePanelAspectRatio?: string;
+    stylePanelAspectRatio?: string | null;
     /**
      * Set a forced aspect ratio for the file items. 
      * 
      * Useful when rendering cropped or fixed aspect ratio images in grid view.
      * @default null
      */
-    styleItemPanelAspectRatio?: string;
+    styleItemPanelAspectRatio?: string | null;
     /** 
      * The position of the remove item button.
      * @default 'left'
@@ -567,6 +601,11 @@ export interface FilePondStyleProps {
      * @default 'right'
      */
     styleProgressIndicatorPosition?: string;
+    /**
+     * Enable to align the remove button to the left side of the file item.
+     * @default false
+     */
+    styleButtonRemoveItemAlign?: boolean;
 }
 
 export type CaptureAttribute = "camera" | "microphone" | "camcorder";
@@ -602,7 +641,10 @@ export interface FilePondBaseProps {
      * @default null
      */
     captureMethod?: CaptureAttribute;
-
+    /**
+     * Set to false to prevent FilePond from setting the file input field `accept` attribute to the value of the `acceptedFileTypes`.
+     */
+    allowSyncAcceptAttribute?: boolean;
     /** 
      * Enable or disable drag n’ drop.
      * @default true
@@ -635,10 +677,21 @@ export interface FilePondBaseProps {
      */
     allowRevert?: boolean;
     /** 
+     * Allows user to process a file. When set to false, this removes the file upload button.
+     * @default true
+     */
+    allowProcess?: boolean;
+    /** 
      * Allows the user to reorder the file items
      * @default false
      */
-    allowReorder?: boolean;
+    allowReorder?: boolean;    
+    /**
+     * Allow only selecting directories with browse (no support for filtering dnd at this point)
+     * @default false
+     */
+    allowDirectoriesOnly?: boolean;
+
     /** 
      * Require the file to be successfully reverted before continuing.
      * @default false
@@ -670,16 +723,10 @@ export interface FilePondBaseProps {
      * The interval to use before showing each item being added to the list.
      * @default 75
      */
-    itemInsertInterval?: number;
-
-    /** 
-     * The maximum number of files that can be uploaded in parallel.
-     * @default null
-     */
-    maxParallelUploads?: number;
+    itemInsertInterval?: number;   
 }
 
-export interface FilePondOptionProps extends
+export interface FilePondOptions extends
     FilePondDragDropProps,
     FilePondServerConfigProps,
     FilePondLabelProps,
@@ -719,7 +766,7 @@ export type FilePondEvent = 'init'
     | 'updatefiles'
     | 'reorderfiles';
 
-export interface FilePond extends Required<FilePondOptionProps> {}
+export interface FilePond extends Required<FilePondOptions> {}
 
 export class FilePond {
     /**
@@ -733,7 +780,7 @@ export class FilePond {
     readonly status: Status;
 
     /** Override multiple options at once. */
-    setOptions: (options: FilePondOptionProps) => void;
+    setOptions: (options: FilePondOptions) => void;
     /** 
      * Adds a file.
      * @param options.index The index that the file should be added at.
@@ -828,7 +875,7 @@ export class FilePond {
 }
 
 /** Creates a new FilePond instance. */
-export function create(element?: Element, options?: FilePondOptionProps): FilePond;
+export function create(element?: Element, options?: FilePondOptions): FilePond;
 /** Destroys the FilePond instance attached to the supplied element. */
 export function destroy(element: Element): void;
 /** Returns the FilePond instance attached to the supplied element. */
@@ -841,9 +888,9 @@ export function parse(context: Element): void;
 /** Registers a FilePond plugin for later use. */
 export function registerPlugin(...plugins: any[]): void;
 /** Sets page level default options for all FilePond instances. */
-export function setOptions(options: FilePondOptionProps): void;
+export function setOptions(options: FilePondOptions): void;
 /** Returns the current default options. */
-export function getOptions(): FilePondOptionProps;
+export function getOptions(): FilePondOptions;
 /** Determines whether or not the browser supports FilePond. */
 export function supported(): boolean;
 /** Returns an object describing all the available options and their types, useful for writing FilePond adapters. */
