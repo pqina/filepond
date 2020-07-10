@@ -29,6 +29,7 @@ export enum FileOrigin {
     LOCAL = 3
 }
 
+//TODO replace with native File on next semver bump
 export type ActualFileObject = Blob & { readonly lastModified: number; readonly name: string; };
 
 export class FilePondFile {
@@ -505,44 +506,44 @@ export interface FilePondCallbackProps {
      * Optionally receives file if error is related to a
      * file object.
      */
-    onwarning?: (error: any, file?: File, status?: any) => void;
+    onwarning?: (error: any, file?: FilePondFile, status?: any) => void;
     /**
      * FilePond instance throws an error. Optionally receives
      * file if error is related to a file object.
      */
-    onerror?: (error: FilePondErrorDescription, file?: File, status?: any) => void;
+    onerror?: (error: FilePondErrorDescription, file?: FilePondFile, status?: any) => void;
     /** Started file load. */
-    onaddfilestart?: (file: File) => void;
+    onaddfilestart?: (file: FilePondFile) => void;
     /** Made progress loading a file. */
-    onaddfileprogress?: (file: File, progress: number) => void;
+    onaddfileprogress?: (file: FilePondFile, progress: number) => void;
     /** If no error, file has been successfully loaded. */
-    onaddfile?: (error: FilePondErrorDescription | null, file: File) => void;
+    onaddfile?: (error: FilePondErrorDescription | null, file: FilePondFile) => void;
     /** Started processing a file. */
-    onprocessfilestart?: (file: File) => void;
+    onprocessfilestart?: (file: FilePondFile) => void;
     /** Made progress processing a file. */
-    onprocessfileprogress?: (file: File, progress: number) => void;
+    onprocessfileprogress?: (file: FilePondFile, progress: number) => void;
     /** Aborted processing of a file. */
-    onprocessfileabort?: (file: File) => void;
+    onprocessfileabort?: (file: FilePondFile) => void;
     /** Processing of a file has been reverted. */
-    onprocessfilerevert?: (file: File) => void;
+    onprocessfilerevert?: (file: FilePondFile) => void;
     /** If no error, Processing of a file has been completed. */
-    onprocessfile?: (error: FilePondErrorDescription | null, file: File) => void;
+    onprocessfile?: (error: FilePondErrorDescription | null, file: FilePondFile) => void;
     /** Called when all files in the list have been processed. */
     onprocessfiles?: () => void;
     /** File has been removed. */
-    onremovefile?: (error: FilePondErrorDescription | null, file: File) => void;
+    onremovefile?: (error: FilePondErrorDescription | null, file: FilePondFile) => void;
     /**
      * File has been transformed by the transform plugin or
      * another plugin subscribing to the prepare_output filter.
      * It receives the file item and the output data.
      */
-    onpreparefile?: (file: File, output: any) => void;
+    onpreparefile?: (file: FilePondFile, output: any) => void;
     /** A file has been added or removed, receives a list of file items. */
-    onupdatefiles?: (files: File[]) => void;
+    onupdatefiles?: (files: FilePondFile[]) => void;
     /* Called when a file is clicked or tapped. **/
-    onactivatefile?: (file: File) => void;
+    onactivatefile?: (file: FilePondFile) => void;
     /** Called when the files have been reordered */
-    onreorderfiles?: (files: File[]) => void;
+    onreorderfiles?: (files: FilePondFile[]) => void;
 }
 
 export interface FilePondHookProps {
@@ -551,19 +552,19 @@ export interface FilePondHookProps {
      * 
      * Return `true` or `false` depending on if you want to allow the item to be dropped.
      */
-    beforeDropFile?: (file: File | string) => boolean;
+    beforeDropFile?: (file: FilePondFile | string) => boolean;
     /**
      * FilePond is about to add this file. 
      * 
      * Return `false` to prevent adding it, or return a `Promise` and resolve with `true` or `false`.
      */
-    beforeAddFile?: (item: File) => boolean | Promise<boolean>;
+    beforeAddFile?: (item: FilePondFile) => boolean | Promise<boolean>;
     /**
      * FilePond is about to remove this file. 
      * 
      * Return `false` to prevent adding it, or return a `Promise` and resolve with `true` or `false`.
      */
-    beforeRemoveFile?: (item: File) => boolean | Promise<boolean>;
+    beforeRemoveFile?: (item: FilePondFile) => boolean | Promise<boolean>;
 }
 
 export interface FilePondStyleProps {
@@ -723,7 +724,7 @@ export interface FilePondBaseProps {
      * Default index in list to add items that have been dropped at the top of the list.
      * @default 'before'
      */
-    itemInsertLocation?: 'before' | 'after' | ((a: File, b: File) => number);
+    itemInsertLocation?: 'before' | 'after' | ((a: FilePondFile, b: FilePondFile) => number);
     /**
      * The interval to use before showing each item being added to the list.
      * @default 75
@@ -803,42 +804,42 @@ export class FilePond {
      * Adds a file.
      * @param options.index The index that the file should be added at.
      */
-    addFile: (source: ActualFileObject | Blob | string, options?: { index: number, metadata: { [key: string]: any } } | {type: 'local', load: boolean, file: { name: string, size: number }, metadata: { [key: string]: any} }) => Promise<File>;
+    addFile: (source: ActualFileObject | Blob | string, options?: { index?: number } & Partial<FilePondInitialFile["options"]> ) => Promise<FilePondFile>;
     /** 
      * Adds multiple files.
      * @param options.index The index that the files should be added at.
      */
-    addFiles: (source: ActualFileObject[] | Blob[] | string[], options?: { index: number }) => Promise<File[]>;
+    addFiles: (source: ActualFileObject[] | Blob[] | string[], options?: { index: number }) => Promise<FilePondFile[]>;
     /** 
      * Moves a file. Select file with query and supply target index. 
      * @param query The file reference, id, or index.
      * @param index The index to move the file to.
      */
-    moveFile: (query: File | string | number, index: number) => void;
+    moveFile: (query: FilePondFile | string | number, index: number) => void;
     /** 
      * Removes a file. If no parameter is provided, removes the first file in the list.
      * @param query The file reference, id, or index.
      */
-    removeFile: (query?: File | string | number) => void;
+    removeFile: (query?: FilePondFile | string | number) => void;
     /** Removes all files. */
     removeFiles: () => void;
     /** 
      * Processes a file. If no parameter is provided, processes the first file in the list.
      * @param query The file reference, id, or index
      */
-    processFile: (query?: File | string | number) => Promise<File>;
+    processFile: (query?: FilePondFile | string | number) => Promise<FilePondFile>;
     /**
      * Processes multiple files. If no parameter is provided, processes all files.
      * @param query The file reference(s), id(s), or index(es)
      */
-    processFiles: (query?: File[] | string[] | number[]) => Promise<File[]>;
+    processFiles: (query?: FilePondFile[] | string[] | number[]) => Promise<FilePondFile[]>;
     /** 
      * Returns a file. If no parameter is provided, returns the first file in the list.
      * @param query The file id, or index
      */
-    getFile: (query?: string | number) => File;
+    getFile: (query?: string | number) => FilePondFile;
     /** Returns all files. */
-    getFiles: () => File[];
+    getFiles: () => FilePondFile[];
     /**
      * Manually trigger the browse files panel.
      * 
@@ -849,7 +850,7 @@ export class FilePond {
      * Sort the items in the files list.
      * @param compare The comparison function
      */
-    sort: (compare: (a: File, b: File) => number) => void;
+    sort: (compare: (a: FilePondFile, b: FilePondFile) => number) => void;
     /** Destroys this FilePond instance. */
     destroy: () => void;
 
