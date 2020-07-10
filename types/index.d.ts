@@ -29,9 +29,15 @@ export enum FileOrigin {
     LOCAL = 3
 }
 
-// TODO replace with native File on next semver bump
+// TODO replace all references to `ActualFileObject` with native `File`
+/**
+ * @deprecated Don't use this type explicitly within your code. It'll be replaced with the native `File` type in a future release.
+ */
 export type ActualFileObject = Blob & { readonly lastModified: number; readonly name: string; };
 
+/**
+ * A custom FilePond File.
+ */
 export class FilePondFile {
  /** Returns the ID of the file. */
  id: string;
@@ -70,8 +76,11 @@ export class FilePondFile {
  setMetadata: (key: string, value: any) => void;
 }
 
+// TODO delete
 /**
- * @deprecated use `FilePondFile`. This will be removed in a future release.
+ * A custom FilePond File. Don't confuse this with the native `File` type. 
+ *  
+ * @deprecated use `FilePondFile` instead. This type will be removed in a future release.
  */
 export class File extends FilePondFile {}
 
@@ -732,6 +741,7 @@ export interface FilePondBaseProps {
     itemInsertInterval?: number;   
 }
 
+// TODO delete
 /**
  * @deprecated use `FilePondOptions`. This will be removed in a future release.
  */
