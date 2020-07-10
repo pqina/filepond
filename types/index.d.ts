@@ -29,7 +29,7 @@ export enum FileOrigin {
     LOCAL = 3
 }
 
-//TODO replace with native File on next semver bump
+// TODO replace with native File on next semver bump
 export type ActualFileObject = Blob & { readonly lastModified: number; readonly name: string; };
 
 export class FilePondFile {
@@ -71,7 +71,7 @@ export class FilePondFile {
 }
 
 /**
- * @deprecated use `FilePondFile`. Will be removed in a future release.
+ * @deprecated use `FilePondFile`. This will be removed in a future release.
  */
 export class File extends FilePondFile {}
 
@@ -259,7 +259,7 @@ export interface FilePondServerConfigProps {
         load?: string | ServerUrl | LoadServerConfigFunction | null;
         fetch?: string | ServerUrl | FetchServerConfigFunction | null;
         remove?: RemoveServerConfigFunction | null;
-    };
+    } | null;
   
     /**
      * Enable chunk uploads
@@ -621,7 +621,7 @@ export interface FilePondBaseProps {
      * The ID to add to the root element.
      * @default null
      */
-    id?: string;
+    id?: string | null;
     /**
      * The input field name to use.
      * @default 'filepond'
@@ -631,7 +631,7 @@ export interface FilePondBaseProps {
      * Class Name to put on wrapper.
      * @default null
      */
-    className?: string;
+    className?: string | null;
     /** 
      * Sets the required attribute to the output field.
      * @default false
@@ -646,7 +646,7 @@ export interface FilePondBaseProps {
      * Sets the given value to the capture attribute.
      * @default null
      */
-    captureMethod?: CaptureAttribute;
+    captureMethod?: CaptureAttribute | null;
     /**
      * Set to false to prevent FilePond from setting the file input field `accept` attribute to the value of the `acceptedFileTypes`.
      */
@@ -708,7 +708,7 @@ export interface FilePondBaseProps {
      * The maximum number of files that filepond pond can handle.
      * @default null
      */
-    maxFiles?: number;
+    maxFiles?: number | null;
     /** 
      * Enables custom validity messages.
      * @default false
@@ -733,7 +733,7 @@ export interface FilePondBaseProps {
 }
 
 /**
- * @deprecated use `FilePondOptions`. Will be removed in a future release.
+ * @deprecated use `FilePondOptions`. This will be removed in a future release.
  */
 export interface FilePondOptionProps extends
     FilePondDragDropProps,
@@ -804,7 +804,7 @@ export class FilePond {
      * Adds a file.
      * @param options.index The index that the file should be added at.
      */
-    addFile: (source: ActualFileObject | Blob | string, options?: { index?: number } & Partial<FilePondInitialFile["options"]> ) => Promise<FilePondFile>;
+    addFile: (source: ActualFileObject | Blob | string, options?: { index?: number } & Partial<FilePondInitialFile["options"]>) => Promise<FilePondFile>;
     /** 
      * Adds multiple files.
      * @param options.index The index that the files should be added at.
