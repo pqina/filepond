@@ -31,43 +31,48 @@ export enum FileOrigin {
 
 export type ActualFileObject = Blob & { readonly lastModified: number; readonly name: string; };
 
-export class File {
-    /** Returns the ID of the file. */
-    id: string;
-    /** Returns the server id of the file. */
-    serverId: string;
-    /** Returns the source of the file. */
-    source: ActualFileObject | string;
-    /** Returns the origin of the file. */
-    origin: FileOrigin;
-    /** Returns the current status of the file. */
-    status: FileStatus;
-    /** Returns the File object. */
-    file: ActualFileObject;
-    /** Returns the file extensions. */
-    fileExtension: string;
-    /** Returns the size of the file. */
-    fileSize: number;
-    /** Returns the type of the file. */
-    fileType: string;
-    /** Returns the full name of the file. */
-    filename: string;
-    /** Returns the name of the file without extension. */
-    filenameWithoutExtension: string;
+export class FilePondFile {
+ /** Returns the ID of the file. */
+ id: string;
+ /** Returns the server id of the file. */
+ serverId: string;
+ /** Returns the source of the file. */
+ source: ActualFileObject | string;
+ /** Returns the origin of the file. */
+ origin: FileOrigin;
+ /** Returns the current status of the file. */
+ status: FileStatus;
+ /** Returns the File object. */
+ file: ActualFileObject;
+ /** Returns the file extensions. */
+ fileExtension: string;
+ /** Returns the size of the file. */
+ fileSize: number;
+ /** Returns the type of the file. */
+ fileType: string;
+ /** Returns the full name of the file. */
+ filename: string;
+ /** Returns the name of the file without extension. */
+ filenameWithoutExtension: string;
 
-    /** Aborts loading of this file */
-    abortLoad: () => void;
-    /** Aborts processing of this file */
-    abortProcessing: () => void;
-    /**
-     * Retrieve metadata saved to the file, pass a key to retrieve
-     * a specific part of the metadata (e.g. 'crop' or 'resize').
-     * If no key is passed, the entire metadata object is returned.
-     */
-    getMetadata: (key?: string) => any;
-    /** Add additional metadata to the file */
-    setMetadata: (key: string, value: any) => void;
+ /** Aborts loading of this file */
+ abortLoad: () => void;
+ /** Aborts processing of this file */
+ abortProcessing: () => void;
+ /**
+  * Retrieve metadata saved to the file, pass a key to retrieve
+  * a specific part of the metadata (e.g. 'crop' or 'resize').
+  * If no key is passed, the entire metadata object is returned.
+  */
+ getMetadata: (key?: string) => any;
+ /** Add additional metadata to the file */
+ setMetadata: (key: string, value: any) => void;
 }
+
+/**
+ * @deprecated use `FilePondFile`. Will be removed in a future release.
+ */
+export class File extends FilePondFile {}
 
 export interface ServerUrl {
     url: string;
@@ -725,6 +730,19 @@ export interface FilePondBaseProps {
      */
     itemInsertInterval?: number;   
 }
+
+/**
+ * @deprecated use `FilePondOptions`. Will be removed in a future release.
+ */
+export interface FilePondOptionProps extends
+    FilePondDragDropProps,
+    FilePondServerConfigProps,
+    FilePondLabelProps,
+    FilePondSvgIconProps,
+    FilePondCallbackProps,
+    FilePondHookProps,
+    FilePondStyleProps,
+    FilePondBaseProps { }
 
 export interface FilePondOptions extends
     FilePondDragDropProps,
