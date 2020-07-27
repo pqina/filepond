@@ -1,5 +1,14 @@
 # Changelog
 
+## 4.19.0
+
+- Add locale folder, can now import different locales.
+- Improve `supports` method, now correctly detects MacOS Safari 8.
+- Improve type definitions file.
+- Fix issue with `removeFiles({ revert: false })` not working.
+- Fix issue where content pasted in a textarea would be interpreted as a file.
+
+
 ## 4.18.0
 
 - Add fallback for `fetch` when loading remote URLs, if no custom fetch supplied, will use default request.

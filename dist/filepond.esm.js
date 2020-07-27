@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.18.0
+ * FilePond 4.19.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -7834,6 +7834,23 @@ let listening = false;
 const listeners$1 = [];
 
 const handlePaste = e => {
+  // if is pasting in input or textarea and the target is outside of a filepond scope, ignore
+  const activeEl = document.activeElement;
+  if (activeEl && /textarea|input/i.test(activeEl.nodeName)) {
+    // test textarea or input is contained in filepond root
+    let inScope = false;
+    let element = activeEl;
+    while (element !== document.body) {
+      if (element.classList.contains('filepond--root')) {
+        inScope = true;
+        break;
+      }
+      element = element.parentNode;
+    }
+
+    if (!inScope) return;
+  }
+
   requestDataTransferItems(e.clipboardData).then(files => {
     // no files received
     if (!files.length) {
@@ -9096,9 +9113,8 @@ const createApp = (initialOptions = {}) => {
 
     const files = getFiles();
 
-    if (!queries.length) {
-      return Promise.all(files.map(removeFile));
-    }
+    if (!queries.length)
+      return Promise.all(files.map(file => removeFile(file, options)));
 
     // when removing by index the indexes shift after each file removal so we need to convert indexes to ids
     const mappedQueries = queries
@@ -9628,6 +9644,8 @@ const hasCreateObjectURL = () =>
   'URL' in window && 'createObjectURL' in window.URL;
 const hasVisibility = () => 'visibilityState' in document;
 const hasTiming = () => 'performance' in window; // iOS 8.x
+const hasCSSSupports = () => 'supports' in (window.CSS || {}); // use to detect Safari 9+
+const isIE11 = () => /MSIE|Trident/.test(window.navigator.userAgent);
 
 const supported = (() => {
   // Runs immidiately and then remembers result for subsequent calls
@@ -9641,7 +9659,9 @@ const supported = (() => {
     hasPromises() &&
     hasBlobSlice() &&
     hasCreateObjectURL() &&
-    hasTiming();
+    hasTiming() &&
+    // doesn't need CSSSupports but is a good way to detect Safari 9+ (we do want to support IE11 though)
+    (hasCSSSupports() || isIE11());
 
   return () => isSupported;
 })();

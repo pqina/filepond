@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.18.0
+ * FilePond 4.19.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -10701,6 +10701,23 @@
   var listeners$1 = [];
 
   var handlePaste = function handlePaste(e) {
+    // if is pasting in input or textarea and the target is outside of a filepond scope, ignore
+    var activeEl = document.activeElement;
+    if (activeEl && /textarea|input/i.test(activeEl.nodeName)) {
+      // test textarea or input is contained in filepond root
+      var inScope = false;
+      var element = activeEl;
+      while (element !== document.body) {
+        if (element.classList.contains('filepond--root')) {
+          inScope = true;
+          break;
+        }
+        element = element.parentNode;
+      }
+
+      if (!inScope) return;
+    }
+
     requestDataTransferItems(e.clipboardData).then(function(files) {
       // no files received
       if (!files.length) {
@@ -12122,9 +12139,12 @@
 
       var files = getFiles();
 
-      if (!queries.length) {
-        return Promise.all(files.map(removeFile));
-      }
+      if (!queries.length)
+        return Promise.all(
+          files.map(function(file) {
+            return removeFile(file, options);
+          })
+        );
 
       // when removing by index the indexes shift after each file removal so we need to convert indexes to ids
       var mappedQueries = queries
@@ -12723,6 +12743,12 @@
   var hasTiming = function hasTiming() {
     return 'performance' in window;
   }; // iOS 8.x
+  var hasCSSSupports = function hasCSSSupports() {
+    return 'supports' in (window.CSS || {});
+  }; // use to detect Safari 9+
+  var isIE11 = function isIE11() {
+    return /MSIE|Trident/.test(window.navigator.userAgent);
+  };
 
   var supported = (function() {
     // Runs immidiately and then remembers result for subsequent calls
@@ -12736,7 +12762,9 @@
       hasPromises() &&
       hasBlobSlice() &&
       hasCreateObjectURL() &&
-      hasTiming();
+      hasTiming() &&
+      // doesn't need CSSSupports but is a good way to detect Safari 9+ (we do want to support IE11 though)
+      (hasCSSSupports() || isIE11());
 
     return function() {
       return isSupported;

@@ -130,7 +130,7 @@ Or get it from a CDN:
 
 ## Internationalization
 
-The [locale folder](./locale/) contains different language files, you can use them like this:
+The [locale folder](./locale/) contains different language files, PR's are welcom,e you can use locale files like this:
 
 ```js
 import pt_BR from 'filepond/locale/pt-br.js';

@@ -453,9 +453,7 @@ export const createApp = (initialOptions = {}) => {
 
         const files = getFiles();
 
-        if (!queries.length) {
-            return Promise.all(files.map(removeFile));
-        }
+        if (!queries.length) return Promise.all(files.map(file => removeFile(file, options)));
 
         // when removing by index the indexes shift after each file removal so we need to convert indexes to ids
         const mappedQueries = queries.map(query =>

@@ -1,11 +1,29 @@
 import { arrayRemove } from '../../utils/arrayRemove';
-import { InteractionMethod } from '../enum/InteractionMethod';
 import { requestDataTransferItems } from './requestDataTransferItems';
 
 let listening = false;
 const listeners = [];
 
 const handlePaste = e => {
+
+    // if is pasting in input or textarea and the target is outside of a filepond scope, ignore
+    const activeEl = document.activeElement;
+    if (activeEl && /textarea|input/i.test(activeEl.nodeName)) {
+
+        // test textarea or input is contained in filepond root
+        let inScope = false;
+        let element = activeEl;
+        while (element !== document.body) {
+            if (element.classList.contains('filepond--root')) {
+                inScope = true;
+                break;
+            }
+            element = element.parentNode;
+        }
+
+        if (!inScope) return;
+    }
+    
     requestDataTransferItems(e.clipboardData).then(files => {
         // no files received
         if (!files.length) {
