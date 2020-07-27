@@ -128,6 +128,17 @@ Or get it from a CDN:
 [Getting started with FilePond](https://pqina.nl/filepond/docs/patterns/getting-started/)
 
 
+## Internationalization
+
+The [locale folder](./locale/) contains different language files, you can use them like this:
+
+```js
+import pt_BR from 'filepond/locale/pt-br.js';
+
+FilePond.setOptions(pt_BR);
+```
+
+
 ## Contributing
 
 At the moment test coverage is not great, it's around 65%. To accept pull requests the tests need to be better, any help to improve them is very much appreciated.
