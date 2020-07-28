@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.19.0
+ * FilePond 4.19.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -6578,7 +6578,7 @@
               return file.source === item.source || file.source === item.file;
             })
           ) {
-            dispatch('REMOVE_ITEM', { query: item });
+            dispatch('REMOVE_ITEM', { query: item, remove: false });
           }
         });
 
@@ -7472,7 +7472,8 @@
         if (
           item.origin === FileOrigin.LOCAL &&
           server &&
-          isFunction(server.remove)
+          isFunction(server.remove) &&
+          options.remove !== false
         ) {
           dispatch('DID_START_ITEM_REMOVE', { id: item.id });
 

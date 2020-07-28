@@ -32,12 +32,75 @@
 
         // Create the FilePond instance
         const pond = FilePond.create(inputElement, {
-            allowMultiple: true,
-            allowReorder: true
+            // allowMultiple: true,
+            allowReorder: true,
+            allowReplace: true,
+            instantUpload: false,
+            // files: [
+            //     {
+            //         source: 'index.html',
+            //         options: {
+            //             type: 'local'
+            //         }
+            //     }
+            // ],
+            onaddfile: () => {
+                console.log('add');
+            },
+            onremovefile: () => {
+                console.log('remove');
+            },
+            server: {
+                process: (a,b,c,load) => {
+                    console.log('process');
+                    load(Date.now());
+                },
+                restore: (src, load) => {
+                    console.log('restore');
+                    fetch(src).then(res => res.blob()).then(load);
+                },
+                load: (src, load) => {
+                    console.log('load');
+                    fetch(src).then(res => res.blob()).then(load);
+                },
+                revert: () => {
+                    console.log('revert');
+                },
+                remove: (a,load) => {
+                    console.log('remove');
+                    load();
+                }
+            }
         });
 
         // Easy console access for testing purposes
         window.pond = pond;
+
+        setTimeout(() => {
+            pond.addFile('index.html');
+
+            // pond.files = [
+            //     {
+            //         source: 'LICENSE',
+            //         options: {
+            //             type: 'local'
+            //         }
+            //     }
+            // ]
+        }, 1000);
+
+        setTimeout(() => {
+            pond.addFile('index.html');
+
+            // pond.files = [
+            //     {
+            //         source: 'LICENSE',
+            //         options: {
+            //             type: 'local'
+            //         }
+            //     }
+            // ]
+        }, 2000);
     </script>
 
 </body>

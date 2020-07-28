@@ -113,7 +113,7 @@ export const actions = (dispatch, query, state) => ({
         activeItems.forEach(item => {
             // if item not is in new value, remove
             if (!files.find(file => file.source === item.source || file.source === item.file)) {
-                dispatch('REMOVE_ITEM', { query: item });
+                dispatch('REMOVE_ITEM', { query: item, remove: false });
             }
         });
 
@@ -886,7 +886,7 @@ export const actions = (dispatch, query, state) => ({
 
         // if this is a local file and the server.remove function has been configured, send source there so dev can remove file from server
         const server = state.options.server;
-        if (item.origin === FileOrigin.LOCAL && server && isFunction(server.remove)) {
+        if (item.origin === FileOrigin.LOCAL && server && isFunction(server.remove) && options.remove !== false) {
             
             dispatch('DID_START_ITEM_REMOVE', { id: item.id });
 
@@ -907,6 +907,7 @@ export const actions = (dispatch, query, state) => ({
 
         }
         else {
+            
             // if is requesting revert and can revert need to call revert handler (not calling request_ because that would also trigger beforeRemoveHook)
             if (options.revert && item.origin !== FileOrigin.LOCAL && item.serverId !== null) {
                 item.revert(createRevertFunction(state.options.server.url, state.options.server.revert), query('GET_FORCE_REVERT'))
