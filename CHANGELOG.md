@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.19.2
+
+- Fix problem with locale files not ending up on npm.
+
+
 ## 4.19.1
 
 - Fix issue where removal of a server file was requested when setting new files to the `files` property.
