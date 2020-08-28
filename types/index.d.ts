@@ -865,6 +865,18 @@ export class FilePond {
      * @param query The file reference(s), id(s), or index(es)
      */
     processFiles(query?: FilePondFile[] | string[] | number[]): Promise<FilePondFile[]>;
+
+    /** 
+     * Starts preparing the file matching the given query, returns a Promise, the Promise is resolved with the file item and the output file { file, output }
+     * @param query The file reference, id, or index
+     */
+    prepareFile(query?: FilePondFile | string | number): Promise<{file: FilePondFile, output: any}>;
+    /**
+     * Processes multiple files. If no parameter is provided, processes all files.
+     * @param query Array containing file reference(s), id(s), or index(es)
+     */
+    prepareFiles(query?: FilePondFile[] | string[] | number[]): Promise<Array<{file: FilePondFile, output: any}>>;
+
     /** 
      * Returns a file. If no parameter is provided, returns the first file in the list.
      * @param query The file id, or index
