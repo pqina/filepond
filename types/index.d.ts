@@ -795,6 +795,11 @@ export type FilePondEvent = 'init'
     | 'updatefiles'
     | 'reorderfiles';
 
+export interface RemoveFileOptions  {
+    remove?: boolean;
+    revert?: boolean;
+}
+
 export interface FilePond extends Required<FilePondOptions> {}
 
 export class FilePond {
@@ -827,11 +832,27 @@ export class FilePond {
      */
     moveFile(query: FilePondFile | string | number, index: number): void;
     /** 
-     * Removes a file. If no parameter is provided, removes the first file in the list.
-     * @param query The file reference, id, or index.
+     * Removes a file. 
+     * @param query The file reference, id, or index. If no query is provided, removes the first file in the list.
+     * @param options Options for removal
      */
-    removeFile(query?: FilePondFile | string | number): void;
-    /** Removes all files. */
+    removeFile(query?: FilePondFile | string | number, options?: RemoveFileOptions): void;
+    /** 
+     * Removes the first file in the list.
+     * @param options Options for removal
+     */
+    removeFile(options: RemoveFileOptions): void;
+
+    /**
+     * Removes files matching the query.
+     * @param query Array containing file references, ids, and/or indexes. If no array is provided, all files are removed
+     * @param options Options for removal
+     */
+    removeFiles(query?: Array<FilePondFile | string | number>, options?: RemoveFileOptions): void;
+    /**
+     * Removes all files.
+     * @param options Options for removal
+     */
     removeFiles(options: RemoveFileOptions): void;
 
     /** 
