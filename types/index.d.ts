@@ -809,98 +809,99 @@ export class FilePond {
     readonly status: Status;
 
     /** Override multiple options at once. */
-    setOptions: (options: FilePondOptions) => void;
+    setOptions(options: FilePondOptions): void;
     /** 
      * Adds a file.
      * @param options.index The index that the file should be added at.
      */
-    addFile: (source: ActualFileObject | Blob | string, options?: { index?: number } & Partial<FilePondInitialFile["options"]>) => Promise<FilePondFile>;
+    addFile(source: ActualFileObject | Blob | string, options?: { index?: number } & Partial<FilePondInitialFile["options"]>): Promise<FilePondFile>;
     /** 
      * Adds multiple files.
      * @param options.index The index that the files should be added at.
      */
-    addFiles: (source: ActualFileObject[] | Blob[] | string[], options?: { index: number }) => Promise<FilePondFile[]>;
+    addFiles(source: ActualFileObject[] | Blob[] | string[], options?: { index: number }): Promise<FilePondFile[]>;
     /** 
      * Moves a file. Select file with query and supply target index. 
      * @param query The file reference, id, or index.
      * @param index The index to move the file to.
      */
-    moveFile: (query: FilePondFile | string | number, index: number) => void;
+    moveFile(query: FilePondFile | string | number, index: number): void;
     /** 
      * Removes a file. If no parameter is provided, removes the first file in the list.
      * @param query The file reference, id, or index.
      */
-    removeFile: (query?: FilePondFile | string | number) => void;
+    removeFile(query?: FilePondFile | string | number): void;
     /** Removes all files. */
-    removeFiles: () => void;
+    removeFiles(options: RemoveFileOptions): void;
+
     /** 
      * Processes a file. If no parameter is provided, processes the first file in the list.
      * @param query The file reference, id, or index
      */
-    processFile: (query?: FilePondFile | string | number) => Promise<FilePondFile>;
+    processFile(query?: FilePondFile | string | number): Promise<FilePondFile>;
     /**
      * Processes multiple files. If no parameter is provided, processes all files.
      * @param query The file reference(s), id(s), or index(es)
      */
-    processFiles: (query?: FilePondFile[] | string[] | number[]) => Promise<FilePondFile[]>;
+    processFiles(query?: FilePondFile[] | string[] | number[]): Promise<FilePondFile[]>;
     /** 
      * Returns a file. If no parameter is provided, returns the first file in the list.
      * @param query The file id, or index
      */
-    getFile: (query?: string | number) => FilePondFile;
+    getFile(query?: string | number): FilePondFile;
     /** Returns all files. */
-    getFiles: () => FilePondFile[];
+    getFiles(): FilePondFile[];
     /**
      * Manually trigger the browse files panel.
      * 
      * Only works if the call originates from the user.
      */
-    browse: () => void;
+    browse(): void;
     /**
      * Sort the items in the files list.
      * @param compare The comparison function
      */
-    sort: (compare: (a: FilePondFile, b: FilePondFile) => number) => void;
+    sort(compare: (a: FilePondFile, b: FilePondFile) => number): void;
     /** Destroys this FilePond instance. */
-    destroy: () => void;
+    destroy(): void;
 
     /** Inserts the FilePond instance after the supplied element. */
-    insertAfter: (element: Element) => void;
+    insertAfter(element: Element): void;
     /** Inserts the FilePond instance before the supplied element. */
-    insertBefore: (element: Element) => void;
+    insertBefore(element: Element): void;
     /** Appends FilePond to the given element.  */
-    appendTo: (element: Element) => void;
+    appendTo(element: Element): void;
     /** Returns true if the current instance is attached to the supplied element. */
-    isAttachedTo: (element: Element) => void;
+    isAttachedTo(element: Element): void;
     /** Replaces the supplied element with FilePond. */
-    replaceElement: (element: Element) => void;
+    replaceElement(element: Element): void;
     /** If FilePond replaced the original element, this restores the original element to its original glory. */
-    restoreElement: (element: Element) => void;
+    restoreElement(element: Element): void;
 
     /** 
      * Adds an event listener to the given event.
      * @param event Name of the event, prefixed with `Filepond:`
      * @param fn Event handler
      */
-    addEventListener: (event: FilePondEventPrefixed, fn: (e: any) => void) => void;
+    addEventListener(event: FilePondEventPrefixed, fn: (e: any) => void): void;
     /** 
      * Listen to an event.
      * @param event Name of the event
      * @param fn Event handler, signature is identical to the callback method
      */
-    on: (event: FilePondEvent, fn: (...args: any[]) => void) => void;
+    on(event: FilePondEvent, fn: (...args: any[]) => void): void;
     /** 
      * Listen to an event once and remove the handler.
      * @param event Name of the event
      * @param fn Event handler, signature is identical to the callback method
      */
-    onOnce: (event: FilePondEvent, fn: (...args: any[]) => void) => void;
+    onOnce(event: FilePondEvent, fn: (...args: any[]) => void): void;
     /** 
      * Stop listening to an event.
      * @param event Name of the event
      * @param fn Event handler, signature is identical to the callback method
      */
-    off: (event: FilePondEvent, fn: (...args: any[]) => void) => void;
+    off(event: FilePondEvent, fn: (...args: any[]) => void): void;
 }
 
 /** Creates a new FilePond instance. */
