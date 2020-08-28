@@ -1,6 +1,9 @@
 // Based on definitions by Zach Posten for React-Filepond <https://github.com/zposten>
 // Updated by FilePond Contributors
 
+/* Disable no-redundant-jsdoc since @default statements are NOT redundant */
+/* tslint:disable:no-redundant-jsdoc */
+
 export { };
 
 export enum FileStatus {
