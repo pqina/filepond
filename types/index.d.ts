@@ -78,8 +78,8 @@ export class FilePondFile {
 
 // TODO delete
 /**
- * A custom FilePond File. Don't confuse this with the native `File` type. 
- *  
+ * A custom FilePond File. Don't confuse this with the native `File` type.
+ *
  * @deprecated use `FilePondFile` instead. This type will be removed in a future release.
  */
 export class File extends FilePondFile {}
@@ -247,7 +247,7 @@ export interface FilePondServerConfigProps {
      * @default true
      */
     instantUpload?: boolean;
-     /** 
+    /**
      * The maximum number of files that can be uploaded in parallel.
      * @default 2
      */
@@ -269,15 +269,15 @@ export interface FilePondServerConfigProps {
         fetch?: string | ServerUrl | FetchServerConfigFunction | null;
         remove?: RemoveServerConfigFunction | null;
     } | null;
-  
+
     /**
      * Enable chunk uploads
-     * @default false 
+     * @default false
      */
     chunkUploads?: boolean;
     /**
      * Force use of chunk uploads even for files smaller than chunk size
-     * @default false 
+     * @default false
      */
     chunkForce?: boolean;
     /**
@@ -299,14 +299,13 @@ export interface FilePondServerConfigProps {
     files?: Array<FilePondInitialFile | ActualFileObject | Blob | string>;
 }
 
-
 export interface FilePondDragDropProps {
     /**
      * FilePond will catch all files dropped on the webpage.
      * @default false
      */
     dropOnPage?: boolean;
-    /** 
+    /**
      * Require drop on the FilePond element itself to catch the file.
      * @default true
      */
@@ -390,7 +389,7 @@ export interface FilePondLabelProps {
      * @default 'Removed'
      */
     labelFileRemoved?: string;
-      /**
+    /**
      * Label used when something went during during removing the file upload.
      * @default 'Error during remove'
      */
@@ -419,7 +418,7 @@ export interface FilePondLabelProps {
      * Label used when something went wrong during reverting the file upload.
      * @default 'Error during revert'
      */
-    labelFileProcessingRevertError?: ((error: any) => string) | string;  
+    labelFileProcessingRevertError?: ((error: any) => string) | string;
     /**
      * Label used to indicate to the user that an action can be cancelled.
      * @default 'tap to cancel'
@@ -558,52 +557,52 @@ export interface FilePondCallbackProps {
 export interface FilePondHookProps {
     /**
      * FilePond is about to allow this item to be dropped, it can be a URL or a File object.
-     * 
+     *
      * Return `true` or `false` depending on if you want to allow the item to be dropped.
      */
     beforeDropFile?: (file: FilePondFile | string) => boolean;
     /**
-     * FilePond is about to add this file. 
-     * 
+     * FilePond is about to add this file.
+     *
      * Return `false` to prevent adding it, or return a `Promise` and resolve with `true` or `false`.
      */
     beforeAddFile?: (item: FilePondFile) => boolean | Promise<boolean>;
     /**
-     * FilePond is about to remove this file. 
-     * 
+     * FilePond is about to remove this file.
+     *
      * Return `false` to prevent adding it, or return a `Promise` and resolve with `true` or `false`.
      */
     beforeRemoveFile?: (item: FilePondFile) => boolean | Promise<boolean>;
 }
 
 export interface FilePondStyleProps {
-    /** 
+    /**
      * Set a different layout render mode.
      * @default null
      */
     stylePanelLayout?: 'integrated' | 'compact' | 'circle' | null;
     /**
      * Set a forced aspect ratio for the FilePond drop area.
-     * 
+     *
      * Accepts human readable aspect ratios like `1:1` or numeric aspect ratios like `0.75`.
      * @default null
      */
     stylePanelAspectRatio?: string | null;
     /**
-     * Set a forced aspect ratio for the file items. 
-     * 
+     * Set a forced aspect ratio for the file items.
+     *
      * Useful when rendering cropped or fixed aspect ratio images in grid view.
      * @default null
      */
     styleItemPanelAspectRatio?: string | null;
-    /** 
+    /**
      * The position of the remove item button.
      * @default 'left'
      */
     styleButtonRemoveItemPosition?: string;
     /**
      * The position of the remove item button.
-     * @default 'right' 
+     * @default 'right'
      */
     styleButtonProcessItemPosition?: string;
     /**
@@ -626,7 +625,7 @@ export interface FilePondStyleProps {
 export type CaptureAttribute = "camera" | "microphone" | "camcorder";
 
 export interface FilePondBaseProps {
-    /** 
+    /**
      * The ID to add to the root element.
      * @default null
      */
@@ -636,12 +635,12 @@ export interface FilePondBaseProps {
      * @default 'filepond'
      */
     name?: string;
-    /** 
+    /**
      * Class Name to put on wrapper.
      * @default null
      */
     className?: string | null;
-    /** 
+    /**
      * Sets the required attribute to the output field.
      * @default false
      */
@@ -651,7 +650,7 @@ export interface FilePondBaseProps {
      * @default false
      */
     disabled?: boolean;
-    /** 
+    /**
      * Sets the given value to the capture attribute.
      * @default null
      */
@@ -660,12 +659,12 @@ export interface FilePondBaseProps {
      * Set to false to prevent FilePond from setting the file input field `accept` attribute to the value of the `acceptedFileTypes`.
      */
     allowSyncAcceptAttribute?: boolean;
-    /** 
+    /**
      * Enable or disable drag n’ drop.
      * @default true
      */
     allowDrop?: boolean;
-    /** 
+    /**
      * Enable or disable file browser.
      * @default true
      */
@@ -676,49 +675,49 @@ export interface FilePondBaseProps {
      * @default true
      */
     allowPaste?: boolean;
-    /** 
+    /**
      * Enable or disable adding multiple files.
      * @default false
      */
     allowMultiple?: boolean;
-    /** 
+    /**
      * Allow drop to replace a file, only works when allowMultiple is false.
      * @default true
      */
     allowReplace?: boolean;
-    /** 
+    /**
      * Allows the user to revert file upload.
      * @default true
      */
     allowRevert?: boolean;
-    /** 
+    /**
      * Allows user to process a file. When set to false, this removes the file upload button.
      * @default true
      */
     allowProcess?: boolean;
-    /** 
+    /**
      * Allows the user to reorder the file items
      * @default false
      */
-    allowReorder?: boolean;    
+    allowReorder?: boolean;
     /**
      * Allow only selecting directories with browse (no support for filtering dnd at this point)
      * @default false
      */
     allowDirectoriesOnly?: boolean;
 
-    /** 
+    /**
      * Require the file to be successfully reverted before continuing.
      * @default false
      */
     forceRevert?: boolean;
 
-    /** 
+    /**
      * The maximum number of files that filepond pond can handle.
      * @default null
      */
     maxFiles?: number | null;
-    /** 
+    /**
      * Enables custom validity messages.
      * @default false
      */
@@ -738,7 +737,7 @@ export interface FilePondBaseProps {
      * The interval to use before showing each item being added to the list.
      * @default 75
      */
-    itemInsertInterval?: number;   
+    itemInsertInterval?: number;
 }
 
 // TODO delete
@@ -815,29 +814,29 @@ export class FilePond {
 
     /** Override multiple options at once. */
     setOptions(options: FilePondOptions): void;
-    /** 
+    /**
      * Adds a file.
      * @param options.index The index that the file should be added at.
      */
     addFile(source: ActualFileObject | Blob | string, options?: { index?: number } & Partial<FilePondInitialFile["options"]>): Promise<FilePondFile>;
-    /** 
+    /**
      * Adds multiple files.
      * @param options.index The index that the files should be added at.
      */
     addFiles(source: ActualFileObject[] | Blob[] | string[], options?: { index: number }): Promise<FilePondFile[]>;
-    /** 
-     * Moves a file. Select file with query and supply target index. 
+    /**
+     * Moves a file. Select file with query and supply target index.
      * @param query The file reference, id, or index.
      * @param index The index to move the file to.
      */
     moveFile(query: FilePondFile | string | number, index: number): void;
-    /** 
-     * Removes a file. 
+    /**
+     * Removes a file.
      * @param query The file reference, id, or index. If no query is provided, removes the first file in the list.
      * @param options Options for removal
      */
     removeFile(query?: FilePondFile | string | number, options?: RemoveFileOptions): void;
-    /** 
+    /**
      * Removes the first file in the list.
      * @param options Options for removal
      */
@@ -855,7 +854,7 @@ export class FilePond {
      */
     removeFiles(options: RemoveFileOptions): void;
 
-    /** 
+    /**
      * Processes a file. If no parameter is provided, processes the first file in the list.
      * @param query The file reference, id, or index
      */
@@ -866,7 +865,7 @@ export class FilePond {
      */
     processFiles(query?: FilePondFile[] | string[] | number[]): Promise<FilePondFile[]>;
 
-    /** 
+    /**
      * Starts preparing the file matching the given query, returns a Promise, the Promise is resolved with the file item and the output file { file, output }
      * @param query The file reference, id, or index
      */
@@ -877,7 +876,7 @@ export class FilePond {
      */
     prepareFiles(query?: FilePondFile[] | string[] | number[]): Promise<Array<{file: FilePondFile, output: any}>>;
 
-    /** 
+    /**
      * Returns a file. If no parameter is provided, returns the first file in the list.
      * @param query The file id, or index
      */
@@ -886,7 +885,7 @@ export class FilePond {
     getFiles(): FilePondFile[];
     /**
      * Manually trigger the browse files panel.
-     * 
+     *
      * Only works if the call originates from the user.
      */
     browse(): void;
@@ -911,25 +910,25 @@ export class FilePond {
     /** If FilePond replaced the original element, this restores the original element to its original glory. */
     restoreElement(element: Element): void;
 
-    /** 
+    /**
      * Adds an event listener to the given event.
      * @param event Name of the event, prefixed with `Filepond:`
      * @param fn Event handler
      */
     addEventListener(event: FilePondEventPrefixed, fn: (e: any) => void): void;
-    /** 
+    /**
      * Listen to an event.
      * @param event Name of the event
      * @param fn Event handler, signature is identical to the callback method
      */
     on(event: FilePondEvent, fn: (...args: any[]) => void): void;
-    /** 
+    /**
      * Listen to an event once and remove the handler.
      * @param event Name of the event
      * @param fn Event handler, signature is identical to the callback method
      */
     onOnce(event: FilePondEvent, fn: (...args: any[]) => void): void;
-    /** 
+    /**
      * Stop listening to an event.
      * @param event Name of the event
      * @param fn Event handler, signature is identical to the callback method
