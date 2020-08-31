@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.19.2
+ * FilePond 4.20.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -171,6 +171,9 @@
 .filepond--file-action-button[disabled] {
   color: rgba(255, 255, 255, 0.5);
   background-color: rgba(0, 0, 0, 0.25);
+}
+.filepond--file-action-button[hidden] {
+  display: none;
 }
 
 .filepond--file-info {

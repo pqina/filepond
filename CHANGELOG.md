@@ -2,8 +2,9 @@
 
 ## 4.20.0
 
-- Fix issue where `removeFiles` would not remove all files.
 - Add `allowRemove`, set to `false` to disable remove button.
+- Improve TypeScript definitions.
+- Fix issue where `removeFiles` would not remove all files.
 
 
 ## 4.19.2
