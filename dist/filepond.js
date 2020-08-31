@@ -8285,6 +8285,9 @@
     // allow reverting upload
     var allowRevert = root.query('GET_ALLOW_REVERT');
 
+    // allow remove file
+    var allowRemove = root.query('GET_ALLOW_REMOVE');
+
     // allow processing upload
     var allowProcess = root.query('GET_ALLOW_PROCESS');
 
@@ -8370,6 +8373,10 @@
       _map.processingCompleteIndicator = { opacity: 1, scaleX: 1, scaleY: 1 };
     }
 
+    if (!allowRemove) {
+      Buttons['RemoveItem'].disabled = true;
+    }
+
     // create the button views
     forin(Buttons, function(key, definition) {
       // create button
@@ -8384,6 +8391,12 @@
         root.appendChildView(buttonView);
       }
 
+      // toggle
+      if (definition.disabled) {
+        buttonView.element.setAttribute('disabled', 'disabled');
+        buttonView.element.setAttribute('hidden', 'hidden');
+      }
+
       // add position attribute
       buttonView.element.dataset.align = root.query(
         'GET_STYLE_' + definition.align
@@ -8395,6 +8408,7 @@
       // handle interactions
       buttonView.on('click', function(e) {
         e.stopPropagation();
+        if (definition.disabled) return;
         root.dispatch(definition.action, { query: id });
       });
 
@@ -12005,9 +12019,13 @@
       });
     };
 
+    var isFilePondFile = function isFilePondFile(obj) {
+      return obj.file && obj.id;
+    };
+
     var removeFile = function removeFile(query, options) {
       // if only passed options
-      if (typeof query === 'object' && !options) {
+      if (typeof query === 'object' && !isFilePondFile(query) && !options) {
         options = query;
         query = undefined;
       }

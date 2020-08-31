@@ -355,10 +355,12 @@ export const createApp = (initialOptions = {}) => {
             .catch(reject)
     });
 
+    const isFilePondFile = (obj) => obj.file && obj.id;
+
     const removeFile = (query, options) => {
 
         // if only passed options
-        if (typeof query === 'object' && !options) {
+        if (typeof query === 'object' && !isFilePondFile(query) && !options) {
             options = query;
             query = undefined;
         }

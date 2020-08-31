@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.20.0
+
+- Fix issue where `removeFiles` would not remove all files.
+- Add `allowRemove`, set to `false` to disable remove button.
+
+
 ## 4.19.2
 
 - Fix problem with locale files not ending up on npm.

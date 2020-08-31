@@ -203,6 +203,9 @@ const create = ({ root, props }) => {
     // allow reverting upload
     const allowRevert = root.query('GET_ALLOW_REVERT');
 
+    // allow remove file
+    const allowRemove = root.query('GET_ALLOW_REMOVE');
+
     // allow processing upload
     const allowProcess = root.query('GET_ALLOW_PROCESS');
     
@@ -270,6 +273,10 @@ const create = ({ root, props }) => {
         map.processingCompleteIndicator = { opacity: 1, scaleX: 1, scaleY: 1 }
     }
 
+    if (!allowRemove) {
+        Buttons['RemoveItem'].disabled = true;
+    }
+
     // create the button views
     forin(Buttons, (key, definition) => {
 
@@ -285,6 +292,12 @@ const create = ({ root, props }) => {
             root.appendChildView(buttonView);
         }
 
+        // toggle
+        if (definition.disabled) {
+            buttonView.element.setAttribute('disabled', 'disabled');
+            buttonView.element.setAttribute('hidden', 'hidden');
+        }
+
         // add position attribute
         buttonView.element.dataset.align = root.query(`GET_STYLE_${definition.align}`);
 
@@ -294,6 +307,7 @@ const create = ({ root, props }) => {
         // handle interactions
         buttonView.on('click', e => {
             e.stopPropagation();
+            if (definition.disabled) return;
             root.dispatch(definition.action, { query: id });
         });
 
