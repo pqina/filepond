@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.20.1
+
+- Add `allowRemove` option so it actually works.
+
+
 ## 4.20.0
 
 - Add `allowRemove`, set to `false` to disable remove button.

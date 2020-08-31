@@ -56,6 +56,7 @@ export const defaultOptions = {
     allowMultiple: [false, Type.BOOLEAN], // Allow multiple files (disabled by default, as multiple attribute is also required on input to allow multiple)
     allowReplace: [true, Type.BOOLEAN], // Allow dropping a file on other file to replace it (only works when multiple is set to false)
     allowRevert: [true, Type.BOOLEAN], // Allows user to revert file upload
+    allowRemove: [true, Type.BOOLEAN], // Allow user to remove a file
     allowProcess: [true, Type.BOOLEAN], // Allows user to process a file, when set to false, this removes the file upload button
     allowReorder: [false, Type.BOOLEAN], // Allow reordering of files
     allowDirectoriesOnly: [false, Type.BOOLEAN], // Allow only selecting directories with browse (no support for filtering dnd at this point)
