@@ -659,10 +659,6 @@ export interface FilePondBaseProps {
      */
     captureMethod?: CaptureAttribute | null;
     /**
-     * Set to false to prevent FilePond from setting the file input field `accept` attribute to the value of the `acceptedFileTypes`.
-     */
-    allowSyncAcceptAttribute?: boolean;
-    /**
      * Enable or disable drag n’ drop.
      * @default true
      */

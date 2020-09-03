@@ -46,9 +46,6 @@ export const defaultOptions = {
     // - Does not work with multiple on apple devices
     // - If set, acceptedFileTypes must be made to match with media wildcard "image/*", "audio/*" or "video/*"
 
-    // sync `acceptedFileTypes` property with `accept` attribute
-    allowSyncAcceptAttribute: [true, Type.BOOLEAN],
-
     // Feature toggles
     allowDrop: [true, Type.BOOLEAN], // Allow dropping of files
     allowBrowse: [true, Type.BOOLEAN], // Allow browsing the file system
