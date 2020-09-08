@@ -59,6 +59,7 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 
 *   [React](https://github.com/pqina/react-filepond)
 *   [Vue](https://github.com/pqina/vue-filepond)
+*   [Svelte](https://github.com/pqina/svelte-filepond)
 *   [jQuery](https://github.com/pqina/jquery-filepond)
 *   [Angular](https://github.com/pqina/ngx-filepond)
 *   [Angular 1](https://github.com/johnnyasantoss/angularjs-filepond) ([johnnyasantoss/angularjs-filepond](https://github.com/johnnyasantoss/angularjs-filepond))
