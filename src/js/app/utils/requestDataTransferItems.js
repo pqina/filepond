@@ -3,7 +3,7 @@ import { getExtensionFromFilename } from '../../utils/getExtensionFromFilename';
 
 export const requestDataTransferItems = dataTransfer =>
     new Promise((resolve, reject) => {
-        // try to get links from transfer, if found we'll exit immidiately (unless a file is in the dataTransfer as well, this is because Firefox could represent the file as a URL and a file object at the same time)
+        // try to get links from transfer, if found we'll exit immediately (unless a file is in the dataTransfer as well, this is because Firefox could represent the file as a URL and a file object at the same time)
         const links = getLinks(dataTransfer);
         if (links.length && !hasFiles(dataTransfer)) {
             return resolve(links);

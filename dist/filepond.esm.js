@@ -1914,7 +1914,7 @@ const defaultOptions = {
   ignoredFiles: [['.ds_store', 'thumbs.db', 'desktop.ini'], Type.ARRAY],
 
   // Upload related
-  instantUpload: [true, Type.BOOLEAN], // Should upload files immidiately on drop
+  instantUpload: [true, Type.BOOLEAN], // Should upload files immediately on drop
   maxParallelUploads: [2, Type.INT], // Maximum files to upload in parallel
 
   // Chunks
@@ -4231,7 +4231,7 @@ const actions = (dispatch, query, state) => ({
         item.abortProcessing().then(doUpload ? upload : () => {});
       };
 
-      // if we should re-upload the file immidiately
+      // if we should re-upload the file immediately
       if (item.status === ItemStatus.PROCESSING_COMPLETE) {
         return revert(state.options.instantUpload);
       }
@@ -4737,7 +4737,7 @@ const actions = (dispatch, query, state) => ({
       return;
     }
 
-    // id we are allowed to upload the file immidiately, lets do it
+    // id we are allowed to upload the file immediately, lets do it
     if (query('IS_ASYNC') && state.options.instantUpload) {
       dispatch('REQUEST_ITEM_PROCESSING', { query: item.id });
     }
@@ -5027,7 +5027,7 @@ const actions = (dispatch, query, state) => ({
   }),
 
   REQUEST_REVERT_ITEM_PROCESSING: getItemByQueryFromState(state, item => {
-    // not instant uploading, revert immidiately
+    // not instant uploading, revert immediately
     if (!state.options.instantUpload) {
       dispatch('REVERT_ITEM_PROCESSING', { query: item });
       return;
@@ -7324,7 +7324,7 @@ const guesstimateMimeType = (extension = '') => {
 
 const requestDataTransferItems = dataTransfer =>
   new Promise((resolve, reject) => {
-    // try to get links from transfer, if found we'll exit immidiately (unless a file is in the dataTransfer as well, this is because Firefox could represent the file as a URL and a file object at the same time)
+    // try to get links from transfer, if found we'll exit immediately (unless a file is in the dataTransfer as well, this is because Firefox could represent the file as a URL and a file object at the same time)
     const links = getLinks(dataTransfer);
     if (links.length && !hasFiles(dataTransfer)) {
       return resolve(links);
@@ -9666,7 +9666,7 @@ const hasCSSSupports = () => 'supports' in (window.CSS || {}); // use to detect 
 const isIE11 = () => /MSIE|Trident/.test(window.navigator.userAgent);
 
 const supported = (() => {
-  // Runs immidiately and then remembers result for subsequent calls
+  // Runs immediately and then remembers result for subsequent calls
   const isSupported =
     // Has to be a browser
     isBrowser() &&
