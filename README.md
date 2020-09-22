@@ -151,6 +151,7 @@ To build the library run `npm run build`
 
 ## Publications
 
+* [Applying Watermarks to Images with FilePond](https://pqina.nl/blog/applying-watermarks-to-images-with-filepond/)
 * [Generating Image Thumbnails in the Browser using JavaScript and FilePond](https://dev.to/pqina/generating-image-thumbnails-in-the-browser-using-javascript-and-filepond-10b8)
 * [How to upload files with Vue and FilePond](https://dev.to/pqina/how-to-upload-files-with-vue-and-filepond-1m02)
 * [Smooth file uploading with React and FilePond](https://itnext.io/uploading-files-with-react-and-filepond-f8a798308557)
