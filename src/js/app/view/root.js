@@ -1,5 +1,5 @@
 import { createView, createRoute } from '../frame/index';
-import { applyFilterChain, applyFilterChainSync, applyFilters } from '../../filter';
+import { applyFilterChainSync, applyFilters } from '../../filter';
 import { listScroller } from './listScroller';
 import { panel } from './panel';
 import { browser } from './browser';
