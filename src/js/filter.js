@@ -1,6 +1,24 @@
 // all registered filters
 const filters = [];
 
+export const applyFilterChainSync = (key, value, utils) => {
+    const matchingFilters = filters
+        .filter(f => f.key === key)
+        .map(f => f.cb);
+
+    if (matchingFilters.length === 0) {
+        return value;
+    }
+
+    const initialFilter = matchingFilters.shift();
+
+    return matchingFilters
+        .reduce(
+            (current, next) => next(current, utils),
+            initialFilter(value, utils)
+        );
+};
+
 // loops over matching filters and passes options to each filter, returning the mapped results
 export const applyFilterChain = (key, value, utils) =>
     new Promise((resolve, reject) => {

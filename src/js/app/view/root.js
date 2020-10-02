@@ -1,5 +1,5 @@
 import { createView, createRoute } from '../frame/index';
-import { applyFilters } from '../../filter';
+import { applyFilterChain, applyFilterChainSync, applyFilters } from '../../filter';
 import { listScroller } from './listScroller';
 import { panel } from './panel';
 import { browser } from './browser';
@@ -469,13 +469,17 @@ const toggleDrop = (root) => {
             },
             {
                 filterItems: items => {
-                    const ignoredFiles = root.query('GET_IGNORED_FILES');
-                    return items.filter(item => {
-                        if (isFile(item)) {
-                            return !ignoredFiles.includes(item.name.toLowerCase())
-                        }
-                        return true;
-                    })
+                    const ignoreFiles = (items) => {
+                        const ignoredFiles = root.query('GET_IGNORED_FILES');
+                        return items.filter(item => {
+                            if (isFile(item)) {
+                                return !ignoredFiles.includes(item.name.toLowerCase())
+                            }
+                            return true;
+                        })
+                    };
+
+                    return applyFilterChainSync('FILTER_DROPPED_ITEMS', ignoreFiles(items), {query: root.query});
                 },
                 catchesDropsOnPage: root.query('GET_DROP_ON_PAGE'),
                 requiresDropOnElement: root.query('GET_DROP_ON_ELEMENT')
