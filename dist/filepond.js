@@ -3811,6 +3811,19 @@
   // all registered filters
   var filters = [];
 
+  var applyFilterChainSync = function applyFilterChainSync(key, value, utils) {
+    return filters
+      .filter(function(f) {
+        return f.key === key;
+      })
+      .map(function(f) {
+        return f.cb;
+      })
+      .reduce(function(current, next) {
+        return next(current, utils);
+      }, value);
+  };
+
   // loops over matching filters and passes options to each filter, returning the mapped results
   var applyFilterChain = function applyFilterChain(key, value, utils) {
     return new Promise(function(resolve, reject) {
@@ -10090,7 +10103,9 @@
       action = _ref6.action;
     var field = getField(root, action.id);
     if (!field) return;
-    field.parentNode.removeChild(field);
+    if (field.parentNode) {
+      field.parentNode.removeChild(field);
+    }
     delete root.ref.fields[action.id];
   };
 
@@ -11506,13 +11521,21 @@
         },
         {
           filterItems: function filterItems(items) {
-            var ignoredFiles = root.query('GET_IGNORED_FILES');
-            return items.filter(function(item) {
-              if (isFile(item)) {
-                return !ignoredFiles.includes(item.name.toLowerCase());
-              }
-              return true;
-            });
+            var ignoreFiles = function ignoreFiles(items) {
+              var ignoredFiles = root.query('GET_IGNORED_FILES');
+              return items.filter(function(item) {
+                if (isFile(item)) {
+                  return !ignoredFiles.includes(item.name.toLowerCase());
+                }
+                return true;
+              });
+            };
+
+            return applyFilterChainSync(
+              'FILTER_DROPPED_ITEMS',
+              ignoreFiles(items),
+              { query: root.query }
+            );
           },
           catchesDropsOnPage: root.query('GET_DROP_ON_PAGE'),
           requiresDropOnElement: root.query('GET_DROP_ON_ELEMENT')

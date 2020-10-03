@@ -1802,6 +1802,12 @@ const Type = {
 // all registered filters
 const filters = [];
 
+const applyFilterChainSync = (key, value, utils) =>
+  filters
+    .filter(f => f.key === key)
+    .map(f => f.cb)
+    .reduce((current, next) => next(current, utils), value);
+
 // loops over matching filters and passes options to each filter, returning the mapped results
 const applyFilterChain = (key, value, utils) =>
   new Promise((resolve, reject) => {
@@ -7267,7 +7273,9 @@ const didSetDisabled = ({ root }) => {
 const didRemoveItem = ({ root, action }) => {
   const field = getField(root, action.id);
   if (!field) return;
-  field.parentNode.removeChild(field);
+  if (field.parentNode) {
+    field.parentNode.removeChild(field);
+  }
   delete root.ref.fields[action.id];
 };
 
@@ -8556,13 +8564,21 @@ const toggleDrop = root => {
       },
       {
         filterItems: items => {
-          const ignoredFiles = root.query('GET_IGNORED_FILES');
-          return items.filter(item => {
-            if (isFile(item)) {
-              return !ignoredFiles.includes(item.name.toLowerCase());
-            }
-            return true;
-          });
+          const ignoreFiles = items => {
+            const ignoredFiles = root.query('GET_IGNORED_FILES');
+            return items.filter(item => {
+              if (isFile(item)) {
+                return !ignoredFiles.includes(item.name.toLowerCase());
+              }
+              return true;
+            });
+          };
+
+          return applyFilterChainSync(
+            'FILTER_DROPPED_ITEMS',
+            ignoreFiles(items),
+            { query: root.query }
+          );
         },
         catchesDropsOnPage: root.query('GET_DROP_ON_PAGE'),
         requiresDropOnElement: root.query('GET_DROP_ON_ELEMENT')
