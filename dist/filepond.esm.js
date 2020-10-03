@@ -7813,7 +7813,10 @@ const createHopper = (scope, validateItems, options) => {
   };
 
   client.ondrop = (position, items) => {
-    const filteredItems = filterItems(items);
+    const filteredItems = applyFilterChainSync(
+      'FILTER_DROPPED_ITEMS',
+      filterItems(items)
+    );
 
     if (!validateItems(filteredItems)) {
       api.ondragend(position);
@@ -8564,21 +8567,13 @@ const toggleDrop = root => {
       },
       {
         filterItems: items => {
-          const ignoreFiles = items => {
-            const ignoredFiles = root.query('GET_IGNORED_FILES');
-            return items.filter(item => {
-              if (isFile(item)) {
-                return !ignoredFiles.includes(item.name.toLowerCase());
-              }
-              return true;
-            });
-          };
-
-          return applyFilterChainSync(
-            'FILTER_DROPPED_ITEMS',
-            ignoreFiles(items),
-            { query: root.query }
-          );
+          const ignoredFiles = root.query('GET_IGNORED_FILES');
+          return items.filter(item => {
+            if (isFile(item)) {
+              return !ignoredFiles.includes(item.name.toLowerCase());
+            }
+            return true;
+          });
         },
         catchesDropsOnPage: root.query('GET_DROP_ON_PAGE'),
         requiresDropOnElement: root.query('GET_DROP_ON_ELEMENT')

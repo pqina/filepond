@@ -10691,7 +10691,10 @@
     };
 
     client.ondrop = function(position, items) {
-      var filteredItems = filterItems(items);
+      var filteredItems = applyFilterChainSync(
+        'FILTER_DROPPED_ITEMS',
+        filterItems(items)
+      );
 
       if (!validateItems(filteredItems)) {
         api.ondragend(position);
@@ -11521,21 +11524,13 @@
         },
         {
           filterItems: function filterItems(items) {
-            var ignoreFiles = function ignoreFiles(items) {
-              var ignoredFiles = root.query('GET_IGNORED_FILES');
-              return items.filter(function(item) {
-                if (isFile(item)) {
-                  return !ignoredFiles.includes(item.name.toLowerCase());
-                }
-                return true;
-              });
-            };
-
-            return applyFilterChainSync(
-              'FILTER_DROPPED_ITEMS',
-              ignoreFiles(items),
-              { query: root.query }
-            );
+            var ignoredFiles = root.query('GET_IGNORED_FILES');
+            return items.filter(function(item) {
+              if (isFile(item)) {
+                return !ignoredFiles.includes(item.name.toLowerCase());
+              }
+              return true;
+            });
           },
           catchesDropsOnPage: root.query('GET_DROP_ON_PAGE'),
           requiresDropOnElement: root.query('GET_DROP_ON_ELEMENT')

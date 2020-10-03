@@ -1,3 +1,4 @@
+import { applyFilterChainSync } from '../../filter';
 import { createDragNDropClient } from '../utils/dnd';
 
 export const createHopper = (scope, validateItems, options) => {
@@ -27,7 +28,7 @@ export const createHopper = (scope, validateItems, options) => {
 
     client.ondrop = (position, items) => {
 
-        const filteredItems = filterItems(items);
+        const filteredItems = applyFilterChainSync('FILTER_DROPPED_ITEMS', filterItems(items));
         
         if (!validateItems(filteredItems)) {
             api.ondragend(position);
