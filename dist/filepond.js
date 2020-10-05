@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.20.1
+ * FilePond 4.21.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1582,6 +1582,8 @@
   };
 
   var toBytes = function toBytes(value) {
+    var base =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1000;
     // is in bytes
     if (isInt(value)) {
       return value;
@@ -1593,13 +1595,13 @@
     // if is value in megabytes
     if (/MB$/i.test(naturalFileSize)) {
       naturalFileSize = naturalFileSize.replace(/MB$i/, '').trim();
-      return toInt(naturalFileSize) * 1000 * 1000;
+      return toInt(naturalFileSize) * base * 1000;
     }
 
     // if is value in kilobytes
     if (/KB/i.test(naturalFileSize)) {
       naturalFileSize = naturalFileSize.replace(/KB$i/, '').trim();
-      return toInt(naturalFileSize) * 1000;
+      return toInt(naturalFileSize) * base;
     }
 
     return toInt(naturalFileSize);
@@ -3959,6 +3961,9 @@
 
     // The server api end points to use for uploading (see docs)
     server: [null, Type.SERVER_API],
+
+    // File size calculations, can set to 1024, this is only used for display, properties use file size base 1000
+    fileSizeBase: [1000, Type.INT],
 
     // Labels and status messages
     labelDecimalSeparator: [getDecimalSeparator(), Type.STRING], // Default is locale separator
@@ -7825,11 +7830,17 @@
   var toNaturalFileSize = function toNaturalFileSize(bytes) {
     var decimalSeparator =
       arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '.';
-    // nope, no negative byte sizes
+    var base =
+      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1000;
+    // no negative byte sizes
     bytes = Math.round(Math.abs(bytes));
 
+    var KB = base;
+    var MB = base * 1000;
+    var GB = base * 1000000;
+
     // just bytes
-    if (bytes < 1000) {
+    if (bytes < KB) {
       return bytes + ' bytes';
     }
 
@@ -7846,10 +7857,6 @@
     // gigabytes
     return removeDecimalsWhenZero(bytes / GB, 2, decimalSeparator) + ' GB';
   };
-
-  var KB = 1000;
-  var MB = 1000000;
-  var GB = 1000000000;
 
   var removeDecimalsWhenZero = function removeDecimalsWhenZero(
     value,
@@ -7894,7 +7901,11 @@
       props = _ref2.props;
     text(
       root.ref.fileSize,
-      toNaturalFileSize(root.query('GET_ITEM_SIZE', props.id))
+      toNaturalFileSize(
+        root.query('GET_ITEM_SIZE', props.id),
+        '.',
+        root.query('GET_FILE_SIZE_BASE')
+      )
     );
 
     text(

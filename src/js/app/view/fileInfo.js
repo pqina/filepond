@@ -32,7 +32,7 @@ const create = ({ root, props }) => {
 const updateFile = ({ root, props }) => {
     text(
         root.ref.fileSize,
-        toNaturalFileSize(root.query('GET_ITEM_SIZE', props.id))
+        toNaturalFileSize(root.query('GET_ITEM_SIZE', props.id), '.', root.query('GET_FILE_SIZE_BASE'))
     );
     text(
         root.ref.fileName,

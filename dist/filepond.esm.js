@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.20.1
+ * FilePond 4.21.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1337,7 +1337,7 @@ const toFloat = value => parseFloat(toNumber(value));
 const isInt = value =>
   isNumber(value) && isFinite(value) && Math.floor(value) === value;
 
-const toBytes = value => {
+const toBytes = (value, base = 1000) => {
   // is in bytes
   if (isInt(value)) {
     return value;
@@ -1349,13 +1349,13 @@ const toBytes = value => {
   // if is value in megabytes
   if (/MB$/i.test(naturalFileSize)) {
     naturalFileSize = naturalFileSize.replace(/MB$i/, '').trim();
-    return toInt(naturalFileSize) * 1000 * 1000;
+    return toInt(naturalFileSize) * base * 1000;
   }
 
   // if is value in kilobytes
   if (/KB/i.test(naturalFileSize)) {
     naturalFileSize = naturalFileSize.replace(/KB$i/, '').trim();
-    return toInt(naturalFileSize) * 1000;
+    return toInt(naturalFileSize) * base;
   }
 
   return toInt(naturalFileSize);
@@ -1925,6 +1925,9 @@ const defaultOptions = {
 
   // The server api end points to use for uploading (see docs)
   server: [null, Type.SERVER_API],
+
+  // File size calculations, can set to 1024, this is only used for display, properties use file size base 1000
+  fileSizeBase: [1000, Type.INT],
 
   // Labels and status messages
   labelDecimalSeparator: [getDecimalSeparator(), Type.STRING], // Default is locale separator
@@ -5277,12 +5280,16 @@ const fileActionButton = createView({
   write: write$1
 });
 
-const toNaturalFileSize = (bytes, decimalSeparator = '.') => {
-  // nope, no negative byte sizes
+const toNaturalFileSize = (bytes, decimalSeparator = '.', base = 1000) => {
+  // no negative byte sizes
   bytes = Math.round(Math.abs(bytes));
 
+  const KB = base;
+  const MB = base * 1000;
+  const GB = base * 1000000;
+
   // just bytes
-  if (bytes < 1000) {
+  if (bytes < KB) {
     return `${bytes} bytes`;
   }
 
@@ -5299,10 +5306,6 @@ const toNaturalFileSize = (bytes, decimalSeparator = '.') => {
   // gigabytes
   return `${removeDecimalsWhenZero(bytes / GB, 2, decimalSeparator)} GB`;
 };
-
-const KB = 1000;
-const MB = 1000000;
-const GB = 1000000000;
 
 const removeDecimalsWhenZero = (value, decimalCount, separator) => {
   return value
@@ -5337,7 +5340,11 @@ const create$2 = ({ root, props }) => {
 const updateFile = ({ root, props }) => {
   text(
     root.ref.fileSize,
-    toNaturalFileSize(root.query('GET_ITEM_SIZE', props.id))
+    toNaturalFileSize(
+      root.query('GET_ITEM_SIZE', props.id),
+      '.',
+      root.query('GET_FILE_SIZE_BASE')
+    )
   );
   text(
     root.ref.fileName,

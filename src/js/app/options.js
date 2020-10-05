@@ -92,6 +92,9 @@ export const defaultOptions = {
     // The server api end points to use for uploading (see docs)
     server: [null, Type.SERVER_API],
 
+    // File size calculations, can set to 1024, this is only used for display, properties use file size base 1000
+    fileSizeBase: [1000, Type.INT], 
+
     // Labels and status messages
     labelDecimalSeparator: [getDecimalSeparator(), Type.STRING], // Default is locale separator
     labelThousandsSeparator: [getThousandsSeparator(), Type.STRING], // Default is locale separator

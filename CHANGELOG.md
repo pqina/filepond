@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.21.0
+
+- Add `fileSizeBase` use to adjust the way files sizes are displayed. Default is `1000`.
+
+
 ## 4.20.1
 
 - Add `allowRemove` option so it actually works.
