@@ -80,7 +80,7 @@ export const defaultOptions = {
     ignoredFiles: [['.ds_store', 'thumbs.db', 'desktop.ini'], Type.ARRAY],
 
     // Upload related
-    instantUpload: [true, Type.BOOLEAN], // Should upload files immidiately on drop
+    instantUpload: [true, Type.BOOLEAN], // Should upload files immediately on drop
     maxParallelUploads: [2, Type.INT], // Maximum files to upload in parallel
     
     // Chunks

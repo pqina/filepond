@@ -3950,7 +3950,7 @@
     ignoredFiles: [['.ds_store', 'thumbs.db', 'desktop.ini'], Type.ARRAY],
 
     // Upload related
-    instantUpload: [true, Type.BOOLEAN], // Should upload files immidiately on drop
+    instantUpload: [true, Type.BOOLEAN], // Should upload files immediately on drop
     maxParallelUploads: [2, Type.INT], // Maximum files to upload in parallel
 
     // Chunks
@@ -6669,7 +6669,7 @@
             item.abortProcessing().then(doUpload ? upload : function() {});
           };
 
-          // if we should re-upload the file immidiately
+          // if we should re-upload the file immediately
           if (item.status === ItemStatus.PROCESSING_COMPLETE) {
             return revert(state.options.instantUpload);
           }
@@ -7224,7 +7224,7 @@
           return;
         }
 
-        // id we are allowed to upload the file immidiately, lets do it
+        // id we are allowed to upload the file immediately, lets do it
         if (query('IS_ASYNC') && state.options.instantUpload) {
           dispatch('REQUEST_ITEM_PROCESSING', { query: item.id });
         }
@@ -7545,7 +7545,7 @@
       REQUEST_REVERT_ITEM_PROCESSING: getItemByQueryFromState(state, function(
         item
       ) {
-        // not instant uploading, revert immidiately
+        // not instant uploading, revert immediately
         if (!state.options.instantUpload) {
           dispatch('REVERT_ITEM_PROCESSING', { query: item });
           return;
@@ -10161,7 +10161,7 @@
     dataTransfer
   ) {
     return new Promise(function(resolve, reject) {
-      // try to get links from transfer, if found we'll exit immidiately (unless a file is in the dataTransfer as well, this is because Firefox could represent the file as a URL and a file object at the same time)
+      // try to get links from transfer, if found we'll exit immediately (unless a file is in the dataTransfer as well, this is because Firefox could represent the file as a URL and a file object at the same time)
       var links = getLinks(dataTransfer);
       if (links.length && !hasFiles(dataTransfer)) {
         return resolve(links);
@@ -12782,7 +12782,7 @@
   };
 
   var supported = (function() {
-    // Runs immidiately and then remembers result for subsequent calls
+    // Runs immediately and then remembers result for subsequent calls
     var isSupported =
       // Has to be a browser
       isBrowser() &&

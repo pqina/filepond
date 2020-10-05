@@ -22,7 +22,7 @@ const isIE11 = () => /MSIE|Trident/.test(window.navigator.userAgent);
 
 export const supported = (() => {
 
-    // Runs immidiately and then remembers result for subsequent calls
+    // Runs immediately and then remembers result for subsequent calls
     const isSupported = 
 
         // Has to be a browser

@@ -183,7 +183,7 @@ export const actions = (dispatch, query, state) => ({
                 .then(doUpload ? upload : () => {});
             }
     
-            // if we should re-upload the file immidiately
+            // if we should re-upload the file immediately
             if (item.status === ItemStatus.PROCESSING_COMPLETE) {
                 return revert(state.options.instantUpload);
             }
@@ -682,7 +682,7 @@ export const actions = (dispatch, query, state) => ({
             return;
         }
 
-        // id we are allowed to upload the file immidiately, lets do it
+        // id we are allowed to upload the file immediately, lets do it
         if (query('IS_ASYNC') && state.options.instantUpload) {
             dispatch('REQUEST_ITEM_PROCESSING', { query: item.id });
         }
@@ -944,7 +944,7 @@ export const actions = (dispatch, query, state) => ({
 
     REQUEST_REVERT_ITEM_PROCESSING: getItemByQueryFromState(state, item => {
 
-        // not instant uploading, revert immidiately
+        // not instant uploading, revert immediately
         if (!state.options.instantUpload) {
             dispatch('REVERT_ITEM_PROCESSING', { query: item });
             return;
