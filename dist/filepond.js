@@ -3811,19 +3811,6 @@
   // all registered filters
   var filters = [];
 
-  var applyFilterChainSync = function applyFilterChainSync(key, value, utils) {
-    return filters
-      .filter(function(f) {
-        return f.key === key;
-      })
-      .map(function(f) {
-        return f.cb;
-      })
-      .reduce(function(current, next) {
-        return next(current, utils);
-      }, value);
-  };
-
   // loops over matching filters and passes options to each filter, returning the mapped results
   var applyFilterChain = function applyFilterChain(key, value, utils) {
     return new Promise(function(resolve, reject) {
@@ -10691,19 +10678,20 @@
     };
 
     client.ondrop = function(position, items) {
-      var filteredItems = applyFilterChainSync(
-        'FILTER_DROPPED_ITEMS',
-        filterItems(items)
-      );
+      var filteredItems = filterItems(items);
 
       if (!validateItems(filteredItems)) {
         api.ondragend(position);
         return;
       }
 
-      currentState = 'drag-drop';
+      applyFilterChain('FILTER_DROPPED_ITEMS', filteredItems).then(function(
+        queuedItems
+      ) {
+        currentState = 'drag-drop';
 
-      api.onload(filteredItems, position);
+        api.onload(queuedItems, position);
+      });
     };
 
     client.ondrag = function(position) {

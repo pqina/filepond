@@ -1802,12 +1802,6 @@ const Type = {
 // all registered filters
 const filters = [];
 
-const applyFilterChainSync = (key, value, utils) =>
-  filters
-    .filter(f => f.key === key)
-    .map(f => f.cb)
-    .reduce((current, next) => next(current, utils), value);
-
 // loops over matching filters and passes options to each filter, returning the mapped results
 const applyFilterChain = (key, value, utils) =>
   new Promise((resolve, reject) => {
@@ -7813,19 +7807,20 @@ const createHopper = (scope, validateItems, options) => {
   };
 
   client.ondrop = (position, items) => {
-    const filteredItems = applyFilterChainSync(
-      'FILTER_DROPPED_ITEMS',
-      filterItems(items)
-    );
+    const filteredItems = filterItems(items);
 
     if (!validateItems(filteredItems)) {
       api.ondragend(position);
       return;
     }
 
-    currentState = 'drag-drop';
+    applyFilterChain('FILTER_DROPPED_ITEMS', filteredItems).then(
+      queuedItems => {
+        currentState = 'drag-drop';
 
-    api.onload(filteredItems, position);
+        api.onload(queuedItems, position);
+      }
+    );
   };
 
   client.ondrag = position => {
