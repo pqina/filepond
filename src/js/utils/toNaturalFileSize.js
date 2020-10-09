@@ -3,8 +3,8 @@ export const toNaturalFileSize = (bytes, decimalSeparator = '.', base = 1000) =>
     bytes = Math.round(Math.abs(bytes));
 
     const KB = base;
-    const MB = base * 1000;
-    const GB = base * 1000000;
+    const MB = base * base;
+    const GB = base * base * base;
     
     // just bytes
     if (bytes < KB) {

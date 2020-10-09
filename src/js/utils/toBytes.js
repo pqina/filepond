@@ -14,7 +14,7 @@ export const toBytes = (value, base = 1000) => {
     // if is value in megabytes
     if (/MB$/i.test(naturalFileSize)) {
         naturalFileSize = naturalFileSize.replace(/MB$i/, '').trim();
-        return toInt(naturalFileSize) * base * 1000;
+        return toInt(naturalFileSize) * base * base;
     }
 
     // if is value in kilobytes

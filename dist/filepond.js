@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.21.0
+ * FilePond 4.21.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1595,7 +1595,7 @@
     // if is value in megabytes
     if (/MB$/i.test(naturalFileSize)) {
       naturalFileSize = naturalFileSize.replace(/MB$i/, '').trim();
-      return toInt(naturalFileSize) * base * 1000;
+      return toInt(naturalFileSize) * base * base;
     }
 
     // if is value in kilobytes
@@ -7836,8 +7836,8 @@
     bytes = Math.round(Math.abs(bytes));
 
     var KB = base;
-    var MB = base * 1000;
-    var GB = base * 1000000;
+    var MB = base * base;
+    var GB = base * base * base;
 
     // just bytes
     if (bytes < KB) {

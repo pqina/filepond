@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.21.1
+
+- Fix calculation of file size when `fileSizeBase` is set to 1024.
+
+
 ## 4.21.0
 
 - Add `fileSizeBase` use to adjust the way files sizes are displayed. Default is `1000`.
