@@ -1,5 +1,5 @@
 import { createView, createRoute } from '../frame/index';
-import { applyFilters } from '../../filter';
+import { applyFilterChain, applyFilters } from '../../filter';
 import { listScroller } from './listScroller';
 import { panel } from './panel';
 import { browser } from './browser';
@@ -488,14 +488,16 @@ const toggleDrop = (root) => {
             const list = root.ref.list.childViews[0];
             const visibleChildren = list.childViews.filter(child => child.rect.element.height);
             const children = root.query('GET_ACTIVE_ITEMS').map(item => visibleChildren.find(child => child.id === item.id)).filter(item => item);
-            
-            // go
-            root.dispatch('ADD_ITEMS', {
-                items,
-                index: getDragIndex(root.ref.list, children, position),
-                interactionMethod: InteractionMethod.DROP
+
+            applyFilterChain('FILTER_ADDED_ITEMS', items, {dispatch: root.dispatch}).then((queue) => {
+                // go
+                root.dispatch('ADD_ITEMS', {
+                    items: queue,
+                    index: getDragIndex(root.ref.list, children, position),
+                    interactionMethod: InteractionMethod.DROP
+                });
             });
-            
+
             root.dispatch('DID_DROP', { position });
 
             root.dispatch('DID_END_DRAG', { position });
@@ -540,11 +542,13 @@ const toggleBrowse =  (root, props) => {
                     // these files don't fit so stop here
                     if (exceedsMaxFiles(root, items)) return false;
 
-                    // add items!
-                    root.dispatch('ADD_ITEMS', {
-                        items,
-                        index: -1,
-                        interactionMethod: InteractionMethod.BROWSE
+                    applyFilterChain('FILTER_ADDED_ITEMS', items, {dispatch: root.dispatch}).then((queue) => {
+                        // add items!
+                        root.dispatch('ADD_ITEMS', {
+                            items: queue,
+                            index: -1,
+                            interactionMethod: InteractionMethod.BROWSE
+                        });
                     });
             
                 }
@@ -568,11 +572,18 @@ const togglePaste = (root) => {
     if (enabled && !root.ref.paster) {
         root.ref.paster = createPaster();
         root.ref.paster.onload = items => {
-            root.dispatch('ADD_ITEMS', {
-                items,
-                index: -1,
-                interactionMethod: InteractionMethod.PASTE
+            // these files don't fit so stop here
+            if (exceedsMaxFiles(root, items)) return false;
+
+            applyFilterChain('FILTER_ADDED_ITEMS', items, {dispatch: root.dispatch}).then(queue => {
+                // add items!
+                root.dispatch('ADD_ITEMS', {
+                    items: queue,
+                    index: -1,
+                    interactionMethod: InteractionMethod.PASTE
+                });
             });
+            
         };
     }
     else if (!enabled && root.ref.paster) {

@@ -7814,13 +7814,9 @@ const createHopper = (scope, validateItems, options) => {
       return;
     }
 
-    applyFilterChain('FILTER_DROPPED_ITEMS', filteredItems).then(
-      queuedItems => {
-        currentState = 'drag-drop';
+    currentState = 'drag-drop';
 
-        api.onload(queuedItems, position);
-      }
-    );
+    api.onload(filteredItems, position);
   };
 
   client.ondrag = position => {
@@ -8586,11 +8582,15 @@ const toggleDrop = root => {
         .map(item => visibleChildren.find(child => child.id === item.id))
         .filter(item => item);
 
-      // go
-      root.dispatch('ADD_ITEMS', {
-        items,
-        index: getDragIndex(root.ref.list, children, position),
-        interactionMethod: InteractionMethod.DROP
+      applyFilterChain('FILTER_ADDED_ITEMS', items, {
+        dispatch: root.dispatch
+      }).then(queue => {
+        // go
+        root.dispatch('ADD_ITEMS', {
+          items: queue,
+          index: getDragIndex(root.ref.list, children, position),
+          interactionMethod: InteractionMethod.DROP
+        });
       });
 
       root.dispatch('DID_DROP', { position });
@@ -8635,11 +8635,15 @@ const toggleBrowse = (root, props) => {
           // these files don't fit so stop here
           if (exceedsMaxFiles(root, items)) return false;
 
-          // add items!
-          root.dispatch('ADD_ITEMS', {
-            items,
-            index: -1,
-            interactionMethod: InteractionMethod.BROWSE
+          applyFilterChain('FILTER_ADDED_ITEMS', items, {
+            dispatch: root.dispatch
+          }).then(queue => {
+            // add items!
+            root.dispatch('ADD_ITEMS', {
+              items: queue,
+              index: -1,
+              interactionMethod: InteractionMethod.BROWSE
+            });
           });
         }
       }),
@@ -8661,10 +8665,18 @@ const togglePaste = root => {
   if (enabled && !root.ref.paster) {
     root.ref.paster = createPaster();
     root.ref.paster.onload = items => {
-      root.dispatch('ADD_ITEMS', {
-        items,
-        index: -1,
-        interactionMethod: InteractionMethod.PASTE
+      // these files don't fit so stop here
+      if (exceedsMaxFiles(root, items)) return false;
+
+      applyFilterChain('FILTER_ADDED_ITEMS', items, {
+        dispatch: root.dispatch
+      }).then(queue => {
+        // add items!
+        root.dispatch('ADD_ITEMS', {
+          items: queue,
+          index: -1,
+          interactionMethod: InteractionMethod.PASTE
+        });
       });
     };
   } else if (!enabled && root.ref.paster) {

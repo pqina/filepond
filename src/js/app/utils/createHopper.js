@@ -1,4 +1,3 @@
-import { applyFilterChain } from '../../filter';
 import { createDragNDropClient } from '../utils/dnd';
 
 export const createHopper = (scope, validateItems, options) => {
@@ -35,11 +34,9 @@ export const createHopper = (scope, validateItems, options) => {
             return;
         }
 
-        applyFilterChain('FILTER_DROPPED_ITEMS', filteredItems).then((queuedItems) => {
-            currentState = 'drag-drop';
+        currentState = 'drag-drop';
 
-            api.onload(queuedItems, position);
-        })
+        api.onload(filteredItems, position);
     };
 
     client.ondrag = position => {

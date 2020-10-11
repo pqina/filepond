@@ -10685,13 +10685,9 @@
         return;
       }
 
-      applyFilterChain('FILTER_DROPPED_ITEMS', filteredItems).then(function(
-        queuedItems
-      ) {
-        currentState = 'drag-drop';
+      currentState = 'drag-drop';
 
-        api.onload(queuedItems, position);
-      });
+      api.onload(filteredItems, position);
     };
 
     client.ondrag = function(position) {
@@ -11542,11 +11538,15 @@
             return item;
           });
 
-        // go
-        root.dispatch('ADD_ITEMS', {
-          items: items,
-          index: getDragIndex(root.ref.list, children, position),
-          interactionMethod: InteractionMethod.DROP
+        applyFilterChain('FILTER_ADDED_ITEMS', items, {
+          dispatch: root.dispatch
+        }).then(function(queue) {
+          // go
+          root.dispatch('ADD_ITEMS', {
+            items: queue,
+            index: getDragIndex(root.ref.list, children, position),
+            interactionMethod: InteractionMethod.DROP
+          });
         });
 
         root.dispatch('DID_DROP', { position: position });
@@ -11592,11 +11592,15 @@
               // these files don't fit so stop here
               if (exceedsMaxFiles(root, items)) return false;
 
-              // add items!
-              root.dispatch('ADD_ITEMS', {
-                items: items,
-                index: -1,
-                interactionMethod: InteractionMethod.BROWSE
+              applyFilterChain('FILTER_ADDED_ITEMS', items, {
+                dispatch: root.dispatch
+              }).then(function(queue) {
+                // add items!
+                root.dispatch('ADD_ITEMS', {
+                  items: queue,
+                  index: -1,
+                  interactionMethod: InteractionMethod.BROWSE
+                });
               });
             }
           })
@@ -11620,10 +11624,18 @@
     if (enabled && !root.ref.paster) {
       root.ref.paster = createPaster();
       root.ref.paster.onload = function(items) {
-        root.dispatch('ADD_ITEMS', {
-          items: items,
-          index: -1,
-          interactionMethod: InteractionMethod.PASTE
+        // these files don't fit so stop here
+        if (exceedsMaxFiles(root, items)) return false;
+
+        applyFilterChain('FILTER_ADDED_ITEMS', items, {
+          dispatch: root.dispatch
+        }).then(function(queue) {
+          // add items!
+          root.dispatch('ADD_ITEMS', {
+            items: queue,
+            index: -1,
+            interactionMethod: InteractionMethod.PASTE
+          });
         });
       };
     } else if (!enabled && root.ref.paster) {
