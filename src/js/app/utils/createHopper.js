@@ -27,7 +27,7 @@ export const createHopper = (scope, validateItems, options) => {
 
     client.ondrop = (position, items) => {
 
-        const filteredItems = filterItems(items);;
+        const filteredItems = filterItems(items);
 
         if (!validateItems(filteredItems)) {
             api.ondragend(position);
