@@ -4,6 +4,7 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/pqina/filepond/blob/master/LICENSE)
 [![npm version](https://badge.fury.io/js/filepond.svg)](https://www.npmjs.com/package/filepond)
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/from-referrer/)
 
 21 KB gzipped. FilePond adapters are available for **[React](https://github.com/pqina/react-filepond)**, **[Vue](https://github.com/pqina/vue-filepond)**, **[Angular](https://github.com/pqina/ngx-filepond)** and **[jQuery](https://github.com/pqina/jquery-filepond)**
 
@@ -148,6 +149,9 @@ Tests are based on Jest and can be run with `npm run test`
 
 To build the library run `npm run build`
 
+### Online one-click setup for Contributing
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/from-referrer/)
 
 ## Publications
 
