@@ -1,5 +1,5 @@
 export default {
-    labelIdle: 'Перетащите или выберите <span class="filepond--label-action"> Изображение </span>',
+    labelIdle: 'Перетащите файлы или <span class="filepond--label-action"> выберите </span>',
     labelInvalidField: 'Поле содержит недопустимые файлы',
     labelFileWaitingForSize: 'Укажите размер',
     labelFileSizeNotAvailable: 'Размер не поддерживается',
@@ -26,7 +26,7 @@ export default {
     labelMaxTotalFileSizeExceeded: 'Превышен максимальный размер',
     labelMaxTotalFileSize: 'Максимальный размер файла: {filesize}',
     labelFileTypeNotAllowed: 'Файл неверного типа',
-    fileValidateTypeLabelExpectedTypes: 'Tipos de arquivo suportados são {allButLastType} ou {lastType}',    
+    fileValidateTypeLabelExpectedTypes: 'Ожидается {allButLastType} или {lastType}',    
     imageValidateSizeLabelFormatError: 'Тип изображения не поддерживается',
     imageValidateSizeLabelImageSizeTooSmall: 'Изображение слишком маленькое',
     imageValidateSizeLabelImageSizeTooBig: 'Изображение слишком большое',
@@ -36,4 +36,4 @@ export default {
     imageValidateSizeLabelImageResolutionTooHigh: 'Разрешение слишком высокое',
     imageValidateSizeLabelExpectedMinResolution: 'Минимальное разрешение: {minResolution}',
     imageValidateSizeLabelExpectedMaxResolution: 'Максимальное разрешение: {maxResolution}'
-}
+};
