@@ -51,7 +51,7 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
         };
 
         // send request object
-        const request = sendRequest(ondata(formData), buildURL(apiUrl, action.url), requestParams);
+        const request = sendRequest(ondata(formData, file), buildURL(apiUrl, action.url), requestParams);
 
         request.onload = (xhr) => cb(onload(xhr, requestParams.method));
 
@@ -159,13 +159,13 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
             'Upload-Name': file.name
         };
 
-        const request = chunk.request = sendRequest(ondata(chunk.data), requestUrl, {
+        const request = chunk.request = sendRequest(ondata(chunk.data, file), requestUrl, {
             ...chunkServer,
             headers
         });
 
         request.onload = () => {
-            
+
             // done!
             chunk.status = ChunkStatus.COMPLETE;
 

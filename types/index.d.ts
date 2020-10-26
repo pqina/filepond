@@ -108,7 +108,7 @@ export interface ServerUrl {
      * Called with the formdata object right before it is sent,
      * return extended formdata object to make changes.
      */
-    ondata?: (data: FormData) => FormData;
+    ondata?: (data: FormData, file: File) => FormData;
 }
 
 export type ProgressServerConfigFunction = (

@@ -42,7 +42,7 @@ export const createFileProcessorFunction = (apiUrl, action, name, options) => (f
     });
 
     // send request object
-    const request = sendRequest(ondata(formData), buildURL(apiUrl, action.url), action);
+    const request = sendRequest(ondata(formData, file), buildURL(apiUrl, action.url), action);
     request.onload = (xhr) => {
         load(
             createResponse(
