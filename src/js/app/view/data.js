@@ -36,9 +36,7 @@ const didSetDisabled = ({ root }) => {
 const didRemoveItem = ({ root, action }) => {
     const field = getField(root, action.id);
     if (!field) return;
-    if (field.parentNode) {
-        field.parentNode.removeChild(field);
-    }
+    if (field.parentNode) field.parentNode.removeChild(field);
     delete root.ref.fields[action.id];
 };
 
