@@ -489,7 +489,7 @@ const toggleDrop = (root) => {
             const visibleChildren = list.childViews.filter(child => child.rect.element.height);
             const children = root.query('GET_ACTIVE_ITEMS').map(item => visibleChildren.find(child => child.id === item.id)).filter(item => item);
 
-            applyFilterChain('FILTER_ADDED_ITEMS', items, {dispatch: root.dispatch}).then((queue) => {
+            applyFilterChain('PREPARE_OUTPUT', items, {dispatch: root.dispatch}).then((queue) => {
                 // go
                 root.dispatch('ADD_ITEMS', {
                     items: queue,
@@ -542,7 +542,7 @@ const toggleBrowse =  (root, props) => {
                     // these files don't fit so stop here
                     if (exceedsMaxFiles(root, items)) return false;
 
-                    applyFilterChain('FILTER_ADDED_ITEMS', items, {dispatch: root.dispatch}).then((queue) => {
+                    applyFilterChain('PREPARE_OUTPUT', items, {dispatch: root.dispatch}).then((queue) => {
                         // add items!
                         root.dispatch('ADD_ITEMS', {
                             items: queue,
@@ -575,7 +575,7 @@ const togglePaste = (root) => {
             // these files don't fit so stop here
             if (exceedsMaxFiles(root, items)) return false;
 
-            applyFilterChain('FILTER_ADDED_ITEMS', items, {dispatch: root.dispatch}).then(queue => {
+            applyFilterChain('PREPARE_OUTPUT', items, {dispatch: root.dispatch}).then(queue => {
                 // add items!
                 root.dispatch('ADD_ITEMS', {
                     items: queue,
