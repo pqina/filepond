@@ -452,10 +452,6 @@ const toggleDrop = (root) => {
         const hopper = createHopper(
             root.element,
             items => {
-
-                // these files don't fit so stop here
-                if (exceedsMaxFiles(root, items)) return false;
-
                 // allow quick validation of dropped items
                 const beforeDropFile = root.query('GET_BEFORE_DROP_FILE') || (() => true);
 
@@ -490,6 +486,9 @@ const toggleDrop = (root) => {
             const children = root.query('GET_ACTIVE_ITEMS').map(item => visibleChildren.find(child => child.id === item.id)).filter(item => item);
 
             applyFilterChain('PREPARE_OUTPUT', items, {dispatch: root.dispatch}).then((queue) => {
+                // these files don't fit so stop here
+                if (exceedsMaxFiles(root, queue)) return false;
+
                 // go
                 root.dispatch('ADD_ITEMS', {
                     items: queue,
@@ -539,10 +538,10 @@ const toggleBrowse =  (root, props) => {
                 ...props,
                 onload: items => {
 
-                    // these files don't fit so stop here
-                    if (exceedsMaxFiles(root, items)) return false;
-
                     applyFilterChain('PREPARE_OUTPUT', items, {dispatch: root.dispatch}).then((queue) => {
+                        // these files don't fit so stop here
+                        if (exceedsMaxFiles(root, queue)) return false;
+
                         // add items!
                         root.dispatch('ADD_ITEMS', {
                             items: queue,
@@ -572,10 +571,11 @@ const togglePaste = (root) => {
     if (enabled && !root.ref.paster) {
         root.ref.paster = createPaster();
         root.ref.paster.onload = items => {
-            // these files don't fit so stop here
-            if (exceedsMaxFiles(root, items)) return false;
 
             applyFilterChain('PREPARE_OUTPUT', items, {dispatch: root.dispatch}).then(queue => {
+                // these files don't fit so stop here
+                if (exceedsMaxFiles(root, queue)) return false;
+
                 // add items!
                 root.dispatch('ADD_ITEMS', {
                     items: queue,

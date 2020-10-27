@@ -11482,9 +11482,6 @@
       var hopper = createHopper(
         root.element,
         function(items) {
-          // these files don't fit so stop here
-          if (exceedsMaxFiles(root, items)) return false;
-
           // allow quick validation of dropped items
           var beforeDropFile =
             root.query('GET_BEFORE_DROP_FILE') ||
@@ -11538,9 +11535,12 @@
             return item;
           });
 
-        applyFilterChain('FILTER_ADDED_ITEMS', items, {
+        applyFilterChain('PREPARE_OUTPUT', items, {
           dispatch: root.dispatch
         }).then(function(queue) {
+          // these files don't fit so stop here
+          if (exceedsMaxFiles(root, queue)) return false;
+
           // go
           root.dispatch('ADD_ITEMS', {
             items: queue,
@@ -11589,12 +11589,12 @@
           browser,
           Object.assign({}, props, {
             onload: function onload(items) {
-              // these files don't fit so stop here
-              if (exceedsMaxFiles(root, items)) return false;
-
-              applyFilterChain('FILTER_ADDED_ITEMS', items, {
+              applyFilterChain('PREPARE_OUTPUT', items, {
                 dispatch: root.dispatch
               }).then(function(queue) {
+                // these files don't fit so stop here
+                if (exceedsMaxFiles(root, queue)) return false;
+
                 // add items!
                 root.dispatch('ADD_ITEMS', {
                   items: queue,
@@ -11624,12 +11624,12 @@
     if (enabled && !root.ref.paster) {
       root.ref.paster = createPaster();
       root.ref.paster.onload = function(items) {
-        // these files don't fit so stop here
-        if (exceedsMaxFiles(root, items)) return false;
-
-        applyFilterChain('FILTER_ADDED_ITEMS', items, {
+        applyFilterChain('PREPARE_OUTPUT', items, {
           dispatch: root.dispatch
         }).then(function(queue) {
+          // these files don't fit so stop here
+          if (exceedsMaxFiles(root, queue)) return false;
+
           // add items!
           root.dispatch('ADD_ITEMS', {
             items: queue,
