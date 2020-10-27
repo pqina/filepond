@@ -11535,19 +11535,19 @@
             return item;
           });
 
-        applyFilterChain('PREPARE_OUTPUT', items, {
-          dispatch: root.dispatch
-        }).then(function(queue) {
-          // these files don't fit so stop here
-          if (exceedsMaxFiles(root, queue)) return false;
+        applyFilterChain('ADD_ITEMS', items, { dispatch: root.dispatch }).then(
+          function(queue) {
+            // these files don't fit so stop here
+            if (exceedsMaxFiles(root, queue)) return false;
 
-          // go
-          root.dispatch('ADD_ITEMS', {
-            items: queue,
-            index: getDragIndex(root.ref.list, children, position),
-            interactionMethod: InteractionMethod.DROP
-          });
-        });
+            // go
+            root.dispatch('ADD_ITEMS', {
+              items: queue,
+              index: getDragIndex(root.ref.list, children, position),
+              interactionMethod: InteractionMethod.DROP
+            });
+          }
+        );
 
         root.dispatch('DID_DROP', { position: position });
 
@@ -11589,7 +11589,7 @@
           browser,
           Object.assign({}, props, {
             onload: function onload(items) {
-              applyFilterChain('PREPARE_OUTPUT', items, {
+              applyFilterChain('ADD_ITEMS', items, {
                 dispatch: root.dispatch
               }).then(function(queue) {
                 // these files don't fit so stop here
@@ -11624,19 +11624,19 @@
     if (enabled && !root.ref.paster) {
       root.ref.paster = createPaster();
       root.ref.paster.onload = function(items) {
-        applyFilterChain('PREPARE_OUTPUT', items, {
-          dispatch: root.dispatch
-        }).then(function(queue) {
-          // these files don't fit so stop here
-          if (exceedsMaxFiles(root, queue)) return false;
+        applyFilterChain('ADD_ITEMS', items, { dispatch: root.dispatch }).then(
+          function(queue) {
+            // these files don't fit so stop here
+            if (exceedsMaxFiles(root, queue)) return false;
 
-          // add items!
-          root.dispatch('ADD_ITEMS', {
-            items: queue,
-            index: -1,
-            interactionMethod: InteractionMethod.PASTE
-          });
-        });
+            // add items!
+            root.dispatch('ADD_ITEMS', {
+              items: queue,
+              index: -1,
+              interactionMethod: InteractionMethod.PASTE
+            });
+          }
+        );
       };
     } else if (!enabled && root.ref.paster) {
       root.ref.paster.destroy();

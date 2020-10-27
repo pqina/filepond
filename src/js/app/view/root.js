@@ -485,7 +485,7 @@ const toggleDrop = (root) => {
             const visibleChildren = list.childViews.filter(child => child.rect.element.height);
             const children = root.query('GET_ACTIVE_ITEMS').map(item => visibleChildren.find(child => child.id === item.id)).filter(item => item);
 
-            applyFilterChain('PREPARE_OUTPUT', items, {dispatch: root.dispatch}).then((queue) => {
+            applyFilterChain('ADD_ITEMS', items, {dispatch: root.dispatch}).then((queue) => {
                 // these files don't fit so stop here
                 if (exceedsMaxFiles(root, queue)) return false;
 
@@ -538,7 +538,7 @@ const toggleBrowse =  (root, props) => {
                 ...props,
                 onload: items => {
 
-                    applyFilterChain('PREPARE_OUTPUT', items, {dispatch: root.dispatch}).then((queue) => {
+                    applyFilterChain('ADD_ITEMS', items, {dispatch: root.dispatch}).then((queue) => {
                         // these files don't fit so stop here
                         if (exceedsMaxFiles(root, queue)) return false;
 
@@ -572,7 +572,7 @@ const togglePaste = (root) => {
         root.ref.paster = createPaster();
         root.ref.paster.onload = items => {
 
-            applyFilterChain('PREPARE_OUTPUT', items, {dispatch: root.dispatch}).then(queue => {
+            applyFilterChain('ADD_ITEMS', items, {dispatch: root.dispatch}).then(queue => {
                 // these files don't fit so stop here
                 if (exceedsMaxFiles(root, queue)) return false;
 
