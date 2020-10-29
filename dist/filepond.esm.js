@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.21.1
+ * FilePond 4.22.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -7267,9 +7267,7 @@ const didSetDisabled = ({ root }) => {
 const didRemoveItem = ({ root, action }) => {
   const field = getField(root, action.id);
   if (!field) return;
-  if (field.parentNode) {
-    field.parentNode.removeChild(field);
-  }
+  if (field.parentNode) field.parentNode.removeChild(field);
   delete root.ref.fields[action.id];
 };
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.22.0
+
+- Add internal filter for plugins to manipulate dropped files before adding them to the files list.
+
+
 ## 4.21.1
 
 - Fix calculation of file size when `fileSizeBase` is set to 1024.
