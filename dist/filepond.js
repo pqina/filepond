@@ -10090,7 +10090,9 @@
       action = _ref6.action;
     var field = getField(root, action.id);
     if (!field) return;
-    field.parentNode.removeChild(field);
+    if (field.parentNode) {
+      field.parentNode.removeChild(field);
+    }
     delete root.ref.fields[action.id];
   };
 
@@ -11480,9 +11482,6 @@
       var hopper = createHopper(
         root.element,
         function(items) {
-          // these files don't fit so stop here
-          if (exceedsMaxFiles(root, items)) return false;
-
           // allow quick validation of dropped items
           var beforeDropFile =
             root.query('GET_BEFORE_DROP_FILE') ||
@@ -11536,12 +11535,19 @@
             return item;
           });
 
-        // go
-        root.dispatch('ADD_ITEMS', {
-          items: items,
-          index: getDragIndex(root.ref.list, children, position),
-          interactionMethod: InteractionMethod.DROP
-        });
+        applyFilterChain('ADD_ITEMS', items, { dispatch: root.dispatch }).then(
+          function(queue) {
+            // these files don't fit so stop here
+            if (exceedsMaxFiles(root, queue)) return false;
+
+            // go
+            root.dispatch('ADD_ITEMS', {
+              items: queue,
+              index: getDragIndex(root.ref.list, children, position),
+              interactionMethod: InteractionMethod.DROP
+            });
+          }
+        );
 
         root.dispatch('DID_DROP', { position: position });
 
@@ -11583,14 +11589,18 @@
           browser,
           Object.assign({}, props, {
             onload: function onload(items) {
-              // these files don't fit so stop here
-              if (exceedsMaxFiles(root, items)) return false;
+              applyFilterChain('ADD_ITEMS', items, {
+                dispatch: root.dispatch
+              }).then(function(queue) {
+                // these files don't fit so stop here
+                if (exceedsMaxFiles(root, queue)) return false;
 
-              // add items!
-              root.dispatch('ADD_ITEMS', {
-                items: items,
-                index: -1,
-                interactionMethod: InteractionMethod.BROWSE
+                // add items!
+                root.dispatch('ADD_ITEMS', {
+                  items: queue,
+                  index: -1,
+                  interactionMethod: InteractionMethod.BROWSE
+                });
               });
             }
           })
@@ -11614,11 +11624,19 @@
     if (enabled && !root.ref.paster) {
       root.ref.paster = createPaster();
       root.ref.paster.onload = function(items) {
-        root.dispatch('ADD_ITEMS', {
-          items: items,
-          index: -1,
-          interactionMethod: InteractionMethod.PASTE
-        });
+        applyFilterChain('ADD_ITEMS', items, { dispatch: root.dispatch }).then(
+          function(queue) {
+            // these files don't fit so stop here
+            if (exceedsMaxFiles(root, queue)) return false;
+
+            // add items!
+            root.dispatch('ADD_ITEMS', {
+              items: queue,
+              index: -1,
+              interactionMethod: InteractionMethod.PASTE
+            });
+          }
+        );
       };
     } else if (!enabled && root.ref.paster) {
       root.ref.paster.destroy();
