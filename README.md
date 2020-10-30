@@ -36,7 +36,7 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 
 ### Need faster FilePond support?
 
-Waiting for a reponse to [Stack Overflow](https://stackoverflow.com/questions/tagged/filepond) questions or GitHub issues (for bug reports) can sometimes be costly, if you require fast support, please consider purchasing one or more [Developer Support Packages](https://pqina.nl/filepond/#support) on the FilePond product page.
+Waiting for a reponse to [Stack Overflow](https://stackoverflow.com/questions/tagged/filepond) questions or GitHub issues (for bug reports) can slow down your project, if you require fast support, please consider purchasing one or more [Developer Support Packages](https://pqina.nl/filepond/#support) on the FilePond product page.
 
 - ✉️ Direct 1st line support
 - 🗓 Max 2 business day reponse time
