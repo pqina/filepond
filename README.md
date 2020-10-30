@@ -42,6 +42,8 @@ Waiting for a reponse to [Stack Overflow](https://stackoverflow.com/questions/ta
 - 🗓 Max 2 business day reponse time
 - 👨‍💻 8 support hours per developer
 
+[Purchase support package](https://pqina.nl/filepond/#support)
+
 ---
 
 ### FilePond Plugins
