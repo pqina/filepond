@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.22.1
+
+- Fix problem with locale files.
+
+
 ## 4.22.0
 
 - Add internal filter for plugins to manipulate dropped files before adding them to the files list.
