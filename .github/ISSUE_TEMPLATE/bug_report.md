@@ -8,14 +8,17 @@ assignees: ''
 ---
 
 **Describe the bug**
+
 A clear and concise description of what the bug is.
 
 
 **Logs**
+
 Please include browser console and server logs around the time this bug occurred.
 
 
 **To Reproduce**
+
 To help us help you, if you've found a bug please consider the following:
 
 * If you can demonstrate the bug, please do so by forking [this codesandbox](https://codesandbox.io/s/vanilla-filepond-2oltb).
@@ -28,10 +31,12 @@ Please [format code snippets](https://help.github.com/articles/creating-and-high
 
 
 **Expected behavior**
+
 A clear and concise description of what you expected to happen.
 
 
 **Stacktraces**
+
 If you have a stack trace to include, we recommend putting inside a `<details>` block for the sake of the thread's readability:
 
 <details>
@@ -42,12 +47,12 @@ If you have a stack trace to include, we recommend putting inside a `<details>` 
 
 
 **Information about your project:**
+
 - Your browser and the version: (e.x. Chrome 52.1, Firefox 48.0, IE 11)
-
 - Your operating system: (e.x. MacOS 10, Ubuntu Linux 19.10, Windows 10, etc)
-
 - FilePond version (Please check you can reproduce the issue with the latest release!)
 
 
 **Additional context**
+
 Add any other context about the problem here.
