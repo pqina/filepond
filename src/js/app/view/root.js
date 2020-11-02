@@ -101,6 +101,22 @@ const create = ({ root, props }) => {
         root.element.addEventListener('touchmove', prevent, { passive: false });
         root.element.addEventListener('gesturestart', prevent);
     }
+
+    // add credits
+    const credits = root.query('GET_CREDITS');
+    const hasCredits = credits.length === 2;
+    if (hasCredits) {
+        const frag = document.createElement('a');
+        frag.className = 'filepond--credits';
+        frag.setAttribute('aria-hidden', 'true');
+        frag.href = credits[0];
+        frag.tabindex = -1;
+        frag.target = '_blank';
+        frag.rel = 'noopener noreferrer';
+        frag.textContent = credits[1];
+        root.element.appendChild(frag);
+        root.ref.credits = frag;
+    }
 };
 
 const write = ({ root, props, actions }) => {
@@ -324,6 +340,9 @@ const write = ({ root, props, actions }) => {
         // set container bounds (so pushes siblings downwards)
         root.height = Math.max(labelHeight, boundsHeight - itemMargin);
     }
+    
+    // move credits to bottom
+    if (root.ref.credits && panel.heightCurrent) root.ref.credits.style.transform = `translateY(${panel.heightCurrent}px)`;
 };
 
 const calculateListItemMargin = (root) => {

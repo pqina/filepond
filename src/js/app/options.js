@@ -186,5 +186,8 @@ export const defaultOptions = {
     styleButtonRemoveItemAlign: [false, Type.BOOLEAN],
 
     // custom initial files array
-    files: [[], Type.ARRAY]
+    files: [[], Type.ARRAY],
+
+    // show support by displaying credits
+    credits: [['https://pqina.nl/', 'Powered by PQINA'], Type.ARRAY]
 };

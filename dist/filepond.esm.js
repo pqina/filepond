@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.22.1
+ * FilePond 4.23.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -2023,7 +2023,10 @@ const defaultOptions = {
   styleButtonRemoveItemAlign: [false, Type.BOOLEAN],
 
   // custom initial files array
-  files: [[], Type.ARRAY]
+  files: [[], Type.ARRAY],
+
+  // show support by displaying credits
+  credits: [['https://pqina.nl/', 'Powered by PQINA'], Type.ARRAY]
 };
 
 const getItemByQuery = (items, query) => {
@@ -6044,11 +6047,12 @@ const write$3 = ({ root, props }) => {
 
 const panel = createView({
   name: 'panel',
+  read: ({ root, props }) => (props.heightCurrent = root.ref.bottom.translateY),
   write: write$3,
   create: create$6,
   ignoreRect: true,
   mixins: {
-    apis: ['height', 'scalable']
+    apis: ['height', 'heightCurrent', 'scalable']
   }
 });
 
@@ -8171,6 +8175,22 @@ const create$e = ({ root, props }) => {
     root.element.addEventListener('touchmove', prevent, { passive: false });
     root.element.addEventListener('gesturestart', prevent);
   }
+
+  // add credits
+  const credits = root.query('GET_CREDITS');
+  const hasCredits = credits.length === 2;
+  if (hasCredits) {
+    const frag = document.createElement('a');
+    frag.className = 'filepond--credits';
+    frag.setAttribute('aria-hidden', 'true');
+    frag.href = credits[0];
+    frag.tabindex = -1;
+    frag.target = '_blank';
+    frag.rel = 'noopener noreferrer';
+    frag.textContent = credits[1];
+    root.element.appendChild(frag);
+    root.ref.credits = frag;
+  }
 };
 
 const write$9 = ({ root, props, actions }) => {
@@ -8398,6 +8418,10 @@ const write$9 = ({ root, props, actions }) => {
     // set container bounds (so pushes siblings downwards)
     root.height = Math.max(labelHeight, boundsHeight - itemMargin);
   }
+
+  // move credits to bottom
+  if (root.ref.credits && panel.heightCurrent)
+    root.ref.credits.style.transform = `translateY(${panel.heightCurrent}px)`;
 };
 
 const calculateListItemMargin = root => {

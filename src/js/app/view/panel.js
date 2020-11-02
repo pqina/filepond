@@ -89,10 +89,11 @@ const write = ({ root, props }) => {
 
 export const panel = createView({
     name: 'panel',
+    read: ({ root, props }) => props.heightCurrent = root.ref.bottom.translateY,
     write,
     create,
     ignoreRect: true,
     mixins: {
-        apis: ['height', 'scalable']
+        apis: ['height', 'heightCurrent', 'scalable']
     }
 });

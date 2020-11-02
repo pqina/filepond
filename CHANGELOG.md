@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.23.0
+
+- Add "powered by" footer and [credits prop](https://pqina.nl/filepond/docs/patterns/api/filepond-instance/#disabling-credits).
+
+
 ## 4.22.1
 
 - Fix problem with locale files.
