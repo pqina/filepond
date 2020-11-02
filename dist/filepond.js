@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.23.0
+ * FilePond 4.23.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -10330,11 +10330,9 @@
     if (file.type.length) return file;
     var date = file.lastModifiedDate;
     var name = file.name;
-    file = file.slice(
-      0,
-      file.size,
-      guesstimateMimeType(getExtensionFromFilename(file.name))
-    );
+    var type = guesstimateMimeType(getExtensionFromFilename(file.name));
+    if (!type.length) return file;
+    file = file.slice(0, file.size, type);
     file.name = name;
     file.lastModifiedDate = date;
     return file;
