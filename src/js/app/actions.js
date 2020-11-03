@@ -988,8 +988,14 @@ export const actions = (dispatch, query, state) => ({
     }),
 
     SET_OPTIONS: ({ options }) => {
-        forin(options, (key, value) => {
-            dispatch(`SET_${fromCamels(key, '_').toUpperCase()}`, { value });
+        // specify option keys that need to be processed before the others (internal order is preserved)
+        const prioritizedOptions = [
+            'server', // must be processed before "files"
+        ].filter(value => value in options);
+
+        // loop through all keys in options, but prioritizedOptions first
+        [...new Set([...prioritizedOptions,...Object.keys(options)])].forEach((optionKey) => {
+            dispatch(`SET_${fromCamels(optionKey, '_').toUpperCase()}`, { value: options[optionKey] });
         });
     }
 });
