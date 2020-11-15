@@ -64,6 +64,7 @@ Waiting for a reponse to [Stack Overflow](https://stackoverflow.com/questions/ta
 *   [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
 *   [Image overlay](https://github.com/nielsboogaard/filepond-plugin-image-overlay) ([nielsboogaard/filepond-plugin-image-overlay](https://github.com/nielsboogaard/filepond-plugin-image-overlay))
 *   [Media preview](https://github.com/nielsboogaard/filepond-plugin-media-preview) ([nielsboogaard/filepond-plugin-media-preview](https://github.com/nielsboogaard/filepond-plugin-media-preview))
+*   [Media preview + PDF](https://github.com/ErnestBrandi/filepond-plugin-media-preview) ([ErnestBrandi/filepond-plugin-media-preview](https://github.com/ErnestBrandi/filepond-plugin-media-preview))
 *   [Get file](https://github.com/nielsboogaard/filepond-plugin-get-file) ([nielsboogaard/filepond-plugin-get-file](https://github.com/nielsboogaard/filepond-plugin-get-file))
 
 
