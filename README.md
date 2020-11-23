@@ -28,7 +28,7 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 
 **Doka.js** is what you're looking for. It's a Modern JavaScript Image Editor, Doka supports setting **crop aspect ratios**, **resizing**, **rotating**, **cropping**, and **flipping** images. Above all, it integrates beautifully with FilePond.
 
-[Learn more about Doka](https://pqina.nl/doka/?ref=github)
+[Learn more about Doka](https://pqina.nl/doka/?ref=github-filepond)
 
 <img src="https://github.com/pqina/filepond-github-assets/blob/master/doka.gif?raw=true" width="478" alt=""/>
 
@@ -42,7 +42,7 @@ Waiting for a reponse to [Stack Overflow](https://stackoverflow.com/questions/ta
 - 🗓 Max 2 business day reponse time
 - 👨‍💻 8 support hours per developer
 
-[Purchase support package](https://pqina.nl/filepond/#support)
+[Purchase support package](https://pqina.nl/filepond/?ref=github-filepond#support)
 
 ---
 
