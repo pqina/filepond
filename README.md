@@ -66,6 +66,7 @@ Waiting for a reponse to [Stack Overflow](https://stackoverflow.com/questions/ta
 *   [Media preview](https://github.com/nielsboogaard/filepond-plugin-media-preview) ([nielsboogaard/filepond-plugin-media-preview](https://github.com/nielsboogaard/filepond-plugin-media-preview))
 *   [Media preview + PDF](https://github.com/ErnestBrandi/filepond-plugin-media-preview) ([ErnestBrandi/filepond-plugin-media-preview](https://github.com/ErnestBrandi/filepond-plugin-media-preview))
 *   [Get file](https://github.com/nielsboogaard/filepond-plugin-get-file) ([nielsboogaard/filepond-plugin-get-file](https://github.com/nielsboogaard/filepond-plugin-get-file))
+*   [Zip Directory Uploads](https://github.com/tzsk/filepond-plugin-zipper) ([tzsk/filepond-plugin-zipper](https://github.com/tzsk/filepond-plugin-zipper))
 
 
 ### Adapters
