@@ -135,7 +135,7 @@ export const actions = (dispatch, query, state) => ({
 
     },
 
-    DID_UPDATE_ITEM_METADATA: ({ id }) => {
+    DID_UPDATE_ITEM_METADATA: ({ id, action }) => {
 
         // if is called multiple times in close succession we combined all calls together to save resources
         clearTimeout(state.itemUpdateTimeout);
@@ -147,7 +147,7 @@ export const actions = (dispatch, query, state) => ({
             if (!query('IS_ASYNC')) {
     
                 // should we update the output data
-                applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query })
+                applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query, action })
                 .then(shouldPrepareOutput => {
                     if (!shouldPrepareOutput) {
                         return;

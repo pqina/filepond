@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.24.0
+
+- Add action info to internal `SHOULD_PREPARE_OUTPUT` call
+- Moved edit button CSS to FilePond
+
+
 ## 4.23.1
 
 - When files are dropped in a folder the file type cannot always be determined, this fix prevents FilePond from creating a Blob if it can't guesstimate the file type.

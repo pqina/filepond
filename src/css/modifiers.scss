@@ -77,6 +77,11 @@
         .filepond--file-info { display: none; }
         .filepond--file-status { display: none; }
 
+        .filepond--action-edit-item {
+            opacity:1 !important;
+            visibility: visible !important;
+        }
+
     }
 
 }

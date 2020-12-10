@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.23.1
+ * FilePond 4.24.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -6614,7 +6614,8 @@
       },
 
       DID_UPDATE_ITEM_METADATA: function DID_UPDATE_ITEM_METADATA(_ref3) {
-        var id = _ref3.id;
+        var id = _ref3.id,
+          action = _ref3.action;
 
         // if is called multiple times in close succession we combined all calls together to save resources
         clearTimeout(state.itemUpdateTimeout);
@@ -6626,7 +6627,8 @@
             // should we update the output data
             applyFilterChain('SHOULD_PREPARE_OUTPUT', false, {
               item: item,
-              query: query
+              query: query,
+              action: action
             }).then(function(shouldPrepareOutput) {
               if (!shouldPrepareOutput) {
                 return;

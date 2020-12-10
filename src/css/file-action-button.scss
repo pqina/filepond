@@ -80,3 +80,41 @@
         display: none;
     }
 }
+
+/* edit button */
+.filepond--action-edit-item.filepond--action-edit-item {
+    width:2em;
+    height:2em;
+    padding:.1875em;
+
+    &[data-align*='center'] {
+        margin-left:-.1875em;
+    }
+    
+    &[data-align*='bottom'] {
+        margin-bottom:-.1875em;
+    }
+}
+
+.filepond--action-edit-item-alt {
+    border: none;
+    line-height: inherit;
+    background: transparent;
+    font-family: inherit;
+    color: inherit;
+    outline: none;
+    padding: 0;
+    margin: 0 0 0 .25em;
+    pointer-events: all;
+    position: absolute;
+
+    svg {
+        width: 1.3125em;
+        height: 1.3125em;
+    }
+
+    span {
+        font-size: 0;
+        opacity: 0;
+    }
+}

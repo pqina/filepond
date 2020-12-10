@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.23.1
+ * FilePond 4.24.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -174,6 +174,40 @@
 }
 .filepond--file-action-button[hidden] {
   display: none;
+}
+
+/* edit button */
+.filepond--action-edit-item.filepond--action-edit-item {
+  width: 2em;
+  height: 2em;
+  padding: 0.1875em;
+}
+.filepond--action-edit-item.filepond--action-edit-item[data-align*='center'] {
+  margin-left: -0.1875em;
+}
+.filepond--action-edit-item.filepond--action-edit-item[data-align*='bottom'] {
+  margin-bottom: -0.1875em;
+}
+
+.filepond--action-edit-item-alt {
+  border: none;
+  line-height: inherit;
+  background: transparent;
+  font-family: inherit;
+  color: inherit;
+  outline: none;
+  padding: 0;
+  margin: 0 0 0 0.25em;
+  pointer-events: all;
+  position: absolute;
+}
+.filepond--action-edit-item-alt svg {
+  width: 1.3125em;
+  height: 1.3125em;
+}
+.filepond--action-edit-item-alt span {
+  font-size: 0;
+  opacity: 0;
 }
 
 .filepond--file-info {
@@ -729,6 +763,10 @@
 }
 .filepond--root[data-style-panel-layout~='circle'] .filepond--file-status {
   display: none;
+}
+.filepond--root[data-style-panel-layout~='circle'] .filepond--action-edit-item {
+  opacity: 1 !important;
+  visibility: visible !important;
 }
 
 @media not all and (min-resolution: 0.001dpcm) {
