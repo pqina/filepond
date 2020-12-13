@@ -741,6 +741,11 @@ export interface FilePondBaseProps {
      * @default 75
      */
     itemInsertInterval?: number;
+    /**
+     * The base value used to calculate file size
+     * @default 1000
+     */
+    fileSizeBase?: number;
 }
 
 // TODO delete
