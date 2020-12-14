@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.25.1
+
+- Renamed `beforePrepareOutput` hook to `beforePrepareFile`
+
+
 ## 4.25.0
 
 - Add `beforePrepareOutput` hook to intercept and prevent preparing a new output file.

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.25.0
+ * FilePond 4.25.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -4051,7 +4051,7 @@
     beforeDropFile: [null, Type.FUNCTION],
     beforeAddFile: [null, Type.FUNCTION],
     beforeRemoveFile: [null, Type.FUNCTION],
-    beforePrepareOutput: [null, Type.FUNCTION],
+    beforePrepareFile: [null, Type.FUNCTION],
 
     // styles
     stylePanelLayout: [null, Type.STRING], // null 'integrated', 'compact', 'circle'
@@ -6632,9 +6632,9 @@
               action: action
             }).then(function(shouldPrepareOutput) {
               // plugins determined the output data should be prepared (or not), can be adjusted with beforePrepareOutput hook
-              var beforePrepareOutput = query('GET_BEFORE_PREPARE_OUTPUT');
-              if (beforePrepareOutput)
-                shouldPrepareOutput = beforePrepareOutput(
+              var beforePrepareFile = query('GET_BEFORE_PREPARE_FILE');
+              if (beforePrepareFile)
+                shouldPrepareOutput = beforePrepareFile(
                   item,
                   shouldPrepareOutput
                 );
@@ -7007,9 +7007,9 @@
               query: query
             }).then(function(shouldPrepareOutput) {
               // plugins determined the output data should be prepared (or not), can be adjusted with beforePrepareOutput hook
-              var beforePrepareOutput = query('GET_BEFORE_PREPARE_OUTPUT');
-              if (beforePrepareOutput)
-                shouldPrepareOutput = beforePrepareOutput(
+              var beforePrepareFile = query('GET_BEFORE_PREPARE_FILE');
+              if (beforePrepareFile)
+                shouldPrepareOutput = beforePrepareFile(
                   item,
                   shouldPrepareOutput
                 );

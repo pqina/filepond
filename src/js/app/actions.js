@@ -151,8 +151,8 @@ export const actions = (dispatch, query, state) => ({
                 .then(shouldPrepareOutput => {
 
                     // plugins determined the output data should be prepared (or not), can be adjusted with beforePrepareOutput hook
-                    const beforePrepareOutput = query('GET_BEFORE_PREPARE_OUTPUT');
-                    if (beforePrepareOutput) shouldPrepareOutput = beforePrepareOutput(item, shouldPrepareOutput);
+                    const beforePrepareFile = query('GET_BEFORE_PREPARE_FILE');
+                    if (beforePrepareFile) shouldPrepareOutput = beforePrepareFile(item, shouldPrepareOutput);
 
                     if (!shouldPrepareOutput) return;
 
@@ -480,8 +480,8 @@ export const actions = (dispatch, query, state) => ({
                 .then(shouldPrepareOutput => {
 
                     // plugins determined the output data should be prepared (or not), can be adjusted with beforePrepareOutput hook
-                    const beforePrepareOutput = query('GET_BEFORE_PREPARE_OUTPUT');
-                    if (beforePrepareOutput) shouldPrepareOutput = beforePrepareOutput(item, shouldPrepareOutput);
+                    const beforePrepareFile = query('GET_BEFORE_PREPARE_FILE');
+                    if (beforePrepareFile) shouldPrepareOutput = beforePrepareFile(item, shouldPrepareOutput);
 
                     const loadComplete = () => {
 
