@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.25.0
+
+- Add `beforePrepareOutput` hook to intercept and prevent preparing a new output file.
+
+
 ## 4.24.0
 
 - Add action info to internal `SHOULD_PREPARE_OUTPUT` call

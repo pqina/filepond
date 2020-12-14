@@ -174,6 +174,7 @@ export const defaultOptions = {
     beforeDropFile: [null, Type.FUNCTION],
     beforeAddFile: [null, Type.FUNCTION],
     beforeRemoveFile: [null, Type.FUNCTION],
+    beforePrepareOutput: [null, Type.FUNCTION],
 
     // styles
     stylePanelLayout: [null, Type.STRING],         // null 'integrated', 'compact', 'circle'

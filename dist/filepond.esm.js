@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.24.0
+ * FilePond 4.25.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -2011,6 +2011,7 @@ const defaultOptions = {
   beforeDropFile: [null, Type.FUNCTION],
   beforeAddFile: [null, Type.FUNCTION],
   beforeRemoveFile: [null, Type.FUNCTION],
+  beforePrepareOutput: [null, Type.FUNCTION],
 
   // styles
   stylePanelLayout: [null, Type.STRING], // null 'integrated', 'compact', 'circle'
@@ -4195,9 +4196,16 @@ const actions = (dispatch, query, state) => ({
           query,
           action
         }).then(shouldPrepareOutput => {
-          if (!shouldPrepareOutput) {
-            return;
-          }
+          // plugins determined the output data should be prepared (or not), can be adjusted with beforePrepareOutput hook
+          const beforePrepareOutput = query('GET_BEFORE_PREPARE_OUTPUT');
+          if (beforePrepareOutput)
+            shouldPrepareOutput = beforePrepareOutput(
+              item,
+              shouldPrepareOutput
+            );
+
+          if (!shouldPrepareOutput) return;
+
           dispatch(
             'REQUEST_PREPARE_OUTPUT',
             {
@@ -4540,6 +4548,14 @@ const actions = (dispatch, query, state) => ({
         // means we'll do this and wait for idle state
         applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query }).then(
           shouldPrepareOutput => {
+            // plugins determined the output data should be prepared (or not), can be adjusted with beforePrepareOutput hook
+            const beforePrepareOutput = query('GET_BEFORE_PREPARE_OUTPUT');
+            if (beforePrepareOutput)
+              shouldPrepareOutput = beforePrepareOutput(
+                item,
+                shouldPrepareOutput
+              );
+
             const loadComplete = () => {
               dispatch('COMPLETE_LOAD_ITEM', {
                 query: id,

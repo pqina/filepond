@@ -149,9 +149,13 @@ export const actions = (dispatch, query, state) => ({
                 // should we update the output data
                 applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query, action })
                 .then(shouldPrepareOutput => {
-                    if (!shouldPrepareOutput) {
-                        return;
-                    }
+
+                    // plugins determined the output data should be prepared (or not), can be adjusted with beforePrepareOutput hook
+                    const beforePrepareOutput = query('GET_BEFORE_PREPARE_OUTPUT');
+                    if (beforePrepareOutput) shouldPrepareOutput = beforePrepareOutput(item, shouldPrepareOutput);
+
+                    if (!shouldPrepareOutput) return;
+
                     dispatch('REQUEST_PREPARE_OUTPUT', {
                         query: id,
                         item,
@@ -474,6 +478,10 @@ export const actions = (dispatch, query, state) => ({
                 // means we'll do this and wait for idle state
                 applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query })
                 .then(shouldPrepareOutput => {
+
+                    // plugins determined the output data should be prepared (or not), can be adjusted with beforePrepareOutput hook
+                    const beforePrepareOutput = query('GET_BEFORE_PREPARE_OUTPUT');
+                    if (beforePrepareOutput) shouldPrepareOutput = beforePrepareOutput(item, shouldPrepareOutput);
 
                     const loadComplete = () => {
 

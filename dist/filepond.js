@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.24.0
+ * FilePond 4.25.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -4051,6 +4051,7 @@
     beforeDropFile: [null, Type.FUNCTION],
     beforeAddFile: [null, Type.FUNCTION],
     beforeRemoveFile: [null, Type.FUNCTION],
+    beforePrepareOutput: [null, Type.FUNCTION],
 
     // styles
     stylePanelLayout: [null, Type.STRING], // null 'integrated', 'compact', 'circle'
@@ -6630,9 +6631,16 @@
               query: query,
               action: action
             }).then(function(shouldPrepareOutput) {
-              if (!shouldPrepareOutput) {
-                return;
-              }
+              // plugins determined the output data should be prepared (or not), can be adjusted with beforePrepareOutput hook
+              var beforePrepareOutput = query('GET_BEFORE_PREPARE_OUTPUT');
+              if (beforePrepareOutput)
+                shouldPrepareOutput = beforePrepareOutput(
+                  item,
+                  shouldPrepareOutput
+                );
+
+              if (!shouldPrepareOutput) return;
+
               dispatch(
                 'REQUEST_PREPARE_OUTPUT',
                 {
@@ -6998,6 +7006,14 @@
               item: item,
               query: query
             }).then(function(shouldPrepareOutput) {
+              // plugins determined the output data should be prepared (or not), can be adjusted with beforePrepareOutput hook
+              var beforePrepareOutput = query('GET_BEFORE_PREPARE_OUTPUT');
+              if (beforePrepareOutput)
+                shouldPrepareOutput = beforePrepareOutput(
+                  item,
+                  shouldPrepareOutput
+                );
+
               var loadComplete = function loadComplete() {
                 dispatch('COMPLETE_LOAD_ITEM', {
                   query: id,
