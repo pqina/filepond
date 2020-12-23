@@ -52,10 +52,10 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 *   [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
 *   [Image overlay](https://github.com/nielsboogaard/filepond-plugin-image-overlay) ([nielsboogaard/filepond-plugin-image-overlay](https://github.com/nielsboogaard/filepond-plugin-image-overlay))
 *   [Media preview](https://github.com/nielsboogaard/filepond-plugin-media-preview) ([nielsboogaard/filepond-plugin-media-preview](https://github.com/nielsboogaard/filepond-plugin-media-preview))
-*   [Media preview + PDF](https://github.com/ErnestBrandi/filepond-plugin-media-preview) ([ErnestBrandi/filepond-plugin-media-preview](https://github.com/ErnestBrandi/filepond-plugin-media-preview))
+*   [Media preview + PDF preview](https://github.com/ErnestBrandi/filepond-plugin-media-preview) ([ErnestBrandi/filepond-plugin-media-preview](https://github.com/ErnestBrandi/filepond-plugin-media-preview))
 *   [Get file](https://github.com/nielsboogaard/filepond-plugin-get-file) ([nielsboogaard/filepond-plugin-get-file](https://github.com/nielsboogaard/filepond-plugin-get-file))
 *   [Zip Directory Uploads](https://github.com/tzsk/filepond-plugin-zipper) ([tzsk/filepond-plugin-zipper](https://github.com/tzsk/filepond-plugin-zipper))
-
+*   [PDF Preview](https://github.com/Adri-Glez/filepond-plugin-pdf-preview) ([Adri-Glez/filepond-plugin-pdf-preview](https://github.com/Adri-Glez/filepond-plugin-pdf-preview)
 
 ### Adapters
 
