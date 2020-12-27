@@ -48,7 +48,7 @@ export const createFileProcessorFunction = (apiUrl, action, name, options) => (f
             createResponse(
                 'load',
                 xhr.status,
-                onload(xhr.response),
+                onload(xhr.response) || xhr.response,
                 xhr.getAllResponseHeaders()
             )
         );
