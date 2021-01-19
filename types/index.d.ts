@@ -76,7 +76,7 @@ export class FilePondFile {
   */
  getMetadata: (key?: string) => any;
  /** Add additional metadata to the file */
- setMetadata: (key: string, value: any) => void;
+ setMetadata: (key: string, value: any, silent?: boolean) => void;
 }
 
 // TODO delete
