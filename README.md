@@ -56,6 +56,8 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 *   [Get file](https://github.com/nielsboogaard/filepond-plugin-get-file) ([nielsboogaard/filepond-plugin-get-file](https://github.com/nielsboogaard/filepond-plugin-get-file))
 *   [Zip Directory Uploads](https://github.com/tzsk/filepond-plugin-zipper) ([tzsk/filepond-plugin-zipper](https://github.com/tzsk/filepond-plugin-zipper))
 *   [PDF Preview](https://github.com/Adri-Glez/filepond-plugin-pdf-preview) ([Adri-Glez/filepond-plugin-pdf-preview](https://github.com/Adri-Glez/filepond-plugin-pdf-preview)
+*   [Copy Path](https://github.com/jnkn6/filepond-plugin-copy-path) ([jnkn6/filepond-plugin-copy-path](https://github.com/jnkn6/filepond-plugin-copy-path))
+
 
 ### Adapters
 
