@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FilePond Demo</title>
-    <link href="./dist/filepond.css" rel="stylesheet">
-</head>
-<body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>FilePond Demo</title>
+        <link href="./dist/filepond.css" rel="stylesheet" />
+    </head>
+    <body>
+        <input type="file" />
 
-    <input type="file"/>
-
-    <script>
-    [
+        <script>
+            // prettier-ignore
+            [
         {supported: 'Symbol' in window, fill: 'https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.6.15/browser-polyfill.min.js'},
         {supported: 'Promise' in window, fill: 'https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js'},
         {supported: 'fetch' in window, fill: 'https://cdn.jsdelivr.net/npm/fetch-polyfill@0.8.2/fetch.min.js'},
@@ -21,24 +21,22 @@
         if (p.supported) return;
         document.write('<script src="' + p.fill + '"><\/script>');
     });
-    </script>
+        </script>
 
-    <script src="./dist/filepond.js"></script>
-    
-    <script>
-        
-        // Get a reference to the file input element
-        const inputElement = document.querySelector('input[type="file"]');
+        <script src="./dist/filepond.js"></script>
 
-        // Create the FilePond instance
-        const pond = FilePond.create(inputElement, {
-            allowMultiple: true,
-            allowReorder: true
-        });
+        <script>
+            // Get a reference to the file input element
+            const inputElement = document.querySelector('input[type="file"]');
 
-        // Easy console access for testing purposes
-        window.pond = pond;
-    </script>
+            // Create the FilePond instance
+            const pond = FilePond.create(inputElement, {
+                allowMultiple: true,
+                allowReorder: true,
+            });
 
-</body>
+            // Easy console access for testing purposes
+            window.pond = pond;
+        </script>
+    </body>
 </html>

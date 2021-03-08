@@ -1,71 +1,71 @@
 {
-  "name": "filepond",
-  "version": "4.25.1",
-  "description": "FilePond, Where files go to stretch their bits.",
-  "license": "MIT",
-  "author": {
-    "name": "PQINA",
-    "url": "https://pqina.nl/"
-  },
-  "homepage": "https://pqina.nl/filepond/",
-  "repository": "pqina/filepond",
-  "main": "dist/filepond.js",
-  "browser": "dist/filepond.js",
-  "module": "dist/filepond.esm.js",
-  "keywords": [
-    "javascript",
-    "file",
-    "upload",
-    "drag",
-    "drop",
-    "browse",
-    "paste",
-    "image",
-    "preview"
-  ],
-  "browserslist": [
-    "last 1 version and not Explorer 10",
-    "Explorer 11",
-    "iOS >= 9",
-    "Android >= 4.4"
-  ],
-  "files": [
-    "dist",
-    "locale",
-    "types/*.d.ts"
-  ],
-  "types": "types/index.d.ts",
-  "scripts": {
-    "test": "npx jest",
-    "dev": "npm run start",
-    "start": "npx rollup -c -w",
-    "build": "npm run scripts | npm run styles",
-    "scripts": "npx rollup -c",
-    "styles": "npm run styles:pretty && npm run styles:nano",
-    "styles:pretty": "cat src/css/* | npx node-sass | npx postcss --no-map --use autoprefixer | npx prettier --single-quote --parser css | node banner-cli.js FilePond > dist/filepond.css",
-    "styles:nano": "cat src/css/* | npx node-sass | npx postcss --no-map --use autoprefixer --use cssnano | node banner-cli.js FilePond > dist/filepond.min.css",
-    "dtslint": "dtslint types"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.5.5",
-    "@babel/plugin-proposal-object-rest-spread": "^7.5.5",
-    "@babel/plugin-transform-template-literals": "^7.4.4",
-    "@babel/preset-env": "^7.5.5",
-    "autoprefixer": "^9.6.1",
-    "babel-jest": "^24.8.0",
-    "cssnano": "^4.1.10",
-    "dtslint": "^3.6.12",
-    "jest": "^24.8.0",
-    "node-sass": "^4.12.0",
-    "postcss-cli": "^6.1.3",
-    "prettier": "^1.18.2",
-    "rollup": "^1.17.0",
-    "rollup-plugin-babel": "^4.3.3",
-    "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-license": "^0.8.1",
-    "rollup-plugin-node-resolve": "^4.2.4",
-    "rollup-plugin-prettier": "^0.6.0",
-    "rollup-plugin-terser": "^4.0.4",
-    "typescript": "^3.9.6"
-  }
+    "name": "filepond",
+    "version": "4.25.2",
+    "description": "FilePond, Where files go to stretch their bits.",
+    "license": "MIT",
+    "author": {
+        "name": "PQINA",
+        "url": "https://pqina.nl/"
+    },
+    "homepage": "https://pqina.nl/filepond/",
+    "repository": "pqina/filepond",
+    "main": "dist/filepond.js",
+    "browser": "dist/filepond.js",
+    "module": "dist/filepond.esm.js",
+    "keywords": [
+        "javascript",
+        "file",
+        "upload",
+        "drag",
+        "drop",
+        "browse",
+        "paste",
+        "image",
+        "preview"
+    ],
+    "browserslist": [
+        "last 1 version and not Explorer 10",
+        "Explorer 11",
+        "iOS >= 9",
+        "Android >= 4.4"
+    ],
+    "files": [
+        "dist",
+        "locale",
+        "types/*.d.ts"
+    ],
+    "types": "types/index.d.ts",
+    "scripts": {
+        "test": "npx jest",
+        "dev": "npm run start",
+        "start": "npx rollup -c -w",
+        "build": "npm run scripts | npm run styles",
+        "scripts": "npx rollup -c",
+        "styles": "npm run styles:pretty && npm run styles:nano",
+        "styles:pretty": "cat src/css/* | npx node-sass | npx postcss --no-map --use autoprefixer | npx prettier --single-quote --parser css | node banner-cli.js FilePond > dist/filepond.css",
+        "styles:nano": "cat src/css/* | npx node-sass | npx postcss --no-map --use autoprefixer --use cssnano | node banner-cli.js FilePond > dist/filepond.min.css",
+        "dtslint": "dtslint types"
+    },
+    "devDependencies": {
+        "@babel/core": "^7.5.5",
+        "@babel/plugin-proposal-object-rest-spread": "^7.5.5",
+        "@babel/plugin-transform-template-literals": "^7.4.4",
+        "@babel/preset-env": "^7.5.5",
+        "autoprefixer": "^9.6.1",
+        "babel-jest": "^24.8.0",
+        "cssnano": "^4.1.10",
+        "dtslint": "^3.6.12",
+        "jest": "^24.8.0",
+        "node-sass": "^4.12.0",
+        "postcss-cli": "^6.1.3",
+        "prettier": "^1.18.2",
+        "rollup": "^1.17.0",
+        "rollup-plugin-babel": "^4.3.3",
+        "rollup-plugin-commonjs": "^9.3.4",
+        "rollup-plugin-license": "^0.8.1",
+        "rollup-plugin-node-resolve": "^4.2.4",
+        "rollup-plugin-prettier": "^0.6.0",
+        "rollup-plugin-terser": "^4.0.4",
+        "typescript": "^3.9.6"
+    }
 }

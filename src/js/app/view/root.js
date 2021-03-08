@@ -18,13 +18,13 @@ import { createElement } from '../../utils/createElement';
 import { createResponse } from '../../utils/createResponse';
 import { debounce } from '../../utils/debounce';
 import { isFile } from '../../utils/isFile';
+import getItemsPerRow from '../utils/getItemsPerRow';
 
 const MAX_FILES_LIMIT = 1000000;
 
 const prevent = e => e.preventDefault();
 
 const create = ({ root, props }) => {
-
     // Add id
     const id = root.query('GET_ID');
     if (id) {
@@ -34,39 +34,34 @@ const create = ({ root, props }) => {
     // Add className
     const className = root.query('GET_CLASS_NAME');
     if (className) {
-        className.split(' ').filter(name => name.length).forEach(name => {
-            root.element.classList.add(name);
-        });
+        className
+            .split(' ')
+            .filter(name => name.length)
+            .forEach(name => {
+                root.element.classList.add(name);
+            });
     }
 
     // Field label
     root.ref.label = root.appendChildView(
         root.createChildView(dropLabel, {
-            ...props, 
+            ...props,
             translateY: null,
-            caption: root.query('GET_LABEL_IDLE')
+            caption: root.query('GET_LABEL_IDLE'),
         })
     );
 
     // List of items
-    root.ref.list = root.appendChildView(
-        root.createChildView(listScroller, { translateY: null })
-    );
+    root.ref.list = root.appendChildView(root.createChildView(listScroller, { translateY: null }));
 
     // Background panel
-    root.ref.panel = root.appendChildView(
-        root.createChildView(panel, { name: 'panel-root' })
-    );
+    root.ref.panel = root.appendChildView(root.createChildView(panel, { name: 'panel-root' }));
 
     // Assistant notifies assistive tech when content changes
-    root.ref.assistant = root.appendChildView(
-        root.createChildView(assistant, { ...props })
-    );
+    root.ref.assistant = root.appendChildView(root.createChildView(assistant, { ...props }));
 
     // Data
-    root.ref.data = root.appendChildView(
-        root.createChildView(data, { ...props })
-    );
+    root.ref.data = root.appendChildView(root.createChildView(data, { ...props }));
 
     // Measure (tests if fixed height was set)
     // DOCTYPE needs to be set for this to work
@@ -78,7 +73,8 @@ const create = ({ root, props }) => {
     root.ref.bounds = null;
 
     // apply initial style properties
-    root.query('GET_STYLES').filter(style => !isEmpty(style.value))
+    root.query('GET_STYLES')
+        .filter(style => !isEmpty(style.value))
         .map(({ name, value }) => {
             root.element.dataset[name] = value;
         });
@@ -120,7 +116,6 @@ const create = ({ root, props }) => {
 };
 
 const write = ({ root, props, actions }) => {
-
     // route actions
     route({ root, props, actions });
 
@@ -145,7 +140,7 @@ const write = ({ root, props, actions }) => {
     let bounds = root.ref.bounds;
     if (!bounds) {
         bounds = root.ref.bounds = calculateRootBoundingBoxHeight(root);
-        
+
         // destroy measure element
         root.element.removeChild(root.ref.measure);
         root.ref.measure = null;
@@ -171,7 +166,6 @@ const write = ({ root, props, actions }) => {
 
     // if reached max capacity and we've just reached it
     if (atMaxCapacity && addAction) {
-
         // get interaction type
         const interactionMethod = addAction.data.interactionMethod;
 
@@ -180,43 +174,40 @@ const write = ({ root, props, actions }) => {
 
         if (isMultiItem) {
             label.translateY = -40;
-        }
-        else {
+        } else {
             if (interactionMethod === InteractionMethod.API) {
                 label.translateX = 40;
-            } 
-            else if (interactionMethod === InteractionMethod.BROWSE) {
+            } else if (interactionMethod === InteractionMethod.BROWSE) {
                 label.translateY = 40;
-            } 
-            else {
+            } else {
                 label.translateY = 30;
             }
         }
-
-    }
-    else if (!atMaxCapacity) {
+    } else if (!atMaxCapacity) {
         label.opacity = 1;
         label.translateX = 0;
         label.translateY = 0;
     }
 
     const listItemMargin = calculateListItemMargin(root);
-    
+
     const listHeight = calculateListHeight(root);
-    
+
     const labelHeight = label.rect.element.height;
     const currentLabelHeight = !isMultiItem || atMaxCapacity ? 0 : labelHeight;
 
     const listMarginTop = atMaxCapacity ? list.rect.element.marginTop : 0;
     const listMarginBottom = totalItems === 0 ? 0 : list.rect.element.marginBottom;
-    
+
     const visualHeight = currentLabelHeight + listMarginTop + listHeight.visual + listMarginBottom;
     const boundsHeight = currentLabelHeight + listMarginTop + listHeight.bounds + listMarginBottom;
-    
-    // link list to label bottom position
-    list.translateY = Math.max(0, currentLabelHeight - list.rect.element.marginTop) - listItemMargin.top;
 
-    if (aspectRatio) { // fixed aspect ratio
+    // link list to label bottom position
+    list.translateY =
+        Math.max(0, currentLabelHeight - list.rect.element.marginTop) - listItemMargin.top;
+
+    if (aspectRatio) {
+        // fixed aspect ratio
 
         // calculate height based on width
         const width = root.rect.element.width;
@@ -227,7 +218,7 @@ const write = ({ root, props, actions }) => {
             root.ref.previousAspectRatio = aspectRatio;
             root.ref.updateHistory = [];
         }
-        
+
         // remember this width
         const history = root.ref.updateHistory;
         history.push(width);
@@ -237,9 +228,8 @@ const write = ({ root, props, actions }) => {
             const l = history.length;
             const bottom = l - 10;
             let bounces = 0;
-            for (let i=l;i>=bottom;i--) {
-
-                if (history[i] === history[i-2]) {
+            for (let i = l; i >= bottom; i--) {
+                if (history[i] === history[i - 2]) {
                     bounces++;
                 }
 
@@ -253,84 +243,84 @@ const write = ({ root, props, actions }) => {
         // fix height of panel so it adheres to aspect ratio
         panel.scalable = false;
         panel.height = height;
-        
+
         // available height for list
-        const listAvailableHeight = 
+        const listAvailableHeight =
             // the height of the panel minus the label height
-            height - currentLabelHeight
+            height -
+            currentLabelHeight -
             // the room we leave open between the end of the list and the panel bottom
-            - (listMarginBottom - listItemMargin.bottom)
+            (listMarginBottom - listItemMargin.bottom) -
             // if we're full we need to leave some room between the top of the panel and the list
-            - (atMaxCapacity ? listMarginTop : 0);
-        
+            (atMaxCapacity ? listMarginTop : 0);
+
         if (listHeight.visual > listAvailableHeight) {
             list.overflow = listAvailableHeight;
-        }
-        else {
+        } else {
             list.overflow = null;
         }
 
         // set container bounds (so pushes siblings downwards)
         root.height = height;
-    }
-    else if (bounds.fixedHeight) { // fixed height
+    } else if (bounds.fixedHeight) {
+        // fixed height
 
         // fix height of panel
         panel.scalable = false;
 
         // available height for list
-        const listAvailableHeight = 
+        const listAvailableHeight =
             // the height of the panel minus the label height
-            bounds.fixedHeight - currentLabelHeight
+            bounds.fixedHeight -
+            currentLabelHeight -
             // the room we leave open between the end of the list and the panel bottom
-            - (listMarginBottom - listItemMargin.bottom)
+            (listMarginBottom - listItemMargin.bottom) -
             // if we're full we need to leave some room between the top of the panel and the list
-            - (atMaxCapacity ? listMarginTop : 0);
-        
+            (atMaxCapacity ? listMarginTop : 0);
+
         // set list height
         if (listHeight.visual > listAvailableHeight) {
             list.overflow = listAvailableHeight;
-        }
-        else {
+        } else {
             list.overflow = null;
         }
-        
+
         // no need to set container bounds as these are handles by CSS fixed height
-        
-    }
-    else if (bounds.cappedHeight) { // max-height
+    } else if (bounds.cappedHeight) {
+        // max-height
 
         // not a fixed height panel
         const isCappedHeight = visualHeight >= bounds.cappedHeight;
         const panelHeight = Math.min(bounds.cappedHeight, visualHeight);
         panel.scalable = true;
-        panel.height = isCappedHeight ? panelHeight : panelHeight - listItemMargin.top - listItemMargin.bottom;
+        panel.height = isCappedHeight
+            ? panelHeight
+            : panelHeight - listItemMargin.top - listItemMargin.bottom;
 
         // available height for list
-        const listAvailableHeight = 
+        const listAvailableHeight =
             // the height of the panel minus the label height
-            panelHeight - currentLabelHeight
+            panelHeight -
+            currentLabelHeight -
             // the room we leave open between the end of the list and the panel bottom
-            - (listMarginBottom - listItemMargin.bottom)
+            (listMarginBottom - listItemMargin.bottom) -
             // if we're full we need to leave some room between the top of the panel and the list
-            - (atMaxCapacity ? listMarginTop : 0);
-        
+            (atMaxCapacity ? listMarginTop : 0);
+
         // set list height (if is overflowing)
         if (visualHeight > bounds.cappedHeight && listHeight.visual > listAvailableHeight) {
             list.overflow = listAvailableHeight;
-        }
-        else {
+        } else {
             list.overflow = null;
         }
-        
+
         // set container bounds (so pushes siblings downwards)
         root.height = Math.min(
             bounds.cappedHeight,
             boundsHeight - listItemMargin.top - listItemMargin.bottom
         );
-        
-    }
-    else { // flexible height
+    } else {
+        // flexible height
 
         // not a fixed height panel
         const itemMargin = totalItems > 0 ? listItemMargin.top + listItemMargin.bottom : 0;
@@ -340,24 +330,26 @@ const write = ({ root, props, actions }) => {
         // set container bounds (so pushes siblings downwards)
         root.height = Math.max(labelHeight, boundsHeight - itemMargin);
     }
-    
+
     // move credits to bottom
-    if (root.ref.credits && panel.heightCurrent) root.ref.credits.style.transform = `translateY(${panel.heightCurrent}px)`;
+    if (root.ref.credits && panel.heightCurrent)
+        root.ref.credits.style.transform = `translateY(${panel.heightCurrent}px)`;
 };
 
-const calculateListItemMargin = (root) => {
+const calculateListItemMargin = root => {
     const item = root.ref.list.childViews[0].childViews[0];
-    return item ? {
-        top: item.rect.element.marginTop,
-        bottom: item.rect.element.marginBottom
-    } : {
-        top: 0,
-        bottom: 0
-    }
-}
+    return item
+        ? {
+              top: item.rect.element.marginTop,
+              bottom: item.rect.element.marginBottom,
+          }
+        : {
+              top: 0,
+              bottom: 0,
+          };
+};
 
-const calculateListHeight = (root) => {
-
+const calculateListHeight = root => {
     let visual = 0;
     let bounds = 0;
 
@@ -365,8 +357,11 @@ const calculateListHeight = (root) => {
     const scrollList = root.ref.list;
     const itemList = scrollList.childViews[0];
     const visibleChildren = itemList.childViews.filter(child => child.rect.element.height);
-    const children = root.query('GET_ACTIVE_ITEMS').map(item => visibleChildren.find(child => child.id === item.id)).filter(item => item);
-   
+    const children = root
+        .query('GET_ACTIVE_ITEMS')
+        .map(item => visibleChildren.find(child => child.id === item.id))
+        .filter(item => item);
+
     // no children, done!
     if (children.length === 0) return { visual, bounds };
 
@@ -381,10 +376,12 @@ const calculateListHeight = (root) => {
     const itemWidth = childRect.width + itemHorizontalMargin;
     const itemHeight = childRect.height + itemVerticalMargin;
 
-    const newItem = (typeof dragIndex !== 'undefined' && dragIndex >= 0 ? 1 : 0);
-    const removedItem = children.find(child => child.markedForRemoval && child.opacity < .45) ? -1 : 0;
+    const newItem = typeof dragIndex !== 'undefined' && dragIndex >= 0 ? 1 : 0;
+    const removedItem = children.find(child => child.markedForRemoval && child.opacity < 0.45)
+        ? -1
+        : 0;
     const verticalItemCount = children.length + newItem + removedItem;
-    const itemsPerRow = Math.round(horizontalSpace / itemWidth);
+    const itemsPerRow = getItemsPerRow(horizontalSpace, itemWidth);
 
     // stack
     if (itemsPerRow === 1) {
@@ -400,23 +397,21 @@ const calculateListHeight = (root) => {
         visual = bounds;
     }
 
-    return { visual, bounds }
-}
+    return { visual, bounds };
+};
 
-const calculateRootBoundingBoxHeight = (root) => {
-
+const calculateRootBoundingBoxHeight = root => {
     const height = root.ref.measureHeight || null;
     const cappedHeight = parseInt(root.style.maxHeight, 10) || null;
     const fixedHeight = height === 0 ? null : height;
 
     return {
         cappedHeight,
-        fixedHeight
+        fixedHeight,
     };
 };
 
 const exceedsMaxFiles = (root, items) => {
-
     const allowReplace = root.query('GET_ALLOW_REPLACE');
     const allowMultiple = root.query('GET_ALLOW_MULTIPLE');
     const totalItems = root.query('GET_TOTAL_ITEMS');
@@ -431,39 +426,35 @@ const exceedsMaxFiles = (root, items) => {
     }
 
     // limit max items to one if not allowed to drop multiple items
-    maxItems = allowMultiple
-        ? maxItems
-        : allowReplace ? maxItems : 1;
+    maxItems = allowMultiple ? maxItems : allowReplace ? maxItems : 1;
 
     // no more room?
     const hasMaxItems = isInt(maxItems);
     if (hasMaxItems && totalItems + totalBrowseItems > maxItems) {
         root.dispatch('DID_THROW_MAX_FILES', {
             source: items,
-            error: createResponse(
-                'warning', 
-                0, 
-                'Max files'
-            )
+            error: createResponse('warning', 0, 'Max files'),
         });
         return true;
     }
 
     return false;
-}
+};
 
 const getDragIndex = (list, children, position) => {
     const itemList = list.childViews[0];
     return getItemIndexByPosition(itemList, children, {
         left: position.scopeLeft - itemList.rect.element.left,
-        top: position.scopeTop - (list.rect.outer.top + list.rect.element.marginTop + list.rect.element.scrollTop)
+        top:
+            position.scopeTop -
+            (list.rect.outer.top + list.rect.element.marginTop + list.rect.element.scrollTop),
     });
-}
+};
 
 /**
  * Enable or disable file drop functionality
  */
-const toggleDrop = (root) => {
+const toggleDrop = root => {
     const isAllowed = root.query('GET_ALLOW_DROP');
     const isDisabled = root.query('GET_DISABLED');
     const enabled = isAllowed && !isDisabled;
@@ -476,35 +467,40 @@ const toggleDrop = (root) => {
 
                 // all items should be validated by all filters as valid
                 const dropValidation = root.query('GET_DROP_VALIDATION');
-                return dropValidation ? items.every(
-                    item => applyFilters('ALLOW_HOPPER_ITEM', item, { query: root.query }).every(result => result === true)
-                    &&
-                    beforeDropFile(item)
-                ) : true;
+                return dropValidation
+                    ? items.every(
+                          item =>
+                              applyFilters('ALLOW_HOPPER_ITEM', item, {
+                                  query: root.query,
+                              }).every(result => result === true) && beforeDropFile(item)
+                      )
+                    : true;
             },
             {
                 filterItems: items => {
                     const ignoredFiles = root.query('GET_IGNORED_FILES');
                     return items.filter(item => {
                         if (isFile(item)) {
-                            return !ignoredFiles.includes(item.name.toLowerCase())
+                            return !ignoredFiles.includes(item.name.toLowerCase());
                         }
                         return true;
-                    })
+                    });
                 },
                 catchesDropsOnPage: root.query('GET_DROP_ON_PAGE'),
-                requiresDropOnElement: root.query('GET_DROP_ON_ELEMENT')
+                requiresDropOnElement: root.query('GET_DROP_ON_ELEMENT'),
             }
         );
 
         hopper.onload = (items, position) => {
-
             // get item children elements and sort based on list sort
             const list = root.ref.list.childViews[0];
             const visibleChildren = list.childViews.filter(child => child.rect.element.height);
-            const children = root.query('GET_ACTIVE_ITEMS').map(item => visibleChildren.find(child => child.id === item.id)).filter(item => item);
+            const children = root
+                .query('GET_ACTIVE_ITEMS')
+                .map(item => visibleChildren.find(child => child.id === item.id))
+                .filter(item => item);
 
-            applyFilterChain('ADD_ITEMS', items, {dispatch: root.dispatch}).then((queue) => {
+            applyFilterChain('ADD_ITEMS', items, { dispatch: root.dispatch }).then(queue => {
                 // these files don't fit so stop here
                 if (exceedsMaxFiles(root, queue)) return false;
 
@@ -512,7 +508,7 @@ const toggleDrop = (root) => {
                 root.dispatch('ADD_ITEMS', {
                     items: queue,
                     index: getDragIndex(root.ref.list, children, position),
-                    interactionMethod: InteractionMethod.DROP
+                    interactionMethod: InteractionMethod.DROP,
                 });
             });
 
@@ -536,8 +532,7 @@ const toggleDrop = (root) => {
         root.ref.hopper = hopper;
 
         root.ref.drip = root.appendChildView(root.createChildView(drip));
-    }
-    else if (!enabled && root.ref.hopper) {
+    } else if (!enabled && root.ref.hopper) {
         root.ref.hopper.destroy();
         root.ref.hopper = null;
         root.removeChildView(root.ref.drip);
@@ -547,7 +542,7 @@ const toggleDrop = (root) => {
 /**
  * Enable or disable browse functionality
  */
-const toggleBrowse =  (root, props) => {
+const toggleBrowse = (root, props) => {
     const isAllowed = root.query('GET_ALLOW_BROWSE');
     const isDisabled = root.query('GET_DISABLED');
     const enabled = isAllowed && !isDisabled;
@@ -556,8 +551,9 @@ const toggleBrowse =  (root, props) => {
             root.createChildView(browser, {
                 ...props,
                 onload: items => {
-
-                    applyFilterChain('ADD_ITEMS', items, {dispatch: root.dispatch}).then((queue) => {
+                    applyFilterChain('ADD_ITEMS', items, {
+                        dispatch: root.dispatch,
+                    }).then(queue => {
                         // these files don't fit so stop here
                         if (exceedsMaxFiles(root, queue)) return false;
 
@@ -565,33 +561,30 @@ const toggleBrowse =  (root, props) => {
                         root.dispatch('ADD_ITEMS', {
                             items: queue,
                             index: -1,
-                            interactionMethod: InteractionMethod.BROWSE
+                            interactionMethod: InteractionMethod.BROWSE,
                         });
                     });
-            
-                }
+                },
             }),
             0
         );
-    }
-    else if (!enabled && root.ref.browser) {
+    } else if (!enabled && root.ref.browser) {
         root.removeChildView(root.ref.browser);
         root.ref.browser = null;
     }
-}
+};
 
 /**
  * Enable or disable paste functionality
  */
-const togglePaste = (root) => {
+const togglePaste = root => {
     const isAllowed = root.query('GET_ALLOW_PASTE');
     const isDisabled = root.query('GET_DISABLED');
     const enabled = isAllowed && !isDisabled;
     if (enabled && !root.ref.paster) {
         root.ref.paster = createPaster();
         root.ref.paster.onload = items => {
-
-            applyFilterChain('ADD_ITEMS', items, {dispatch: root.dispatch}).then(queue => {
+            applyFilterChain('ADD_ITEMS', items, { dispatch: root.dispatch }).then(queue => {
                 // these files don't fit so stop here
                 if (exceedsMaxFiles(root, queue)) return false;
 
@@ -599,17 +592,15 @@ const togglePaste = (root) => {
                 root.dispatch('ADD_ITEMS', {
                     items: queue,
                     index: -1,
-                    interactionMethod: InteractionMethod.PASTE
+                    interactionMethod: InteractionMethod.PASTE,
                 });
             });
-            
         };
-    }
-    else if (!enabled && root.ref.paster) {
+    } else if (!enabled && root.ref.paster) {
         root.ref.paster.destroy();
         root.ref.paster = null;
     }
-}
+};
 
 /**
  * Route actions
@@ -630,13 +621,12 @@ const route = createRoute({
         toggleBrowse(root, props);
         const isDisabled = root.query('GET_DISABLED');
         if (isDisabled) {
-            root.element.dataset.disabled = 'disabled'
-        }
-        else {
+            root.element.dataset.disabled = 'disabled';
+        } else {
             // delete root.element.dataset.disabled; <= this does not work on iOS 10
             root.element.removeAttribute('data-disabled');
         }
-    }
+    },
 });
 
 export const root = createView({
@@ -659,6 +649,6 @@ export const root = createView({
         root.element.removeEventListener('gesturestart', prevent);
     },
     mixins: {
-        styles: ['height']
-    }
+        styles: ['height'],
+    },
 });

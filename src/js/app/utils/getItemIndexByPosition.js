@@ -1,5 +1,6 @@
-export const getItemIndexByPosition = (view, children, positionInView) => {
+import getItemsPerRow from './getItemsPerRow';
 
+export const getItemIndexByPosition = (view, children, positionInView) => {
     if (!positionInView) return;
 
     const horizontalSpace = view.rect.element.width;
@@ -15,13 +16,13 @@ export const getItemIndexByPosition = (view, children, positionInView) => {
     const itemRect = item.rect.element;
     const itemHorizontalMargin = itemRect.marginLeft + itemRect.marginRight;
     const itemWidth = itemRect.width + itemHorizontalMargin;
-    const itemsPerRow = Math.round(horizontalSpace / itemWidth);
+    const itemsPerRow = getItemsPerRow(horizontalSpace, itemWidth);
 
     // stack
     if (itemsPerRow === 1) {
-        for (let index=0; index<l; index++) {
+        for (let index = 0; index < l; index++) {
             const child = children[index];
-            const childMid = child.rect.outer.top + (child.rect.element.height * .5);
+            const childMid = child.rect.outer.top + child.rect.element.height * 0.5;
             if (positionInView.top < childMid) {
                 return index;
             }
@@ -32,9 +33,8 @@ export const getItemIndexByPosition = (view, children, positionInView) => {
     // grid
     const itemVerticalMargin = itemRect.marginTop + itemRect.marginBottom;
     const itemHeight = itemRect.height + itemVerticalMargin;
-    for (let index=0; index<l; index++) {
-        
-        const indexX = (index % itemsPerRow);
+    for (let index = 0; index < l; index++) {
+        const indexX = index % itemsPerRow;
         const indexY = Math.floor(index / itemsPerRow);
 
         const offsetX = indexX * itemWidth;
@@ -43,19 +43,16 @@ export const getItemIndexByPosition = (view, children, positionInView) => {
         const itemTop = offsetY - itemRect.marginTop;
         const itemRight = offsetX + itemWidth;
         const itemBottom = offsetY + itemHeight + itemRect.marginBottom;
-        
+
         if (positionInView.top < itemBottom && positionInView.top > itemTop) {
             if (positionInView.left < itemRight) {
                 return index;
-            }
-            else if (index !== l - 1) {
+            } else if (index !== l - 1) {
                 last = index;
-            }
-            else {
+            } else {
                 last = null;
             }
         }
-
     }
 
     if (last !== null) {

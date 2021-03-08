@@ -4,6 +4,7 @@ import { item } from './item';
 import { attr } from '../../utils/attr';
 import { getItemIndexByPosition } from '../utils/getItemIndexByPosition';
 import { dropAreaDimensions } from '../utils/dropAreaDimensions';
+import getItemsPerRow from '../utils/getItemsPerRow';
 
 const create = ({ root }) => {
     // need to set role to list as otherwise it won't be read as a list by VoiceOver
@@ -45,7 +46,7 @@ const addItemView = ({ root, action }) => {
                 spawnDate,
                 id,
                 opacity,
-                interactionMethod
+                interactionMethod,
             }
         ),
         index
@@ -53,7 +54,6 @@ const addItemView = ({ root, action }) => {
 };
 
 const moveItem = (item, x, y, vx = 0, vy = 1) => {
-
     // set to null to remove animation while dragging
     if (item.dragOffset) {
         item.translateX = null;
@@ -62,13 +62,11 @@ const moveItem = (item, x, y, vx = 0, vy = 1) => {
         item.translateY = item.dragOrigin.y + item.dragOffset.y;
         item.scaleX = 1.025;
         item.scaleY = 1.025;
-    }
-    else {
+    } else {
         item.translateX = x;
         item.translateY = y;
 
         if (Date.now() > item.spawnDate) {
-
             // reveal element
             if (item.opacity === 0) {
                 introItemView(item, x, y, vx, vy);
@@ -78,45 +76,34 @@ const moveItem = (item, x, y, vx = 0, vy = 1) => {
             item.scaleX = 1;
             item.scaleY = 1;
             item.opacity = 1;
-
         }
     }
-
-}
+};
 
 const introItemView = (item, x, y, vx, vy) => {
-
     if (item.interactionMethod === InteractionMethod.NONE) {
         item.translateX = null;
         item.translateX = x;
         item.translateY = null;
         item.translateY = y;
-    }
-
-    else if (item.interactionMethod === InteractionMethod.DROP) {
-
+    } else if (item.interactionMethod === InteractionMethod.DROP) {
         item.translateX = null;
-        item.translateX = x - (vx * 20);
+        item.translateX = x - vx * 20;
 
         item.translateY = null;
-        item.translateY = y - (vy * 10);
+        item.translateY = y - vy * 10;
 
-        item.scaleX = .8;
-        item.scaleY = .8;
-    }
-
-    else if (item.interactionMethod === InteractionMethod.BROWSE) {
+        item.scaleX = 0.8;
+        item.scaleY = 0.8;
+    } else if (item.interactionMethod === InteractionMethod.BROWSE) {
         item.translateY = null;
         item.translateY = y - 30;
-    }
-
-    else if (item.interactionMethod === InteractionMethod.API) {
+    } else if (item.interactionMethod === InteractionMethod.API) {
         item.translateX = null;
         item.translateX = x - 30;
         item.translateY = null;
     }
-
-}
+};
 
 /**
  * Removes an existing item
@@ -143,11 +130,16 @@ const removeItemView = ({ root, action }) => {
     view.markedForRemoval = true;
 };
 
-const getItemHeight = child => child.rect.element.height + (child.rect.element.marginBottom * .5) + (child.rect.element.marginTop * .5);
-const getItemWidth = child => child.rect.element.width + (child.rect.element.marginLeft * .5) + (child.rect.element.marginRight * .5);
+const getItemHeight = child =>
+    child.rect.element.height +
+    child.rect.element.marginBottom * 0.5 +
+    child.rect.element.marginTop * 0.5;
+const getItemWidth = child =>
+    child.rect.element.width +
+    child.rect.element.marginLeft * 0.5 +
+    child.rect.element.marginRight * 0.5;
 
 const dragItem = ({ root, action }) => {
-
     const { id, dragState } = action;
 
     // reference to item
@@ -164,8 +156,8 @@ const dragItem = ({ root, action }) => {
 
     const dragPosition = {
         x: view.dragOrigin.x + view.dragOffset.x + view.dragCenter.x,
-        y: view.dragOrigin.y + view.dragOffset.y + view.dragCenter.y
-    }
+        y: view.dragOrigin.y + view.dragOffset.y + view.dragCenter.y,
+    };
 
     // get drag area dimensions
     const dragHeight = getItemHeight(view);
@@ -182,27 +174,32 @@ const dragItem = ({ root, action }) => {
     dropAreaDimensions.setWidth = dragWidth * cols;
 
     // get new index of dragged item
-	var location = {
-		y: Math.floor(dragPosition.y / dragHeight),
-		x: Math.floor(dragPosition.x / dragWidth),
-		getGridIndex: function getGridIndex() {
-			if (dragPosition.y > dropAreaDimensions.getHeight ||
+    var location = {
+        y: Math.floor(dragPosition.y / dragHeight),
+        x: Math.floor(dragPosition.x / dragWidth),
+        getGridIndex: function getGridIndex() {
+            if (
+                dragPosition.y > dropAreaDimensions.getHeight ||
                 dragPosition.y < 0 ||
                 dragPosition.x > dropAreaDimensions.getWidth ||
-                dragPosition.x < 0) return oldIndex;
+                dragPosition.x < 0
+            )
+                return oldIndex;
             return this.y * cols + this.x;
-		},
-		getColIndex: function getColIndex() {
+        },
+        getColIndex: function getColIndex() {
             const items = root.query('GET_ACTIVE_ITEMS');
             const visibleChildren = root.childViews.filter(child => child.rect.element.height);
-            const children = items.map(item => visibleChildren.find(childView => childView.id === item.id));
+            const children = items.map(item =>
+                visibleChildren.find(childView => childView.id === item.id)
+            );
             const currentIndex = children.findIndex(child => child === view);
-			const dragHeight = getItemHeight(view);
+            const dragHeight = getItemHeight(view);
             const l = children.length;
-			let idx = l;
+            let idx = l;
             let childHeight = 0;
-			let childBottom = 0;
-			let childTop = 0;
+            let childBottom = 0;
+            let childTop = 0;
             for (let i = 0; i < l; i++) {
                 childHeight = getItemHeight(children[i]);
                 childTop = childBottom;
@@ -219,24 +216,27 @@ const dragItem = ({ root, action }) => {
                     break;
                 }
             }
-			return idx;
-		}
-    }
-    
+            return idx;
+        },
+    };
+
     // get new index
-	const index = cols > 1 ? location.getGridIndex() : location.getColIndex();
+    const index = cols > 1 ? location.getGridIndex() : location.getColIndex();
     root.dispatch('MOVE_ITEM', { query: view, index });
 
     // if the index of the item changed, dispatch reorder action
     const currentIndex = dragState.getIndex();
 
     if (currentIndex === undefined || currentIndex !== index) {
-        
         dragState.setIndex(index);
-        
+
         if (currentIndex === undefined) return;
 
-        root.dispatch('DID_REORDER_ITEMS', { items: root.query('GET_ACTIVE_ITEMS'), origin: oldIndex, target: index });
+        root.dispatch('DID_REORDER_ITEMS', {
+            items: root.query('GET_ACTIVE_ITEMS'),
+            origin: oldIndex,
+            target: index,
+        });
     }
 };
 
@@ -246,9 +246,8 @@ const dragItem = ({ root, action }) => {
 const route = createRoute({
     DID_ADD_ITEM: addItemView,
     DID_REMOVE_ITEM: removeItemView,
-    DID_DRAG_ITEM: dragItem
+    DID_DRAG_ITEM: dragItem,
 });
-
 
 /**
  * Write to view
@@ -257,7 +256,6 @@ const route = createRoute({
  * @param props
  */
 const write = ({ root, props, actions, shouldOptimize }) => {
-
     // route actions
     route({ root, props, actions });
 
@@ -270,10 +268,15 @@ const write = ({ root, props, actions, shouldOptimize }) => {
     const visibleChildren = root.childViews.filter(child => child.rect.element.height);
 
     // sort based on current active items
-    const children = root.query('GET_ACTIVE_ITEMS').map(item => visibleChildren.find(child => child.id === item.id)).filter(item => item);
+    const children = root
+        .query('GET_ACTIVE_ITEMS')
+        .map(item => visibleChildren.find(child => child.id === item.id))
+        .filter(item => item);
 
     // get index
-    const dragIndex = dragCoordinates ? getItemIndexByPosition(root, children, dragCoordinates) : null;
+    const dragIndex = dragCoordinates
+        ? getItemIndexByPosition(root, children, dragCoordinates)
+        : null;
 
     // add index is used to reserve the dropped/added item index till the actual item is rendered
     const addIndex = root.ref.addIndex || null;
@@ -292,31 +295,25 @@ const write = ({ root, props, actions, shouldOptimize }) => {
     const itemHorizontalMargin = childRect.marginLeft + childRect.marginRight;
     const itemWidth = childRect.width + itemHorizontalMargin;
     const itemHeight = childRect.height + itemVerticalMargin;
-    const itemsPerRow = Math.round(horizontalSpace / itemWidth);
+    const itemsPerRow = getItemsPerRow(horizontalSpace, itemWidth);
 
     // stack
     if (itemsPerRow === 1) {
-
         let offsetY = 0;
         let dragOffset = 0;
 
         children.forEach((child, index) => {
-
             if (dragIndex) {
                 let dist = index - dragIndex;
                 if (dist === -2) {
-                    dragOffset = -itemVerticalMargin * .25;
-                }
-                else if (dist === -1) {
-                    dragOffset = -itemVerticalMargin * .75;
-                }
-                else if (dist === 0) {
-                    dragOffset = itemVerticalMargin * .75;
-                }
-                else if (dist === 1) {
-                    dragOffset = itemVerticalMargin * .25;
-                }
-                else {
+                    dragOffset = -itemVerticalMargin * 0.25;
+                } else if (dist === -1) {
+                    dragOffset = -itemVerticalMargin * 0.75;
+                } else if (dist === 0) {
+                    dragOffset = itemVerticalMargin * 0.75;
+                } else if (dist === 1) {
+                    dragOffset = itemVerticalMargin * 0.25;
+                } else {
                     dragOffset = 0;
                 }
             }
@@ -335,17 +332,14 @@ const write = ({ root, props, actions, shouldOptimize }) => {
             let visualHeight = itemHeight * (child.markedForRemoval ? child.opacity : 1);
 
             offsetY += visualHeight;
-
         });
     }
     // grid
     else {
-
         let prevX = 0;
         let prevY = 0;
 
         children.forEach((child, index) => {
-
             if (index === dragIndex) {
                 dragIndexOffset = 1;
             }
@@ -354,13 +348,13 @@ const write = ({ root, props, actions, shouldOptimize }) => {
                 addIndexOffset += 1;
             }
 
-            if (child.markedForRemoval && child.opacity < .5) {
+            if (child.markedForRemoval && child.opacity < 0.5) {
                 removeIndexOffset -= 1;
             }
 
             const visualIndex = index + addIndexOffset + dragIndexOffset + removeIndexOffset;
 
-            const indexX = (visualIndex % itemsPerRow);
+            const indexX = visualIndex % itemsPerRow;
             const indexY = Math.floor(visualIndex / itemsPerRow);
 
             const offsetX = indexX * itemWidth;
@@ -382,7 +376,6 @@ const write = ({ root, props, actions, shouldOptimize }) => {
             moveItem(child, offsetX, offsetY, vectorX, vectorY);
         });
     }
-
 };
 
 /**
@@ -392,7 +385,6 @@ const write = ({ root, props, actions, shouldOptimize }) => {
  */
 const filterSetItemActions = (child, actions) =>
     actions.filter(action => {
-
         // if action has an id, filter out actions that don't have this child id
         if (action.data && action.data.id) {
             return child.id === action.data.id;
@@ -417,6 +409,6 @@ export const list = createView({
     },
     filterFrameActionsForChild: filterSetItemActions,
     mixins: {
-        apis: ['dragCoordinates']
-    }
+        apis: ['dragCoordinates'],
+    },
 });
