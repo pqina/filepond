@@ -1,13 +1,17 @@
 # Changelog
 
+## 4.25.3
+
+-   Fix issue with `chunkRetryDelays`. #671
+
 ## 4.25.2
 
--   Fix issue with fixed with file items not row wrapping correctly #653
--   Fix file info label when remove button positioned to the right #620
+-   Fix issue with fixed with file items not row wrapping correctly. #653
+-   Fix file info label when remove button positioned to the right. #620
 
 ## 4.25.1
 
--   Renamed `beforePrepareOutput` hook to `beforePrepareFile`
+-   Renamed `beforePrepareOutput` hook to `beforePrepareFile`.
 
 ## 4.25.0
 

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.25.2
+ * FilePond 4.25.3
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1856,7 +1856,7 @@ const defaultOptions = {
     chunkUploads: [false, Type.BOOLEAN], // Enable chunked uploads
     chunkForce: [false, Type.BOOLEAN], // Force use of chunk uploads even for files smaller than chunk size
     chunkSize: [5000000, Type.INT], // Size of chunks (5MB default)
-    chunkRetryDelays: [[500, 1000, 3000], Type.Array], // Amount of times to retry upload of a chunk when it fails
+    chunkRetryDelays: [[500, 1000, 3000], Type.ARRAY], // Amount of times to retry upload of a chunk when it fails
 
     // The server api end points to use for uploading (see docs)
     server: [null, Type.SERVER_API],
