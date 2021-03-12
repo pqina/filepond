@@ -37,7 +37,7 @@ export const createFileProcessorFunction = (apiUrl, action, name, options) => (f
     if (isObject(metadata)) { formData.append(name, JSON.stringify(metadata)); }
 
     // Turn into an array of objects so no matter what the input, we can handle it the same way
-    (file instanceof Blob ? [{ name: null, file }] : file).forEach(item => {
+    [{ name: null, file }].forEach(item => {
         formData.append(name, item.file, item.name === null ? item.file.name : `${item.name}${item.file.name}`);
     });
 
