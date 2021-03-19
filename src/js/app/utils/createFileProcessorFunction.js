@@ -14,8 +14,15 @@ function signature:
   }
 }
 */
-export const createFileProcessorFunction = (apiUrl, action, name, options) => (file, metadata, load, error, progress, abort, transfer) => {
-
+export const createFileProcessorFunction = (apiUrl, action, name, options) => (
+    file,
+    metadata,
+    load,
+    error,
+    progress,
+    abort,
+    transfer
+) => {
     // no file received
     if (!file) return;
 
@@ -23,38 +30,62 @@ export const createFileProcessorFunction = (apiUrl, action, name, options) => (f
     const canChunkUpload = options.chunkUploads;
     const shouldChunkUpload = canChunkUpload && file.size > options.chunkSize;
     const willChunkUpload = canChunkUpload && (shouldChunkUpload || options.chunkForce);
-    if (file instanceof Blob && willChunkUpload) return processFileChunked(apiUrl, action, name, file, metadata, load, error, progress, abort, transfer, options);
-    
+    if (file instanceof Blob && willChunkUpload)
+        return processFileChunked(
+            apiUrl,
+            action,
+            name,
+            file,
+            metadata,
+            load,
+            error,
+            progress,
+            abort,
+            transfer,
+            options
+        );
+
     // set handlers
     const ondata = action.ondata || (fd => fd);
     const onload = action.onload || (res => res);
     const onerror = action.onerror || (res => null);
 
+    const headers =
+        typeof action.headers === 'function'
+            ? action.headers(file, metadata) || {}
+            : {
+                  ...action.headers,
+              };
+
+    const requestParams = {
+        ...action,
+        headers,
+    };
+
     // create formdata object
     var formData = new FormData();
 
     // add metadata under same name
-    if (isObject(metadata)) { formData.append(name, JSON.stringify(metadata)); }
+    if (isObject(metadata)) {
+        formData.append(name, JSON.stringify(metadata));
+    }
 
     // Turn into an array of objects so no matter what the input, we can handle it the same way
     (file instanceof Blob ? [{ name: null, file }] : file).forEach(item => {
-        formData.append(name, item.file, item.name === null ? item.file.name : `${item.name}${item.file.name}`);
+        formData.append(
+            name,
+            item.file,
+            item.name === null ? item.file.name : `${item.name}${item.file.name}`
+        );
     });
 
     // send request object
-    const request = sendRequest(ondata(formData), buildURL(apiUrl, action.url), action);
-    request.onload = (xhr) => {
-        load(
-            createResponse(
-                'load',
-                xhr.status,
-                onload(xhr.response),
-                xhr.getAllResponseHeaders()
-            )
-        );
+    const request = sendRequest(ondata(formData), buildURL(apiUrl, action.url), requestParams);
+    request.onload = xhr => {
+        load(createResponse('load', xhr.status, onload(xhr.response), xhr.getAllResponseHeaders()));
     };
 
-    request.onerror = (xhr) => {
+    request.onerror = xhr => {
         error(
             createResponse(
                 'error',

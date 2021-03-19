@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.25.3
+ * FilePond 4.26.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -3062,6 +3062,18 @@ const createFileProcessorFunction = (apiUrl, action, name, options) => (
     const onload = action.onload || (res => res);
     const onerror = action.onerror || (res => null);
 
+    const headers =
+        typeof action.headers === 'function'
+            ? action.headers(file, metadata) || {}
+            : {
+                  ...action.headers,
+              };
+
+    const requestParams = {
+        ...action,
+        headers,
+    };
+
     // create formdata object
     var formData = new FormData();
 
@@ -3080,7 +3092,7 @@ const createFileProcessorFunction = (apiUrl, action, name, options) => (
     });
 
     // send request object
-    const request = sendRequest(ondata(formData), buildURL(apiUrl, action.url), action);
+    const request = sendRequest(ondata(formData), buildURL(apiUrl, action.url), requestParams);
     request.onload = xhr => {
         load(createResponse('load', xhr.status, onload(xhr.response), xhr.getAllResponseHeaders()));
     };
@@ -6049,7 +6061,7 @@ const item = createView({
 var getItemsPerRow = (horizontalSpace, itemWidth) => {
     // add one pixel leeway, when using percentages for item width total items can be 1.99 per row
 
-    return Math.floor((horizontalSpace + 1) / itemWidth);
+    return Math.max(1, Math.floor((horizontalSpace + 1) / itemWidth));
 };
 
 const getItemIndexByPosition = (view, children, positionInView) => {

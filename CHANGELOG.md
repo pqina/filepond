@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.26.0
+
+-   Fix problem with rendering 0 items per row. #676
+-   The `headers` property of the `server.process` end point can now be a function.
+
 ## 4.25.3
 
 -   Fix issue with `chunkRetryDelays`. #671

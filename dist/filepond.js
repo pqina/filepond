@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.25.3
+ * FilePond 4.26.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -5177,6 +5177,19 @@
                     return null;
                 };
 
+            var headers =
+                typeof action.headers === 'function'
+                    ? action.headers(file, metadata) || {}
+                    : Object.assign(
+                          {},
+
+                          action.headers
+                      );
+
+            var requestParams = Object.assign({}, action, {
+                headers: headers,
+            });
+
             // create formdata object
             var formData = new FormData();
 
@@ -5195,7 +5208,11 @@
             });
 
             // send request object
-            var request = sendRequest(ondata(formData), buildURL(apiUrl, action.url), action);
+            var request = sendRequest(
+                ondata(formData),
+                buildURL(apiUrl, action.url),
+                requestParams
+            );
             request.onload = function(xhr) {
                 load(
                     createResponse(
@@ -8599,7 +8616,7 @@
     var getItemsPerRow = function(horizontalSpace, itemWidth) {
         // add one pixel leeway, when using percentages for item width total items can be 1.99 per row
 
-        return Math.floor((horizontalSpace + 1) / itemWidth);
+        return Math.max(1, Math.floor((horizontalSpace + 1) / itemWidth));
     };
 
     var getItemIndexByPosition = function getItemIndexByPosition(view, children, positionInView) {
