@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.26.0
+ * FilePond 4.26.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -6265,7 +6265,6 @@
             if (!item) {
                 failure({
                     error: createResponse('error', 0, 'Item not found'),
-
                     file: null,
                 });
 
@@ -6294,7 +6293,6 @@
             DID_SET_FILES: function DID_SET_FILES(_ref2) {
                 var _ref2$value = _ref2.value,
                     value = _ref2$value === void 0 ? [] : _ref2$value;
-
                 // map values to file objects
                 var files = value.map(function(file) {
                     return {
@@ -6342,8 +6340,8 @@
 
             DID_UPDATE_ITEM_METADATA: function DID_UPDATE_ITEM_METADATA(_ref3) {
                 var id = _ref3.id,
-                    action = _ref3.action;
-
+                    action = _ref3.action,
+                    change = _ref3.change;
                 // if is called multiple times in close succession we combined all calls together to save resources
                 clearTimeout(state.itemUpdateTimeout);
                 state.itemUpdateTimeout = setTimeout(function() {
@@ -6356,6 +6354,7 @@
                             item: item,
                             query: query,
                             action: action,
+                            change: change,
                         }).then(function(shouldPrepareOutput) {
                             // plugins determined the output data should be prepared (or not), can be adjusted with beforePrepareOutput hook
                             var beforePrepareFile = query('GET_BEFORE_PREPARE_FILE');
@@ -6373,6 +6372,7 @@
                                         dispatch('DID_PREPARE_OUTPUT', { id: id, file: file });
                                     },
                                 },
+
                                 true
                             );
                         });
@@ -6447,7 +6447,6 @@
                     success = _ref6$success === void 0 ? function() {} : _ref6$success,
                     _ref6$failure = _ref6.failure,
                     failure = _ref6$failure === void 0 ? function() {} : _ref6$failure;
-
                 var currentIndex = index;
 
                 if (index === -1 || typeof index === 'undefined') {
@@ -6498,12 +6497,10 @@
                     failure = _ref7$failure === void 0 ? function() {} : _ref7$failure,
                     _ref7$options = _ref7.options,
                     options = _ref7$options === void 0 ? {} : _ref7$options;
-
                 // if no source supplied
                 if (isEmpty(source)) {
                     failure({
                         error: createResponse('error', 0, 'No source'),
-
                         file: null,
                     });
 
@@ -6751,6 +6748,7 @@
                                             loadComplete();
                                         },
                                     },
+
                                     true
                                 );
 
@@ -6873,11 +6871,9 @@
                     success = _ref9.success,
                     _ref9$failure = _ref9.failure,
                     failure = _ref9$failure === void 0 ? function() {} : _ref9$failure;
-
                 // error response if item archived
                 var err = {
                     error: createResponse('error', 0, 'Item not found'),
-
                     file: null,
                 };
 
@@ -6972,6 +6968,7 @@
                         },
                         failure: failure,
                     },
+
                     true
                 );
             }),

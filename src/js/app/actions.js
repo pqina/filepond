@@ -26,57 +26,52 @@ import { getActiveItems } from './utils/getActiveItems';
 import { isFunction } from '../utils/isFunction';
 import { limit } from '../utils/limit';
 
-const isMockItem = (item) => !isFile(item.file);
+const isMockItem = item => !isFile(item.file);
 
 const listUpdated = (dispatch, state) => {
     clearTimeout(state.listUpdateTimeout);
     state.listUpdateTimeout = setTimeout(() => {
         dispatch('DID_UPDATE_ITEMS', { items: getActiveItems(state.items) });
     }, 0);
-}
+};
 
-const optionalPromise = (fn, ...params) => new Promise((resolve) => {
+const optionalPromise = (fn, ...params) =>
+    new Promise(resolve => {
+        if (!fn) {
+            return resolve(true);
+        }
 
-    if (!fn) {
-        return resolve(true);
-    }
+        const result = fn(...params);
 
-    const result = fn(...params);
+        if (result == null) {
+            return resolve(true);
+        }
 
-    if (result == null) {
-        return resolve(true);
-    }
+        if (typeof result === 'boolean') {
+            return resolve(result);
+        }
 
-    if (typeof result === 'boolean') {
-        return resolve(result);
-    }
-
-    if (typeof result.then === 'function') {
-        result.then(resolve);
-    }
-
-});
+        if (typeof result.then === 'function') {
+            result.then(resolve);
+        }
+    });
 
 const sortItems = (state, compare) => {
     state.items.sort((a, b) => compare(createItemAPI(a), createItemAPI(b)));
-}
+};
 
 // returns item based on state
 const getItemByQueryFromState = (state, itemHandler) => ({
     query,
-    success = () => { },
-    failure = () => { },
+    success = () => {},
+    failure = () => {},
     ...options
 } = {}) => {
     const item = getItemByQuery(state.items, query);
     if (!item) {
         failure({
-            error: createResponse(
-                'error', 
-                0, 
-                'Item not found'
-            ),
-            file: null
+            error: createResponse('error', 0, 'Item not found'),
+            file: null,
         });
         return;
     }
@@ -99,11 +94,10 @@ export const actions = (dispatch, query, state) => ({
      * Sets initial files
      */
     DID_SET_FILES: ({ value = [] }) => {
-        
         // map values to file objects
         const files = value.map(file => ({
             source: file.source ? file.source : file,
-            options: file.options
+            options: file.options,
         }));
 
         // loop over files, if file is in list, leave it be, if not, remove
@@ -120,89 +114,92 @@ export const actions = (dispatch, query, state) => ({
         // add new files
         activeItems = getActiveItems(state.items);
         files.forEach((file, index) => {
-
             // if file is already in list
-            if (activeItems.find(item => item.source === file.source || item.file === file.source)) return;
+            if (activeItems.find(item => item.source === file.source || item.file === file.source))
+                return;
 
             // not in list, add
             dispatch('ADD_ITEM', {
                 ...file,
                 interactionMethod: InteractionMethod.NONE,
-                index
+                index,
             });
-
         });
-
     },
 
-    DID_UPDATE_ITEM_METADATA: ({ id, action }) => {
-
+    DID_UPDATE_ITEM_METADATA: ({ id, action, change }) => {
         // if is called multiple times in close succession we combined all calls together to save resources
         clearTimeout(state.itemUpdateTimeout);
         state.itemUpdateTimeout = setTimeout(() => {
-
             const item = getItemById(state.items, id);
 
             // only revert and attempt to upload when we're uploading to a server
             if (!query('IS_ASYNC')) {
-    
                 // should we update the output data
-                applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query, action })
-                .then(shouldPrepareOutput => {
-
+                applyFilterChain('SHOULD_PREPARE_OUTPUT', false, {
+                    item,
+                    query,
+                    action,
+                    change,
+                }).then(shouldPrepareOutput => {
                     // plugins determined the output data should be prepared (or not), can be adjusted with beforePrepareOutput hook
                     const beforePrepareFile = query('GET_BEFORE_PREPARE_FILE');
-                    if (beforePrepareFile) shouldPrepareOutput = beforePrepareFile(item, shouldPrepareOutput);
+                    if (beforePrepareFile)
+                        shouldPrepareOutput = beforePrepareFile(item, shouldPrepareOutput);
 
                     if (!shouldPrepareOutput) return;
 
-                    dispatch('REQUEST_PREPARE_OUTPUT', {
-                        query: id,
-                        item,
-                        success: (file) => {
-                            dispatch('DID_PREPARE_OUTPUT', { id, file });
-                        }
-                    }, true);
+                    dispatch(
+                        'REQUEST_PREPARE_OUTPUT',
+                        {
+                            query: id,
+                            item,
+                            success: file => {
+                                dispatch('DID_PREPARE_OUTPUT', { id, file });
+                            },
+                        },
+                        true
+                    );
                 });
-    
+
                 return;
             }
-    
+
             // for async scenarios
             const upload = () => {
                 // we push this forward a bit so the interface is updated correctly
                 setTimeout(() => {
-                    dispatch('REQUEST_ITEM_PROCESSING', { query: id })
+                    dispatch('REQUEST_ITEM_PROCESSING', { query: id });
                 }, 32);
-            }
-    
-            const revert = (doUpload) => {
-                item.revert(createRevertFunction(state.options.server.url, state.options.server.revert), query('GET_FORCE_REVERT'))
-                .then(doUpload ? upload : () => {})
-                .catch(() => {})
-            }
-    
-            const abort = (doUpload) => {
-                item.abortProcessing()
-                .then(doUpload ? upload : () => {});
-            }
-    
+            };
+
+            const revert = doUpload => {
+                item.revert(
+                    createRevertFunction(state.options.server.url, state.options.server.revert),
+                    query('GET_FORCE_REVERT')
+                )
+                    .then(doUpload ? upload : () => {})
+                    .catch(() => {});
+            };
+
+            const abort = doUpload => {
+                item.abortProcessing().then(doUpload ? upload : () => {});
+            };
+
             // if we should re-upload the file immediately
             if (item.status === ItemStatus.PROCESSING_COMPLETE) {
                 return revert(state.options.instantUpload);
             }
-            
+
             // if currently uploading, cancel upload
             if (item.status === ItemStatus.PROCESSING) {
                 return abort(state.options.instantUpload);
             }
-    
+
             if (state.options.instantUpload) {
                 upload();
             }
-            
         }, 0);
-
     },
 
     MOVE_ITEM: ({ query, index }) => {
@@ -217,12 +214,11 @@ export const actions = (dispatch, query, state) => ({
     SORT: ({ compare }) => {
         sortItems(state, compare);
         dispatch('DID_SORT_ITEMS', {
-            items: query('GET_ACTIVE_ITEMS')
+            items: query('GET_ACTIVE_ITEMS'),
         });
     },
 
-    ADD_ITEMS: ({ items, index, interactionMethod, success = () => { }, failure = () => { } }) => {
-
+    ADD_ITEMS: ({ items, index, interactionMethod, success = () => {}, failure = () => {} }) => {
         let currentIndex = index;
 
         if (index === -1 || typeof index === 'undefined') {
@@ -232,25 +228,27 @@ export const actions = (dispatch, query, state) => ({
         }
 
         const ignoredFiles = query('GET_IGNORED_FILES');
-        const isValidFile = source => isFile(source) ? !ignoredFiles.includes(source.name.toLowerCase()) : !isEmpty(source);
+        const isValidFile = source =>
+            isFile(source) ? !ignoredFiles.includes(source.name.toLowerCase()) : !isEmpty(source);
         const validItems = items.filter(isValidFile);
 
-        const promises = validItems.map(source => 
-            new Promise((resolve, reject) => {
-                dispatch('ADD_ITEM', {
-                    interactionMethod,
-                    source: source.source || source,
-                    success: resolve,
-                    failure: reject,
-                    index: currentIndex++,
-                    options: source.options || {}
-                });
-            }
-        ));
+        const promises = validItems.map(
+            source =>
+                new Promise((resolve, reject) => {
+                    dispatch('ADD_ITEM', {
+                        interactionMethod,
+                        source: source.source || source,
+                        success: resolve,
+                        failure: reject,
+                        index: currentIndex++,
+                        options: source.options || {},
+                    });
+                })
+        );
 
         Promise.all(promises)
             .then(success)
-            .catch(failure)
+            .catch(failure);
     },
 
     /**
@@ -262,20 +260,15 @@ export const actions = (dispatch, query, state) => ({
         source,
         index = -1,
         interactionMethod,
-        success = () => { },
-        failure = () => { },
-        options = {}
+        success = () => {},
+        failure = () => {},
+        options = {},
     }) => {
-
         // if no source supplied
         if (isEmpty(source)) {
             failure({
-                error: createResponse(
-                    'error', 
-                    0, 
-                    'No source'
-                ),
-                file: null
+                error: createResponse('error', 0, 'No source'),
+                file: null,
             });
             return;
         }
@@ -285,25 +278,20 @@ export const actions = (dispatch, query, state) => ({
             // fail silently
             return;
         }
-        
+
         // test if there's still room in the list of files
         if (!hasRoomForItem(state)) {
-
             // if multiple allowed, we can't replace
             // or if only a single item is allowed but we're not allowed to replace it we exit
             if (
                 state.options.allowMultiple ||
                 (!state.options.allowMultiple && !state.options.allowReplace)
             ) {
-                const error = createResponse(
-                    'warning', 
-                    0, 
-                    'Max files'
-                );
+                const error = createResponse('warning', 0, 'Max files');
 
                 dispatch('DID_THROW_MAX_FILES', {
                     source,
-                    error
+                    error,
                 });
 
                 failure({ error, file: null });
@@ -314,21 +302,32 @@ export const actions = (dispatch, query, state) => ({
             // let's replace the item
             // id of first item we're about to remove
             const item = getActiveItems(state.items)[0];
-            
-            // if has been processed remove it from the server as well
-            if (item.status === ItemStatus.PROCESSING_COMPLETE || item.status === ItemStatus.PROCESSING_REVERT_ERROR) {
-                
-                const forceRevert = query('GET_FORCE_REVERT');
-                item.revert(createRevertFunction(state.options.server.url, state.options.server.revert), forceRevert)
-                    .then(() => {
 
+            // if has been processed remove it from the server as well
+            if (
+                item.status === ItemStatus.PROCESSING_COMPLETE ||
+                item.status === ItemStatus.PROCESSING_REVERT_ERROR
+            ) {
+                const forceRevert = query('GET_FORCE_REVERT');
+                item.revert(
+                    createRevertFunction(state.options.server.url, state.options.server.revert),
+                    forceRevert
+                )
+                    .then(() => {
                         if (!forceRevert) return;
 
                         // try to add now
-                        dispatch('ADD_ITEM', { source, index, interactionMethod, success, failure, options });
+                        dispatch('ADD_ITEM', {
+                            source,
+                            index,
+                            interactionMethod,
+                            success,
+                            failure,
+                            options,
+                        });
                     })
-                    .catch(() => {}) // no need to handle this catch state for now
-                
+                    .catch(() => {}); // no need to handle this catch state for now
+
                 if (forceRevert) return;
             }
 
@@ -337,12 +336,12 @@ export const actions = (dispatch, query, state) => ({
         }
 
         // where did the file originate
-        const origin = 
-            options.type === 'local' 
-                ? FileOrigin.LOCAL 
-                : options.type === 'limbo' 
-                    ? FileOrigin.LIMBO 
-                    : FileOrigin.INPUT;
+        const origin =
+            options.type === 'local'
+                ? FileOrigin.LOCAL
+                : options.type === 'limbo'
+                ? FileOrigin.LIMBO
+                : FileOrigin.INPUT;
 
         // create a new blank item
         const item = createItem(
@@ -401,7 +400,6 @@ export const actions = (dispatch, query, state) => ({
         });
 
         item.on('load-request-error', error => {
-
             const mainStatus = dynamicLabel(state.options.labelFileLoadError)(error);
 
             // is client error, no way to recover
@@ -411,8 +409,8 @@ export const actions = (dispatch, query, state) => ({
                     error,
                     status: {
                         main: mainStatus,
-                        sub: `${error.code} (${error.body})`
-                    }
+                        sub: `${error.code} (${error.body})`,
+                    },
                 });
 
                 // reject the file so can be dealt with through API
@@ -426,8 +424,8 @@ export const actions = (dispatch, query, state) => ({
                 error,
                 status: {
                     main: mainStatus,
-                    sub: state.options.labelTapToRetry
-                }
+                    sub: state.options.labelTapToRetry,
+                },
             });
         });
 
@@ -435,7 +433,7 @@ export const actions = (dispatch, query, state) => ({
             dispatch('DID_THROW_ITEM_INVALID', {
                 id,
                 error: error.status,
-                status: error.status
+                status: error.status,
             });
             failure({ error: error.status, file: createItemAPI(item) });
         });
@@ -445,26 +443,22 @@ export const actions = (dispatch, query, state) => ({
         });
 
         item.on('load-skip', () => {
-
             dispatch('COMPLETE_LOAD_ITEM', {
                 query: id,
                 item,
                 data: {
                     source,
-                    success
-                }
+                    success,
+                },
             });
-
         });
 
         item.on('load', () => {
-
-            const handleAdd = (shouldAdd) => {
-
+            const handleAdd = shouldAdd => {
                 // no should not add this file
                 if (!shouldAdd) {
                     dispatch('REMOVE_ITEM', {
-                        query: id
+                        query: id,
                     });
                     return;
                 }
@@ -476,60 +470,62 @@ export const actions = (dispatch, query, state) => ({
 
                 // let plugins decide if the output data should be prepared at this point
                 // means we'll do this and wait for idle state
-                applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query })
-                .then(shouldPrepareOutput => {
+                applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query }).then(
+                    shouldPrepareOutput => {
+                        // plugins determined the output data should be prepared (or not), can be adjusted with beforePrepareOutput hook
+                        const beforePrepareFile = query('GET_BEFORE_PREPARE_FILE');
+                        if (beforePrepareFile)
+                            shouldPrepareOutput = beforePrepareFile(item, shouldPrepareOutput);
 
-                    // plugins determined the output data should be prepared (or not), can be adjusted with beforePrepareOutput hook
-                    const beforePrepareFile = query('GET_BEFORE_PREPARE_FILE');
-                    if (beforePrepareFile) shouldPrepareOutput = beforePrepareFile(item, shouldPrepareOutput);
+                        const loadComplete = () => {
+                            dispatch('COMPLETE_LOAD_ITEM', {
+                                query: id,
+                                item,
+                                data: {
+                                    source,
+                                    success,
+                                },
+                            });
 
-                    const loadComplete = () => {
+                            listUpdated(dispatch, state);
+                        };
 
-                        dispatch('COMPLETE_LOAD_ITEM', {
-                            query: id,
-                            item,
-                            data:{
-                                source,
-                                success
-                            }
-                        });
+                        // exit
+                        if (shouldPrepareOutput) {
+                            // wait for idle state and then run PREPARE_OUTPUT
+                            dispatch(
+                                'REQUEST_PREPARE_OUTPUT',
+                                {
+                                    query: id,
+                                    item,
+                                    success: file => {
+                                        dispatch('DID_PREPARE_OUTPUT', { id, file });
+                                        loadComplete();
+                                    },
+                                },
+                                true
+                            );
 
-                        listUpdated(dispatch, state);
-                        
+                            return;
+                        }
+
+                        loadComplete();
                     }
-
-                    // exit
-                    if (shouldPrepareOutput) {
-                        
-                        // wait for idle state and then run PREPARE_OUTPUT
-                        dispatch('REQUEST_PREPARE_OUTPUT', {
-                            query: id,
-                            item,
-                            success: (file) => {
-                                dispatch('DID_PREPARE_OUTPUT', { id, file });
-                                loadComplete();
-                            }
-                        }, true)
-
-                        return;
-                    }
-
-                    loadComplete();
-
-                });
-
-            }
+                );
+            };
 
             // item loaded, allow plugins to
             // - read data (quickly)
             // - add metadata
             applyFilterChain('DID_LOAD_ITEM', item, { query, dispatch })
-            .then(() => {
-                optionalPromise(query('GET_BEFORE_ADD_FILE'), createItemAPI(item))
-                    .then(handleAdd);
-            }).catch(() => {
-                handleAdd(false);
-            })
+                .then(() => {
+                    optionalPromise(query('GET_BEFORE_ADD_FILE'), createItemAPI(item)).then(
+                        handleAdd
+                    );
+                })
+                .catch(() => {
+                    handleAdd(false);
+                });
         });
 
         item.on('process-start', () => {
@@ -546,8 +542,8 @@ export const actions = (dispatch, query, state) => ({
                 error,
                 status: {
                     main: dynamicLabel(state.options.labelFileProcessingError)(error),
-                    sub: state.options.labelTapToRetry
-                }
+                    sub: state.options.labelTapToRetry,
+                },
             });
         });
 
@@ -557,8 +553,8 @@ export const actions = (dispatch, query, state) => ({
                 error,
                 status: {
                     main: dynamicLabel(state.options.labelFileProcessingRevertError)(error),
-                    sub: state.options.labelTapToRetry
-                }
+                    sub: state.options.labelTapToRetry,
+                },
             });
         });
 
@@ -566,7 +562,7 @@ export const actions = (dispatch, query, state) => ({
             dispatch('DID_COMPLETE_ITEM_PROCESSING', {
                 id,
                 error: null,
-                serverFileReference
+                serverFileReference,
             });
             dispatch('DID_DEFINE_VALUE', { id, value: serverFileReference });
         });
@@ -577,7 +573,7 @@ export const actions = (dispatch, query, state) => ({
 
         item.on('process-revert', () => {
             dispatch('DID_REVERT_ITEM_PROCESSING', { id });
-            dispatch('DID_DEFINE_VALUE', { id, value: null })
+            dispatch('DID_DEFINE_VALUE', { id, value: null });
         });
 
         // let view know the item has been inserted
@@ -593,16 +589,17 @@ export const actions = (dispatch, query, state) => ({
 
             // this creates a function that loads the file based on the type of file (string, base64, blob, file) and location of file (local, remote, limbo)
             createFileLoader(
-                origin === FileOrigin.INPUT 
-                    // input, if is remote, see if should use custom fetch, else use default fetchBlob
-                    ? isString(source) && isExternalURL(source)
-                        ? (fetch ? createFetchFunction(url, fetch) : fetchBlob) // remote url
+                origin === FileOrigin.INPUT
+                    ? // input, if is remote, see if should use custom fetch, else use default fetchBlob
+                      isString(source) && isExternalURL(source)
+                        ? fetch
+                            ? createFetchFunction(url, fetch)
+                            : fetchBlob // remote url
                         : fetchBlob // try to fetch url
-                    // limbo or local
-                    : origin === FileOrigin.LIMBO
-                        ? createFetchFunction(url, restore) // limbo
-                        : createFetchFunction(url, load) // local
-
+                    : // limbo or local
+                    origin === FileOrigin.LIMBO
+                    ? createFetchFunction(url, restore) // limbo
+                    : createFetchFunction(url, load) // local
             ),
 
             // called when the file is loaded so it can be piped through the filters
@@ -616,42 +613,29 @@ export const actions = (dispatch, query, state) => ({
     },
 
     REQUEST_PREPARE_OUTPUT: ({ item, success, failure = () => {} }) => {
-
         // error response if item archived
         const err = {
-            error: createResponse(
-                'error', 
-                0, 
-                'Item not found'
-            ),
-            file: null
+            error: createResponse('error', 0, 'Item not found'),
+            file: null,
         };
 
         // don't handle archived items, an item could have been archived (load aborted) while waiting to be prepared
         if (item.archived) return failure(err);
-        
-        // allow plugins to alter the file data
-        applyFilterChain('PREPARE_OUTPUT', item.file, { query, item })
-        .then(result => {
-            applyFilterChain('COMPLETE_PREPARE_OUTPUT', result, { query, item })
-            .then(result => {
 
+        // allow plugins to alter the file data
+        applyFilterChain('PREPARE_OUTPUT', item.file, { query, item }).then(result => {
+            applyFilterChain('COMPLETE_PREPARE_OUTPUT', result, { query, item }).then(result => {
                 // don't handle archived items, an item could have been archived (load aborted) while being prepared
                 if (item.archived) return failure(err);
-                
+
                 // we done!
                 success(result);
             });
         });
-            
     },
 
-    COMPLETE_LOAD_ITEM: ({item, data}) => {
-        
-        const {
-            success,
-            source,
-        } = data;
+    COMPLETE_LOAD_ITEM: ({ item, data }) => {
+        const { success, source } = data;
 
         // sort items in list
         const itemInsertLocation = query('GET_ITEM_INSERT_LOCATION');
@@ -663,7 +647,7 @@ export const actions = (dispatch, query, state) => ({
         dispatch('DID_LOAD_ITEM', {
             id: item.id,
             error: null,
-            serverFileReference: item.origin === FileOrigin.INPUT ? null : source
+            serverFileReference: item.origin === FileOrigin.INPUT ? null : source,
         });
 
         // item has been successfully loaded and added to the
@@ -681,11 +665,11 @@ export const actions = (dispatch, query, state) => ({
             dispatch('DID_COMPLETE_ITEM_PROCESSING', {
                 id: item.id,
                 error: null,
-                serverFileReference: source
+                serverFileReference: source,
             });
             dispatch('DID_DEFINE_VALUE', {
                 id: item.id,
-                value: source
+                value: source,
             });
             return;
         }
@@ -694,7 +678,6 @@ export const actions = (dispatch, query, state) => ({
         if (query('IS_ASYNC') && state.options.instantUpload) {
             dispatch('REQUEST_ITEM_PROCESSING', { query: item.id });
         }
-
     },
 
     RETRY_ITEM_LOAD: getItemByQueryFromState(state, item => {
@@ -702,47 +685,53 @@ export const actions = (dispatch, query, state) => ({
         item.retryLoad();
     }),
 
-    REQUEST_ITEM_PREPARE: getItemByQueryFromState(state,  (item, success, failure) => {
-        dispatch('REQUEST_PREPARE_OUTPUT', {
-            query: item.id,
-            item,
-            success: (file) => {
-                dispatch('DID_PREPARE_OUTPUT', { id: item.id, file });
-                success({
-                    file: item,
-                    output: file
-                });
+    REQUEST_ITEM_PREPARE: getItemByQueryFromState(state, (item, success, failure) => {
+        dispatch(
+            'REQUEST_PREPARE_OUTPUT',
+            {
+                query: item.id,
+                item,
+                success: file => {
+                    dispatch('DID_PREPARE_OUTPUT', { id: item.id, file });
+                    success({
+                        file: item,
+                        output: file,
+                    });
+                },
+                failure,
             },
-            failure
-        }, true);
+            true
+        );
     }),
 
-    REQUEST_ITEM_PROCESSING: getItemByQueryFromState(state,  (item, success, failure) => {
-        
+    REQUEST_ITEM_PROCESSING: getItemByQueryFromState(state, (item, success, failure) => {
         // cannot be queued (or is already queued)
-        const itemCanBeQueuedForProcessing = 
+        const itemCanBeQueuedForProcessing =
             // waiting for something
-            (item.status === ItemStatus.IDLE) ||
+            item.status === ItemStatus.IDLE ||
             // processing went wrong earlier
-            (item.status === ItemStatus.PROCESSING_ERROR);
+            item.status === ItemStatus.PROCESSING_ERROR;
 
         // not ready to be processed
         if (!itemCanBeQueuedForProcessing) {
+            const processNow = () =>
+                dispatch('REQUEST_ITEM_PROCESSING', { query: item, success, failure });
 
-            const processNow = () => dispatch('REQUEST_ITEM_PROCESSING', { query: item, success, failure });
-
-            const process = () => document.hidden ? processNow() : setTimeout(processNow, 32);
+            const process = () => (document.hidden ? processNow() : setTimeout(processNow, 32));
 
             // if already done processing or tried to revert but didn't work, try again
-            if (item.status === ItemStatus.PROCESSING_COMPLETE || item.status === ItemStatus.PROCESSING_REVERT_ERROR) {
-                item.revert(createRevertFunction(state.options.server.url,state.options.server.revert), query('GET_FORCE_REVERT'))
-                .then(process)
-                .catch(() => {}) // don't continue with processing if something went wrong
-            }
-
-            else if (item.status === ItemStatus.PROCESSING) {
-                item.abortProcessing()
-                .then(process);
+            if (
+                item.status === ItemStatus.PROCESSING_COMPLETE ||
+                item.status === ItemStatus.PROCESSING_REVERT_ERROR
+            ) {
+                item.revert(
+                    createRevertFunction(state.options.server.url, state.options.server.revert),
+                    query('GET_FORCE_REVERT')
+                )
+                    .then(process)
+                    .catch(() => {}); // don't continue with processing if something went wrong
+            } else if (item.status === ItemStatus.PROCESSING) {
+                item.abortProcessing().then(process);
             }
 
             return;
@@ -759,29 +748,26 @@ export const actions = (dispatch, query, state) => ({
     }),
 
     PROCESS_ITEM: getItemByQueryFromState(state, (item, success, failure) => {
-
         const maxParallelUploads = query('GET_MAX_PARALLEL_UPLOADS');
         const totalCurrentUploads = query('GET_ITEMS_BY_STATUS', ItemStatus.PROCESSING).length;
 
         // queue and wait till queue is freed up
         if (totalCurrentUploads === maxParallelUploads) {
-
             // queue for later processing
             state.processingQueue.push({
                 id: item.id,
                 success,
-                failure
+                failure,
             });
 
             // stop it!
             return;
-        };
+        }
 
         // if was not queued or is already processing exit here
         if (item.status === ItemStatus.PROCESSING) return;
 
         const processNext = () => {
-
             // process queueud items
             const queueEntry = state.processingQueue.shift();
 
@@ -800,16 +786,17 @@ export const actions = (dispatch, query, state) => ({
 
             // process queued item
             dispatch('PROCESS_ITEM', { query: id, success, failure }, true);
-        }
+        };
 
         // we done function
         item.onOnce('process-complete', () => {
-
             success(createItemAPI(item));
             processNext();
 
             // All items processed? No errors?
-            const allItemsProcessed = query('GET_ITEMS_BY_STATUS', ItemStatus.PROCESSING_COMPLETE).length === state.items.length;
+            const allItemsProcessed =
+                query('GET_ITEMS_BY_STATUS', ItemStatus.PROCESSING_COMPLETE).length ===
+                state.items.length;
             if (allItemsProcessed) {
                 dispatch('DID_COMPLETE_ITEM_PROCESSING_ALL');
             }
@@ -825,23 +812,17 @@ export const actions = (dispatch, query, state) => ({
         const options = state.options;
         item.process(
             createFileProcessor(
-                createProcessorFunction(
-                    options.server.url,
-                    options.server.process,
-                    options.name,
-                    {
-                        chunkTransferId: item.transferId,
-                        chunkServer: options.server.patch,
-                        chunkUploads: options.chunkUploads,
-                        chunkForce: options.chunkForce,
-                        chunkSize: options.chunkSize,
-                        chunkRetryDelays: options.chunkRetryDelays,
-                    }
-                )
+                createProcessorFunction(options.server.url, options.server.process, options.name, {
+                    chunkTransferId: item.transferId,
+                    chunkServer: options.server.patch,
+                    chunkUploads: options.chunkUploads,
+                    chunkForce: options.chunkForce,
+                    chunkSize: options.chunkSize,
+                    chunkRetryDelays: options.chunkRetryDelays,
+                })
             ),
             // called when the file is about to be processed so it can be piped through the transform filters
             (file, success, error) => {
-
                 // allow plugins to alter the file data
                 applyFilterChain('PREPARE_OUTPUT', file, { query, item })
                     .then(file => {
@@ -858,24 +839,21 @@ export const actions = (dispatch, query, state) => ({
         dispatch('REQUEST_ITEM_PROCESSING', { query: item });
     }),
 
-    REQUEST_REMOVE_ITEM: getItemByQueryFromState(state, (item) => {
-        optionalPromise(query('GET_BEFORE_REMOVE_FILE'), createItemAPI(item))
-            .then((shouldRemove) => {
-                if (!shouldRemove) {
-                    return;
-                }
-                dispatch('REMOVE_ITEM', { query: item });
-            });
+    REQUEST_REMOVE_ITEM: getItemByQueryFromState(state, item => {
+        optionalPromise(query('GET_BEFORE_REMOVE_FILE'), createItemAPI(item)).then(shouldRemove => {
+            if (!shouldRemove) {
+                return;
+            }
+            dispatch('REMOVE_ITEM', { query: item });
+        });
     }),
 
-    RELEASE_ITEM: getItemByQueryFromState(state, (item) => {
+    RELEASE_ITEM: getItemByQueryFromState(state, item => {
         item.release();
     }),
 
     REMOVE_ITEM: getItemByQueryFromState(state, (item, success, failure, options) => {
-
         const removeFromView = () => {
-
             // get id reference
             const id = item.id;
 
@@ -883,57 +861,58 @@ export const actions = (dispatch, query, state) => ({
             getItemById(state.items, id).archive();
 
             // tell the view the item has been removed
-            dispatch('DID_REMOVE_ITEM', { error:null, id, item });
+            dispatch('DID_REMOVE_ITEM', { error: null, id, item });
 
             // now the list has been modified
             listUpdated(dispatch, state);
-            
+
             // correctly removed
             success(createItemAPI(item));
-        }
+        };
 
         // if this is a local file and the server.remove function has been configured, send source there so dev can remove file from server
         const server = state.options.server;
-        if (item.origin === FileOrigin.LOCAL && server && isFunction(server.remove) && options.remove !== false) {
-            
+        if (
+            item.origin === FileOrigin.LOCAL &&
+            server &&
+            isFunction(server.remove) &&
+            options.remove !== false
+        ) {
             dispatch('DID_START_ITEM_REMOVE', { id: item.id });
 
             server.remove(
-                item.source, 
+                item.source,
                 () => removeFromView(),
-                (status) => {
+                status => {
                     dispatch('DID_THROW_ITEM_REMOVE_ERROR', {
                         id: item.id,
                         error: createResponse('error', 0, status, null),
                         status: {
                             main: dynamicLabel(state.options.labelFileRemoveError)(status),
-                            sub: state.options.labelTapToRetry
-                        }
+                            sub: state.options.labelTapToRetry,
+                        },
                     });
                 }
             );
-
-        }
-        else {
-            
+        } else {
             // if is requesting revert and can revert need to call revert handler (not calling request_ because that would also trigger beforeRemoveHook)
             if (options.revert && item.origin !== FileOrigin.LOCAL && item.serverId !== null) {
-                item.revert(createRevertFunction(state.options.server.url, state.options.server.revert), query('GET_FORCE_REVERT'))
+                item.revert(
+                    createRevertFunction(state.options.server.url, state.options.server.revert),
+                    query('GET_FORCE_REVERT')
+                );
             }
 
             // can now safely remove from view
             removeFromView();
         }
-
     }),
-    
 
     ABORT_ITEM_LOAD: getItemByQueryFromState(state, item => {
         item.abortLoad();
     }),
 
     ABORT_ITEM_PROCESSING: getItemByQueryFromState(state, item => {
-
         // test if is already processed
         if (item.serverId) {
             dispatch('REVERT_ITEM_PROCESSING', { id: item.id });
@@ -941,63 +920,65 @@ export const actions = (dispatch, query, state) => ({
         }
 
         // abort
-        item.abortProcessing()
-            .then(() => {
-                const shouldRemove = state.options.instantUpload;
-                if (shouldRemove) {
-                    dispatch('REMOVE_ITEM', { query: item.id });
-                }
-            });
+        item.abortProcessing().then(() => {
+            const shouldRemove = state.options.instantUpload;
+            if (shouldRemove) {
+                dispatch('REMOVE_ITEM', { query: item.id });
+            }
+        });
     }),
 
     REQUEST_REVERT_ITEM_PROCESSING: getItemByQueryFromState(state, item => {
-
         // not instant uploading, revert immediately
         if (!state.options.instantUpload) {
             dispatch('REVERT_ITEM_PROCESSING', { query: item });
             return;
         }
 
-        // if we're instant uploading the file will also be removed if we revert, 
+        // if we're instant uploading the file will also be removed if we revert,
         // so if a before remove file hook is defined we need to run it now
-        const handleRevert = (shouldRevert) => {
+        const handleRevert = shouldRevert => {
             if (!shouldRevert) return;
             dispatch('REVERT_ITEM_PROCESSING', { query: item });
-        }
+        };
 
         const fn = query('GET_BEFORE_REMOVE_FILE');
         if (!fn) {
             return handleRevert(true);
         }
-    
+
         const requestRemoveResult = fn(createItemAPI(item));
-        if (requestRemoveResult == null) { // undefined or null
+        if (requestRemoveResult == null) {
+            // undefined or null
             return handleRevert(true);
         }
-    
+
         if (typeof requestRemoveResult === 'boolean') {
             return handleRevert(requestRemoveResult);
         }
-    
+
         if (typeof requestRemoveResult.then === 'function') {
             requestRemoveResult.then(handleRevert);
         }
-    
     }),
 
     REVERT_ITEM_PROCESSING: getItemByQueryFromState(state, item => {
-        item.revert(createRevertFunction(state.options.server.url, state.options.server.revert), query('GET_FORCE_REVERT'))
+        item.revert(
+            createRevertFunction(state.options.server.url, state.options.server.revert),
+            query('GET_FORCE_REVERT')
+        )
             .then(() => {
                 const shouldRemove = state.options.instantUpload || isMockItem(item);
                 if (shouldRemove) {
                     dispatch('REMOVE_ITEM', { query: item.id });
                 }
-            }).catch(() => {})
+            })
+            .catch(() => {});
     }),
 
     SET_OPTIONS: ({ options }) => {
         forin(options, (key, value) => {
             dispatch(`SET_${fromCamels(key, '_').toUpperCase()}`, { value });
         });
-    }
+    },
 });

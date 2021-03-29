@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.26.0
+ * FilePond 4.26.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -4050,7 +4050,7 @@ const actions = (dispatch, query, state) => ({
         });
     },
 
-    DID_UPDATE_ITEM_METADATA: ({ id, action }) => {
+    DID_UPDATE_ITEM_METADATA: ({ id, action, change }) => {
         // if is called multiple times in close succession we combined all calls together to save resources
         clearTimeout(state.itemUpdateTimeout);
         state.itemUpdateTimeout = setTimeout(() => {
@@ -4059,28 +4059,31 @@ const actions = (dispatch, query, state) => ({
             // only revert and attempt to upload when we're uploading to a server
             if (!query('IS_ASYNC')) {
                 // should we update the output data
-                applyFilterChain('SHOULD_PREPARE_OUTPUT', false, { item, query, action }).then(
-                    shouldPrepareOutput => {
-                        // plugins determined the output data should be prepared (or not), can be adjusted with beforePrepareOutput hook
-                        const beforePrepareFile = query('GET_BEFORE_PREPARE_FILE');
-                        if (beforePrepareFile)
-                            shouldPrepareOutput = beforePrepareFile(item, shouldPrepareOutput);
+                applyFilterChain('SHOULD_PREPARE_OUTPUT', false, {
+                    item,
+                    query,
+                    action,
+                    change,
+                }).then(shouldPrepareOutput => {
+                    // plugins determined the output data should be prepared (or not), can be adjusted with beforePrepareOutput hook
+                    const beforePrepareFile = query('GET_BEFORE_PREPARE_FILE');
+                    if (beforePrepareFile)
+                        shouldPrepareOutput = beforePrepareFile(item, shouldPrepareOutput);
 
-                        if (!shouldPrepareOutput) return;
+                    if (!shouldPrepareOutput) return;
 
-                        dispatch(
-                            'REQUEST_PREPARE_OUTPUT',
-                            {
-                                query: id,
-                                item,
-                                success: file => {
-                                    dispatch('DID_PREPARE_OUTPUT', { id, file });
-                                },
+                    dispatch(
+                        'REQUEST_PREPARE_OUTPUT',
+                        {
+                            query: id,
+                            item,
+                            success: file => {
+                                dispatch('DID_PREPARE_OUTPUT', { id, file });
                             },
-                            true
-                        );
-                    }
-                );
+                        },
+                        true
+                    );
+                });
 
                 return;
             }

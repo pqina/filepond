@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.26.1
+
+-   Add metdata change info to internal `SHOULD_PREPARE_OUTPUT` call
+
 ## 4.26.0
 
 -   Fix problem with rendering 0 items per row. #676
