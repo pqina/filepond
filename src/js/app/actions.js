@@ -128,6 +128,9 @@ export const actions = (dispatch, query, state) => ({
     },
 
     DID_UPDATE_ITEM_METADATA: ({ id, action, change }) => {
+        // don't do anything
+        if (change.silent) return;
+
         // if is called multiple times in close succession we combined all calls together to save resources
         clearTimeout(state.itemUpdateTimeout);
         state.itemUpdateTimeout = setTimeout(() => {

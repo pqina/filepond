@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.26.1
+ * FilePond 4.26.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -5995,13 +5995,11 @@
             // update value
             data[last] = value;
 
-            // don't fire update
-            if (silent) return;
-
             // fire update
             fire('metadata-update', {
                 key: root,
                 value: metadata[root],
+                silent: silent,
             });
         };
 
@@ -6342,6 +6340,9 @@
                 var id = _ref3.id,
                     action = _ref3.action,
                     change = _ref3.change;
+                // don't do anything
+                if (change.silent) return;
+
                 // if is called multiple times in close succession we combined all calls together to save resources
                 clearTimeout(state.itemUpdateTimeout);
                 state.itemUpdateTimeout = setTimeout(function() {

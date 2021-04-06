@@ -18,7 +18,6 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
      * Internal item state
      */
     const state = {
-
         // is archived
         archived: false,
 
@@ -44,9 +43,7 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         processingAborted: false,
 
         // current item status
-        status: serverFileReference
-            ? ItemStatus.PROCESSING_COMPLETE
-            : ItemStatus.INIT,
+        status: serverFileReference ? ItemStatus.PROCESSING_COMPLETE : ItemStatus.INIT,
 
         // active processes
         activeLoader: null,
@@ -68,7 +65,7 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
     const fire = (event, ...params) => {
         if (state.released || state.frozen) return;
         api.fire(event, ...params);
-    }
+    };
 
     // file data
     const getFileExtension = () => getExtensionFromFilename(state.file.name);
@@ -76,18 +73,16 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
     const getFileSize = () => state.file.size;
     const getFile = () => state.file;
 
-
     //
     // logic to load a file
     //
     const load = (source, loader, onload) => {
-
         // remember the original item source
         state.source = source;
 
         // source is known
         api.fireSync('init');
-        
+
         // file stub is already there
         if (state.file) {
             api.fireSync('load-skip');
@@ -104,7 +99,6 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
 
         // we'eve received a size indication, let's update the stub
         loader.on('meta', meta => {
-
             // set size of file stub
             state.file.size = meta.size;
 
@@ -144,24 +138,21 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
 
         // done loading
         loader.on('load', file => {
-
             // as we've now loaded the file the loader is no longer required
             state.activeLoader = null;
 
             // called when file has loaded succesfully
             const success = result => {
-                
                 // set (possibly) transformed file
                 state.file = isFile(result) ? result : state.file;
 
                 // file received
                 if (origin === FileOrigin.LIMBO && state.serverFileReference) {
                     setStatus(ItemStatus.PROCESSING_COMPLETE);
-                }
-                else {
+                } else {
                     setStatus(ItemStatus.IDLE);
                 }
-                
+
                 fire('load');
             };
 
@@ -191,7 +182,7 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         state.activeLoader = loader;
 
         // load the source data
-        loader.load()
+        loader.load();
     };
 
     const retryLoad = () => {
@@ -210,15 +201,13 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         fire('load-abort');
     };
 
-
     //
     // logic to process a file
     //
     const process = (processor, onprocess) => {
-
         // processing was aborted
         if (state.processingAborted) {
-            state.processingAborted = false; 
+            state.processingAborted = false;
             return;
         }
 
@@ -238,19 +227,15 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
 
         // setup processor
         processor.on('load', serverFileReference => {
-
             // need this id to be able to revert the upload
             state.transferId = null;
             state.serverFileReference = serverFileReference;
-
         });
 
         // register transfer id
         processor.on('transfer', transferId => {
-
             // need this id to be able to revert the upload
             state.transferId = transferId;
-
         });
 
         processor.on('load-perceived', serverFileReference => {
@@ -297,7 +282,6 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
 
         // when successfully transformed
         const success = file => {
-            
             // if was archived in the mean time, don't process
             if (state.archived) return;
 
@@ -318,68 +302,64 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
     const requestProcessing = () => {
         state.processingAborted = false;
         setStatus(ItemStatus.PROCESSING_QUEUED);
-    }
+    };
 
-    const abortProcessing = () => new Promise((resolve) => {
-        
-        if (!state.activeProcessor) {
+    const abortProcessing = () =>
+        new Promise(resolve => {
+            if (!state.activeProcessor) {
+                state.processingAborted = true;
 
-            state.processingAborted = true;
+                setStatus(ItemStatus.IDLE);
+                fire('process-abort');
 
-            setStatus(ItemStatus.IDLE);
-            fire('process-abort');
-            
-            resolve();
-            return;
-        }
-        
-        abortProcessingRequestComplete = () => {
-            resolve();
-        }
-        
-        state.activeProcessor.abort();
-    });
-    
+                resolve();
+                return;
+            }
+
+            abortProcessingRequestComplete = () => {
+                resolve();
+            };
+
+            state.activeProcessor.abort();
+        });
 
     //
     // logic to revert a processed file
     //
-    const revert = (revertFileUpload, forceRevert) => new Promise((resolve, reject) => {
-
-        // cannot revert without a server id for this process
-        if (state.serverFileReference === null) {
-            resolve();
-            return;
-        }
-
-        // revert the upload (fire and forget)
-        revertFileUpload(
-            state.serverFileReference,
-            () => {
-
-                // reset file server id as now it's no available on the server
-                state.serverFileReference = null;
+    const revert = (revertFileUpload, forceRevert) =>
+        new Promise((resolve, reject) => {
+            // cannot revert without a server id for this process
+            if (state.serverFileReference === null) {
                 resolve();
-            },
-            error => {
-                // don't set error state when reverting is optional, it will always resolve
-                if (!forceRevert) {
-                    resolve();
-                    return;
-                }
-
-                // oh no errors
-                setStatus(ItemStatus.PROCESSING_REVERT_ERROR);
-                fire('process-revert-error');
-                reject(error);
+                return;
             }
-        );
 
-        // fire event
-        setStatus(ItemStatus.IDLE);
-        fire('process-revert');
-    });
+            // revert the upload (fire and forget)
+            revertFileUpload(
+                state.serverFileReference,
+                () => {
+                    // reset file server id as now it's no available on the server
+                    state.serverFileReference = null;
+                    resolve();
+                },
+                error => {
+                    // don't set error state when reverting is optional, it will always resolve
+                    if (!forceRevert) {
+                        resolve();
+                        return;
+                    }
 
+                    // oh no errors
+                    setStatus(ItemStatus.PROCESSING_REVERT_ERROR);
+                    fire('process-revert-error');
+                    reject(error);
+                }
+            );
+
+            // fire event
+            setStatus(ItemStatus.IDLE);
+            fire('process-revert');
+        });
 
     // exposed methods
     const setMetadata = (key, value, silent) => {
@@ -387,7 +367,7 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         const root = keys[0];
         const last = keys.pop();
         let data = metadata;
-        keys.forEach(key => data = data[key]);
+        keys.forEach(key => (data = data[key]));
 
         // compare old value against new value, if they're the same, we're not updating
         if (JSON.stringify(data[last]) === JSON.stringify(value)) return;
@@ -395,21 +375,19 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         // update value
         data[last] = value;
 
-        // don't fire update
-        if (silent) return;
-
         // fire update
         fire('metadata-update', {
             key: root,
-            value: metadata[root]
+            value: metadata[root],
+            silent,
         });
-    }
+    };
 
-    const getMetadata = (key) => deepCloneObject(key ? metadata[key] : metadata);
+    const getMetadata = key => deepCloneObject(key ? metadata[key] : metadata);
 
     const api = {
         id: { get: () => id },
-        origin: { get:() => origin },
+        origin: { get: () => origin },
         serverId: { get: () => state.serverFileReference },
         transferId: { get: () => state.transferId },
         status: { get: () => state.status },
@@ -429,14 +407,14 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
                 const data = key;
                 Object.keys(data).forEach(key => {
                     setMetadata(key, data[key], value);
-                })
+                });
                 return key;
             }
             setMetadata(key, value, silent);
             return value;
         },
 
-        extend: (name, handler) => itemAPI[name] = handler,
+        extend: (name, handler) => (itemAPI[name] = handler),
 
         abortLoad,
         retryLoad,
@@ -449,18 +427,17 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
 
         ...on(),
 
-        freeze: () => state.frozen = true,
+        freeze: () => (state.frozen = true),
 
-        release: () => state.released = true,
+        release: () => (state.released = true),
         released: { get: () => state.released },
 
-        archive: () => state.archived = true,
-        archived: { get: () => state.archived }
+        archive: () => (state.archived = true),
+        archived: { get: () => state.archived },
     };
 
     // create it here instead of returning it instantly so we can extend it later
     const itemAPI = createObject(api);
 
     return itemAPI;
-
 };
