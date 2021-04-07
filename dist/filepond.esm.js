@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.26.2
+ * FilePond 4.27.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1851,6 +1851,7 @@ const defaultOptions = {
     // Upload related
     instantUpload: [true, Type.BOOLEAN], // Should upload files immediately on drop
     maxParallelUploads: [2, Type.INT], // Maximum files to upload in parallel
+    allowMinimumUploadDuration: [true, Type.BOOLEAN], // if true uploads take at least 750 ms, this ensures the user sees the upload progress giving trust the upload actually happened
 
     // Chunks
     chunkUploads: [false, Type.BOOLEAN], // Enable chunked uploads
@@ -3221,7 +3222,7 @@ const createPerceivedPerformanceUpdater = (
     };
 };
 
-const createFileProcessor = processFn => {
+const createFileProcessor = (processFn, options) => {
     const state = {
         complete: false,
         perceivedProgress: 0,
@@ -3233,6 +3234,8 @@ const createFileProcessor = processFn => {
         request: null,
         response: null,
     };
+
+    const { allowMinimumUploadDuration } = options;
 
     const process = (file, metadata) => {
         const progressFn = () => {
@@ -3273,7 +3276,7 @@ const createFileProcessor = processFn => {
             },
             // random delay as in a list of files you start noticing
             // files uploading at the exact same speed
-            getRandomNumber(750, 1500)
+            allowMinimumUploadDuration ? getRandomNumber(750, 1500) : 0
         );
 
         // remember request so we can abort it later
@@ -4743,7 +4746,10 @@ const actions = (dispatch, query, state) => ({
                     chunkForce: options.chunkForce,
                     chunkSize: options.chunkSize,
                     chunkRetryDelays: options.chunkRetryDelays,
-                })
+                }),
+                {
+                    allowMinimumUploadDuration: query('GET_ALLOW_MINIMUM_UPLOAD_DURATION'),
+                }
             ),
             // called when the file is about to be processed so it can be piped through the transform filters
             (file, success, error) => {

@@ -822,7 +822,10 @@ export const actions = (dispatch, query, state) => ({
                     chunkForce: options.chunkForce,
                     chunkSize: options.chunkSize,
                     chunkRetryDelays: options.chunkRetryDelays,
-                })
+                }),
+                {
+                    allowMinimumUploadDuration: query('GET_ALLOW_MINIMUM_UPLOAD_DURATION'),
+                }
             ),
             // called when the file is about to be processed so it can be piped through the transform filters
             (file, success, error) => {

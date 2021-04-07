@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.26.2
+ * FilePond 4.27.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -3777,6 +3777,7 @@
         // Upload related
         instantUpload: [true, Type.BOOLEAN], // Should upload files immediately on drop
         maxParallelUploads: [2, Type.INT], // Maximum files to upload in parallel
+        allowMinimumUploadDuration: [true, Type.BOOLEAN], // if true uploads take at least 750 ms, this ensures the user sees the upload progress giving trust the upload actually happened
 
         // Chunks
         chunkUploads: [false, Type.BOOLEAN], // Enable chunked uploads
@@ -3798,6 +3799,7 @@
             'Drag & Drop your files or <span class="filepond--label-action">Browse</span>',
             Type.STRING,
         ],
+
         labelInvalidField: ['Field contains invalid files', Type.STRING],
         labelFileWaitingForSize: ['Waiting for size', Type.STRING],
         labelFileSizeNotAvailable: ['Size not available', Type.STRING],
@@ -5378,7 +5380,7 @@
         };
     };
 
-    var createFileProcessor = function createFileProcessor(processFn) {
+    var createFileProcessor = function createFileProcessor(processFn, options) {
         var state = {
             complete: false,
             perceivedProgress: 0,
@@ -5390,6 +5392,7 @@
             request: null,
             response: null,
         };
+        var allowMinimumUploadDuration = options.allowMinimumUploadDuration;
 
         var process = function process(file, metadata) {
             var progressFn = function progressFn() {
@@ -5430,7 +5433,7 @@
                 },
                 // random delay as in a list of files you start noticing
                 // files uploading at the exact same speed
-                getRandomNumber(750, 1500)
+                allowMinimumUploadDuration ? getRandomNumber(750, 1500) : 0
             );
 
             // remember request so we can abort it later
@@ -7115,7 +7118,11 @@
                                 chunkSize: options.chunkSize,
                                 chunkRetryDelays: options.chunkRetryDelays,
                             }
-                        )
+                        ),
+
+                        {
+                            allowMinimumUploadDuration: query('GET_ALLOW_MINIMUM_UPLOAD_DURATION'),
+                        }
                     ),
 
                     // called when the file is about to be processed so it can be piped through the transform filters

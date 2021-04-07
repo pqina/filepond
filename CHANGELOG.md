@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.27.0
+
+-   add `allowMinimumUploadDuration` set to `false` to prevent a minimum upload time of 750ms.
+
 ## 4.26.2
 
 -   `setMetadata` internal `silent` bool now does fire internal `DID_UPDATE_ITEM_METADATA` but doesn't trigger upload or file prepare logic. This fixes an issue with the new image editor and file poster plugins.

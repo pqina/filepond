@@ -18,13 +18,16 @@ export const setOptions = opts => {
         if (!defaultOptions[key]) {
             return;
         }
-        defaultOptions[key][0] = getValueByType(value, defaultOptions[key][0], defaultOptions[key][1]);
+        defaultOptions[key][0] = getValueByType(
+            value,
+            defaultOptions[key][0],
+            defaultOptions[key][1]
+        );
     });
 };
 
 // default options on app
 export const defaultOptions = {
-
     // the id to add to the root element
     id: [null, Type.STRING],
 
@@ -72,7 +75,7 @@ export const defaultOptions = {
     itemInsertLocationFreedom: [true, Type.BOOLEAN], // Set to false to always add items to begin or end of list
     itemInsertLocation: ['before', Type.STRING], // Default index in list to add items that have been dropped at the top of the list
     itemInsertInterval: [75, Type.INT],
-    
+
     // Drag 'n Drop related
     dropOnPage: [false, Type.BOOLEAN], // Allow dropping of files anywhere on page (prevents browser from opening file if dropped outside of Up)
     dropOnElement: [true, Type.BOOLEAN], // Drop needs to happen on element (set to false to also load drops outside of Up)
@@ -82,7 +85,8 @@ export const defaultOptions = {
     // Upload related
     instantUpload: [true, Type.BOOLEAN], // Should upload files immediately on drop
     maxParallelUploads: [2, Type.INT], // Maximum files to upload in parallel
-    
+    allowMinimumUploadDuration: [true, Type.BOOLEAN], // if true uploads take at least 750 ms, this ensures the user sees the upload progress giving trust the upload actually happened
+
     // Chunks
     chunkUploads: [false, Type.BOOLEAN], // Enable chunked uploads
     chunkForce: [false, Type.BOOLEAN], // Force use of chunk uploads even for files smaller than chunk size
@@ -93,13 +97,16 @@ export const defaultOptions = {
     server: [null, Type.SERVER_API],
 
     // File size calculations, can set to 1024, this is only used for display, properties use file size base 1000
-    fileSizeBase: [1000, Type.INT], 
+    fileSizeBase: [1000, Type.INT],
 
     // Labels and status messages
     labelDecimalSeparator: [getDecimalSeparator(), Type.STRING], // Default is locale separator
     labelThousandsSeparator: [getThousandsSeparator(), Type.STRING], // Default is locale separator
 
-    labelIdle: ['Drag & Drop your files or <span class="filepond--label-action">Browse</span>', Type.STRING],    
+    labelIdle: [
+        'Drag & Drop your files or <span class="filepond--label-action">Browse</span>',
+        Type.STRING,
+    ],
     labelInvalidField: ['Field contains invalid files', Type.STRING],
     labelFileWaitingForSize: ['Waiting for size', Type.STRING],
     labelFileSizeNotAvailable: ['Size not available', Type.STRING],
@@ -115,11 +122,11 @@ export const defaultOptions = {
     labelFileProcessingAborted: ['Upload cancelled', Type.STRING],
     labelFileProcessingError: ['Error during upload', Type.STRING],
     labelFileProcessingRevertError: ['Error during revert', Type.STRING],
-    
+
     labelTapToCancel: ['tap to cancel', Type.STRING],
     labelTapToRetry: ['tap to retry', Type.STRING],
     labelTapToUndo: ['tap to undo', Type.STRING],
-    
+
     labelButtonRemoveItem: ['Remove', Type.STRING],
     labelButtonAbortItemLoad: ['Abort', Type.STRING],
     labelButtonRetryItemLoad: ['Retry', Type.STRING],
@@ -131,23 +138,23 @@ export const defaultOptions = {
     // make sure width and height plus viewpox are even numbers so icons are nicely centered
     iconRemove: [
         '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M11.586 13l-2.293 2.293a1 1 0 0 0 1.414 1.414L13 14.414l2.293 2.293a1 1 0 0 0 1.414-1.414L14.414 13l2.293-2.293a1 1 0 0 0-1.414-1.414L13 11.586l-2.293-2.293a1 1 0 0 0-1.414 1.414L11.586 13z" fill="currentColor" fill-rule="nonzero"/></svg>',
-        Type.STRING
+        Type.STRING,
     ],
     iconProcess: [
         '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M14 10.414v3.585a1 1 0 0 1-2 0v-3.585l-1.293 1.293a1 1 0 0 1-1.414-1.415l3-3a1 1 0 0 1 1.414 0l3 3a1 1 0 0 1-1.414 1.415L14 10.414zM9 18a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2H9z" fill="currentColor" fill-rule="evenodd"/></svg>',
-        Type.STRING
+        Type.STRING,
     ],
     iconRetry: [
         '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M10.81 9.185l-.038.02A4.997 4.997 0 0 0 8 13.683a5 5 0 0 0 5 5 5 5 0 0 0 5-5 1 1 0 0 1 2 0A7 7 0 1 1 9.722 7.496l-.842-.21a.999.999 0 1 1 .484-1.94l3.23.806c.535.133.86.675.73 1.21l-.804 3.233a.997.997 0 0 1-1.21.73.997.997 0 0 1-.73-1.21l.23-.928v-.002z" fill="currentColor" fill-rule="nonzero"/></svg>',
-        Type.STRING
+        Type.STRING,
     ],
     iconUndo: [
         '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M9.185 10.81l.02-.038A4.997 4.997 0 0 1 13.683 8a5 5 0 0 1 5 5 5 5 0 0 1-5 5 1 1 0 0 0 0 2A7 7 0 1 0 7.496 9.722l-.21-.842a.999.999 0 1 0-1.94.484l.806 3.23c.133.535.675.86 1.21.73l3.233-.803a.997.997 0 0 0 .73-1.21.997.997 0 0 0-1.21-.73l-.928.23-.002-.001z" fill="currentColor" fill-rule="nonzero"/></svg>',
-        Type.STRING
+        Type.STRING,
     ],
     iconDone: [
         '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M18.293 9.293a1 1 0 0 1 1.414 1.414l-7.002 7a1 1 0 0 1-1.414 0l-3.998-4a1 1 0 1 1 1.414-1.414L12 15.586l6.294-6.293z" fill="currentColor" fill-rule="nonzero"/></svg>',
-        Type.STRING
+        Type.STRING,
     ],
 
     // event handlers
@@ -177,8 +184,8 @@ export const defaultOptions = {
     beforePrepareFile: [null, Type.FUNCTION],
 
     // styles
-    stylePanelLayout: [null, Type.STRING],         // null 'integrated', 'compact', 'circle'
-    stylePanelAspectRatio: [null, Type.STRING],    // null or '3:2' or 1
+    stylePanelLayout: [null, Type.STRING], // null 'integrated', 'compact', 'circle'
+    stylePanelAspectRatio: [null, Type.STRING], // null or '3:2' or 1
     styleItemPanelAspectRatio: [null, Type.STRING],
     styleButtonRemoveItemPosition: ['left', Type.STRING],
     styleButtonProcessItemPosition: ['right', Type.STRING],
@@ -190,5 +197,5 @@ export const defaultOptions = {
     files: [[], Type.ARRAY],
 
     // show support by displaying credits
-    credits: [['https://pqina.nl/', 'Powered by PQINA'], Type.ARRAY]
+    credits: [['https://pqina.nl/', 'Powered by PQINA'], Type.ARRAY],
 };
