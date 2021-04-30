@@ -95,7 +95,10 @@ export const createFileProcessor = (processFn, options) => {
                 // we are really done
                 // if perceived progress is 1 ( wait for perceived progress to complete )
                 // or if server does not support progress ( null )
-                if (state.perceivedProgress === 1) {
+                if (
+                    !allowMinimumUploadDuration ||
+                    (allowMinimumUploadDuration && state.perceivedProgress === 1)
+                ) {
                     completeFn();
                 }
             },
@@ -171,9 +174,13 @@ export const createFileProcessor = (processFn, options) => {
         state.response = null;
     };
 
-    const getProgress = () =>
-        state.progress ? Math.min(state.progress, state.perceivedProgress) : null;
-    const getDuration = () => Math.min(state.duration, state.perceivedDuration);
+    const getProgress = allowMinimumUploadDuration
+        ? () => (state.progress ? Math.min(state.progress, state.perceivedProgress) : null)
+        : () => state.progress || null;
+
+    const getDuration = allowMinimumUploadDuration
+        ? () => Math.min(state.duration, state.perceivedDuration)
+        : () => state.duration;
 
     const api = {
         ...on(),

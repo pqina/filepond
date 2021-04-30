@@ -1,8 +1,12 @@
 # Changelog
 
+## 4.27.1
+
+-   Fix issue with `allowMinimumUploadDuration` set to `false` throwing error.
+
 ## 4.27.0
 
--   add `allowMinimumUploadDuration` set to `false` to prevent a minimum upload time of 750ms.
+-   Add `allowMinimumUploadDuration` set to `false` to prevent a minimum upload time of 750ms.
 
 ## 4.26.2
 

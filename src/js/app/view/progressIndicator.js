@@ -13,7 +13,7 @@ const create = ({ root, props }) => {
     const svg = createElement('svg');
     root.ref.path = createElement('path', {
         'stroke-width': 2,
-        'stroke-linecap': 'round'
+        'stroke-linecap': 'round',
     });
     svg.appendChild(root.ref.path);
 
@@ -23,7 +23,6 @@ const create = ({ root, props }) => {
 };
 
 const write = ({ root, props }) => {
-
     if (props.opacity === 0) {
         return;
     }
@@ -52,23 +51,13 @@ const write = ({ root, props }) => {
     }
 
     // get arc path
-    const coordinates = percentageArc(
-        size,
-        size,
-        size - ringStrokeWidth,
-        ringFrom,
-        ringTo
-    );
+    const coordinates = percentageArc(size, size, size - ringStrokeWidth, ringFrom, ringTo);
 
     // update progress bar
     attr(root.ref.path, 'd', coordinates);
 
     // hide while contains 0 value
-    attr(
-        root.ref.path,
-        'stroke-opacity',
-        props.spin || props.progress > 0 ? 1 : 0
-    );
+    attr(root.ref.path, 'stroke-opacity', props.spin || props.progress > 0 ? 1 : 0);
 };
 
 export const progressIndicator = createView({
@@ -87,8 +76,8 @@ export const progressIndicator = createView({
                 type: 'spring',
                 stiffness: 0.95,
                 damping: 0.65,
-                mass: 10
-            }
-        }
-    }
+                mass: 10,
+            },
+        },
+    },
 });

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.27.0
+ * FilePond 4.27.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -3213,7 +3213,7 @@ const createPerceivedPerformanceUpdater = (
         timeout = setTimeout(tick, delay);
     };
 
-    tick();
+    if (duration > 0) tick();
 
     return {
         clear: () => {
@@ -3314,7 +3314,10 @@ const createFileProcessor = (processFn, options) => {
                 // we are really done
                 // if perceived progress is 1 ( wait for perceived progress to complete )
                 // or if server does not support progress ( null )
-                if (state.perceivedProgress === 1) {
+                if (
+                    !allowMinimumUploadDuration ||
+                    (allowMinimumUploadDuration && state.perceivedProgress === 1)
+                ) {
                     completeFn();
                 }
             },
@@ -3390,9 +3393,13 @@ const createFileProcessor = (processFn, options) => {
         state.response = null;
     };
 
-    const getProgress = () =>
-        state.progress ? Math.min(state.progress, state.perceivedProgress) : null;
-    const getDuration = () => Math.min(state.duration, state.perceivedDuration);
+    const getProgress = allowMinimumUploadDuration
+        ? () => (state.progress ? Math.min(state.progress, state.perceivedProgress) : null)
+        : () => state.progress || null;
+
+    const getDuration = allowMinimumUploadDuration
+        ? () => Math.min(state.duration, state.perceivedDuration)
+        : () => state.duration;
 
     const api = {
         ...on(),

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.27.0
+ * FilePond 4.27.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -5371,7 +5371,7 @@
             timeout = setTimeout(tick, delay);
         };
 
-        tick();
+        if (duration > 0) tick();
 
         return {
             clear: function clear() {
@@ -5471,7 +5471,10 @@
                     // we are really done
                     // if perceived progress is 1 ( wait for perceived progress to complete )
                     // or if server does not support progress ( null )
-                    if (state.perceivedProgress === 1) {
+                    if (
+                        !allowMinimumUploadDuration ||
+                        (allowMinimumUploadDuration && state.perceivedProgress === 1)
+                    ) {
                         completeFn();
                     }
                 },
@@ -5547,12 +5550,21 @@
             state.response = null;
         };
 
-        var getProgress = function getProgress() {
-            return state.progress ? Math.min(state.progress, state.perceivedProgress) : null;
-        };
-        var getDuration = function getDuration() {
-            return Math.min(state.duration, state.perceivedDuration);
-        };
+        var getProgress = allowMinimumUploadDuration
+            ? function() {
+                  return state.progress ? Math.min(state.progress, state.perceivedProgress) : null;
+              }
+            : function() {
+                  return state.progress || null;
+              };
+
+        var getDuration = allowMinimumUploadDuration
+            ? function() {
+                  return Math.min(state.duration, state.perceivedDuration);
+              }
+            : function() {
+                  return state.duration;
+              };
 
         var api = Object.assign({}, on(), {
             process: process, // start processing file
@@ -7375,7 +7387,6 @@
     var write = function write(_ref2) {
         var root = _ref2.root,
             props = _ref2.props;
-
         if (props.opacity === 0) {
             return;
         }

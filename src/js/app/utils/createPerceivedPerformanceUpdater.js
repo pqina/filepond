@@ -11,7 +11,6 @@ export const createPerceivedPerformanceUpdater = (
     const start = Date.now();
 
     const tick = () => {
-
         let runtime = Date.now() - start;
         let delay = getRandomNumber(tickMin, tickMax);
 
@@ -30,11 +29,11 @@ export const createPerceivedPerformanceUpdater = (
         timeout = setTimeout(tick, delay);
     };
 
-    tick();
+    if (duration > 0) tick();
 
     return {
         clear: () => {
             clearTimeout(timeout);
-        }
+        },
     };
 };
