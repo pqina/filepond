@@ -583,7 +583,7 @@ export interface FilePondStyleProps {
      * Set a different layout render mode.
      * @default null
      */
-    stylePanelLayout?: 'integrated' | 'compact' | 'circle' | null;
+    stylePanelLayout?: 'integrated' | 'compact' | 'circle' | 'integrated circle' | 'compact circle' | null;
     /**
      * Set a forced aspect ratio for the FilePond drop area.
      *
