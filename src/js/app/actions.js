@@ -670,9 +670,10 @@ export const actions = (dispatch, query, state) => ({
                 error: null,
                 serverFileReference: source,
             });
+
             dispatch('DID_DEFINE_VALUE', {
                 id: item.id,
-                value: source,
+                value: item.serverId || source,
             });
             return;
         }

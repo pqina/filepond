@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.27.1
+ * FilePond 4.27.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -6952,7 +6952,7 @@
 
                     dispatch('DID_DEFINE_VALUE', {
                         id: item.id,
-                        value: source,
+                        value: item.serverId || source,
                     });
 
                     return;

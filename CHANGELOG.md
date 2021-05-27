@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.27.2
+
+-   Fix issue with fetch and `HEAD` no setting server id to hidden input element.
+
 ## 4.27.1
 
 -   Fix issue with `allowMinimumUploadDuration` set to `false` throwing error.
