@@ -6,12 +6,14 @@ labels: 'Question'
 assignees: ''
 
 ---
-This issue tracker is intended to collect bug reports and feature requests.
+This issue tracker is intended to collect **bug reports** and **feature requests**, it is *not* to be used for asking questions. 
 
-- If you need help with integrating FilePond;
-- If you are looking for information on how features work;
-- If you have questions about specific features of FilePond;
+Please use Stack Overflow when:
 
-Please use Stack Overflow https://stackoverflow.com/questions/tagged/filepond
+- You need help with integrating FilePond;
+- You are looking for information on how a feature works;
+- You have a question about a specific feature of FilePond;
+
+https://stackoverflow.com/questions/tagged/filepond
 
 Any issues opened for help requests will be closed to keep from clogging up the issue tracker.
