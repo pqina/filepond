@@ -275,9 +275,8 @@ const create = ({ root, props }) => {
         map.processingCompleteIndicator = { opacity: 1, scaleX: 1, scaleY: 1 };
     }
 
-    if (!allowRemove) {
-        Buttons['RemoveItem'].disabled = true;
-    }
+    // show/hide RemoveItem button
+    Buttons['RemoveItem'].disabled = !allowRemove;
 
     // create the button views
     forin(Buttons, (key, definition) => {
