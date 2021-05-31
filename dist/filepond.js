@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.27.2
+ * FilePond 4.27.3
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -7936,6 +7936,11 @@
     var create$4 = function create(_ref2) {
         var root = _ref2.root,
             props = _ref2.props;
+        // copy Buttons object
+        var LocalButtons = Object.keys(Buttons).reduce(function(prev, curr) {
+            prev[curr] = Object.assign({}, Buttons[curr]);
+            return prev;
+        }, {});
         var id = props.id;
 
         // allow reverting upload
@@ -7986,8 +7991,8 @@
 
         // update icon and label for revert button when instant uploading
         if (instantUpload && allowRevert) {
-            Buttons['RevertItemProcessing'].label = 'GET_LABEL_BUTTON_REMOVE_ITEM';
-            Buttons['RevertItemProcessing'].icon = 'GET_ICON_REMOVE';
+            LocalButtons['RevertItemProcessing'].label = 'GET_LABEL_BUTTON_REMOVE_ITEM';
+            LocalButtons['RevertItemProcessing'].icon = 'GET_ICON_REMOVE';
         }
 
         // remove last button (revert) if not allowed
@@ -8014,19 +8019,20 @@
 
         // move remove button to right
         if (alignRemoveItemButton && allowRevert) {
-            Buttons['RevertItemProcessing'].align = 'BUTTON_REMOVE_ITEM_POSITION';
+            LocalButtons['RevertItemProcessing'].align = 'BUTTON_REMOVE_ITEM_POSITION';
             var _map = StyleMap['DID_COMPLETE_ITEM_PROCESSING'];
             _map.info.translateX = calculateFileInfoOffset;
             _map.status.translateY = calculateFileVerticalCenterOffset;
             _map.processingCompleteIndicator = { opacity: 1, scaleX: 1, scaleY: 1 };
         }
 
+        // show/hide RemoveItem button
         if (!allowRemove) {
-            Buttons['RemoveItem'].disabled = true;
+            LocalButtons['RemoveItem'].disabled = true;
         }
 
         // create the button views
-        forin(Buttons, function(key, definition) {
+        forin(LocalButtons, function(key, definition) {
             // create button
             var buttonView = root.createChildView(fileActionButton, {
                 label: root.query(definition.label),

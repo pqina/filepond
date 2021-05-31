@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.27.3
+
+-   Fix issue with file.js component leaking state causing `allowRemove` to impact other instances of FilePond. #713
+
 ## 4.27.2
 
 -   Fix issue with fetch and `HEAD` no setting server id to hidden input element.
