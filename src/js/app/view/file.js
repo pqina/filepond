@@ -198,6 +198,12 @@ const processingCompleteIndicatorView = createView({
  * Creates the file view
  */
 const create = ({ root, props }) => {
+    // copy Buttons object
+    const LocalButtons = Object.keys(Buttons).reduce((prev, curr) => {
+        prev[curr] = { ...Buttons[curr] };
+        return prev;
+    }, {});
+
     const { id } = props;
 
     // allow reverting upload
@@ -240,8 +246,8 @@ const create = ({ root, props }) => {
 
     // update icon and label for revert button when instant uploading
     if (instantUpload && allowRevert) {
-        Buttons['RevertItemProcessing'].label = 'GET_LABEL_BUTTON_REMOVE_ITEM';
-        Buttons['RevertItemProcessing'].icon = 'GET_ICON_REMOVE';
+        LocalButtons['RevertItemProcessing'].label = 'GET_LABEL_BUTTON_REMOVE_ITEM';
+        LocalButtons['RevertItemProcessing'].icon = 'GET_ICON_REMOVE';
     }
 
     // remove last button (revert) if not allowed
@@ -268,7 +274,7 @@ const create = ({ root, props }) => {
 
     // move remove button to right
     if (alignRemoveItemButton && allowRevert) {
-        Buttons['RevertItemProcessing'].align = 'BUTTON_REMOVE_ITEM_POSITION';
+        LocalButtons['RevertItemProcessing'].align = 'BUTTON_REMOVE_ITEM_POSITION';
         const map = StyleMap['DID_COMPLETE_ITEM_PROCESSING'];
         map.info.translateX = calculateFileInfoOffset;
         map.status.translateY = calculateFileVerticalCenterOffset;
@@ -276,11 +282,11 @@ const create = ({ root, props }) => {
     }
 
     if (!allowRemove) {
-        Buttons['RemoveItem'].disabled = true;
+        LocalButtons['RemoveItem'].disabled = true;
     }
 
     // create the button views
-    forin(Buttons, (key, definition) => {
+    forin(LocalButtons, (key, definition) => {
         // create button
         const buttonView = root.createChildView(fileActionButton, {
             label: root.query(definition.label),
