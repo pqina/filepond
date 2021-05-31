@@ -281,6 +281,7 @@ const create = ({ root, props }) => {
         map.processingCompleteIndicator = { opacity: 1, scaleX: 1, scaleY: 1 };
     }
 
+    // show/hide RemoveItem button
     if (!allowRemove) {
         LocalButtons['RemoveItem'].disabled = true;
     }
