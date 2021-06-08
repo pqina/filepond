@@ -1,10 +1,9 @@
 /* Hard to override styles */
 .filepond--file-action-button.filepond--file-action-button {
-
     font-size: 1em;
     width: 1.625em;
     height: 1.625em;
-    
+
     font-family: inherit;
     line-height: inherit;
 
@@ -15,8 +14,8 @@
 
     will-change: transform, opacity;
 
-    // hidden label
-    span {
+    /* hidden label */
+    & span {
         position: absolute;
         overflow: hidden;
         height: 1px;
@@ -28,41 +27,40 @@
         white-space: nowrap;
     }
 
-    // scale SVG to fill button
-    svg {
+    /* scale SVG to fill button */
+    & svg {
         width: 100%;
         height: 100%;
     }
 
-    // bigger touch area
+    /* bigger touch area */
     &::after {
-        position:absolute;
-        left:-.75em;
-        right:-.75em;
-        top:-.75em;
-        bottom:-.75em;
-        content:'';
+        position: absolute;
+        left: -0.75em;
+        right: -0.75em;
+        top: -0.75em;
+        bottom: -0.75em;
+        content: '';
     }
 }
 
 /* Soft styles */
 .filepond--file-action-button {
-
-    // use default arrow cursor
+    /* use default arrow cursor */
     cursor: auto;
 
-    // reset default button styles
+    /* reset default button styles */
     color: #fff;
 
-    // set default look n feel
+    /* set default look n feel */
     border-radius: 50%;
     background-color: rgba(0, 0, 0, 0.5);
     background-image: none;
 
-    // we animate box shadow on focus
-    // it's only slightly slower than animating
-    // a pseudo-element with transforms and renders
-    // a lot better on chrome
+    /* we animate box shadow on focus */
+    /* it's only slightly slower than animating */
+    /* a pseudo-element with transforms and renders */
+    /* a lot better on chrome */
     box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
     transition: box-shadow 0.25s ease-in;
 
@@ -72,7 +70,7 @@
     }
 
     &[disabled] {
-        color: rgba(255,255,255,.5);
+        color: rgba(255, 255, 255, 0.5);
         background-color: rgba(0, 0, 0, 0.25);
     }
 
@@ -83,16 +81,16 @@
 
 /* edit button */
 .filepond--action-edit-item.filepond--action-edit-item {
-    width:2em;
-    height:2em;
-    padding:.1875em;
+    width: 2em;
+    height: 2em;
+    padding: 0.1875em;
 
     &[data-align*='center'] {
-        margin-left:-.1875em;
+        margin-left: -0.1875em;
     }
-    
+
     &[data-align*='bottom'] {
-        margin-bottom:-.1875em;
+        margin-bottom: -0.1875em;
     }
 }
 
@@ -104,7 +102,7 @@
     color: inherit;
     outline: none;
     padding: 0;
-    margin: 0 0 0 .25em;
+    margin: 0 0 0 0.25em;
     pointer-events: all;
     position: absolute;
 

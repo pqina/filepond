@@ -1,0 +1,15 @@
+/* ignore all other interaction elements while dragging a file */
+.filepond--hopper[data-hopper-state='drag-over'] > * {
+    pointer-events: none;
+}
+
+/* capture all hit tests using a hidden layer, this speeds up the event flow */
+.filepond--hopper[data-hopper-state='drag-over']::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+}

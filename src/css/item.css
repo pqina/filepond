@@ -6,30 +6,30 @@
     z-index: 1;
 
     padding: 0;
-    margin: .25em;
+    margin: 0.25em;
 
     will-change: transform, opacity;
 
-    // item children order
-    > .filepond--panel {
+    /* item children order */
+    & > .filepond--panel {
         z-index: -1;
 
-        // has a slight shadow
+        /* has a slight shadow */
         .filepond--panel-bottom {
             box-shadow: 0 0.0625em 0.125em -0.0625em rgba(0, 0, 0, 0.25);
         }
     }
-    
-    // drag related
-    > .filepond--file-wrapper,
-    > .filepond--panel {
-        transition: opacity .15s ease-out;
+
+    /* drag related */
+    & > .filepond--file-wrapper,
+    & > .filepond--panel {
+        transition: opacity 0.15s ease-out;
     }
 
     &[data-drag-state] {
         cursor: grab;
         > .filepond--panel {
-            transition: box-shadow .125s ease-in-out;
+            transition: box-shadow 0.125s ease-in-out;
             box-shadow: 0 0 0 rgba(0, 0, 0, 0);
         }
     }
@@ -37,7 +37,7 @@
     &[data-drag-state='drag'] {
         cursor: grabbing;
         > .filepond--panel {
-            box-shadow: 0 .125em .3125em rgba(0, 0, 0, .325);
+            box-shadow: 0 0.125em 0.3125em rgba(0, 0, 0, 0.325);
         }
     }
 
@@ -46,29 +46,25 @@
     }
 }
 
-// states
-$color-default: #64605e;
-$color-success: #369763;
-$color-error: #c44e47;
-
+/* states */
 .filepond--item-panel {
-    background-color: $color-default;
+    background-color: #64605e;
 }
 
 [data-filepond-item-state='processing-complete'] {
     .filepond--item-panel {
-        background-color: $color-success;
+        background-color: #369763;
     }
 }
 
 [data-filepond-item-state*='invalid'],
 [data-filepond-item-state*='error'] {
     .filepond--item-panel {
-        background-color: $color-error;
+        background-color: #c44e47;
     }
 }
 
-// style of item panel
+/* style of item panel */
 .filepond--item-panel {
     border-radius: 0.5em;
     transition: background-color 0.25s;

@@ -7,30 +7,28 @@
     overflow: hidden;
     opacity: 0.1;
 
-    // can't interact with this element
+    /* can't interact with this element */
     pointer-events: none;
 
-    // inherit border radius from parent (needed for drip-blob cut of)
+    /* inherit border radius from parent (needed for drip-blob cut of) */
     border-radius: 0.5em;
 
-    // this seems to prevent Chrome from redrawing this layer constantly
+    /* this seems to prevent Chrome from redrawing this layer constantly */
     background: rgba(0, 0, 0, 0.01);
 }
 
 .filepond--drip-blob {
-    $blobSize: 8em;
-
     position: absolute;
     transform-origin: center center;
     top: 0;
     left: 0;
-    width: $blobSize;
-    height: $blobSize;
-    margin-left: -$blobSize * 0.5;
-    margin-top: -$blobSize * 0.5;
+    width: 8em;
+    height: 8em;
+    margin-left: -4em;
+    margin-top: -4em;
     background: #292625;
     border-radius: 50%;
 
-    // will be animated
+    /* will be animated */
     will-change: transform, opacity;
 }

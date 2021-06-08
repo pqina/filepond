@@ -10,28 +10,28 @@
     min-width: 2.25em;
     text-align: right;
 
-    // will be animated
+    /* will be animated */
     will-change: transform, opacity;
 
-    // can't do anything with this info
+    /* can't do anything with this info */
     pointer-events: none;
     user-select: none;
 
-    // no margins on children
-    * {
+    /* no margins on children */
+    & * {
         margin: 0;
         white-space: nowrap;
     }
 
-    // font sizes
-    .filepond--file-status-main {
+    /* font sizes */
+    & .filepond--file-status-main {
         font-size: 0.75em;
         line-height: 1.2;
     }
 
-    .filepond--file-status-sub {
+    & .filepond--file-status-sub {
         font-size: 0.625em;
         opacity: 0.5;
-        transition: opacity .25s ease-in-out;
+        transition: opacity 0.25s ease-in-out;
     }
 }

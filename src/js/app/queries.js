@@ -5,19 +5,31 @@ import { getNumericAspectRatioFromString } from '../utils/getNumericAspectRatioF
 import { getActiveItems } from './utils/getActiveItems';
 import { Status } from './enum/Status';
 import { ItemStatus } from './enum/ItemStatus';
+import { canUpdateFileInput } from '../utils/canUpdateFileInput';
 
-const ITEM_ERROR = [ItemStatus.LOAD_ERROR, ItemStatus.PROCESSING_ERROR, ItemStatus.PROCESSING_REVERT_ERROR];
-const ITEM_BUSY = [ItemStatus.LOADING, ItemStatus.PROCESSING, ItemStatus.PROCESSING_QUEUED, ItemStatus.INIT];
+const ITEM_ERROR = [
+    ItemStatus.LOAD_ERROR,
+    ItemStatus.PROCESSING_ERROR,
+    ItemStatus.PROCESSING_REVERT_ERROR,
+];
+const ITEM_BUSY = [
+    ItemStatus.LOADING,
+    ItemStatus.PROCESSING,
+    ItemStatus.PROCESSING_QUEUED,
+    ItemStatus.INIT,
+];
 const ITEM_READY = [ItemStatus.PROCESSING_COMPLETE];
 
 const isItemInErrorState = item => ITEM_ERROR.includes(item.status);
 const isItemInBusyState = item => ITEM_BUSY.includes(item.status);
 const isItemInReadyState = item => ITEM_READY.includes(item.status);
 
+const isAsync = state =>
+    isObject(state.options.server) &&
+    (isObject(state.options.server.process) || isFunction(state.options.server.process));
+
 export const queries = state => ({
-
     GET_STATUS: () => {
-
         const items = getActiveItems(state.items);
 
         const { EMPTY, ERROR, BUSY, IDLE, READY } = Status;
@@ -32,7 +44,7 @@ export const queries = state => ({
 
         return IDLE;
     },
-    
+
     GET_ITEM: query => getItemByQuery(state.items, query),
 
     GET_ACTIVE_ITEM: query => getItemByQuery(getActiveItems(state.items), query),
@@ -51,27 +63,31 @@ export const queries = state => ({
         return item ? item.fileSize : null;
     },
 
-    GET_STYLES: () => Object.keys(state.options)
-        .filter(key => /^style/.test(key))
-        .map(option => ({
-            name: option,
-            value: state.options[option]
-        })),
+    GET_STYLES: () =>
+        Object.keys(state.options)
+            .filter(key => /^style/.test(key))
+            .map(option => ({
+                name: option,
+                value: state.options[option],
+            })),
 
     GET_PANEL_ASPECT_RATIO: () => {
         const isShapeCircle = /circle/.test(state.options.stylePanelLayout);
-        const aspectRatio = isShapeCircle ? 1 : getNumericAspectRatioFromString(state.options.stylePanelAspectRatio);
+        const aspectRatio = isShapeCircle
+            ? 1
+            : getNumericAspectRatioFromString(state.options.stylePanelAspectRatio);
         return aspectRatio;
     },
 
     GET_ITEM_PANEL_ASPECT_RATIO: () => state.options.styleItemPanelAspectRatio,
 
-    GET_ITEMS_BY_STATUS: (status) => getActiveItems(state.items).filter(item => item.status === status),
+    GET_ITEMS_BY_STATUS: status =>
+        getActiveItems(state.items).filter(item => item.status === status),
 
     GET_TOTAL_ITEMS: () => getActiveItems(state.items).length,
 
-    IS_ASYNC: () =>
-        isObject(state.options.server) &&
-        (isObject(state.options.server.process) ||
-            isFunction(state.options.server.process))
+    SHOULD_UPDATE_FILE_INPUT: () =>
+        state.options.storeAsFile && canUpdateFileInput() && !isAsync(state),
+
+    IS_ASYNC: () => isAsync(state),
 });

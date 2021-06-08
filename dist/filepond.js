@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.27.3
+ * FilePond 4.28.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1586,6 +1586,9 @@
         forin(methods, function(key) {
             api[key] = createAction(key, outline[key], methods[key], api.timeout, api.headers);
         });
+
+        // remove process if no url or process on outline
+        api.process = outline.process || isString(outline) || outline.url ? api.process : null;
 
         // special treatment for remove
         api.remove = outline.remove || null;
@@ -3756,6 +3759,9 @@
         allowReorder: [false, Type.BOOLEAN], // Allow reordering of files
         allowDirectoriesOnly: [false, Type.BOOLEAN], // Allow only selecting directories with browse (no support for filtering dnd at this point)
 
+        // Try store file if `server` not set
+        storeAsFile: [false, Type.BOOLEAN],
+
         // Revert mode
         forceRevert: [false, Type.BOOLEAN], // Set to 'force' to require the file to be reverted before removal
 
@@ -3946,17 +3952,36 @@
         READY: 4, // all files uploaded
     };
 
+    var res = null;
+    var canUpdateFileInput = function canUpdateFileInput() {
+        if (res === null) {
+            try {
+                var dataTransfer = new DataTransfer();
+                dataTransfer.items.add(new File(['hello world'], 'This_Works.txt'));
+                var el = document.createElement('input');
+                el.setAttribute('type', 'file');
+                el.files = dataTransfer.files;
+                res = el.files.length === 1;
+            } catch (err) {
+                res = false;
+            }
+        }
+        return res;
+    };
+
     var ITEM_ERROR = [
         ItemStatus.LOAD_ERROR,
         ItemStatus.PROCESSING_ERROR,
         ItemStatus.PROCESSING_REVERT_ERROR,
     ];
+
     var ITEM_BUSY = [
         ItemStatus.LOADING,
         ItemStatus.PROCESSING,
         ItemStatus.PROCESSING_QUEUED,
         ItemStatus.INIT,
     ];
+
     var ITEM_READY = [ItemStatus.PROCESSING_COMPLETE];
 
     var isItemInErrorState = function isItemInErrorState(item) {
@@ -3967,6 +3992,13 @@
     };
     var isItemInReadyState = function isItemInReadyState(item) {
         return ITEM_READY.includes(item.status);
+    };
+
+    var isAsync = function isAsync(state) {
+        return (
+            isObject(state.options.server) &&
+            (isObject(state.options.server.process) || isFunction(state.options.server.process))
+        );
     };
 
     var queries = function queries(state) {
@@ -4051,12 +4083,12 @@
                 return getActiveItems(state.items).length;
             },
 
+            SHOULD_UPDATE_FILE_INPUT: function SHOULD_UPDATE_FILE_INPUT() {
+                return state.options.storeAsFile && canUpdateFileInput() && !isAsync(state);
+            },
+
             IS_ASYNC: function IS_ASYNC() {
-                return (
-                    isObject(state.options.server) &&
-                    (isObject(state.options.server.process) ||
-                        isFunction(state.options.server.process))
-                );
+                return isAsync(state);
             },
         };
     };
@@ -9638,6 +9670,30 @@
         write: write$7,
     });
 
+    var setInputFiles = function setInputFiles(element, files) {
+        try {
+            // Create a DataTransfer instance and add a newly created file
+            var dataTransfer = new DataTransfer();
+            files.forEach(function(file) {
+                if (file instanceof File) {
+                    dataTransfer.items.add(file);
+                } else {
+                    dataTransfer.items.add(
+                        new File([file], file.name, {
+                            type: file.type,
+                        })
+                    );
+                }
+            });
+
+            // Assign the DataTransfer files list to the file input
+            element.files = dataTransfer.files;
+        } catch (err) {
+            return false;
+        }
+        return true;
+    };
+
     var create$c = function create(_ref) {
         var root = _ref.root;
         return (root.ref.fields = {});
@@ -9662,8 +9718,11 @@
     var didAddItem = function didAddItem(_ref3) {
         var root = _ref3.root,
             action = _ref3.action;
+        var fileItem = root.query('GET_ITEM', action.id);
+        var isLocalFile = fileItem.origin === FileOrigin.LOCAL;
+        var shouldUseFileInput = !isLocalFile && root.query('SHOULD_UPDATE_FILE_INPUT');
         var dataContainer = createElement$1('input');
-        dataContainer.type = 'hidden';
+        dataContainer.type = shouldUseFileInput ? 'file' : 'hidden';
         dataContainer.name = root.query('GET_NAME');
         dataContainer.disabled = root.query('GET_DISABLED');
         root.ref.fields[action.id] = dataContainer;
@@ -9674,32 +9733,55 @@
         var root = _ref4.root,
             action = _ref4.action;
         var field = getField(root, action.id);
-        if (!field || action.serverFileReference === null) return;
-        field.value = action.serverFileReference;
+        if (!field) return;
+
+        // store server ref in hidden input
+        if (action.serverFileReference !== null) field.value = action.serverFileReference;
+
+        // store file item in file input
+        if (!root.query('SHOULD_UPDATE_FILE_INPUT')) return;
+
+        var fileItem = root.query('GET_ITEM', action.id);
+        setInputFiles(field, [fileItem.file]);
     };
 
-    var didSetDisabled = function didSetDisabled(_ref5) {
-        var root = _ref5.root;
+    var didPrepareOutput = function didPrepareOutput(_ref5) {
+        var root = _ref5.root,
+            action = _ref5.action;
+        // this timeout pushes the handler after 'load'
+        if (!root.query('SHOULD_UPDATE_FILE_INPUT')) return;
+        setTimeout(function() {
+            var field = getField(root, action.id);
+            if (!field) return;
+            setInputFiles(field, [action.file]);
+        }, 0);
+    };
+
+    var didSetDisabled = function didSetDisabled(_ref6) {
+        var root = _ref6.root;
         root.element.disabled = root.query('GET_DISABLED');
     };
 
-    var didRemoveItem = function didRemoveItem(_ref6) {
-        var root = _ref6.root,
-            action = _ref6.action;
+    var didRemoveItem = function didRemoveItem(_ref7) {
+        var root = _ref7.root,
+            action = _ref7.action;
         var field = getField(root, action.id);
         if (!field) return;
         if (field.parentNode) field.parentNode.removeChild(field);
         delete root.ref.fields[action.id];
     };
 
-    var didDefineValue = function didDefineValue(_ref7) {
-        var root = _ref7.root,
-            action = _ref7.action;
+    // only runs for server files (so doesn't deal with file input)
+    var didDefineValue = function didDefineValue(_ref8) {
+        var root = _ref8.root,
+            action = _ref8.action;
         var field = getField(root, action.id);
         if (!field) return;
         if (action.value === null) {
+            // clear field value
             field.removeAttribute('value');
         } else {
+            // set field value
             field.value = action.value;
         }
         syncFieldPositionsWithItems(root);
@@ -9711,6 +9793,7 @@
         DID_LOAD_ITEM: didLoadItem$1,
         DID_REMOVE_ITEM: didRemoveItem,
         DID_DEFINE_VALUE: didDefineValue,
+        DID_PREPARE_OUTPUT: didPrepareOutput,
         DID_REORDER_ITEMS: didReorderItems,
         DID_SORT_ITEMS: didReorderItems,
     });

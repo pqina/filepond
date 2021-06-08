@@ -5,10 +5,10 @@
     right: 0;
     margin: 0;
 
-    // defaults to 100% height (fixed height mode) this fixes problem with panel height in IE11
+    /* defaults to 100% height (fixed height mode) this fixes problem with panel height in IE11 */
     height: 100% !important;
 
-    // no interaction possible with panel
+    /* no interaction possible with panel */
     pointer-events: none;
 }
 
@@ -23,12 +23,12 @@
 }
 
 .filepond--panel[data-scalable='true'] {
-    // this seems to fix Chrome performance issues
-    // - when box-shadow is enabled
-    // - when multiple ponds are active on the same page
+    /* this seems to fix Chrome performance issues */
+    /* - when box-shadow is enabled */
+    /* - when multiple ponds are active on the same page */
     transform-style: preserve-3d;
 
-    // prevent borders and backgrounds
+    /* prevent borders and backgrounds */
     background-color: transparent !important;
     border: none !important;
 }
@@ -54,7 +54,7 @@
     border-bottom-right-radius: 0 !important;
     border-bottom: none !important;
 
-    // fixes tiny transparant line between top and center panel
+    /* fixes tiny transparant line between top and center panel */
     &::after {
         content: '';
         position: absolute;
@@ -79,7 +79,7 @@
     border-top-right-radius: 0 !important;
     border-top: none !important;
 
-    // fixes tiny transparant line between bottom and center of panel
+    /* fixes tiny transparant line between bottom and center of panel */
     &::before {
         content: '';
         position: absolute;
@@ -92,15 +92,15 @@
 }
 
 .filepond--panel-center {
-    // the center panel is scaled using scale3d to fit the correct height
-    // we use 100px instead of 1px as scaling 1px to a huge height is really laggy on chrome
+    /* the center panel is scaled using scale3d to fit the correct height */
+    /* we use 100px instead of 1px as scaling 1px to a huge height is really laggy on chrome */
     height: 100px !important;
     border-top: none !important;
     border-bottom: none !important;
     border-radius: 0 !important;
 
-    // hide if not transformed, prevents a little flash when the panel is at 100px height while attached for first time
+    /* hide if not transformed, prevents a little flash when the panel is at 100px height while attached for first time */
     &:not([style]) {
-       visibility: hidden;
+        visibility: hidden;
     }
 }

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.27.3
+ * FilePond 4.28.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1345,6 +1345,9 @@ const createServerAPI = outline => {
         api[key] = createAction(key, outline[key], methods[key], api.timeout, api.headers);
     });
 
+    // remove process if no url or process on outline
+    api.process = outline.process || isString(outline) || outline.url ? api.process : null;
+
     // special treatment for remove
     api.remove = outline.remove || null;
 
@@ -1830,6 +1833,9 @@ const defaultOptions = {
     allowReorder: [false, Type.BOOLEAN], // Allow reordering of files
     allowDirectoriesOnly: [false, Type.BOOLEAN], // Allow only selecting directories with browse (no support for filtering dnd at this point)
 
+    // Try store file if `server` not set
+    storeAsFile: [false, Type.BOOLEAN],
+
     // Revert mode
     forceRevert: [false, Type.BOOLEAN], // Set to 'force' to require the file to be reverted before removal
 
@@ -2007,6 +2013,23 @@ const Status = {
     READY: 4, // all files uploaded
 };
 
+let res = null;
+const canUpdateFileInput = () => {
+    if (res === null) {
+        try {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(new File(['hello world'], 'This_Works.txt'));
+            const el = document.createElement('input');
+            el.setAttribute('type', 'file');
+            el.files = dataTransfer.files;
+            res = el.files.length === 1;
+        } catch (err) {
+            res = false;
+        }
+    }
+    return res;
+};
+
 const ITEM_ERROR = [
     ItemStatus.LOAD_ERROR,
     ItemStatus.PROCESSING_ERROR,
@@ -2023,6 +2046,10 @@ const ITEM_READY = [ItemStatus.PROCESSING_COMPLETE];
 const isItemInErrorState = item => ITEM_ERROR.includes(item.status);
 const isItemInBusyState = item => ITEM_BUSY.includes(item.status);
 const isItemInReadyState = item => ITEM_READY.includes(item.status);
+
+const isAsync = state =>
+    isObject(state.options.server) &&
+    (isObject(state.options.server.process) || isFunction(state.options.server.process));
 
 const queries = state => ({
     GET_STATUS: () => {
@@ -2082,9 +2109,10 @@ const queries = state => ({
 
     GET_TOTAL_ITEMS: () => getActiveItems(state.items).length,
 
-    IS_ASYNC: () =>
-        isObject(state.options.server) &&
-        (isObject(state.options.server.process) || isFunction(state.options.server.process)),
+    SHOULD_UPDATE_FILE_INPUT: () =>
+        state.options.storeAsFile && canUpdateFileInput() && !isAsync(state),
+
+    IS_ASYNC: () => isAsync(state),
 });
 
 const hasRoomForItem = state => {
@@ -6982,6 +7010,30 @@ const drip = createView({
     write: write$7,
 });
 
+const setInputFiles = (element, files) => {
+    try {
+        // Create a DataTransfer instance and add a newly created file
+        const dataTransfer = new DataTransfer();
+        files.forEach(file => {
+            if (file instanceof File) {
+                dataTransfer.items.add(file);
+            } else {
+                dataTransfer.items.add(
+                    new File([file], file.name, {
+                        type: file.type,
+                    })
+                );
+            }
+        });
+
+        // Assign the DataTransfer files list to the file input
+        element.files = dataTransfer.files;
+    } catch (err) {
+        return false;
+    }
+    return true;
+};
+
 const create$c = ({ root }) => (root.ref.fields = {});
 
 const getField = (root, id) => root.ref.fields[id];
@@ -6996,8 +7048,11 @@ const syncFieldPositionsWithItems = root => {
 const didReorderItems = ({ root }) => syncFieldPositionsWithItems(root);
 
 const didAddItem = ({ root, action }) => {
+    const fileItem = root.query('GET_ITEM', action.id);
+    const isLocalFile = fileItem.origin === FileOrigin.LOCAL;
+    const shouldUseFileInput = !isLocalFile && root.query('SHOULD_UPDATE_FILE_INPUT');
     const dataContainer = createElement$1('input');
-    dataContainer.type = 'hidden';
+    dataContainer.type = shouldUseFileInput ? 'file' : 'hidden';
     dataContainer.name = root.query('GET_NAME');
     dataContainer.disabled = root.query('GET_DISABLED');
     root.ref.fields[action.id] = dataContainer;
@@ -7006,8 +7061,26 @@ const didAddItem = ({ root, action }) => {
 
 const didLoadItem$1 = ({ root, action }) => {
     const field = getField(root, action.id);
-    if (!field || action.serverFileReference === null) return;
-    field.value = action.serverFileReference;
+    if (!field) return;
+
+    // store server ref in hidden input
+    if (action.serverFileReference !== null) field.value = action.serverFileReference;
+
+    // store file item in file input
+    if (!root.query('SHOULD_UPDATE_FILE_INPUT')) return;
+
+    const fileItem = root.query('GET_ITEM', action.id);
+    setInputFiles(field, [fileItem.file]);
+};
+
+const didPrepareOutput = ({ root, action }) => {
+    // this timeout pushes the handler after 'load'
+    if (!root.query('SHOULD_UPDATE_FILE_INPUT')) return;
+    setTimeout(() => {
+        const field = getField(root, action.id);
+        if (!field) return;
+        setInputFiles(field, [action.file]);
+    }, 0);
 };
 
 const didSetDisabled = ({ root }) => {
@@ -7021,12 +7094,15 @@ const didRemoveItem = ({ root, action }) => {
     delete root.ref.fields[action.id];
 };
 
+// only runs for server files (so doesn't deal with file input)
 const didDefineValue = ({ root, action }) => {
     const field = getField(root, action.id);
     if (!field) return;
     if (action.value === null) {
+        // clear field value
         field.removeAttribute('value');
     } else {
+        // set field value
         field.value = action.value;
     }
     syncFieldPositionsWithItems(root);
@@ -7038,6 +7114,7 @@ const write$8 = createRoute({
     DID_LOAD_ITEM: didLoadItem$1,
     DID_REMOVE_ITEM: didRemoveItem,
     DID_DEFINE_VALUE: didDefineValue,
+    DID_PREPARE_OUTPUT: didPrepareOutput,
     DID_REORDER_ITEMS: didReorderItems,
     DID_SORT_ITEMS: didReorderItems,
 });

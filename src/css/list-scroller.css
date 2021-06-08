@@ -1,4 +1,4 @@
-// normal mode
+/* normal mode */
 .filepond--list-scroller {
     position: absolute;
     top: 0;
@@ -8,10 +8,9 @@
     will-change: transform;
 }
 
-// scroll mode
+/* scroll mode */
 .filepond--list-scroller[data-state='overflow'] {
-
-    .filepond--list {
+    & .filepond--list {
         bottom: 0;
         right: 0;
     }
@@ -19,13 +18,10 @@
     overflow-y: scroll;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
-    mask: linear-gradient(to bottom, #000 calc(100% - .5em), transparent 100%);
+    mask: linear-gradient(to bottom, #000 calc(100% - 0.5em), transparent 100%);
 }
 
-
-//
-// style scrollbar
-//
+/* style scrollbar */
 .filepond--list-scroller::-webkit-scrollbar {
     background: transparent;
 }

@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.28.0
+
+-   Add `storeAsFile` property, if set to `true` FilePond will attempt to store the file objects in file input elements allowing file submit along with parent form (no need for `server` property). **This only works if the browser [supports the DataTransfer constructor](https://caniuse.com/mdn-api_datatransfer_datatransfer), this is the case on Firefox, Chrome, Chromium powered browsers and Safari version 14.1 and higher.**
+-   Switch to PostCSS for style output.
+
 ## 4.27.3
 
 -   Fix issue with file.js component leaking state causing `allowRemove` to impact other instances of FilePond. #713

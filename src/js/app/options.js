@@ -64,6 +64,9 @@ export const defaultOptions = {
     allowReorder: [false, Type.BOOLEAN], // Allow reordering of files
     allowDirectoriesOnly: [false, Type.BOOLEAN], // Allow only selecting directories with browse (no support for filtering dnd at this point)
 
+    // Try store file if `server` not set
+    storeAsFile: [false, Type.BOOLEAN],
+
     // Revert mode
     forceRevert: [false, Type.BOOLEAN], // Set to 'force' to require the file to be reverted before removal
 

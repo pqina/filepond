@@ -6,12 +6,12 @@
     padding: 0;
     list-style-type: none;
 
-    // prevents endless paint calls on filepond--list-scroller
+    /* prevents endless paint calls on filepond--list-scroller */
     will-change: transform;
 }
 
 /* used for padding so allowed to be restyled */
 .filepond--list {
-    left: .75em;
-    right: .75em;
+    left: 0.75em;
+    right: 0.75em;
 }

@@ -1,0 +1,16 @@
+/* Hard to override styles */
+.filepond--browser.filepond--browser {
+    /* is positioned absolute so it is focusable for form validation errors */
+    position: absolute;
+    margin: 0;
+    padding: 0;
+
+    /* is positioned ~behind drop label */
+    left: 1em;
+    top: 1.75em;
+    width: calc(100% - 2em);
+
+    /* hide visually */
+    opacity: 0;
+    font-size: 0; /* removes text cursor in Internet Explorer 11 */
+}

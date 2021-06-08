@@ -6,8 +6,8 @@
     min-width: 0;
     height: 100%;
 
-    // hide legend for visual users
-    > legend {
+    /* hide legend for visual users */
+    & > legend {
         position: absolute;
         overflow: hidden;
         height: 1px;

@@ -8,7 +8,7 @@ const methods = {
     revert: 'DELETE',
     fetch: 'GET',
     restore: 'GET',
-    load: 'GET'
+    load: 'GET',
 };
 
 export const createServerAPI = outline => {
@@ -21,6 +21,9 @@ export const createServerAPI = outline => {
     forin(methods, key => {
         api[key] = createAction(key, outline[key], methods[key], api.timeout, api.headers);
     });
+
+    // remove process if no url or process on outline
+    api.process = outline.process || isString(outline) || outline.url ? api.process : null;
 
     // special treatment for remove
     api.remove = outline.remove || null;
@@ -51,7 +54,7 @@ const createAction = (name, outline, method, timeout, headers) => {
         timeout,
         onload: null,
         ondata: null,
-        onerror: null
+        onerror: null,
     };
 
     // is a single url
@@ -68,7 +71,7 @@ const createAction = (name, outline, method, timeout, headers) => {
         const parts = action.headers.split(/:(.+)/);
         action.headers = {
             header: parts[0],
-            value: parts[1]
+            value: parts[1],
         };
     }
 
