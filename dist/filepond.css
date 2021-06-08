@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.28.0
+ * FilePond 4.28.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -389,7 +389,7 @@
     left: calc(50% - 0.8125em); /* .8125 is half of button width */
 }
 .filepond--file [data-align*='bottom'] {
-    bottom: 0.5625em * 2;
+    bottom: 1.125em;
 }
 .filepond--file [data-align='center'] {
     top: calc(50% - 0.8125em);

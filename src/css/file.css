@@ -41,7 +41,7 @@
     }
 
     & [data-align*='bottom'] {
-        bottom: 0.5625em * 2;
+        bottom: 1.125em;
     }
 
     & [data-align='center'] {
