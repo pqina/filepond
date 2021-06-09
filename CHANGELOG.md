@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.28.2
+
+-   Fix issue where local server files could not be re-uploaded after editing and did not trigger remove of source file.
+
 ## 4.28.1
 
 -   Fix CSS error.

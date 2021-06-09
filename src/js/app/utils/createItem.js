@@ -387,7 +387,7 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
 
     const api = {
         id: { get: () => id },
-        origin: { get: () => origin },
+        origin: { get: () => origin, set: value => (origin = value) },
         serverId: { get: () => state.serverFileReference },
         transferId: { get: () => state.transferId },
         status: { get: () => state.status },

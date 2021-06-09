@@ -168,6 +168,15 @@ export const actions = (dispatch, query, state) => ({
                 return;
             }
 
+            // if is local item we need to enable upload button so change can be propagated to server
+            if (item.origin === FileOrigin.LOCAL) {
+                dispatch('DID_LOAD_ITEM', {
+                    id: item.id,
+                    error: null,
+                    serverFileReference: item.source,
+                });
+            }
+
             // for async scenarios
             const upload = () => {
                 // we push this forward a bit so the interface is updated correctly
@@ -797,6 +806,16 @@ export const actions = (dispatch, query, state) => ({
             success(createItemAPI(item));
             processNext();
 
+            // if origin is local, and we're instant uploading, trigger remove of original
+            // as revert will remove file from list
+            const server = state.options.server;
+            const instantUpload = state.options.instantUpload;
+            if (instantUpload && item.origin === FileOrigin.LOCAL && isFunction(server.remove)) {
+                const noop = () => {};
+                item.origin = FileOrigin.LIMBO;
+                state.options.server.remove(item.source, noop, noop);
+            }
+
             // All items processed? No errors?
             const allItemsProcessed =
                 query('GET_ITEMS_BY_STATUS', ItemStatus.PROCESSING_COMPLETE).length ===
@@ -877,7 +896,8 @@ export const actions = (dispatch, query, state) => ({
             success(createItemAPI(item));
         };
 
-        // if this is a local file and the server.remove function has been configured, send source there so dev can remove file from server
+        // if this is a local file and the `server.remove` function has been configured,
+        // send source there so dev can remove file from server
         const server = state.options.server;
         if (
             item.origin === FileOrigin.LOCAL &&
