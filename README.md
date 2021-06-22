@@ -26,7 +26,7 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 
 ### Also need Image Editing?
 
-**Pintura Image Editor** is what you're looking for. It's a Modern JavaScript Image Editor, Pintura supports setting **crop aspect ratios**, **resizing**, **rotating**, **cropping**, and **flipping** images. Above all, it integrates beautifully with FilePond.
+**Pintura the modern JavaScript Image Editor** is what you're looking for. Pintura supports setting **crop aspect ratios**, **resizing**, **rotating**, **cropping**, and **flipping** images. Above all, it integrates beautifully with FilePond.
 
 [Learn more about Pintura](https://pqina.nl/pintura/?ref=github-filepond)
 
