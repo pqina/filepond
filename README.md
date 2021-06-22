@@ -30,7 +30,7 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 
 [Learn more about Pintura](https://pqina.nl/pintura/?ref=github-filepond)
 
-<img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond_doka.gif?raw=true" width="600" alt=""/>
+<img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond_pintura.gif?raw=true" width="600" alt=""/>
 
 ---
 
