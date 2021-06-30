@@ -76,7 +76,7 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 *   [Django](https://github.com/ImperialCollegeLondon/django-drf-filepond)  ([ImperialCollegeLondon/django-drf-filepond](https://github.com/ImperialCollegeLondon/django-drf-filepond))
 *   [Laravel](https://github.com/Sopamo/laravel-filepond) ([Sopamo/laravel-filepond](https://github.com/Sopamo/laravel-filepond))
 *   [Laravel](https://github.com/Albert221/laravel-filepond) ([Albert221/laravel-filepond](https://github.com/Albert221/laravel-filepond))
-
+*   [SilverStripe](https://github.com/lekoala/silverstripe-filepond) ([lekoala/silverstripe-filepond](https://github.com/lekoala/silverstripe-filepond))
 
 ## Quick Start
 
