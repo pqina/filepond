@@ -9,7 +9,7 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 
 ---
 
-<img src="https://github.com/pqina/filepond-github-assets/blob/master/header.svg" alt="FilePond"/>
+[<img src="https://github.com/pqina/filepond-github-assets/blob/master/header.svg" alt="FilePond"/>](https://www.buymeacoffee.com/rikschennink/)
 
 [Buy me a Coffee](https://www.buymeacoffee.com/rikschennink/) / [Use FilePond with Pintura](https://pqina.nl/pintura/?ref=github-filepond) / [Dev updates on Twitter](https://twitter.com/rikschennink/)
 
