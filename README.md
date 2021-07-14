@@ -1,4 +1,4 @@
-# <img src="https://github.com/pqina/filepond-github-assets/blob/master/logo.svg" height="44" alt="FilePond"/>
+# [<img src="https://github.com/pqina/filepond-github-assets/blob/master/logo.svg" height="44" alt="FilePond"/>](https://pqina.nl/filepond/)
 
 A JavaScript library that can upload anything you throw at it, optimizes images for faster uploads, and offers a great, accessible, silky smooth user experience.
 
@@ -27,7 +27,7 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 
 [Learn more about FilePond](https://pqina.nl/filepond/)
 
-<img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif?raw=true" width="370" alt=""/>
+[<img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif?raw=true" width="370" alt=""/>](https://pqina.nl/filepond/)
 
 ---
 
@@ -37,7 +37,7 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 
 [Learn more about Pintura](https://pqina.nl/pintura/?ref=github-filepond)
 
-<img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond_pintura.gif?raw=true" width="600" alt=""/>
+[<img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond_pintura.gif?raw=true" width="600" alt=""/>](https://pqina.nl/pintura/?ref=github-filepond)
 
 ---
 
