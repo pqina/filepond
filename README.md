@@ -1,4 +1,4 @@
-# <img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-logo.svg" height="44" alt="FilePond"/>
+# <img src="https://github.com/pqina/filepond-github-assets/blob/master/logo.svg" height="44" alt="FilePond"/>
 
 A JavaScript library that can upload anything you throw at it, optimizes images for faster uploads, and offers a great, accessible, silky smooth user experience.
 
