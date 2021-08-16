@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.29.0
+
+-   Enable rejecting images with an error message using the internal `DID_LOAD_ITEM` hook.
+
 ## 4.28.2
 
 -   Fix issue where local server files could not be re-uploaded after editing and did not trigger remove of source file.

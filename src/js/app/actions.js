@@ -535,8 +535,13 @@ export const actions = (dispatch, query, state) => ({
                         handleAdd
                     );
                 })
-                .catch(() => {
-                    handleAdd(false);
+                .catch(e => {
+                    if (!e || !e.error || !e.status) return handleAdd(false);
+                    dispatch('DID_THROW_ITEM_INVALID', {
+                        id,
+                        error: e.error,
+                        status: e.status,
+                    });
                 });
         });
 

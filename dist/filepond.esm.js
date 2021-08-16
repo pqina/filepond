@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.28.2
+ * FilePond 4.29.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -4494,8 +4494,13 @@ const actions = (dispatch, query, state) => ({
                         handleAdd
                     );
                 })
-                .catch(() => {
-                    handleAdd(false);
+                .catch(e => {
+                    if (!e || !e.error || !e.status) return handleAdd(false);
+                    dispatch('DID_THROW_ITEM_INVALID', {
+                        id,
+                        error: e.error,
+                        status: e.status,
+                    });
                 });
         });
 
@@ -5211,6 +5216,7 @@ const updateFile = ({ root, props }) => {
 const updateFileSizeOnError = ({ root, props }) => {
     // if size is available don't fallback to unknown size message
     if (isInt(root.query('GET_ITEM_SIZE', props.id))) {
+        updateFile({ root, props });
         return;
     }
 

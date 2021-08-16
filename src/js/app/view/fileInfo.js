@@ -32,17 +32,19 @@ const create = ({ root, props }) => {
 const updateFile = ({ root, props }) => {
     text(
         root.ref.fileSize,
-        toNaturalFileSize(root.query('GET_ITEM_SIZE', props.id), '.', root.query('GET_FILE_SIZE_BASE'))
+        toNaturalFileSize(
+            root.query('GET_ITEM_SIZE', props.id),
+            '.',
+            root.query('GET_FILE_SIZE_BASE')
+        )
     );
-    text(
-        root.ref.fileName,
-        formatFilename(root.query('GET_ITEM_NAME', props.id))
-    );
+    text(root.ref.fileName, formatFilename(root.query('GET_ITEM_NAME', props.id)));
 };
 
 const updateFileSizeOnError = ({ root, props }) => {
     // if size is available don't fallback to unknown size message
     if (isInt(root.query('GET_ITEM_SIZE', props.id))) {
+        updateFile({ root, props });
         return;
     }
 
@@ -57,7 +59,7 @@ export const fileInfo = createView({
         DID_LOAD_ITEM: updateFile,
         DID_UPDATE_ITEM_META: updateFile,
         DID_THROW_ITEM_LOAD_ERROR: updateFileSizeOnError,
-        DID_THROW_ITEM_INVALID: updateFileSizeOnError
+        DID_THROW_ITEM_INVALID: updateFileSizeOnError,
     }),
     didCreateView: root => {
         applyFilters('CREATE_VIEW', { ...root, view: root });
@@ -67,7 +69,7 @@ export const fileInfo = createView({
         styles: ['translateX', 'translateY'],
         animations: {
             translateX: 'spring',
-            translateY: 'spring'
-        }
-    }
+            translateY: 'spring',
+        },
+    },
 });
