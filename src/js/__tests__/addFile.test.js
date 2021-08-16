@@ -1,31 +1,34 @@
-import "./windowMatchMedia.mock";
+import './windowMatchMedia.mock';
 import { create } from '../index.js';
 
 describe('adding files', () => {
-
     let pond = null;
 
     beforeEach(() => {
         if (pond) {
             pond.destroy();
         }
+
         pond = create();
 
         // enables draw loop, else it seems that filepond is hidden
         Object.defineProperty(pond.element, 'offsetParent', {
-            get: jest.fn(() => 1)
+            get: jest.fn(() => 1),
         });
     });
 
     test('add file', done => {
-        const data = new File(['Hello World!'], 'dummy.txt', {type: 'text/plain', lastModified: new Date()})
+        const data = new File(['Hello World!'], 'dummy.txt', {
+            type: 'text/plain',
+            lastModified: new Date(),
+        });
         pond.addFile(data).then(item => {
             done();
         });
     });
 
     test('add blob', done => {
-        const data = new Blob(['Hello World!'], {type: 'text/plain'});
+        const data = new Blob(['Hello World!'], { type: 'text/plain' });
         pond.addFile(data).then(item => {
             done();
         });
@@ -37,5 +40,4 @@ describe('adding files', () => {
             done();
         });
     });
-
 });
