@@ -1,15 +1,20 @@
-# <img src="https://github.com/pqina/filepond-github-assets/blob/master/logo.svg" height="44" alt="FilePond"/>
+# [<img src="https://github.com/pqina/filepond-github-assets/blob/master/logo.svg" height="44" alt="FilePond"/>](https://pqina.nl/filepond/)
 
 A JavaScript library that can upload anything you throw at it, optimizes images for faster uploads, and offers a great, accessible, silky smooth user experience.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/pqina/filepond/blob/master/LICENSE)
 [![npm version](https://badge.fury.io/js/filepond.svg)](https://www.npmjs.com/package/filepond)
+![npm](https://img.shields.io/npm/dt/filepond)
 
 21 KB gzipped. FilePond adapters are available for **[React](https://github.com/pqina/react-filepond)**, **[Vue](https://github.com/pqina/vue-filepond)**, **[Angular](https://github.com/pqina/ngx-filepond)**, **[Svelte](https://github.com/pqina/svelte-filepond)**, and **[jQuery](https://github.com/pqina/jquery-filepond)**
 
-FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
+---
 
-<img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif?raw=true" width="370" alt=""/>
+[<img src="https://github.com/pqina/filepond-github-assets/blob/master/header.svg" alt="FilePond"/>](https://www.buymeacoffee.com/rikschennink/)
+
+[Buy me a Coffee](https://www.buymeacoffee.com/rikschennink/) / [Use FilePond with Pintura](https://pqina.nl/pintura/?ref=github-filepond) / [Dev updates on Twitter](https://twitter.com/rikschennink/)
+
+---
 
 ### Core Features
 
@@ -22,15 +27,17 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 
 [Learn more about FilePond](https://pqina.nl/filepond/)
 
+[<img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond-animation-01.gif?raw=true" width="370" alt=""/>](https://pqina.nl/filepond/)
+
 ---
 
 ### Also need Image Editing?
 
-**Doka.js** is what you're looking for. It's a Modern JavaScript Image Editor, Doka supports setting **crop aspect ratios**, **resizing**, **rotating**, **cropping**, and **flipping** images. Above all, it integrates beautifully with FilePond.
+**Pintura the modern JavaScript Image Editor** is what you're looking for. Pintura supports setting **crop aspect ratios**, **resizing**, **rotating**, **cropping**, and **flipping** images. Above all, it integrates beautifully with FilePond.
 
-[Learn more about Doka](https://pqina.nl/doka/?ref=github-filepond)
+[Learn more about Pintura](https://pqina.nl/pintura/?ref=github-filepond)
 
-<img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond_doka.gif?raw=true" width="600" alt=""/>
+[<img src="https://github.com/pqina/filepond-github-assets/blob/master/filepond_pintura.gif?raw=true" width="600" alt=""/>](https://pqina.nl/pintura/?ref=github-filepond)
 
 ---
 
@@ -76,7 +83,7 @@ FilePond is maintained by **[Rik Schennink](https://twitter.com/rikschennink/)**
 *   [Django](https://github.com/ImperialCollegeLondon/django-drf-filepond)  ([ImperialCollegeLondon/django-drf-filepond](https://github.com/ImperialCollegeLondon/django-drf-filepond))
 *   [Laravel](https://github.com/Sopamo/laravel-filepond) ([Sopamo/laravel-filepond](https://github.com/Sopamo/laravel-filepond))
 *   [Laravel](https://github.com/Albert221/laravel-filepond) ([Albert221/laravel-filepond](https://github.com/Albert221/laravel-filepond))
-
+*   [SilverStripe](https://github.com/lekoala/silverstripe-filepond) ([lekoala/silverstripe-filepond](https://github.com/lekoala/silverstripe-filepond))
 
 ## Quick Start
 
