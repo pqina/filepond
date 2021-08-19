@@ -162,6 +162,7 @@ To build the library run `npm run build`
 
 ## Publications
 
+* [Using FilePond with NodeJS](https://www.infoworld.com/article/3627248/how-to-use-filepond-with-nodejs.html)
 * [Applying Watermarks to Images with FilePond](https://pqina.nl/blog/applying-watermarks-to-images-with-filepond/)
 * [Generating Image Thumbnails in the Browser using JavaScript and FilePond](https://dev.to/pqina/generating-image-thumbnails-in-the-browser-using-javascript-and-filepond-10b8)
 * [How to upload files with Vue and FilePond](https://dev.to/pqina/how-to-upload-files-with-vue-and-filepond-1m02)
