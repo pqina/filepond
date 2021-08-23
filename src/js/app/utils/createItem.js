@@ -328,17 +328,21 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
     //
     const revert = (revertFileUpload, forceRevert) =>
         new Promise((resolve, reject) => {
+            // a completed upload will have a serverFileReference, a failed chunked upload where
+            // getting a serverId succeeded but >=0 chunks have been uploaded will have transferId set
+            const serverTransferId = (state.serverFileReference !== null) ? state.serverFileReference : state.transferId;
+
             // cannot revert without a server id for this process
-            if (state.serverFileReference === null) {
+            if (serverTransferId === null) {
                 resolve();
                 return;
             }
 
             // revert the upload (fire and forget)
             revertFileUpload(
-                state.serverFileReference,
+                serverTransferId,
                 () => {
-                    // reset file server id as now it's no available on the server
+                    // reset file server id and transfer id as now it's not available on the server
                     state.serverFileReference = null;
                     resolve();
                 },
