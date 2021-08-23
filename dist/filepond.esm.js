@@ -3734,7 +3734,6 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
             state.activeProcessor = null;
 
             // if file was uploaded but processing was cancelled during perceived processor time store file reference
-            state.transferId = null;
             state.serverFileReference = serverFileReference;
 
             setStatus(ItemStatus.IDLE);
@@ -3815,6 +3814,7 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
                 () => {
                     // reset file server id and transfer id as now it's not available on the server
                     state.serverFileReference = null;
+                    state.transferId = null;
                     resolve();
                 },
                 error => {

@@ -5927,7 +5927,6 @@
                 state.activeProcessor = null;
 
                 // if file was uploaded but processing was cancelled during perceived processor time store file reference
-                state.transferId = null;
                 state.serverFileReference = serverFileReference;
 
                 setStatus(ItemStatus.IDLE);
@@ -6011,6 +6010,7 @@
                     function() {
                         // reset file server id and transfer id as now it's not available on the server
                         state.serverFileReference = null;
+                        state.transferId = null;
                         resolve();
                     },
                     function(error) {
