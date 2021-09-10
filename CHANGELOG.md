@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.29.1
+
+-   Revert chunked uploads #757
+
 ## 4.29.0
 
 -   Enable rejecting images with an error message using the internal `DID_LOAD_ITEM` hook.
