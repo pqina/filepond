@@ -928,7 +928,12 @@ export const actions = (dispatch, query, state) => ({
             );
         } else {
             // if is requesting revert and can revert need to call revert handler (not calling request_ because that would also trigger beforeRemoveHook)
-            if (options.revert && item.origin !== FileOrigin.LOCAL && item.serverId !== null) {
+            if ((options.revert && item.origin !== FileOrigin.LOCAL && item.serverId !== null) ||
+                // if chunked uploads are enabled and we're uploading in chunks for this specific file
+                // or if the file isn't big enough for chunked uploads but chunkForce is set then call
+                // revert before removing from the view...
+                (state.options.chunkUploads && (item.file.size > state.options.chunkSize)) ||
+                (state.options.chunkUploads && state.options.chunkForce)) {
                 item.revert(
                     createRevertFunction(state.options.server.url, state.options.server.revert),
                     query('GET_FORCE_REVERT')

@@ -3734,7 +3734,6 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
             state.activeProcessor = null;
 
             // if file was uploaded but processing was cancelled during perceived processor time store file reference
-            state.transferId = null;
             state.serverFileReference = serverFileReference;
 
             setStatus(ItemStatus.IDLE);
@@ -3798,18 +3797,24 @@ const createItem = (origin = null, serverFileReference = null, file = null) => {
     //
     const revert = (revertFileUpload, forceRevert) =>
         new Promise((resolve, reject) => {
+            // a completed upload will have a serverFileReference, a failed chunked upload where
+            // getting a serverId succeeded but >=0 chunks have been uploaded will have transferId set
+            const serverTransferId =
+                state.serverFileReference !== null ? state.serverFileReference : state.transferId;
+
             // cannot revert without a server id for this process
-            if (state.serverFileReference === null) {
+            if (serverTransferId === null) {
                 resolve();
                 return;
             }
 
             // revert the upload (fire and forget)
             revertFileUpload(
-                state.serverFileReference,
+                serverTransferId,
                 () => {
-                    // reset file server id as now it's no available on the server
+                    // reset file server id and transfer id as now it's not available on the server
                     state.serverFileReference = null;
+                    state.transferId = null;
                     resolve();
                 },
                 error => {
@@ -4887,7 +4892,14 @@ const actions = (dispatch, query, state) => ({
             );
         } else {
             // if is requesting revert and can revert need to call revert handler (not calling request_ because that would also trigger beforeRemoveHook)
-            if (options.revert && item.origin !== FileOrigin.LOCAL && item.serverId !== null) {
+            if (
+                (options.revert && item.origin !== FileOrigin.LOCAL && item.serverId !== null) ||
+                // if chunked uploads are enabled and we're uploading in chunks for this specific file
+                // or if the file isn't big enough for chunked uploads but chunkForce is set then call
+                // revert before removing from the view...
+                (state.options.chunkUploads && item.file.size > state.options.chunkSize) ||
+                (state.options.chunkUploads && state.options.chunkForce)
+            ) {
                 item.revert(
                     createRevertFunction(state.options.server.url, state.options.server.revert),
                     query('GET_FORCE_REVERT')
