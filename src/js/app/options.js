@@ -103,6 +103,11 @@ export const defaultOptions = {
     fileSizeBase: [1000, Type.INT],
 
     // Labels and status messages
+    labelFileSizeBytes: ['bytes', Type.STRING],
+    labelFileSizeKilobytes: ['KB', Type.STRING],
+    labelFileSizeMegabytes: ['MB', Type.STRING],
+    labelFileSizeGigabytes: ['GB', Type.STRING],
+
     labelDecimalSeparator: [getDecimalSeparator(), Type.STRING], // Default is locale separator
     labelThousandsSeparator: [getThousandsSeparator(), Type.STRING], // Default is locale separator
 

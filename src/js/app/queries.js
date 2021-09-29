@@ -90,4 +90,11 @@ export const queries = state => ({
         state.options.storeAsFile && canUpdateFileInput() && !isAsync(state),
 
     IS_ASYNC: () => isAsync(state),
+
+    GET_FILE_SIZE_LABELS: query => ({
+        labelBytes: query('GET_LABEL_FILE_SIZE_BYTES') || undefined,
+        labelKilobytes: query('GET_LABEL_FILE_SIZE_KILOBYTES') || undefined,
+        labelMegabytes: query('GET_LABEL_FILE_SIZE_MEGABYTES') || undefined,
+        labelGigabytes: query('GET_LABEL_FILE_SIZE_GIGABYTES') || undefined,
+    }),
 });

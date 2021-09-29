@@ -35,7 +35,8 @@ const updateFile = ({ root, props }) => {
         toNaturalFileSize(
             root.query('GET_ITEM_SIZE', props.id),
             '.',
-            root.query('GET_FILE_SIZE_BASE')
+            root.query('GET_FILE_SIZE_BASE'),
+            root.query('GET_FILE_SIZE_LABELS', root.query)
         )
     );
     text(root.ref.fileName, formatFilename(root.query('GET_ITEM_NAME', props.id)));

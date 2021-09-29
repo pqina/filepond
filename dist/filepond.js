@@ -3798,6 +3798,11 @@
         fileSizeBase: [1000, Type.INT],
 
         // Labels and status messages
+        labelFileSizeBytes: ['bytes', Type.STRING],
+        labelFileSizeKilobytes: ['KB', Type.STRING],
+        labelFileSizeMegabytes: ['MB', Type.STRING],
+        labelFileSizeGigabytes: ['GB', Type.STRING],
+
         labelDecimalSeparator: [getDecimalSeparator(), Type.STRING], // Default is locale separator
         labelThousandsSeparator: [getThousandsSeparator(), Type.STRING], // Default is locale separator
 
@@ -4089,6 +4094,15 @@
 
             IS_ASYNC: function IS_ASYNC() {
                 return isAsync(state);
+            },
+
+            GET_FILE_SIZE_LABELS: function GET_FILE_SIZE_LABELS(query) {
+                return {
+                    labelBytes: query('GET_LABEL_FILE_SIZE_BYTES') || undefined,
+                    labelKilobytes: query('GET_LABEL_FILE_SIZE_KILOBYTES') || undefined,
+                    labelMegabytes: query('GET_LABEL_FILE_SIZE_MEGABYTES') || undefined,
+                    labelGigabytes: query('GET_LABEL_FILE_SIZE_GIGABYTES') || undefined,
+                };
             },
         };
     };
@@ -7576,6 +7590,16 @@
         var decimalSeparator =
             arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '.';
         var base = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1000;
+        var options = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : {};
+        var _options$labelBytes = options.labelBytes,
+            labelBytes = _options$labelBytes === void 0 ? 'bytes' : _options$labelBytes,
+            _options$labelKilobyt = options.labelKilobytes,
+            labelKilobytes = _options$labelKilobyt === void 0 ? 'KB' : _options$labelKilobyt,
+            _options$labelMegabyt = options.labelMegabytes,
+            labelMegabytes = _options$labelMegabyt === void 0 ? 'MB' : _options$labelMegabyt,
+            _options$labelGigabyt = options.labelGigabytes,
+            labelGigabytes = _options$labelGigabyt === void 0 ? 'GB' : _options$labelGigabyt;
+
         // no negative byte sizes
         bytes = Math.round(Math.abs(bytes));
 
@@ -7585,21 +7609,21 @@
 
         // just bytes
         if (bytes < KB) {
-            return bytes + ' bytes';
+            return bytes + ' ' + labelBytes;
         }
 
         // kilobytes
         if (bytes < MB) {
-            return Math.floor(bytes / KB) + ' KB';
+            return Math.floor(bytes / KB) + ' ' + labelKilobytes;
         }
 
         // megabytes
         if (bytes < GB) {
-            return removeDecimalsWhenZero(bytes / MB, 1, decimalSeparator) + ' MB';
+            return removeDecimalsWhenZero(bytes / MB, 1, decimalSeparator) + ' ' + labelMegabytes;
         }
 
         // gigabytes
-        return removeDecimalsWhenZero(bytes / GB, 2, decimalSeparator) + ' GB';
+        return removeDecimalsWhenZero(bytes / GB, 2, decimalSeparator) + ' ' + labelGigabytes;
     };
 
     var removeDecimalsWhenZero = function removeDecimalsWhenZero(value, decimalCount, separator) {
@@ -7644,7 +7668,8 @@
             toNaturalFileSize(
                 root.query('GET_ITEM_SIZE', props.id),
                 '.',
-                root.query('GET_FILE_SIZE_BASE')
+                root.query('GET_FILE_SIZE_BASE'),
+                root.query('GET_FILE_SIZE_LABELS', root.query)
             )
         );
 

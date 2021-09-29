@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.30.0
+
+-   Add `labelFileSizeBytes`, `labelFileSizeKilobytes`, `labelFileSizeMegabytes`, `labelFileSizeGigabytes` #763
+
 ## 4.29.1
 
 -   Revert chunked uploads #757

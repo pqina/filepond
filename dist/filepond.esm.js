@@ -1872,6 +1872,11 @@ const defaultOptions = {
     fileSizeBase: [1000, Type.INT],
 
     // Labels and status messages
+    labelFileSizeBytes: ['bytes', Type.STRING],
+    labelFileSizeKilobytes: ['KB', Type.STRING],
+    labelFileSizeMegabytes: ['MB', Type.STRING],
+    labelFileSizeGigabytes: ['GB', Type.STRING],
+
     labelDecimalSeparator: [getDecimalSeparator(), Type.STRING], // Default is locale separator
     labelThousandsSeparator: [getThousandsSeparator(), Type.STRING], // Default is locale separator
 
@@ -2113,6 +2118,13 @@ const queries = state => ({
         state.options.storeAsFile && canUpdateFileInput() && !isAsync(state),
 
     IS_ASYNC: () => isAsync(state),
+
+    GET_FILE_SIZE_LABELS: query => ({
+        labelBytes: query('GET_LABEL_FILE_SIZE_BYTES') || undefined,
+        labelKilobytes: query('GET_LABEL_FILE_SIZE_KILOBYTES') || undefined,
+        labelMegabytes: query('GET_LABEL_FILE_SIZE_MEGABYTES') || undefined,
+        labelGigabytes: query('GET_LABEL_FILE_SIZE_GIGABYTES') || undefined,
+    }),
 });
 
 const hasRoomForItem = state => {
@@ -5156,7 +5168,14 @@ const fileActionButton = createView({
     write: write$1,
 });
 
-const toNaturalFileSize = (bytes, decimalSeparator = '.', base = 1000) => {
+const toNaturalFileSize = (bytes, decimalSeparator = '.', base = 1000, options = {}) => {
+    const {
+        labelBytes = 'bytes',
+        labelKilobytes = 'KB',
+        labelMegabytes = 'MB',
+        labelGigabytes = 'GB',
+    } = options;
+
     // no negative byte sizes
     bytes = Math.round(Math.abs(bytes));
 
@@ -5166,21 +5185,21 @@ const toNaturalFileSize = (bytes, decimalSeparator = '.', base = 1000) => {
 
     // just bytes
     if (bytes < KB) {
-        return `${bytes} bytes`;
+        return `${bytes} ${labelBytes}`;
     }
 
     // kilobytes
     if (bytes < MB) {
-        return `${Math.floor(bytes / KB)} KB`;
+        return `${Math.floor(bytes / KB)} ${labelKilobytes}`;
     }
 
     // megabytes
     if (bytes < GB) {
-        return `${removeDecimalsWhenZero(bytes / MB, 1, decimalSeparator)} MB`;
+        return `${removeDecimalsWhenZero(bytes / MB, 1, decimalSeparator)} ${labelMegabytes}`;
     }
 
     // gigabytes
-    return `${removeDecimalsWhenZero(bytes / GB, 2, decimalSeparator)} GB`;
+    return `${removeDecimalsWhenZero(bytes / GB, 2, decimalSeparator)} ${labelGigabytes}`;
 };
 
 const removeDecimalsWhenZero = (value, decimalCount, separator) => {
@@ -5219,7 +5238,8 @@ const updateFile = ({ root, props }) => {
         toNaturalFileSize(
             root.query('GET_ITEM_SIZE', props.id),
             '.',
-            root.query('GET_FILE_SIZE_BASE')
+            root.query('GET_FILE_SIZE_BASE'),
+            root.query('GET_FILE_SIZE_LABELS', root.query)
         )
     );
     text(root.ref.fileName, formatFilename(root.query('GET_ITEM_NAME', props.id)));
