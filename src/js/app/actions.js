@@ -1031,8 +1031,6 @@ export const actions = (dispatch, query, state) => ({
             ...Object.keys(options).filter(key => !prioritizedOptionKeys.includes(key)),
         ];
 
-        console.log(orderedOptionKeys);
-
         // dispatch set event for each option
         orderedOptionKeys.forEach(key => {
             dispatch(`SET_${fromCamels(key, '_').toUpperCase()}`, {

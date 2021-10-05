@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.30.1
+ * FilePond 4.30.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -7412,8 +7412,6 @@
                         })
                     )
                 );
-
-                console.log(orderedOptionKeys);
 
                 // dispatch set event for each option
                 orderedOptionKeys.forEach(function(key) {

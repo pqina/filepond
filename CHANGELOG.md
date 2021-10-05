@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.30.2
+
+-   Remove accidental log statement.
+
 ## 4.30.1
 
 -   Prioritize server prop before other props when passed to setOptions #606
