@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.30.0
+ * FilePond 4.30.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -4992,11 +4992,35 @@ const actions = (dispatch, query, state) => ({
     }),
 
     SET_OPTIONS: ({ options }) => {
-        forin(options, (key, value) => {
-            dispatch(`SET_${fromCamels(key, '_').toUpperCase()}`, { value });
+        // get all keys passed
+        const optionKeys = Object.keys(options);
+
+        // get prioritized keyed to include (remove once not in options object)
+        const prioritizedOptionKeys = PrioritizedOptions.filter(key => optionKeys.includes(key));
+
+        // order the keys, prioritized first, then rest
+        const orderedOptionKeys = [
+            // add prioritized first if passed to options, else remove
+            ...prioritizedOptionKeys,
+
+            // prevent duplicate keys
+            ...Object.keys(options).filter(key => !prioritizedOptionKeys.includes(key)),
+        ];
+
+        console.log(orderedOptionKeys);
+
+        // dispatch set event for each option
+        orderedOptionKeys.forEach(key => {
+            dispatch(`SET_${fromCamels(key, '_').toUpperCase()}`, {
+                value: options[key],
+            });
         });
     },
 });
+
+const PrioritizedOptions = [
+    'server', // must be processed before "files"
+];
 
 const formatFilename = name => name;
 

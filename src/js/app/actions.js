@@ -928,12 +928,14 @@ export const actions = (dispatch, query, state) => ({
             );
         } else {
             // if is requesting revert and can revert need to call revert handler (not calling request_ because that would also trigger beforeRemoveHook)
-            if ((options.revert && item.origin !== FileOrigin.LOCAL && item.serverId !== null) ||
+            if (
+                (options.revert && item.origin !== FileOrigin.LOCAL && item.serverId !== null) ||
                 // if chunked uploads are enabled and we're uploading in chunks for this specific file
                 // or if the file isn't big enough for chunked uploads but chunkForce is set then call
                 // revert before removing from the view...
-                (state.options.chunkUploads && (item.file.size > state.options.chunkSize)) ||
-                (state.options.chunkUploads && state.options.chunkForce)) {
+                (state.options.chunkUploads && item.file.size > state.options.chunkSize) ||
+                (state.options.chunkUploads && state.options.chunkForce)
+            ) {
                 item.revert(
                     createRevertFunction(state.options.server.url, state.options.server.revert),
                     query('GET_FORCE_REVERT')
@@ -1014,14 +1016,32 @@ export const actions = (dispatch, query, state) => ({
     }),
 
     SET_OPTIONS: ({ options }) => {
-        // specify option keys that need to be processed before the others (internal order is preserved)
-        const prioritizedOptions = [
-            'server', // must be processed before "files"
-        ].filter(value => value in options);
+        // get all keys passed
+        const optionKeys = Object.keys(options);
 
-        // loop through all keys in options, but prioritizedOptions first
-        [...new Set([...prioritizedOptions,...Object.keys(options)])].forEach((optionKey) => {
-            dispatch(`SET_${fromCamels(optionKey, '_').toUpperCase()}`, { value: options[optionKey] });
+        // get prioritized keyed to include (remove once not in options object)
+        const prioritizedOptionKeys = PrioritizedOptions.filter(key => optionKeys.includes(key));
+
+        // order the keys, prioritized first, then rest
+        const orderedOptionKeys = [
+            // add prioritized first if passed to options, else remove
+            ...prioritizedOptionKeys,
+
+            // prevent duplicate keys
+            ...Object.keys(options).filter(key => !prioritizedOptionKeys.includes(key)),
+        ];
+
+        console.log(orderedOptionKeys);
+
+        // dispatch set event for each option
+        orderedOptionKeys.forEach(key => {
+            dispatch(`SET_${fromCamels(key, '_').toUpperCase()}`, {
+                value: options[key],
+            });
         });
     },
 });
+
+const PrioritizedOptions = [
+    'server', // must be processed before "files"
+];

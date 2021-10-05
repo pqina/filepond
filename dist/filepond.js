@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.30.0
+ * FilePond 4.30.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -7395,12 +7395,37 @@
 
             SET_OPTIONS: function SET_OPTIONS(_ref11) {
                 var options = _ref11.options;
-                forin(options, function(key, value) {
-                    dispatch('SET_' + fromCamels(key, '_').toUpperCase(), { value: value });
+                // get all keys passed
+                var optionKeys = Object.keys(options);
+
+                // get prioritized keyed to include (remove once not in options object)
+                var prioritizedOptionKeys = PrioritizedOptions.filter(function(key) {
+                    return optionKeys.includes(key);
+                });
+
+                // order the keys, prioritized first, then rest
+                var orderedOptionKeys = [].concat(
+                    _toConsumableArray(prioritizedOptionKeys),
+                    _toConsumableArray(
+                        Object.keys(options).filter(function(key) {
+                            return !prioritizedOptionKeys.includes(key);
+                        })
+                    )
+                );
+
+                console.log(orderedOptionKeys);
+
+                // dispatch set event for each option
+                orderedOptionKeys.forEach(function(key) {
+                    dispatch('SET_' + fromCamels(key, '_').toUpperCase(), {
+                        value: options[key],
+                    });
                 });
             },
         };
     };
+
+    var PrioritizedOptions = ['server'];
 
     var formatFilename = function formatFilename(name) {
         return name;

@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.30.1
+
+-   Prioritize server prop before other props when passed to setOptions #606
+
 ## 4.30.0
 
 -   Add `labelFileSizeBytes`, `labelFileSizeKilobytes`, `labelFileSizeMegabytes`, `labelFileSizeGigabytes` #763
