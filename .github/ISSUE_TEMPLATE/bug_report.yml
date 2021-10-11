@@ -1,4 +1,5 @@
 name: "Bug report"
+title: "[Bug]: "
 description: Report an issue with FilePond
 labels: ["bug"]
 body:
