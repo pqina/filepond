@@ -2,10 +2,6 @@ name: "Bug report"
 about: "Report a FilePond bug"
 labels: ["bug"]
 body:
-  - type: markdown
-    attributes:
-      value: |
-        Thanks for taking the time to fill out this bug report!
   - type: textarea
     attributes:
         label: Describe the bug
