@@ -21,18 +21,18 @@ body:
       placeholder: Reproduction
     validations:
       required: true
-- type: textarea
-  attributes:
-    label: Environment
-    description: |
-      examples:
-        - **Device**: Ubuntu 20.04
-        - **OS**: 13.14.0
-        - **Browser**: 7.6.3
-    value: |
-        - Device:
-        - OS:
-        - Broser:
-    render: markdown
-  validations:
-    required: true
+  - type: textarea
+    attributes:
+      label: Environment
+      description: |
+        examples:
+          - **Device**: Ubuntu 20.04
+          - **OS**: 13.14.0
+          - **Browser**: 7.6.3
+      value: |
+          - Device:
+          - OS:
+          - Broser:
+      render: markdown
+    validations:
+      required: true
