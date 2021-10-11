@@ -1,7 +1,8 @@
-name: "Bug report"
-title: "[Bug]: "
-description: Report an issue with FilePond
-labels: ["bug"]
+---
+name: "FilePond bug report"
+title: "[Bug] "
+description: "Report an issue with FilePond"
+labels: "bug"
 body:
   - type: markdown
     attributes:
