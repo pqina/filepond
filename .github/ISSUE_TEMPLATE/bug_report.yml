@@ -7,6 +7,20 @@ body:
     attributes:
       value: |
         Thanks for taking the time to fill out this bug report!
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered.
+      options:
+      - label: I have searched the existing issues
+        required: true
+  - type: checkboxes
+    attributes:
+      label: Have you updated FilePond and its plugins?
+      description: Please update both FilePond and its plugins to the most recent version.
+      options:
+      - label: I have updated FilePond and its plugins
+        required: true
   - type: textarea
     attributes:
       label: Describe the bug
