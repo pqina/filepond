@@ -63,7 +63,7 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 *   [Get file](https://github.com/nielsboogaard/filepond-plugin-get-file) ([nielsboogaard/filepond-plugin-get-file](https://github.com/nielsboogaard/filepond-plugin-get-file))
 *   [Zip Directory Uploads](https://github.com/tzsk/filepond-plugin-zipper) ([tzsk/filepond-plugin-zipper](https://github.com/tzsk/filepond-plugin-zipper))
 *   [PDF Preview](https://github.com/Adri-Glez/filepond-plugin-pdf-preview) ([Adri-Glez/filepond-plugin-pdf-preview](https://github.com/Adri-Glez/filepond-plugin-pdf-preview)
-*   [PDF Convert](https://github.com/alexandreDavid/filepond-plugin-pdf-convert) ([alexandreDavid/filepond-plugin-pdf-convert](https://github.com/alexandreDavid/filepond-plugin-pdf-convert)
+*   [PDF Convert](https://github.com/alexandreDavid/filepond-plugin-pdf-convert) ([alexandreDavid/filepond-plugin-pdf-convert](https://github.com/alexandreDavid/filepond-plugin-pdf-convert))
 *   [Copy Path](https://github.com/jnkn6/filepond-plugin-copy-path) ([jnkn6/filepond-plugin-copy-path](https://github.com/jnkn6/filepond-plugin-copy-path))
 
 
