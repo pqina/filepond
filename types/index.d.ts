@@ -4,6 +4,8 @@
 /* Disable no-redundant-jsdoc since @default statements are NOT redundant */
 /* tslint:disable:no-redundant-jsdoc */
 
+export as namespace FilePond;
+
 export { };
 
 export enum FileStatus {
