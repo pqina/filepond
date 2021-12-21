@@ -46,7 +46,7 @@ body:
       value: |
           - Device:
           - OS:
-          - Broser:
+          - Browser:
       render: markdown
     validations:
       required: true
