@@ -124,7 +124,7 @@ const write = ({ root, props, actions }) => {
         .filter(action => /^DID_SET_STYLE_/.test(action.type))
         .filter(action => !isEmpty(action.data.value))
         .map(({ type, data }) => {
-            const name = toCamels(type.substr(8).toLowerCase(), '_');
+            const name = toCamels(type.substring(8).toLowerCase(), '_');
             root.element.dataset[name] = data.value;
             root.invalidateLayout();
         });
