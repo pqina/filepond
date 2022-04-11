@@ -1600,7 +1600,7 @@ const InteractionMethod = {
 const getUniqueId = () =>
     Math.random()
         .toString(36)
-        .substr(2, 9);
+        .substring(2, 11);
 
 const arrayRemove = (arr, index) => arr.splice(index, 1);
 
@@ -2626,24 +2626,27 @@ const sendRequest = (data, url, options) => {
         xhr.timeout = options.timeout;
     }
 
-    // add headers
-    Object.keys(options.headers).forEach(key => {
-        const value = unescape(encodeURIComponent(options.headers[key]));
-        xhr.setRequestHeader(key, value);
+    // execute async headers
+    Promise.resolve(options.headers).then(headers => {
+        // add headers
+        Object.keys(headers).forEach(key => {
+            const value = unescape(encodeURIComponent(headers[key]));
+            xhr.setRequestHeader(key, value);
+        });
+
+        // set type of response
+        if (options.responseType) {
+            xhr.responseType = options.responseType;
+        }
+
+        // set credentials
+        if (options.withCredentials) {
+            xhr.withCredentials = true;
+        }
+
+        // let's send our data
+        xhr.send(data);
     });
-
-    // set type of response
-    if (options.responseType) {
-        xhr.responseType = options.responseType;
-    }
-
-    // set credentials
-    if (options.withCredentials) {
-        xhr.withCredentials = true;
-    }
-
-    // let's send our data
-    xhr.send(data);
 
     return api;
 };
@@ -3453,7 +3456,7 @@ const createFileProcessor = (processFn, options) => {
     return api;
 };
 
-const getFilenameWithoutExtension = name => name.substr(0, name.lastIndexOf('.')) || name;
+const getFilenameWithoutExtension = name => name.substring(0, name.lastIndexOf('.')) || name;
 
 const createFileStub = source => {
     let data = [source.name, source.size, source.type];
@@ -8063,7 +8066,7 @@ const write$9 = ({ root, props, actions }) => {
         .filter(action => /^DID_SET_STYLE_/.test(action.type))
         .filter(action => !isEmpty(action.data.value))
         .map(({ type, data }) => {
-            const name = toCamels(type.substr(8).toLowerCase(), '_');
+            const name = toCamels(type.substring(8).toLowerCase(), '_');
             root.element.dataset[name] = data.value;
             root.invalidateLayout();
         });

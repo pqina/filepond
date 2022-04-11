@@ -1875,7 +1875,7 @@
     var getUniqueId = function getUniqueId() {
         return Math.random()
             .toString(36)
-            .substr(2, 9);
+            .substring(2, 11);
     };
 
     function _typeof(obj) {
@@ -4676,24 +4676,27 @@
             xhr.timeout = options.timeout;
         }
 
-        // add headers
-        Object.keys(options.headers).forEach(function(key) {
-            var value = unescape(encodeURIComponent(options.headers[key]));
-            xhr.setRequestHeader(key, value);
+        // execute async headers
+        Promise.resolve(options.headers).then(function(headers) {
+            // add headers
+            Object.keys(headers).forEach(function(key) {
+                var value = unescape(encodeURIComponent(headers[key]));
+                xhr.setRequestHeader(key, value);
+            });
+
+            // set type of response
+            if (options.responseType) {
+                xhr.responseType = options.responseType;
+            }
+
+            // set credentials
+            if (options.withCredentials) {
+                xhr.withCredentials = true;
+            }
+
+            // let's send our data
+            xhr.send(data);
         });
-
-        // set type of response
-        if (options.responseType) {
-            xhr.responseType = options.responseType;
-        }
-
-        // set credentials
-        if (options.withCredentials) {
-            xhr.withCredentials = true;
-        }
-
-        // let's send our data
-        xhr.send(data);
 
         return api;
     };
@@ -5624,7 +5627,7 @@
     };
 
     var getFilenameWithoutExtension = function getFilenameWithoutExtension(name) {
-        return name.substr(0, name.lastIndexOf('.')) || name;
+        return name.substring(0, name.lastIndexOf('.')) || name;
     };
 
     var createFileStub = function createFileStub(source) {
@@ -10871,7 +10874,7 @@
             .map(function(_ref4) {
                 var type = _ref4.type,
                     data = _ref4.data;
-                var name = toCamels(type.substr(8).toLowerCase(), '_');
+                var name = toCamels(type.substring(8).toLowerCase(), '_');
                 root.element.dataset[name] = data.value;
                 root.invalidateLayout();
             });
