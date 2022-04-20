@@ -124,6 +124,27 @@ export type ProgressServerConfigFunction = (
     totalDataAmount: number,
 ) => void;
 
+export interface ProcessServerChunkTransferOptions {
+    chunkTransferId: string,
+    chunkServer: ServerUrl,
+    /**
+     * Chunk uploads enabled
+     */
+    chunkUploads: boolean,
+    /**
+     * Forcing use of chunk uploads even for files smaller than chunk size
+     */
+    chunkForce: boolean,
+    /**
+     * Size of chunks
+     */
+    chunkSize: number,
+    /**
+     * Amount of times to retry upload of a chunk when it fails
+     */
+    chunkRetryDelays: number[]
+}
+
 export type ProcessServerConfigFunction = (
     /** The name of the input field. */
     fieldName: string,
@@ -145,7 +166,14 @@ export type ProcessServerConfigFunction = (
      */
     progress: ProgressServerConfigFunction,
     /** Let FilePond know the request has been cancelled. */
-    abort: () => void
+    abort: () => void,
+    /**
+     * Let Filepond know and store the current file chunk transfer id so it can track the
+     * progress of the whole file upload
+     */
+    transfer: (transferId: string) => void,
+
+    options: ProcessServerChunkTransferOptions
 ) => void;
 
 export type RevertServerConfigFunction = (
@@ -746,6 +774,23 @@ export interface FilePondBaseProps {
      * @default 1000
      */
     fileSizeBase?: number;
+
+    /**
+     * Tells FilePond to store files in hidden file input elements so they can be posted along with
+     * normal form post. This only works if the browser supports the DataTransfer constructor,
+     * this is the case on Firefox, Chrome, Chromium powered browsers and Safari version 14.1
+     * and higher.
+     * @default false
+     */
+    storeAsFile?: boolean;
+
+    /**
+     * Shows Powered by PQINA in footer. Can be disabled by setting to false, but please do
+     * link to https://pqina.nl somewhere else on your website, or otherwise donate to help
+     * keep the project alive.
+     * @default "Powered by PQINA"
+     */
+    credits?: false
 }
 
 // TODO delete
