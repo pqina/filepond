@@ -566,7 +566,16 @@ export const createApp = (initialOptions = {}) => {
          */
         destroy: () => {
             // request destruction
-            exports.fire('destroy', view.element);
+            var indexToRemove = state.apps.findIndex(function (app) {
+                return app.isAttachedTo(view.element);
+            });
+            if (indexToRemove >= 0) {
+                // remove from apps
+                var app = state.apps.splice(indexToRemove, 1)[0];
+
+                // restore original dom element
+                app.restoreElement();
+            }
 
             // stop active processes (file uploads, fetches, stuff like that)
             // loop over items and depending on states call abort for ongoing processes
