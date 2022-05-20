@@ -426,7 +426,12 @@ const exceedsMaxFiles = (root, items) => {
     }
 
     // limit max items to one if not allowed to drop multiple items
-    maxItems = allowMultiple ? maxItems : allowReplace ? maxItems : 1;
+    maxItems = allowMultiple ? maxItems : 1;
+
+    if (!allowMultiple && allowReplace) {
+        // There is only one item, so there is room to replace or add an item
+        return false;
+    }
 
     // no more room?
     const hasMaxItems = isInt(maxItems);
