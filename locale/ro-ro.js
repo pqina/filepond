@@ -34,6 +34,6 @@ export default {
     imageValidateSizeLabelExpectedMaxSize: 'Mărimea maximă este de {maxWidth} x {maxHeight}',
     imageValidateSizeLabelImageResolutionTooLow: 'Rezoluția este prea mică',
     imageValidateSizeLabelImageResolutionTooHigh: 'Rezoluția este prea mare',
-    imageValidateSizeLabelExpectedMinResolution: 'Rezoluția minimă este de {minResolution}'
+    imageValidateSizeLabelExpectedMinResolution: 'Rezoluția minimă este de {minResolution}',
     imageValidateSizeLabelExpectedMaxResolution: 'Rezoluția maximă este de {maxResolution}'
 };
