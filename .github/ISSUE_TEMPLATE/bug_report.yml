@@ -1,0 +1,52 @@
+name: Bug report
+title: "[Bug] "
+description: Report an issue with FilePond
+labels: bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered.
+      options:
+      - label: I have searched the existing issues
+        required: true
+  - type: checkboxes
+    attributes:
+      label: Have you updated FilePond and its plugins?
+      description: Please update both FilePond and its plugins to the most recent version.
+      options:
+      - label: I have updated FilePond and its plugins
+        required: true
+  - type: textarea
+    attributes:
+      label: Describe the bug
+      description: A concise description of what the bug is.
+      placeholder: Bug description
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Reproduction
+      description: Provide clear steps to reproduce the bug. Please take the time to create a reproduction of the bug by [forking this project on codesandbox.io](https://codesandbox.io/s/filepond-plain-javascript-24i1m)
+      placeholder: Reproduction
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Environment
+      description: |
+        examples:
+          - **Device**: Samsung Galaxy s20, iPhone 12 Mini, Macbook Pro (2020), etc.
+          - **OS**: Android 8, iOS 12, Windows 10, etc.
+          - **Browser**: Firefox 93, Chrome 94, etc.
+      value: |
+          - Device:
+          - OS:
+          - Browser:
+      render: markdown
+    validations:
+      required: true

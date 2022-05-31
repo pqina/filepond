@@ -1,0 +1,35 @@
+name: Feature request
+title: "[Feature] "
+description: Suggest an idea for this project
+labels: new feature
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request!
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the feature request you want to submit.
+      options:
+      - label: I have searched the existing issues
+        required: true
+  - type: textarea
+    attributes:
+      label: Is your feature request related to a problem? Please describe.
+      description: A clear and concise description of what the problem is you want to solve.
+      placeholder: I'm always frustrated when...
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Describe the solution you'd like
+      description: A clear and concise description of what you want to happen.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Describe alternatives you've considered
+      description: A clear and concise description of any alternative solutions or features you've considered.
+    validations:
+      required: true
