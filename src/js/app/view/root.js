@@ -422,6 +422,10 @@ const exceedsMaxFiles = (root, items) => {
 
     // if does not allow multiple items and dragging more than one item
     if (!allowMultiple && totalBrowseItems > 1) {
+        root.dispatch('DID_THROW_MAX_FILES', {
+            source: items,
+            error: createResponse('warning', 0, 'Max files'),
+        });
         return true;
     }
 
