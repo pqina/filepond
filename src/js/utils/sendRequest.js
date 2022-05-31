@@ -107,24 +107,28 @@ export const sendRequest = (data, url, options) => {
         xhr.timeout = options.timeout;
     }
 
-    // add headers
-    Object.keys(options.headers).forEach(key => {
-        const value = unescape(encodeURIComponent(options.headers[key]));
-        xhr.setRequestHeader(key, value);
+    // execute async headers
+    Promise.resolve(options.headers).then(headers => {
+
+        // add headers
+        Object.keys(headers).forEach(key => {
+            const value = unescape(encodeURIComponent(headers[key]));
+            xhr.setRequestHeader(key, value);
+        });
+
+        // set type of response
+        if (options.responseType) {
+            xhr.responseType = options.responseType;
+        }
+
+        // set credentials
+        if (options.withCredentials) {
+            xhr.withCredentials = true;
+        }
+
+        // let's send our data
+        xhr.send(data);
     });
-
-    // set type of response
-    if (options.responseType) {
-        xhr.responseType = options.responseType;
-    }
-
-    // set credentials
-    if (options.withCredentials) {
-        xhr.withCredentials = true;
-    }
-
-    // let's send our data
-    xhr.send(data);
 
     return api;
 };
