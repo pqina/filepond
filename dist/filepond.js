@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.30.3
+ * FilePond 4.30.4
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1875,7 +1875,7 @@
     var getUniqueId = function getUniqueId() {
         return Math.random()
             .toString(36)
-            .substr(2, 9);
+            .substring(2, 11);
     };
 
     function _typeof(obj) {
@@ -5624,7 +5624,7 @@
     };
 
     var getFilenameWithoutExtension = function getFilenameWithoutExtension(name) {
-        return name.substr(0, name.lastIndexOf('.')) || name;
+        return name.substring(0, name.lastIndexOf('.')) || name;
     };
 
     var createFileStub = function createFileStub(source) {
@@ -10871,7 +10871,7 @@
             .map(function(_ref4) {
                 var type = _ref4.type,
                     data = _ref4.data;
-                var name = toCamels(type.substr(8).toLowerCase(), '_');
+                var name = toCamels(type.substring(8).toLowerCase(), '_');
                 root.element.dataset[name] = data.value;
                 root.invalidateLayout();
             });
@@ -11187,11 +11187,21 @@
 
         // if does not allow multiple items and dragging more than one item
         if (!allowMultiple && totalBrowseItems > 1) {
+            root.dispatch('DID_THROW_MAX_FILES', {
+                source: items,
+                error: createResponse('warning', 0, 'Max files'),
+            });
+
             return true;
         }
 
         // limit max items to one if not allowed to drop multiple items
-        maxItems = allowMultiple ? maxItems : allowReplace ? maxItems : 1;
+        maxItems = allowMultiple ? maxItems : 1;
+
+        if (!allowMultiple && allowReplace) {
+            // There is only one item, so there is room to replace or add an item
+            return false;
+        }
 
         // no more room?
         var hasMaxItems = isInt(maxItems);
