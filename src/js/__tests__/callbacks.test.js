@@ -1,3 +1,5 @@
+import mockConsole from "jest-mock-console";
+
 import './windowMatchMedia.mock';
 import { create, OptionTypes, FileStatus } from '../index.js';
 
@@ -11,7 +13,6 @@ describe('adding files', () => {
         }
 
         pond = create({
-            ...options,
             server: {
                 process: (fieldName, file, metadata, load, error, progress, abort) => {
                     let p = 0;
@@ -31,7 +32,8 @@ describe('adding files', () => {
                         },
                     };
                 },
-            },
+            },            
+            ...options,
         });
 
         // enables draw loop, else it seems that filepond is hidden and it won't run
@@ -70,6 +72,22 @@ describe('adding files', () => {
             done();
         };
         pond.addFile(data);
+    });
+
+    test('onerror', done => {
+        // we don't want the console error about the server call failure to muddy up the console
+        const restoreConsole = mockConsole();
+
+        createPond({
+            server: './invalid-path'
+        });
+        pond.onerror = () => {
+            done();
+        };
+        pond.addFile(data);
+
+        // restore the console back to normal so that real issues aren't hidden
+        restoreConsole();
     });
 
     test('onremovefile', done => {

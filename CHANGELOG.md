@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.30.4
+
+-   Fix a bug where the selected file is not replaced #841
+-   Fix a bug where the onwarning event is not triggered #839
+-   Add more translations
+
 ## 4.30.3
 
 -   Fix accidental push.

@@ -124,7 +124,7 @@ const write = ({ root, props, actions }) => {
         .filter(action => /^DID_SET_STYLE_/.test(action.type))
         .filter(action => !isEmpty(action.data.value))
         .map(({ type, data }) => {
-            const name = toCamels(type.substr(8).toLowerCase(), '_');
+            const name = toCamels(type.substring(8).toLowerCase(), '_');
             root.element.dataset[name] = data.value;
             root.invalidateLayout();
         });
@@ -436,11 +436,20 @@ const exceedsMaxFiles = (root, items) => {
 
     // if does not allow multiple items and dragging more than one item
     if (!allowMultiple && totalBrowseItems > 1) {
+        root.dispatch('DID_THROW_MAX_FILES', {
+            source: items,
+            error: createResponse('warning', 0, 'Max files'),
+        });
         return true;
     }
 
     // limit max items to one if not allowed to drop multiple items
-    maxItems = allowMultiple ? maxItems : allowReplace ? maxItems : 1;
+    maxItems = allowMultiple ? maxItems : 1;
+
+    if (!allowMultiple && allowReplace) {
+        // There is only one item, so there is room to replace or add an item
+        return false;
+    }
 
     // no more room?
     const hasMaxItems = isInt(maxItems);
