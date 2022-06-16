@@ -362,10 +362,10 @@ const write = ({ root, props, actions, shouldOptimize }) => {
             }
     
             const isLastItemInRow = indexX + 1 === itemsPerRow || !(children[index + 1]);
-    
+
             const offsetX = indexX * itemWidth;
             const offsetY = prevY;
-    
+
             const vectorX = Math.sign(offsetX - prevX);
             const vectorY = Math.sign(offsetY - prevY);
     
