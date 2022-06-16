@@ -368,7 +368,7 @@ const write = ({ root, props, actions, shouldOptimize }) => {
 
             const vectorX = Math.sign(offsetX - prevX);
             const vectorY = Math.sign(offsetY - prevY);
-    
+
             prevX = offsetX;
     
             if (isLastItemInRow) {
