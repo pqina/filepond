@@ -35,5 +35,5 @@ export default {
     imageValidateSizeLabelImageResolutionTooLow: "画像の解像度が低すぎます",                                                                  
     imageValidateSizeLabelImageResolutionTooHigh: "画像の解像度が高すぎます",                                                                 
     imageValidateSizeLabelExpectedMinResolution: "画像の最小解像度は{minResolution}です",                                                     
-    imageValidateSizeLabelExpectedMaxResolution: "画像の最大解像度は{minResolution}です",                                                     
+    imageValidateSizeLabelExpectedMaxResolution: "画像の最大解像度は{maxResolution}です",                                                     
 };
