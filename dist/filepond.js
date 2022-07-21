@@ -4595,15 +4595,35 @@
         );
 
         // encode url
-        url = encodeURI(url);
+        try {
+            url = new URL(url);
+        } catch (error) {
+            url = encodeURI(url);
+        }
 
         // if method is GET, add any received data to url
 
         if (isGet(options.method) && data) {
-            url =
-                '' +
-                url +
-                encodeURIComponent(typeof data === 'string' ? data : JSON.stringify(data));
+            try {
+                var additionalParams = new URLSearchParams(data);
+                url = new URL(
+                    '' +
+                        url.origin +
+                        url.pathname +
+                        '?' +
+                        new URLSearchParams(
+                            [].concat(
+                                _toConsumableArray(Array.from(url.searchParams.entries())),
+                                _toConsumableArray(Object.entries(additionalParams))
+                            )
+                        ).toString()
+                );
+            } catch (err) {
+                url =
+                    '' +
+                    url +
+                    encodeURIComponent(typeof data === 'string' ? data : JSON.stringify(data));
+            }
         }
 
         // create request
