@@ -5,8 +5,8 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/pqina/filepond/blob/master/LICENSE)
 [![npm version](https://badge.fury.io/js/filepond.svg)](https://www.npmjs.com/package/filepond)
 ![npm](https://img.shields.io/npm/dt/filepond)
-
-21 KB gzipped. FilePond adapters are available for **[React](https://github.com/pqina/react-filepond)**, **[Vue](https://github.com/pqina/vue-filepond)**, **[Angular](https://github.com/pqina/ngx-filepond)**, **[Svelte](https://github.com/pqina/svelte-filepond)**, and **[jQuery](https://github.com/pqina/jquery-filepond)**
+[![minzipped size](https://img.shields.io/bundlephobia/minzip/filepond)](https://bundlephobia.com/package/filepond)
+FilePond adapters are available for **[React](https://github.com/pqina/react-filepond)**, **[Vue](https://github.com/pqina/vue-filepond)**, **[Angular](https://github.com/pqina/ngx-filepond)**, **[Svelte](https://github.com/pqina/svelte-filepond)**, and **[jQuery](https://github.com/pqina/jquery-filepond)**
 
 ---
 
