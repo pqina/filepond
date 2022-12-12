@@ -847,6 +847,7 @@ export const actions = (dispatch, query, state) => ({
                     chunkForce: options.chunkForce,
                     chunkSize: options.chunkSize,
                     chunkRetryDelays: options.chunkRetryDelays,
+                    chunkParallelize: options.chunkParallelize
                 }),
                 {
                     allowMinimumUploadDuration: query('GET_ALLOW_MINIMUM_UPLOAD_DURATION'),
