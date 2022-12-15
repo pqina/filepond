@@ -1864,6 +1864,7 @@ const defaultOptions = {
     chunkForce: [false, Type.BOOLEAN], // Force use of chunk uploads even for files smaller than chunk size
     chunkSize: [5000000, Type.INT], // Size of chunks (5MB default)
     chunkRetryDelays: [[500, 1000, 3000], Type.ARRAY], // Amount of times to retry upload of a chunk when it fails
+    chunkParallelize: [false, Type.BOOLEAN], // Enable uploads of chuncks in parallel
 
     // The server api end points to use for uploading (see docs)
     server: [null, Type.SERVER_API],
@@ -2768,7 +2769,9 @@ const processFileChunked = (
 ) => {
     // all chunks
     const chunks = [];
-    const { chunkTransferId, chunkServer, chunkSize, chunkRetryDelays } = options;
+    console.log('options', options);
+    const { chunkTransferId, chunkServer, chunkSize, chunkRetryDelays, chunkParallelize } = options;
+    // console.log('processFileChunked', chunkTransferId, chunkServer, chunkSize, chunkParallelize);
 
     // default state
     const state = {
@@ -2873,6 +2876,7 @@ const processFileChunked = (
             timeout: null,
         };
     }
+    const lastChunk = chunks.pop();
 
     const completeProcessingChunks = () => load(state.serverId);
 
@@ -2908,17 +2912,91 @@ const processFileChunked = (
         // send request object
         const requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
 
+        if (!chunkParallelize) {
+            const headers =
+                typeof chunkServer.headers === 'function'
+                    ? chunkServer.headers(chunk)
+                    : {
+                          ...chunkServer.headers,
+                          'Content-Type': 'application/offset+octet-stream',
+                          'Upload-Offset': chunk.offset,
+                          'Upload-Length': file.size,
+                          'Upload-Name': file.name,
+                      };
+
+            const request = (chunk.request = sendRequest(ondata(chunk.data), requestUrl, {
+                ...chunkServer,
+                headers,
+            }));
+
+            request.onload = () => {
+                // done!
+                chunk.status = ChunkStatus.COMPLETE;
+
+                // remove request reference
+                chunk.request = null;
+
+                // start processing more chunks
+                processChunks();
+            };
+
+            request.onprogress = (lengthComputable, loaded, total) => {
+                chunk.progress = lengthComputable ? loaded : null;
+                updateTotalProgress();
+            };
+
+            request.onerror = xhr => {
+                chunk.status = ChunkStatus.ERROR;
+                chunk.request = null;
+                chunk.error = onerror(xhr.response) || xhr.statusText;
+                if (!retryProcessChunk(chunk)) {
+                    error(
+                        createResponse(
+                            'error',
+                            xhr.status,
+                            onerror(xhr.response) || xhr.statusText,
+                            xhr.getAllResponseHeaders()
+                        )
+                    );
+                }
+            };
+
+            request.ontimeout = xhr => {
+                chunk.status = ChunkStatus.ERROR;
+                chunk.request = null;
+                if (!retryProcessChunk(chunk)) {
+                    createTimeoutResponse(error)(xhr);
+                }
+            };
+
+            request.onabort = () => {
+                chunk.status = ChunkStatus.QUEUED;
+                chunk.request = null;
+                abort();
+            };
+        } else {
+            for (const chunk of chunks) {
+                processChunkRequest(chunk);
+            }
+        }
+    };
+
+    const processChunkRequest = (chunk, isLastChunk = false) => {
         const headers =
             typeof chunkServer.headers === 'function'
                 ? chunkServer.headers(chunk)
                 : {
                       ...chunkServer.headers,
                       'Content-Type': 'application/offset+octet-stream',
-                      'Upload-Offset': chunk.offset,
-                      'Upload-Length': file.size,
+                      'Upload-Index': chunk.index,
+                      'Upload-Chunks-Number': chunks.length + 1,
+                      // 'Upload-Offset': chunk.offset,
+                      // 'Upload-Length': file.size,
                       'Upload-Name': file.name,
                   };
 
+        // send request object
+        const requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
         const request = (chunk.request = sendRequest(ondata(chunk.data), requestUrl, {
             ...chunkServer,
             headers,
@@ -2927,12 +3005,20 @@ const processFileChunked = (
         request.onload = () => {
             // done!
             chunk.status = ChunkStatus.COMPLETE;
-
             // remove request reference
             chunk.request = null;
-
             // start processing more chunks
-            processChunks();
+            // processChunks();
+            if (
+                chunks.length === chunks.filter(c => c.status === ChunkStatus.COMPLETE).length &&
+                !isLastChunk
+            ) {
+                console.log('processo ultimo chunk', lastChunk);
+                processChunkRequest(lastChunk, true);
+            }
+            if (isLastChunk) {
+                completeProcessingChunks();
+            }
         };
 
         request.onprogress = (lengthComputable, loaded, total) => {
@@ -4823,6 +4909,7 @@ const actions = (dispatch, query, state) => ({
                     chunkForce: options.chunkForce,
                     chunkSize: options.chunkSize,
                     chunkRetryDelays: options.chunkRetryDelays,
+                    chunkParallelize: options.chunkParallelize,
                 }),
                 {
                     allowMinimumUploadDuration: query('GET_ALLOW_MINIMUM_UPLOAD_DURATION'),

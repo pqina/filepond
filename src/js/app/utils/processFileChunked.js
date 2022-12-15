@@ -117,6 +117,7 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
             timeout: null
         }
     }
+    const lastChunk = chunks.pop();
 
     const completeProcessingChunks = () => load(state.serverId);
 
@@ -141,7 +142,6 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
             // no chunk to handle
             return;
         }
-        ;
 
         // now processing this chunk
         chunk.status = ChunkStatus.PROCESSING;
@@ -219,67 +219,81 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
         } else {
 
             for (const chunk of chunks) {
-                const headers = typeof chunkServer.headers === 'function' ? chunkServer.headers(chunk) : {
-                    ...chunkServer.headers,
-                    'Content-Type': 'application/offset+octet-stream',
-                    'Upload-Index': chunk.index,
-                    'Upload-Chunks-Number': chunks.length,
-                    // 'Upload-Offset': chunk.offset,
-                    // 'Upload-Length': file.size,
-                    'Upload-Name': file.name
-                };
-
-                const request = chunk.request = sendRequest(ondata(chunk.data), requestUrl, {
-                    ...chunkServer,
-                    headers
-                });
-
-                request.onload = () => {
-                    // done!
-                    chunk.status = ChunkStatus.COMPLETE;
-                    // remove request reference
-                    chunk.request = null;
-                    // start processing more chunks
-                    // processChunks();
-                };
-
-                request.onprogress = (lengthComputable, loaded, total) => {
-                    chunk.progress = lengthComputable ? loaded : null;
-                    updateTotalProgress();
-                };
-
-                request.onerror = (xhr) => {
-                    chunk.status = ChunkStatus.ERROR;
-                    chunk.request = null;
-                    chunk.error = onerror(xhr.response) || xhr.statusText;
-                    if (!retryProcessChunk(chunk)) {
-                        error(
-                            createResponse(
-                                'error',
-                                xhr.status,
-                                onerror(xhr.response) || xhr.statusText,
-                                xhr.getAllResponseHeaders()
-                            )
-                        );
-                    }
-                };
-
-                request.ontimeout = (xhr) => {
-                    chunk.status = ChunkStatus.ERROR;
-                    chunk.request = null;
-                    if (!retryProcessChunk(chunk)) {
-                        createTimeoutResponse(error)(xhr);
-                    }
-                };
-
-                request.onabort = () => {
-                    chunk.status = ChunkStatus.QUEUED;
-                    chunk.request = null;
-                    abort();
-                };
+                processChunkRequest(chunk);
             }
 
         }
+    }
+
+    const processChunkRequest = (chunk, isLastChunk= false) => {
+
+        const headers = typeof chunkServer.headers === 'function' ? chunkServer.headers(chunk) : {
+            ...chunkServer.headers,
+            'Content-Type': 'application/offset+octet-stream',
+            'Upload-Index': chunk.index,
+            'Upload-Chunks-Number': chunks.length + 1,
+            // 'Upload-Offset': chunk.offset,
+            // 'Upload-Length': file.size,
+            'Upload-Name': file.name
+        };
+
+        // send request object
+        const requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
+        const request = chunk.request = sendRequest(ondata(chunk.data), requestUrl, {
+            ...chunkServer,
+            headers
+        });
+
+        request.onload = () => {
+            // done!
+            chunk.status = ChunkStatus.COMPLETE;
+            // remove request reference
+            chunk.request = null;
+            // start processing more chunks
+            // processChunks();
+            if (chunks.length === chunks.filter(c => c.status === ChunkStatus.COMPLETE).length && !isLastChunk) {
+                console.log('processo ultimo chunk', lastChunk);
+                processChunkRequest(lastChunk, true);
+            }
+            if (isLastChunk) {
+                completeProcessingChunks();
+            }
+        };
+
+        request.onprogress = (lengthComputable, loaded, total) => {
+            chunk.progress = lengthComputable ? loaded : null;
+            updateTotalProgress();
+        };
+
+        request.onerror = (xhr) => {
+            chunk.status = ChunkStatus.ERROR;
+            chunk.request = null;
+            chunk.error = onerror(xhr.response) || xhr.statusText;
+            if (!retryProcessChunk(chunk)) {
+                error(
+                    createResponse(
+                        'error',
+                        xhr.status,
+                        onerror(xhr.response) || xhr.statusText,
+                        xhr.getAllResponseHeaders()
+                    )
+                );
+            }
+        };
+
+        request.ontimeout = (xhr) => {
+            chunk.status = ChunkStatus.ERROR;
+            chunk.request = null;
+            if (!retryProcessChunk(chunk)) {
+                createTimeoutResponse(error)(xhr);
+            }
+        };
+
+        request.onabort = () => {
+            chunk.status = ChunkStatus.QUEUED;
+            chunk.request = null;
+            abort();
+        };
     }
 
     const retryProcessChunk = (chunk) => {

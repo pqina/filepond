@@ -3790,6 +3790,7 @@
         chunkForce: [false, Type.BOOLEAN], // Force use of chunk uploads even for files smaller than chunk size
         chunkSize: [5000000, Type.INT], // Size of chunks (5MB default)
         chunkRetryDelays: [[500, 1000, 3000], Type.ARRAY], // Amount of times to retry upload of a chunk when it fails
+        chunkParallelize: [false, Type.BOOLEAN], // Enable uploads of chuncks in parallel
 
         // The server api end points to use for uploading (see docs)
         server: [null, Type.SERVER_API],
@@ -4840,10 +4841,13 @@
     ) {
         // all chunks
         var chunks = [];
+        console.log('options', options);
         var chunkTransferId = options.chunkTransferId,
             chunkServer = options.chunkServer,
             chunkSize = options.chunkSize,
-            chunkRetryDelays = options.chunkRetryDelays;
+            chunkRetryDelays = options.chunkRetryDelays,
+            chunkParallelize = options.chunkParallelize;
+        // console.log('processFileChunked', chunkTransferId, chunkServer, chunkSize, chunkParallelize);
 
         // default state
         var state = {
@@ -4963,6 +4967,7 @@
                 timeout: null,
             };
         }
+        var lastChunk = chunks.pop();
 
         var completeProcessingChunks = function completeProcessingChunks() {
             return load(state.serverId);
@@ -5013,16 +5018,96 @@
             // send request object
             var requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
 
+            if (!chunkParallelize) {
+                var headers =
+                    typeof chunkServer.headers === 'function'
+                        ? chunkServer.headers(chunk)
+                        : Object.assign({}, chunkServer.headers, {
+                              'Content-Type': 'application/offset+octet-stream',
+                              'Upload-Offset': chunk.offset,
+                              'Upload-Length': file.size,
+                              'Upload-Name': file.name,
+                          });
+
+                var request = (chunk.request = sendRequest(
+                    ondata(chunk.data),
+                    requestUrl,
+                    Object.assign({}, chunkServer, {
+                        headers: headers,
+                    })
+                ));
+
+                request.onload = function() {
+                    // done!
+                    chunk.status = ChunkStatus.COMPLETE;
+
+                    // remove request reference
+                    chunk.request = null;
+
+                    // start processing more chunks
+                    processChunks();
+                };
+
+                request.onprogress = function(lengthComputable, loaded, total) {
+                    chunk.progress = lengthComputable ? loaded : null;
+                    updateTotalProgress();
+                };
+
+                request.onerror = function(xhr) {
+                    chunk.status = ChunkStatus.ERROR;
+                    chunk.request = null;
+                    chunk.error = onerror(xhr.response) || xhr.statusText;
+                    if (!retryProcessChunk(chunk)) {
+                        error(
+                            createResponse(
+                                'error',
+                                xhr.status,
+                                onerror(xhr.response) || xhr.statusText,
+                                xhr.getAllResponseHeaders()
+                            )
+                        );
+                    }
+                };
+
+                request.ontimeout = function(xhr) {
+                    chunk.status = ChunkStatus.ERROR;
+                    chunk.request = null;
+                    if (!retryProcessChunk(chunk)) {
+                        createTimeoutResponse(error)(xhr);
+                    }
+                };
+
+                request.onabort = function() {
+                    chunk.status = ChunkStatus.QUEUED;
+                    chunk.request = null;
+                    abort();
+                };
+            } else {
+                for (var _i = 0, _chunks = chunks; _i < _chunks.length; _i++) {
+                    var _chunk = _chunks[_i];
+                    processChunkRequest(_chunk);
+                }
+            }
+        };
+
+        var processChunkRequest = function processChunkRequest(chunk) {
+            var isLastChunk =
+                arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
             var headers =
                 typeof chunkServer.headers === 'function'
                     ? chunkServer.headers(chunk)
                     : Object.assign({}, chunkServer.headers, {
                           'Content-Type': 'application/offset+octet-stream',
-                          'Upload-Offset': chunk.offset,
-                          'Upload-Length': file.size,
+                          'Upload-Index': chunk.index,
+                          'Upload-Chunks-Number': chunks.length + 1,
+                          // 'Upload-Offset': chunk.offset,
+                          // 'Upload-Length': file.size,
                           'Upload-Name': file.name,
                       });
 
+            // send request object
+            var requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
             var request = (chunk.request = sendRequest(
                 ondata(chunk.data),
                 requestUrl,
@@ -5034,12 +5119,23 @@
             request.onload = function() {
                 // done!
                 chunk.status = ChunkStatus.COMPLETE;
-
                 // remove request reference
                 chunk.request = null;
-
                 // start processing more chunks
-                processChunks();
+                // processChunks();
+                if (
+                    chunks.length ===
+                        chunks.filter(function(c) {
+                            return c.status === ChunkStatus.COMPLETE;
+                        }).length &&
+                    !isLastChunk
+                ) {
+                    console.log('processo ultimo chunk', lastChunk);
+                    processChunkRequest(lastChunk, true);
+                }
+                if (isLastChunk) {
+                    completeProcessingChunks();
+                }
             };
 
             request.onprogress = function(lengthComputable, loaded, total) {
@@ -7213,6 +7309,7 @@
                                 chunkForce: options.chunkForce,
                                 chunkSize: options.chunkSize,
                                 chunkRetryDelays: options.chunkRetryDelays,
+                                chunkParallelize: options.chunkParallelize,
                             }
                         ),
 
