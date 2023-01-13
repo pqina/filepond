@@ -86,6 +86,7 @@ FilePond adapters are available for **[React](https://github.com/pqina/react-fil
 *   [Laravel](https://github.com/Sopamo/laravel-filepond) ([Sopamo/laravel-filepond](https://github.com/Sopamo/laravel-filepond))
 *   [Laravel](https://github.com/Albert221/laravel-filepond) ([Albert221/laravel-filepond](https://github.com/Albert221/laravel-filepond))
 *   [SilverStripe](https://github.com/lekoala/silverstripe-filepond) ([lekoala/silverstripe-filepond](https://github.com/lekoala/silverstripe-filepond))
+*   [Ruby on Rails](https://github.com/Code-With-Rails/filepond-rails) ([Code-With-Rails/filepond-rails](https://github.com/Code-With-Rails/filepond-rails))
 
 ## Quick Start
 
