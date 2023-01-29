@@ -9,13 +9,10 @@ function tick(ts) {
     // queue next tick
     const scheduleTick = () => {
         if (state.activeCount === 0) {
-            console.log("STOP")
             isTicking = false;
         } else if (document.hidden) {
-            console.log("TIMEOUT")
             setTimeout(() => tick(performance.now()), interval);
         } else {
-            console.log("ANIMATION")
             window.requestAnimationFrame(tick);
         }
     }
@@ -30,7 +27,6 @@ function tick(ts) {
     } else {
         const delta = ts - last;
         last = ts - delta % interval;
-        console.log({ delta, interval })
         if (delta <= interval) {
             scheduleTick()
             return;
