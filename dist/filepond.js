@@ -12429,17 +12429,15 @@
     var state = null;
 
     function tick(ts) {
+        // queue next tick
         var scheduleTick = function scheduleTick() {
             if (state.activeCount === 0) {
-                console.log('STOP');
                 isTicking = false;
             } else if (document.hidden) {
-                console.log('TIMEOUT');
                 setTimeout(function() {
                     return tick(performance.now());
                 }, interval);
             } else {
-                console.log('ANIMATION');
                 window.requestAnimationFrame(tick);
             }
         };
@@ -12448,19 +12446,17 @@
 
         var painter = window[name];
 
+        // limit fps
         if (!last) {
             last = ts;
         } else {
             var delta = ts - last;
             last = ts - (delta % interval);
-            console.log({ delta: delta, interval: interval });
             if (delta <= interval) {
                 scheduleTick();
                 return;
             }
         }
-
-        console.log('TICK', painter, name);
 
         // update view
         painter.readers.forEach(function(read) {
@@ -12475,7 +12471,6 @@
 
     var triggerTick = function triggerTick(outterState) {
         state = outterState;
-        // window.requestAnimationFrame(tick)
         if (isTicking) return;
         isTicking = true;
         tick(performance.now());
@@ -12534,6 +12529,7 @@
     var state$1 = {
         // active app instances, used to redraw the apps and to find the later
         apps: [],
+        activeCount: 0,
     };
 
     // plugin name
@@ -12554,7 +12550,6 @@
     exports.registerPlugin = fn;
     exports.getOptions = fn;
     exports.setOptions = fn;
-    state$1.activeCount = 0;
 
     // if not supported, no API
     if (supported()) {
@@ -12591,7 +12586,6 @@
 
             // clean up event
             document.removeEventListener('DOMContentLoaded', dispatch);
-            // state.loaded = true
         };
 
         if (document.readyState !== 'loading') {

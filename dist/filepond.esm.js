@@ -9471,15 +9471,13 @@ let isTicking = false;
 let state = null;
 
 function tick(ts) {
+    // queue next tick
     const scheduleTick = () => {
         if (state.activeCount === 0) {
-            console.log('STOP');
             isTicking = false;
         } else if (document.hidden) {
-            console.log('TIMEOUT');
             setTimeout(() => tick(performance.now()), interval);
         } else {
-            console.log('ANIMATION');
             window.requestAnimationFrame(tick);
         }
     };
@@ -9488,19 +9486,17 @@ function tick(ts) {
 
     const painter = window[name];
 
+    // limit fps
     if (!last) {
         last = ts;
     } else {
         const delta = ts - last;
         last = ts - (delta % interval);
-        console.log({ delta, interval });
         if (delta <= interval) {
             scheduleTick();
             return;
         }
     }
-
-    console.log('TICK', painter, name);
 
     // update view
     painter.readers.forEach(read => read());
@@ -9511,7 +9507,6 @@ function tick(ts) {
 
 const triggerTick = outterState => {
     state = outterState;
-    // window.requestAnimationFrame(tick)
     if (isTicking) return;
     isTicking = true;
     tick(performance.now());
@@ -9552,6 +9547,7 @@ const supported = (() => {
 const state$1 = {
     // active app instances, used to redraw the apps and to find the later
     apps: [],
+    activeCount: 0,
 };
 
 // plugin name
@@ -9572,7 +9568,6 @@ let find = fn;
 let registerPlugin = fn;
 let getOptions$1 = fn;
 let setOptions$1 = fn;
-state$1.activeCount = 0;
 
 // if not supported, no API
 if (supported()) {
@@ -9605,7 +9600,6 @@ if (supported()) {
 
         // clean up event
         document.removeEventListener('DOMContentLoaded', dispatch);
-        // state.loaded = true
     };
 
     if (document.readyState !== 'loading') {
