@@ -9,6 +9,7 @@ import { ItemStatus } from './app/enum/ItemStatus';
 import { Status as StatusEnum } from './app/enum/Status';
 import { FileOrigin as FileOriginEnum } from './app/enum/FileOrigin';
 import { isBrowser } from './utils/isBrowser';
+import { triggerTick } from '../tick';
 
 // feature detection used by supported() method
 const isOperaMini = () => Object.prototype.toString.call(window.operamini) === '[object OperaMini]';
@@ -23,7 +24,7 @@ const isIE11 = () => /MSIE|Trident/.test(window.navigator.userAgent);
 export const supported = (() => {
 
     // Runs immediately and then remembers result for subsequent calls
-    const isSupported = 
+    const isSupported =
 
         // Has to be a browser
         isBrowser() &&
@@ -50,7 +51,8 @@ export const supported = (() => {
  */
 const state = {
     // active app instances, used to redraw the apps and to find the later
-    apps: []
+    apps: [],
+    activeCount: 0,
 };
 
 // plugin name
@@ -59,7 +61,7 @@ const name = 'filepond';
 /**
  * Public Plugin methods
  */
-const fn = () => {};
+const fn = () => { };
 export let Status = {};
 export let FileStatus = {};
 export let FileOrigin = {};
@@ -128,9 +130,11 @@ if (supported()) {
 
     // create method, creates apps and adds them to the app array
     create = (...args) => {
+        state.activeCount++
         const app = createApp(...args);
         app.on('destroy', destroy);
         state.apps.push(app);
+        triggerTick(state);
         return createAppAPI(app);
     };
 
@@ -139,7 +143,9 @@ if (supported()) {
         // returns true if the app was destroyed successfully
         const indexToRemove = state.apps.findIndex(app => app.isAttachedTo(hook));
         if (indexToRemove >= 0) {
-            
+
+            state.activeCount--
+
             // remove from apps
             const app = state.apps.splice(indexToRemove, 1)[0];
 
