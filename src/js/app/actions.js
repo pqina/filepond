@@ -766,6 +766,14 @@ export const actions = (dispatch, query, state) => ({
     }),
 
     PROCESS_ITEM: getItemByQueryFromState(state, (item, success, failure) => {
+        // beforeProcessFile hook
+        const beforeProcess = query('GET_BEFORE_PROCESS_FILE');
+        if(beforeProcess && !beforeProcess(item)){
+           let error = Error("beforeProcessFile hook prevented upload.");
+           item.abortProcessing();
+           failure({error,item})
+           return;
+        }
         const maxParallelUploads = query('GET_MAX_PARALLEL_UPLOADS');
         const totalCurrentUploads = query('GET_ITEMS_BY_STATUS', ItemStatus.PROCESSING).length;
 
