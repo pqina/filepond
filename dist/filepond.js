@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.30.4
+ * FilePond 4.30.5
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -8721,14 +8721,6 @@
             }),
 
             PROCESS_ITEM: getItemByQueryFromState(state, function(item, success, failure) {
-                // beforeProcessFile hook
-                var beforeProcess = query('GET_BEFORE_PROCESS_FILE');
-                if (beforeProcess && !beforeProcess(item)) {
-                    var error = Error('beforeProcessFile hook prevented upload.');
-                    item.abortProcessing();
-                    failure({ error: error, item: item });
-                    return;
-                }
                 var maxParallelUploads = query('GET_MAX_PARALLEL_UPLOADS');
                 var totalCurrentUploads = query('GET_ITEMS_BY_STATUS', ItemStatus.PROCESSING)
                     .length;
@@ -8838,7 +8830,14 @@
                         applyFilterChain('PREPARE_OUTPUT', file, { query: query, item: item })
                             .then(function(file) {
                                 dispatch('DID_PREPARE_OUTPUT', { id: item.id, file: file });
-
+                                // beforeProcessFile hook
+                                var beforeProcess = query('GET_BEFORE_PROCESS_FILE');
+                                if (beforeProcess && !beforeProcess(file)) {
+                                    var _error = Error('beforeProcessFile hook prevented upload.');
+                                    item.abortProcessing();
+                                    failure({ error: _error, item: item });
+                                    return;
+                                }
                                 success(file);
                             })
                             .catch(error);
