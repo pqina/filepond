@@ -22,12 +22,12 @@ export const createDragNDropClient = (
         element,
         filterElement,
         state: null,
-        ondrop: () => {},
-        onenter: () => {},
-        ondrag: () => {},
-        onexit: () => {},
-        onload: () => {},
-        allowdrop: () => {}
+        ondrop: () => { },
+        onenter: () => { },
+        ondrag: () => { },
+        onexit: () => { },
+        onload: () => { },
+        allowdrop: () => { }
     };
 
     client.destroy = observer.addListener(client);
@@ -111,7 +111,7 @@ const isEventTarget = (e, target) => {
 
     // get element at position
     // if root is not actual shadow DOM and does not have elementFromPoint method, use the one on document
-    const elementAtPosition = elementFromPoint(root,{
+    const elementAtPosition = elementFromPoint(root, {
         x: e.pageX - window.pageXOffset,
         y: e.pageY - window.pageYOffset
     });
@@ -126,10 +126,11 @@ const setDropEffect = (dataTransfer, effect) => {
     // is in try catch as IE11 will throw error if not
     try {
         dataTransfer.dropEffect = effect;
-    } catch (e) {}
+    } catch (e) { }
 };
 
 const dragenter = (root, clients) => e => {
+    e.stopPropagation();
     e.preventDefault();
 
     initialTarget = e.target;
@@ -147,6 +148,7 @@ const dragenter = (root, clients) => e => {
 };
 
 const dragover = (root, clients) => e => {
+    e.stopPropagation();
     e.preventDefault();
 
     const dataTransfer = e.dataTransfer;
@@ -179,7 +181,7 @@ const dragover = (root, clients) => e => {
 
             // targetting this client
             if (isEventTarget(e, element)) {
-                
+
                 overDropTarget = true;
 
                 // had no previous state, means we are entering this client
@@ -220,6 +222,7 @@ const dragover = (root, clients) => e => {
 };
 
 const drop = (root, clients) => e => {
+    e.stopPropagation();
     e.preventDefault();
 
     const dataTransfer = e.dataTransfer;
