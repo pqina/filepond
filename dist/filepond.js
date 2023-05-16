@@ -10269,6 +10269,7 @@
 
     var dragenter = function dragenter(root, clients) {
         return function(e) {
+            e.stopPropagation();
             e.preventDefault();
 
             initialTarget = e.target;
@@ -10289,6 +10290,7 @@
 
     var dragover = function dragover(root, clients) {
         return function(e) {
+            e.stopPropagation();
             e.preventDefault();
 
             var dataTransfer = e.dataTransfer;
@@ -10357,6 +10359,7 @@
 
     var drop = function drop(root, clients) {
         return function(e) {
+            e.stopPropagation();
             e.preventDefault();
 
             var dataTransfer = e.dataTransfer;

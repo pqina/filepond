@@ -7547,6 +7547,7 @@ const setDropEffect = (dataTransfer, effect) => {
 };
 
 const dragenter = (root, clients) => e => {
+    e.stopPropagation();
     e.preventDefault();
 
     initialTarget = e.target;
@@ -7564,6 +7565,7 @@ const dragenter = (root, clients) => e => {
 };
 
 const dragover = (root, clients) => e => {
+    e.stopPropagation();
     e.preventDefault();
 
     const dataTransfer = e.dataTransfer;
@@ -7625,6 +7627,7 @@ const dragover = (root, clients) => e => {
 };
 
 const drop = (root, clients) => e => {
+    e.stopPropagation();
     e.preventDefault();
 
     const dataTransfer = e.dataTransfer;
