@@ -15,19 +15,19 @@
 })(this, function(exports) {
     'use strict';
 
-    var isNode = function isNode(value) {
+    let isNode = function isNode(value) {
         return value instanceof HTMLElement;
     };
 
-    var createStore = function createStore(initialState) {
-        var queries = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
-        var actions = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+    let createStore = function createStore(initialState) {
+        let queries = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+        let actions = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
         // internal state
-        var state = Object.assign({}, initialState);
+        let state = Object.assign({}, initialState);
 
         // contains all actions for next frame, is clear when actions are requested
-        var actionQueue = [];
-        var dispatchQueue = [];
+        let actionQueue = [];
+        let dispatchQueue = [];
 
         // returns a duplicate of the current state
         var getState = function getState() {
@@ -35,9 +35,9 @@
         };
 
         // returns a duplicate of the actions array and clears the actions array
-        var processActionQueue = function processActionQueue() {
+        let processActionQueue = function processActionQueue() {
             // create copy of actions queue
-            var queue = [].concat(actionQueue);
+            let queue = [].concat(actionQueue);
 
             // clear actions queue (we don't want no double actions)
             actionQueue.length = 0;
@@ -46,23 +46,23 @@
         };
 
         // processes actions that might block the main UI thread
-        var processDispatchQueue = function processDispatchQueue() {
+        let processDispatchQueue = function processDispatchQueue() {
             // create copy of actions queue
-            var queue = [].concat(dispatchQueue);
+            let queue = [].concat(dispatchQueue);
 
             // clear actions queue (we don't want no double actions)
             dispatchQueue.length = 0;
 
             // now dispatch these actions
             queue.forEach(function(_ref) {
-                var type = _ref.type,
+                let type = _ref.type,
                     data = _ref.data;
                 dispatch(type, data);
             });
         };
 
         // adds a new action, calls its handler and
-        var dispatch = function dispatch(type, data, isBlocking) {
+        let dispatch = function dispatch(type, data, isBlocking) {
             // is blocking action (should never block if document is hidden)
             if (isBlocking && !document.hidden) {
                 dispatchQueue.push({ type: type, data: data });
@@ -81,10 +81,10 @@
             });
         };
 
-        var query = function query(str) {
-            var _queryHandles;
+        let query = function query(str) {
+            let _queryHandles;
             for (
-                var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1;
+                let _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1;
                 _key < _len;
                 _key++
             ) {
@@ -95,7 +95,7 @@
                 : null;
         };
 
-        var api = {
+        let api = {
             getState: getState,
             processActionQueue: processActionQueue,
             processDispatchQueue: processDispatchQueue,
@@ -103,12 +103,12 @@
             query: query,
         };
 
-        var queryHandles = {};
+        let queryHandles = {};
         queries.forEach(function(query) {
             queryHandles = Object.assign({}, query(state), {}, queryHandles);
         });
 
-        var actionHandlers = {};
+        let actionHandlers = {};
         actions.forEach(function(action) {
             actionHandlers = Object.assign({}, action(dispatch, query, state), {}, actionHandlers);
         });
@@ -116,7 +116,7 @@
         return api;
     };
 
-    var defineProperty = function defineProperty(obj, property, definition) {
+    let defineProperty = function defineProperty(obj, property, definition) {
         if (typeof definition === 'function') {
             obj[property] = definition;
             return;
@@ -124,8 +124,8 @@
         Object.defineProperty(obj, property, Object.assign({}, definition));
     };
 
-    var forin = function forin(obj, cb) {
-        for (var key in obj) {
+    let forin = function forin(obj, cb) {
+        for (let key in obj) {
             if (!obj.hasOwnProperty(key)) {
                 continue;
             }
@@ -134,36 +134,36 @@
         }
     };
 
-    var createObject = function createObject(definition) {
-        var obj = {};
+    let createObject = function createObject(definition) {
+        let obj = {};
         forin(definition, function(property) {
             defineProperty(obj, property, definition[property]);
         });
         return obj;
     };
 
-    var attr = function attr(node, name) {
-        var value = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+    let attr = function attr(node, name) {
+        let value = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
         if (value === null) {
             return node.getAttribute(name) || node.hasAttribute(name);
         }
         node.setAttribute(name, value);
     };
 
-    var ns = 'http://www.w3.org/2000/svg';
-    var svgElements = ['svg', 'path']; // only svg elements used
+    let ns = 'http://www.w3.org/2000/svg';
+    let svgElements = ['svg', 'path']; // only svg elements used
 
-    var isSVGElement = function isSVGElement(tag) {
+    let isSVGElement = function isSVGElement(tag) {
         return svgElements.includes(tag);
     };
 
-    var createElement = function createElement(tag, className) {
-        var attributes = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    let createElement = function createElement(tag, className) {
+        let attributes = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
         if (typeof className === 'object') {
             attributes = className;
             className = null;
         }
-        var element = isSVGElement(tag)
+        let element = isSVGElement(tag)
             ? document.createElementNS(ns, tag)
             : document.createElement(tag);
         if (className) {
@@ -179,7 +179,7 @@
         return element;
     };
 
-    var appendChild = function appendChild(parent) {
+    let appendChild = function appendChild(parent) {
         return function(child, index) {
             if (typeof index !== 'undefined' && parent.children[index]) {
                 parent.insertBefore(child, parent.children[index]);
@@ -189,7 +189,7 @@
         };
     };
 
-    var appendChildView = function appendChildView(parent, childViews) {
+    let appendChildView = function appendChildView(parent, childViews) {
         return function(view, index) {
             if (typeof index !== 'undefined') {
                 childViews.splice(index, 0, view);
@@ -201,7 +201,7 @@
         };
     };
 
-    var removeChildView = function removeChildView(parent, childViews) {
+    let removeChildView = function removeChildView(parent, childViews) {
         return function(view) {
             // remove from child views
             childViews.splice(childViews.indexOf(view), 1);
@@ -215,15 +215,15 @@
         };
     };
 
-    var IS_BROWSER = (function() {
+    let IS_BROWSER = (function() {
         return typeof window !== 'undefined' && typeof window.document !== 'undefined';
     })();
-    var isBrowser = function isBrowser() {
+    let isBrowser = function isBrowser() {
         return IS_BROWSER;
     };
 
-    var testElement = isBrowser() ? createElement('svg') : {};
-    var getChildCount =
+    let testElement = isBrowser() ? createElement('svg') : {};
+    let getChildCount =
         'children' in testElement
             ? function(el) {
                   return el.children.length;
@@ -232,13 +232,13 @@
                   return el.childNodes.length;
               };
 
-    var getViewRect = function getViewRect(elementRect, childViews, offset, scale) {
-        var left = offset[0] || elementRect.left;
-        var top = offset[1] || elementRect.top;
-        var right = left + elementRect.width;
-        var bottom = top + elementRect.height * (scale[1] || 1);
+    let getViewRect = function getViewRect(elementRect, childViews, offset, scale) {
+        let left = offset[0] || elementRect.left;
+        let top = offset[1] || elementRect.top;
+        let right = left + elementRect.width;
+        let bottom = top + elementRect.height * (scale[1] || 1);
 
-        var rect = {
+        let rect = {
             // the rectangle of the element itself
             element: Object.assign({}, elementRect),
 
@@ -286,7 +286,7 @@
         return rect;
     };
 
-    var expandRect = function expandRect(parent, child) {
+    let expandRect = function expandRect(parent, child) {
         // adjust for parent offset
         child.top += parent.top;
         child.right += parent.left;
@@ -302,12 +302,12 @@
         }
     };
 
-    var calculateRectSize = function calculateRectSize(rect) {
+    let calculateRectSize = function calculateRectSize(rect) {
         rect.width = rect.right - rect.left;
         rect.height = rect.bottom - rect.top;
     };
 
-    var isNumber = function isNumber(value) {
+    let isNumber = function isNumber(value) {
         return typeof value === 'number';
     };
 
@@ -319,32 +319,32 @@
      * @param errorMargin
      * @returns {boolean}
      */
-    var thereYet = function thereYet(position, destination, velocity) {
-        var errorMargin = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0.001;
+    let thereYet = function thereYet(position, destination, velocity) {
+        let errorMargin = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0.001;
         return Math.abs(position - destination) < errorMargin && Math.abs(velocity) < errorMargin;
     };
 
     /**
      * Spring animation
      */
-    var spring =
+    let spring =
         // default options
         function spring() // method definition
         {
-            var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+            let _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
                 _ref$stiffness = _ref.stiffness,
                 stiffness = _ref$stiffness === void 0 ? 0.5 : _ref$stiffness,
                 _ref$damping = _ref.damping,
                 damping = _ref$damping === void 0 ? 0.75 : _ref$damping,
                 _ref$mass = _ref.mass,
                 mass = _ref$mass === void 0 ? 10 : _ref$mass;
-            var target = null;
-            var position = null;
-            var velocity = 0;
-            var resting = false;
+            let target = null;
+            let position = null;
+            let velocity = 0;
+            let resting = false;
 
             // updates spring state
-            var interpolate = function interpolate(ts, skipToEndState) {
+            let interpolate = function interpolate(ts, skipToEndState) {
                 // in rest, don't animate
                 if (resting) return;
 
@@ -356,7 +356,7 @@
                 }
 
                 // calculate spring force
-                var f = -(position - target) * stiffness;
+                let f = -(position - target) * stiffness;
 
                 // update velocity by adding force based on mass
                 velocity += f / mass;
@@ -386,7 +386,7 @@
              * Set new target value
              * @param value
              */
-            var setTarget = function setTarget(value) {
+            let setTarget = function setTarget(value) {
                 // if currently has no position, set target and position to this value
                 if (isNumber(value) && !isNumber(position)) {
                     position = value;
@@ -418,7 +418,7 @@
             };
 
             // need 'api' to call onupdate callback
-            var api = createObject({
+            let api = createObject({
                 interpolate: interpolate,
                 target: {
                     set: setTarget,
@@ -440,32 +440,32 @@
             return api;
         };
 
-    var easeLinear = function easeLinear(t) {
+    let easeLinear = function easeLinear(t) {
         return t;
     };
-    var easeInOutQuad = function easeInOutQuad(t) {
+    let easeInOutQuad = function easeInOutQuad(t) {
         return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
     };
 
-    var tween =
+    let tween =
         // default values
         function tween() // method definition
         {
-            var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+            let _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
                 _ref$duration = _ref.duration,
                 duration = _ref$duration === void 0 ? 500 : _ref$duration,
                 _ref$easing = _ref.easing,
                 easing = _ref$easing === void 0 ? easeInOutQuad : _ref$easing,
                 _ref$delay = _ref.delay,
                 delay = _ref$delay === void 0 ? 0 : _ref$delay;
-            var start = null;
-            var t;
-            var p;
-            var resting = true;
-            var reverse = false;
-            var target = null;
+            let start = null;
+            let t;
+            let p;
+            let resting = true;
+            let reverse = false;
+            let target = null;
 
-            var interpolate = function interpolate(ts, skipToEndState) {
+            let interpolate = function interpolate(ts, skipToEndState) {
                 if (resting || target === null) return;
 
                 if (start === null) {
@@ -489,7 +489,7 @@
             };
 
             // need 'api' to call onupdate callback
-            var api = createObject({
+            let api = createObject({
                 interpolate: interpolate,
                 target: {
                     get: function get() {
@@ -533,7 +533,7 @@
             return api;
         };
 
-    var animator = {
+    let animator = {
         spring: spring,
         tween: tween,
     };
@@ -543,30 +543,30 @@
                        { translation: { type: 'spring', ... }, ... }
                        { translation: { x: { type: 'spring', ... } } }
                       */
-    var createAnimator = function createAnimator(definition, category, property) {
+    let createAnimator = function createAnimator(definition, category, property) {
         // default is single definition
         // we check if transform is set, if so, we check if property is set
-        var def =
+        let def =
             definition[category] && typeof definition[category][property] === 'object'
                 ? definition[category][property]
                 : definition[category] || definition;
 
-        var type = typeof def === 'string' ? def : def.type;
-        var props = typeof def === 'object' ? Object.assign({}, def) : {};
+        let type = typeof def === 'string' ? def : def.type;
+        let props = typeof def === 'object' ? Object.assign({}, def) : {};
 
         return animator[type] ? animator[type](props) : null;
     };
 
-    var addGetSet = function addGetSet(keys, obj, props) {
-        var overwrite = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+    let addGetSet = function addGetSet(keys, obj, props) {
+        let overwrite = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
         obj = Array.isArray(obj) ? obj : [obj];
         obj.forEach(function(o) {
             keys.forEach(function(key) {
-                var name = key;
-                var getter = function getter() {
+                let name = key;
+                let getter = function getter() {
                     return props[key];
                 };
-                var setter = function setter(value) {
+                let setter = function setter(value) {
                     return (props[key] = value);
                 };
 
@@ -592,20 +592,20 @@
     // add getters and setters to internal and external api (if not set)
     // setup animators
 
-    var animations = function animations(_ref) {
-        var mixinConfig = _ref.mixinConfig,
+    let animations = function animations(_ref) {
+        let mixinConfig = _ref.mixinConfig,
             viewProps = _ref.viewProps,
             viewInternalAPI = _ref.viewInternalAPI,
             viewExternalAPI = _ref.viewExternalAPI;
         // initial properties
-        var initialProps = Object.assign({}, viewProps);
+        let initialProps = Object.assign({}, viewProps);
 
         // list of all active animations
-        var animations = [];
+        let animations = [];
 
         // setup animators
         forin(mixinConfig, function(property, animation) {
-            var animator = createAnimator(animation);
+            let animator = createAnimator(animation);
             if (!animator) {
                 return;
             }
@@ -619,7 +619,7 @@
             animator.target = initialProps[property];
 
             // when value is set, set the animator target value
-            var prop = {
+            let prop = {
                 key: property,
                 setter: function setter(value) {
                     // if already at target, we done!
@@ -644,8 +644,8 @@
         // expose internal write api
         return {
             write: function write(ts) {
-                var skipToEndState = document.hidden;
-                var resting = true;
+                let skipToEndState = document.hidden;
+                let resting = true;
                 animations.forEach(function(animation) {
                     if (!animation.resting) resting = false;
                     animation.interpolate(ts, skipToEndState);
@@ -656,30 +656,30 @@
         };
     };
 
-    var addEvent = function addEvent(element) {
+    let addEvent = function addEvent(element) {
         return function(type, fn) {
             element.addEventListener(type, fn);
         };
     };
 
-    var removeEvent = function removeEvent(element) {
+    let removeEvent = function removeEvent(element) {
         return function(type, fn) {
             element.removeEventListener(type, fn);
         };
     };
 
     // mixin
-    var listeners = function listeners(_ref) {
-        var mixinConfig = _ref.mixinConfig,
+    let listeners = function listeners(_ref) {
+        let mixinConfig = _ref.mixinConfig,
             viewProps = _ref.viewProps,
             viewInternalAPI = _ref.viewInternalAPI,
             viewExternalAPI = _ref.viewExternalAPI,
             viewState = _ref.viewState,
             view = _ref.view;
-        var events = [];
+        let events = [];
 
-        var add = addEvent(view.element);
-        var remove = removeEvent(view.element);
+        let add = addEvent(view.element);
+        let remove = removeEvent(view.element);
 
         viewExternalAPI.on = function(type, fn) {
             events.push({
@@ -716,14 +716,14 @@
 
     // add to external api and link to props
 
-    var apis = function apis(_ref) {
-        var mixinConfig = _ref.mixinConfig,
+    let apis = function apis(_ref) {
+        let mixinConfig = _ref.mixinConfig,
             viewProps = _ref.viewProps,
             viewExternalAPI = _ref.viewExternalAPI;
         addGetSet(mixinConfig, viewExternalAPI, viewProps);
     };
 
-    var isDefined = function isDefined(value) {
+    let isDefined = function isDefined(value) {
         return value != null;
     };
 
@@ -732,7 +732,7 @@
     // set initial state based on props in viewProps
     // apply as transforms each frame
 
-    var defaults = {
+    let defaults = {
         opacity: 1,
         scaleX: 1,
         scaleY: 1,
@@ -745,30 +745,30 @@
         originY: 0,
     };
 
-    var styles = function styles(_ref) {
-        var mixinConfig = _ref.mixinConfig,
+    let styles = function styles(_ref) {
+        let mixinConfig = _ref.mixinConfig,
             viewProps = _ref.viewProps,
             viewInternalAPI = _ref.viewInternalAPI,
             viewExternalAPI = _ref.viewExternalAPI,
             view = _ref.view;
         // initial props
-        var initialProps = Object.assign({}, viewProps);
+        let initialProps = Object.assign({}, viewProps);
 
         // current props
-        var currentProps = {};
+        let currentProps = {};
 
         // we will add those properties to the external API and link them to the viewState
         addGetSet(mixinConfig, [viewInternalAPI, viewExternalAPI], viewProps);
 
         // override rect on internal and external rect getter so it takes in account transforms
-        var getOffset = function getOffset() {
+        let getOffset = function getOffset() {
             return [viewProps['translateX'] || 0, viewProps['translateY'] || 0];
         };
 
-        var getScale = function getScale() {
+        let getScale = function getScale() {
             return [viewProps['scaleX'] || 0, viewProps['scaleY'] || 0];
         };
-        var getRect = function getRect() {
+        let getRect = function getRect() {
             return view.rect
                 ? getViewRect(view.rect, view.childViews, getOffset(), getScale())
                 : null;
@@ -803,14 +803,14 @@
         };
     };
 
-    var propsHaveChanged = function propsHaveChanged(currentProps, newProps) {
+    let propsHaveChanged = function propsHaveChanged(currentProps, newProps) {
         // different amount of keys
         if (Object.keys(currentProps).length !== Object.keys(newProps).length) {
             return true;
         }
 
         // lets analyze the individual props
-        for (var prop in newProps) {
+        for (let prop in newProps) {
             if (newProps[prop] !== currentProps[prop]) {
                 return true;
             }
@@ -819,8 +819,8 @@
         return false;
     };
 
-    var applyStyles = function applyStyles(element, _ref2) {
-        var opacity = _ref2.opacity,
+    let applyStyles = function applyStyles(element, _ref2) {
+        let opacity = _ref2.opacity,
             perspective = _ref2.perspective,
             translateX = _ref2.translateX,
             translateY = _ref2.translateY,
@@ -834,8 +834,8 @@
             width = _ref2.width,
             height = _ref2.height;
 
-        var transforms = '';
-        var styles = '';
+        let transforms = '';
+        let styles = '';
 
         // handle transform origin
         if (isDefined(originX) || isDefined(originY)) {
@@ -919,17 +919,17 @@
         }
     };
 
-    var Mixins = {
+    let Mixins = {
         styles: styles,
         listeners: listeners,
         animations: animations,
         apis: apis,
     };
 
-    var updateRect = function updateRect() {
-        var rect = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        var element = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-        var style = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+    let updateRect = function updateRect() {
+        let rect = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        let element = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        let style = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
 
         if (!element.layoutCalculated) {
             rect.paddingTop = parseInt(style.paddingTop, 10) || 0;
@@ -955,10 +955,10 @@
         return rect;
     };
 
-    var createView =
+    let createView =
         // default view definition
         function createView() {
-            var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
+            let _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {},
                 _ref$tag = _ref.tag,
                 tag = _ref$tag === void 0 ? 'div' : _ref$tag,
                 _ref$name = _ref.name,
@@ -994,68 +994,68 @@
                 // each view requires reference to store
                 store
             ) {
-                var props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+                let props = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
                 // root element should not be changed
-                var element = createElement(tag, 'filepond--' + name, attributes);
+                let element = createElement(tag, 'filepond--' + name, attributes);
 
                 // style reference should also not be changed
-                var style = window.getComputedStyle(element, null);
+                let style = window.getComputedStyle(element, null);
 
                 // element rectangle
-                var rect = updateRect();
-                var frameRect = null;
+                let rect = updateRect();
+                let frameRect = null;
 
                 // rest state
-                var isResting = false;
+                let isResting = false;
 
                 // pretty self explanatory
-                var childViews = [];
+                let childViews = [];
 
                 // loaded mixins
-                var activeMixins = [];
+                let activeMixins = [];
 
                 // references to created children
-                var ref = {};
+                let ref = {};
 
                 // state used for each instance
-                var state = {};
+                let state = {};
 
                 // list of writers that will be called to update this view
-                var writers = [
+                let writers = [
                     write, // default writer
                 ];
 
-                var readers = [
+                let readers = [
                     read, // default reader
                 ];
 
-                var destroyers = [
+                let destroyers = [
                     destroy, // default destroy
                 ];
 
                 // core view methods
-                var getElement = function getElement() {
+                let getElement = function getElement() {
                     return element;
                 };
-                var getChildViews = function getChildViews() {
+                let getChildViews = function getChildViews() {
                     return childViews.concat();
                 };
-                var getReference = function getReference() {
+                let getReference = function getReference() {
                     return ref;
                 };
-                var createChildView = function createChildView(store) {
+                let createChildView = function createChildView(store) {
                     return function(view, props) {
                         return view(store, props);
                     };
                 };
-                var getRect = function getRect() {
+                let getRect = function getRect() {
                     if (frameRect) {
                         return frameRect;
                     }
                     frameRect = getViewRect(rect, childViews, [0, 0], [1, 1]);
                     return frameRect;
                 };
-                var getStyle = function getStyle() {
+                let getStyle = function getStyle() {
                     return style;
                 };
 
@@ -1063,7 +1063,7 @@
                  * Read data from DOM
                  * @private
                  */
-                var _read = function _read() {
+                let _read = function _read() {
                     frameRect = null;
 
                     // read child views
@@ -1071,13 +1071,13 @@
                         return child._read();
                     });
 
-                    var shouldUpdate = !(ignoreRectUpdate && rect.width && rect.height);
+                    let shouldUpdate = !(ignoreRectUpdate && rect.width && rect.height);
                     if (shouldUpdate) {
                         updateRect(rect, element, style);
                     }
 
                     // readers
-                    var api = { root: internalAPI, props: props, rect: rect };
+                    let api = { root: internalAPI, props: props, rect: rect };
                     readers.forEach(function(reader) {
                         return reader(api);
                     });
@@ -1087,13 +1087,13 @@
                  * Write data to DOM
                  * @private
                  */
-                var _write = function _write(ts, frameActions, shouldOptimize) {
+                let _write = function _write(ts, frameActions, shouldOptimize) {
                     // if no actions, we assume that the view is resting
-                    var resting = frameActions.length === 0;
+                    let resting = frameActions.length === 0;
 
                     // writers
                     writers.forEach(function(writer) {
-                        var writerResting = writer({
+                        let writerResting = writer({
                             props: props,
                             root: internalAPI,
                             actions: frameActions,
@@ -1109,7 +1109,7 @@
                     // run mixins
                     activeMixins.forEach(function(mixin) {
                         // if one of the mixins is still busy after write operation, we are not resting
-                        var mixinResting = mixin.write(ts);
+                        let mixinResting = mixin.write(ts);
                         if (mixinResting === false) {
                             resting = false;
                         }
@@ -1122,7 +1122,7 @@
                         })
                         .forEach(function(child) {
                             // if a child view is not resting, we are not resting
-                            var childResting = child._write(
+                            let childResting = child._write(
                                 ts,
                                 filterFrameActionsForChild(child, frameActions),
                                 shouldOptimize
@@ -1173,7 +1173,7 @@
                     return resting;
                 };
 
-                var _destroy = function _destroy() {
+                let _destroy = function _destroy() {
                     activeMixins.forEach(function(mixin) {
                         return mixin.destroy();
                     });
@@ -1186,7 +1186,7 @@
                 };
 
                 // sharedAPI
-                var sharedAPIDefinition = {
+                let sharedAPIDefinition = {
                     element: {
                         get: getElement,
                     },
@@ -1201,7 +1201,7 @@
                 };
 
                 // private API definition
-                var internalAPIDefinition = Object.assign({}, sharedAPIDefinition, {
+                let internalAPIDefinition = Object.assign({}, sharedAPIDefinition, {
                     rect: {
                         get: getRect,
                     },
@@ -1245,7 +1245,7 @@
                 });
 
                 // public view API methods
-                var externalAPIDefinition = {
+                let externalAPIDefinition = {
                     element: {
                         get: getElement,
                     },
@@ -1273,7 +1273,7 @@
                 };
 
                 // mixin API methods
-                var mixinAPIDefinition = Object.assign({}, sharedAPIDefinition, {
+                let mixinAPIDefinition = Object.assign({}, sharedAPIDefinition, {
                     rect: {
                         get: function get() {
                             return rect;
@@ -1293,7 +1293,7 @@
                         return 0;
                     })
                     .forEach(function(key) {
-                        var mixinAPI = Mixins[key]({
+                        let mixinAPI = Mixins[key]({
                             mixinConfig: mixins[key],
                             viewProps: props,
                             viewState: state,
@@ -1308,7 +1308,7 @@
                     });
 
                 // construct private api
-                var internalAPI = createObject(internalAPIDefinition);
+                let internalAPI = createObject(internalAPIDefinition);
 
                 // create the view
                 create({
@@ -1317,7 +1317,7 @@
                 });
 
                 // append created child views to root node
-                var childCount = getChildCount(element); // need to know the current child count so appending happens in correct order
+                let childCount = getChildCount(element); // need to know the current child count so appending happens in correct order
                 childViews.forEach(function(child, index) {
                     internalAPI.appendChild(child.element, childCount + index);
                 });
@@ -1330,10 +1330,10 @@
             };
         };
 
-    var createPainter = function createPainter(read, write) {
-        var fps = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 60;
+    let createPainter = function createPainter(read, write) {
+        let fps = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 60;
 
-        var name = '__framePainter';
+        let name = '__framePainter';
 
         // set global painter
         if (window[name]) {
@@ -1347,15 +1347,15 @@
             writers: [write],
         };
 
-        var painter = window[name];
+        let painter = window[name];
 
-        var interval = 1000 / fps;
-        var last = null;
-        var id = null;
-        var requestTick = null;
-        var cancelTick = null;
+        let interval = 1000 / fps;
+        let last = null;
+        let id = null;
+        let requestTick = null;
+        let cancelTick = null;
 
-        var setTimerType = function setTimerType() {
+        let setTimerType = function setTimerType() {
             if (document.hidden) {
                 requestTick = function requestTick() {
                     return window.setTimeout(function() {
@@ -1381,7 +1381,7 @@
             tick(performance.now());
         });
 
-        var tick = function tick(ts) {
+        let tick = function tick(ts) {
             // queue next tick
             id = requestTick(tick);
 
@@ -1390,7 +1390,7 @@
                 last = ts;
             }
 
-            var delta = ts - last;
+            let delta = ts - last;
 
             if (delta <= interval) {
                 // skip frame
@@ -1419,9 +1419,9 @@
         };
     };
 
-    var createRoute = function createRoute(routes, fn) {
+    let createRoute = function createRoute(routes, fn) {
         return function(_ref) {
-            var root = _ref.root,
+            let root = _ref.root,
                 props = _ref.props,
                 _ref$actions = _ref.actions,
                 actions = _ref$actions === void 0 ? [] : _ref$actions,
@@ -1453,32 +1453,32 @@
         };
     };
 
-    var insertBefore = function insertBefore(newNode, referenceNode) {
+    let insertBefore = function insertBefore(newNode, referenceNode) {
         return referenceNode.parentNode.insertBefore(newNode, referenceNode);
     };
 
-    var insertAfter = function insertAfter(newNode, referenceNode) {
+    let insertAfter = function insertAfter(newNode, referenceNode) {
         return referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
     };
 
-    var isArray = function isArray(value) {
+    let isArray = function isArray(value) {
         return Array.isArray(value);
     };
 
-    var isEmpty = function isEmpty(value) {
+    let isEmpty = function isEmpty(value) {
         return value == null;
     };
 
-    var trim = function trim(str) {
+    let trim = function trim(str) {
         return str.trim();
     };
 
-    var toString = function toString(value) {
+    let toString = function toString(value) {
         return '' + value;
     };
 
-    var toArray = function toArray(value) {
-        var splitter = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ',';
+    let toArray = function toArray(value) {
+        let splitter = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ',';
         if (isEmpty(value)) {
             return [];
         }
@@ -1493,19 +1493,19 @@
             });
     };
 
-    var isBoolean = function isBoolean(value) {
+    let isBoolean = function isBoolean(value) {
         return typeof value === 'boolean';
     };
 
-    var toBoolean = function toBoolean(value) {
+    let toBoolean = function toBoolean(value) {
         return isBoolean(value) ? value : value === 'true';
     };
 
-    var isString = function isString(value) {
+    let isString = function isString(value) {
         return typeof value === 'string';
     };
 
-    var toNumber = function toNumber(value) {
+    let toNumber = function toNumber(value) {
         return isNumber(value)
             ? value
             : isString(value)
@@ -1513,27 +1513,27 @@
             : 0;
     };
 
-    var toInt = function toInt(value) {
+    let toInt = function toInt(value) {
         return parseInt(toNumber(value), 10);
     };
 
-    var toFloat = function toFloat(value) {
+    let toFloat = function toFloat(value) {
         return parseFloat(toNumber(value));
     };
 
-    var isInt = function isInt(value) {
+    let isInt = function isInt(value) {
         return isNumber(value) && isFinite(value) && Math.floor(value) === value;
     };
 
-    var toBytes = function toBytes(value) {
-        var base = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1000;
+    let toBytes = function toBytes(value) {
+        let base = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1000;
         // is in bytes
         if (isInt(value)) {
             return value;
         }
 
         // is natural file size
-        var naturalFileSize = toString(value).trim();
+        let naturalFileSize = toString(value).trim();
 
         // if is value in megabytes
         if (/MB$/i.test(naturalFileSize)) {
@@ -1550,14 +1550,14 @@
         return toInt(naturalFileSize);
     };
 
-    var isFunction = function isFunction(value) {
+    let isFunction = function isFunction(value) {
         return typeof value === 'function';
     };
 
-    var toFunctionReference = function toFunctionReference(string) {
-        var ref = self;
-        var levels = string.split('.');
-        var level = null;
+    let toFunctionReference = function toFunctionReference(string) {
+        let ref = self;
+        let levels = string.split('.');
+        let level = null;
         while ((level = levels.shift())) {
             ref = ref[level];
             if (!ref) {
@@ -1567,7 +1567,7 @@
         return ref;
     };
 
-    var methods = {
+    let methods = {
         process: 'POST',
         patch: 'PATCH',
         revert: 'DELETE',
@@ -1576,8 +1576,8 @@
         load: 'GET',
     };
 
-    var createServerAPI = function createServerAPI(outline) {
-        var api = {};
+    let createServerAPI = function createServerAPI(outline) {
+        let api = {};
 
         api.url = isString(outline) ? outline : outline.url || '';
         api.timeout = outline.timeout ? parseInt(outline.timeout, 10) : 0;
@@ -1599,7 +1599,7 @@
         return api;
     };
 
-    var createAction = function createAction(name, outline, method, timeout, headers) {
+    let createAction = function createAction(name, outline, method, timeout, headers) {
         // is explicitely set to null so disable
         if (outline === null) {
             return null;
@@ -1611,7 +1611,7 @@
         }
 
         // build action object
-        var action = {
+        let action = {
             url: method === 'GET' || method === 'PATCH' ? '?' + name + '=' : '',
             method: method,
             headers: headers,
@@ -1633,7 +1633,7 @@
 
         // see if should reformat headers;
         if (isString(action.headers)) {
-            var parts = action.headers.split(/:(.+)/);
+            let parts = action.headers.split(/:(.+)/);
             action.headers = {
                 header: parts[0],
                 value: parts[1],
@@ -1646,19 +1646,19 @@
         return action;
     };
 
-    var toServerAPI = function toServerAPI(value) {
+    let toServerAPI = function toServerAPI(value) {
         return createServerAPI(value);
     };
 
-    var isNull = function isNull(value) {
+    let isNull = function isNull(value) {
         return value === null;
     };
 
-    var isObject = function isObject(value) {
+    let isObject = function isObject(value) {
         return typeof value === 'object' && value !== null;
     };
 
-    var isAPI = function isAPI(value) {
+    let isAPI = function isAPI(value) {
         return (
             isObject(value) &&
             isString(value.url) &&
@@ -1669,7 +1669,7 @@
         );
     };
 
-    var getType = function getType(value) {
+    let getType = function getType(value) {
         if (isArray(value)) {
             return 'array';
         }
@@ -1693,7 +1693,7 @@
         return typeof value;
     };
 
-    var replaceSingleQuotes = function replaceSingleQuotes(str) {
+    let replaceSingleQuotes = function replaceSingleQuotes(str) {
         return str
             .replace(/{\s*'/g, '{"')
             .replace(/'\s*}/g, '"}')
@@ -1703,7 +1703,7 @@
             .replace(/'\s*,/g, '",');
     };
 
-    var conversionTable = {
+    let conversionTable = {
         array: toArray,
         boolean: toBoolean,
         int: function int(value) {
@@ -1728,23 +1728,23 @@
         },
     };
 
-    var convertTo = function convertTo(value, type) {
+    let convertTo = function convertTo(value, type) {
         return conversionTable[type](value);
     };
 
-    var getValueByType = function getValueByType(newValue, defaultValue, valueType) {
+    let getValueByType = function getValueByType(newValue, defaultValue, valueType) {
         // can always assign default value
         if (newValue === defaultValue) {
             return newValue;
         }
 
         // get the type of the new value
-        var newValueType = getType(newValue);
+        let newValueType = getType(newValue);
 
         // is valid type?
         if (newValueType !== valueType) {
             // is string input, let's attempt to convert
-            var convertedValue = convertTo(newValue, valueType);
+            let convertedValue = convertTo(newValue, valueType);
 
             // what is the type now
             newValueType = getType(convertedValue);
@@ -1765,8 +1765,8 @@
         return newValue;
     };
 
-    var createOption = function createOption(defaultValue, valueType) {
-        var currentValue = defaultValue;
+    let createOption = function createOption(defaultValue, valueType) {
+        let currentValue = defaultValue;
         return {
             enumerable: true,
             get: function get() {
@@ -1778,16 +1778,16 @@
         };
     };
 
-    var createOptions = function createOptions(options) {
-        var obj = {};
+    let createOptions = function createOptions(options) {
+        let obj = {};
         forin(options, function(prop) {
-            var optionDefinition = options[prop];
+            let optionDefinition = options[prop];
             obj[prop] = createOption(optionDefinition[0], optionDefinition[1]);
         });
         return createObject(obj);
     };
 
-    var createInitialState = function createInitialState(options) {
+    let createInitialState = function createInitialState(options) {
         return {
             // model
             items: [],
@@ -1806,8 +1806,8 @@
         };
     };
 
-    var fromCamels = function fromCamels(string) {
-        var separator = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '-';
+    let fromCamels = function fromCamels(string) {
+        let separator = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '-';
         return string
             .split(/(?=[A-Z])/)
             .map(function(part) {
@@ -1816,8 +1816,8 @@
             .join(separator);
     };
 
-    var createOptionAPI = function createOptionAPI(store, options) {
-        var obj = {};
+    let createOptionAPI = function createOptionAPI(store, options) {
+        let obj = {};
         forin(options, function(key) {
             obj[key] = {
                 get: function get() {
@@ -1833,11 +1833,11 @@
         return obj;
     };
 
-    var createOptionActions = function createOptionActions(options) {
+    let createOptionActions = function createOptionActions(options) {
         return function(dispatch, query, state) {
-            var obj = {};
+            let obj = {};
             forin(options, function(key) {
-                var name = fromCamels(key, '_').toUpperCase();
+                let name = fromCamels(key, '_').toUpperCase();
 
                 obj['SET_' + name] = function(action) {
                     try {
@@ -1852,9 +1852,9 @@
         };
     };
 
-    var createOptionQueries = function createOptionQueries(options) {
+    let createOptionQueries = function createOptionQueries(options) {
         return function(state) {
-            var obj = {};
+            let obj = {};
             forin(options, function(key) {
                 obj['GET_' + fromCamels(key, '_').toUpperCase()] = function(action) {
                     return state.options[key];
@@ -1864,7 +1864,7 @@
         };
     };
 
-    var InteractionMethod = {
+    let InteractionMethod = {
         API: 1,
         DROP: 2,
         BROWSE: 3,
@@ -1872,7 +1872,7 @@
         NONE: 5,
     };
 
-    var getUniqueId = function getUniqueId() {
+    let getUniqueId = function getUniqueId() {
         return Math.random()
             .toString(36)
             .substring(2, 11);
@@ -1897,7 +1897,7 @@
         return _typeof(obj);
     }
 
-    var REACT_ELEMENT_TYPE;
+    let REACT_ELEMENT_TYPE;
 
     function _jsx(type, props, key, children) {
         if (!REACT_ELEMENT_TYPE) {
@@ -1906,8 +1906,8 @@
                 0xeac7;
         }
 
-        var defaultProps = type && type.defaultProps;
-        var childrenLength = arguments.length - 3;
+        let defaultProps = type && type.defaultProps;
+        let childrenLength = arguments.length - 3;
 
         if (!props && childrenLength !== 0) {
             props = {
@@ -1916,7 +1916,7 @@
         }
 
         if (props && defaultProps) {
-            for (var propName in defaultProps) {
+            for (let propName in defaultProps) {
                 if (props[propName] === void 0) {
                     props[propName] = defaultProps[propName];
                 }
@@ -1928,9 +1928,9 @@
         if (childrenLength === 1) {
             props.children = children;
         } else if (childrenLength > 1) {
-            var childArray = new Array(childrenLength);
+            let childArray = new Array(childrenLength);
 
-            for (var i = 0; i < childrenLength; i++) {
+            for (let i = 0; i < childrenLength; i++) {
                 childArray[i] = arguments[i + 3];
             }
 
@@ -1948,7 +1948,7 @@
     }
 
     function _asyncIterator(iterable) {
-        var method;
+        let method;
 
         if (typeof Symbol !== 'undefined') {
             if (Symbol.asyncIterator) {
@@ -1970,11 +1970,11 @@
     }
 
     function _AsyncGenerator(gen) {
-        var front, back;
+        let front, back;
 
         function send(key, arg) {
             return new Promise(function(resolve, reject) {
-                var request = {
+                let request = {
                     key: key,
                     arg: arg,
                     resolve: resolve,
@@ -1993,9 +1993,9 @@
 
         function resume(key, arg) {
             try {
-                var result = gen[key](arg);
-                var value = result.value;
-                var wrappedAwait = value instanceof _AwaitValue;
+                let result = gen[key](arg);
+                let value = result.value;
+                let wrappedAwait = value instanceof _AwaitValue;
                 Promise.resolve(wrappedAwait ? value.wrapped : value).then(
                     function(arg) {
                         if (wrappedAwait) {
@@ -2080,7 +2080,7 @@
     }
 
     function _asyncGeneratorDelegate(inner, awaitWrap) {
-        var iter = {},
+        let iter = {},
             waiting = false;
 
         function pump(key, value) {
@@ -2131,8 +2131,8 @@
 
     function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
         try {
-            var info = gen[key](arg);
-            var value = info.value;
+            let info = gen[key](arg);
+            let value = info.value;
         } catch (error) {
             reject(error);
             return;
@@ -2147,10 +2147,10 @@
 
     function _asyncToGenerator(fn) {
         return function() {
-            var self = this,
+            let self = this,
                 args = arguments;
             return new Promise(function(resolve, reject) {
-                var gen = fn.apply(self, args);
+                let gen = fn.apply(self, args);
 
                 function _next(value) {
                     asyncGeneratorStep(gen, resolve, reject, _next, _throw, 'next', value);
@@ -2172,8 +2172,8 @@
     }
 
     function _defineProperties(target, props) {
-        for (var i = 0; i < props.length; i++) {
-            var descriptor = props[i];
+        for (let i = 0; i < props.length; i++) {
+            let descriptor = props[i];
             descriptor.enumerable = descriptor.enumerable || false;
             descriptor.configurable = true;
             if ('value' in descriptor) descriptor.writable = true;
@@ -2188,19 +2188,19 @@
     }
 
     function _defineEnumerableProperties(obj, descs) {
-        for (var key in descs) {
-            var desc = descs[key];
+        for (let key in descs) {
+            let desc = descs[key];
             desc.configurable = desc.enumerable = true;
             if ('value' in desc) desc.writable = true;
             Object.defineProperty(obj, key, desc);
         }
 
         if (Object.getOwnPropertySymbols) {
-            var objectSymbols = Object.getOwnPropertySymbols(descs);
+            let objectSymbols = Object.getOwnPropertySymbols(descs);
 
-            for (var i = 0; i < objectSymbols.length; i++) {
-                var sym = objectSymbols[i];
-                var desc = descs[sym];
+            for (let i = 0; i < objectSymbols.length; i++) {
+                let sym = objectSymbols[i];
+                let desc = descs[sym];
                 desc.configurable = desc.enumerable = true;
                 if ('value' in desc) desc.writable = true;
                 Object.defineProperty(obj, sym, desc);
@@ -2211,11 +2211,11 @@
     }
 
     function _defaults(obj, defaults) {
-        var keys = Object.getOwnPropertyNames(defaults);
+        let keys = Object.getOwnPropertyNames(defaults);
 
-        for (var i = 0; i < keys.length; i++) {
-            var key = keys[i];
-            var value = Object.getOwnPropertyDescriptor(defaults, key);
+        for (let i = 0; i < keys.length; i++) {
+            let key = keys[i];
+            let value = Object.getOwnPropertyDescriptor(defaults, key);
 
             if (value && value.configurable && obj[key] === undefined) {
                 Object.defineProperty(obj, key, value);
@@ -2244,10 +2244,10 @@
         _extends =
             Object.assign ||
             function(target) {
-                for (var i = 1; i < arguments.length; i++) {
-                    var source = arguments[i];
+                for (let i = 1; i < arguments.length; i++) {
+                    let source = arguments[i];
 
-                    for (var key in source) {
+                    for (let key in source) {
                         if (Object.prototype.hasOwnProperty.call(source, key)) {
                             target[key] = source[key];
                         }
@@ -2261,9 +2261,9 @@
     }
 
     function _objectSpread(target) {
-        for (var i = 1; i < arguments.length; i++) {
-            var source = arguments[i] != null ? arguments[i] : {};
-            var ownKeys = Object.keys(source);
+        for (let i = 1; i < arguments.length; i++) {
+            let source = arguments[i] != null ? arguments[i] : {};
+            let ownKeys = Object.keys(source);
 
             if (typeof Object.getOwnPropertySymbols === 'function') {
                 ownKeys = ownKeys.concat(
@@ -2282,10 +2282,10 @@
     }
 
     function ownKeys(object, enumerableOnly) {
-        var keys = Object.keys(object);
+        let keys = Object.keys(object);
 
         if (Object.getOwnPropertySymbols) {
-            var symbols = Object.getOwnPropertySymbols(object);
+            let symbols = Object.getOwnPropertySymbols(object);
             if (enumerableOnly)
                 symbols = symbols.filter(function(sym) {
                     return Object.getOwnPropertyDescriptor(object, sym).enumerable;
@@ -2297,8 +2297,8 @@
     }
 
     function _objectSpread2(target) {
-        for (var i = 1; i < arguments.length; i++) {
-            var source = arguments[i] != null ? arguments[i] : {};
+        for (let i = 1; i < arguments.length; i++) {
+            let source = arguments[i] != null ? arguments[i] : {};
 
             if (i % 2) {
                 ownKeys(source, true).forEach(function(key) {
@@ -2379,10 +2379,10 @@
             _construct = Reflect.construct;
         } else {
             _construct = function _construct(Parent, args, Class) {
-                var a = [null];
+                let a = [null];
                 a.push.apply(a, args);
-                var Constructor = Function.bind.apply(Parent, a);
-                var instance = new Constructor();
+                let Constructor = Function.bind.apply(Parent, a);
+                let instance = new Constructor();
                 if (Class) _setPrototypeOf(instance, Class.prototype);
                 return instance;
             };
@@ -2396,7 +2396,7 @@
     }
 
     function _wrapNativeSuper(Class) {
-        var _cache = typeof Map === 'function' ? new Map() : undefined;
+        let _cache = typeof Map === 'function' ? new Map() : undefined;
 
         _wrapNativeSuper = function _wrapNativeSuper(Class) {
             if (Class === null || !_isNativeFunction(Class)) return Class;
@@ -2449,12 +2449,12 @@
         if (obj && obj.__esModule) {
             return obj;
         } else {
-            var newObj = {};
+            let newObj = {};
 
             if (obj != null) {
-                for (var key in obj) {
+                for (let key in obj) {
                     if (Object.prototype.hasOwnProperty.call(obj, key)) {
-                        var desc =
+                        let desc =
                             Object.defineProperty && Object.getOwnPropertyDescriptor
                                 ? Object.getOwnPropertyDescriptor(obj, key)
                                 : {};
@@ -2485,9 +2485,9 @@
 
     function _objectWithoutPropertiesLoose(source, excluded) {
         if (source == null) return {};
-        var target = {};
-        var sourceKeys = Object.keys(source);
-        var key, i;
+        let target = {};
+        let sourceKeys = Object.keys(source);
+        let key, i;
 
         for (i = 0; i < sourceKeys.length; i++) {
             key = sourceKeys[i];
@@ -2501,12 +2501,12 @@
     function _objectWithoutProperties(source, excluded) {
         if (source == null) return {};
 
-        var target = _objectWithoutPropertiesLoose(source, excluded);
+        let target = _objectWithoutPropertiesLoose(source, excluded);
 
-        var key, i;
+        let key, i;
 
         if (Object.getOwnPropertySymbols) {
-            var sourceSymbolKeys = Object.getOwnPropertySymbols(source);
+            let sourceSymbolKeys = Object.getOwnPropertySymbols(source);
 
             for (i = 0; i < sourceSymbolKeys.length; i++) {
                 key = sourceSymbolKeys[i];
@@ -2549,10 +2549,10 @@
             _get = Reflect.get;
         } else {
             _get = function _get(target, property, receiver) {
-                var base = _superPropBase(target, property);
+                let base = _superPropBase(target, property);
 
                 if (!base) return;
-                var desc = Object.getOwnPropertyDescriptor(base, property);
+                let desc = Object.getOwnPropertyDescriptor(base, property);
 
                 if (desc.get) {
                     return desc.get.call(receiver);
@@ -2570,9 +2570,9 @@
             set = Reflect.set;
         } else {
             set = function set(target, property, value, receiver) {
-                var base = _superPropBase(target, property);
+                let base = _superPropBase(target, property);
 
-                var desc;
+                let desc;
 
                 if (base) {
                     desc = Object.getOwnPropertyDescriptor(base, property);
@@ -2606,7 +2606,7 @@
     }
 
     function _set(target, property, value, receiver, isStrict) {
-        var s = set(target, property, value, receiver || target);
+        let s = set(target, property, value, receiver || target);
 
         if (!s && isStrict) {
             throw new Error('failed to set property');
@@ -2654,7 +2654,7 @@
         throw new Error('Class "' + name + '" cannot be referenced in computed property keys.');
     }
 
-    var _temporalUndefined = {};
+    let _temporalUndefined = {};
 
     function _slicedToArray(arr, i) {
         return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest();
@@ -2674,7 +2674,7 @@
 
     function _arrayWithoutHoles(arr) {
         if (Array.isArray(arr)) {
-            for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
+            for (let i = 0, arr2 = new Array(arr.length); i < arr.length; i++) arr2[i] = arr[i];
 
             return arr2;
         }
@@ -2693,13 +2693,13 @@
     }
 
     function _iterableToArrayLimit(arr, i) {
-        var _arr = [];
-        var _n = true;
-        var _d = false;
-        var _e = undefined;
+        let _arr = [];
+        let _n = true;
+        let _d = false;
+        let _e = undefined;
 
         try {
-            for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
+            for (let _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) {
                 _arr.push(_s.value);
 
                 if (i && _arr.length === i) break;
@@ -2719,9 +2719,9 @@
     }
 
     function _iterableToArrayLimitLoose(arr, i) {
-        var _arr = [];
+        let _arr = [];
 
-        for (var _iterator = arr[Symbol.iterator](), _step; !(_step = _iterator.next()).done; ) {
+        for (let _iterator = arr[Symbol.iterator](), _step; !(_step = _iterator.next()).done; ) {
             _arr.push(_step.value);
 
             if (i && _arr.length === i) break;
@@ -2740,7 +2740,7 @@
 
     function _skipFirstGeneratorNext(fn) {
         return function() {
-            var it = fn.apply(this, arguments);
+            let it = fn.apply(this, arguments);
             it.next();
             return it;
         };
@@ -2748,10 +2748,10 @@
 
     function _toPrimitive(input, hint) {
         if (typeof input !== 'object' || input === null) return input;
-        var prim = input[Symbol.toPrimitive];
+        let prim = input[Symbol.toPrimitive];
 
         if (prim !== undefined) {
-            var res = prim.call(input, hint || 'default');
+            let res = prim.call(input, hint || 'default');
             if (typeof res !== 'object') return res;
             throw new TypeError('@@toPrimitive must return a primitive value.');
         }
@@ -2760,7 +2760,7 @@
     }
 
     function _toPropertyKey(arg) {
-        var key = _toPrimitive(arg, 'string');
+        let key = _toPrimitive(arg, 'string');
 
         return typeof key === 'symbol' ? key : String(key);
     }
@@ -2785,7 +2785,7 @@
     }
 
     function _applyDecoratedDescriptor(target, property, decorators, descriptor, context) {
-        var desc = {};
+        let desc = {};
         Object.keys(descriptor).forEach(function(key) {
             desc[key] = descriptor[key];
         });
@@ -2816,7 +2816,7 @@
         return desc;
     }
 
-    var id = 0;
+    let id = 0;
 
     function _classPrivateFieldLooseKey(name) {
         return '__private_' + id++ + '_' + name;
@@ -2831,7 +2831,7 @@
     }
 
     function _classPrivateFieldGet(receiver, privateMap) {
-        var descriptor = privateMap.get(receiver);
+        let descriptor = privateMap.get(receiver);
 
         if (!descriptor) {
             throw new TypeError('attempted to get private field on non-instance');
@@ -2845,7 +2845,7 @@
     }
 
     function _classPrivateFieldSet(receiver, privateMap, value) {
-        var descriptor = privateMap.get(receiver);
+        let descriptor = privateMap.get(receiver);
 
         if (!descriptor) {
             throw new TypeError('attempted to set private field on non-instance');
@@ -2869,7 +2869,7 @@
             throw new TypeError('attempted to set private field on non-instance');
         }
 
-        var descriptor = privateMap.get(receiver);
+        let descriptor = privateMap.get(receiver);
 
         if (descriptor.set) {
             if (!('__destrObj' in descriptor)) {
@@ -2924,18 +2924,18 @@
     }
 
     function _decorate(decorators, factory, superClass, mixins) {
-        var api = _getDecoratorsApi();
+        let api = _getDecoratorsApi();
 
         if (mixins) {
-            for (var i = 0; i < mixins.length; i++) {
+            for (let i = 0; i < mixins.length; i++) {
                 api = mixins[i](api);
             }
         }
 
-        var r = factory(function initialize(O) {
+        let r = factory(function initialize(O) {
             api.initializeInstanceElements(O, decorated.elements);
         }, superClass);
-        var decorated = api.decorateClass(
+        let decorated = api.decorateClass(
             _coalesceClassElements(r.d.map(_createElementDescriptor)),
             decorators
         );
@@ -2948,7 +2948,7 @@
             return api;
         };
 
-        var api = {
+        let api = {
             elementsDefinitionOrder: [['method'], ['field']],
             initializeInstanceElements: function(O, elements) {
                 ['method', 'field'].forEach(function(kind) {
@@ -2960,26 +2960,26 @@
                 }, this);
             },
             initializeClassElements: function(F, elements) {
-                var proto = F.prototype;
+                let proto = F.prototype;
                 ['method', 'field'].forEach(function(kind) {
                     elements.forEach(function(element) {
-                        var placement = element.placement;
+                        let placement = element.placement;
 
                         if (
                             element.kind === kind &&
                             (placement === 'static' || placement === 'prototype')
                         ) {
-                            var receiver = placement === 'static' ? F : proto;
+                            let receiver = placement === 'static' ? F : proto;
                             this.defineClassElement(receiver, element);
                         }
                     }, this);
                 }, this);
             },
             defineClassElement: function(receiver, element) {
-                var descriptor = element.descriptor;
+                let descriptor = element.descriptor;
 
                 if (element.kind === 'field') {
-                    var initializer = element.initializer;
+                    let initializer = element.initializer;
                     descriptor = {
                         enumerable: descriptor.enumerable,
                         writable: descriptor.writable,
@@ -2991,9 +2991,9 @@
                 Object.defineProperty(receiver, element.key, descriptor);
             },
             decorateClass: function(elements, decorators) {
-                var newElements = [];
-                var finishers = [];
-                var placements = {
+                let newElements = [];
+                let finishers = [];
+                let placements = {
                     static: [],
                     prototype: [],
                     own: [],
@@ -3003,7 +3003,7 @@
                 }, this);
                 elements.forEach(function(element) {
                     if (!_hasDecorators(element)) return newElements.push(element);
-                    var elementFinishersExtras = this.decorateElement(element, placements);
+                    let elementFinishersExtras = this.decorateElement(element, placements);
                     newElements.push(elementFinishersExtras.element);
                     newElements.push.apply(newElements, elementFinishersExtras.extras);
                     finishers.push.apply(finishers, elementFinishersExtras.finishers);
@@ -3016,13 +3016,13 @@
                     };
                 }
 
-                var result = this.decorateConstructor(newElements, decorators);
+                let result = this.decorateConstructor(newElements, decorators);
                 finishers.push.apply(finishers, result.finishers);
                 result.finishers = finishers;
                 return result;
             },
             addElementPlacement: function(element, placements, silent) {
-                var keys = placements[element.placement];
+                let keys = placements[element.placement];
 
                 if (!silent && keys.indexOf(element.key) !== -1) {
                     throw new TypeError('Duplicated element (' + element.key + ')');
@@ -3031,14 +3031,14 @@
                 keys.push(element.key);
             },
             decorateElement: function(element, placements) {
-                var extras = [];
-                var finishers = [];
+                let extras = [];
+                let finishers = [];
 
-                for (var decorators = element.decorators, i = decorators.length - 1; i >= 0; i--) {
-                    var keys = placements[element.placement];
+                for (let decorators = element.decorators, i = decorators.length - 1; i >= 0; i--) {
+                    let keys = placements[element.placement];
                     keys.splice(keys.indexOf(element.key), 1);
-                    var elementObject = this.fromElementDescriptor(element);
-                    var elementFinisherExtras = this.toElementFinisherExtras(
+                    let elementObject = this.fromElementDescriptor(element);
+                    let elementFinisherExtras = this.toElementFinisherExtras(
                         (0, decorators[i])(elementObject) || elementObject
                     );
                     element = elementFinisherExtras.element;
@@ -3048,10 +3048,10 @@
                         finishers.push(elementFinisherExtras.finisher);
                     }
 
-                    var newExtras = elementFinisherExtras.extras;
+                    let newExtras = elementFinisherExtras.extras;
 
                     if (newExtras) {
-                        for (var j = 0; j < newExtras.length; j++) {
+                        for (let j = 0; j < newExtras.length; j++) {
                             this.addElementPlacement(newExtras[j], placements);
                         }
 
@@ -3066,11 +3066,11 @@
                 };
             },
             decorateConstructor: function(elements, decorators) {
-                var finishers = [];
+                let finishers = [];
 
-                for (var i = decorators.length - 1; i >= 0; i--) {
-                    var obj = this.fromClassDescriptor(elements);
-                    var elementsAndFinisher = this.toClassDescriptor(
+                for (let i = decorators.length - 1; i >= 0; i--) {
+                    let obj = this.fromClassDescriptor(elements);
+                    let elementsAndFinisher = this.toClassDescriptor(
                         (0, decorators[i])(obj) || obj
                     );
 
@@ -3081,8 +3081,8 @@
                     if (elementsAndFinisher.elements !== undefined) {
                         elements = elementsAndFinisher.elements;
 
-                        for (var j = 0; j < elements.length - 1; j++) {
-                            for (var k = j + 1; k < elements.length; k++) {
+                        for (let j = 0; j < elements.length - 1; j++) {
+                            for (let k = j + 1; k < elements.length; k++) {
                                 if (
                                     elements[j].key === elements[k].key &&
                                     elements[j].placement === elements[k].placement
@@ -3102,13 +3102,13 @@
                 };
             },
             fromElementDescriptor: function(element) {
-                var obj = {
+                let obj = {
                     kind: element.kind,
                     key: element.key,
                     placement: element.placement,
                     descriptor: element.descriptor,
                 };
-                var desc = {
+                let desc = {
                     value: 'Descriptor',
                     configurable: true,
                 };
@@ -3119,14 +3119,14 @@
             toElementDescriptors: function(elementObjects) {
                 if (elementObjects === undefined) return;
                 return _toArray(elementObjects).map(function(elementObject) {
-                    var element = this.toElementDescriptor(elementObject);
+                    let element = this.toElementDescriptor(elementObject);
                     this.disallowProperty(elementObject, 'finisher', 'An element descriptor');
                     this.disallowProperty(elementObject, 'extras', 'An element descriptor');
                     return element;
                 }, this);
             },
             toElementDescriptor: function(elementObject) {
-                var kind = String(elementObject.kind);
+                let kind = String(elementObject.kind);
 
                 if (kind !== 'method' && kind !== 'field') {
                     throw new TypeError(
@@ -3138,9 +3138,9 @@
                     );
                 }
 
-                var key = _toPropertyKey(elementObject.key);
+                let key = _toPropertyKey(elementObject.key);
 
-                var placement = String(elementObject.placement);
+                let placement = String(elementObject.placement);
 
                 if (placement !== 'static' && placement !== 'prototype' && placement !== 'own') {
                     throw new TypeError(
@@ -3152,9 +3152,9 @@
                     );
                 }
 
-                var descriptor = elementObject.descriptor;
+                let descriptor = elementObject.descriptor;
                 this.disallowProperty(elementObject, 'elements', 'An element descriptor');
-                var element = {
+                let element = {
                     kind: kind,
                     key: key,
                     placement: placement,
@@ -3185,11 +3185,11 @@
                 return element;
             },
             toElementFinisherExtras: function(elementObject) {
-                var element = this.toElementDescriptor(elementObject);
+                let element = this.toElementDescriptor(elementObject);
 
-                var finisher = _optionalCallableProperty(elementObject, 'finisher');
+                let finisher = _optionalCallableProperty(elementObject, 'finisher');
 
-                var extras = this.toElementDescriptors(elementObject.extras);
+                let extras = this.toElementDescriptors(elementObject.extras);
                 return {
                     element: element,
                     finisher: finisher,
@@ -3197,11 +3197,11 @@
                 };
             },
             fromClassDescriptor: function(elements) {
-                var obj = {
+                let obj = {
                     kind: 'class',
                     elements: elements.map(this.fromElementDescriptor, this),
                 };
-                var desc = {
+                let desc = {
                     value: 'Descriptor',
                     configurable: true,
                 };
@@ -3209,7 +3209,7 @@
                 return obj;
             },
             toClassDescriptor: function(obj) {
-                var kind = String(obj.kind);
+                let kind = String(obj.kind);
 
                 if (kind !== 'class') {
                     throw new TypeError(
@@ -3226,7 +3226,7 @@
                 this.disallowProperty(obj, 'initializer', 'A class descriptor');
                 this.disallowProperty(obj, 'extras', 'A class descriptor');
 
-                var finisher = _optionalCallableProperty(obj, 'finisher');
+                let finisher = _optionalCallableProperty(obj, 'finisher');
 
                 var elements = this.toElementDescriptors(obj.elements);
                 return {
@@ -3235,7 +3235,7 @@
                 };
             },
             runClassFinishers: function(constructor, finishers) {
-                for (var i = 0; i < finishers.length; i++) {
+                for (let i = 0; i < finishers.length; i++) {
                     var newConstructor = (0, finishers[i])(constructor);
 
                     if (newConstructor !== undefined) {
@@ -3259,9 +3259,9 @@
     }
 
     function _createElementDescriptor(def) {
-        var key = _toPropertyKey(def.key);
+        let key = _toPropertyKey(def.key);
 
-        var descriptor;
+        let descriptor;
 
         if (def.kind === 'method') {
             descriptor = {
@@ -3290,7 +3290,7 @@
             };
         }
 
-        var element = {
+        let element = {
             kind: def.kind === 'field' ? 'field' : 'method',
             key: key,
             placement: def.static ? 'static' : def.kind === 'field' ? 'own' : 'prototype',
@@ -3310,9 +3310,9 @@
     }
 
     function _coalesceClassElements(elements) {
-        var newElements = [];
+        let newElements = [];
 
-        var isSameElement = function(other) {
+        let isSameElement = function(other) {
             return (
                 other.kind === 'method' &&
                 other.key === element.key &&
@@ -3320,9 +3320,9 @@
             );
         };
 
-        for (var i = 0; i < elements.length; i++) {
-            var element = elements[i];
-            var other;
+        for (let i = 0; i < elements.length; i++) {
+            let element = elements[i];
+            let other;
 
             if (element.kind === 'method' && (other = newElements.find(isSameElement))) {
                 if (_isDataDescriptor(element.descriptor) || _isDataDescriptor(other.descriptor)) {
@@ -3366,7 +3366,7 @@
     }
 
     function _optionalCallableProperty(obj, name) {
-        var value = obj[name];
+        let value = obj[name];
 
         if (value !== undefined && typeof value !== 'function') {
             throw new TypeError("Expected '" + name + "' to be a function");
@@ -3392,14 +3392,14 @@
             return new BabelRegExp(re, groups);
         };
 
-        var _RegExp = _wrapNativeSuper(RegExp);
+        let _RegExp = _wrapNativeSuper(RegExp);
 
-        var _super = RegExp.prototype;
+        let _super = RegExp.prototype;
 
-        var _groups = new WeakMap();
+        let _groups = new WeakMap();
 
         function BabelRegExp(re, groups) {
-            var _this = _RegExp.call(this, re);
+            let _this = _RegExp.call(this, re);
 
             _groups.set(_this, groups);
 
@@ -3409,7 +3409,7 @@
         _inherits(BabelRegExp, _RegExp);
 
         BabelRegExp.prototype.exec = function(str) {
-            var result = _super.exec.call(this, str);
+            let result = _super.exec.call(this, str);
 
             if (result) result.groups = buildGroups(result, this);
             return result;
@@ -3427,10 +3427,10 @@
                     })
                 );
             } else if (typeof substitution === 'function') {
-                var _this = this;
+                let _this = this;
 
                 return _super[Symbol.replace].call(this, str, function() {
-                    var args = [];
+                    let args = [];
                     args.push.apply(args, arguments);
 
                     if (typeof args[args.length - 1] !== 'object') {
@@ -3445,7 +3445,7 @@
         };
 
         function buildGroups(result, re) {
-            var g = _groups.get(re);
+            let g = _groups.get(re);
 
             return Object.keys(g).reduce(function(groups, name) {
                 groups[name] = result[g[name]];
@@ -3456,11 +3456,11 @@
         return _wrapRegExp.apply(this, arguments);
     }
 
-    var arrayRemove = function arrayRemove(arr, index) {
+    let arrayRemove = function arrayRemove(arr, index) {
         return arr.splice(index, 1);
     };
 
-    var run = function run(cb, sync) {
+    let run = function run(cb, sync) {
         if (sync) {
             cb();
         } else if (document.hidden) {
@@ -3470,9 +3470,9 @@
         }
     };
 
-    var on = function on() {
-        var listeners = [];
-        var off = function off(event, cb) {
+    let on = function on() {
+        let listeners = [];
+        let off = function off(event, cb) {
             arrayRemove(
                 listeners,
                 listeners.findIndex(function(listener) {
@@ -3480,7 +3480,7 @@
                 })
             );
         };
-        var _fire = function fire(event, args, sync) {
+        let _fire = function fire(event, args, sync) {
             listeners
                 .filter(function(listener) {
                     return listener.event === event;
@@ -3497,7 +3497,7 @@
         return {
             fireSync: function fireSync(event) {
                 for (
-                    var _len = arguments.length,
+                    let _len = arguments.length,
                         args = new Array(_len > 1 ? _len - 1 : 0),
                         _key = 1;
                     _key < _len;
@@ -3509,7 +3509,7 @@
             },
             fire: function fire(event) {
                 for (
-                    var _len2 = arguments.length,
+                    let _len2 = arguments.length,
                         args = new Array(_len2 > 1 ? _len2 - 1 : 0),
                         _key2 = 1;
                     _key2 < _len2;
@@ -3535,7 +3535,7 @@
         };
     };
 
-    var copyObjectPropertiesToObject = function copyObjectPropertiesToObject(
+    let copyObjectPropertiesToObject = function copyObjectPropertiesToObject(
         src,
         target,
         excluded
@@ -3553,7 +3553,7 @@
             });
     };
 
-    var PRIVATE = [
+    let PRIVATE = [
         'fire',
         'process',
         'revert',
@@ -3571,13 +3571,13 @@
         'freeze',
     ];
 
-    var createItemAPI = function createItemAPI(item) {
-        var api = {};
+    let createItemAPI = function createItemAPI(item) {
+        let api = {};
         copyObjectPropertiesToObject(item, api, PRIVATE);
         return api;
     };
 
-    var removeReleasedItems = function removeReleasedItems(items) {
+    let removeReleasedItems = function removeReleasedItems(items) {
         items.forEach(function(item, index) {
             if (item.released) {
                 arrayRemove(items, index);
@@ -3585,7 +3585,7 @@
         });
     };
 
-    var ItemStatus = {
+    let ItemStatus = {
         INIT: 1,
         IDLE: 2,
         PROCESSING_QUEUED: 9,
@@ -3597,33 +3597,33 @@
         LOAD_ERROR: 8,
     };
 
-    var FileOrigin = {
+    let FileOrigin = {
         INPUT: 1,
         LIMBO: 2,
         LOCAL: 3,
     };
 
-    var getNonNumeric = function getNonNumeric(str) {
+    let getNonNumeric = function getNonNumeric(str) {
         return /[^0-9]+/.exec(str);
     };
 
-    var getDecimalSeparator = function getDecimalSeparator() {
+    let getDecimalSeparator = function getDecimalSeparator() {
         return getNonNumeric((1.1).toLocaleString())[0];
     };
 
-    var getThousandsSeparator = function getThousandsSeparator() {
+    let getThousandsSeparator = function getThousandsSeparator() {
         // Added for browsers that do not return the thousands separator (happend on native browser Android 4.4.4)
         // We check against the normal toString output and if they're the same return a comma when decimal separator is a dot
-        var decimalSeparator = getDecimalSeparator();
-        var thousandsStringWithSeparator = (1000.0).toLocaleString();
-        var thousandsStringWithoutSeparator = (1000.0).toString();
+        let decimalSeparator = getDecimalSeparator();
+        let thousandsStringWithSeparator = (1000.0).toLocaleString();
+        let thousandsStringWithoutSeparator = (1000.0).toString();
         if (thousandsStringWithSeparator !== thousandsStringWithoutSeparator) {
             return getNonNumeric(thousandsStringWithSeparator)[0];
         }
         return decimalSeparator === '.' ? ',' : '.';
     };
 
-    var Type = {
+    let Type = {
         BOOLEAN: 'boolean',
         INT: 'int',
         NUMBER: 'number',
@@ -3637,13 +3637,13 @@
     };
 
     // all registered filters
-    var filters = [];
+    let filters = [];
 
     // loops over matching filters and passes options to each filter, returning the mapped results
-    var applyFilterChain = function applyFilterChain(key, value, utils) {
+    let applyFilterChain = function applyFilterChain(key, value, utils) {
         return new Promise(function(resolve, reject) {
             // find matching filters for this key
-            var matchingFilters = filters
+            let matchingFilters = filters
                 .filter(function(f) {
                     return f.key === key;
                 })
@@ -3658,7 +3658,7 @@
             }
 
             // first filter to kick things of
-            var initialFilter = matchingFilters.shift();
+            let initialFilter = matchingFilters.shift();
 
             // chain filters
             matchingFilters
@@ -3684,7 +3684,7 @@
         });
     };
 
-    var applyFilters = function applyFilters(key, value, utils) {
+    let applyFilters = function applyFilters(key, value, utils) {
         return filters
             .filter(function(f) {
                 return f.key === key;
@@ -3695,19 +3695,19 @@
     };
 
     // adds a new filter to the list
-    var addFilter = function addFilter(key, cb) {
+    let addFilter = function addFilter(key, cb) {
         return filters.push({ key: key, cb: cb });
     };
 
-    var extendDefaultOptions = function extendDefaultOptions(additionalOptions) {
+    let extendDefaultOptions = function extendDefaultOptions(additionalOptions) {
         return Object.assign(defaultOptions, additionalOptions);
     };
 
-    var getOptions = function getOptions() {
+    let getOptions = function getOptions() {
         return Object.assign({}, defaultOptions);
     };
 
-    var setOptions = function setOptions(opts) {
+    let setOptions = function setOptions(opts) {
         forin(opts, function(key, value) {
             // key does not exist, so this option cannot be set
             if (!defaultOptions[key]) {
@@ -3722,7 +3722,7 @@
     };
 
     // default options on app
-    var defaultOptions = {
+    let defaultOptions = {
         // the id to add to the root element
         id: [null, Type.STRING],
 
@@ -3908,7 +3908,7 @@
         credits: [['https://pqina.nl/', 'Powered by PQINA'], Type.ARRAY],
     };
 
-    var getItemByQuery = function getItemByQuery(items, query) {
+    let getItemByQuery = function getItemByQuery(items, query) {
         // just return first index
         if (isEmpty(query)) {
             return items[0] || null;
@@ -3932,7 +3932,7 @@
         );
     };
 
-    var getNumericAspectRatioFromString = function getNumericAspectRatioFromString(aspectRatio) {
+    let getNumericAspectRatioFromString = function getNumericAspectRatioFromString(aspectRatio) {
         if (isEmpty(aspectRatio)) {
             return aspectRatio;
         }
@@ -3943,13 +3943,13 @@
         return parseFloat(aspectRatio);
     };
 
-    var getActiveItems = function getActiveItems(items) {
+    let getActiveItems = function getActiveItems(items) {
         return items.filter(function(item) {
             return !item.archived;
         });
     };
 
-    var Status = {
+    let Status = {
         EMPTY: 0,
         IDLE: 1, // waiting
         ERROR: 2, // a file is in error state
@@ -3957,13 +3957,13 @@
         READY: 4, // all files uploaded
     };
 
-    var res = null;
-    var canUpdateFileInput = function canUpdateFileInput() {
+    let res = null;
+    let canUpdateFileInput = function canUpdateFileInput() {
         if (res === null) {
             try {
-                var dataTransfer = new DataTransfer();
+                let dataTransfer = new DataTransfer();
                 dataTransfer.items.add(new File(['hello world'], 'This_Works.txt'));
-                var el = document.createElement('input');
+                let el = document.createElement('input');
                 el.setAttribute('type', 'file');
                 el.files = dataTransfer.files;
                 res = el.files.length === 1;
@@ -3974,43 +3974,43 @@
         return res;
     };
 
-    var ITEM_ERROR = [
+    let ITEM_ERROR = [
         ItemStatus.LOAD_ERROR,
         ItemStatus.PROCESSING_ERROR,
         ItemStatus.PROCESSING_REVERT_ERROR,
     ];
 
-    var ITEM_BUSY = [
+    let ITEM_BUSY = [
         ItemStatus.LOADING,
         ItemStatus.PROCESSING,
         ItemStatus.PROCESSING_QUEUED,
         ItemStatus.INIT,
     ];
 
-    var ITEM_READY = [ItemStatus.PROCESSING_COMPLETE];
+    let ITEM_READY = [ItemStatus.PROCESSING_COMPLETE];
 
-    var isItemInErrorState = function isItemInErrorState(item) {
+    let isItemInErrorState = function isItemInErrorState(item) {
         return ITEM_ERROR.includes(item.status);
     };
-    var isItemInBusyState = function isItemInBusyState(item) {
+    let isItemInBusyState = function isItemInBusyState(item) {
         return ITEM_BUSY.includes(item.status);
     };
-    var isItemInReadyState = function isItemInReadyState(item) {
+    let isItemInReadyState = function isItemInReadyState(item) {
         return ITEM_READY.includes(item.status);
     };
 
-    var isAsync = function isAsync(state) {
+    let isAsync = function isAsync(state) {
         return (
             isObject(state.options.server) &&
             (isObject(state.options.server.process) || isFunction(state.options.server.process))
         );
     };
 
-    var queries = function queries(state) {
+    let queries = function queries(state) {
         return {
             GET_STATUS: function GET_STATUS() {
-                var items = getActiveItems(state.items);
-                var EMPTY = Status.EMPTY,
+                let items = getActiveItems(state.items);
+                let EMPTY = Status.EMPTY,
                     ERROR = Status.ERROR,
                     BUSY = Status.BUSY,
                     IDLE = Status.IDLE,
@@ -4044,12 +4044,12 @@
             },
 
             GET_ITEM_NAME: function GET_ITEM_NAME(query) {
-                var item = getItemByQuery(state.items, query);
+                let item = getItemByQuery(state.items, query);
                 return item ? item.filename : null;
             },
 
             GET_ITEM_SIZE: function GET_ITEM_SIZE(query) {
-                var item = getItemByQuery(state.items, query);
+                let item = getItemByQuery(state.items, query);
                 return item ? item.fileSize : null;
             },
 
@@ -4067,8 +4067,8 @@
             },
 
             GET_PANEL_ASPECT_RATIO: function GET_PANEL_ASPECT_RATIO() {
-                var isShapeCircle = /circle/.test(state.options.stylePanelLayout);
-                var aspectRatio = isShapeCircle
+                let isShapeCircle = /circle/.test(state.options.stylePanelLayout);
+                let aspectRatio = isShapeCircle
                     ? 1
                     : getNumericAspectRatioFromString(state.options.stylePanelAspectRatio);
                 return aspectRatio;
@@ -4107,8 +4107,8 @@
         };
     };
 
-    var hasRoomForItem = function hasRoomForItem(state) {
-        var count = getActiveItems(state.items).length;
+    let hasRoomForItem = function hasRoomForItem(state) {
+        let count = getActiveItems(state.items).length;
 
         // if cannot have multiple items, to add one item it should currently not contain items
         if (!state.options.allowMultiple) {
@@ -4116,7 +4116,7 @@
         }
 
         // if allows multiple items, we check if a max item count has been set, if not, there's no limit
-        var maxFileCount = state.options.maxFiles;
+        let maxFileCount = state.options.maxFiles;
         if (maxFileCount === null) {
             return true;
         }
@@ -4130,15 +4130,15 @@
         return false;
     };
 
-    var limit = function limit(value, min, max) {
+    let limit = function limit(value, min, max) {
         return Math.max(Math.min(max, value), min);
     };
 
-    var arrayInsert = function arrayInsert(arr, index, item) {
+    let arrayInsert = function arrayInsert(arr, index, item) {
         return arr.splice(index, 0, item);
     };
 
-    var insertItem = function insertItem(items, item, index) {
+    let insertItem = function insertItem(items, item, index) {
         if (isEmpty(item)) {
             return null;
         }
@@ -4159,13 +4159,13 @@
         return item;
     };
 
-    var isBase64DataURI = function isBase64DataURI(str) {
+    let isBase64DataURI = function isBase64DataURI(str) {
         return /^\s*data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?(;base64)?,([a-z0-9!$&',()*+;=\-._~:@\/?%\s]*)\s*$/i.test(
             str
         );
     };
 
-    var getFilenameFromURL = function getFilenameFromURL(url) {
+    let getFilenameFromURL = function getFilenameFromURL(url) {
         return url
             .split('/')
             .pop()
@@ -4173,18 +4173,18 @@
             .shift();
     };
 
-    var getExtensionFromFilename = function getExtensionFromFilename(name) {
+    let getExtensionFromFilename = function getExtensionFromFilename(name) {
         return name.split('.').pop();
     };
 
-    var guesstimateExtension = function guesstimateExtension(type) {
+    let guesstimateExtension = function guesstimateExtension(type) {
         // if no extension supplied, exit here
         if (typeof type !== 'string') {
             return '';
         }
 
         // get subtype
-        var subtype = type.split('/').pop();
+        let subtype = type.split('/').pop();
 
         // is svg subtype
         if (/svg/.test(subtype)) {
@@ -4217,13 +4217,13 @@
         return '';
     };
 
-    var leftPad = function leftPad(value) {
-        var padding = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+    let leftPad = function leftPad(value) {
+        let padding = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
         return (padding + value).slice(-padding.length);
     };
 
-    var getDateString = function getDateString() {
-        var date = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : new Date();
+    let getDateString = function getDateString() {
+        let date = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : new Date();
         return (
             date.getFullYear() +
             '-' +
@@ -4239,10 +4239,10 @@
         );
     };
 
-    var getFileFromBlob = function getFileFromBlob(blob, filename) {
-        var type = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
-        var extension = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
-        var file =
+    let getFileFromBlob = function getFileFromBlob(blob, filename) {
+        let type = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+        let extension = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+        let file =
             typeof type === 'string'
                 ? blob.slice(0, blob.size, type)
                 : blob.slice(0, blob.size, blob.type);
@@ -4267,7 +4267,7 @@
         return file;
     };
 
-    var getBlobBuilder = function getBlobBuilder() {
+    let getBlobBuilder = function getBlobBuilder() {
         return (window.BlobBuilder =
             window.BlobBuilder ||
             window.WebKitBlobBuilder ||
@@ -4275,11 +4275,11 @@
             window.MSBlobBuilder);
     };
 
-    var createBlob = function createBlob(arrayBuffer, mimeType) {
-        var BB = getBlobBuilder();
+    let createBlob = function createBlob(arrayBuffer, mimeType) {
+        let BB = getBlobBuilder();
 
         if (BB) {
-            var bb = new BB();
+            let bb = new BB();
             bb.append(arrayBuffer);
             return bb.getBlob(mimeType);
         }
@@ -4289,53 +4289,53 @@
         });
     };
 
-    var getBlobFromByteStringWithMimeType = function getBlobFromByteStringWithMimeType(
+    let getBlobFromByteStringWithMimeType = function getBlobFromByteStringWithMimeType(
         byteString,
         mimeType
     ) {
-        var ab = new ArrayBuffer(byteString.length);
-        var ia = new Uint8Array(ab);
+        let ab = new ArrayBuffer(byteString.length);
+        let ia = new Uint8Array(ab);
 
-        for (var i = 0; i < byteString.length; i++) {
+        for (let i = 0; i < byteString.length; i++) {
             ia[i] = byteString.charCodeAt(i);
         }
 
         return createBlob(ab, mimeType);
     };
 
-    var getMimeTypeFromBase64DataURI = function getMimeTypeFromBase64DataURI(dataURI) {
+    let getMimeTypeFromBase64DataURI = function getMimeTypeFromBase64DataURI(dataURI) {
         return (/^data:(.+);/.exec(dataURI) || [])[1] || null;
     };
 
-    var getBase64DataFromBase64DataURI = function getBase64DataFromBase64DataURI(dataURI) {
+    let getBase64DataFromBase64DataURI = function getBase64DataFromBase64DataURI(dataURI) {
         // get data part of string (remove data:image/jpeg...,)
-        var data = dataURI.split(',')[1];
+        let data = dataURI.split(',')[1];
 
         // remove any whitespace as that causes InvalidCharacterError in IE
         return data.replace(/\s/g, '');
     };
 
-    var getByteStringFromBase64DataURI = function getByteStringFromBase64DataURI(dataURI) {
+    let getByteStringFromBase64DataURI = function getByteStringFromBase64DataURI(dataURI) {
         return atob(getBase64DataFromBase64DataURI(dataURI));
     };
 
-    var getBlobFromBase64DataURI = function getBlobFromBase64DataURI(dataURI) {
-        var mimeType = getMimeTypeFromBase64DataURI(dataURI);
-        var byteString = getByteStringFromBase64DataURI(dataURI);
+    let getBlobFromBase64DataURI = function getBlobFromBase64DataURI(dataURI) {
+        let mimeType = getMimeTypeFromBase64DataURI(dataURI);
+        let byteString = getByteStringFromBase64DataURI(dataURI);
 
         return getBlobFromByteStringWithMimeType(byteString, mimeType);
     };
 
-    var getFileFromBase64DataURI = function getFileFromBase64DataURI(dataURI, filename, extension) {
+    let getFileFromBase64DataURI = function getFileFromBase64DataURI(dataURI, filename, extension) {
         return getFileFromBlob(getBlobFromBase64DataURI(dataURI), filename, null, extension);
     };
 
-    var getFileNameFromHeader = function getFileNameFromHeader(header) {
+    let getFileNameFromHeader = function getFileNameFromHeader(header) {
         // test if is content disposition header, if not exit
         if (!/^content-disposition:/i.test(header)) return null;
 
         // get filename parts
-        var matches = header
+        let matches = header
             .split(/filename=|filename\*=.+''/)
             .splice(1)
             .map(function(name) {
@@ -4348,54 +4348,54 @@
         return matches.length ? decodeURI(matches[matches.length - 1]) : null;
     };
 
-    var getFileSizeFromHeader = function getFileSizeFromHeader(header) {
+    let getFileSizeFromHeader = function getFileSizeFromHeader(header) {
         if (/content-length:/i.test(header)) {
-            var size = header.match(/[0-9]+/)[0];
+            let size = header.match(/[0-9]+/)[0];
             return size ? parseInt(size, 10) : null;
         }
         return null;
     };
 
-    var getTranfserIdFromHeader = function getTranfserIdFromHeader(header) {
+    let getTranfserIdFromHeader = function getTranfserIdFromHeader(header) {
         if (/x-content-transfer-id:/i.test(header)) {
-            var id = (header.split(':')[1] || '').trim();
+            let id = (header.split(':')[1] || '').trim();
             return id || null;
         }
         return null;
     };
 
-    var getFileInfoFromHeaders = function getFileInfoFromHeaders(headers) {
-        var info = {
+    let getFileInfoFromHeaders = function getFileInfoFromHeaders(headers) {
+        let info = {
             source: null,
             name: null,
             size: null,
         };
 
-        var rows = headers.split('\n');
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
+        let rows = headers.split('\n');
+        let _iteratorNormalCompletion = true;
+        let _didIteratorError = false;
+        let _iteratorError = undefined;
         try {
             for (
-                var _iterator = rows[Symbol.iterator](), _step;
+                let _iterator = rows[Symbol.iterator](), _step;
                 !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
                 _iteratorNormalCompletion = true
             ) {
-                var header = _step.value;
+                let header = _step.value;
 
-                var name = getFileNameFromHeader(header);
+                let name = getFileNameFromHeader(header);
                 if (name) {
                     info.name = name;
                     continue;
                 }
 
-                var size = getFileSizeFromHeader(header);
+                let size = getFileSizeFromHeader(header);
                 if (size) {
                     info.size = size;
                     continue;
                 }
 
-                var source = getTranfserIdFromHeader(header);
+                let source = getTranfserIdFromHeader(header);
                 if (source) {
                     info.source = source;
                     continue;
@@ -4419,8 +4419,8 @@
         return info;
     };
 
-    var createFileLoader = function createFileLoader(fetchFn) {
-        var state = {
+    let createFileLoader = function createFileLoader(fetchFn) {
+        let state = {
             source: null,
             complete: false,
             progress: 0,
@@ -4430,19 +4430,19 @@
             request: null,
         };
 
-        var getProgress = function getProgress() {
+        let getProgress = function getProgress() {
             return state.progress;
         };
-        var abort = function abort() {
+        let abort = function abort() {
             if (state.request && state.request.abort) {
                 state.request.abort();
             }
         };
 
         // load source
-        var load = function load() {
+        let load = function load() {
             // get quick reference
-            var source = state.source;
+            let source = state.source;
 
             api.fire('init', source);
 
@@ -4462,7 +4462,7 @@
         };
 
         // loads a url
-        var loadURL = function loadURL(url) {
+        let loadURL = function loadURL(url) {
             // is remote url and no fetch method supplied
             if (!fetchFn) {
                 api.fire('error', {
@@ -4538,7 +4538,7 @@
                     api.fire('abort');
                 },
                 function(response) {
-                    var fileinfo = getFileInfoFromHeaders(
+                    let fileinfo = getFileInfoFromHeaders(
                         typeof response === 'string' ? response : response.headers
                     );
                     api.fire('meta', {
@@ -4550,7 +4550,7 @@
             );
         };
 
-        var api = Object.assign({}, on(), {
+        let api = Object.assign({}, on(), {
             setSource: function setSource(source) {
                 return (state.source = source);
             },
@@ -4562,12 +4562,12 @@
         return api;
     };
 
-    var isGet = function isGet(method) {
+    let isGet = function isGet(method) {
         return /GET|HEAD/.test(method);
     };
 
-    var sendRequest = function sendRequest(data, url, options) {
-        var api = {
+    let sendRequest = function sendRequest(data, url, options) {
+        let api = {
             onheaders: function onheaders() {},
             onprogress: function onprogress() {},
             onload: function onload() {},
@@ -4581,8 +4581,8 @@
         };
 
         // timeout identifier, only used when timeout is defined
-        var aborted = false;
-        var headersReceived = false;
+        let aborted = false;
+        let headersReceived = false;
 
         // set default options
         options = Object.assign(
@@ -4607,10 +4607,10 @@
         }
 
         // create request
-        var xhr = new XMLHttpRequest();
+        let xhr = new XMLHttpRequest();
 
         // progress of load
-        var process = isGet(options.method) ? xhr : xhr.upload;
+        let process = isGet(options.method) ? xhr : xhr.upload;
         process.onprogress = function(e) {
             // no progress event when aborted ( onprogress is called once after abort() )
             if (aborted) {
@@ -4678,7 +4678,7 @@
 
         // add headers
         Object.keys(options.headers).forEach(function(key) {
-            var value = unescape(encodeURIComponent(options.headers[key]));
+            let value = unescape(encodeURIComponent(options.headers[key]));
             xhr.setRequestHeader(key, value);
         });
 
@@ -4698,7 +4698,7 @@
         return api;
     };
 
-    var createResponse = function createResponse(type, code, body, headers) {
+    let createResponse = function createResponse(type, code, body, headers) {
         return {
             type: type,
             code: code,
@@ -4707,18 +4707,18 @@
         };
     };
 
-    var createTimeoutResponse = function createTimeoutResponse(cb) {
+    let createTimeoutResponse = function createTimeoutResponse(cb) {
         return function(xhr) {
             cb(createResponse('error', 0, 'Timeout', xhr.getAllResponseHeaders()));
         };
     };
 
-    var hasQS = function hasQS(str) {
+    let hasQS = function hasQS(str) {
         return /\?/.test(str);
     };
-    var buildURL = function buildURL() {
-        var url = '';
-        for (var _len = arguments.length, parts = new Array(_len), _key = 0; _key < _len; _key++) {
+    let buildURL = function buildURL() {
+        let url = '';
+        for (let _len = arguments.length, parts = new Array(_len), _key = 0; _key < _len; _key++) {
             parts[_key] = arguments[_key];
         }
         parts.forEach(function(part) {
@@ -4727,9 +4727,9 @@
         return url;
     };
 
-    var createFetchFunction = function createFetchFunction() {
-        var apiUrl = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
-        var action = arguments.length > 1 ? arguments[1] : undefined;
+    let createFetchFunction = function createFetchFunction() {
+        let apiUrl = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+        let action = arguments.length > 1 ? arguments[1] : undefined;
         // custom handler (should also handle file, load, error, progress and abort)
         if (typeof action === 'function') {
             return action;
@@ -4741,12 +4741,12 @@
         }
 
         // set onload hanlder
-        var onload =
+        let onload =
             action.onload ||
             function(res) {
                 return res;
             };
-        var onerror =
+        let onerror =
             action.onerror ||
             function(res) {
                 return null;
@@ -4755,7 +4755,7 @@
         // internal handler
         return function(url, load, error, progress, abort, headers) {
             // do local or remote request based on if the url is external
-            var request = sendRequest(
+            let request = sendRequest(
                 url,
                 buildURL(apiUrl, action.url),
                 Object.assign({}, action, {
@@ -4765,10 +4765,10 @@
 
             request.onload = function(xhr) {
                 // get headers
-                var headers = xhr.getAllResponseHeaders();
+                let headers = xhr.getAllResponseHeaders();
 
                 // get filename
-                var filename = getFileInfoFromHeaders(headers).name || getFilenameFromURL(url);
+                let filename = getFileInfoFromHeaders(headers).name || getFilenameFromURL(url);
 
                 // create response
                 load(
@@ -4807,7 +4807,7 @@
         };
     };
 
-    var ChunkStatus = {
+    let ChunkStatus = {
         QUEUED: 0,
         COMPLETE: 1,
         PROCESSING: 2,
@@ -4816,16 +4816,16 @@
     };
 
     /*
-                                                       function signature:
-                                                         (file, metadata, load, error, progress, abort, transfer, options) => {
-                                                           return {
-                                                           abort:() => {}
-                                                         }
-                                                       }
-                                                       */
+   function signature:
+   (file, metadata, load, error, progress, abort, transfer, options) => {
+    return {
+    abort:() => {}
+     }
+     }
+     */
 
     // apiUrl, action, name, file, metadata, load, error, progress, abort, transfer, options
-    var processFileChunked = function processFileChunked(
+    let processFileChunked = function processFileChunked(
         apiUrl,
         action,
         name,
@@ -4839,55 +4839,55 @@
         options
     ) {
         // all chunks
-        var chunks = [];
-        var chunkTransferId = options.chunkTransferId,
+        let chunks = [];
+        let chunkTransferId = options.chunkTransferId,
             chunkServer = options.chunkServer,
             chunkSize = options.chunkSize,
             chunkRetryDelays = options.chunkRetryDelays;
 
         // default state
-        var state = {
+        let state = {
             serverId: chunkTransferId,
             aborted: false,
         };
 
         // set onload handlers
-        var ondata =
+        let ondata =
             action.ondata ||
             function(fd) {
                 return fd;
             };
-        var onload =
+        let onload =
             action.onload ||
             function(xhr, method) {
                 return method === 'HEAD' ? xhr.getResponseHeader('Upload-Offset') : xhr.response;
             };
-        var onerror =
+        let onerror =
             action.onerror ||
             function(res) {
                 return null;
             };
 
         // create server hook
-        var requestTransferId = function requestTransferId(cb) {
-            var formData = new FormData();
+        let requestTransferId = function requestTransferId(cb) {
+            let formData = new FormData();
 
             // add metadata under same name
             if (isObject(metadata)) formData.append(name, JSON.stringify(metadata));
 
-            var headers =
+            let headers =
                 typeof action.headers === 'function'
                     ? action.headers(file, metadata)
                     : Object.assign({}, action.headers, {
                           'Upload-Length': file.size,
                       });
 
-            var requestParams = Object.assign({}, action, {
+            let requestParams = Object.assign({}, action, {
                 headers: headers,
             });
 
             // send request object
-            var request = sendRequest(
+            let request = sendRequest(
                 ondata(formData),
                 buildURL(apiUrl, action.url),
                 requestParams
@@ -4911,20 +4911,20 @@
             request.ontimeout = createTimeoutResponse(error);
         };
 
-        var requestTransferOffset = function requestTransferOffset(cb) {
-            var requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
+        let requestTransferOffset = function requestTransferOffset(cb) {
+            let requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
 
-            var headers =
+            let headers =
                 typeof action.headers === 'function'
                     ? action.headers(state.serverId)
                     : Object.assign({}, action.headers);
 
-            var requestParams = {
+            let requestParams = {
                 headers: headers,
                 method: 'HEAD',
             };
 
-            var request = sendRequest(null, requestUrl, requestParams);
+            let request = sendRequest(null, requestUrl, requestParams);
 
             request.onload = function(xhr) {
                 return cb(onload(xhr, requestParams.method));
@@ -4945,10 +4945,10 @@
         };
 
         // create chunks
-        var lastChunkIndex = Math.floor(file.size / chunkSize);
-        for (var i = 0; i <= lastChunkIndex; i++) {
-            var offset = i * chunkSize;
-            var data = file.slice(offset, offset + chunkSize, 'application/offset+octet-stream');
+        let lastChunkIndex = Math.floor(file.size / chunkSize);
+        for (let i = 0; i <= lastChunkIndex; i++) {
+            let offset = i * chunkSize;
+            let data = file.slice(offset, offset + chunkSize, 'application/offset+octet-stream');
             chunks[i] = {
                 index: i,
                 size: data.size,
@@ -4964,15 +4964,15 @@
             };
         }
 
-        var completeProcessingChunks = function completeProcessingChunks() {
+        let completeProcessingChunks = function completeProcessingChunks() {
             return load(state.serverId);
         };
 
-        var canProcessChunk = function canProcessChunk(chunk) {
+        let canProcessChunk = function canProcessChunk(chunk) {
             return chunk.status === ChunkStatus.QUEUED || chunk.status === ChunkStatus.ERROR;
         };
 
-        var processChunk = function processChunk(chunk) {
+        let processChunk = function processChunk(chunk) {
             // processing is paused, wait here
             if (state.aborted) return;
 
@@ -4999,21 +4999,21 @@
             chunk.progress = null;
 
             // allow parsing of formdata
-            var ondata =
+            let ondata =
                 chunkServer.ondata ||
                 function(fd) {
                     return fd;
                 };
-            var onerror =
+            let onerror =
                 chunkServer.onerror ||
                 function(res) {
                     return null;
                 };
 
             // send request object
-            var requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
+            let requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
 
-            var headers =
+            let headers =
                 typeof chunkServer.headers === 'function'
                     ? chunkServer.headers(chunk)
                     : Object.assign({}, chunkServer.headers, {
@@ -5023,7 +5023,7 @@
                           'Upload-Name': file.name,
                       });
 
-            var request = (chunk.request = sendRequest(
+            let request = (chunk.request = sendRequest(
                 ondata(chunk.data),
                 requestUrl,
                 Object.assign({}, chunkServer, {
