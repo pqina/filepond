@@ -62,6 +62,7 @@ export const defaultOptions = {
     allowRemove: [true, Type.BOOLEAN], // Allow user to remove a file
     allowProcess: [true, Type.BOOLEAN], // Allows user to process a file, when set to false, this removes the file upload button
     allowReorder: [false, Type.BOOLEAN], // Allow reordering of files
+    reorderHoldInterval: [0, Type.INT], // The hold (long press) interval to wait before reordering the file
     allowDirectoriesOnly: [false, Type.BOOLEAN], // Allow only selecting directories with browse (no support for filtering dnd at this point)
 
     // Try store file if `server` not set
