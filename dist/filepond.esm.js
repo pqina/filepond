@@ -6568,7 +6568,6 @@ const write$5 = ({ root, props, actions, shouldOptimize }) => {
     const itemVerticalMargin = childRect.marginTop + childRect.marginBottom;
     const itemHorizontalMargin = childRect.marginLeft + childRect.marginRight;
     const itemWidth = childRect.width + itemHorizontalMargin;
-    const itemHeight = childRect.height + itemVerticalMargin;
     const itemsPerRow = getItemsPerRow(horizontalSpace, itemWidth);
 
     // stack
@@ -6612,6 +6611,7 @@ const write$5 = ({ root, props, actions, shouldOptimize }) => {
     else {
         let prevX = 0;
         let prevY = 0;
+        let rowMaxHeight = 0;
 
         children.forEach((child, index) => {
             if (index === dragIndex) {
@@ -6629,16 +6629,26 @@ const write$5 = ({ root, props, actions, shouldOptimize }) => {
             const visualIndex = index + addIndexOffset + dragIndexOffset + removeIndexOffset;
 
             const indexX = visualIndex % itemsPerRow;
-            const indexY = Math.floor(visualIndex / itemsPerRow);
+            const itemHeight = child.rect.element.height + itemVerticalMargin;
+
+            if (itemHeight > rowMaxHeight) {
+                rowMaxHeight = itemHeight;
+            }
+
+            const isLastItemInRow = indexX + 1 === itemsPerRow || !children[index + 1];
 
             const offsetX = indexX * itemWidth;
-            const offsetY = indexY * itemHeight;
+            const offsetY = prevY;
 
             const vectorX = Math.sign(offsetX - prevX);
             const vectorY = Math.sign(offsetY - prevY);
 
             prevX = offsetX;
-            prevY = offsetY;
+
+            if (isLastItemInRow) {
+                prevY += rowMaxHeight;
+                rowMaxHeight = 0;
+            }
 
             if (child.markedForRemoval) return;
 
@@ -8305,7 +8315,6 @@ const calculateListHeight = root => {
     if (children.length === 0) return { visual, bounds };
 
     const horizontalSpace = itemList.rect.element.width;
-    const dragIndex = getItemIndexByPosition(itemList, children, scrollList.dragCoordinates);
 
     const childRect = children[0].rect.element;
 
@@ -8313,13 +8322,7 @@ const calculateListHeight = root => {
     const itemHorizontalMargin = childRect.marginLeft + childRect.marginRight;
 
     const itemWidth = childRect.width + itemHorizontalMargin;
-    const itemHeight = childRect.height + itemVerticalMargin;
 
-    const newItem = typeof dragIndex !== 'undefined' && dragIndex >= 0 ? 1 : 0;
-    const removedItem = children.find(child => child.markedForRemoval && child.opacity < 0.45)
-        ? -1
-        : 0;
-    const verticalItemCount = children.length + newItem + removedItem;
     const itemsPerRow = getItemsPerRow(horizontalSpace, itemWidth);
 
     // stack
@@ -8332,7 +8335,28 @@ const calculateListHeight = root => {
     }
     // grid
     else {
-        bounds = Math.ceil(verticalItemCount / itemsPerRow) * itemHeight;
+        let maxItemHeightInRow = 0;
+        let maxColumnHeight = 0;
+
+        children.forEach(function(item, index) {
+            let height = item.rect.element.height + itemVerticalMargin;
+            const rowIndex = Math.floor(index / itemsPerRow);
+            const colIndex = Math.floor(index - rowIndex * itemsPerRow);
+            const isLastItemInRow = colIndex + 1 === itemsPerRow || !children[index + 1];
+            if (height > maxItemHeightInRow) {
+                maxItemHeightInRow = height;
+            }
+
+            if (!isLastItemInRow) {
+                return;
+            }
+
+            maxColumnHeight += maxItemHeightInRow;
+
+            maxItemHeightInRow = 0;
+        });
+
+        bounds = maxColumnHeight;
         visual = bounds;
     }
 

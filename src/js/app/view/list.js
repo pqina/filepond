@@ -294,7 +294,6 @@ const write = ({ root, props, actions, shouldOptimize }) => {
     const itemVerticalMargin = childRect.marginTop + childRect.marginBottom;
     const itemHorizontalMargin = childRect.marginLeft + childRect.marginRight;
     const itemWidth = childRect.width + itemHorizontalMargin;
-    const itemHeight = childRect.height + itemVerticalMargin;
     const itemsPerRow = getItemsPerRow(horizontalSpace, itemWidth);
 
     // stack
@@ -338,6 +337,7 @@ const write = ({ root, props, actions, shouldOptimize }) => {
     else {
         let prevX = 0;
         let prevY = 0;
+        let rowMaxHeight = 0;
 
         children.forEach((child, index) => {
             if (index === dragIndex) {
@@ -355,16 +355,26 @@ const write = ({ root, props, actions, shouldOptimize }) => {
             const visualIndex = index + addIndexOffset + dragIndexOffset + removeIndexOffset;
 
             const indexX = visualIndex % itemsPerRow;
-            const indexY = Math.floor(visualIndex / itemsPerRow);
+            const itemHeight = child.rect.element.height + itemVerticalMargin;
+
+            if (itemHeight > rowMaxHeight) {
+                rowMaxHeight = itemHeight;
+            }
+    
+            const isLastItemInRow = indexX + 1 === itemsPerRow || !(children[index + 1]);
 
             const offsetX = indexX * itemWidth;
-            const offsetY = indexY * itemHeight;
+            const offsetY = prevY;
 
             const vectorX = Math.sign(offsetX - prevX);
             const vectorY = Math.sign(offsetY - prevY);
 
             prevX = offsetX;
-            prevY = offsetY;
+    
+            if (isLastItemInRow) {
+                prevY += rowMaxHeight;
+                rowMaxHeight = 0;
+            }
 
             if (child.markedForRemoval) return;
 

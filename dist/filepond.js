@@ -9178,7 +9178,6 @@
         var itemVerticalMargin = childRect.marginTop + childRect.marginBottom;
         var itemHorizontalMargin = childRect.marginLeft + childRect.marginRight;
         var itemWidth = childRect.width + itemHorizontalMargin;
-        var itemHeight = childRect.height + itemVerticalMargin;
         var itemsPerRow = getItemsPerRow(horizontalSpace, itemWidth);
 
         // stack
@@ -9222,6 +9221,7 @@
         else {
             var prevX = 0;
             var prevY = 0;
+            var rowMaxHeight = 0;
 
             children.forEach(function(child, index) {
                 if (index === dragIndex) {
@@ -9239,16 +9239,26 @@
                 var visualIndex = index + addIndexOffset + dragIndexOffset + removeIndexOffset;
 
                 var indexX = visualIndex % itemsPerRow;
-                var indexY = Math.floor(visualIndex / itemsPerRow);
+                var itemHeight = child.rect.element.height + itemVerticalMargin;
+
+                if (itemHeight > rowMaxHeight) {
+                    rowMaxHeight = itemHeight;
+                }
+
+                var isLastItemInRow = indexX + 1 === itemsPerRow || !children[index + 1];
 
                 var offsetX = indexX * itemWidth;
-                var offsetY = indexY * itemHeight;
+                var offsetY = prevY;
 
                 var vectorX = Math.sign(offsetX - prevX);
                 var vectorY = Math.sign(offsetY - prevY);
 
                 prevX = offsetX;
-                prevY = offsetY;
+
+                if (isLastItemInRow) {
+                    prevY += rowMaxHeight;
+                    rowMaxHeight = 0;
+                }
 
                 if (child.markedForRemoval) return;
 
@@ -11129,7 +11139,6 @@
         if (children.length === 0) return { visual: visual, bounds: bounds };
 
         var horizontalSpace = itemList.rect.element.width;
-        var dragIndex = getItemIndexByPosition(itemList, children, scrollList.dragCoordinates);
 
         var childRect = children[0].rect.element;
 
@@ -11137,15 +11146,7 @@
         var itemHorizontalMargin = childRect.marginLeft + childRect.marginRight;
 
         var itemWidth = childRect.width + itemHorizontalMargin;
-        var itemHeight = childRect.height + itemVerticalMargin;
 
-        var newItem = typeof dragIndex !== 'undefined' && dragIndex >= 0 ? 1 : 0;
-        var removedItem = children.find(function(child) {
-            return child.markedForRemoval && child.opacity < 0.45;
-        })
-            ? -1
-            : 0;
-        var verticalItemCount = children.length + newItem + removedItem;
         var itemsPerRow = getItemsPerRow(horizontalSpace, itemWidth);
 
         // stack
@@ -11158,7 +11159,28 @@
         }
         // grid
         else {
-            bounds = Math.ceil(verticalItemCount / itemsPerRow) * itemHeight;
+            var maxItemHeightInRow = 0;
+            var maxColumnHeight = 0;
+
+            children.forEach(function(item, index) {
+                var height = item.rect.element.height + itemVerticalMargin;
+                var rowIndex = Math.floor(index / itemsPerRow);
+                var colIndex = Math.floor(index - rowIndex * itemsPerRow);
+                var isLastItemInRow = colIndex + 1 === itemsPerRow || !children[index + 1];
+                if (height > maxItemHeightInRow) {
+                    maxItemHeightInRow = height;
+                }
+
+                if (!isLastItemInRow) {
+                    return;
+                }
+
+                maxColumnHeight += maxItemHeightInRow;
+
+                maxItemHeightInRow = 0;
+            });
+
+            bounds = maxColumnHeight;
             visual = bounds;
         }
 
