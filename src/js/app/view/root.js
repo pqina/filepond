@@ -22,8 +22,6 @@ import getItemsPerRow from '../utils/getItemsPerRow';
 
 const MAX_FILES_LIMIT = 1000000;
 
-const prevent = e => e.preventDefault();
-
 const create = ({ root, props }) => {
     // Add id
     const id = root.query('GET_ID');
@@ -94,6 +92,12 @@ const create = ({ root, props }) => {
     const canHover = window.matchMedia('(pointer: fine) and (hover: hover)').matches;
     const hasPointerEvents = 'PointerEvent' in window;
     if (root.query('GET_ALLOW_REORDER') && hasPointerEvents && !canHover) {
+        const prevent = e => {
+            if (root.element.dataset.isReordering) {
+                e.preventDefault();
+            }
+        }
+
         root.element.addEventListener('touchmove', prevent, { passive: false });
         root.element.addEventListener('gesturestart', prevent);
     }
