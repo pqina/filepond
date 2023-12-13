@@ -1331,8 +1331,6 @@
         };
 
     var createPainter = function createPainter(read, write) {
-        var fps = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 60;
-
         var name = '__framePainter';
 
         // set global painter
@@ -1347,75 +1345,8 @@
             writers: [write],
         };
 
-        var painter = window[name];
-
-        var interval = 1000 / fps;
-        var last = null;
-        var id = null;
-        var requestTick = null;
-        var cancelTick = null;
-
-        var setTimerType = function setTimerType() {
-            if (document.hidden) {
-                requestTick = function requestTick() {
-                    return window.setTimeout(function() {
-                        return tick(performance.now());
-                    }, interval);
-                };
-                cancelTick = function cancelTick() {
-                    return window.clearTimeout(id);
-                };
-            } else {
-                requestTick = function requestTick() {
-                    return window.requestAnimationFrame(tick);
-                };
-                cancelTick = function cancelTick() {
-                    return window.cancelAnimationFrame(id);
-                };
-            }
-        };
-
-        document.addEventListener('visibilitychange', function() {
-            if (cancelTick) cancelTick();
-            setTimerType();
-            tick(performance.now());
-        });
-
-        var tick = function tick(ts) {
-            // queue next tick
-            id = requestTick(tick);
-
-            // limit fps
-            if (!last) {
-                last = ts;
-            }
-
-            var delta = ts - last;
-
-            if (delta <= interval) {
-                // skip frame
-                return;
-            }
-
-            // align next frame
-            last = ts - (delta % interval);
-
-            // update view
-            painter.readers.forEach(function(read) {
-                return read();
-            });
-            painter.writers.forEach(function(write) {
-                return write(ts);
-            });
-        };
-
-        setTimerType();
-        tick(performance.now());
-
         return {
-            pause: function pause() {
-                cancelTick(id);
-            },
+            pause: function pause() {},
         };
     };
 
@@ -12491,6 +12422,60 @@
         extendDefaultOptions(pluginOutline.options);
     };
 
+    var fps = 60;
+    var interval = 1000 / fps;
+    var last = null;
+    var isTicking = false;
+    var state = null;
+
+    function tick(ts) {
+        // queue next tick
+        var scheduleTick = function scheduleTick() {
+            if (state.activeCount === 0) {
+                isTicking = false;
+            } else if (document.hidden) {
+                setTimeout(function() {
+                    return tick(performance.now());
+                }, interval);
+            } else {
+                window.requestAnimationFrame(tick);
+            }
+        };
+
+        var name = '__framePainter';
+
+        var painter = window[name];
+
+        // limit fps
+        if (!last) {
+            last = ts;
+        } else {
+            var delta = ts - last;
+            last = ts - (delta % interval);
+            if (delta <= interval) {
+                scheduleTick();
+                return;
+            }
+        }
+
+        // update view
+        painter.readers.forEach(function(read) {
+            return read();
+        });
+        painter.writers.forEach(function(write) {
+            return write(ts);
+        });
+
+        scheduleTick();
+    }
+
+    var triggerTick = function triggerTick(outterState) {
+        state = outterState;
+        if (isTicking) return;
+        isTicking = true;
+        tick(performance.now());
+    };
+
     // feature detection used by supported() method
     var isOperaMini = function isOperaMini() {
         return Object.prototype.toString.call(window.operamini) === '[object OperaMini]';
@@ -12541,9 +12526,10 @@
     /**
      * Plugin internal state (over all instances)
      */
-    var state = {
+    var state$1 = {
         // active app instances, used to redraw the apps and to find the later
         apps: [],
+        activeCount: 0,
     };
 
     // plugin name
@@ -12570,12 +12556,12 @@
         // start painter and fire load event
         createPainter(
             function() {
-                state.apps.forEach(function(app) {
+                state$1.apps.forEach(function(app) {
                     return app._read();
                 });
             },
             function(ts) {
-                state.apps.forEach(function(app) {
+                state$1.apps.forEach(function(app) {
                     return app._write(ts);
                 });
             }
@@ -12627,21 +12613,25 @@
 
         // create method, creates apps and adds them to the app array
         exports.create = function create() {
+            state$1.activeCount++;
             var app = createApp$1.apply(void 0, arguments);
             app.on('destroy', exports.destroy);
-            state.apps.push(app);
+            state$1.apps.push(app);
+            triggerTick(state$1);
             return createAppAPI(app);
         };
 
         // destroys apps and removes them from the app array
         exports.destroy = function destroy(hook) {
             // returns true if the app was destroyed successfully
-            var indexToRemove = state.apps.findIndex(function(app) {
+            var indexToRemove = state$1.apps.findIndex(function(app) {
                 return app.isAttachedTo(hook);
             });
             if (indexToRemove >= 0) {
+                state$1.activeCount--;
+
                 // remove from apps
-                var app = state.apps.splice(indexToRemove, 1)[0];
+                var app = state$1.apps.splice(indexToRemove, 1)[0];
 
                 // restore original dom element
                 app.restoreElement();
@@ -12659,7 +12649,7 @@
 
             // filter out already active hooks
             var newHooks = matchedHooks.filter(function(newHook) {
-                return !state.apps.find(function(app) {
+                return !state$1.apps.find(function(app) {
                     return app.isAttachedTo(newHook);
                 });
             });
@@ -12672,7 +12662,7 @@
 
         // returns an app based on the given element hook
         exports.find = function find(hook) {
-            var app = state.apps.find(function(app) {
+            var app = state$1.apps.find(function(app) {
                 return app.isAttachedTo(hook);
             });
             if (!app) {
@@ -12709,7 +12699,7 @@
         exports.setOptions = function setOptions$1(opts) {
             if (isObject(opts)) {
                 // update existing plugins
-                state.apps.forEach(function(app) {
+                state$1.apps.forEach(function(app) {
                     app.setOptions(opts);
                 });
 

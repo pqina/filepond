@@ -1159,7 +1159,7 @@ const createView =
         return createObject(externalAPIDefinition);
     };
 
-const createPainter = (read, write, fps = 60) => {
+const createPainter = (read, write) => {
     const name = '__framePainter';
 
     // set global painter
@@ -1174,61 +1174,8 @@ const createPainter = (read, write, fps = 60) => {
         writers: [write],
     };
 
-    const painter = window[name];
-
-    const interval = 1000 / fps;
-    let last = null;
-    let id = null;
-    let requestTick = null;
-    let cancelTick = null;
-
-    const setTimerType = () => {
-        if (document.hidden) {
-            requestTick = () => window.setTimeout(() => tick(performance.now()), interval);
-            cancelTick = () => window.clearTimeout(id);
-        } else {
-            requestTick = () => window.requestAnimationFrame(tick);
-            cancelTick = () => window.cancelAnimationFrame(id);
-        }
-    };
-
-    document.addEventListener('visibilitychange', () => {
-        if (cancelTick) cancelTick();
-        setTimerType();
-        tick(performance.now());
-    });
-
-    const tick = ts => {
-        // queue next tick
-        id = requestTick(tick);
-
-        // limit fps
-        if (!last) {
-            last = ts;
-        }
-
-        const delta = ts - last;
-
-        if (delta <= interval) {
-            // skip frame
-            return;
-        }
-
-        // align next frame
-        last = ts - (delta % interval);
-
-        // update view
-        painter.readers.forEach(read => read());
-        painter.writers.forEach(write => write(ts));
-    };
-
-    setTimerType();
-    tick(performance.now());
-
     return {
-        pause: () => {
-            cancelTick(id);
-        },
+        pause: () => {},
     };
 };
 
@@ -9517,6 +9464,54 @@ const createAppPlugin = plugin => {
     extendDefaultOptions(pluginOutline.options);
 };
 
+const fps = 60;
+const interval = 1000 / fps;
+let last = null;
+let isTicking = false;
+let state = null;
+
+function tick(ts) {
+    // queue next tick
+    const scheduleTick = () => {
+        if (state.activeCount === 0) {
+            isTicking = false;
+        } else if (document.hidden) {
+            setTimeout(() => tick(performance.now()), interval);
+        } else {
+            window.requestAnimationFrame(tick);
+        }
+    };
+
+    const name = '__framePainter';
+
+    const painter = window[name];
+
+    // limit fps
+    if (!last) {
+        last = ts;
+    } else {
+        const delta = ts - last;
+        last = ts - (delta % interval);
+        if (delta <= interval) {
+            scheduleTick();
+            return;
+        }
+    }
+
+    // update view
+    painter.readers.forEach(read => read());
+    painter.writers.forEach(write => write(ts));
+
+    scheduleTick();
+}
+
+const triggerTick = outterState => {
+    state = outterState;
+    if (isTicking) return;
+    isTicking = true;
+    tick(performance.now());
+};
+
 // feature detection used by supported() method
 const isOperaMini = () => Object.prototype.toString.call(window.operamini) === '[object OperaMini]';
 const hasPromises = () => 'Promise' in window;
@@ -9549,9 +9544,10 @@ const supported = (() => {
 /**
  * Plugin internal state (over all instances)
  */
-const state = {
+const state$1 = {
     // active app instances, used to redraw the apps and to find the later
     apps: [],
+    activeCount: 0,
 };
 
 // plugin name
@@ -9578,10 +9574,10 @@ if (supported()) {
     // start painter and fire load event
     createPainter(
         () => {
-            state.apps.forEach(app => app._read());
+            state$1.apps.forEach(app => app._read());
         },
         ts => {
-            state.apps.forEach(app => app._write(ts));
+            state$1.apps.forEach(app => app._write(ts));
         }
     );
 
@@ -9628,19 +9624,23 @@ if (supported()) {
 
     // create method, creates apps and adds them to the app array
     create$f = (...args) => {
+        state$1.activeCount++;
         const app = createApp$1(...args);
         app.on('destroy', destroy);
-        state.apps.push(app);
+        state$1.apps.push(app);
+        triggerTick(state$1);
         return createAppAPI(app);
     };
 
     // destroys apps and removes them from the app array
     destroy = hook => {
         // returns true if the app was destroyed successfully
-        const indexToRemove = state.apps.findIndex(app => app.isAttachedTo(hook));
+        const indexToRemove = state$1.apps.findIndex(app => app.isAttachedTo(hook));
         if (indexToRemove >= 0) {
+            state$1.activeCount--;
+
             // remove from apps
-            const app = state.apps.splice(indexToRemove, 1)[0];
+            const app = state$1.apps.splice(indexToRemove, 1)[0];
 
             // restore original dom element
             app.restoreElement();
@@ -9658,7 +9658,7 @@ if (supported()) {
 
         // filter out already active hooks
         const newHooks = matchedHooks.filter(
-            newHook => !state.apps.find(app => app.isAttachedTo(newHook))
+            newHook => !state$1.apps.find(app => app.isAttachedTo(newHook))
         );
 
         // create new instance for each hook
@@ -9667,7 +9667,7 @@ if (supported()) {
 
     // returns an app based on the given element hook
     find = hook => {
-        const app = state.apps.find(app => app.isAttachedTo(hook));
+        const app = state$1.apps.find(app => app.isAttachedTo(hook));
         if (!app) {
             return null;
         }
@@ -9694,7 +9694,7 @@ if (supported()) {
     setOptions$1 = opts => {
         if (isObject(opts)) {
             // update existing plugins
-            state.apps.forEach(app => {
+            state$1.apps.forEach(app => {
                 app.setOptions(opts);
             });
 
