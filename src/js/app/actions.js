@@ -858,7 +858,14 @@ export const actions = (dispatch, query, state) => ({
                 applyFilterChain('PREPARE_OUTPUT', file, { query, item })
                     .then(file => {
                         dispatch('DID_PREPARE_OUTPUT', { id: item.id, file });
-
+                        // beforeProcessFile hook
+                        const beforeProcess = query('GET_BEFORE_PROCESS_FILE');
+                        if(beforeProcess && !beforeProcess(file)){
+                            let error = Error("beforeProcessFile hook prevented upload.");
+                            item.abortProcessing();
+                            failure({error,item})
+                            return;
+                        }
                         success(file);
                     })
                     .catch(error);

@@ -190,6 +190,7 @@ export const defaultOptions = {
     beforeAddFile: [null, Type.FUNCTION],
     beforeRemoveFile: [null, Type.FUNCTION],
     beforePrepareFile: [null, Type.FUNCTION],
+    beforeProcessFile: [null, Type.FUNCTION],
 
     // styles
     stylePanelLayout: [null, Type.STRING], // null 'integrated', 'compact', 'circle'

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.30.4
+ * FilePond 4.30.5
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -603,7 +603,10 @@ const listeners = ({
     };
 
     viewExternalAPI.off = (type, fn) => {
-        events.splice(events.findIndex(event => event.type === type && event.fn === fn), 1);
+        events.splice(
+            events.findIndex(event => event.type === type && event.fn === fn),
+            1
+        );
         remove(type, fn);
     };
 
@@ -1959,6 +1962,7 @@ const defaultOptions = {
     beforeAddFile: [null, Type.FUNCTION],
     beforeRemoveFile: [null, Type.FUNCTION],
     beforePrepareFile: [null, Type.FUNCTION],
+    beforeProcessFile: [null, Type.FUNCTION],
 
     // styles
     stylePanelLayout: [null, Type.STRING], // null 'integrated', 'compact', 'circle'
@@ -4834,7 +4838,14 @@ const actions = (dispatch, query, state) => ({
                 applyFilterChain('PREPARE_OUTPUT', file, { query, item })
                     .then(file => {
                         dispatch('DID_PREPARE_OUTPUT', { id: item.id, file });
-
+                        // beforeProcessFile hook
+                        const beforeProcess = query('GET_BEFORE_PROCESS_FILE');
+                        if (beforeProcess && !beforeProcess(file)) {
+                            let error = Error('beforeProcessFile hook prevented upload.');
+                            item.abortProcessing();
+                            failure({ error, item });
+                            return;
+                        }
                         success(file);
                     })
                     .catch(error);

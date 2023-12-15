@@ -604,6 +604,12 @@ export interface FilePondHookProps {
      * Return `false` to prevent adding it, or return a `Promise` and resolve with `true` or `false`.
      */
     beforeRemoveFile?: (item: FilePondFile) => boolean | Promise<boolean>;
+    /**
+     * FilePond is about to upload this file, so there's a chance to change things to be submitted to the server, e.g. headers, extra form fields per file.
+     *
+     * Return `true` or `false` depending on if you want to allow the item to be uploaded.
+     */
+    beforeProcessFile?: (item: FilePondFile) => boolean;
 }
 
 export interface FilePondStyleProps {
