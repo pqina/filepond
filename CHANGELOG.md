@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.30.5
+
+-   Fix file field value assignment #905
+
 ## 4.30.4
 
 -   Fix a bug where the selected file is not replaced #841
