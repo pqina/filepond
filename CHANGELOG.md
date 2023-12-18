@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.30.6
+
+-   Fix issue where using a number as source for a local file would throw a `url.split` error.
+
 ## 4.30.5
 
 -   Fix file field value assignment #905

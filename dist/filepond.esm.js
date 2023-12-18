@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.30.5
+ * FilePond 4.30.6
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -2181,7 +2181,7 @@ const isBase64DataURI = str =>
     );
 
 const getFilenameFromURL = url =>
-    url
+    `${url}`
         .split('/')
         .pop()
         .split('?')

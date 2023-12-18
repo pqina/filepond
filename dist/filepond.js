@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.30.5
+ * FilePond 4.30.6
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -4166,7 +4166,7 @@
     };
 
     var getFilenameFromURL = function getFilenameFromURL(url) {
-        return url
+        return ('' + url)
             .split('/')
             .pop()
             .split('?')
