@@ -76,6 +76,7 @@ FilePond adapters are available for **[React](https://github.com/pqina/react-fil
 *   [jQuery](https://github.com/pqina/jquery-filepond)
 *   [Angular](https://github.com/pqina/ngx-filepond)
 *   [Angular 1](https://github.com/johnnyasantoss/angularjs-filepond) ([johnnyasantoss/angularjs-filepond](https://github.com/johnnyasantoss/angularjs-filepond))
+*   [Blazor](https://github.com/soenneker/soenneker.blazor.filepond) ([soenneker/soenneker.blazor.filepond](https://github.com/soenneker/soenneker.blazor.filepond))
 *   [Ember](https://github.com/alexdiliberto/ember-filepond) ([alexdiliberto/ember-filepond](https://github.com/alexdiliberto/ember-filepond))
 
 
