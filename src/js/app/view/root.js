@@ -104,7 +104,6 @@ const create = ({ root, props }) => {
     if (hasCredits) {
         const frag = document.createElement('a');
         frag.className = 'filepond--credits';
-        frag.setAttribute('aria-hidden', 'true');
         frag.href = credits[0];
         frag.tabindex = -1;
         frag.target = '_blank';
