@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.30.4
+ * FilePond 4.30.6
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -2182,7 +2182,7 @@ const isBase64DataURI = str =>
     );
 
 const getFilenameFromURL = url =>
-    url
+    `${url}`
         .split('/')
         .pop()
         .split('?')
@@ -7261,7 +7261,8 @@ const didRemoveItem = ({ root, action }) => {
     delete root.ref.fields[action.id];
 };
 
-// only runs for server files (so doesn't deal with file input)
+// only runs for server files. will refuse to update the value if the field
+// is a file field
 const didDefineValue = ({ root, action }) => {
     const field = getField(root, action.id);
     if (!field) return;
@@ -7270,7 +7271,9 @@ const didDefineValue = ({ root, action }) => {
         field.removeAttribute('value');
     } else {
         // set field value
-        field.value = action.value;
+        if (field.type != 'file') {
+            field.value = action.value;
+        }
     }
     syncFieldPositionsWithItems(root);
 };

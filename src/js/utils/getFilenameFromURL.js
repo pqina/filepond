@@ -1,5 +1,5 @@
 export const getFilenameFromURL = url =>
-    url
+    `${url}`
         .split('/')
         .pop()
         .split('?')

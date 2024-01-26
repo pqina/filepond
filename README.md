@@ -63,7 +63,7 @@ FilePond adapters are available for **[React](https://github.com/pqina/react-fil
 *   [Media preview + PDF preview](https://github.com/ErnestBrandi/filepond-plugin-media-preview) ([ErnestBrandi/filepond-plugin-media-preview](https://github.com/ErnestBrandi/filepond-plugin-media-preview))
 *   [Get file](https://github.com/nielsboogaard/filepond-plugin-get-file) ([nielsboogaard/filepond-plugin-get-file](https://github.com/nielsboogaard/filepond-plugin-get-file))
 *   [Zip Directory Uploads](https://github.com/tzsk/filepond-plugin-zipper) ([tzsk/filepond-plugin-zipper](https://github.com/tzsk/filepond-plugin-zipper))
-*   [PDF Preview](https://github.com/Adri-Glez/filepond-plugin-pdf-preview) ([Adri-Glez/filepond-plugin-pdf-preview](https://github.com/Adri-Glez/filepond-plugin-pdf-preview)
+*   [PDF Preview](https://github.com/Adri-Glez/filepond-plugin-pdf-preview) ([Adri-Glez/filepond-plugin-pdf-preview](https://github.com/Adri-Glez/filepond-plugin-pdf-preview))
 *   [PDF Convert](https://github.com/alexandreDavid/filepond-plugin-pdf-convert) ([alexandreDavid/filepond-plugin-pdf-convert](https://github.com/alexandreDavid/filepond-plugin-pdf-convert))
 *   [Copy Path](https://github.com/jnkn6/filepond-plugin-copy-path) ([jnkn6/filepond-plugin-copy-path](https://github.com/jnkn6/filepond-plugin-copy-path))
 
@@ -76,6 +76,7 @@ FilePond adapters are available for **[React](https://github.com/pqina/react-fil
 *   [jQuery](https://github.com/pqina/jquery-filepond)
 *   [Angular](https://github.com/pqina/ngx-filepond)
 *   [Angular 1](https://github.com/johnnyasantoss/angularjs-filepond) ([johnnyasantoss/angularjs-filepond](https://github.com/johnnyasantoss/angularjs-filepond))
+*   [Blazor](https://github.com/soenneker/soenneker.blazor.filepond) ([soenneker/soenneker.blazor.filepond](https://github.com/soenneker/soenneker.blazor.filepond))
 *   [Ember](https://github.com/alexdiliberto/ember-filepond) ([alexdiliberto/ember-filepond](https://github.com/alexdiliberto/ember-filepond))
 
 
@@ -86,6 +87,7 @@ FilePond adapters are available for **[React](https://github.com/pqina/react-fil
 *   [Laravel](https://github.com/Sopamo/laravel-filepond) ([Sopamo/laravel-filepond](https://github.com/Sopamo/laravel-filepond))
 *   [Laravel](https://github.com/Albert221/laravel-filepond) ([Albert221/laravel-filepond](https://github.com/Albert221/laravel-filepond))
 *   [SilverStripe](https://github.com/lekoala/silverstripe-filepond) ([lekoala/silverstripe-filepond](https://github.com/lekoala/silverstripe-filepond))
+*   [Ruby on Rails](https://github.com/Code-With-Rails/filepond-rails) ([Code-With-Rails/filepond-rails](https://github.com/Code-With-Rails/filepond-rails))
 
 ## Quick Start
 

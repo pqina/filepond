@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.30.4
+ * FilePond 4.30.6
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -4167,7 +4167,7 @@
     };
 
     var getFilenameFromURL = function getFilenameFromURL(url) {
-        return url
+        return ('' + url)
             .split('/')
             .pop()
             .split('?')
@@ -9961,7 +9961,8 @@
         delete root.ref.fields[action.id];
     };
 
-    // only runs for server files (so doesn't deal with file input)
+    // only runs for server files. will refuse to update the value if the field
+    // is a file field
     var didDefineValue = function didDefineValue(_ref8) {
         var root = _ref8.root,
             action = _ref8.action;
@@ -9972,7 +9973,9 @@
             field.removeAttribute('value');
         } else {
             // set field value
-            field.value = action.value;
+            if (field.type != 'file') {
+                field.value = action.value;
+            }
         }
         syncFieldPositionsWithItems(root);
     };
