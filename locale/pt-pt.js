@@ -1,6 +1,6 @@
 export default {
     labelIdle: 'Arraste & Largue os ficheiros ou <span class="filepond--label-action"> Seleccione </span>',
-    labelInvalidField: 'O campo contém ficheios inválidos',
+    labelInvalidField: 'O campo contém ficheiros inválidos',
     labelFileWaitingForSize: 'A aguardar tamanho',
     labelFileSizeNotAvailable: 'Tamanho não disponível',
     labelFileLoading: 'A carregar',
