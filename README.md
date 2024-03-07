@@ -121,7 +121,7 @@ Or get it from a CDN:
   <title>FilePond from CDN</title>
 
   <!-- Filepond stylesheet -->
-  <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/filepond@4/dist/filepond.css" rel="stylesheet">
 
 </head>
 <body>
@@ -130,7 +130,7 @@ Or get it from a CDN:
   <input type="file" class="filepond">
 
   <!-- Load FilePond library -->
-  <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/filepond@4/dist/filepond.js"></script>
 
   <!-- Turn all file input elements into ponds -->
   <script>
