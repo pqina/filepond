@@ -95,6 +95,7 @@ export const defaultOptions = {
     chunkForce: [false, Type.BOOLEAN], // Force use of chunk uploads even for files smaller than chunk size
     chunkSize: [5000000, Type.INT], // Size of chunks (5MB default)
     chunkRetryDelays: [[500, 1000, 3000], Type.ARRAY], // Amount of times to retry upload of a chunk when it fails
+    chunkParallelize: [false, Type.BOOLEAN], // Enable uploads of chuncks in parallel
 
     // The server api end points to use for uploading (see docs)
     server: [null, Type.SERVER_API],
