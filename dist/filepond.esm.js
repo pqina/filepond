@@ -6030,14 +6030,20 @@ const create$7 = ({ root, props }) => {
     // set to idle so shows grab cursor
     root.element.dataset.dragState = 'idle';
 
-    const grab = e => {
-        if (!e.isPrimary) return;
+    var startInteraction = function(e, isTouch) {
+        var pageX = isTouch ? e.touches[0].pageX : e.pageX;
+        var pageY = isTouch ? e.touches[0].pageY : e.pageY;
+        var rect = e.target.getBoundingClientRect();
+        var offsetX = isTouch ? e.touches[0].pageX - rect.left : e.offsetX;
+        var offsetY = isTouch ? e.touches[0].pageY - rect.top : e.offsetY;
 
-        let removedActivateListener = false;
+        if (!isTouch) e.preventDefault(); // Prevent text selection on drag for non-touch devices
 
-        const origin = {
-            x: e.pageX,
-            y: e.pageY,
+        var removedActivateListener = false;
+
+        var origin = {
+            x: pageX,
+            y: pageY,
         };
 
         props.dragOrigin = {
@@ -6046,60 +6052,76 @@ const create$7 = ({ root, props }) => {
         };
 
         props.dragCenter = {
-            x: e.offsetX,
-            y: e.offsetY,
+            x: offsetX,
+            y: offsetY,
         };
 
-        const dragState = createDragHelper(root.query('GET_ACTIVE_ITEMS'));
+        var dragState = createDragHelper(root.query('GET_ACTIVE_ITEMS'));
 
-        root.dispatch('DID_GRAB_ITEM', { id: props.id, dragState });
+        root.dispatch('DID_GRAB_ITEM', { id: props.id, dragState: dragState });
 
-        const drag = e => {
-            if (!e.isPrimary) return;
+        var moveHandler = function(e) {
+            var pageX = isTouch ? e.touches[0].pageX : e.pageX;
+            var pageY = isTouch ? e.touches[0].pageY : e.pageY;
 
-            e.stopPropagation();
             e.preventDefault();
+            if (isTouch) {
+                e.stopImmediatePropagation();
+            }
 
             props.dragOffset = {
-                x: e.pageX - origin.x,
-                y: e.pageY - origin.y,
+                x: pageX - origin.x,
+                y: pageY - origin.y,
             };
 
             // if dragged stop listening to clicks, will re-add when done dragging
-            const dist =
+            var dist =
                 props.dragOffset.x * props.dragOffset.x + props.dragOffset.y * props.dragOffset.y;
             if (dist > 16 && !removedActivateListener) {
                 removedActivateListener = true;
                 root.element.removeEventListener('click', root.ref.handleClick);
             }
 
-            root.dispatch('DID_DRAG_ITEM', { id: props.id, dragState });
+            root.dispatch('DID_DRAG_ITEM', { id: props.id, dragState: dragState });
         };
 
-        const drop = e => {
-            if (!e.isPrimary) return;
+        var endHandler = function(e) {
+            var pageX = isTouch ? e.changedTouches[0].pageX : e.pageX;
+            var pageY = isTouch ? e.changedTouches[0].pageY : e.pageY;
 
-            document.removeEventListener('pointermove', drag);
-            document.removeEventListener('pointerup', drop);
+            document.removeEventListener('mousemove', moveHandler);
+            document.removeEventListener('touchmove', moveHandler);
+            document.removeEventListener('mouseup', endHandler);
+            document.removeEventListener('touchend', endHandler);
 
             props.dragOffset = {
-                x: e.pageX - origin.x,
-                y: e.pageY - origin.y,
+                x: pageX - origin.x,
+                y: pageY - origin.y,
             };
 
-            root.dispatch('DID_DROP_ITEM', { id: props.id, dragState });
+            root.dispatch('DID_DROP_ITEM', { id: props.id, dragState: dragState });
 
             // start listening to clicks again
             if (removedActivateListener) {
-                setTimeout(() => root.element.addEventListener('click', root.ref.handleClick), 0);
+                setTimeout(function() {
+                    return root.element.addEventListener('click', root.ref.handleClick);
+                }, 0);
             }
         };
 
-        document.addEventListener('pointermove', drag);
-        document.addEventListener('pointerup', drop);
+        document.addEventListener(isTouch ? 'touchmove' : 'mousemove', moveHandler, {
+            passive: false,
+        });
+        document.addEventListener(isTouch ? 'touchend' : 'mouseup', endHandler);
     };
 
-    root.element.addEventListener('pointerdown', grab);
+    var grab = function grab(e) {
+        if (e.type === 'mousedown' && e.button !== 0) return; // Only handle left-click for mousedown
+        startInteraction(e, e.type === 'touchstart');
+    };
+
+    root.element.addEventListener('mousedown', grab);
+    root.element.addEventListener('touchstart', grab);
 };
 
 const route$1 = createRoute({
