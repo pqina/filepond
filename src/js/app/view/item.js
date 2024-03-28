@@ -69,8 +69,8 @@ const create = ({ root, props }) => {
         var pageX = isTouch ? e.touches[0].pageX : e.pageX;
         var pageY = isTouch ? e.touches[0].pageY : e.pageY;
         var rect = e.target.getBoundingClientRect();
-        var offsetX = isTouch ? e.touches[0].pageX - rect.left : e.offsetX;
-        var offsetY = isTouch ? e.touches[0].pageY - rect.top : e.offsetY;
+        var offsetX = isTouch ? (e.touches[0].pageX - window.pageXOffset - rect.left) : e.offsetX;
+        var offsetY = isTouch ? (e.touches[0].pageY - window.pageYOffset - rect.top) : e.offsetY;
 
         if (!isTouch) e.preventDefault(); // Prevent text selection on drag for non-touch devices
 
