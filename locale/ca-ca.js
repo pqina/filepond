@@ -18,7 +18,7 @@ export default {
     labelButtonAbortItemLoad: `Cancel·lar`,
     labelButtonRetryItemLoad: `Reintentar`,
     labelButtonAbortItemProcessing: `Cancel·lar`,
-    labelButtonUndoItemProcessing: `Desfér`,
+    labelButtonUndoItemProcessing: `Desfer`,
     labelButtonRetryItemProcessing: `Reintentar`,
     labelButtonProcessItem: `Pujar`,
     labelMaxFileSizeExceeded: `El fitxer és massa gran`,
