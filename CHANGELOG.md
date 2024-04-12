@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.31.1
+
+-   Fix issue with dragging file items sometimes not working.
+
 ## 4.31.0
 
 -   Add support for editing mock files if `item.source` is url.

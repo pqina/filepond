@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.31.0
+ * FilePond 4.31.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -6079,13 +6079,22 @@ const create$7 = ({ root, props }) => {
         const drop = e => {
             if (!e.isPrimary) return;
 
-            document.removeEventListener('pointermove', drag);
-            document.removeEventListener('pointerup', drop);
-
             props.dragOffset = {
                 x: e.pageX - origin.x,
                 y: e.pageY - origin.y,
             };
+
+            reset();
+        };
+
+        const cancel = () => {
+            reset();
+        };
+
+        const reset = () => {
+            document.removeEventListener('pointercancel', cancel);
+            document.removeEventListener('pointermove', drag);
+            document.removeEventListener('pointerup', drop);
 
             root.dispatch('DID_DROP_ITEM', { id: props.id, dragState });
 
@@ -6095,6 +6104,7 @@ const create$7 = ({ root, props }) => {
             }
         };
 
+        document.addEventListener('pointercancel', cancel);
         document.addEventListener('pointermove', drag);
         document.addEventListener('pointerup', drop);
     };
