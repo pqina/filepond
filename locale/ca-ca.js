@@ -1,5 +1,5 @@
 export default {
-    labelIdle: `Arrossega i deixa els teus fitxers o <span class="filepond--label-action"> Navega </span>`,
+    labelIdle: `Arrossega i deixa anar els teus fitxers o <span class="filepond--label-action"> Navega </span>`,
     labelInvalidField: `El camp conté fitxers invàlids`,
     labelFileWaitingForSize: `Esperant mida`,
     labelFileSizeNotAvailable: `Mida no disponible`,
