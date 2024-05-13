@@ -722,6 +722,11 @@ export interface FilePondBaseProps {
      */
     allowRevert?: boolean;
     /**
+     * When set to false the remove button is hidden and disabled.
+     * @default true
+     */
+    allowRemove?: boolean;
+    /**
      * Allows user to process a file. When set to false, this removes the file upload button.
      * @default true
      */
