@@ -329,7 +329,8 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
         new Promise((resolve, reject) => {
             // a completed upload will have a serverFileReference, a failed chunked upload where
             // getting a serverId succeeded but >=0 chunks have been uploaded will have transferId set
-            const serverTransferId = (state.serverFileReference !== null) ? state.serverFileReference : state.transferId;
+            const serverTransferId =
+                state.serverFileReference !== null ? state.serverFileReference : state.transferId;
 
             // cannot revert without a server id for this process
             if (serverTransferId === null) {
@@ -438,6 +439,9 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
 
         archive: () => (state.archived = true),
         archived: { get: () => state.archived },
+
+        // replace source and file object
+        setFile: file => (state.file = file),
     };
 
     // create it here instead of returning it instantly so we can extend it later

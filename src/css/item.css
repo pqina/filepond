@@ -10,6 +10,8 @@
 
     will-change: transform, opacity;
 
+    touch-action: none;
+
     /* item children order */
     & > .filepond--panel {
         z-index: -1;

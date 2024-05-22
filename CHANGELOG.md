@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.31.1
+
+-   Fix issue with dragging file items sometimes not working.
+
+## 4.31.0
+
+-   Add support for editing mock files if `item.source` is url.
+
 ## 4.30.6
 
 -   Fix issue where using a number as source for a local file would throw a `url.split` error.

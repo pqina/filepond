@@ -455,6 +455,11 @@ export const actions = (dispatch, query, state) => ({
         });
 
         item.on('load-skip', () => {
+            item.on('metadata-update', change => {
+                if (!isFile(item.file)) return;
+                dispatch('DID_UPDATE_ITEM_METADATA', { id, change });
+            });
+
             dispatch('COMPLETE_LOAD_ITEM', {
                 query: id,
                 item,

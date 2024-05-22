@@ -7,11 +7,10 @@ const ITEM_TRANSLATE_SPRING = {
     type: 'spring',
     stiffness: 0.75,
     damping: 0.45,
-    mass: 10
-}
+    mass: 10,
+};
 
 const ITEM_SCALE_SPRING = 'spring';
-
 
 const StateMap = {
     DID_START_ITEM_LOAD: 'busy',
@@ -28,30 +27,25 @@ const StateMap = {
     DID_THROW_ITEM_PROCESSING_ERROR: 'processing-error',
     DID_THROW_ITEM_PROCESSING_REVERT_ERROR: 'processing-revert-error',
     DID_ABORT_ITEM_PROCESSING: 'cancelled',
-    DID_REVERT_ITEM_PROCESSING: 'idle'
+    DID_REVERT_ITEM_PROCESSING: 'idle',
 };
 
 /**
  * Creates the file view
  */
 const create = ({ root, props }) => {
-
     // select
     root.ref.handleClick = e => root.dispatch('DID_ACTIVATE_ITEM', { id: props.id });
 
     // set id
     root.element.id = `filepond--item-${props.id}`;
     root.element.addEventListener('click', root.ref.handleClick);
-    
+
     // file view
-    root.ref.container = root.appendChildView(
-        root.createChildView(fileWrapper, { id: props.id })
-    );
+    root.ref.container = root.appendChildView(root.createChildView(fileWrapper, { id: props.id }));
 
     // file panel
-    root.ref.panel = root.appendChildView(
-        root.createChildView(panel, { name: 'item-panel' })
-    );
+    root.ref.panel = root.appendChildView(root.createChildView(panel, { name: 'item-panel' }));
 
     // default start height
     root.ref.panel.height = null;
@@ -66,32 +60,30 @@ const create = ({ root, props }) => {
     root.element.dataset.dragState = 'idle';
 
     const grab = e => {
-
         if (!e.isPrimary) return;
 
         let removedActivateListener = false;
 
         const origin = {
             x: e.pageX,
-            y: e.pageY
+            y: e.pageY,
         };
 
         props.dragOrigin = {
             x: root.translateX,
-            y: root.translateY
-        }
+            y: root.translateY,
+        };
 
         props.dragCenter = {
             x: e.offsetX,
-            y: e.offsetY
-        }
+            y: e.offsetY,
+        };
 
         const dragState = createDragHelper(root.query('GET_ACTIVE_ITEMS'));
 
         root.dispatch('DID_GRAB_ITEM', { id: props.id, dragState });
 
         const drag = e => {
-
             if (!e.isPrimary) return;
 
             e.stopPropagation();
@@ -99,11 +91,12 @@ const create = ({ root, props }) => {
 
             props.dragOffset = {
                 x: e.pageX - origin.x,
-                y: e.pageY - origin.y
+                y: e.pageY - origin.y,
             };
 
             // if dragged stop listening to clicks, will re-add when done dragging
-            const dist = (props.dragOffset.x * props.dragOffset.x) + (props.dragOffset.y * props.dragOffset.y);
+            const dist =
+                props.dragOffset.x * props.dragOffset.x + props.dragOffset.y * props.dragOffset.y;
             if (dist > 16 && !removedActivateListener) {
                 removedActivateListener = true;
                 root.element.removeEventListener('click', root.ref.handleClick);
@@ -111,18 +104,26 @@ const create = ({ root, props }) => {
 
             root.dispatch('DID_DRAG_ITEM', { id: props.id, dragState });
         };
-    
+
         const drop = e => {
-
             if (!e.isPrimary) return;
-
-            document.removeEventListener('pointermove', drag);
-            document.removeEventListener('pointerup', drop);
 
             props.dragOffset = {
                 x: e.pageX - origin.x,
-                y: e.pageY - origin.y
+                y: e.pageY - origin.y,
             };
+
+            reset();
+        };
+
+        const cancel = () => {
+            reset();
+        };
+
+        const reset = () => {
+            document.removeEventListener('pointercancel', cancel);
+            document.removeEventListener('pointermove', drag);
+            document.removeEventListener('pointerup', drop);
 
             root.dispatch('DID_DROP_ITEM', { id: props.id, dragState });
 
@@ -132,9 +133,10 @@ const create = ({ root, props }) => {
             }
         };
 
+        document.addEventListener('pointercancel', cancel);
         document.addEventListener('pointermove', drag);
         document.addEventListener('pointerup', drop);
-    }
+    };
 
     root.element.addEventListener('pointerdown', grab);
 };
@@ -142,67 +144,69 @@ const create = ({ root, props }) => {
 const route = createRoute({
     DID_UPDATE_PANEL_HEIGHT: ({ root, action }) => {
         root.height = action.height;
-    }
+    },
 });
 
-const write = createRoute({
-    DID_GRAB_ITEM: ({ root, props }) => {
-        props.dragOrigin = {
-            x: root.translateX,
-            y: root.translateY
-        }
+const write = createRoute(
+    {
+        DID_GRAB_ITEM: ({ root, props }) => {
+            props.dragOrigin = {
+                x: root.translateX,
+                y: root.translateY,
+            };
+        },
+        DID_DRAG_ITEM: ({ root }) => {
+            root.element.dataset.dragState = 'drag';
+        },
+        DID_DROP_ITEM: ({ root, props }) => {
+            props.dragOffset = null;
+            props.dragOrigin = null;
+            root.element.dataset.dragState = 'drop';
+        },
     },
-    DID_DRAG_ITEM: ({ root }) => {
-        root.element.dataset.dragState = 'drag';
-    },
-    DID_DROP_ITEM: ({ root, props }) => {
-        props.dragOffset = null;
-        props.dragOrigin = null;
-        root.element.dataset.dragState = 'drop';
-    }
-}, ({ root, actions, props, shouldOptimize }) => {
-
-    if (root.element.dataset.dragState === 'drop') {
-        if (root.scaleX <= 1) {
-            root.element.dataset.dragState = 'idle';
+    ({ root, actions, props, shouldOptimize }) => {
+        if (root.element.dataset.dragState === 'drop') {
+            if (root.scaleX <= 1) {
+                root.element.dataset.dragState = 'idle';
+            }
         }
-    }
 
-    // select last state change action
-    let action = actions.concat()
-        .filter(action => /^DID_/.test(action.type))
-        .reverse()
-        .find(action => StateMap[action.type]);
+        // select last state change action
+        let action = actions
+            .concat()
+            .filter(action => /^DID_/.test(action.type))
+            .reverse()
+            .find(action => StateMap[action.type]);
 
-    // no need to set same state twice
-    if (action && action.type !== props.currentState) {
-            
-        // set current state
-        props.currentState = action.type;
+        // no need to set same state twice
+        if (action && action.type !== props.currentState) {
+            // set current state
+            props.currentState = action.type;
 
-        // set state
-        root.element.dataset.filepondItemState = StateMap[props.currentState] || '';
-    }
-
-    // route actions
-    const aspectRatio = root.query('GET_ITEM_PANEL_ASPECT_RATIO') || root.query('GET_PANEL_ASPECT_RATIO');
-    if (!aspectRatio) {
-        route({ root, actions, props });
-        if (!root.height && root.ref.container.rect.element.height > 0) {
-            root.height = root.ref.container.rect.element.height;
+            // set state
+            root.element.dataset.filepondItemState = StateMap[props.currentState] || '';
         }
-    }
-    else if (!shouldOptimize) {
-        root.height = root.rect.element.width * aspectRatio;
-    }
-    
-    // sync panel height with item height
-    if (shouldOptimize) {
-        root.ref.panel.height = null;
-    }
 
-    root.ref.panel.height = root.height;
-});
+        // route actions
+        const aspectRatio =
+            root.query('GET_ITEM_PANEL_ASPECT_RATIO') || root.query('GET_PANEL_ASPECT_RATIO');
+        if (!aspectRatio) {
+            route({ root, actions, props });
+            if (!root.height && root.ref.container.rect.element.height > 0) {
+                root.height = root.ref.container.rect.element.height;
+            }
+        } else if (!shouldOptimize) {
+            root.height = root.rect.element.width * aspectRatio;
+        }
+
+        // sync panel height with item height
+        if (shouldOptimize) {
+            root.ref.panel.height = null;
+        }
+
+        root.ref.panel.height = root.height;
+    }
+);
 
 export const item = createView({
     create,
@@ -214,21 +218,22 @@ export const item = createView({
     tag: 'li',
     name: 'item',
     mixins: {
-        apis: ['id', 'interactionMethod', 'markedForRemoval', 'spawnDate', 'dragCenter', 'dragOrigin', 'dragOffset'],
-        styles: [
-            'translateX',
-            'translateY',
-            'scaleX',
-            'scaleY',
-            'opacity',
-            'height'
+        apis: [
+            'id',
+            'interactionMethod',
+            'markedForRemoval',
+            'spawnDate',
+            'dragCenter',
+            'dragOrigin',
+            'dragOffset',
         ],
+        styles: ['translateX', 'translateY', 'scaleX', 'scaleY', 'opacity', 'height'],
         animations: {
             scaleX: ITEM_SCALE_SPRING,
             scaleY: ITEM_SCALE_SPRING,
             translateX: ITEM_TRANSLATE_SPRING,
             translateY: ITEM_TRANSLATE_SPRING,
-            opacity: { type: 'tween', duration: 150 }
-        }
-    }
+            opacity: { type: 'tween', duration: 150 },
+        },
+    },
 });

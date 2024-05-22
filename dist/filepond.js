@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.30.6
+ * FilePond 4.31.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -6277,6 +6277,11 @@
                         return state.archived;
                     },
                 },
+
+                // replace source and file object
+                setFile: function setFile(file) {
+                    return (state.file = file);
+                },
             }
         );
 
@@ -6862,6 +6867,11 @@
                 });
 
                 item.on('load-skip', function() {
+                    item.on('metadata-update', function(change) {
+                        if (!isFile(item.file)) return;
+                        dispatch('DID_UPDATE_ITEM_METADATA', { id: id, change: change });
+                    });
+
                     dispatch('COMPLETE_LOAD_ITEM', {
                         query: id,
                         item: item,
@@ -8636,7 +8646,6 @@
     var create$7 = function create(_ref) {
         var root = _ref.root,
             props = _ref.props;
-
         // select
         root.ref.handleClick = function(e) {
             return root.dispatch('DID_ACTIVATE_ITEM', { id: props.id });
@@ -8716,13 +8725,22 @@
             var drop = function drop(e) {
                 if (!e.isPrimary) return;
 
-                document.removeEventListener('pointermove', drag);
-                document.removeEventListener('pointerup', drop);
-
                 props.dragOffset = {
                     x: e.pageX - origin.x,
                     y: e.pageY - origin.y,
                 };
+
+                reset();
+            };
+
+            var cancel = function cancel() {
+                reset();
+            };
+
+            var reset = function reset() {
+                document.removeEventListener('pointercancel', cancel);
+                document.removeEventListener('pointermove', drag);
+                document.removeEventListener('pointerup', drop);
 
                 root.dispatch('DID_DROP_ITEM', { id: props.id, dragState: dragState });
 
@@ -8734,6 +8752,7 @@
                 }
             };
 
+            document.addEventListener('pointercancel', cancel);
             document.addEventListener('pointermove', drag);
             document.addEventListener('pointerup', drop);
         };
@@ -8771,12 +8790,12 @@
                 root.element.dataset.dragState = 'drop';
             },
         },
+
         function(_ref6) {
             var root = _ref6.root,
                 actions = _ref6.actions,
                 props = _ref6.props,
                 shouldOptimize = _ref6.shouldOptimize;
-
             if (root.element.dataset.dragState === 'drop') {
                 if (root.scaleX <= 1) {
                     root.element.dataset.dragState = 'idle';
@@ -8845,8 +8864,8 @@
                 'dragOrigin',
                 'dragOffset',
             ],
-            styles: ['translateX', 'translateY', 'scaleX', 'scaleY', 'opacity', 'height'],
 
+            styles: ['translateX', 'translateY', 'scaleX', 'scaleY', 'opacity', 'height'],
             animations: {
                 scaleX: ITEM_SCALE_SPRING,
                 scaleY: ITEM_SCALE_SPRING,

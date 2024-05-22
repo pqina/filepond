@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.30.6
+ * FilePond 4.31.1
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -631,6 +631,8 @@
     margin: 0.25em;
 
     will-change: transform, opacity;
+
+    touch-action: none;
 
     /* item children order */
 }
