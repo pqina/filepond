@@ -537,54 +537,59 @@ export interface FilePondErrorDescription {
     body: string;
 }
 
-export interface FilePondCallbackProps {
+export interface FilePondCallbacks {
     /** FilePond instance has been created and is ready. */
-    oninit?: () => void;
+    init?: () => void;
     /**
      * FilePond instance throws a warning. For instance
      * when the maximum amount of files has been reached.
      * Optionally receives file if error is related to a
      * file object.
      */
-    onwarning?: (error: any, file?: FilePondFile, status?: any) => void;
+    warning?: (error: any, file?: FilePondFile, status?: any) => void;
     /**
      * FilePond instance throws an error. Optionally receives
      * file if error is related to a file object.
      */
-    onerror?: (error: FilePondErrorDescription, file?: FilePondFile, status?: any) => void;
+    error?: (error: FilePondErrorDescription, file?: FilePondFile, status?: any) => void;
     /** Started file load. */
-    onaddfilestart?: (file: FilePondFile) => void;
+    addfilestart?: (file: FilePondFile) => void;
     /** Made progress loading a file. */
-    onaddfileprogress?: (file: FilePondFile, progress: number) => void;
+    addfileprogress?: (file: FilePondFile, progress: number) => void;
     /** If no error, file has been successfully loaded. */
-    onaddfile?: (error: FilePondErrorDescription | null, file: FilePondFile) => void;
+    addfile?: (error: FilePondErrorDescription | null, file: FilePondFile) => void;
     /** Started processing a file. */
-    onprocessfilestart?: (file: FilePondFile) => void;
+    processfilestart?: (file: FilePondFile) => void;
     /** Made progress processing a file. */
-    onprocessfileprogress?: (file: FilePondFile, progress: number) => void;
+    processfileprogress?: (file: FilePondFile, progress: number) => void;
     /** Aborted processing of a file. */
-    onprocessfileabort?: (file: FilePondFile) => void;
+    processfileabort?: (file: FilePondFile) => void;
     /** Processing of a file has been reverted. */
-    onprocessfilerevert?: (file: FilePondFile) => void;
+    processfilerevert?: (file: FilePondFile) => void;
     /** If no error, Processing of a file has been completed. */
-    onprocessfile?: (error: FilePondErrorDescription | null, file: FilePondFile) => void;
+    processfile?: (error: FilePondErrorDescription | null, file: FilePondFile) => void;
     /** Called when all files in the list have been processed. */
-    onprocessfiles?: () => void;
+    processfiles?: () => void;
     /** File has been removed. */
-    onremovefile?: (error: FilePondErrorDescription | null, file: FilePondFile) => void;
+    removefile?: (error: FilePondErrorDescription | null, file: FilePondFile) => void;
     /**
      * File has been transformed by the transform plugin or
      * another plugin subscribing to the prepare_output filter.
      * It receives the file item and the output data.
      */
-    onpreparefile?: (file: FilePondFile, output: any) => void;
+    preparefile?: (file: FilePondFile, output: any) => void;
     /** A file has been added or removed, receives a list of file items. */
-    onupdatefiles?: (files: FilePondFile[]) => void;
+    updatefiles?: (files: FilePondFile[]) => void;
     /* Called when a file is clicked or tapped. **/
-    onactivatefile?: (file: FilePondFile) => void;
+    activatefile?: (file: FilePondFile) => void;
     /** Called when the files have been reordered */
-    onreorderfiles?: (files: FilePondFile[]) => void;
+    reorderfiles?: (files: FilePondFile[]) => void;
 }
+
+export type FilePondCallbackProps = {
+  [Property in keyof FilePondCallbacks as `on${Property}`]: FilePondCallbacks[Property]
+};
+
 
 export interface FilePondHookProps {
     /**
@@ -823,35 +828,11 @@ export interface FilePondOptions extends
     FilePondStyleProps,
     FilePondBaseProps { }
 
-export type FilePondEventPrefixed = 'FilePond:init'
-    | 'FilePond:warning'
-    | 'FilePond:error'
-    | 'FilePond:addfilestart'
-    | 'FilePond:addfileprogress'
-    | 'FilePond:addfile'
-    | 'FilePond:processfilestart'
-    | 'FilePond:processfileprogress'
-    | 'FilePond:processfileabort'
-    | 'FilePond:processfilerevert'
-    | 'FilePond:processfile'
-    | 'FilePond:removefile'
-    | 'FilePond:updatefiles'
-    | 'FilePond:reorderfiles';
 
-export type FilePondEvent = 'init'
-    | 'warning'
-    | 'error'
-    | 'addfilestart'
-    | 'addfileprogress'
-    | 'addfile'
-    | 'processfilestart'
-    | 'processfileprogress'
-    | 'processfileabort'
-    | 'processfilerevert'
-    | 'processfile'
-    | 'removefile'
-    | 'updatefiles'
-    | 'reorderfiles';
+export type FilePondEvent = keyof FilePondCallbacks;
+
+type Prefix<K> = K extends string ? `FilePond:${K}` : K;
+export type FilePondEventPrefixed = Prefix<FilePondEvent>
 
 export interface RemoveFileOptions  {
     remove?: boolean;
@@ -860,7 +841,7 @@ export interface RemoveFileOptions  {
 
 export interface FilePond extends Required<FilePondOptions> {}
 
-export class FilePond {
+export interface FilePond {
     /**
      * The root element of the Filepond instance.
      */
@@ -980,19 +961,19 @@ export class FilePond {
      * @param event Name of the event
      * @param fn Event handler, signature is identical to the callback method
      */
-    on(event: FilePondEvent, fn: (...args: any[]) => void): void;
+    on<E extends keyof FilePondCallbacks>(event: E, fn: NonNullable<FilePondCallbacks[E]>): void;
     /**
      * Listen to an event once and remove the handler.
      * @param event Name of the event
      * @param fn Event handler, signature is identical to the callback method
      */
-    onOnce(event: FilePondEvent, fn: (...args: any[]) => void): void;
+    onOnce<E extends keyof FilePondCallbacks>(event: E, fn: NonNullable<FilePondCallbacks[E]>): void;
     /**
      * Stop listening to an event.
      * @param event Name of the event
      * @param fn Event handler, signature is identical to the callback method
      */
-    off(event: FilePondEvent, fn: (...args: any[]) => void): void;
+    off<E extends keyof FilePondCallbacks>(event: E, fn: NonNullable<FilePondCallbacks[E]>): void;
 }
 
 /** Creates a new FilePond instance. */
