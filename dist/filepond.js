@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.31.1
+ * FilePond 4.31.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -9612,16 +9612,12 @@
     var create$b = function create(_ref) {
         var root = _ref.root,
             props = _ref.props;
-
         // create the label and link it to the file browser
         var label = createElement$1('label');
         attr(label, 'for', 'filepond--browser-' + props.id);
 
         // use for labeling file input (aria-labelledby on file input)
         attr(label, 'id', 'filepond--drop-label-' + props.id);
-
-        // hide the label for screenreaders, the input element will read the contents of the label when it's focussed. If we don't set aria-hidden the screenreader will also navigate the contents of the label separately from the input.
-        attr(label, 'aria-hidden', 'true');
 
         // handle keys
         root.ref.handleKeyDown = function(e) {
@@ -10864,9 +10860,8 @@
         if (hasCredits) {
             var frag = document.createElement('a');
             frag.className = 'filepond--credits';
-            frag.setAttribute('aria-hidden', 'true');
             frag.href = credits[0];
-            frag.tabindex = -1;
+            frag.tabIndex = -1;
             frag.target = '_blank';
             frag.rel = 'noopener noreferrer';
             frag.textContent = credits[1];

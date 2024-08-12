@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.31.2
+
+-   Remove `aria-hidden` from drop label as suggested by Lighthouse.
+-   Fix `tabIndex` attribute on credits link not set correctly, now no longer included in tab flow.
+
 ## 4.31.1
 
 -   Fix issue with dragging file items sometimes not working.
