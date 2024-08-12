@@ -298,6 +298,7 @@ export interface FilePondServerConfigProps {
         restore?: string | ServerUrl | RestoreServerConfigFunction | null;
         load?: string | ServerUrl | LoadServerConfigFunction | null;
         fetch?: string | ServerUrl | FetchServerConfigFunction | null;
+        patch?: string | ServerUrl | null;
         remove?: RemoveServerConfigFunction | null;
     } | null;
 
@@ -721,6 +722,11 @@ export interface FilePondBaseProps {
      * @default true
      */
     allowRevert?: boolean;
+    /**
+     * When set to false the remove button is hidden and disabled.
+     * @default true
+     */
+    allowRemove?: boolean;
     /**
      * Allows user to process a file. When set to false, this removes the file upload button.
      * @default true
