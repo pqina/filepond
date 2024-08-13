@@ -298,6 +298,7 @@ export interface FilePondServerConfigProps {
         restore?: string | ServerUrl | RestoreServerConfigFunction | null;
         load?: string | ServerUrl | LoadServerConfigFunction | null;
         fetch?: string | ServerUrl | FetchServerConfigFunction | null;
+        patch?: string | ServerUrl | null;
         remove?: RemoveServerConfigFunction | null;
     } | null;
 

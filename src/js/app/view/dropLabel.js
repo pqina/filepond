@@ -4,16 +4,12 @@ import { createElement } from '../../utils/createElement';
 import { Key } from '../enum/Key';
 
 const create = ({ root, props }) => {
-
     // create the label and link it to the file browser
     const label = createElement('label');
     attr(label, 'for', `filepond--browser-${props.id}`);
 
     // use for labeling file input (aria-labelledby on file input)
     attr(label, 'id', `filepond--drop-label-${props.id}`);
-
-    // hide the label for screenreaders, the input element will read the contents of the label when it's focussed. If we don't set aria-hidden the screenreader will also navigate the contents of the label separately from the input.
-    attr(label, 'aria-hidden', 'true');
 
     // handle keys
     root.ref.handleKeyDown = e => {
@@ -27,7 +23,6 @@ const create = ({ root, props }) => {
     };
 
     root.ref.handleClick = e => {
-
         const isLabelClick = e.target === label || label.contains(e.target);
 
         // don't want to click twice
@@ -69,14 +64,14 @@ export const dropLabel = createView({
     write: createRoute({
         DID_SET_LABEL_IDLE: ({ root, action }) => {
             updateLabelValue(root.ref.label, action.value);
-        }
+        },
     }),
     mixins: {
         styles: ['opacity', 'translateX', 'translateY'],
         animations: {
             opacity: { type: 'tween', duration: 150 },
             translateX: 'spring',
-            translateY: 'spring'
-        }
-    }
+            translateY: 'spring',
+        },
+    },
 });
