@@ -467,8 +467,17 @@ const toggleDrop = root => {
     const isDisabled = root.query('GET_DISABLED');
     const enabled = isAllowed && !isDisabled;
     if (enabled && !root.ref.hopper) {
+        let scopeElement = root.element;
+        let externalElementID = root.query('GET_DROP_ON_EXTERNAL');
+        if (externalElementID) {
+            if (document.getElementById(externalElementID)) {
+                scopeElement = document.getElementById(externalElementID);
+            } else {
+                console.error("Element does not exist, will revert to root element for drag and drop",externalElementID)
+            }
+        }
         const hopper = createHopper(
-            root.element,
+            scopeElement,
             items => {
                 // allow quick validation of dropped items
                 const beforeDropFile = root.query('GET_BEFORE_DROP_FILE') || (() => true);
