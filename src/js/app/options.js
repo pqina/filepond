@@ -81,6 +81,7 @@ export const defaultOptions = {
 
     // Drag 'n Drop related
     dropOnPage: [false, Type.BOOLEAN], // Allow dropping of files anywhere on page (prevents browser from opening file if dropped outside of Up)
+    dropOnExternal: [null, Type.STRING], // Specify ID of another element for user to drag and drop into. Will disable drag and drop of root element
     dropOnElement: [true, Type.BOOLEAN], // Drop needs to happen on element (set to false to also load drops outside of Up)
     dropValidation: [false, Type.BOOLEAN], // Enable or disable validating files on drop
     ignoredFiles: [['.ds_store', 'thumbs.db', 'desktop.ini'], Type.ARRAY],
