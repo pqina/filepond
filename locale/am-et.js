@@ -13,7 +13,7 @@ export default {
     labelFileRemoveError: 'በማጥፋት ላይ ችግር ተፈጥሯል',
     labelTapToCancel: 'ለማቋረጥ ነካ ያድርጉ',
     labelTapToRetry: 'ደግሞ ለመሞከር ነካ ያድርጉ',
-    labelTapToUndo: 'ወደነበረበት ለመመለስ ታፕ ያድርጉ',
+    labelTapToUndo: 'ወደነበረበት ለመመለስ ነካ ያድርጉ',
     labelButtonRemoveItem: 'ላጥፋ',
     labelButtonAbortItemLoad: 'ላቋርጥ',
     labelButtonRetryItemLoad: 'ደግሜ ልሞክር',
