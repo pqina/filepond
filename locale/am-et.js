@@ -19,7 +19,7 @@ export default {
     labelButtonRetryItemLoad: 'ደግሜ ልሞክር',
     labelButtonAbortItemProcessing: 'ይቅር',
     labelButtonUndoItemProcessing: 'ወደነበረበት ልመልስ',
-    labelButtonRetryItemProcessing: 'ደግመሜ ልሞክር',
+    labelButtonRetryItemProcessing: 'ደግሜ ልሞክር',
     labelButtonProcessItem: 'ልጫን',
     labelMaxFileSizeExceeded: 'ፋይሉ ተልቋል',
     labelMaxFileSize: 'የፋይል መጠን ከ {filesize} መብለጥ አይፈቀድም',
