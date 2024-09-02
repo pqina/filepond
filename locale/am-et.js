@@ -16,7 +16,7 @@ export default {
     labelTapToUndo: 'ወደነበረበት ለመመለስ ታፕ ያድርጉ',
     labelButtonRemoveItem: 'ላጥፋ',
     labelButtonAbortItemLoad: 'ላጨናግፍ',
-    labelButtonRetryItemLoad: 'ደግመሜ ልሞክር',
+    labelButtonRetryItemLoad: 'ደግሜ ልሞክር',
     labelButtonAbortItemProcessing: 'ይቅር',
     labelButtonUndoItemProcessing: 'ወደነበረበት ልመልስ',
     labelButtonRetryItemProcessing: 'ደግመሜ ልሞክር',
