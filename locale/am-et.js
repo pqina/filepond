@@ -3,7 +3,7 @@ export default {
     labelInvalidField: 'መስኩ ልክ ያልሆኑ ፋይሎችን ይዟል',
     labelFileWaitingForSize: 'የፋይሉን መጠን በመጠባበቅ ላይ',
     labelFileSizeNotAvailable: 'የፋይሉን መጠን ሊገኝ አልቻለም',
-    labelFileLoading: 'በማምበብ ላይ',
+    labelFileLoading: 'በማንበብ ላይ',
     labelFileLoadError: 'በማምበብ ላይ ችግር ተፈጥሯል',
     labelFileProcessing: 'ፋይሉን በመጫን ላይ',
     labelFileProcessingComplete: 'ፋይሉን መጫን ተጠናቅቋል',
