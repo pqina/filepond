@@ -7,7 +7,7 @@ export default {
     labelFileLoadError: 'በማንበብ ላይ ችግር ተፈጥሯል',
     labelFileProcessing: 'ፋይሉን በመጫን ላይ',
     labelFileProcessingComplete: 'ፋይሉን መጫን ተጠናቅቋል',
-    labelFileProcessingAborted: 'ፋይሉን መጫን ተጨናግፏል',
+    labelFileProcessingAborted: 'ፋይሉን መጫን ተቋርጧል',
     labelFileProcessingError: 'ፋይሉን በመጫን ላይ ችግር ተፈጥሯል',
     labelFileProcessingRevertError: 'ፈይሉን በመቀልበስ ላይ ችግር ተፈጥሯል',
     labelFileRemoveError: 'በማጥፋት ላይ ችግር ተፈጥሯል',
