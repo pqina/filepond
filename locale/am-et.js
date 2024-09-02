@@ -12,7 +12,7 @@ export default {
     labelFileProcessingRevertError: 'ፈይሉን በመቀልበስ ላይ ችግር ተፈጥሯል',
     labelFileRemoveError: 'በማጥፋት ላይ ችግር ተፈጥሯል',
     labelTapToCancel: 'ለማቋረጥ ነካ ያድርጉ',
-    labelTapToRetry: 'ደግሞ ለመሞከር ታፕ ያድርጉ',
+    labelTapToRetry: 'ደግሞ ለመሞከር ነካ ያድርጉ',
     labelTapToUndo: 'ወደነበረበት ለመመለስ ታፕ ያድርጉ',
     labelButtonRemoveItem: 'ላጥፋ',
     labelButtonAbortItemLoad: 'ላቋርጥ',
