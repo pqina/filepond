@@ -11,7 +11,7 @@ export default {
     labelFileProcessingError: 'ፋይሉን በመጫን ላይ ችግር ተፈጥሯል',
     labelFileProcessingRevertError: 'ፈይሉን በመቀልበስ ላይ ችግር ተፈጥሯል',
     labelFileRemoveError: 'በማጥፋት ላይ ችግር ተፈጥሯል',
-    labelTapToCancel: 'ለማጨናገፍ ታፕ ያድርጉ',
+    labelTapToCancel: 'ለማቋረጥ ነካ ያድርጉ',
     labelTapToRetry: 'ደግሞ ለመሞከር ታፕ ያድርጉ',
     labelTapToUndo: 'ወደነበረበት ለመመለስ ታፕ ያድርጉ',
     labelButtonRemoveItem: 'ላጥፋ',
