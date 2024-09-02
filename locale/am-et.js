@@ -4,7 +4,7 @@ export default {
     labelFileWaitingForSize: 'የፋይሉን መጠን በመጠባበቅ ላይ',
     labelFileSizeNotAvailable: 'የፋይሉን መጠን ሊገኝ አልቻለም',
     labelFileLoading: 'በማንበብ ላይ',
-    labelFileLoadError: 'በማምበብ ላይ ችግር ተፈጥሯል',
+    labelFileLoadError: 'በማንበብ ላይ ችግር ተፈጥሯል',
     labelFileProcessing: 'ፋይሉን በመጫን ላይ',
     labelFileProcessingComplete: 'ፋይሉን መጫን ተጠናቅቋል',
     labelFileProcessingAborted: 'ፋይሉን መጫን ተጨናግፏል',
