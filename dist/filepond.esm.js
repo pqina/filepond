@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.31.2
+ * FilePond 4.31.3
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -7149,7 +7149,6 @@ const didAddItem = ({ root, action }) => {
     const dataContainer = createElement$1('input');
     dataContainer.type = shouldUseFileInput ? 'file' : 'hidden';
     dataContainer.name = root.query('GET_NAME');
-    dataContainer.disabled = root.query('GET_DISABLED');
     root.ref.fields[action.id] = dataContainer;
     syncFieldPositionsWithItems(root);
 };

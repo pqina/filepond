@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.31.3
+
+-   Fix issue where hidden input fields in `filepond--data` fieldset would stay disabled after enabling FilePond. #1001
+
 ## 4.31.2
 
 -   Remove `aria-hidden` from drop label as suggested by Lighthouse.

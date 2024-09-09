@@ -23,7 +23,6 @@ const didAddItem = ({ root, action }) => {
     const dataContainer = createElement('input');
     dataContainer.type = shouldUseFileInput ? 'file' : 'hidden';
     dataContainer.name = root.query('GET_NAME');
-    dataContainer.disabled = root.query('GET_DISABLED');
     root.ref.fields[action.id] = dataContainer;
     syncFieldPositionsWithItems(root);
 };
