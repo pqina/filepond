@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.31.4
+
+-   Fix issue where images pasted in contenteditable elements would be handled by FilePond.
+
 ## 4.31.3
 
 -   Fix issue where hidden input fields in `filepond--data` fieldset would stay disabled after enabling FilePond. #1001

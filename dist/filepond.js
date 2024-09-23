@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.31.3
+ * FilePond 4.31.4
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -10505,7 +10505,12 @@
     var handlePaste = function handlePaste(e) {
         // if is pasting in input or textarea and the target is outside of a filepond scope, ignore
         var activeEl = document.activeElement;
-        if (activeEl && /textarea|input/i.test(activeEl.nodeName)) {
+        var isActiveElementEditable =
+            activeEl &&
+            (/textarea|input/i.test(activeEl.nodeName) ||
+                activeEl.getAttribute('contenteditable') === 'true');
+
+        if (isActiveElementEditable) {
             // test textarea or input is contained in filepond root
             var inScope = false;
             var element = activeEl;
