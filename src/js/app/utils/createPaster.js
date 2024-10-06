@@ -5,11 +5,14 @@ let listening = false;
 const listeners = [];
 
 const handlePaste = e => {
-
     // if is pasting in input or textarea and the target is outside of a filepond scope, ignore
     const activeEl = document.activeElement;
-    if (activeEl && /textarea|input/i.test(activeEl.nodeName)) {
+    const isActiveElementEditable =
+        activeEl &&
+        (/textarea|input/i.test(activeEl.nodeName) ||
+            activeEl.getAttribute('contenteditable') === 'true');
 
+    if (isActiveElementEditable) {
         // test textarea or input is contained in filepond root
         let inScope = false;
         let element = activeEl;
