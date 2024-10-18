@@ -19,12 +19,12 @@ FilePond adapters are available for **[React](https://github.com/pqina/react-fil
 
 ### Core Features
 
-*   Accepts **directories**, **files**, blobs, local URLs, **remote URLs** and Data URIs.
-*   **Drop files**, select on filesystem, **copy and paste files**, or add files using the API.
-*   **Async uploads** with AJAX, supports **chunk uploads**, can encode files as base64 data and send along form post.
-*   **Accessible**, tested with AT software like VoiceOver and JAWS, **navigable by Keyboard**.
-*   **Image optimization**, automatic image resizing, **cropping**, filtering, and **fixes EXIF orientation**.
-*   **Responsive**, automatically scales to available space, is functional on both **mobile and desktop devices**.
+-   Accepts **directories**, **files**, blobs, local URLs, **remote URLs** and Data URIs.
+-   **Drop files**, select on filesystem, **copy and paste files**, or add files using the API.
+-   **Async uploads** with AJAX, supports **chunk uploads**, can encode files as base64 data and send along form post.
+-   **Accessible**, tested with AT software like VoiceOver and JAWS, **navigable by Keyboard**.
+-   **Image optimization**, automatic image resizing, **cropping**, filtering, and **fixes EXIF orientation**.
+-   **Responsive**, automatically scales to available space, is functional on both **mobile and desktop devices**.
 
 [Learn more about FilePond](https://pqina.nl/filepond/)
 
@@ -42,52 +42,57 @@ FilePond adapters are available for **[React](https://github.com/pqina/react-fil
 
 ---
 
-### FilePond Plugins
+### Live Demos
 
-*   [File encode](https://github.com/pqina/filepond-plugin-file-encode)
-*   [File rename](https://github.com/pqina/filepond-plugin-file-rename)
-*   [File size validation](https://github.com/pqina/filepond-plugin-file-validate-size)
-*   [File type validation](https://github.com/pqina/filepond-plugin-file-validate-type)
-*   [File metadata](https://github.com/pqina/filepond-plugin-file-metadata)
-*   [File poster](https://github.com/pqina/filepond-plugin-file-poster)
-*   [Image editor](https://github.com/pqina/filepond-plugin-image-edit)
-*   [Image size validation](https://github.com/pqina/filepond-plugin-image-validate-size)
-*   [Image preview](https://github.com/pqina/filepond-plugin-image-preview)
-*   [Image crop](https://github.com/pqina/filepond-plugin-image-crop)
-*   [Image filter](https://github.com/pqina/filepond-plugin-image-filter)
-*   [Image resize](https://github.com/pqina/filepond-plugin-image-resize)
-*   [Image transform](https://github.com/pqina/filepond-plugin-image-transform)
-*   [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
-*   [Image overlay](https://github.com/nielsboogaard/filepond-plugin-image-overlay) ([nielsboogaard/filepond-plugin-image-overlay](https://github.com/nielsboogaard/filepond-plugin-image-overlay))
-*   [Media preview](https://github.com/nielsboogaard/filepond-plugin-media-preview) ([nielsboogaard/filepond-plugin-media-preview](https://github.com/nielsboogaard/filepond-plugin-media-preview))
-*   [Media preview + PDF preview](https://github.com/ErnestBrandi/filepond-plugin-media-preview) ([ErnestBrandi/filepond-plugin-media-preview](https://github.com/ErnestBrandi/filepond-plugin-media-preview))
-*   [Get file](https://github.com/nielsboogaard/filepond-plugin-get-file) ([nielsboogaard/filepond-plugin-get-file](https://github.com/nielsboogaard/filepond-plugin-get-file))
-*   [Zip Directory Uploads](https://github.com/tzsk/filepond-plugin-zipper) ([tzsk/filepond-plugin-zipper](https://github.com/tzsk/filepond-plugin-zipper))
-*   [PDF Preview](https://github.com/Adri-Glez/filepond-plugin-pdf-preview) ([Adri-Glez/filepond-plugin-pdf-preview](https://github.com/Adri-Glez/filepond-plugin-pdf-preview))
-*   [PDF Convert](https://github.com/alexandreDavid/filepond-plugin-pdf-convert) ([alexandreDavid/filepond-plugin-pdf-convert](https://github.com/alexandreDavid/filepond-plugin-pdf-convert))
-*   [Copy Path](https://github.com/jnkn6/filepond-plugin-copy-path) ([jnkn6/filepond-plugin-copy-path](https://github.com/jnkn6/filepond-plugin-copy-path))
+-   [React](https://stackblitz.com/github/pqina/pintura-example-react?file=src%2FExampleFilePond.js)
+-   [Angular](https://stackblitz.com/github/pqina/pintura-example-angular?file=src%2Fapp%2Ffilepond-example%2Ffilepond-example.component.ts)
+-   [Svelte](https://stackblitz.com/github/pqina/pintura-example-svelte?file=src%2FApp.svelte%3AL152)
+-   [Vue](https://stackblitz.com/github/pqina/pintura-example-vue-3?file=src%2FExampleFilePond.vue)
 
+### Plugins
+
+-   [File encode](https://github.com/pqina/filepond-plugin-file-encode)
+-   [File rename](https://github.com/pqina/filepond-plugin-file-rename)
+-   [File size validation](https://github.com/pqina/filepond-plugin-file-validate-size)
+-   [File type validation](https://github.com/pqina/filepond-plugin-file-validate-type)
+-   [File metadata](https://github.com/pqina/filepond-plugin-file-metadata)
+-   [File poster](https://github.com/pqina/filepond-plugin-file-poster)
+-   [Image editor](https://github.com/pqina/filepond-plugin-image-edit)
+-   [Image size validation](https://github.com/pqina/filepond-plugin-image-validate-size)
+-   [Image preview](https://github.com/pqina/filepond-plugin-image-preview)
+-   [Image crop](https://github.com/pqina/filepond-plugin-image-crop)
+-   [Image filter](https://github.com/pqina/filepond-plugin-image-filter)
+-   [Image resize](https://github.com/pqina/filepond-plugin-image-resize)
+-   [Image transform](https://github.com/pqina/filepond-plugin-image-transform)
+-   [Image EXIF orientation](https://github.com/pqina/filepond-plugin-image-exif-orientation)
+-   [Image overlay](https://github.com/nielsboogaard/filepond-plugin-image-overlay) ([nielsboogaard/filepond-plugin-image-overlay](https://github.com/nielsboogaard/filepond-plugin-image-overlay))
+-   [Media preview](https://github.com/nielsboogaard/filepond-plugin-media-preview) ([nielsboogaard/filepond-plugin-media-preview](https://github.com/nielsboogaard/filepond-plugin-media-preview))
+-   [Media preview + PDF preview](https://github.com/ErnestBrandi/filepond-plugin-media-preview) ([ErnestBrandi/filepond-plugin-media-preview](https://github.com/ErnestBrandi/filepond-plugin-media-preview))
+-   [Get file](https://github.com/nielsboogaard/filepond-plugin-get-file) ([nielsboogaard/filepond-plugin-get-file](https://github.com/nielsboogaard/filepond-plugin-get-file))
+-   [Zip Directory Uploads](https://github.com/tzsk/filepond-plugin-zipper) ([tzsk/filepond-plugin-zipper](https://github.com/tzsk/filepond-plugin-zipper))
+-   [PDF Preview](https://github.com/Adri-Glez/filepond-plugin-pdf-preview) ([Adri-Glez/filepond-plugin-pdf-preview](https://github.com/Adri-Glez/filepond-plugin-pdf-preview))
+-   [PDF Convert](https://github.com/alexandreDavid/filepond-plugin-pdf-convert) ([alexandreDavid/filepond-plugin-pdf-convert](https://github.com/alexandreDavid/filepond-plugin-pdf-convert))
+-   [Copy Path](https://github.com/jnkn6/filepond-plugin-copy-path) ([jnkn6/filepond-plugin-copy-path](https://github.com/jnkn6/filepond-plugin-copy-path))
 
 ### Adapters
 
-*   [React](https://github.com/pqina/react-filepond)
-*   [Vue](https://github.com/pqina/vue-filepond)
-*   [Svelte](https://github.com/pqina/svelte-filepond)
-*   [jQuery](https://github.com/pqina/jquery-filepond)
-*   [Angular](https://github.com/pqina/ngx-filepond)
-*   [Angular 1](https://github.com/johnnyasantoss/angularjs-filepond) ([johnnyasantoss/angularjs-filepond](https://github.com/johnnyasantoss/angularjs-filepond))
-*   [Blazor](https://github.com/soenneker/soenneker.blazor.filepond) ([soenneker/soenneker.blazor.filepond](https://github.com/soenneker/soenneker.blazor.filepond))
-*   [Ember](https://github.com/alexdiliberto/ember-filepond) ([alexdiliberto/ember-filepond](https://github.com/alexdiliberto/ember-filepond))
-
+-   [React](https://github.com/pqina/react-filepond)
+-   [Vue](https://github.com/pqina/vue-filepond)
+-   [Svelte](https://github.com/pqina/svelte-filepond)
+-   [jQuery](https://github.com/pqina/jquery-filepond)
+-   [Angular](https://github.com/pqina/ngx-filepond)
+-   [Angular 1](https://github.com/johnnyasantoss/angularjs-filepond) ([johnnyasantoss/angularjs-filepond](https://github.com/johnnyasantoss/angularjs-filepond))
+-   [Blazor](https://github.com/soenneker/soenneker.blazor.filepond) ([soenneker/soenneker.blazor.filepond](https://github.com/soenneker/soenneker.blazor.filepond))
+-   [Ember](https://github.com/alexdiliberto/ember-filepond) ([alexdiliberto/ember-filepond](https://github.com/alexdiliberto/ember-filepond))
 
 ### Backend
 
-*   [PHP](https://github.com/pqina/filepond-boilerplate-php)
-*   [Django](https://github.com/ImperialCollegeLondon/django-drf-filepond)  ([ImperialCollegeLondon/django-drf-filepond](https://github.com/ImperialCollegeLondon/django-drf-filepond))
-*   [Laravel](https://github.com/Sopamo/laravel-filepond) ([Sopamo/laravel-filepond](https://github.com/Sopamo/laravel-filepond))
-*   [Laravel](https://github.com/Albert221/laravel-filepond) ([Albert221/laravel-filepond](https://github.com/Albert221/laravel-filepond))
-*   [SilverStripe](https://github.com/lekoala/silverstripe-filepond) ([lekoala/silverstripe-filepond](https://github.com/lekoala/silverstripe-filepond))
-*   [Ruby on Rails](https://github.com/Code-With-Rails/filepond-rails) ([Code-With-Rails/filepond-rails](https://github.com/Code-With-Rails/filepond-rails))
+-   [PHP](https://github.com/pqina/filepond-boilerplate-php)
+-   [Django](https://github.com/ImperialCollegeLondon/django-drf-filepond) ([ImperialCollegeLondon/django-drf-filepond](https://github.com/ImperialCollegeLondon/django-drf-filepond))
+-   [Laravel](https://github.com/Sopamo/laravel-filepond) ([Sopamo/laravel-filepond](https://github.com/Sopamo/laravel-filepond))
+-   [Laravel](https://github.com/Albert221/laravel-filepond) ([Albert221/laravel-filepond](https://github.com/Albert221/laravel-filepond))
+-   [SilverStripe](https://github.com/lekoala/silverstripe-filepond) ([lekoala/silverstripe-filepond](https://github.com/lekoala/silverstripe-filepond))
+-   [Ruby on Rails](https://github.com/Code-With-Rails/filepond-rails) ([Code-With-Rails/filepond-rails](https://github.com/Code-With-Rails/filepond-rails))
 
 ## Quick Start
 
@@ -105,7 +110,7 @@ import * as FilePond from 'filepond';
 // Create a multi file upload component
 const pond = FilePond.create({
     multiple: true,
-    name: 'filepond'
+    name: 'filepond',
 });
 
 // Add it to the DOM
@@ -117,32 +122,28 @@ Or get it from a CDN:
 ```html
 <!DOCTYPE html>
 <html>
-<head>
-  <title>FilePond from CDN</title>
+    <head>
+        <title>FilePond from CDN</title>
 
-  <!-- Filepond stylesheet -->
-  <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
+        <!-- Filepond stylesheet -->
+        <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet" />
+    </head>
+    <body>
+        <!-- We'll transform this input into a pond -->
+        <input type="file" class="filepond" />
 
-</head>
-<body>
+        <!-- Load FilePond library -->
+        <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
 
-  <!-- We'll transform this input into a pond -->
-  <input type="file" class="filepond">
-
-  <!-- Load FilePond library -->
-  <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
-
-  <!-- Turn all file input elements into ponds -->
-  <script>
-  FilePond.parse(document.body);
-  </script>
-
-</body>
+        <!-- Turn all file input elements into ponds -->
+        <script>
+            FilePond.parse(document.body);
+        </script>
+    </body>
 </html>
 ```
 
 [Getting started with FilePond](https://pqina.nl/filepond/docs/patterns/getting-started/)
-
 
 ## Internationalization
 
@@ -154,7 +155,6 @@ import pt_BR from 'filepond/locale/pt-br.js';
 FilePond.setOptions(pt_BR);
 ```
 
-
 ## Contributing
 
 At the moment test coverage is not great, it's around 65%. To accept pull requests the tests need to be better, any help to improve them is very much appreciated.
@@ -163,20 +163,18 @@ Tests are based on Jest and can be run with `npm run test`
 
 To build the library run `npm run build`
 
-
 ## Publications
 
-* [Using FilePond with NodeJS](https://www.infoworld.com/article/3627248/how-to-use-filepond-with-nodejs.html)
-* [Applying Watermarks to Images with FilePond](https://pqina.nl/blog/applying-watermarks-to-images-with-filepond/)
-* [Generating Image Thumbnails in the Browser using JavaScript and FilePond](https://dev.to/pqina/generating-image-thumbnails-in-the-browser-using-javascript-and-filepond-10b8)
-* [How to upload files with Vue and FilePond](https://dev.to/pqina/how-to-upload-files-with-vue-and-filepond-1m02)
-* [Smooth file uploading with React and FilePond](https://itnext.io/uploading-files-with-react-and-filepond-f8a798308557)
-* [5 interesting technical challenges I faced while building FilePond](https://itnext.io/filepond-frontend-trickery-a3073c934c77)
-* [Image uploads with Laravel and FilePond](https://devdojo.com/episode/image-uploads-with-laravel-and-filepond)
-* [Integrating FilePond with Ember](https://alexdiliberto.com/ember-filepond/)
-* [FilePond launch day post-mortem](https://pqina.nl/blog/filepond-launch-day-post-mortem)
-* [FilePond on ProductHunt](https://www.producthunt.com/posts/filepond-js)
-
+-   [Using FilePond with NodeJS](https://www.infoworld.com/article/3627248/how-to-use-filepond-with-nodejs.html)
+-   [Applying Watermarks to Images with FilePond](https://pqina.nl/blog/applying-watermarks-to-images-with-filepond/)
+-   [Generating Image Thumbnails in the Browser using JavaScript and FilePond](https://dev.to/pqina/generating-image-thumbnails-in-the-browser-using-javascript-and-filepond-10b8)
+-   [How to upload files with Vue and FilePond](https://dev.to/pqina/how-to-upload-files-with-vue-and-filepond-1m02)
+-   [Smooth file uploading with React and FilePond](https://itnext.io/uploading-files-with-react-and-filepond-f8a798308557)
+-   [5 interesting technical challenges I faced while building FilePond](https://itnext.io/filepond-frontend-trickery-a3073c934c77)
+-   [Image uploads with Laravel and FilePond](https://devdojo.com/episode/image-uploads-with-laravel-and-filepond)
+-   [Integrating FilePond with Ember](https://alexdiliberto.com/ember-filepond/)
+-   [FilePond launch day post-mortem](https://pqina.nl/blog/filepond-launch-day-post-mortem)
+-   [FilePond on ProductHunt](https://www.producthunt.com/posts/filepond-js)
 
 ### Browser Compatibility
 
@@ -185,7 +183,6 @@ FilePond is compatible with a wide range of desktop and mobile browsers, the old
 FilePond uses [BrowserStack](https://www.browserstack.com/) for compatibility testing.
 
 [<img src="https://github.com/pqina/filepond-github-assets/blob/master/browserstack-logo.svg" height="32" alt="BrowserStack"/>](https://www.browserstack.com/)
-
 
 ## License
 
