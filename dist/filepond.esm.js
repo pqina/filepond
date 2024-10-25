@@ -2797,6 +2797,7 @@ const processFileChunked = (
                 : {
                       ...action.headers,
                       'Upload-Length': file.size,
+                      'Upload-Name': file.name,
                   };
 
         const requestParams = {

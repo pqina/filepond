@@ -42,7 +42,8 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
         
         const headers = typeof action.headers === 'function' ? action.headers(file, metadata) : {
             ...action.headers,
-            'Upload-Length': file.size
+            'Upload-Length': file.size,
+            'Upload-Name': file.name
         };
 
         const requestParams = {

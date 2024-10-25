@@ -4880,6 +4880,7 @@
                     ? action.headers(file, metadata)
                     : Object.assign({}, action.headers, {
                           'Upload-Length': file.size,
+                          'Upload-Name': file.name,
                       });
 
             var requestParams = Object.assign({}, action, {
