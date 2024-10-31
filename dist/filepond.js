@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.31.4
+ * FilePond 4.32.0
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -4878,9 +4878,14 @@
             var headers =
                 typeof action.headers === 'function'
                     ? action.headers(file, metadata)
-                    : Object.assign({}, action.headers, {
-                          'Upload-Length': file.size,
-                      });
+                    : Object.assign(
+                          {},
+
+                          action.headers,
+                          {
+                              'Upload-Length': file.size,
+                          }
+                      );
 
             var requestParams = Object.assign({}, action, {
                 headers: headers,
@@ -4917,7 +4922,11 @@
             var headers =
                 typeof action.headers === 'function'
                     ? action.headers(state.serverId)
-                    : Object.assign({}, action.headers);
+                    : Object.assign(
+                          {},
+
+                          action.headers
+                      );
 
             var requestParams = {
                 headers: headers,
@@ -5009,6 +5018,7 @@
                 function(res) {
                     return null;
                 };
+            var onload = chunkServer.onload || function() {};
 
             // send request object
             var requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
@@ -5016,12 +5026,17 @@
             var headers =
                 typeof chunkServer.headers === 'function'
                     ? chunkServer.headers(chunk)
-                    : Object.assign({}, chunkServer.headers, {
-                          'Content-Type': 'application/offset+octet-stream',
-                          'Upload-Offset': chunk.offset,
-                          'Upload-Length': file.size,
-                          'Upload-Name': file.name,
-                      });
+                    : Object.assign(
+                          {},
+
+                          chunkServer.headers,
+                          {
+                              'Content-Type': 'application/offset+octet-stream',
+                              'Upload-Offset': chunk.offset,
+                              'Upload-Length': file.size,
+                              'Upload-Name': file.name,
+                          }
+                      );
 
             var request = (chunk.request = sendRequest(
                 ondata(chunk.data),
@@ -5031,7 +5046,10 @@
                 })
             ));
 
-            request.onload = function() {
+            request.onload = function(xhr) {
+                // allow hooking into request result
+                onload(xhr, chunk.index, chunks.length);
+
                 // done!
                 chunk.status = ChunkStatus.COMPLETE;
 
@@ -10590,7 +10608,7 @@
         var root = _ref.root,
             props = _ref.props;
         root.element.id = 'filepond--assistant-' + props.id;
-        attr(root.element, 'role', 'status');
+        attr(root.element, 'role', 'alert');
         attr(root.element, 'aria-live', 'polite');
         attr(root.element, 'aria-relevant', 'additions');
     };
@@ -10648,7 +10666,6 @@
         clearTimeout(addFilesNotificationTimeout);
         addFilesNotificationTimeout = setTimeout(function() {
             listModified(root, filenames.join(', '), root.query('GET_LABEL_FILE_ADDED'));
-
             filenames.length = 0;
         }, 750);
     };

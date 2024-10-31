@@ -4,5 +4,5 @@ coverage/
 .idea
 .vscode/
 upload/
-test.html
+test*.html
 _TODO.md

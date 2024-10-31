@@ -25,9 +25,6 @@
 
         <script src="./dist/filepond.js"></script>
 
-        <button type="button" id="disable">Disable</button>
-        <button type="button" id="enable">Enable</button>
-
         <script>
             // Get a reference to the file input element
             const inputElement = document.querySelector('input[type="file"]');
@@ -35,31 +32,11 @@
             // Create the FilePond instance
             const pond = FilePond.create(inputElement, {
                 allowMultiple: true,
-                server: {
-                    load: 'https://i.imgur.com/',
-                },
-                files: [
-                    {
-                        source: 'rBkbXS3.jpeg',
-                        options: {
-                            type: 'local',
-                        },
-                    },
-                ],
                 storeAsFile: true,
-                disabled: true,
             });
 
             // Easy console access for testing purposes
             window.pond = pond;
-
-            document.querySelector('#disable').onclick = function() {
-                pond.setOptions({ disabled: true });
-            };
-
-            document.querySelector('#enable').onclick = function() {
-                pond.setOptions({ disabled: false });
-            };
         </script>
     </body>
 </html>

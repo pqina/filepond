@@ -1,7 +1,8 @@
 # Changelog
 
-## 4.31.5
+## 4.32.0
 
+-   Add `onload` property to chunk patch request, receives `xhr` object, chunk index, and total chunks. #649
 -   Fix role attribute in voice over assistant to improve WCAG compatibility #988
 
 ## 4.31.4

@@ -15,90 +15,110 @@ function signature:
 */
 
 // apiUrl, action, name, file, metadata, load, error, progress, abort, transfer, options
-export const processFileChunked = (apiUrl, action, name, file, metadata, load, error, progress, abort, transfer, options) => {
-
+export const processFileChunked = (
+    apiUrl,
+    action,
+    name,
+    file,
+    metadata,
+    load,
+    error,
+    progress,
+    abort,
+    transfer,
+    options
+) => {
     // all chunks
     const chunks = [];
     const { chunkTransferId, chunkServer, chunkSize, chunkRetryDelays } = options;
-    
+
     // default state
     const state = {
         serverId: chunkTransferId,
-        aborted: false
+        aborted: false,
     };
 
     // set onload handlers
     const ondata = action.ondata || (fd => fd);
-    const onload = action.onload || ((xhr, method) => method === 'HEAD' ? xhr.getResponseHeader('Upload-Offset') : xhr.response);
+    const onload =
+        action.onload ||
+        ((xhr, method) =>
+            method === 'HEAD' ? xhr.getResponseHeader('Upload-Offset') : xhr.response);
     const onerror = action.onerror || (res => null);
 
     // create server hook
     const requestTransferId = cb => {
-
         const formData = new FormData();
-        
+
         // add metadata under same name
         if (isObject(metadata)) formData.append(name, JSON.stringify(metadata));
-        
-        const headers = typeof action.headers === 'function' ? action.headers(file, metadata) : {
-            ...action.headers,
-            'Upload-Length': file.size
-        };
+
+        const headers =
+            typeof action.headers === 'function'
+                ? action.headers(file, metadata)
+                : {
+                      ...action.headers,
+                      'Upload-Length': file.size,
+                  };
 
         const requestParams = {
             ...action,
-            headers
+            headers,
         };
 
         // send request object
         const request = sendRequest(ondata(formData), buildURL(apiUrl, action.url), requestParams);
 
-        request.onload = (xhr) => cb(onload(xhr, requestParams.method));
+        request.onload = xhr => cb(onload(xhr, requestParams.method));
 
-        request.onerror = (xhr) => error(
-            createResponse(
-                'error',
-                xhr.status,
-                onerror(xhr.response) || xhr.statusText,
-                xhr.getAllResponseHeaders()
-            )
-        );
+        request.onerror = xhr =>
+            error(
+                createResponse(
+                    'error',
+                    xhr.status,
+                    onerror(xhr.response) || xhr.statusText,
+                    xhr.getAllResponseHeaders()
+                )
+            );
 
         request.ontimeout = createTimeoutResponse(error);
-    }
+    };
 
     const requestTransferOffset = cb => {
-
         const requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
-        
-        const headers = typeof action.headers === 'function' ? action.headers(state.serverId) : {
-            ...action.headers
-        };
-        
+
+        const headers =
+            typeof action.headers === 'function'
+                ? action.headers(state.serverId)
+                : {
+                      ...action.headers,
+                  };
+
         const requestParams = {
             headers,
-            method: 'HEAD'
+            method: 'HEAD',
         };
 
         const request = sendRequest(null, requestUrl, requestParams);
 
-        request.onload = (xhr) => cb(onload(xhr, requestParams.method));
+        request.onload = xhr => cb(onload(xhr, requestParams.method));
 
-        request.onerror = (xhr) => error(
-            createResponse(
-                'error',
-                xhr.status,
-                onerror(xhr.response) || xhr.statusText,
-                xhr.getAllResponseHeaders()
-            )
-        );
+        request.onerror = xhr =>
+            error(
+                createResponse(
+                    'error',
+                    xhr.status,
+                    onerror(xhr.response) || xhr.statusText,
+                    xhr.getAllResponseHeaders()
+                )
+            );
 
         request.ontimeout = createTimeoutResponse(error);
-    }
+    };
 
-	// create chunks
+    // create chunks
     const lastChunkIndex = Math.floor(file.size / chunkSize);
-	for (let i = 0; i <= lastChunkIndex; i++) {
+    for (let i = 0; i <= lastChunkIndex; i++) {
         const offset = i * chunkSize;
         const data = file.slice(offset, offset + chunkSize, 'application/offset+octet-stream');
         chunks[i] = {
@@ -112,25 +132,24 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
             status: ChunkStatus.QUEUED,
             error: null,
             request: null,
-            timeout: null
-        }
+            timeout: null,
+        };
     }
 
     const completeProcessingChunks = () => load(state.serverId);
 
-    const canProcessChunk = chunk => chunk.status === ChunkStatus.QUEUED || chunk.status === ChunkStatus.ERROR;
+    const canProcessChunk = chunk =>
+        chunk.status === ChunkStatus.QUEUED || chunk.status === ChunkStatus.ERROR;
 
-    const processChunk = (chunk) => {
-
+    const processChunk = chunk => {
         // processing is paused, wait here
         if (state.aborted) return;
-        
+
         // get next chunk to process
         chunk = chunk || chunks.find(canProcessChunk);
 
         // no more chunks to process
         if (!chunk) {
-
             // all done?
             if (chunks.every(chunk => chunk.status === ChunkStatus.COMPLETE)) {
                 completeProcessingChunks();
@@ -138,7 +157,7 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
 
             // no chunk to handle
             return;
-        };
+        }
 
         // now processing this chunk
         chunk.status = ChunkStatus.PROCESSING;
@@ -147,25 +166,31 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
         // allow parsing of formdata
         const ondata = chunkServer.ondata || (fd => fd);
         const onerror = chunkServer.onerror || (res => null);
+        const onload = chunkServer.onload || (() => {});
 
         // send request object
         const requestUrl = buildURL(apiUrl, chunkServer.url, state.serverId);
 
-        const headers = typeof chunkServer.headers === 'function' ? chunkServer.headers(chunk) : {
-            ...chunkServer.headers,
-            'Content-Type': 'application/offset+octet-stream',
-            'Upload-Offset': chunk.offset,
-            'Upload-Length': file.size,
-            'Upload-Name': file.name
-        };
+        const headers =
+            typeof chunkServer.headers === 'function'
+                ? chunkServer.headers(chunk)
+                : {
+                      ...chunkServer.headers,
+                      'Content-Type': 'application/offset+octet-stream',
+                      'Upload-Offset': chunk.offset,
+                      'Upload-Length': file.size,
+                      'Upload-Name': file.name,
+                  };
 
-        const request = chunk.request = sendRequest(ondata(chunk.data), requestUrl, {
+        const request = (chunk.request = sendRequest(ondata(chunk.data), requestUrl, {
             ...chunkServer,
-            headers
-        });
+            headers,
+        }));
 
-        request.onload = () => {
-            
+        request.onload = xhr => {
+            // allow hooking into request result
+            onload(xhr, chunk.index, chunks.length);
+
             // done!
             chunk.status = ChunkStatus.COMPLETE;
 
@@ -181,7 +206,7 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
             updateTotalProgress();
         };
 
-        request.onerror = (xhr) => {
+        request.onerror = xhr => {
             chunk.status = ChunkStatus.ERROR;
             chunk.request = null;
             chunk.error = onerror(xhr.response) || xhr.statusText;
@@ -197,7 +222,7 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
             }
         };
 
-        request.ontimeout = (xhr) => {
+        request.ontimeout = xhr => {
             chunk.status = ChunkStatus.ERROR;
             chunk.request = null;
             if (!retryProcessChunk(chunk)) {
@@ -210,11 +235,9 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
             chunk.request = null;
             abort();
         };
+    };
 
-    }
-
-    const retryProcessChunk = (chunk) => {
-
+    const retryProcessChunk = chunk => {
         // no more retries left
         if (chunk.retries.length === 0) return false;
 
@@ -224,13 +247,12 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
         chunk.timeout = setTimeout(() => {
             processChunk(chunk);
         }, chunk.retries.shift());
-        
+
         // we're going to retry
         return true;
-    }
+    };
 
     const updateTotalProgress = () => {
-
         // calculate total progress fraction
         const totalBytesTransfered = chunks.reduce((p, chunk) => {
             if (p === null || chunk.progress === null) return null;
@@ -244,29 +266,29 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
         const totalSize = chunks.reduce((total, chunk) => total + chunk.size, 0);
 
         // can update progress indicator
-        progress(true, totalBytesTransfered, totalSize)
-    }
+        progress(true, totalBytesTransfered, totalSize);
+    };
 
     // process new chunks
     const processChunks = () => {
-        const totalProcessing = chunks.filter(chunk => chunk.status === ChunkStatus.PROCESSING).length;
+        const totalProcessing = chunks.filter(chunk => chunk.status === ChunkStatus.PROCESSING)
+            .length;
         if (totalProcessing >= 1) return;
         processChunk();
     };
-    
+
     const abortChunks = () => {
         chunks.forEach(chunk => {
             clearTimeout(chunk.timeout);
             if (chunk.request) {
-                chunk.request.abort()
+                chunk.request.abort();
             }
-        })
+        });
     };
 
     // let's go!
     if (!state.serverId) {
         requestTransferId(serverId => {
-
             // stop here if aborted, might have happened in between request and callback
             if (state.aborted) return;
 
@@ -276,31 +298,29 @@ export const processFileChunked = (apiUrl, action, name, file, metadata, load, e
             // store internally
             state.serverId = serverId;
             processChunks();
-        })
-    }
-    else {
+        });
+    } else {
         requestTransferOffset(offset => {
-
             // stop here if aborted, might have happened in between request and callback
             if (state.aborted) return;
 
             // mark chunks with lower offset as complete
-            chunks.filter(chunk => chunk.offset < offset)
+            chunks
+                .filter(chunk => chunk.offset < offset)
                 .forEach(chunk => {
                     chunk.status = ChunkStatus.COMPLETE;
                     chunk.progress = chunk.size;
-                }
-            );
+                });
 
             // continue processing
             processChunks();
-        })
+        });
     }
-    
+
     return {
         abort: () => {
             state.aborted = true;
             abortChunks();
-        }
-    } 
+        },
+    };
 };
