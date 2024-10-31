@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.31.5
+
+-   Fix role attribute in voice over assistant to improve WCAG compatibility #988
+
 ## 4.31.4
 
 -   Fix issue where images pasted in contenteditable elements would be handled by FilePond.

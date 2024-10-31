@@ -6,7 +6,7 @@ import { attr } from '../../utils/attr';
  */
 const create = ({ root, props }) => {
     root.element.id = `filepond--assistant-${props.id}`;
-    attr(root.element, 'role', 'status');
+    attr(root.element, 'role', 'alert');
     attr(root.element, 'aria-live', 'polite');
     attr(root.element, 'aria-relevant', 'additions');
 };
@@ -42,8 +42,7 @@ const listModified = (root, filename, label) => {
     }, 1500);
 };
 
-const isUsingFilePond = root =>
-    root.element.parentNode.contains(document.activeElement);
+const isUsingFilePond = root => root.element.parentNode.contains(document.activeElement);
 
 const itemAdded = ({ root, action }) => {
     if (!isUsingFilePond(root)) {
@@ -56,11 +55,7 @@ const itemAdded = ({ root, action }) => {
 
     clearTimeout(addFilesNotificationTimeout);
     addFilesNotificationTimeout = setTimeout(() => {
-        listModified(
-            root,
-            filenames.join(', '),
-            root.query('GET_LABEL_FILE_ADDED')
-        );
+        listModified(root, filenames.join(', '), root.query('GET_LABEL_FILE_ADDED'));
         filenames.length = 0;
     }, 750);
 };
@@ -112,12 +107,12 @@ export const assistant = createView({
 
         DID_ABORT_ITEM_PROCESSING: itemProcessedUndo,
         DID_REVERT_ITEM_PROCESSING: itemProcessedUndo,
-        
+
         DID_THROW_ITEM_REMOVE_ERROR: itemError,
         DID_THROW_ITEM_LOAD_ERROR: itemError,
         DID_THROW_ITEM_INVALID: itemError,
-        DID_THROW_ITEM_PROCESSING_ERROR: itemError
+        DID_THROW_ITEM_PROCESSING_ERROR: itemError,
     }),
     tag: 'span',
-    name: 'assistant'
+    name: 'assistant',
 });
