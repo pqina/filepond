@@ -4,7 +4,7 @@
 /* Disable no-redundant-jsdoc since @default statements are NOT redundant */
 /* tslint:disable:no-redundant-jsdoc */
 
-export { };
+export {};
 
 export enum FileStatus {
     INIT = 1,
@@ -15,7 +15,7 @@ export enum FileStatus {
     PROCESSING_ERROR = 6,
     PROCESSING_REVERT_ERROR = 10,
     LOADING = 7,
-    LOAD_ERROR = 8
+    LOAD_ERROR = 8,
 }
 
 export enum Status {
@@ -23,60 +23,60 @@ export enum Status {
     IDLE = 1,
     ERROR = 2,
     BUSY = 3,
-    READY = 4
+    READY = 4,
 }
 
 export enum FileOrigin {
     INPUT = 1,
     LIMBO = 2,
-    LOCAL = 3
+    LOCAL = 3,
 }
 
 // TODO replace all references to `ActualFileObject` with native `File`
 /**
  * @deprecated Don't use this type explicitly within your code. It'll be replaced with the native `File` type in a future release.
  */
-export type ActualFileObject = Blob & { readonly lastModified: number; readonly name: string; };
+export type ActualFileObject = Blob & { readonly lastModified: number; readonly name: string };
 
 /**
  * A custom FilePond File.
  */
 export class FilePondFile {
- /** Returns the ID of the file. */
- id: string;
- /** Returns the server id of the file. */
- serverId: string;
- /** Returns the source of the file. */
- source: ActualFileObject | string;
- /** Returns the origin of the file. */
- origin: FileOrigin;
- /** Returns the current status of the file. */
- status: FileStatus;
- /** Returns the File object. */
- file: ActualFileObject;
- /** Returns the file extensions. */
- fileExtension: string;
- /** Returns the size of the file. */
- fileSize: number;
- /** Returns the type of the file. */
- fileType: string;
- /** Returns the full name of the file. */
- filename: string;
- /** Returns the name of the file without extension. */
- filenameWithoutExtension: string;
+    /** Returns the ID of the file. */
+    id: string;
+    /** Returns the server id of the file. */
+    serverId: string;
+    /** Returns the source of the file. */
+    source: ActualFileObject | string;
+    /** Returns the origin of the file. */
+    origin: FileOrigin;
+    /** Returns the current status of the file. */
+    status: FileStatus;
+    /** Returns the File object. */
+    file: ActualFileObject;
+    /** Returns the file extensions. */
+    fileExtension: string;
+    /** Returns the size of the file. */
+    fileSize: number;
+    /** Returns the type of the file. */
+    fileType: string;
+    /** Returns the full name of the file. */
+    filename: string;
+    /** Returns the name of the file without extension. */
+    filenameWithoutExtension: string;
 
- /** Aborts loading of this file */
- abortLoad: () => void;
- /** Aborts processing of this file */
- abortProcessing: () => void;
- /**
-  * Retrieve metadata saved to the file, pass a key to retrieve
-  * a specific part of the metadata (e.g. 'crop' or 'resize').
-  * If no key is passed, the entire metadata object is returned.
-  */
- getMetadata: (key?: string) => any;
- /** Add additional metadata to the file */
- setMetadata: (key: string, value: any, silent?: boolean) => void;
+    /** Aborts loading of this file */
+    abortLoad: () => void;
+    /** Aborts processing of this file */
+    abortProcessing: () => void;
+    /**
+     * Retrieve metadata saved to the file, pass a key to retrieve
+     * a specific part of the metadata (e.g. 'crop' or 'resize').
+     * If no key is passed, the entire metadata object is returned.
+     */
+    getMetadata: (key?: string) => any;
+    /** Add additional metadata to the file */
+    setMetadata: (key: string, value: any, silent?: boolean) => void;
 }
 
 // TODO delete
@@ -121,28 +121,28 @@ export type ProgressServerConfigFunction = (
     /** The amount of data currently transferred. */
     loadedDataAmount: number,
     /** The total amount of data to be transferred. */
-    totalDataAmount: number,
+    totalDataAmount: number
 ) => void;
 
 export interface ProcessServerChunkTransferOptions {
-    chunkTransferId: string,
-    chunkServer: ServerUrl,
+    chunkTransferId: string;
+    chunkServer: ServerUrl;
     /**
      * Chunk uploads enabled
      */
-    chunkUploads: boolean,
+    chunkUploads: boolean;
     /**
      * Forcing use of chunk uploads even for files smaller than chunk size
      */
-    chunkForce: boolean,
+    chunkForce: boolean;
     /**
      * Size of chunks
      */
-    chunkSize: number,
+    chunkSize: number;
     /**
      * Amount of times to retry upload of a chunk when it fails
      */
-    chunkRetryDelays: number[]
+    chunkRetryDelays: number[];
 }
 
 export type ProcessServerConfigFunction = (
@@ -289,18 +289,21 @@ export interface FilePondServerConfigProps {
      * See: https://pqina.nl/filepond/docs/patterns/api/server
      * @default null
      */
-    server?: string | {
-        url?: string
-        timeout?: number
-        headers?: { [key: string]: string | boolean | number };
-        process?: string | ServerUrl | ProcessServerConfigFunction | null;
-        revert?: string | ServerUrl | RevertServerConfigFunction | null;
-        restore?: string | ServerUrl | RestoreServerConfigFunction | null;
-        load?: string | ServerUrl | LoadServerConfigFunction | null;
-        fetch?: string | ServerUrl | FetchServerConfigFunction | null;
-        patch?: string | ServerUrl | null;
-        remove?: RemoveServerConfigFunction | null;
-    } | null;
+    server?:
+        | string
+        | {
+              url?: string;
+              timeout?: number;
+              headers?: { [key: string]: string | boolean | number };
+              process?: string | ServerUrl | ProcessServerConfigFunction | null;
+              revert?: string | ServerUrl | RevertServerConfigFunction | null;
+              restore?: string | ServerUrl | RestoreServerConfigFunction | null;
+              load?: string | ServerUrl | LoadServerConfigFunction | null;
+              fetch?: string | ServerUrl | FetchServerConfigFunction | null;
+              patch?: string | ServerUrl | null;
+              remove?: RemoveServerConfigFunction | null;
+          }
+        | null;
 
     /**
      * Enable chunk uploads
@@ -391,6 +394,31 @@ export interface FilePondLabelProps {
      * @default 'Size not available'
      */
     labelFileSizeNotAvailable?: string;
+
+    /**
+     * Label used to indicate bytes
+     * @default 'Bytes'
+     */
+    labelFileSizeBytes?: string;
+
+    /**
+     * Label used to indicate kilobytes
+     * @default 'KB'
+     */
+    labelFileSizeKilobytes?: string;
+
+    /**
+     * Label used to indicate megabytes
+     * @default 'MB'
+     */
+    labelFileSizeMegabytes?: string;
+
+    /**
+     * Label used to indicate gigabytes
+     * @default 'GB'
+     */
+    labelFileSizeGigabytes?: string;
+
     /**
      * Label used when showing the number of files and there is only one.
      * @default 'file in list'
@@ -612,7 +640,13 @@ export interface FilePondStyleProps {
      * Set a different layout render mode.
      * @default null
      */
-    stylePanelLayout?: 'integrated' | 'compact' | 'circle' | 'integrated circle' | 'compact circle' | null;
+    stylePanelLayout?:
+        | 'integrated'
+        | 'compact'
+        | 'circle'
+        | 'integrated circle'
+        | 'compact circle'
+        | null;
     /**
      * Set a forced aspect ratio for the FilePond drop area.
      *
@@ -654,7 +688,7 @@ export interface FilePondStyleProps {
     styleButtonRemoveItemAlign?: boolean;
 }
 
-export type CaptureAttribute = "camera" | "microphone" | "camcorder";
+export type CaptureAttribute = 'camera' | 'microphone' | 'camcorder';
 
 export interface FilePondBaseProps {
     /**
@@ -796,34 +830,35 @@ export interface FilePondBaseProps {
      * keep the project alive.
      * @default "Powered by PQINA"
      */
-    credits?: false
+    credits?: false;
 }
 
 // TODO delete
 /**
  * @deprecated use `FilePondOptions`. This will be removed in a future release.
  */
-export interface FilePondOptionProps extends
-    FilePondDragDropProps,
-    FilePondServerConfigProps,
-    FilePondLabelProps,
-    FilePondSvgIconProps,
-    FilePondCallbackProps,
-    FilePondHookProps,
-    FilePondStyleProps,
-    FilePondBaseProps { }
+export interface FilePondOptionProps
+    extends FilePondDragDropProps,
+        FilePondServerConfigProps,
+        FilePondLabelProps,
+        FilePondSvgIconProps,
+        FilePondCallbackProps,
+        FilePondHookProps,
+        FilePondStyleProps,
+        FilePondBaseProps {}
 
-export interface FilePondOptions extends
-    FilePondDragDropProps,
-    FilePondServerConfigProps,
-    FilePondLabelProps,
-    FilePondSvgIconProps,
-    FilePondCallbackProps,
-    FilePondHookProps,
-    FilePondStyleProps,
-    FilePondBaseProps { }
+export interface FilePondOptions
+    extends FilePondDragDropProps,
+        FilePondServerConfigProps,
+        FilePondLabelProps,
+        FilePondSvgIconProps,
+        FilePondCallbackProps,
+        FilePondHookProps,
+        FilePondStyleProps,
+        FilePondBaseProps {}
 
-export type FilePondEventPrefixed = 'FilePond:init'
+export type FilePondEventPrefixed =
+    | 'FilePond:init'
     | 'FilePond:warning'
     | 'FilePond:error'
     | 'FilePond:addfilestart'
@@ -838,7 +873,8 @@ export type FilePondEventPrefixed = 'FilePond:init'
     | 'FilePond:updatefiles'
     | 'FilePond:reorderfiles';
 
-export type FilePondEvent = 'init'
+export type FilePondEvent =
+    | 'init'
     | 'warning'
     | 'error'
     | 'addfilestart'
@@ -853,7 +889,7 @@ export type FilePondEvent = 'init'
     | 'updatefiles'
     | 'reorderfiles';
 
-export interface RemoveFileOptions  {
+export interface RemoveFileOptions {
     remove?: boolean;
     revert?: boolean;
 }
@@ -877,12 +913,18 @@ export class FilePond {
      * Adds a file.
      * @param options.index The index that the file should be added at.
      */
-    addFile(source: ActualFileObject | Blob | string, options?: { index?: number } & Partial<FilePondInitialFile["options"]>): Promise<FilePondFile>;
+    addFile(
+        source: ActualFileObject | Blob | string,
+        options?: { index?: number } & Partial<FilePondInitialFile['options']>
+    ): Promise<FilePondFile>;
     /**
      * Adds multiple files.
      * @param options.index The index that the files should be added at.
      */
-    addFiles(source: ActualFileObject[] | Blob[] | string[], options?: { index: number }): Promise<FilePondFile[]>;
+    addFiles(
+        source: ActualFileObject[] | Blob[] | string[],
+        options?: { index: number }
+    ): Promise<FilePondFile[]>;
     /**
      * Moves a file. Select file with query and supply target index.
      * @param query The file reference, id, or index.
@@ -928,12 +970,16 @@ export class FilePond {
      * Starts preparing the file matching the given query, returns a Promise, the Promise is resolved with the file item and the output file { file, output }
      * @param query The file reference, id, or index
      */
-    prepareFile(query?: FilePondFile | string | number): Promise<{file: FilePondFile, output: any}>;
+    prepareFile(
+        query?: FilePondFile | string | number
+    ): Promise<{ file: FilePondFile; output: any }>;
     /**
      * Processes multiple files. If no parameter is provided, processes all files.
      * @param query Array containing file reference(s), id(s), or index(es)
      */
-    prepareFiles(query?: FilePondFile[] | string[] | number[]): Promise<Array<{file: FilePondFile, output: any}>>;
+    prepareFiles(
+        query?: FilePondFile[] | string[] | number[]
+    ): Promise<Array<{ file: FilePondFile; output: any }>>;
 
     /**
      * Returns a file. If no parameter is provided, returns the first file in the list.
