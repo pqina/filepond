@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.32.1
+ * FilePond 4.32.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -7133,7 +7133,12 @@ const setInputFiles = (element, files) => {
     return true;
 };
 
-const create$c = ({ root }) => (root.ref.fields = {});
+const create$c = ({ root }) => {
+    root.ref.fields = {};
+    const legend = document.createElement('legend');
+    legend.textContent = 'Files';
+    root.element.appendChild(legend);
+};
 
 const getField = (root, id) => root.ref.fields[id];
 

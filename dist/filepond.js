@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.32.1
+ * FilePond 4.32.2
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -9822,7 +9822,10 @@
 
     var create$c = function create(_ref) {
         var root = _ref.root;
-        return (root.ref.fields = {});
+        root.ref.fields = {};
+        var legend = document.createElement('legend');
+        legend.textContent = 'Files';
+        root.element.appendChild(legend);
     };
 
     var getField = function getField(root, id) {

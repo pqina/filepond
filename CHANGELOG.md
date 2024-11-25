@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.32.2
+
+-   Fix accessibility issue with data fieldset missing a legend.
+
+## 4.32.1
+
+-   Fix types.
+
 ## 4.32.0
 
 -   Add `onload` property to chunk patch request, receives `xhr` object, chunk index, and total chunks. #649

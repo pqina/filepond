@@ -3,7 +3,12 @@ import { createElement } from '../../utils/createElement';
 import { setInputFiles } from '../../utils/setInputFiles';
 import { FileOrigin } from '../enum/FileOrigin';
 
-const create = ({ root }) => (root.ref.fields = {});
+const create = ({ root }) => {
+    root.ref.fields = {};
+    const legend = document.createElement('legend');
+    legend.textContent = 'Files';
+    root.element.appendChild(legend);
+};
 
 const getField = (root, id) => root.ref.fields[id];
 
