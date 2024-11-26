@@ -70,7 +70,7 @@
     & .filepond--credits {
         position: absolute;
         right: 0;
-        opacity: 0.175;
+        opacity: 0.4;
         line-height: 0.85;
         font-size: 11px;
         color: inherit;

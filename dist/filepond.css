@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.32.2
+ * FilePond 4.32.4
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -1034,7 +1034,7 @@
 .filepond--root .filepond--credits {
     position: absolute;
     right: 0;
-    opacity: 0.175;
+    opacity: 0.4;
     line-height: 0.85;
     font-size: 11px;
     color: inherit;
