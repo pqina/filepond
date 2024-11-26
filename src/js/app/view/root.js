@@ -107,7 +107,7 @@ const create = ({ root, props }) => {
         frag.href = credits[0];
         frag.tabIndex = -1;
         frag.target = '_blank';
-        frag.rel = 'noopener noreferrer';
+        frag.rel = 'noopener noreferrer nofollow';
         frag.textContent = credits[1];
         root.element.appendChild(frag);
         root.ref.credits = frag;

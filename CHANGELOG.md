@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.32.3
+
+-   Add nofollow to credits link.
+
 ## 4.32.2
 
 -   Fix accessibility issue with data fieldset missing a legend.
