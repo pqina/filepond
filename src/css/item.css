@@ -10,7 +10,7 @@
 
     will-change: transform, opacity;
 
-    touch-action: none;
+    touch-action: auto;
 
     /* item children order */
     & > .filepond--panel {

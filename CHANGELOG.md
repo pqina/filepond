@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.32.5
+
+-   Attempt to fix item dragging issue on Android.
+
 ## 4.32.4
 
 -   Make credits link more visible to prevent authors from leaving it in place accidentally.
