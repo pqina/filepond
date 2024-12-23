@@ -869,6 +869,7 @@ export type FilePondEventPrefixed =
     | 'FilePond:processfileabort'
     | 'FilePond:processfilerevert'
     | 'FilePond:processfile'
+    | 'FilePond:processfiles'
     | 'FilePond:removefile'
     | 'FilePond:updatefiles'
     | 'FilePond:reorderfiles';
@@ -885,6 +886,7 @@ export type FilePondEvent =
     | 'processfileabort'
     | 'processfilerevert'
     | 'processfile'
+    | 'processfiles'
     | 'removefile'
     | 'updatefiles'
     | 'reorderfiles';

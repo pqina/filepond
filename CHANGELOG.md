@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.32.6
+
+-   Fix `processfiles` event missing from types.`
+
 ## 4.32.5
 
 -   Attempt to fix item dragging issue on Android.
