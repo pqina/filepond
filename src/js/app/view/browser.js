@@ -2,9 +2,9 @@ import { createView, createRoute } from '../frame/index';
 import { attrToggle } from '../../utils/attrToggle';
 import { resetFileInput } from '../../utils/resetFileInput';
 import { attr } from '../../utils/attr';
+import { ItemStatus } from '../enum/ItemStatus';
 
 const create = ({ root, props }) => {
-
     // set id so can be referenced from outside labels
     root.element.id = `filepond--browser-${props.id}`;
 
@@ -45,19 +45,14 @@ const create = ({ root, props }) => {
             // reset input, it's just for exposing a method to drop files, should not retain any state
             resetFileInput(root.element);
         }, 250);
-    }
+    };
 
     root.element.addEventListener('change', root.ref.handleChange);
 };
 
 const setAcceptedFileTypes = ({ root, action }) => {
     if (!root.query('GET_ALLOW_SYNC_ACCEPT_ATTRIBUTE')) return;
-    attrToggle(
-        root.element,
-        'accept',
-        !!action.value,
-        action.value ? action.value.join(',') : ''
-    );
+    attrToggle(root.element, 'accept', !!action.value, action.value ? action.value.join(',') : '');
 };
 
 const toggleAllowMultiple = ({ root, action }) => {
@@ -73,7 +68,7 @@ const toggleDisabled = ({ root }) => {
     const doesAllowBrowse = root.query('GET_ALLOW_BROWSE');
     const disableField = isDisabled || !doesAllowBrowse;
     attrToggle(root.element, 'disabled', disableField);
-}
+};
 
 const toggleRequired = ({ root, action }) => {
     // want to remove required, always possible
@@ -87,12 +82,7 @@ const toggleRequired = ({ root, action }) => {
 };
 
 const setCaptureMethod = ({ root, action }) => {
-    attrToggle(
-        root.element,
-        'capture',
-        !!action.value,
-        action.value === true ? '' : action.value
-    );
+    attrToggle(root.element, 'capture', !!action.value, action.value === true ? '' : action.value);
 };
 
 const updateRequiredStatus = ({ root }) => {
@@ -101,9 +91,20 @@ const updateRequiredStatus = ({ root }) => {
     if (root.query('GET_TOTAL_ITEMS') > 0) {
         attrToggle(element, 'required', false);
         attrToggle(element, 'name', false);
-    }
-    else {
 
+        // still has items
+        const activeItems = root.query('GET_ACTIVE_ITEMS');
+        let hasInvalidField = false;
+        for (let i = 0; i < activeItems.length; i++) {
+            if (activeItems[i].status === ItemStatus.LOAD_ERROR) {
+                hasInvalidField = true;
+            }
+        }
+        // set validity status
+        root.element.setCustomValidity(
+            hasInvalidField ? root.query('GET_LABEL_INVALID_FIELD') : ''
+        );
+    } else {
         // add name attribute
         attrToggle(element, 'name', true, root.query('GET_NAME'));
 
@@ -112,7 +113,7 @@ const updateRequiredStatus = ({ root }) => {
         if (shouldCheckValidity) {
             element.setCustomValidity('');
         }
-        
+
         // we only add required if the field has been deemed required
         if (root.query('GET_REQUIRED')) {
             attrToggle(element, 'required', true);
@@ -124,7 +125,7 @@ const updateFieldValidityStatus = ({ root }) => {
     const shouldCheckValidity = root.query('GET_CHECK_VALIDITY');
     if (!shouldCheckValidity) return;
     root.element.setCustomValidity(root.query('GET_LABEL_INVALID_FIELD'));
-}
+};
 
 export const browser = createView({
     tag: 'input',
@@ -132,7 +133,7 @@ export const browser = createView({
     ignoreRect: true,
     ignoreRectUpdate: true,
     attributes: {
-        type: 'file'
+        type: 'file',
     },
     create,
     destroy: ({ root }) => {
@@ -149,6 +150,6 @@ export const browser = createView({
         DID_SET_ALLOW_MULTIPLE: toggleAllowMultiple,
         DID_SET_ACCEPTED_FILE_TYPES: setAcceptedFileTypes,
         DID_SET_CAPTURE_METHOD: setCaptureMethod,
-        DID_SET_REQUIRED: toggleRequired
-    })
+        DID_SET_REQUIRED: toggleRequired,
+    }),
 });

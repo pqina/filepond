@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.32.7
+
+-   Fix issue where `checkValidity` would not reset field validity status after removing an invalid file.
+
 ## 4.32.6
 
 -   Fix `processfiles` event missing from types.`

@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.32.6
+ * FilePond 4.32.7
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -9454,7 +9454,6 @@
     var create$a = function create(_ref) {
         var root = _ref.root,
             props = _ref.props;
-
         // set id so can be referenced from outside labels
         root.element.id = 'filepond--browser-' + props.id;
 
@@ -9569,6 +9568,19 @@
         if (root.query('GET_TOTAL_ITEMS') > 0) {
             attrToggle(element, 'required', false);
             attrToggle(element, 'name', false);
+
+            // still has items
+            var activeItems = root.query('GET_ACTIVE_ITEMS');
+            var hasInvalidField = false;
+            for (var i = 0; i < activeItems.length; i++) {
+                if (activeItems[i].status === ItemStatus.LOAD_ERROR) {
+                    hasInvalidField = true;
+                }
+            }
+            // set validity status
+            root.element.setCustomValidity(
+                hasInvalidField ? root.query('GET_LABEL_INVALID_FIELD') : ''
+            );
         } else {
             // add name attribute
             attrToggle(element, 'name', true, root.query('GET_NAME'));
