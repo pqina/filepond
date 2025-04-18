@@ -72,7 +72,6 @@ FilePond adapters are available for **[React](https://github.com/pqina/react-fil
 -   [Zip Directory Uploads](https://github.com/tzsk/filepond-plugin-zipper) ([tzsk/filepond-plugin-zipper](https://github.com/tzsk/filepond-plugin-zipper))
 -   [PDF Preview](https://github.com/Adri-Glez/filepond-plugin-pdf-preview) ([Adri-Glez/filepond-plugin-pdf-preview](https://github.com/Adri-Glez/filepond-plugin-pdf-preview))
 -   [PDF Convert](https://github.com/alexandreDavid/filepond-plugin-pdf-convert) ([alexandreDavid/filepond-plugin-pdf-convert](https://github.com/alexandreDavid/filepond-plugin-pdf-convert))
--   [Copy Path](https://github.com/jnkn6/filepond-plugin-copy-path) ([jnkn6/filepond-plugin-copy-path](https://github.com/jnkn6/filepond-plugin-copy-path))
 
 ### Adapters
 
