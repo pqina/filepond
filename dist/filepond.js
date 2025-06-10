@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.32.7
+ * FilePond 4.32.8
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -10541,7 +10541,8 @@
         var isActiveElementEditable =
             activeEl &&
             (/textarea|input/i.test(activeEl.nodeName) ||
-                activeEl.getAttribute('contenteditable') === 'true');
+                activeEl.getAttribute('contenteditable') === 'true' ||
+                activeEl.getAttribute('contenteditable') === '');
 
         if (isActiveElementEditable) {
             // test textarea or input is contained in filepond root
