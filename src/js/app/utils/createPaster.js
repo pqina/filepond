@@ -10,7 +10,8 @@ const handlePaste = e => {
     const isActiveElementEditable =
         activeEl &&
         (/textarea|input/i.test(activeEl.nodeName) ||
-            activeEl.getAttribute('contenteditable') === 'true');
+            activeEl.getAttribute('contenteditable') === 'true' ||
+            activeEl.getAttribute('contenteditable') === '');
 
     if (isActiveElementEditable) {
         // test textarea or input is contained in filepond root
