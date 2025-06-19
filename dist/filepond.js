@@ -3751,6 +3751,7 @@
         allowDrop: [true, Type.BOOLEAN], // Allow dropping of files
         allowBrowse: [true, Type.BOOLEAN], // Allow browsing the file system
         allowPaste: [true, Type.BOOLEAN], // Allow pasting files
+        pasteOnHover: [true, Type.BOOLEAN], // Allow pasting files
         allowMultiple: [false, Type.BOOLEAN], // Allow multiple files (disabled by default, as multiple attribute is also required on input to allow multiple)
         allowReplace: [true, Type.BOOLEAN], // Allow dropping a file on other file to replace it (only works when multiple is set to false)
         allowRevert: [true, Type.BOOLEAN], // Allows user to revert file upload
@@ -10541,7 +10542,8 @@
         var isActiveElementEditable =
             activeEl &&
             (/textarea|input/i.test(activeEl.nodeName) ||
-                activeEl.getAttribute('contenteditable') === 'true');
+                activeEl.getAttribute('contenteditable') === 'true' ||
+                activeEl.getAttribute('contenteditable') === '');
 
         if (isActiveElementEditable) {
             // test textarea or input is contained in filepond root
@@ -11428,6 +11430,7 @@
      */
     var togglePaste = function togglePaste(root) {
         var isAllowed = root.query('GET_ALLOW_PASTE');
+        var pasteOnHover = root.query('GET_PASTE_ON_HOVER');
         var isDisabled = root.query('GET_DISABLED');
         var enabled = isAllowed && !isDisabled;
         if (enabled && !root.ref.paster) {
@@ -11438,6 +11441,9 @@
                 ) {
                     // these files don't fit so stop here
                     if (exceedsMaxFiles(root, queue)) return false;
+
+                    // If paste on hover is enabled, only add items if the root element is hovered
+                    if (pasteOnHover && !root.element.matches(':hover')) return false;
 
                     // add items!
                     root.dispatch('ADD_ITEMS', {

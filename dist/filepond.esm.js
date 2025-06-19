@@ -1825,6 +1825,7 @@ const defaultOptions = {
     allowDrop: [true, Type.BOOLEAN], // Allow dropping of files
     allowBrowse: [true, Type.BOOLEAN], // Allow browsing the file system
     allowPaste: [true, Type.BOOLEAN], // Allow pasting files
+    pasteOnHover: [true, Type.BOOLEAN], // Allow pasting files
     allowMultiple: [false, Type.BOOLEAN], // Allow multiple files (disabled by default, as multiple attribute is also required on input to allow multiple)
     allowReplace: [true, Type.BOOLEAN], // Allow dropping a file on other file to replace it (only works when multiple is set to false)
     allowRevert: [true, Type.BOOLEAN], // Allows user to revert file upload
@@ -7783,7 +7784,8 @@ const handlePaste = e => {
     const isActiveElementEditable =
         activeEl &&
         (/textarea|input/i.test(activeEl.nodeName) ||
-            activeEl.getAttribute('contenteditable') === 'true');
+            activeEl.getAttribute('contenteditable') === 'true' ||
+            activeEl.getAttribute('contenteditable') === '');
 
     if (isActiveElementEditable) {
         // test textarea or input is contained in filepond root
@@ -8570,6 +8572,7 @@ const toggleBrowse = (root, props) => {
  */
 const togglePaste = root => {
     const isAllowed = root.query('GET_ALLOW_PASTE');
+    const pasteOnHover = root.query('GET_PASTE_ON_HOVER');
     const isDisabled = root.query('GET_DISABLED');
     const enabled = isAllowed && !isDisabled;
     if (enabled && !root.ref.paster) {
@@ -8578,6 +8581,9 @@ const togglePaste = root => {
             applyFilterChain('ADD_ITEMS', items, { dispatch: root.dispatch }).then(queue => {
                 // these files don't fit so stop here
                 if (exceedsMaxFiles(root, queue)) return false;
+
+                // If paste on hover is enabled, only add items if the root element is hovered
+                if (pasteOnHover && !root.element.matches(':hover')) return false;
 
                 // add items!
                 root.dispatch('ADD_ITEMS', {
