@@ -27,7 +27,7 @@ const handlePaste = e => {
 
         if (!inScope) return;
     }
-    
+
     requestDataTransferItems(e.clipboardData).then(files => {
         // no files received
         if (!files.length) {
