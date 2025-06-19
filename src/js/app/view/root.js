@@ -597,8 +597,11 @@ const togglePaste = root => {
                 // these files don't fit so stop here
                 if (exceedsMaxFiles(root, queue)) return false;
 
+                // Determine if hover is available on this device
+                const canHover = window.matchMedia('(pointer: fine) and (hover: hover)').matches;
+
                 // If paste on hover is enabled, only add items if the root element is hovered
-                if (pasteOnHover && !root.element.matches(':hover')) return false;
+                if (pasteOnHover && canHover && !root.element.matches(':hover')) return false;
 
                 // add items!
                 root.dispatch('ADD_ITEMS', {
