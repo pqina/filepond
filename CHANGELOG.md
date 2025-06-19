@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.32.8
+
+-   Merged multiple PRs with various fixes.
+
 ## 4.32.7
 
 -   Fix issue where `checkValidity` would not reset field validity status after removing an invalid file.
