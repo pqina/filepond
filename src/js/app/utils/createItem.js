@@ -141,7 +141,7 @@ export const createItem = (origin = null, serverFileReference = null, file = nul
             // as we've now loaded the file the loader is no longer required
             state.activeLoader = null;
 
-            // called when file has loaded succesfully
+            // called when file has loaded successfully
             const success = result => {
                 // set (possibly) transformed file
                 state.file = isFile(result) ? result : state.file;
