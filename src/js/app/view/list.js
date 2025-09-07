@@ -132,8 +132,8 @@ const removeItemView = ({ root, action }) => {
 
 const getItemHeight = child =>
     child.rect.element.height +
-    child.rect.element.marginBottom * 0.5 +
-    child.rect.element.marginTop * 0.5;
+    child.rect.element.marginBottom +
+    child.rect.element.marginTop;
 const getItemWidth = child =>
     child.rect.element.width +
     child.rect.element.marginLeft * 0.5 +
