@@ -1,5 +1,9 @@
 # Changelog
 
+## 4.32.9
+
+-   Added various new locales.
+
 ## 4.32.8
 
 -   Merged multiple PRs with various fixes.
