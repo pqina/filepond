@@ -587,6 +587,7 @@ const toggleBrowse = (root, props) => {
  */
 const togglePaste = root => {
     const isAllowed = root.query('GET_ALLOW_PASTE');
+    const pasteOnHover = root.query('GET_PASTE_ON_HOVER');
     const isDisabled = root.query('GET_DISABLED');
     const enabled = isAllowed && !isDisabled;
     if (enabled && !root.ref.paster) {
@@ -595,6 +596,12 @@ const togglePaste = root => {
             applyFilterChain('ADD_ITEMS', items, { dispatch: root.dispatch }).then(queue => {
                 // these files don't fit so stop here
                 if (exceedsMaxFiles(root, queue)) return false;
+
+                // Determine if hover is available on this device
+                const canHover = window.matchMedia('(pointer: fine) and (hover: hover)').matches;
+
+                // If paste on hover is enabled, only add items if the root element is hovered
+                if (pasteOnHover && canHover && !root.element.matches(':hover')) return false;
 
                 // add items!
                 root.dispatch('ADD_ITEMS', {
