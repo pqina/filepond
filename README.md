@@ -10,6 +10,8 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 
 FilePond adapters are available for **[React](https://github.com/pqina/react-filepond)**, **[Vue](https://github.com/pqina/vue-filepond)**, **[Angular](https://github.com/pqina/ngx-filepond)**, **[Svelte](https://github.com/pqina/svelte-filepond)**, and **[jQuery](https://github.com/pqina/jquery-filepond)**
 
+[Documentation](https://pqina.nl/filepond/docs) • [Discord](https://discord.gg/KTyymsrTrX) • [Examples](#live-demos)
+
 ---
 
 [<img src="https://github.com/pqina/filepond-github-assets/blob/master/header.svg" alt="FilePond"/>](https://www.buymeacoffee.com/rikschennink/)
