@@ -5,7 +5,7 @@ if (!window.CSS) window.CSS = {};
 window.CSS.supports = () => true;
 
 window.URL.createObjectURL = blob => {
-    return `blob:${serializeURL(location.origin)}/${uuid()}`;
+    return `blob: ${serializeURL(location.origin)}/${uuid()}`;
 };
 
 window.URL.revokeObjectURL = url => {};
