@@ -1,5 +1,10 @@
 # Changelog
 
+## 4.32.10
+
+-   Added various new locales.
+-   Merge fix for drop offset mismatch when scrolling.
+
 ## 4.32.9
 
 -   Added various new locales.

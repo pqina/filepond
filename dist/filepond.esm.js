@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.32.9
+ * FilePond 4.32.10
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -6427,9 +6427,7 @@ const removeItemView = ({ root, action }) => {
 };
 
 const getItemHeight = child =>
-    child.rect.element.height +
-    child.rect.element.marginBottom * 0.5 +
-    child.rect.element.marginTop * 0.5;
+    child.rect.element.height + child.rect.element.marginBottom + child.rect.element.marginTop;
 const getItemWidth = child =>
     child.rect.element.width +
     child.rect.element.marginLeft * 0.5 +
