@@ -1,5 +1,7 @@
 {
-    "private": true,
+    "publishConfig": {
+        "tag": "alpha"
+    },
     "name": "filepond",
     "version": "5.0.0-alpha.0",
     "description": "FilePond, where files go to stretch their bits.",
@@ -11,7 +13,8 @@
         "dev-clean": "NODE_ENV=production vite --host",
         "test": "vite --port 5175 --open /test/",
         "build": "vite build && npm run ts",
-        "ts": "tsc -p ./tsconfig.build.json && cp src/types/*.d.ts dist/types && echo 'import \"./custom-element.js\";\nimport \"./default-extensions.js\";' >> dist/types/index.d.ts"
+        "ts": "tsc -p ./tsconfig.build.json && cp src/types/*.d.ts dist/types && echo 'import \"./custom-element.js\";\nimport \"./default-extensions.js\";' >> dist/types/index.d.ts",
+        "prepublishOnly": "node before-publish.js"
     },
     "files": [
         "./dist"
