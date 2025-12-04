@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "rootDir": "./src/",
+        "allowJs": true,
+        "checkJs": true,
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "resolveJsonModule": true,
+        "skipLibCheck": true,
+        "sourceMap": true,
+        "strict": true,
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "target": "esnext",
+        "verbatimModuleSyntax": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        "lib": ["esnext", "DOM", "DOM.Iterable"]
+    },
+    "include": ["global.d.ts", "src/**/*"],
+    "exclude": []
+}

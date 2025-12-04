@@ -1,0 +1,26 @@
+media-video {
+    display: block;
+    height: inherit;
+
+    /* this prevents video from upscaling grid cell */
+    min-width: 0;
+    min-height: 0;
+}
+
+.media-time-indicator {
+    color: currentColor;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+}
+
+/* this aligns the text inside these controls */
+.media-scrubber > div,
+.media-time-indicator > div {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+
+    & range-input {
+        flex: 1;
+    }
+}

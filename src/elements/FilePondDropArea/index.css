@@ -1,0 +1,18 @@
+/*
+
+Custom properties passed to `element-pane`
+
+--border: none;
+--border-radius: none;
+--background-color: none;
+
+*/
+:host {
+    contain: layout;
+}
+
+:host,
+.root {
+    position: absolute;
+    inset: 0;
+}

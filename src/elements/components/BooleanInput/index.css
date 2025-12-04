@@ -1,0 +1,98 @@
+boolean-input {
+    --input-size: 1em;
+    --input-padding: 0.25em;
+
+    --input-icon-size: var(--icon-size, calc(var(--input-size) * 2 / 3));
+    --input-icon-stroke: var(--icon-stroke, 3.5);
+    --input-icon-color: var(--icon-color, currentColor);
+
+    --input-focus-color: var(--focus-color, currentColor);
+    --input-focus-width: 2px;
+
+    --input-font-size: 0.75em;
+    --input-background-color: var(--background-color, rgb(from currentColor r g b / 0.15));
+
+    --input-transition-duration: var(--_100ms);
+
+    display: inline-grid;
+    align-items: center;
+    justify-items: center;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto;
+
+    /* no interaction with root */
+    pointer-events: auto;
+    user-select: none;
+
+    & input,
+    & label {
+        cursor: pointer;
+        font-size: var(--input-font-size);
+    }
+
+    /* if label is visible we enable gap */
+    &:has(label:not(.implicit)) {
+        gap: 0.375em;
+    }
+
+    & .icon,
+    & input {
+        font-size: 1em;
+        display: block;
+        margin: 0;
+        padding: 0;
+        width: var(--input-size);
+        height: var(--input-size);
+        border: 0;
+        grid-row: 1;
+        grid-column: 1;
+        outline: none;
+    }
+
+    & input {
+        margin: var(--input-padding);
+        appearance: none;
+        border-radius: 0.25em;
+        background-color: var(--input-background-color);
+        box-shadow: 0 0 0 0 transparent;
+        transition:
+            box-shadow var(--input-transition-duration) ease-in-out,
+            background-color var(--input-transition-duration) ease-in-out;
+    }
+
+    /* focus ring */
+    & input:hover,
+    & input:focus-visible {
+        box-shadow: 0 0 0 var(--input-focus-width) var(--input-focus-color);
+    }
+
+    /* check icon */
+    & .icon {
+        /* No need for interacting with icon */
+        pointer-events: none;
+        stroke-width: var(--input-icon-stroke);
+        width: var(--input-icon-size);
+        height: var(--input-icon-size);
+
+        /* SVG always covers icon element */
+        & > svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    & .icon {
+        pointer-events: none;
+        color: transparent;
+        transform: scale(0.75);
+        transition:
+            color var(--input-transition-duration) ease-in-out,
+            transform var(--_200ms) ease-in-out;
+    }
+
+    & input:checked + .icon {
+        color: var(--input-icon-color);
+        transform: scale(1);
+    }
+}

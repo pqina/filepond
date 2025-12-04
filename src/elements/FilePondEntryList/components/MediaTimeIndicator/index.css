@@ -1,0 +1,5 @@
+media-time-indicator {
+    white-space: nowrap;
+    font-variant: tabular-nums;
+    letter-spacing: -0.5px;
+}

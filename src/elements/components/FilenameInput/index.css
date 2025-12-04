@@ -1,0 +1,62 @@
+filename-input {
+    --input-transition-duration: var(--_150ms);
+
+    display: inline-flex;
+    width: min(var(--value-width), calc(100% + var(--extension-width)));
+    white-space: nowrap;
+
+    /* input that holds file name */
+    & input {
+        width: min(var(--value-width), 100%);
+        transition: background-color var(--input-transition-duration) ease-out;
+        &:focus,
+        &:hover {
+            background-color: rgb(from currentColor r g b / 0.15);
+        }
+    }
+
+    &:focus-within {
+        width: min(var(--value-width), 100%);
+    }
+
+    /* if text overflows we use ellipsis, when we focus the input, we show the extension */
+    &[data-overflow] {
+        & input {
+            text-overflow: ellipsis;
+        }
+
+        & span {
+            visibility: hidden;
+        }
+
+        /* show extension when focussed */
+        & input:focus + span {
+            visibility: visible;
+        }
+    }
+
+    /* the file extension */
+    & span {
+        display: inline-block;
+        color: currentColor;
+        background-color: transparent;
+    }
+
+    /* text measure */
+    & .measure-island {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 0;
+        contain: strict;
+        overflow: hidden;
+    }
+
+    & .measure {
+        box-sizing: border-box;
+        pointer-events: none;
+        position: absolute;
+        white-space: pre;
+    }
+}

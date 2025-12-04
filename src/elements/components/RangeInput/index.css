@@ -1,0 +1,126 @@
+range-input {
+    --transition-duration: var(--_150ms);
+    --thumb-size: 0.5em;
+    --thumb-color: currentColor;
+    --track-color: rgb(from currentColor r g b / 0.25);
+    --track-size: 0.1875em;
+    --track-interaction-size: 1.25em;
+    --progress-color: currentColor;
+
+    display: block;
+    position: relative;
+    opacity: var(--opacity);
+
+    /* we catch events with the input, then we draw the state using the Bar elements */
+    & input {
+        /* offsets the input so it aligns with the Bar element */
+        --br-alignment: calc(var(--track-border-radius) * 1px);
+        appearance: none;
+        pointer-events: all;
+        display: block;
+
+        width: calc(100% + (var(--thumb-size) * 2) - (var(--br-alignment) * 2));
+        margin-left: calc((var(--thumb-size) * -1) + var(--br-alignment));
+
+        height: var(--track-interaction-size);
+        cursor: pointer;
+        background: transparent;
+    }
+
+    & input::-webkit-slider-thumb {
+        opacity: 0;
+    }
+}
+
+/* visual only */
+.range-input-bar,
+.range-input-knob {
+    contain: layout;
+    pointer-events: none;
+
+    &,
+    & div,
+    &::before,
+    &::after {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform-origin: 0 0;
+    }
+}
+
+.range-input-bar {
+    height: var(--track-size);
+
+    /* inside input track */
+    margin-top: calc((var(--track-interaction-size) * 0.5) - (var(--track-size) * 0.5));
+
+    /* panes */
+    & element-pane {
+        --background-color: var(--fill);
+        --backdrop-filter: var(--track-backdrop-filter, none);
+        --border-radius: 9999px;
+    }
+}
+
+.range-input-track {
+    --fill: var(--track-color);
+}
+
+.range-input-progress {
+    --fill: var(--progress-color);
+}
+
+.range-input-hover {
+    transition: opacity var(--transition-duration) ease-out;
+    opacity: 0;
+    --fill: var(--progress-color);
+}
+
+.range-input-knob {
+    /* move with progress */
+    transform: translate3d(calc((var(--offset) + var(--track-border-radius)) * 1px), 0, 0);
+
+    /* center vertically inside input element */
+    margin-top: calc((var(--track-interaction-size) * 0.5));
+
+    /* visual knob */
+    &::after {
+        transform-origin: center center;
+        transition: transform var(--transition-duration) ease-out;
+        content: '';
+        position: absolute;
+        background: var(--thumb-background-color);
+        border-radius: 9999px;
+        width: var(--thumb-size);
+        height: var(--thumb-size);
+        top: calc(var(--thumb-size) * -0.5);
+        left: calc(var(--thumb-size) * -0.5);
+        transform: scale(0);
+    }
+}
+
+.range-input-title {
+    position: absolute;
+    left: 0;
+    bottom: calc(100% - var(--track-interaction-size) * 0.25);
+    transform: translateX(var(--title-x));
+    transition: opacity var(--transition-duration) ease-out;
+    opacity: var(--title-reveal);
+    pointer-events: none;
+}
+
+range-input:hover .range-input-hover {
+    opacity: 0.5;
+}
+
+range-input:hover .range-input-knob::after {
+    transform: scale(1);
+}
+
+/* Firefox */
+range-input {
+    & input::-moz-range-thumb {
+        opacity: 0;
+    }
+}

@@ -1,0 +1,37 @@
+/*
+
+Custom properties passed to `.root` and `element-pane`
+
+--border: none;
+--border-radius: none;
+--background-color: none;
+
+*/
+
+:host {
+    /* no user interaction with this element */
+    pointer-events: none;
+
+    /* always render behind items */
+    contain: layout;
+}
+
+:host,
+.root {
+    /* expand to fill parent */
+    position: absolute;
+    inset: 0;
+}
+
+.root {
+    /* mask drop indicator with container edges */
+    border-radius: calc(var(--border-radius) - 1px);
+    overflow: hidden;
+
+    & > div {
+        position: absolute;
+        top: 0;
+        left: 0;
+        transform-origin: center center;
+    }
+}

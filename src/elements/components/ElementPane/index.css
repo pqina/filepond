@@ -1,0 +1,27 @@
+element-pane {
+    contain: size layout style;
+    pointer-events: none;
+    user-select: none;
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+
+    & div {
+        position: absolute;
+        left: 0;
+        top: 0;
+        isolation: isolate;
+        box-sizing: border-box;
+        border-top: var(--border-top, var(--border));
+        border-right: var(--border-right, var(--border));
+        border-bottom: var(--border-bottom, var(--border));
+        border-left: var(--border-left, var(--border));
+        border-radius: var(--border-radius, 0);
+        background-color: var(--background-color, transparent);
+        box-shadow: var(--box-shadow, none);
+        backdrop-filter: var(--backdrop-filter, none);
+        -webkit-backdrop-filter: var(--backdrop-filter, none);
+        transition: var(--transition, none);
+        opacity: var(--opacity, 1);
+    }
+}

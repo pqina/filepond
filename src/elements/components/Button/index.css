@@ -1,0 +1,121 @@
+.button {
+    /* springs powered by transitions */
+    --spring: ease-out;
+    @supports (animation: linear(1, 2 3%)) {
+        /* prettier-ignore */
+        --spring: linear(0,0.0066,0.105,0.268,0.452,0.635,0.8,0.936,1.04,1.11,1.14,1.15,1.15,1.13,1.1,1.07,1.04,1.02,1,0.989,0.981,0.978,0.977,0.979,0.983,0.987,0.991,0.995,0.998,1,1,1,1,1,1,1,1,1,1,1);
+    }
+
+    /* these need to be set directly on the button */
+    --btn-opacity: 1;
+
+    /* By default use `auto`, if `--btn-size` is set on one of the parents we use `--btn-size`. We have to create "private" style properties because using `--btn-size` as property overwrites any cascaded properties */
+    --_btn-size: var(--btn-size, auto);
+    --_btn-font-size: var(--font-size-m, auto);
+    --_btn-border-radius: var(--btn-border-radius, 0);
+    --_btn-color: var(--btn-color, currentColor);
+    --_btn-background-color: var(--btn-background-color, transparent);
+    --_btn-backdrop-filter: var(--btn-backdrop-filter, none);
+    --_btn-shadow: var(--btn-shadow, none);
+
+    --_btn-hover-color: var(--btn-hover-color, currentColor);
+    --_btn-hover-shadow: var(--btn-hover-shadow, none);
+    --_btn-hover-background-color: var(--btn-hover-background-color, transparent);
+    --_btn-focus-color: var(--btn-focus-color, currentColor);
+    --_btn-focus-shadow: var(--btn-focus-shadow, none);
+    --_btn-focus-background-color: var(--btn-focus-background-color, transparent);
+    --_btn-icon-size: var(--btn-icon-size, 1em);
+    --_btn-icon-stroke: var(--btn-icon-stroke, 1.5);
+    --_btn-icon-color: var(--btn-icon-color, currentColor);
+
+    --_btn-icon-transform: var(--btn-icon-transform, scale(1));
+
+    --_btn-icon-transition-duration: var(--btn-icon-transition-duration, var(--_500ms, 0));
+    --_btn-icon-transition-easing: var(--btn-icon-transition-easing, var(--spring, linear));
+
+    --_btn-transition-duration: var(--btn-transition-duration, var(--_150ms, 0));
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    pointer-events: all;
+    width: var(--_btn-size);
+    height: var(--_btn-size);
+    border-radius: var(--_btn-border-radius);
+    background-color: var(--_btn-background-color);
+    backdrop-filter: var(--_btn-backdrop-filter);
+    -webkit-backdrop-filter: var(--_btn-backdrop-filter);
+    transition:
+        color var(--_btn-transition-duration) ease-in-out,
+        background-color var(--_btn-transition-duration) ease-in-out,
+        box-shadow var(--_btn-transition-duration) ease-in-out,
+        width var(--_btn-transition-duration) ease-in-out,
+        height var(--_btn-transition-duration) ease-in-out,
+        opacity var(--_btn-transition-duration) ease-in-out;
+
+    opacity: var(--btn-opacity, 1);
+    outline: none;
+    box-shadow: var(--_btn-shadow);
+    color: currentColor;
+
+    & .icon {
+        flex-shrink: 0;
+        color: var(--_btn-icon-color);
+        width: var(--_btn-icon-size);
+        height: var(--_btn-icon-size);
+        stroke-width: var(--_btn-icon-stroke);
+        transform: var(--_btn-icon-transform);
+        transition:
+            transform var(--_btn-icon-transition-duration) var(--_btn-icon-transition-easing),
+            opacity var(--_btn-icon-transition-duration) var(--_btn-icon-transition-easing);
+
+        /* we create spacing around the icon so it takes up remaining space when button has a fixed size */
+        margin: max(0px, calc((var(--_btn-size) - var(--_btn-icon-size)) * 0.5));
+
+        /* No need for interacting with icon */
+        pointer-events: none;
+
+        /* SVG always covers icon element */
+        & > svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    & .label {
+        flex-shrink: 1;
+        overflow: hidden;
+        color: currentColor;
+        font-size: var(--_btn-font-size);
+    }
+
+    /* This _individual_ button is disabled */
+    &[disabled] {
+        pointer-events: none;
+        & .icon,
+        & .label {
+            opacity: calc(var(--btn-opacity, 1) * 0.3);
+        }
+    }
+}
+
+/* Enlarge hit area for touch screens */
+@media (pointer: coarse) {
+    .button {
+        position: relative;
+        &::after {
+            --size: 44px;
+            --offset: calc((var(--_btn-size) - var(--size)) * 0.5);
+            content: '';
+            position: absolute;
+            top: var(--offset);
+            left: var(--offset);
+            width: var(--size);
+            height: var(--size);
+            z-index: 1;
+        }
+    }
+}

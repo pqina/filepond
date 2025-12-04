@@ -1,0 +1,33 @@
+:host {
+    /* default effects duration */
+    --animate: 1;
+
+    /* improve font rendering */
+    -webkit-font-smoothing: antialiased;
+
+    /* default styles */
+    display: block;
+    position: relative;
+    isolation: isolate;
+    line-height: var(--default-line-height, 1.5);
+    font-family: var(--default-font-family, inherit);
+    padding: var(--default-padding, 0);
+
+    /* needs to have a height for form validation to work */
+    min-height: 1px;
+
+    /*  */
+    & slot {
+        display: block;
+    }
+}
+
+/* apply "never" animation state */
+:host([animations='never']) {
+    --animate: 0;
+}
+
+/* move to top when dragging */
+:host([dragging]) {
+    z-index: 2147483647;
+}

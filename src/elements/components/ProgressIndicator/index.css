@@ -1,0 +1,219 @@
+progress-indicator {
+    --progress-color: var(--progress-color, currentColor);
+
+    --track-color: rgb(from var(--progress-color) r g b / 0.25);
+    --track-size: var(--size, 1.5em);
+    --track-border-radius: var(--border-radius, 0);
+
+    --progress-cap: round;
+
+    /* this variable is also used in .svelte file for calculating stroke-width on Safari */
+    --_stroke-width: var(--progress-stroke, 1.75);
+
+    /* base styles */
+    display: block;
+    background: transparent;
+    pointer-events: none;
+    overflow: hidden;
+    border-radius: var(--track-border-radius);
+
+    & div,
+    & svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    /* hide progress indicator element */
+    & progress {
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        height: 1px;
+        overflow: hidden;
+        position: absolute;
+        white-space: nowrap;
+        width: 1px;
+    }
+
+    &[shape='line'] {
+        width: 100%;
+        height: calc(var(--_stroke-width) * 1px);
+
+        & rect {
+            x: 0;
+            y: calc(50% - (var(--_stroke-width) * 0.5px));
+            width: 100%;
+            height: calc(var(--_stroke-width) * 1px);
+            rx: calc(var(--_stroke-width) * 0.5px);
+            fill: var(--progress-color);
+            transition: width 0.5s linear;
+        }
+
+        & rect:first-of-type {
+            fill: var(--track-color);
+        }
+
+        /* state where we have a value */
+        & progress:not(:indeterminate) ~ div {
+            & rect:last-of-type {
+                x: calc(var(--_offset) * 1px);
+                width: calc(var(--_progress) * 100%);
+                transition: none;
+            }
+        }
+
+        /* infinite bar */
+        & progress:indeterminate ~ div {
+            /* 0 for reverse / 1 for forwards */
+            --_f: max(0, var(--_flip));
+            --_from: translateX(calc(75% - (var(--_f) * 75%)));
+            --_to: translateX(calc(var(--_f) * 75%));
+
+            & rect:last-of-type {
+                --_flip: 1;
+                animation: progress-indicator-busy 0.75s infinite alternate ease-in-out;
+                width: 25%;
+            }
+        }
+    }
+
+    &[shape='circle'],
+    &[shape='rectangle'] {
+        width: var(--track-size);
+        height: var(--track-size);
+
+        & div {
+            transform-origin: center center;
+        }
+
+        & g rect,
+        & g circle {
+            fill: none;
+            stroke: var(--progress-color);
+            stroke-width: var(--_stroke-width);
+            stroke-linecap: var(--progress-cap);
+        }
+
+        & g rect:first-of-type,
+        & g circle:first-of-type {
+            stroke: var(--track-color);
+        }
+    }
+
+    &[shape='circle'] {
+        /* for round progress indicators */
+        & g circle {
+            --r: calc(var(--_size) * 0.5);
+            r: calc((var(--r) - var(--_stroke-width) * 0.5) * 1px);
+            cx: calc(var(--r) * 1px);
+            cy: calc(var(--r) * 1px);
+        }
+
+        /* state where we have a value */
+        & progress:not(:indeterminate) ~ div {
+            /* animates svg to origin using offset supplied by module */
+            transform: scaleX(var(--_flip)) rotate(calc(var(--_offset) * 1rad));
+
+            /* draw progress update */
+            & g circle:last-of-type {
+                stroke-dashoffset: calc(1 - var(--_progress));
+                stroke-dasharray: 1;
+            }
+        }
+
+        /* infinite spinner */
+        & progress:indeterminate ~ div {
+            --_from: rotate(0deg);
+            --_to: rotate(360deg);
+
+            /* we animate the div, animating the svg triggers occasional layout requests on Chrome */
+            animation: progress-indicator-busy 0.5s infinite linear;
+
+            /* 50/50 */
+            & g circle:last-of-type {
+                transition:
+                    stroke-dashoffset 0.5s ease-out,
+                    stroke-dasharray 0.5s ease-out;
+
+                /* move counter clockwise */
+                stroke-dashoffset: -1;
+
+                /* 50% fill */
+                stroke-dasharray: 0.5;
+            }
+        }
+    }
+
+    &[shape='rectangle'] {
+        & div {
+            transform: scaleX(var(--_flip));
+        }
+
+        & mask rect:last-of-type {
+            stroke-width: var(--_stroke-width);
+        }
+
+        /* for rectangle progress indicators */
+        & mask rect:last-of-type,
+        & g rect {
+            --_o: calc(var(--_stroke-width) * 0.5px);
+            x: var(--_o);
+            y: var(--_o);
+            --_s: calc((var(--_size) - var(--_stroke-width)) * 1px);
+            width: var(--_s);
+            height: var(--_s);
+            rx: var(--_border-radius);
+        }
+
+        /* state where we have a value */
+        & progress:not(:indeterminate) ~ div {
+            mask: none !important;
+
+            & g rect:last-of-type {
+                stroke-dashoffset: calc(var(--_offset) + var(--_center));
+                stroke-dasharray: var(--_progress) calc(1 - var(--_progress));
+            }
+        }
+
+        /* infinite spinner */
+        & progress:indeterminate ~ div {
+            & g rect:last-of-type {
+                display: none;
+            }
+
+            &::before {
+                --_from: rotate(-220deg);
+                --_to: rotate(140deg);
+                content: '';
+                position: absolute;
+                left: -25%;
+                top: -25%;
+                right: 50%;
+                bottom: -25%;
+                background: var(--progress-color);
+                transform-origin: 100% center;
+                animation: progress-indicator-busy 0.5s infinite linear;
+            }
+        }
+    }
+}
+
+@keyframes progress-indicator-busy {
+    from {
+        transform: scaleX(var(--_flip)) var(--_from);
+    }
+
+    to {
+        transform: scaleX(var(--_flip)) var(--_to);
+    }
+}
+
+@keyframes progress-indicator-loop {
+    from {
+        stroke-dashoffset: 1;
+    }
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}

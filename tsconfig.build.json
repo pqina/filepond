@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "allowJs": true,
+        "declaration": true,
+        "declarationMap": false,
+        "emitDeclarationOnly": true,
+        "rootDir": "src",
+        "outDir": "dist/types",
+        "target": "esnext",
+        "module": "NodeNext",
+        "moduleResolution": "NodeNext",
+        "paths": {
+            // we do this so the `import "filepond"` statement doesn't trigger TypeScript from looking at the exports on the "filepond" `package.json` file (for now this works, perhaps it's better to have a stub.d.ts file)
+            "filepond": ["./global.d.ts"]
+        }
+    },
+    "include": ["src", "global.d.ts"],
+    "exclude": ["node_modules", "package.json"]
+}

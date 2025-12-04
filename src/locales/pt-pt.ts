@@ -1,0 +1,179 @@
+export const core = {
+    abort: 'Abortar',
+    remove: 'Remover',
+    reset: 'Repor',
+    undo: 'Anular',
+    cancel: 'Cancelar',
+    store: 'Guardar',
+    revert: 'Reverter',
+    busy: 'Ocupado',
+    loading: 'A carregar',
+
+    error: 'Erro',
+    warning: 'Aviso',
+    success: 'Concluído',
+    info: 'Info',
+    system: 'Sistema',
+
+    fileMainTypeImage: 'imagem',
+    fileMainTypeVideo: 'vídeo',
+    fileMainTypeAudio: 'áudio',
+    fileMainTypeApplication: 'ficheiro',
+
+    assistAbort: 'Toque para cancelar',
+    assistUndo: 'Toque para anular',
+
+    loadError: 'Não foi possível carregar o ficheiro.',
+
+    loadDataTranserProgress: 'A carregar ficheiros',
+    loadDataTranserInfo: '{{processedFiles}} de {{totalFiles}} ficheiros processados',
+
+    validationInvalid: 'Ficheiro inválido.',
+    validationFileNameMissing: 'Nome do ficheiro em falta',
+
+    validationInvalidEntries: 'A lista contém itens inválidos.',
+    validationInvalidState: 'A lista de ficheiros está num estado inválido.',
+    validationInvalidBusy: 'A lista de ficheiros está ocupada.',
+    validationInvalidEmpty: 'Preencha este campo.',
+};
+
+export const media = {
+    mediaEdit: 'Editar',
+    mediaPlay: 'Reproduzir',
+    mediaPause: 'Pausa',
+    mediaSilent: 'Sem áudio',
+    mediaUnmute: 'Ativar som',
+    mediaMute: 'Silenciar',
+    mediaFullscreen: 'Ecrã inteiro',
+    mediaLoadError: 'Não foi possível carregar a {{fileMainType}}.',
+    mediaPlayError: 'Não foi possível reproduzir o vídeo.',
+};
+
+export const store = {
+    storeRestoreProgress: 'A carregar {{progress}}%',
+
+    storeStorageQueued: 'A aguardar envio',
+    storeStorageProgress: 'A enviar {{progress}}%',
+    storeStorageComplete: 'Envio concluído',
+
+    storeError: 'Não foi possível guardar o ficheiro.',
+    storeAwaitingCompletion: 'Nem todos os ficheiros foram guardados.',
+};
+
+export const transform = {
+    transformEditBusy: 'A editar ficheiro',
+    transformError: 'Não foi possível editar o ficheiro. Tente novamente.',
+};
+
+export const validationFileMimeType = {
+    validationFileMimeTypeMismatch: {
+        template: 'Este tipo de ficheiro não é permitido. {{details}}.',
+        variables: {
+            details: {
+                context: 'count',
+                map: {
+                    1: 'O ficheiro tem de ser do tipo {{accept}}',
+                    else: 'Os tipos permitidos são: {{accept}}',
+                },
+            },
+        },
+    },
+};
+
+export const validationFileExtension = {
+    validationFileExtensionMismatch: {
+        template: 'Esta extensão de ficheiro não é permitida. {{details}}.',
+        variables: {
+            details: {
+                context: 'count',
+                map: {
+                    1: 'O ficheiro tem de ter a extensão {{accept}}',
+                    else: 'As extensões permitidas são: {{accept}}',
+                },
+            },
+        },
+    },
+};
+
+export const validationFileName = {
+    validationFileNameMissing: 'Nome do ficheiro em falta',
+    validationFileNameMismatch: 'Este nome de ficheiro é inválido.',
+};
+
+export const validationFileSize = {
+    validationFileSizeUnderflow:
+        'Este ficheiro é demasiado pequeno. O tamanho mínimo é {{minSize}}.',
+    validationFileSizeOverflow: 'Este ficheiro é demasiado grande. O tamanho máximo é {{maxSize}}.',
+};
+
+export const validationListSize = {
+    validationListSizeUnderflow:
+        'O tamanho total dos ficheiros é demasiado pequeno. O mínimo necessário é {minListSize}.',
+    validationListSizeOverflow:
+        'O tamanho total dos ficheiros é demasiado grande. O máximo permitido é {maxListSize}.',
+};
+
+export const validationMediaResolution = {
+    validationMediaSizeUnavailable: 'Não foi possível ler o tamanho do ficheiro multimédia.',
+
+    validationMediaWidthRangeMismatch:
+        'A largura da {{fileMainType}} é inválida. Deve estar entre {{minWidth}} e {{maxWidth}}.',
+    validationMediaWidthUnderflow:
+        'A {{fileMainType}} é demasiado estreita. A largura mínima é {{minWidth}}.',
+    validationMediaWidthOverflow:
+        'A {{fileMainType}} é demasiado larga. A largura máxima é {{maxWidth}}.',
+
+    validationMediaHeightRangeMismatch:
+        'A altura da {{fileMainType}} é inválida. Deve estar entre {{minHeight}} e {{maxHeight}}.',
+    validationMediaHeightUnderflow:
+        'A {{fileMainType}} é demasiado baixa. A altura mínima é {{minHeight}}.',
+    validationMediaHeightOverflow:
+        'A {{fileMainType}} é demasiado alta. A altura máxima é {{maxHeight}}.',
+
+    validationMediaResolutionRangeMismatch:
+        'A resolução da {{fileMainType}} é inválida. Deve estar entre {{minResolution}} e {maxResolution}.',
+    validationMediaResolutionUnderflow:
+        'A resolução da {{fileMainType}} é inválida. A resolução mínima é {{minResolution}}.',
+    validationMediaResolutionOverflow:
+        'A resolução da {{fileMainType}} é inválida. A resolução máxima é {{maxResolution}}.',
+};
+
+export const validationListCount = {
+    validationListEntryCountUnderflow: {
+        template: 'Poucos ficheiros. O mínimo necessário é {{minFiles}} {{files}}.',
+        variables: {
+            files: {
+                context: 'minFiles',
+                map: { 1: 'ficheiro', else: 'ficheiros' },
+            },
+        },
+    },
+
+    validationListEntryCountOverflow: {
+        template: 'Demasiados ficheiros. O máximo permitido é {{maxFiles}} {{files}}.',
+        variables: {
+            files: {
+                context: 'minFiles',
+                map: { 1: 'ficheiro', else: 'ficheiros' },
+            },
+        },
+    },
+};
+
+export const validation = {
+    ...validationFileSize,
+    ...validationFileMimeType,
+    ...validationFileExtension,
+    ...validationFileName,
+    ...validationMediaResolution,
+    ...validationListSize,
+    ...validationListCount,
+};
+
+export const locale = {
+    ...core,
+    ...store,
+    ...media,
+    ...validation,
+    ...transform,
+};

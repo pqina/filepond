@@ -1,0 +1,235 @@
+/* Default entry styles */
+.entry {
+    isolation: isolate;
+
+    /* Use border box so we don't have to subtract padding from min-height */
+    box-sizing: border-box;
+
+    /* Minimum height so height animation is less extreme on load */
+    min-height: var(--entry-min-height);
+
+    /* so we respect max-height set on entry item */
+    max-height: inherit;
+    height: inherit;
+
+    /* masking */
+    clip-path: inset(var(--mask) round var(--entry-border-radius));
+
+    /* line height for text items */
+    line-height: 1.15;
+
+    /* use entry color */
+    color: var(--entry-color);
+
+    /* entry selected state */
+    &[data-selected='true'] ~ .entry-front {
+        --_entry-selected: 2px solid var(--primary-color);
+        --background-color: rgb(from var(--primary-color) r g b / 0.25);
+    }
+}
+
+/* entry info items */
+.entry-info-main,
+.entry-info-sub {
+    word-break: break-word;
+    font-variant-numeric: tabular-nums;
+}
+
+.entry-info-main + .entry-info-sub {
+    margin-top: 1px;
+}
+
+.entry-info-main {
+    font-size: var(--font-size-m);
+
+    /* skeleton sizing */
+    --skeleton-width: 8em;
+    --skeleton-max-width: 100%;
+
+    /* clamp lines */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--entry-name-max-lines, 1);
+    overflow: hidden;
+}
+
+.entry-info-sub {
+    --skeleton-max-width: 50%;
+    font-size: var(--font-size-xs);
+    font-weight: 400;
+    color: rgb(from currentColor r g b / 0.5);
+}
+
+/* entry decorative elements */
+.entry-back,
+.entry-front,
+.entry-disabled-overlay {
+    --border-radius: var(--entry-border-radius);
+}
+
+.entry-back {
+    --box-shadow: var(--entry-shadow);
+    --background-color: var(--entry-background-color);
+    --transition: box-shadow var(--_250ms) ease-out;
+}
+
+.entry-front {
+    z-index: 1;
+    --transition-duration: var(--_100ms);
+    --transition: border var(--transition-duration) ease-out,
+        background-color var(--transition-duration) ease-in-out;
+    --border-top: var(--_entry-selected, var(--entry-border-top));
+    --border-right: var(--_entry-selected, var(--entry-border-right));
+    --border-bottom: var(--_entry-selected, var(--entry-border-bottom));
+    --border-left: var(--_entry-selected, var(--entry-border-left));
+}
+
+.entry-disabled {
+    --background-color: color-mix(
+        in srgb,
+        var(--entry-background-color) calc(var(--disabled-state) * 40%),
+        transparent
+    );
+}
+
+/* Default entry layout */
+.entry {
+    container-type: inline-size;
+    container-name: entry;
+
+    & .entry-checkable {
+        grid-row: 1;
+        grid-column: 1;
+        padding: var(--entry-padding);
+    }
+
+    &[data-selected='true'] .entry-checkable {
+        --background-color: var(--primary-color);
+    }
+
+    & .entry-info {
+        pointer-events: none;
+        & > [layout='split'] > *:nth-child(2) {
+            /* alignment of content in second child (storage state) */
+            text-align: right;
+
+            /* we need to scale the box to fit the content so when the parent entry width changes the spring that wraps this element is moved correctly */
+            min-width: fit-content;
+        }
+    }
+
+    & .entry-media {
+        min-width: 0;
+        min-height: 0;
+    }
+
+    & .entry-media-controls {
+        /* item spacing */
+        gap: var(--gap, var(--entry-padding));
+
+        /* fade in media controls */
+        --opacity: 0;
+        &[data-media-is-visible] {
+            --opacity: 1;
+        }
+
+        & .media-control > element-stack,
+        & .media-control-group > element-stack {
+            --_transition: opacity var(--_250ms) var(--_100ms) ease-in-out;
+
+            /* cannot set opacity directly on pane as that would cause backdrop blur to flicker */
+            & > .media-control-pane {
+                --transition: var(--_transition);
+            }
+
+            /* all other children _are_ animated directly */
+            & > *:not(.media-control-pane) {
+                opacity: var(--opacity);
+                transition: var(--_transition);
+            }
+        }
+    }
+
+    & .media-control-pane {
+        --border-radius: var(--panel-border-radius);
+        --backdrop-filter: var(--panel-backdrop-filter);
+        --background-color: var(--panel-background-color);
+    }
+
+    & .media-control-group {
+        flex: 1;
+        & > element-stack {
+            gap: var(--entry-padding);
+        }
+    }
+
+    & .justify-content-start {
+        justify-content: start;
+    }
+
+    & .justify-content-end {
+        justify-content: end;
+    }
+
+    & .media-scrubber {
+        flex: 1;
+    }
+
+    /* If the container is larger than 700px */
+    @container entry (width < 200px) {
+        & .media-time-indicator {
+            display: none;
+        }
+    }
+
+    /* If the container is larger than 700px */
+    @container entry (width < 120px) {
+        & .media-scrubber {
+            display: none;
+        }
+    }
+}
+
+/* Data Transfer layout */
+.entry.entry-data-transfer {
+    & ~ .entry-back {
+        --border: none;
+        --box-shadow: none;
+        --background-color: var(--data-transfer-background-color);
+    }
+
+    & ~ .entry-front {
+        display: none;
+    }
+
+    & .entry-info {
+        grid-row: 1;
+        grid-column: 2/4;
+        padding-right: var(--entry-padding);
+    }
+}
+
+/* Entry layout where media underlays controls 
+.entry {
+
+    & .button {
+        --backdrop-filter: var(--media-backdrop-filter);
+        --background-color: rgb(from var(--media-background-color) r g b / 0.35);
+    }
+
+    & .media-overlay {
+        z-index: 1;
+        --border-radius: 0;
+        --backdrop-filter: var(--media-backdrop-filter);
+        --background-color: rgb(from var(--media-background-color) r g b / 0.35);
+        mask: linear-gradient(black 10%, transparent);
+        max-height: 4em !important;
+    }
+
+    & .entry-media {
+        grid-row: 1 / 3;
+        grid-column: 1 / 4;
+        z-index: -1;
+    }
+}
+*/

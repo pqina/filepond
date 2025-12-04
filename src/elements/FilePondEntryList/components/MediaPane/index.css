@@ -1,0 +1,51 @@
+/* media-pane */
+media-pane {
+    position: relative;
+    display: block;
+    pointer-events: none;
+
+    /* allows item to shrink so fits max grid width/height (if set) */
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
+
+    /* So scales to contain image */
+    aspect-ratio: var(--_aspect-ratio);
+
+    /* mask for when in contain mode */
+    clip-path: inset(
+        var(--_mask-top) var(--_mask-right) var(--_mask-bottom) var(--_mask-left) round
+            var(--media-border-radius, 0)
+    );
+
+    /* Scale to use for media */
+    --_px: calc(var(--_pan-x) * var(--_overflow-amount));
+    --_py: calc(var(--_pan-y) * var(--_overflow-amount));
+    --_s: calc(var(--_scale) + (var(--_scalar) * var(--_overflow-scale)));
+    --_tx: calc(var(--_x) + var(--_px));
+    --_ty: calc(var(--_y) + var(--_py));
+
+    /* Media itself */
+    & canvas,
+    & video {
+        /* This dramatically improves render performance, pixelation doesn't really show because we're scaling with transforms */
+        image-rendering: pixelated;
+
+        /* So we can transform this element */
+        position: absolute;
+        left: 0;
+        top: 0;
+        max-width: none;
+        width: auto;
+        opacity: var(--_opacity);
+        transform-origin: center center;
+        transform: translate3d(var(--_tx), var(--_ty), 0) scale(var(--_s));
+    }
+}
+
+/* define media backdrop style here as this is conditionally loaded */
+.media-pane {
+    --background-color: var(--media-background-color);
+    --border-radius: 0;
+}

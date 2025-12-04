@@ -1,0 +1,172 @@
+export const core = {
+    abort: 'Avbryt',
+    remove: 'Ta bort',
+    reset: 'Återställ',
+    undo: 'Ångra',
+    cancel: 'Avbryt',
+    store: 'Spara',
+    revert: 'Återgå',
+    busy: 'Upptagen',
+    loading: 'Laddar',
+
+    error: 'Fel',
+    warning: 'Varning',
+    success: 'Klart',
+    info: 'Info',
+    system: 'System',
+
+    fileMainTypeImage: 'bild',
+    fileMainTypeVideo: 'video',
+    fileMainTypeAudio: 'ljud',
+    fileMainTypeApplication: 'fil',
+
+    assistAbort: 'Tryck för att avbryta',
+    assistUndo: 'Tryck för att ångra',
+
+    loadError: 'Det gick inte att ladda filen.',
+
+    loadDataTranserProgress: 'Laddar filer',
+    loadDataTranserInfo: '{{processedFiles}} av {{totalFiles}} filer behandlade',
+
+    validationInvalid: 'Ogiltig fil.',
+    validationFileNameMissing: 'Filnamn saknas',
+
+    validationInvalidEntries: 'Listan innehåller ogiltiga objekt.',
+    validationInvalidState: 'Fillistan är i ett ogiltigt tillstånd.',
+    validationInvalidBusy: 'Fillistan är upptagen.',
+    validationInvalidEmpty: 'Fyll i det här fältet.',
+};
+
+export const media = {
+    mediaEdit: 'Redigera',
+    mediaPlay: 'Spela upp',
+    mediaPause: 'Pausa',
+    mediaSilent: 'Inget ljud',
+    mediaUnmute: 'Slå på ljud',
+    mediaMute: 'Stäng av ljud',
+    mediaFullscreen: 'Helskärm',
+    mediaLoadError: 'Det gick inte att ladda {{fileMainType}}.',
+    mediaPlayError: 'Det går inte att spela upp videon.',
+};
+
+export const store = {
+    storeRestoreProgress: 'Laddar {{progress}}%',
+
+    storeStorageQueued: 'Väntar på uppladdning',
+    storeStorageProgress: 'Laddar upp {{progress}}%',
+    storeStorageComplete: 'Uppladdning klar',
+
+    storeError: 'Det gick inte att spara filen.',
+    storeAwaitingCompletion: 'Alla filer är inte sparade ännu.',
+};
+
+export const transform = {
+    transformEditBusy: 'Redigerar fil',
+    transformError: 'Det gick inte att redigera filen. Försök igen.',
+};
+
+export const validationFileMimeType = {
+    validationFileMimeTypeMismatch: {
+        template: 'Denna filtyp är inte tillåten. {{details}}.',
+        variables: {
+            details: {
+                context: 'count',
+                map: {
+                    1: 'Filen måste vara av typen {{accept}}',
+                    else: 'Tillåtna typer är: {{accept}}',
+                },
+            },
+        },
+    },
+};
+
+export const validationFileExtension = {
+    validationFileExtensionMismatch: {
+        template: 'Denna filändelse är inte tillåten. {{details}}.',
+        variables: {
+            details: {
+                context: 'count',
+                map: {
+                    1: 'Filen måste ha filändelsen {{accept}}',
+                    else: 'Tillåtna filändelser är: {{accept}}',
+                },
+            },
+        },
+    },
+};
+
+export const validationFileName = {
+    validationFileNameMissing: 'Filnamn saknas',
+    validationFileNameMismatch: 'Detta filnamn är ogiltigt.',
+};
+
+export const validationFileSize = {
+    validationFileSizeUnderflow: 'Denna fil är för liten. Minimistorlek är {{minSize}}.',
+    validationFileSizeOverflow: 'Denna fil är för stor. Maximal storlek är {{maxSize}}.',
+};
+
+export const validationListSize = {
+    validationListSizeUnderflow: 'Total filstorlek är för liten. Minimikravet är {minListSize}.',
+    validationListSizeOverflow: 'Total filstorlek är för stor. Maxgränsen är {maxListSize}.',
+};
+
+export const validationMediaResolution = {
+    validationMediaSizeUnavailable: 'Det gick inte att läsa mediestorleken.',
+
+    validationMediaWidthRangeMismatch:
+        'Bredden på {{fileMainType}} är ogiltig. Den måste vara mellan {{minWidth}} och {{maxWidth}}.',
+    validationMediaWidthUnderflow: '{{fileMainType}} är för smal. Minsta bredd är {{minWidth}}.',
+    validationMediaWidthOverflow: '{{fileMainType}} är för bred. Största bredd är {{maxWidth}}.',
+
+    validationMediaHeightRangeMismatch:
+        'Höjden på {{fileMainType}} är ogiltig. Den måste vara mellan {{minHeight}} och {{maxHeight}}.',
+    validationMediaHeightUnderflow: '{{fileMainType}} är för låg. Minsta höjd är {{minHeight}}.',
+    validationMediaHeightOverflow: '{{fileMainType}} är för hög. Största höjd är {{maxHeight}}.',
+
+    validationMediaResolutionRangeMismatch:
+        'Upplösningen för {{fileMainType}} är ogiltig. Den måste vara mellan {{minResolution}} och {maxResolution}.',
+    validationMediaResolutionUnderflow:
+        'Upplösningen för {{fileMainType}} är ogiltig. Minsta upplösning är {{minResolution}}.',
+    validationMediaResolutionOverflow:
+        'Upplösningen för {{fileMainType}} är ogiltig. Största upplösning är {{maxResolution}}.',
+};
+
+export const validationListCount = {
+    validationListEntryCountUnderflow: {
+        template: 'För få filer. Minimikravet är {{minFiles}} {{files}}.',
+        variables: {
+            files: {
+                context: 'minFiles',
+                map: { 1: 'fil', else: 'filer' },
+            },
+        },
+    },
+
+    validationListEntryCountOverflow: {
+        template: 'För många filer. Maxgränsen är {{maxFiles}} {{files}}.',
+        variables: {
+            files: {
+                context: 'minFiles',
+                map: { 1: 'fil', else: 'filer' },
+            },
+        },
+    },
+};
+
+export const validation = {
+    ...validationFileSize,
+    ...validationFileMimeType,
+    ...validationFileExtension,
+    ...validationFileName,
+    ...validationMediaResolution,
+    ...validationListSize,
+    ...validationListCount,
+};
+
+export const locale = {
+    ...core,
+    ...store,
+    ...media,
+    ...validation,
+    ...transform,
+};

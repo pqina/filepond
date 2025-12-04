@@ -1,0 +1,138 @@
+/* No nested styles in this CSS file as for some weird reason this crashed Safari (tested on 17.6 Sonoma) */
+
+/* Used to animate disabled between true/false */
+@property --disabled-state {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+}
+
+.root {
+    /* create new stacking context for FilePondEntryList and its subtree */
+    isolation: isolate;
+
+    /* Default styles */
+    text-align: left;
+    font-weight: 500;
+}
+
+:host {
+    --entry-padding: calc(var(--default-padding) * 0.5);
+    --entry-shadow: none;
+    --entry-lifted-shadow: none;
+    --entry-min-height: 2.5em;
+    --entry-color: currentColor;
+    --entry-background-color: inherit;
+    --entry-border-radius: calc(var(--default-border-radius, 0) * 0.5);
+    --entry-border: var(--default-border, none);
+    --entry-border-top: var(--entry-border);
+    --entry-border-right: var(--entry-border);
+    --entry-border-bottom: var(--entry-border);
+    --entry-border-left: var(--entry-border);
+
+    --data-transfer-background-color: color-mix(
+        in srgb,
+        var(--entry-color) 10%,
+        var(--entry-background-color)
+    );
+
+    --media-background-color: black;
+
+    --font-size-m: 0.75em;
+    --font-size-s: 0.625em;
+    --font-size-xs: 0.5em;
+
+    --status-info: #a7d6fb;
+    --status-success: #97e1a8;
+    --status-warning: #f9db82;
+    --status-error: #f7938c;
+    --status-system: #d3d3d3;
+
+    --_100ms: calc(100ms * var(--animate));
+    --_150ms: calc(150ms * var(--animate));
+    --_200ms: calc(200ms * var(--animate));
+    --_250ms: calc(250ms * var(--animate));
+    --_500ms: calc(500ms * var(--animate));
+}
+
+/* basic style reset */
+* {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+li {
+    /* for some reason, if the li is displayed as a list-item, the animation in the skeleton component triggers nodes to be endlessly generated in Chrome & Safari */
+    display: block;
+}
+
+label,
+button,
+select,
+textarea,
+input {
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    font: inherit;
+    box-sizing: content-box;
+}
+
+element-stack {
+    display: flex;
+    flex-direction: row;
+}
+
+element-stack[layout='split'] {
+    justify-content: space-between;
+}
+
+element-stack[layout='col'] {
+    flex-direction: column;
+}
+
+element-stack[layout='pile'] {
+    display: grid;
+    grid-template: 1fr / 1fr;
+}
+
+element-stack[layout='pile'] > * {
+    grid-area: 1 / 1;
+}
+
+/* disabled state */
+.root {
+    --disabled-state: 0;
+    --disabled-state-duration: var(--_150ms);
+    transition: --disabled-state var(--disabled-state-duration) ease-in-out;
+}
+
+.root[disabled] {
+    --disabled-state: 1;
+    filter: grayscale(var(--disabled-state));
+}
+
+.root[disabled] * {
+    pointer-events: none !important;
+}
+
+/* Hide element from screen but still leave accessible to screenreader */
+.implicit {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
+
+/* Covers the parent element, useful for expanding buttons or labels so an entire element is clickable */
+.cover {
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    color: transparent;
+}

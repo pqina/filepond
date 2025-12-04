@@ -1,0 +1,73 @@
+entry-status {
+    isolation: isolate;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.entry-status-message {
+    --ci: color-mix(in hsl, var(--cb) 60%, black);
+    --cf: color-mix(in srgb, var(--cb) 40%, black);
+
+    &[data-type='info'] {
+        --cb: var(--status-info);
+        --i: var(--status-info-icon, var(--ci));
+        --f: var(--status-info-foreground, var(--cf));
+        --b: var(--status-info-background, var(--cb));
+    }
+
+    &[data-type='success'] {
+        --cb: var(--status-success);
+        --i: var(--status-success-icon, var(--ci));
+        --f: var(--status-success-foreground, var(--cf));
+        --b: var(--status-success-background, var(--cb));
+    }
+
+    &[data-type='warning'] {
+        --cb: var(--status-warning);
+        --i: var(--status-warning-icon, var(--ci));
+        --f: var(--status-warning-foreground, var(--cf));
+        --b: var(--status-warning-background, var(--cb));
+    }
+
+    &[data-type='error'] {
+        --cb: var(--status-error);
+        --i: var(--status-error-icon, var(--ci));
+        --f: var(--status-error-foreground, var(--cf));
+        --b: var(--status-error-background, var(--cb));
+    }
+
+    &[data-type='system'] {
+        --cb: var(--status-system);
+        --i: var(--status-system-icon, var(--ci));
+        --f: var(--status-system-foreground, var(--cf));
+        --b: var(--status-system-background, var(--cb));
+    }
+}
+
+.entry-status-message-content {
+    display: flex;
+    align-items: center;
+    line-height: 1.25;
+    padding: var(--entry-padding);
+    color: var(--f);
+
+    & svg {
+        color: var(--i);
+        stroke-width: 1.5;
+        flex-shrink: 0;
+        width: 1.5em;
+        height: 1em;
+        margin-right: 0.5em;
+    }
+
+    & span {
+        font-size: var(--font-size-m);
+        pointer-events: auto;
+    }
+}
+
+.entry-status-message element-pane {
+    background-color: var(--b);
+    --border-radius: unset;
+    --border: unset;
+}

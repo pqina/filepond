@@ -1,0 +1,9 @@
+input {
+    box-sizing: border-box;
+    pointer-events: all;
+    height: 1lh;
+    outline: none;
+    background: transparent;
+    color: currentColor;
+    border-radius: 0.125em;
+}

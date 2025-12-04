@@ -1,72 +1,72 @@
 {
+    "private": true,
     "name": "filepond",
-    "version": "4.32.10",
-    "description": "FilePond, Where files go to stretch their bits.",
+    "version": "5.0.0-alpha.0",
+    "description": "FilePond, where files go to stretch their bits.",
+    "author": "Rik Schennink",
     "license": "MIT",
-    "author": {
-        "name": "PQINA",
-        "url": "https://pqina.nl/"
-    },
-    "homepage": "https://pqina.nl/filepond/",
-    "repository": "pqina/filepond",
-    "main": "dist/filepond.js",
-    "browser": "dist/filepond.js",
-    "module": "dist/filepond.esm.js",
-    "keywords": [
-        "javascript",
-        "file",
-        "upload",
-        "drag",
-        "drop",
-        "browse",
-        "paste",
-        "image",
-        "preview"
-    ],
-    "browserslist": [
-        "last 1 version and not Explorer 10",
-        "Explorer 11",
-        "iOS >= 9",
-        "Android >= 4.4"
-    ],
-    "files": [
-        "dist",
-        "locale",
-        "types/*.d.ts"
-    ],
-    "types": "types/index.d.ts",
+    "type": "module",
     "scripts": {
-        "test": "npx jest",
-        "dev": "npm run start",
-        "start": "npx rollup -c -w",
-        "build": "npm run scripts | npm run styles",
-        "scripts": "npx rollup -c",
-        "styles": "npm run styles:pretty && npm run styles:nano",
-        "styles:pretty": "npx postcss src/css/styles.css --no-map --use precss --use autoprefixer | npx prettier --single-quote --parser css | node banner-cli.js FilePond > dist/filepond.css",
-        "styles:nano": "npx postcss src/css/styles.css --no-map --use precss --use autoprefixer --use cssnano | node banner-cli.js FilePond > dist/filepond.min.css",
-        "dtslint": "dtslint types"
+        "dev": "vite --host",
+        "dev-clean": "NODE_ENV=production vite --host",
+        "test": "vite --port 5175 --open /test/",
+        "build": "vite build && npm run ts",
+        "ts": "tsc -p ./tsconfig.build.json && cp src/types/*.d.ts dist/types && echo 'import \"./custom-element.js\";\nimport \"./default-extensions.js\";' >> dist/types/index.d.ts"
+    },
+    "files": [
+        "./dist"
+    ],
+    "module": "./dist/esm/index.js",
+    "types": "./dist/types/index.d.ts",
+    "exports": {
+        ".": {
+            "types": "./dist/types/index.d.ts",
+            "import": "./dist/esm/index.js"
+        },
+        "./extensions": {
+            "types": "./dist/types/extensions/index.d.ts",
+            "import": "./dist/esm/extensions/index.js"
+        },
+        "./extensions/*": {
+            "types": "./dist/types/extensions/*.d.ts",
+            "import": "./dist/esm/extensions/*.js"
+        },
+        "./elements": {
+            "types": "./dist/types/elements/index.d.ts",
+            "import": "./dist/esm/elements/index.js"
+        },
+        "./locales": {
+            "types": "./dist/types/locales/index.d.ts",
+            "import": "./dist/esm/locales/index.js"
+        },
+        "./locales/*": {
+            "types": "./dist/types/locales/*.d.ts",
+            "import": "./dist/esm/locales/*"
+        },
+        "./assets": {
+            "types": "./dist/types/locales/index.d.ts",
+            "import": "./dist/esm/assets/index.js"
+        }
     },
     "devDependencies": {
-        "@babel/core": "^7.5.5",
-        "@babel/plugin-proposal-object-rest-spread": "^7.5.5",
-        "@babel/plugin-transform-template-literals": "^7.4.4",
-        "@babel/preset-env": "^7.5.5",
-        "autoprefixer": "^9.6.1",
-        "babel-jest": "^24.8.0",
-        "cssnano": "^4.1.10",
-        "dtslint": "^3.6.12",
-        "jest": "^24.8.0",
-        "jest-mock-console": "^1.2.3",
-        "postcss-cli": "^6.1.3",
-        "precss": "^4.0.0",
-        "prettier": "^1.18.2",
-        "rollup": "^1.17.0",
-        "rollup-plugin-babel": "^4.3.3",
-        "rollup-plugin-commonjs": "^9.3.4",
-        "rollup-plugin-license": "^0.8.1",
-        "rollup-plugin-node-resolve": "^4.2.4",
-        "rollup-plugin-prettier": "^0.6.0",
-        "rollup-plugin-terser": "^4.0.4",
-        "typescript": "^3.9.6"
+        "@sveltejs/vite-plugin-svelte": "^6.0.0",
+        "chai": "^4.3.7",
+        "chokidar-cli": "^3.0.0",
+        "eslint-plugin-svelte": "^2.46.1",
+        "glob": "^11.0.3",
+        "http-server": "^14.1.1",
+        "mocha": "^10.2.0",
+        "mocha-headless-chrome": "^4.0.0",
+        "prettier-plugin-jsdoc": "^1.3.0",
+        "prettier-plugin-svelte": "^3.4.0",
+        "replace-in-files-cli": "^3.0.0",
+        "sinon": "^15.0.1",
+        "svelte": "^5.43.6",
+        "svelte-check": "^4.3.1",
+        "typescript": "^5.9.2",
+        "unplugin-dts": "^1.0.0-beta.0",
+        "vite": "^7.1.3",
+        "vite-plugin-dts": "^4.5.4",
+        "vite-plugin-static-copy": "^3.1.2"
     }
 }

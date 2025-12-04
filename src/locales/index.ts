@@ -1,0 +1,13 @@
+export { locale as en_GB } from './en-gb.js';
+export { locale as nl_NL } from './nl-nl.js';
+export { locale as de_DE } from './de-de.js';
+export { locale as es_ES } from './es-es.js';
+export { locale as fr_FR } from './fr-fr.js';
+export { locale as pt_PT } from './pt-pt.js';
+export { locale as it_IT } from './pt-pt.js';
+export { locale as nb_NO } from './nb-no.js';
+export { locale as sv_SE } from './sv-se.js';
+export { locale as hi_IN } from './hi-in.js';
+export { locale as ko_KR } from './ko-kr.js';
+export { locale as ja_JP } from './js-jp.js';
+export { locale as zh_CN } from './zh-cn.js';

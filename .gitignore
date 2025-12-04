@@ -1,8 +1,31 @@
-npm-debug.log
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
 node_modules/
-coverage/
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode
+.vscode/*
+!.vscode/extensions.json
 .idea
-.vscode/
-upload/
-test*.html
-_TODO.md
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+_*.md
+
+# Various temp private folders
+/_*/
+/dist/
+/_TODO.md

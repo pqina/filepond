@@ -1,0 +1,23 @@
+media-image {
+    display: block;
+    height: inherit;
+
+    /* this prevents image from upscaling grid cells */
+    min-width: 0;
+    min-height: 0;
+}
+
+media-image-item {
+    position: absolute;
+    inset: 0;
+    height: inherit;
+
+    &[complete]:last-of-type {
+        position: relative;
+    }
+
+    &:not([active]):not([poster]) {
+        transition: opacity var(--_150ms) var(--_500ms) ease-in;
+        opacity: 0;
+    }
+}

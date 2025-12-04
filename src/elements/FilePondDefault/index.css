@@ -1,0 +1,219 @@
+/* Default FilePond Styles */
+:host {
+    --default-background-color: white;
+    --default-color: black;
+    --default-padding: 1em;
+    --default-border-radius: 1.25em;
+    --default-backdrop-filter: blur(20px) saturate(1.25);
+    --default-primary-color: deepskyblue;
+    --default-border: 1px solid
+        rgb(from var(--default-color) r g b / calc(0.1 + var(--default-contrast-factor, 0) * 0.065));
+
+    /* entry list positioning */
+    display: flex;
+    flex-direction: column;
+    gap: var(--default-padding);
+
+    /* used to detect theme changes and calculate colors */
+    & .pipet {
+        position: absolute;
+        pointer-events: none;
+        width: 0;
+        height: 0;
+        color: var(--default-color);
+        background-color: var(--default-background-color);
+        transition:
+            color 1ms,
+            background-color 1ms;
+    }
+
+    /* slot element layout */
+    & slot {
+        position: relative;
+        isolation: isolate;
+    }
+}
+
+:host:has(file-pond-entry-list[empty]) {
+    gap: 0;
+}
+
+/* slot and slotted element styles */
+::slotted(input[type='file']) {
+    position: absolute;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    z-index: -1;
+    pointer-events: none;
+    user-select: none;
+
+    /* hide from view */
+    mask: linear-gradient(transparent, transparent);
+
+    /* we align it to the top so Safari tooltip points to the field */
+    top: 0;
+    left: 0;
+}
+
+::slotted(label) {
+    --width-px: calc(var(--width) * 1px);
+    --center-px: calc((var(--width-px) - (2 * var(--default-padding))) * 0.5);
+
+    display: inline-block;
+    transform: translateX(calc(var(--center-px) - 50%));
+    align-self: flex-start;
+
+    padding-top: var(--default-padding);
+    padding-bottom: var(--default-padding);
+
+    color: var(--default-color);
+}
+
+/* sub elements */
+file-pond-drop-area {
+    --border-radius: var(--default-border-radius);
+    --border: var(--default-border);
+}
+
+file-pond-drop-indicator {
+    --border-radius: var(--default-border-radius);
+    --background-color: color-mix(
+        in srgb,
+        var(--default-color) 10%,
+        var(--default-background-color)
+    );
+}
+
+file-pond-entry-list {
+    --entry-color: var(--default-color);
+    --entry-background-color: var(--default-background-color);
+
+    --entry-shadow: 0 1px 4px rgb(0 0 0 / 0.2);
+    --entry-lifted-shadow: 0 4px 8px rgb(0 0 0 / 0.5);
+
+    --entry-button-outline: 0 0 0 1.5px currentColor;
+
+    &::part(entry-button) {
+        --btn-size: 1.5em;
+        --btn-border-radius: calc(var(--entry-border-radius) - var(--entry-padding) * 0.625);
+        --btn-background-color: rgb(from var(--entry-color) r g b / 0.15);
+        --btn-icon-stroke: 2.5;
+
+        box-shadow: 0 0 0 0 transparent;
+        transition:
+            box-shadow var(--_150ms, 0) ease-in-out,
+            background-color var(--_150ms, 0) ease-in-out;
+    }
+
+    &::part(entry-button):hover {
+        background-color: rgb(
+            from var(--entry-color) r g b / calc(0.25 + var(--default-contrast-factor, 0) * 0.075)
+        );
+        box-shadow: var(--entry-button-outline);
+    }
+
+    &::part(entry-button):focus-visible {
+        box-shadow: var(--entry-button-outline);
+    }
+
+    &::part(media-button) {
+        --btn-border-radius: var(--panel-border-radius);
+        transition:
+            box-shadow var(--_150ms, 0) ease-in-out,
+            background-color var(--_150ms, 0) ease-in-out;
+    }
+
+    &::part(media-button):hover {
+        background-color: rgb(from currentColor r g b / 0.15);
+        box-shadow: var(--entry-button-outline);
+    }
+
+    &::part(media-button):focus-visible {
+        box-shadow: var(--entry-button-outline);
+    }
+
+    &::part(list) {
+        display: flex;
+        flex-direction: column;
+        gap: calc(var(--default-padding) * 0.5);
+    }
+
+    &::part(entry) {
+        display: grid;
+        grid: min-content 1fr min-content / min-content 1fr min-content;
+    }
+
+    &::part(entry-load-state) {
+        grid-row: 1;
+        grid-column: 1;
+        padding: var(--entry-padding);
+    }
+
+    &::part(entry-info) {
+        grid-row: 1;
+        grid-column: 2;
+        padding-top: var(--entry-padding);
+        padding-bottom: var(--entry-padding);
+    }
+
+    &::part(entry-store-state) {
+        grid-row: 1;
+        grid-column: 3;
+        padding: var(--entry-padding);
+    }
+
+    &::part(entry-status) {
+        grid-row: 2;
+        grid-column: 1 / 4;
+    }
+
+    &::part(entry-media) {
+        grid-row: 2;
+        grid-column: 1 / 4;
+    }
+
+    &::part(media-controls) {
+        grid-row: 2;
+        grid-column: 1 / 4;
+        align-self: end;
+        color: #fff;
+        margin: 0.6125em;
+
+        /* style for buttons in this component */
+        --btn-size: 1.25em;
+        --btn-icon-stroke: 2.5;
+        --btn-icon-size: 0.75em;
+
+        /* panel style in this component */
+        --panel-border-radius: 0.25em;
+        --panel-border-radius: calc(var(--entry-border-radius) - 0.3125em);
+        --panel-background-color: rgb(0 0 0 / 0.35);
+        --panel-backdrop-filter: var(--default-backdrop-filter);
+    }
+}
+
+/* Powered by FilePond */
+:host a {
+    --font-size: 0.625;
+    --inset: calc(var(--default-padding) / var(--font-size));
+    --text-opacity: calc(0.5 - var(--default-contrast-factor, 0) * 0.1);
+    --line-opacity: calc(0.2 + var(--default-contrast-factor, 0) * 0.05);
+    position: absolute;
+    top: 0;
+    left: 0;
+    line-height: 2;
+    transform: translate(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px))
+        translateX(calc(-100% - var(--inset)));
+    font-size: calc(var(--font-size) * 1em);
+    color: rgb(from var(--default-color) r g b / var(--text-opacity));
+    text-underline-offset: 1px;
+    text-decoration-color: rgb(from var(--default-color) r g b / var(--line-opacity));
+    text-transform: lowercase;
+    transition: color var(--_150ms) ease-in-out;
+    user-select: none;
+    &:hover {
+        --text-opacity: 0.75;
+        --line-opacity: 0.25;
+    }
+}

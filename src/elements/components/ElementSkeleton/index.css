@@ -1,0 +1,108 @@
+element-skeleton {
+    --skeleton-color: currentColor;
+    --skeleton-duration: var(--_500ms);
+    --skeleton-radius: 0.125em;
+
+    /* calculated based on amount of skeleton loaders on the page */
+    --skeleton-delay: calc(var(--skeleton-offset, 0) * -0.1s);
+
+    /* skeleton intro/outro */
+    --skeleton-visibility: 0;
+    --skeleton-rag: calc(mod(var(--skeleton-offset, 0), 4) * 1em);
+
+    /* width of skeleton panel */
+    --skeleton-width: 1em;
+    --skeleton-max-width: 1em;
+
+    /* box style */
+    position: relative;
+    display: block;
+
+    /* just so it always takes up some space while loading*/
+    min-height: 1lh;
+    &:not([ready]) {
+        min-width: var(--skeleton-width);
+    }
+
+    /* text fades in and --skeleton-visibility fades in background color */
+    --transition-duration: var(--_250ms);
+    transition: color var(--transition-duration) ease-out;
+
+    & > skeleton-pane,
+    & > skeleton-pane::before {
+        position: absolute;
+        inset: 0;
+    }
+
+    & > skeleton-pane {
+        max-width: var(--skeleton-max-width);
+        opacity: 0;
+        transition: opacity var(--transition-duration)
+            calc((0.1s + 0.025s * var(--skeleton-offset, 0)) * var(--animate, 1)) ease-in-out;
+
+        /* the skeleton loader */
+        &::before {
+            content: '';
+
+            box-sizing: border-box;
+            background-clip: content-box;
+
+            /* rag */
+            right: calc(var(--skeleton-rag));
+
+            /* skeletong style */
+            border-radius: var(--skeleton-radius);
+            background-color: var(--skeleton-color);
+
+            animation-name: skeleton-busy;
+            animation-duration: var(--skeleton-duration);
+            animation-delay: var(--skeleton-delay);
+            animation-timing-function: ease-in-out;
+            animation-iteration-count: infinite;
+            animation-direction: alternate;
+
+            /* fade in out and animate */
+            opacity: calc(var(--skeleton-opacity) * var(--skeleton-visibility));
+        }
+    }
+
+    &[ready] {
+        & > skeleton-pane {
+            opacity: 0;
+            max-width: none;
+        }
+    }
+
+    &[ready]:has(skeleton-pane) {
+        width: fit-content;
+    }
+
+    /* specific state styles */
+    &[active],
+    &[frozen] {
+        & > skeleton-pane {
+            opacity: 1;
+        }
+    }
+
+    &[active] {
+        color: transparent;
+    }
+
+    &[frozen] {
+        & > skeleton-pane::before {
+            animation-play-state: paused;
+        }
+    }
+}
+
+/* Skeleton loading animation */
+@keyframes skeleton-busy {
+    from {
+        opacity: 0.1;
+    }
+
+    to {
+        opacity: 0.2;
+    }
+}
