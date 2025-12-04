@@ -29,7 +29,7 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 We can install the `filepond` package by running the following command in our terminal:
 
 ```
-npm install filepond@5.0.0-beta
+npm install filepond@5.0.0-alpha
 ```
 
 ## Getting Started
