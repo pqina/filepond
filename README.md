@@ -7,22 +7,18 @@
 
 A JavaScript library that can upload anything you throw at it, optimizes images for faster uploads, and offers a great, accessible, silky smooth user experience.
 
-**This is the v5 beta branch. [Take me to the v4 branch](https://github.com/pqina/filepond)**
+**This is the v5 alpha/beta branch. [Take me to the v4 branch](https://github.com/pqina/filepond)**
 
 TODO:
 
 -   Docs are on the way
 -   Naming of some types
--   Safari flashing of video while dragginh
+-   Safari flashing of video while dragging
 -   Run more tests on mobile devices
 -   Add basic image manipulation extensions
--   default styles for `:valid`, `:invalid, and `:focus`
+-   default styles for `:valid`, `:invalid`, and `:focus`
 
----
-
-[<img src="https://github.com/pqina/filepond-github-assets/blob/master/header.svg" alt="FilePond"/>](https://www.buymeacoffee.com/rikschennink/)
-
-[Buy me a Coffee](https://www.buymeacoffee.com/rikschennink/) • [Use FilePond with Pintura](https://pqina.nl/pintura/?ref=github-filepond) • [Dev updates](https://rik.schenn.ink)
+If you're trying out v5, please share your feedback on [Discord](https://discord.gg/KTyymsrTrX)
 
 ## Installing
 
@@ -56,8 +52,6 @@ npm install filepond@alpha
 ```
 
 ## License
-
-MIT License
 
 Copyright (c) 2017-2025 Pqina
 
