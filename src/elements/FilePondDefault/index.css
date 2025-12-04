@@ -34,8 +34,8 @@
     }
 }
 
-:host:has(file-pond-entry-list[empty]) {
-    gap: 0;
+file-pond-entry-list[empty] {
+    margin-top: calc(-1 * var(--default-padding));
 }
 
 /* slot and slotted element styles */
