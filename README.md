@@ -20,7 +20,7 @@ TODO:
 
 If you're trying out v5, please share your feedback on [Discord](https://discord.gg/KTyymsrTrX)
 
-## Installing
+## Install
 
 We can install the `filepond` package by running the following command in our terminal:
 
@@ -28,7 +28,7 @@ We can install the `filepond` package by running the following command in our te
 npm install filepond@alpha
 ```
 
-## Getting Started
+We wrap an `<input type="file">` with the `<file-pond>` custom element and then register the custom element using the `defineFilePond` function.
 
 ```html
 <form action="/upload" method="POST">
@@ -44,7 +44,6 @@ npm install filepond@alpha
     import { defineFilePond } from 'filepond';
     import { en_GB } from 'filepond/locales';
 
-    // registers the <file-pond> custom element, returns found elements, and sets initial options
     const elements = defineFilePond({
         locale: en_GB,
     });
@@ -72,3 +71,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+```
+
+```
