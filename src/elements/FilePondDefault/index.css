@@ -1,31 +1,21 @@
 /* Default FilePond Styles */
 :host {
-    --default-color: currentColor;
-    --default-background-color: hsl(from var(--default-color) calc(h + 180) s calc(100 - l));
+    /* Supported color schemes */
+    color-scheme: light dark;
+
+    /*  Default colors */
+    --default-color: FieldText;
+    --default-background-color: color-mix(in srgb, FieldText 10%, Canvas 100%);
     --default-padding: 1em;
     --default-border-radius: 1.25em;
     --default-backdrop-filter: blur(20px) saturate(1.25);
-    --default-primary-color: deepskyblue;
-    --default-border: 1px solid
-        rgb(from var(--default-color) r g b / calc(0.1 + var(--default-contrast-factor, 0) * 0.065));
+    --default-primary-color: AccentColor;
+    --default-border: 1px solid rgb(from FieldText r g b / 0.1);
 
     /* entry list positioning */
     display: flex;
     flex-direction: column;
     gap: var(--default-padding);
-
-    /* used to detect theme changes and calculate colors */
-    & .pipet {
-        position: absolute;
-        pointer-events: none;
-        width: 0;
-        height: 0;
-        color: var(--default-color);
-        background-color: var(--default-background-color);
-        transition:
-            color 1ms,
-            background-color 1ms;
-    }
 
     /* slot element layout */
     & slot {
@@ -63,11 +53,10 @@ file-pond-entry-list[empty] {
     display: inline-block;
     transform: translateX(calc(var(--center-px) - 50%));
     align-self: flex-start;
+    text-align: center;
 
     padding-top: var(--default-padding);
     padding-bottom: var(--default-padding);
-
-    color: var(--default-color);
 }
 
 /* sub elements */
@@ -78,11 +67,7 @@ file-pond-drop-area {
 
 file-pond-drop-indicator {
     --border-radius: var(--default-border-radius);
-    --background-color: color-mix(
-        in srgb,
-        var(--default-color) 10%,
-        var(--default-background-color)
-    );
+    --background-color: rgb(from var(--default-color) r g b / 0.1);
 }
 
 file-pond-entry-list {
@@ -107,9 +92,7 @@ file-pond-entry-list {
     }
 
     &::part(entry-button):hover {
-        background-color: rgb(
-            from var(--entry-color) r g b / calc(0.25 + var(--default-contrast-factor, 0) * 0.075)
-        );
+        background-color: rgb(from var(--entry-color) r g b / 0.25);
         box-shadow: var(--entry-button-outline);
     }
 
@@ -197,9 +180,10 @@ file-pond-entry-list {
 :host a {
     --font-size: 0.625;
     --inset: calc(var(--default-padding) / var(--font-size));
-    --text-opacity: calc(0.5 - var(--default-contrast-factor, 0) * 0.1);
-    --line-opacity: calc(0.2 + var(--default-contrast-factor, 0) * 0.05);
+    --text-opacity: 0.5;
+    --line-opacity: 0.2;
     position: absolute;
+    z-index: -1;
     top: 0;
     left: 0;
     line-height: 2;

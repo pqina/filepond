@@ -330,46 +330,6 @@ export class FilePondElement extends FilePondBaseElement {
         addListener(filePondEntryList, 'updateplaceholder', (e) => {
             filePondDropIndicator.indicatorRect = e.detail;
         });
-
-        // detect color changes so we can calculate contrast
-        const pipet = h('div', { class: 'pipet' });
-        this._root.append(pipet);
-        const computedStyle = getComputedStyle(pipet);
-        if (computedStyle.getPropertyValue('--default-contrast-factor').length) {
-            // developer has set value, let's exit here
-            pipet.remove();
-        }
-
-        pipet.addEventListener('transitionend', (e) => {
-            updateContrastFactor();
-        });
-
-        function averageColorValue(color?: string) {
-            const res = color?.match(/\d+/g)?.map(Number);
-            return res ? res.slice(0, 3).reduce((a, c) => a + c) / 3 / 255 : undefined;
-        }
-
-        function updateContrastFactor() {
-            const color = averageColorValue(getStyleProperty(computedStyle, 'color'));
-            const backgroundColor = averageColorValue(
-                getStyleProperty(computedStyle, 'background-color')
-            );
-
-            if (!isNumber(color) || !isNumber(backgroundColor)) {
-                return;
-            }
-
-            localStyles.replaceSync(
-                `:host { --default-contrast-factor: ${color > backgroundColor ? 1 : 0}}`
-            );
-        }
-
-        // create local styles sheet
-        const localStyles = new CSSStyleSheet();
-        this._root.adoptedStyleSheets.push(localStyles);
-
-        // update contrast for first time
-        updateContrastFactor();
     }
 }
 
