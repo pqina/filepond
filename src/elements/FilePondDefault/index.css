@@ -1,7 +1,7 @@
 /* Default FilePond Styles */
 :host {
-    --default-background-color: white;
-    --default-color: black;
+    --default-color: currentColor;
+    --default-background-color: hsl(from var(--default-color) calc(h + 180) s calc(100 - l));
     --default-padding: 1em;
     --default-border-radius: 1.25em;
     --default-backdrop-filter: blur(20px) saturate(1.25);
