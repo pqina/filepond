@@ -42,6 +42,7 @@ export default defineConfig({
     build: {
         minify: false,
         outDir: 'dist/esm',
+        cssMinify: true,
         lib: {
             formats: ['es'],
             entry: {
