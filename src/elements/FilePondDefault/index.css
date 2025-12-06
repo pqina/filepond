@@ -1,8 +1,5 @@
 /* Default FilePond Styles */
 :host {
-    /* Supported color schemes */
-    color-scheme: light dark;
-
     /*  Default colors */
     --default-color: FieldText;
     --default-background-color: color-mix(in srgb, FieldText 10%, Canvas 100%);
@@ -12,20 +9,16 @@
     --default-primary-color: AccentColor;
     --default-border: 1px solid rgb(from FieldText r g b / 0.1);
 
-    /* entry list positioning */
+    /* Layout */
     display: flex;
     flex-direction: column;
     gap: var(--default-padding);
 
-    /* slot element layout */
+    /* Slot layout */
     & slot {
         position: relative;
         isolation: isolate;
     }
-}
-
-file-pond-entry-list[empty] {
-    margin-top: calc(-1 * var(--default-padding));
 }
 
 /* slot and slotted element styles */
@@ -78,6 +71,10 @@ file-pond-entry-list {
     --entry-lifted-shadow: 0 4px 8px rgb(0 0 0 / 0.5);
 
     --entry-button-outline: 0 0 0 1.5px currentColor;
+
+    &[empty] {
+        margin-top: calc(-1 * var(--default-padding));
+    }
 
     &::part(entry-button) {
         --btn-size: 1.5em;
