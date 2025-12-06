@@ -8,7 +8,6 @@
     "author": "Rik Schennink",
     "license": "MIT",
     "type": "module",
-    "sideEffects": false,
     "scripts": {
         "dev": "vite --host",
         "dev-clean": "NODE_ENV=production vite --host",

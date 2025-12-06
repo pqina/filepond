@@ -64,7 +64,6 @@ export default defineConfig({
                     if (chunkInfo.name.includes('node_modules')) {
                         return chunkInfo.name.replace('node_modules', 'views/svelte') + '.js';
                     }
-
                     return '[name].js';
                 },
             },
