@@ -3,7 +3,7 @@
         "tag": "alpha"
     },
     "name": "filepond",
-    "version": "5.0.0-alpha.4",
+    "version": "5.0.0-alpha.5",
     "description": "FilePond, where files go to stretch their bits.",
     "author": "Rik Schennink",
     "license": "MIT",
