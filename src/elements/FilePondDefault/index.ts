@@ -22,9 +22,8 @@ import {
     defineCustomElements,
     hasDefinedTag,
     addListener,
-    getStyleProperty,
 } from '../../utils/dom.js';
-import { isBrowser, isNumber, isString } from '../../utils/test.js';
+import { isBrowser, isString } from '../../utils/test.js';
 import { assets } from '../../assets/index.js';
 
 // default FilePond styles

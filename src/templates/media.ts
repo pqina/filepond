@@ -3,21 +3,19 @@ import {
     createButton,
     createSpringPane,
     getExtensionByAction,
-    hasExtensionWithAction,
     hasExtensionWithStatusCode,
     hasExtensionWithStatusType,
 } from './helpers.js';
-import {
-    MediaVideo,
-    MediaTimeIndicator,
-    EntryActivityIndicator,
-    MediaImage,
-} from '../elements/FilePondEntryList/components/index.js';
-import { SpringElement, RangeInput } from '../elements/components/index.js';
+import { RangeInput } from '../elements/components/RangeInput/index.js';
 import { supportsRequestFullscreen } from '../utils/support.js';
 import { toTime } from '../utils/date.js';
 import { type NodeContext, nodeTree } from '../elements/common/nodeTree.js';
 import { boolToAttributeValue } from '../utils/dom.js';
+import { MediaVideo } from '../elements/FilePondEntryList/components/MediaVideo/index.js';
+import { MediaTimeIndicator } from '../elements/FilePondEntryList/components/MediaTimeIndicator/index.js';
+import { EntryActivityIndicator } from '../elements/FilePondEntryList/components/EntryActivityIndicator/index.js';
+import { MediaImage } from '../elements/FilePondEntryList/components/MediaImage/index.js';
+import { SpringElement } from '../elements/components/SpringElement/index.js';
 
 export type MediaResizeQuality = 'pixelated' | 'low' | 'medium' | 'high';
 

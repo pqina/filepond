@@ -1,20 +1,6 @@
 import type { EntryListFunctions, TemplateNode } from '../types/index.js';
 import type { NodeContext } from '../elements/common/nodeTree.js';
 
-import {
-    Entry,
-    EntryList,
-    EntryStatus,
-    EntryActivityIndicator,
-    useEntryContext,
-} from '../elements/FilePondEntryList/components/index.js';
-
-import {
-    BooleanInput,
-    ElementSkeleton,
-    FilenameInput,
-    SpringElement,
-} from '../elements/components/index.js';
 import { isDataTransferEntry, isFileEntry, isNumber, isString } from '../utils/test.js';
 import { bytesToNaturalFileSize } from '../utils/file.js';
 import { fade } from '../elements/common/transition.js';
@@ -25,6 +11,15 @@ import {
     hasExtensionWithStatusCode,
 } from './helpers.js';
 import { cache } from '../utils/cache.js';
+import { BooleanInput } from '../elements/components/BooleanInput/index.js';
+import { ElementSkeleton } from '../elements/components/ElementSkeleton/index.js';
+import { FilenameInput } from '../elements/components/FilenameInput/index.js';
+import { SpringElement } from '../elements/components/SpringElement/index.js';
+import { EntryActivityIndicator } from '../elements/FilePondEntryList/components/EntryActivityIndicator/index.js';
+import { EntryStatus } from '../elements/FilePondEntryList/components/EntryStatus/index.js';
+import { EntryList } from '../elements/FilePondEntryList/components/EntryList/index.js';
+import { Entry } from '../elements/FilePondEntryList/components/Entry/index.js';
+import { useEntryContext } from '../elements/FilePondEntryList/components/EntryContext/index.js';
 
 export interface EntryListTemplateOptions {
     debug?: boolean;

@@ -10,8 +10,6 @@ import type {
     ExtensionStatus,
     ExtensionStatusType,
 } from '../extensions/common/createExtension.js';
-import { Button, ElementPane } from '../elements/components/index.js';
-import { Entry } from '../elements/FilePondEntryList/components/index.js';
 import {
     isArray,
     isBlobOrFile,
@@ -22,6 +20,9 @@ import {
     isString,
 } from '../utils/test.js';
 import { arrayWrap } from '../utils/array.js';
+import { Button } from '../elements/components/Button/index.js';
+import { ElementPane } from '../elements/components/ElementPane/index.js';
+import { Entry } from '../elements/FilePondEntryList/components/Entry/index.js';
 
 export function getEntryExtensionsAsArray(entry: FilePondEntry): ExtensionState[] {
     if (!entry || !entry.extension) {

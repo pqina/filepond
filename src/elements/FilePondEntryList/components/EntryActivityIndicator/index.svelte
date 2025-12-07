@@ -8,8 +8,9 @@
     import { getAppContext } from '../../contexts/appContext.js';
     import { getEntryContext } from '../../contexts/entryContext.js';
     import { gate } from '../../../common/store.svelte.js';
-    import { Button, ProgressIndicator } from '../../../components/index.js';
-    import { SpringElement } from '../../../components/index.js';
+    import { SpringElement } from '../../../components/SpringElement/index.js';
+    import { Button } from '../../../components/Button/index.js';
+    import { ProgressIndicator } from '../../../components/ProgressIndicator/index.js';
     import type { ExtensionState } from '../../../../types/index.js';
 
     interface EntryActivityIndicatorOptions {

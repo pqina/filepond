@@ -44,7 +44,8 @@
     import { setSpringElementTreeContext } from './contexts/springElementTreeContext.js';
     import { sizeFromRect, type Size } from '../../utils/size.js';
     import { isNumber } from '../../utils/test.js';
-    import { NodeList } from '../components/index.js';
+
+    import { NodeList } from '../components/NodeList/index.js';
     import { hasOwnProp } from '../../utils/object.js';
     import { getDragTargetIndex, getDropTargetIndex } from '../common/dragDrop.js';
 

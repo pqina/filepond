@@ -1,11 +1,11 @@
 <script lang="ts">
-    import type { Vector } from '../../utils/vector.js';
-    import type { Rect } from '../../utils/rect.js';
-    import type { Bounds } from '../../utils/bounds.js';
-    import type { Size } from '../../utils/size.js';
-    import type { SpringElementContext } from '../FilePondEntryList/contexts/springElementTreeContext.js';
+    import type { Vector } from '../../../utils/vector.js';
+    import type { Rect } from '../../../utils/rect.js';
+    import type { Bounds } from '../../../utils/bounds.js';
+    import type { Size } from '../../../utils/size.js';
+    import type { SpringElementContext } from '../../FilePondEntryList/contexts/springElementTreeContext.js';
     import type { Snippet } from 'svelte';
-    import type { SpringOptions } from '../../types/index.js';
+    import type { SpringOptions } from '../../../types/index.js';
 
     interface SpringElementOptions {
         /** Defaults to 'div' */
@@ -82,28 +82,33 @@
     }
 
     import { onDestroy, untrack } from 'svelte';
-    import { vectorCreate, vectorEqual, vectorFromRect, vectorInvert } from '../../utils/vector.js';
-    import { sizeEqual, sizeFromRect } from '../../utils/size.js';
+    import {
+        vectorCreate,
+        vectorEqual,
+        vectorFromRect,
+        vectorInvert,
+    } from '../../../utils/vector.js';
+    import { sizeEqual, sizeFromRect } from '../../../utils/size.js';
     import {
         rectCenter,
         rectCreate,
         rectEqual,
         rectFromBounds,
         rectScale,
-    } from '../../utils/rect.js';
-    import { isFunction, isNumber } from '../../utils/test.js';
+    } from '../../../utils/rect.js';
+    import { isFunction, isNumber } from '../../../utils/test.js';
     import { Spring } from 'svelte/motion';
-    import { updateDataset, updateStyles } from '../../utils/dom.js';
-    import { measurable } from '../attachments/measurable.js';
-    import { getAppContext } from '../FilePondEntryList/contexts/appContext.js';
+    import { updateDataset, updateStyles } from '../../../utils/dom.js';
+    import { measurable } from '../../attachments/measurable.js';
+    import { getAppContext } from '../../FilePondEntryList/contexts/appContext.js';
     import {
         getSpringElementTreeContext,
         hasSpringElementTreeContext,
         setSpringElementTreeContext,
-    } from '../FilePondEntryList/contexts/springElementTreeContext.js';
-    import { noop } from '../../utils/placeholder.js';
-    import { gate } from '../common/store.svelte.js';
-    import { roundPrecision } from '../../utils/math.js';
+    } from '../../FilePondEntryList/contexts/springElementTreeContext.js';
+    import { noop } from '../../../utils/placeholder.js';
+    import { gate } from '../../common/store.svelte.js';
+    import { roundPrecision } from '../../../utils/math.js';
 
     let {
         springConfig = undefined,

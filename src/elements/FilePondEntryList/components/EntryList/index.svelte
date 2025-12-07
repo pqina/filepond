@@ -22,11 +22,11 @@
     import { measurable, VIEWPORT_MARGIN } from '../../../attachments/measurable.js';
     import { isNumber } from '../../../../utils/test.js';
     import { noop } from '../../../../utils/placeholder.js';
-    import { SpringElement } from '../../../components/index.js';
     import type { FilePondEntry, SpringOptions } from '../../../../types/index.js';
     import type { Bounds } from '../../../../utils/bounds.js';
     import { type Size, sizeFromRect } from '../../../../utils/size.js';
     import { toClassName } from '../../../common/string.js';
+    import { SpringElement } from '../../../components/SpringElement/index.js';
 
     let {
         entries,

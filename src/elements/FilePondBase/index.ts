@@ -50,8 +50,8 @@ import { Status } from '../../common/status.js';
 // inline styles
 import { HTMLElementSafe } from '../../common/ssr.js';
 import { getFilenameFromURL } from '../../utils/url.js';
-import defaultStyles from './index.css?inline';
 import { arrayRemoveFalsy } from '../../utils/array.js';
+import defaultStyles from './index.css?inline';
 
 // https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals/setValidity#flags
 // validity flag order

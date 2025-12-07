@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { type FilePondEntry } from '../../../types/index.js';
+    import { type FilePondEntry } from '../../../../types/index.js';
     import { type Snippet } from 'svelte';
 
     interface EntryContextOptions {
@@ -7,7 +7,7 @@
         children: Snippet<[{ id: string; entry: FilePondEntry }]>;
     }
 
-    import { setEntryContext } from '../contexts/entryContext.js';
+    import { setEntryContext } from '../../contexts/entryContext.js';
 
     let { entry, children }: EntryContextOptions = $props();
 

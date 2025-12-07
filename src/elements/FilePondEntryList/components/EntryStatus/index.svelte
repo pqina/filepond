@@ -1,11 +1,12 @@
 <script lang="ts">
     import type { ExtensionState, ExtensionStatus, Locale } from '../../../../types/index.js';
-    import { SpringElement, ElementPane } from '../../../components/index.js';
     import { getExtensionStatusItems } from '../../../../common/entry.js';
     import { statusToLabel, statusToIcon } from '../../../common/string.js';
     import { arrayRemoveFalsy } from '../../../../utils/array.js';
     import { getAppContext } from '../../contexts/appContext.js';
     import { getEntryContext } from '../../contexts/entryContext.js';
+    import { SpringElement } from '../../../components/SpringElement/index.js';
+    import { ElementPane } from '../../../components/ElementPane/index.js';
 
     interface EntryStatusOptions {
         class?: string;
