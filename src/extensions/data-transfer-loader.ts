@@ -202,4 +202,7 @@ declare module '../index.js' {
     interface FilePondElement {
         DataTransferLoader: DataTransferLoaderOptions;
     }
+    interface defineFilePondOptions {
+        DataTransferLoader: DataTransferLoaderOptions;
+    }
 }

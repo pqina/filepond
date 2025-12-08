@@ -1,3 +1,4 @@
+import packageJson from './package.json' with { type: 'json' };
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
@@ -23,24 +24,53 @@ const fixSvelteDollarCollisions: any = {
     },
 };
 
-export default defineConfig({
-    html: {
-        cspNonce: '1234',
+const banner = `/*!
+* FilePond v${packageJson.version}
+* Copyright (c) 2017-${new Date().getFullYear()} Pqina B.V.
+* Released under the MIT License
+* https://filepond.com
+*/`;
+
+const addBanner: any = {
+    name: 'banner',
+    generateBundle(_: any, bundle: any[]) {
+        for (const [fileName, file] of Object.entries(bundle)) {
+            if (fileName.startsWith('svelte')) {
+                continue;
+            }
+            console.log(fileName);
+            file.code = banner + '\n' + file.code;
+        }
     },
-    plugins: [svelte(), fixSvelteDollarCollisions, fullReloadAlways],
+};
+
+export default defineConfig({
+    plugins: [
+        svelte({
+            compilerOptions: {
+                discloseVersion: false,
+            },
+        }),
+        fixSvelteDollarCollisions,
+        addBanner,
+        fullReloadAlways,
+    ],
+
     resolve: {
         // for dev/index.html
         alias: {
             'filepond/locales/en-gb.js': resolve(__dirname, './src/locales/en-gb.js'),
             'filepond/locales': resolve(__dirname, './src/locales/index.js'),
             'filepond/assets': resolve(__dirname, './src/assets/index.js'),
-            'filepond/extension': resolve(__dirname, './src/extensions/index.js'),
+            'filepond/extensions': resolve(__dirname, './src/extensions/index.js'),
+            'filepond/templates': resolve(__dirname, './src/templates/index.js'),
             'filepond/dev': resolve(__dirname, './src/dev/index.js'),
             filepond: resolve(__dirname, './src/index.js'),
         },
     },
+
     build: {
-        minify: false,
+        minify: true,
         outDir: 'dist/esm',
         cssMinify: true,
         lib: {
@@ -50,7 +80,7 @@ export default defineConfig({
                 'assets/index': resolve(__dirname, './src/assets/index.js'),
                 'locales/index': resolve(__dirname, './src/locales/index.js'),
                 'extensions/index': resolve(__dirname, './src/extensions/index.ts'),
-                // 'elements/index': resolve(__dirname, './src/elements/index.ts'),
+                'templates/index': resolve(__dirname, './src/templates/index.ts'),
                 'dev/index': resolve(__dirname, './src/dev/index.ts'),
             },
         },
@@ -61,7 +91,7 @@ export default defineConfig({
                 chunkFileNames: '[name].js',
                 entryFileNames: (chunkInfo) => {
                     if (chunkInfo.name.includes('node_modules')) {
-                        return chunkInfo.name.replace('node_modules', 'views/svelte') + '.js';
+                        return chunkInfo.name.replace('node_modules', 'svelte') + '.js';
                     }
                     return '[name].js';
                 },

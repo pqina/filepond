@@ -51,7 +51,7 @@
 
     let {
         disabled = false,
-        beforeRenderTemplate = passthrough,
+        beforeAssignTemplate = passthrough,
         beforeRenderNode = passthrough,
         assets = {},
         locale = {},
@@ -73,7 +73,7 @@
         springConfig,
     }: FilePondEntryListOptions = $props();
 
-    // we update the template like this as when we set it via $props() Svelte creates a proxy which makes it difficult to update the template via beforeRenderTemplate
+    // we update the template like this as when we set it via $props() Svelte creates a proxy which makes it difficult to update the template via beforeAssignTemplate
     let template: TemplateNode[] = $state.raw([]);
     export function setTemplate(newTemplate: TemplateNode[]) {
         template = newTemplate;
@@ -930,7 +930,7 @@
     })}
 >
     <NodeList
-        nodes={beforeRenderTemplate(template)}
+        nodes={beforeAssignTemplate(template)}
         context={{ entries: computedEntries }}
         sharedContext={entryListAPI}
         beforeRenderNode={(node, context, sharedContext) =>

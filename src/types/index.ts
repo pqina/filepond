@@ -253,8 +253,8 @@ export interface FilePondEntryListOptions extends Omit<FilePondSvelteComponentOp
     /** Template to use for rendering different types */
     template?: TemplateNode[];
 
-    /** Hook to manipulate template before rendering */
-    beforeRenderTemplate?: (template: TemplateNode[]) => TemplateNode[];
+    /** Hook to manipulate template before its assigned to the nodes prop */
+    beforeAssignTemplate?: (template: TemplateNode[]) => TemplateNode[];
 
     /** Hook to manipulate nodes before rendering */
     beforeRenderNode?: (

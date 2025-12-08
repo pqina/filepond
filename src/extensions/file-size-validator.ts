@@ -77,4 +77,7 @@ declare module '../index.js' {
     interface FilePondElement {
         FileSizeValidator: FileSizeValidatorOptions;
     }
+    interface defineFilePondOptions {
+        FileSizeValidator: FileSizeValidatorOptions;
+    }
 }

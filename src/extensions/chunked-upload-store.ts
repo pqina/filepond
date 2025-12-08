@@ -400,4 +400,7 @@ declare module '../index.js' {
     interface FilePondElement {
         ChunkedUploadStore: ChunkedUploadStoreOptions;
     }
+    interface defineFilePondOptions {
+        ChunkedUploadStore: ChunkedUploadStoreOptions;
+    }
 }

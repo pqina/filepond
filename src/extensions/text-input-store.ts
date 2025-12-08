@@ -73,4 +73,7 @@ declare module '../index.js' {
     interface FilePondElement {
         TextInputStore: TextInputStoreOptions;
     }
+    interface defineFilePondOptions {
+        TextInputStore: TextInputStoreOptions;
+    }
 }

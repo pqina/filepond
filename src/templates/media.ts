@@ -1,38 +1,28 @@
-import type { EntryListFunctions } from '../types/index.js';
+import { type EntryListFunctions } from '../types/index.js';
+import { type MediaVideoOptions } from '../elements/FilePondEntryList/components/MediaVideo/index.js';
 import {
     createButton,
     createSpringPane,
     getExtensionByAction,
     hasExtensionWithStatusCode,
     hasExtensionWithStatusType,
+    whenEntryHasAction,
+    whenEntryIs,
+    whenEntryNotHasStatus,
 } from './helpers.js';
 import { RangeInput } from '../elements/components/RangeInput/index.js';
 import { supportsRequestFullscreen } from '../utils/support.js';
 import { toTime } from '../utils/date.js';
-import { type NodeContext, nodeTree } from '../elements/common/nodeTree.js';
+import { type NodeContext, type TemplateNode, nodeTree } from '../elements/common/nodeTree.js';
 import { boolToAttributeValue } from '../utils/dom.js';
 import { MediaVideo } from '../elements/FilePondEntryList/components/MediaVideo/index.js';
 import { MediaTimeIndicator } from '../elements/FilePondEntryList/components/MediaTimeIndicator/index.js';
 import { EntryActivityIndicator } from '../elements/FilePondEntryList/components/EntryActivityIndicator/index.js';
-import { MediaImage } from '../elements/FilePondEntryList/components/MediaImage/index.js';
+import {
+    type MediaImageOptions,
+    MediaImage,
+} from '../elements/FilePondEntryList/components/MediaImage/index.js';
 import { SpringElement } from '../elements/components/SpringElement/index.js';
-
-export type MediaResizeQuality = 'pixelated' | 'low' | 'medium' | 'high';
-
-export interface MediaViewOptions {
-    objectSize?: 'cover' | 'contain';
-    overflowAmount?: number;
-    enableParallax?: boolean;
-}
-
-export interface ImageViewOptions extends MediaViewOptions {
-    maximumPixels?: number;
-    resizeQuality?: MediaResizeQuality;
-}
-
-interface VideoViewOptions extends MediaViewOptions {
-    mute?: boolean;
-}
 
 export function createEditMediaButton(options?: { action?: string }) {
     const { action = 'editMedia' } = options ?? {};
@@ -97,14 +87,8 @@ export function createResetMediaButton(options?: { action?: string }) {
     });
 }
 
-export function createImageView(options?: ImageViewOptions) {
-    const {
-        objectSize = undefined,
-        overflowAmount = undefined,
-        enableParallax = undefined,
-        maximumPixels = undefined,
-        resizeQuality = undefined,
-    } = options ?? {};
+export function createImageView(options?: MediaImageOptions) {
+    const { objectSize = undefined } = options ?? {};
 
     return {
         key: 'entry-image-spring',
@@ -117,13 +101,7 @@ export function createImageView(options?: ImageViewOptions) {
             {
                 key: 'entry-image',
                 component: MediaImage,
-                props: {
-                    objectSize,
-                    maximumPixels,
-                    resizeQuality,
-                    overflowAmount,
-                    enableParallax,
-                },
+                props: options,
             },
             {
                 if: {
@@ -147,14 +125,8 @@ function getMediaContextReference({ entry }: NodeContext): NodeContext {
     };
 }
 
-export function createVideoView(options?: VideoViewOptions) {
-    const {
-        objectSize = undefined,
-        overflowAmount = undefined,
-        enableParallax = undefined,
-        mute = undefined,
-    } = options ?? {};
-
+export function createVideoView(options?: MediaVideoOptions) {
+    const { objectSize = undefined } = options ?? {};
     return {
         key: 'entry-video-spring',
         component: SpringElement,
@@ -166,12 +138,7 @@ export function createVideoView(options?: VideoViewOptions) {
             {
                 key: 'entry-video',
                 component: MediaVideo,
-                props: {
-                    objectSize,
-                    overflowAmount,
-                    enableParallax,
-                    mute,
-                },
+                props: options,
             },
             {
                 if: {
@@ -360,4 +327,62 @@ export function createMediaTimeIndicator() {
             }),
         },
     };
+}
+
+export function appendEntryImageView(
+    template: TemplateNode[],
+    options?: { imageViewOptions?: MediaImageOptions }
+) {
+    const { imageViewOptions } = options ?? {};
+    nodeTree(template)
+        .find('entry')
+        .append(
+            whenEntryIs('image').append(
+                createImageView(imageViewOptions),
+                whenEntryNotHasStatus('error').append(
+                    whenEntryHasAction('editMedia').append(
+                        createMediaControls({ justifyContent: 'end' }).append(
+                            createMediaControl().append(createResetMediaButton()),
+                            createMediaControl().append(createEditMediaButton())
+                        )
+                    )
+                )
+            )
+        );
+}
+
+export function appendEntryVideoView(
+    template: TemplateNode[],
+    options?: { videoViewOptions?: MediaVideoOptions }
+) {
+    const { videoViewOptions } = options ?? {};
+    nodeTree(template)
+        .find('entry')
+        .append(
+            whenEntryIs('video').append(
+                createVideoView(videoViewOptions),
+                whenEntryNotHasStatus('error').append(
+                    createMediaControls().append(
+                        createMediaControlGroup({ key: 'video-controls' }).append(
+                            createTogglePlaybackButton(),
+                            createMediaScrubber(),
+                            createMediaTimeIndicator(),
+                            createToggleAudioButton()
+                        ),
+                        whenEntryHasAction('editMedia').append(
+                            createMediaControl().append(createResetMediaButton()),
+                            createMediaControl().append(createEditMediaButton())
+                        )
+                    )
+                )
+            )
+        )
+        .update({
+            routes: {
+                'toggle-playback:click': 'entry-video.togglePlayback',
+                'toggle-audio:click': 'entry-video.toggleAudio',
+                'toggle-fullscreen:click': 'entry-video.toggleFullscreen',
+                'media-scrubber:input': 'entry-video.setCurrentTime',
+            },
+        });
 }

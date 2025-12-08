@@ -6,7 +6,7 @@
     --default-padding: 1em;
     --default-border-radius: 1.25em;
     --default-backdrop-filter: blur(20px) saturate(1.25);
-    --default-primary-color: AccentColor;
+    --default-accent-color: #007aff;
     --default-border: 1px solid rgb(from FieldText r g b / 0.1);
 
     /* Layout */
@@ -130,6 +130,12 @@ file-pond-entry-list {
         padding: var(--entry-padding);
     }
 
+    &::part(entry-checkbox) {
+        grid-row: 1;
+        grid-column: 1;
+        padding: var(--entry-padding);
+    }
+
     &::part(entry-info) {
         grid-row: 1;
         grid-column: 2;
@@ -172,6 +178,31 @@ file-pond-entry-list {
         --panel-backdrop-filter: var(--default-backdrop-filter);
     }
 }
+
+/* Entry layout where media underlays controls 
+.entry {
+
+    & .button {
+        --backdrop-filter: var(--media-backdrop-filter);
+        --background-color: rgb(from var(--media-background-color) r g b / 0.35);
+    }
+
+    & .media-overlay {
+        z-index: 1;
+        --border-radius: 0;
+        --backdrop-filter: var(--media-backdrop-filter);
+        --background-color: rgb(from var(--media-background-color) r g b / 0.35);
+        mask: linear-gradient(black 10%, transparent);
+        max-height: 4em !important;
+    }
+
+    & .entry-media {
+        grid-row: 1 / 3;
+        grid-column: 1 / 4;
+        z-index: -1;
+    }
+}
+*/
 
 /* Powered by FilePond */
 :host a {

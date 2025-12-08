@@ -29,6 +29,7 @@
     --entry-border-right: var(--entry-border);
     --entry-border-bottom: var(--entry-border);
     --entry-border-left: var(--entry-border);
+    --entry-accent-color: var(--default-accent-color);
 
     --data-transfer-background-color: color-mix(
         in srgb,

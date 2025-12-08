@@ -1,5 +1,5 @@
 import type { EntryListFunctions, TemplateNode } from '../types/index.js';
-import type { NodeContext } from '../elements/common/nodeTree.js';
+import { nodeTree, type NodeContext } from '../elements/common/nodeTree.js';
 
 import { isDataTransferEntry, isFileEntry, isNumber, isString } from '../utils/test.js';
 import { bytesToNaturalFileSize } from '../utils/file.js';
@@ -27,6 +27,30 @@ export interface EntryListTemplateOptions {
 
 export interface EntryTemplateOptions {
     debug?: boolean;
+}
+
+export function createFilePondEntryList(options?: EntryListTemplateOptions): TemplateNode[] {
+    return [
+        {
+            key: 'entry-list',
+            component: EntryList,
+            props: ({ entries }: NodeContext) => ({
+                part: 'list',
+                itemPart: 'list-item',
+                itemPlaceholderPart: 'list-item-placeholder',
+                entries,
+            }),
+            item: {
+                key: 'entry-context',
+                component: useEntryContext,
+                props: ({ entry }: NodeContext) => ({
+                    // pass entry list parameters as a prop to entry context
+                    entry,
+                }),
+                children: createFilePondEntry(options),
+            },
+        },
+    ];
 }
 
 export function createFilePondEntry(options?: EntryTemplateOptions): TemplateNode {
@@ -397,30 +421,6 @@ export function createEntryStoreState() {
     };
 }
 
-export function createFilePondEntryList(options?: EntryListTemplateOptions): TemplateNode[] {
-    return [
-        {
-            key: 'entry-list',
-            component: EntryList,
-            props: ({ entries }: NodeContext) => ({
-                part: 'list',
-                itemPart: 'list-item',
-                itemPlaceholderPart: 'list-item-placeholder',
-                entries,
-            }),
-            item: {
-                key: 'entry-context',
-                component: useEntryContext,
-                props: ({ entry }: NodeContext) => ({
-                    // pass entry list parameters as a prop to entry context
-                    entry,
-                }),
-                children: createFilePondEntry(options),
-            },
-        },
-    ];
-}
-
 interface EntryCheckboxOptions {
     /** Key of the component */
     key?: string;
@@ -430,12 +430,13 @@ interface EntryCheckboxOptions {
 }
 
 export function createEntryCheckbox(options?: EntryCheckboxOptions): TemplateNode {
-    const { key = 'entry-checkable', stateKey = 'checked' } = options ?? {};
+    const { key = 'entry-checkbox', stateKey = 'checked' } = options ?? {};
     return {
         key,
         component: BooleanInput,
         props: ({ id, entry }: NodeContext, { updateEntryState }: EntryListFunctions) => ({
             class: key,
+            part: key,
             icon: 'check',
             label: 'Select',
             labelIsImplicit: true,
@@ -484,4 +485,26 @@ export function createFileRenameInput(options?: FileRenameInputOptions): Templat
             children: `{{entry.name}}`,
         },
     };
+}
+
+export function appendEntryCheckbox(template: TemplateNode[]) {
+    nodeTree(template)
+        .remove('entry-store-state')
+        .replace('entry-load-state', createEntryCheckbox())
+        .find('entry')
+        .update({
+            props: ({ entry }: NodeContext) => ({
+                part: 'entry',
+                class: isDataTransferEntry(entry) ? 'entry-data-transfer' : undefined,
+                dataset: {
+                    selected: entry.state.checked ? '' : undefined,
+                },
+            }),
+        });
+}
+
+export function appendEntryRenameInput(template: TemplateNode[]) {
+    nodeTree(template).find('file-info-main').update({
+        children: createFileRenameInput(),
+    });
 }

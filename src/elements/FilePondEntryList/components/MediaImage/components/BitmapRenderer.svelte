@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { type MediaResizeQuality } from '../index.js';
+
     interface BitmapRendererOptions {
         /** Image file to render */
         file: Blob;
@@ -7,7 +9,7 @@
         /** Limit size of image, defaults to `1024 * 1024` */
         maximumPixels?: number;
         /** Quality to resize the image with, defaults to `'medium'` */
-        resizeQuality?: 'low' | 'medium' | 'high';
+        resizeQuality?: MediaResizeQuality;
         oninit?: () => void;
         onload?: (size: { width: number; height: number }) => void;
         onrender?: () => void;

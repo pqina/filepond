@@ -3,7 +3,8 @@ import { arrayRemoveInPlace } from './array.js';
 import { requestIdleCallback } from './poly.js';
 import { createObjectURL } from './objectURL.js';
 
-const wrapFunction = (fn: Function | string) => `function () {
+/*
+function () {
     self.onmessage = function (message) {
         (${fn.toString()}).apply(
             null, 
@@ -20,7 +21,10 @@ const wrapFunction = (fn: Function | string) => `function () {
             ])
         )
     }
-}`;
+}
+*/
+const wrapFunction = (fn: Function | string) =>
+    `function () {self.onmessage = function (message) {(${fn.toString()}).apply(null, message.data.concat([function (err, response, transferList = []) {const message = { content: response, error: err };return self.postMessage(message, transferList);},{onprogress: function({ lengthComputable, loaded, total }) {self.postMessage({ type: 'progress', content: { lengthComputable, loaded, total }, error: null })}}]))}}`;
 
 interface PooledWorker {
     busy: boolean;

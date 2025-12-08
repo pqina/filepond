@@ -5,6 +5,7 @@
 
     interface BooleanInputOptions {
         class?: string;
+        part?: string;
         dataset?: { [key: string]: string | number | boolean };
         id?: string;
         label?: string;
@@ -19,6 +20,7 @@
 
     const {
         class: klass = undefined,
+        part = undefined,
         dataset = undefined,
         id = `bool-${getUniqueId()}`,
         label,
@@ -48,7 +50,7 @@
     }
 </script>
 
-<boolean-input class={klass} bind:this={root}>
+<boolean-input {part} class={klass} bind:this={root}>
     <label for={id} class={labelIsImplicit ? 'implicit' : undefined}>{label}</label>
     <input
         {type}

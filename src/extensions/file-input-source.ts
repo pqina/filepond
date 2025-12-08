@@ -97,4 +97,7 @@ declare module '../index.js' {
     interface FilePondElement {
         FileInputSource: FileInputSourceOptions;
     }
+    interface defineFilePondOptions {
+        FileInputSource: FileInputSourceOptions;
+    }
 }

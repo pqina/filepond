@@ -15,13 +15,6 @@ export interface ConsoleViewOptions {
     /** Debounce the log call from the 'updateEntries' event, defaults to `true` */
     debounce?: boolean;
 }
-
-declare module '../index.js' {
-    interface FilePondElement {
-        ConsoleView: ConsoleViewOptions;
-    }
-}
-
 // this counts public pond instances
 let pondCounter = 0;
 
@@ -280,3 +273,12 @@ export const ConsoleView = createExtension(
         };
     }
 );
+
+declare module '../index.js' {
+    interface FilePondElement {
+        ConsoleView: ConsoleViewOptions;
+    }
+    interface defineFilePondOptions {
+        ConsoleView: ConsoleViewOptions;
+    }
+}

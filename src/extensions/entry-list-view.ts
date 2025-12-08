@@ -106,4 +106,7 @@ declare module '../index.js' {
     interface FilePondElement {
         EntryListView: EntryListViewOptions;
     }
+    interface defineFilePondOptions {
+        EntryListView: EntryListViewOptions;
+    }
 }

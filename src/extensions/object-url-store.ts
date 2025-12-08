@@ -42,4 +42,7 @@ declare module '../index.js' {
     interface FilePondElement {
         ObjectURLStore: ObjectURLStoreOptions;
     }
+    interface defineFilePondOptions {
+        ObjectURLStore: ObjectURLStoreOptions;
+    }
 }

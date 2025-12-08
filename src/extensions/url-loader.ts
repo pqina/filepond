@@ -299,4 +299,7 @@ declare module '../index.js' {
     interface FilePondElement {
         URLLoader: URLLoaderOptions;
     }
+    interface defineFilePondOptions {
+        URLLoader: URLLoaderOptions;
+    }
 }

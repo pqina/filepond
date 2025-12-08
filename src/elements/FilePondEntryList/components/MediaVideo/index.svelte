@@ -1,24 +1,6 @@
 <script lang="ts">
-    interface VideoViewerOptions {
-        class?: string;
-
-        /** The amount we should overflowAmount the image when we move it around */
-        overflowAmount?: number;
-
-        /** How to present image in viewer, defaults to 'cover', alternative is 'contain' */
-        objectSize?: 'cover' | 'contain';
-
-        /** Enable parallax on media */
-        enableParallax?: boolean;
-
-        /** Set to false to enable audio by default */
-        mute?: boolean;
-
-        /** Children to render on top of the video */
-        children?: Snippet<[]>;
-    }
-
-    import { type Snippet, onDestroy, untrack } from 'svelte';
+    import { type MediaVideoOptions } from './index.js';
+    import { onDestroy, untrack } from 'svelte';
     import { toTime } from '../../../../utils/date.js';
     import { isIOS, isNumber, isSafari } from '../../../../utils/test.js';
     import { videoHasAudioTrack } from '../../../../utils/dom.js';
@@ -37,7 +19,7 @@
         objectSize = undefined,
         mute = true,
         children = undefined,
-    }: VideoViewerOptions = $props();
+    }: MediaVideoOptions = $props();
 
     // get app
     const { setEntryExtensionState, pushTask } = getAppContext();

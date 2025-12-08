@@ -1,6 +1,5 @@
 import { supportsUserAgentData } from './support.js';
 import type { FilePondFileEntry, FilePondDirectoryEntry } from '../types/index.js';
-import { hasDefinedTag } from './dom.js';
 
 /** Stores test results locally */
 export function createTest(test: () => boolean, requireBrowser = true) {
@@ -13,12 +12,6 @@ export function createTest(test: () => boolean, requireBrowser = true) {
         return result;
     };
 }
-
-// a list of valid html elements, this list excludes elements like <body>, <html>, <script> that won't be suitable for use in FilePond
-export const HTML_ELEMENTS =
-    'a,abbr,address,area,article,aside,audio,b,bdi,bdo,blockquote,br,button,canvas,caption,cite,code,col,colgroup,data,datalist,dd,del,details,dfn,dialog,div,dl,dt,em,embed,fieldset,figcaption,figure,footer,form,h1,h2,h3,h4,h5,h6,header,hgroup,hr,i,iframe,img,input,ins,kbd,label,legend,li,link,map,mark,menu,meter,nav,object,ol,optgroup,option,output,p,picture,pre,progress,q,s,samp,search,section,select,slot,small,source,span,strong,style,sub,summary,sup,svg,table,tbody,td,template,textarea,tfoot,th,thead,time,tr,track,u,ul,var,video,wbr'.split(
-        ','
-    );
 
 /** Tests if value is null */
 export function isNull(value: unknown): value is null {
@@ -59,34 +52,6 @@ export function isFunction(value: unknown): value is Function {
 export function isElement(value: unknown): value is HTMLElement {
     return value instanceof HTMLElement;
 }
-
-/** Tests if is an element */
-export function isTag(value: unknown): value is string {
-    // not an element
-    if (!isString(value)) {
-        return false;
-    }
-
-    // already tested
-    let result = testedElements.get(value);
-    if (isBoolean(result)) {
-        return result;
-    }
-
-    // test if is valid tag name
-    if (!/^[a-z-]+$/i.test(value)) {
-        result = false;
-    }
-    // test if is custom element
-    else {
-        result = hasDefinedTag(value);
-    }
-    testedElements.set(value, result);
-    return result;
-}
-
-// cache that holds tested elements, add initial elements that we already know are tags
-const testedElements = new Map(HTML_ELEMENTS.map((tag) => [tag, true]));
 
 export function isURL(value: string | URL): value is URL {
     let url;

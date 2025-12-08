@@ -1,5 +1,3 @@
-import { isObjectLiteral } from './test.js';
-
 export function transformFirstLetter(str: string, fn: (char: string) => string) {
     return fn(str.charAt(0)) + str.slice(1);
 }
@@ -33,20 +31,6 @@ export function toKebabCase(str: string) {
         .split(/[\s_\b]|(?=[A-Z])/)
         .join('-')
         .toLowerCase();
-}
-
-/** Replaces a pattern in a string */
-export function stringReplace(
-    str: string,
-    entries: { [key: string]: string },
-    prefix = '',
-    postfix = ''
-) {
-    return Object.keys(entries)
-        .filter((key) => !isObjectLiteral(entries[key]))
-        .reduce((prev, curr) => {
-            return prev.replace(new RegExp(prefix + curr + postfix), entries[curr]);
-        }, str);
 }
 
 /** Returns the default locale for the current client, this is used when no locale is supplied */

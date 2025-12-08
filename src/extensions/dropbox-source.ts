@@ -136,4 +136,7 @@ declare module '../index.js' {
     interface FilePondElement {
         DropboxSource: DropboxSourceOptions;
     }
+    interface defineFilePondOptions {
+        DropboxSource: DropboxSourceOptions;
+    }
 }

@@ -77,4 +77,7 @@ declare module '../index.js' {
     interface FilePondElement {
         ListCountValidator: ListCountValidatorOptions;
     }
+    interface defineFilePondOptions {
+        ListCountValidator: ListCountValidatorOptions;
+    }
 }

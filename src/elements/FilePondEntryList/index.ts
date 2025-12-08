@@ -68,9 +68,9 @@ export interface AppCallbacks {
 
 // Props to create getters and setters for, the defaults for these props are set in the FilePondEntryList component
 export const COMPONENT_PROPS = [
-    // We don't include 'template' as it's handled with a manual setter, this prevents Svelte from creating a proxy when the template is passed to the `beforeRenderTemplate` function
+    // We don't include 'template' as it's handled with a manual setter, this prevents Svelte from creating a proxy when the template is passed to the `beforeAssignTemplate` function
     'disabled',
-    'beforeRenderTemplate',
+    'beforeAssignTemplate',
     'beforeRenderNode',
     'assets',
     'locale',

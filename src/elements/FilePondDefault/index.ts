@@ -1,5 +1,5 @@
 import type { ExtensionFactory } from '../../core/extensionManager.ts';
-import type { AnimationMode, Locale, SpringOptions } from '../../types/index.js';
+import type { AnimationMode, Locale, SpringOptions, TemplateNode } from '../../types/index.js';
 import { FilePondBaseElement } from '../FilePondBase/index.js';
 import { FilePondEntryListElement } from '../FilePondEntryList/index.js';
 import { FilePondDropAreaElement } from '../FilePondDropArea/index.js';
@@ -30,31 +30,7 @@ import { assets } from '../../assets/index.js';
 import defaultStyles from './index.css?inline';
 
 // template
-import {
-    createFilePondEntryList,
-    createEntryCheckbox,
-    createFileRenameInput,
-} from '../../templates/entry.js';
-
-import {
-    type MediaViewOptions,
-    createImageView,
-    createVideoView,
-    createMediaControls,
-    createTogglePlaybackButton,
-    createToggleFullscreenButton,
-    createToggleAudioButton,
-    createMediaScrubber,
-    createMediaTimeIndicator,
-    createEditMediaButton,
-    createResetMediaButton,
-    createMediaControlGroup,
-    createMediaControl,
-} from '../../templates/media.js';
-
-import { whenEntryHasAction, whenEntryIs, whenEntryNotHasStatus } from '../../templates/helpers.js';
-
-import { nodeTree } from '../common/nodeTree.js';
+import { createFilePondEntryList } from '../../templates/entry.js';
 
 /** Auto assigns props to just created file-pond elements */
 function autoAssignFilePondProperties(tag: string, options: unknown) {
@@ -155,8 +131,6 @@ export class FilePondElement extends FilePondBaseElement {
         // create items list
         const filePondEntryList = h('file-pond-entry-list', {
             part: 'entry-list',
-            // exportparts:
-            //     'list, entry, button:entry-button, media-button: entry-media-button, media-controls',
         }) as FilePondEntryListElement;
 
         const filePondDropIndicator = h('file-pond-drop-indicator', {
@@ -198,79 +172,8 @@ export class FilePondElement extends FilePondBaseElement {
 
                 // the template to render
                 template: createFilePondEntryList({
-                    debug: false,
+                    // debug: false,
                 }),
-
-                // called before the template is rendered, allows modifying the template, for example removing or adding nodes
-                beforeRenderTemplate(template) {
-                    // so video's and images are rendered the same way
-                    const sharedMediaProps: MediaViewOptions = {
-                        objectSize: 'cover',
-                    };
-
-                    nodeTree(template)
-                        .find('entry')
-                        .append(
-                            whenEntryIs('image').append(
-                                createImageView(sharedMediaProps),
-
-                                whenEntryNotHasStatus('error').append(
-                                    whenEntryHasAction('editMedia').append(
-                                        createMediaControls({ justifyContent: 'end' }).append(
-                                            createMediaControl().append(createResetMediaButton()),
-                                            createMediaControl().append(createEditMediaButton())
-                                        )
-                                    )
-                                )
-                            ),
-
-                            whenEntryIs('video').append(
-                                createVideoView(sharedMediaProps),
-                                whenEntryNotHasStatus('error').append(
-                                    createMediaControls().append(
-                                        createMediaControlGroup({ key: 'video-controls' }).append(
-                                            createTogglePlaybackButton(),
-                                            createMediaScrubber(),
-                                            createMediaTimeIndicator(),
-                                            createToggleAudioButton()
-                                        ),
-
-                                        whenEntryHasAction('editMedia').append(
-                                            createMediaControl().append(createResetMediaButton()),
-                                            createMediaControl().append(createEditMediaButton())
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                        // route video control events
-                        .update({
-                            routes: {
-                                'toggle-playback:click': 'entry-video.togglePlayback',
-                                'toggle-audio:click': 'entry-video.toggleAudio',
-                                'toggle-fullscreen:click': 'entry-video.toggleFullscreen',
-                                'media-scrubber:input': 'entry-video.setCurrentTime',
-                            },
-                        });
-
-                    // nodeTree(template)
-                    //     .remove('entry-store-state')
-                    //     .replace('entry-load-state', createEntryCheckbox())
-                    //     .find('entry')
-                    //     .update({
-                    //         props: ({ entry }: NodeContext) => ({
-                    //             dataset: {
-                    //                 selected: entry.state.checked,
-                    //             },
-                    //         }),
-                    //     });
-
-                    // nodeTree(template).find('file-info-main').update({
-                    //     children: createFileRenameInput(),
-                    // });
-
-                    return template;
-                },
 
                 // called before rendering a node, allows dynamically modifying a node or adding nodes
                 beforeRenderNode(node: any) {

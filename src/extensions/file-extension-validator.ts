@@ -91,4 +91,7 @@ declare module '../index.js' {
     interface FilePondElement {
         FileExtensionValidator: FileExtensionValidatorOptions;
     }
+    interface defineFilePondOptions {
+        FileExtensionValidator: FileExtensionValidatorOptions;
+    }
 }

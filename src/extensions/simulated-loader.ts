@@ -313,4 +313,7 @@ declare module '../index.js' {
     interface FilePondElement {
         SimulatedLoader: SimulatedLoaderOptions;
     }
+    interface defineFilePondOptions {
+        SimulatedLoader: SimulatedLoaderOptions;
+    }
 }

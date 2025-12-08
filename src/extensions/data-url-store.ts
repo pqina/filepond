@@ -51,4 +51,7 @@ declare module '../index.js' {
     interface FilePondElement {
         DataURLStore: DataURLStoreOptions;
     }
+    interface defineFilePondOptions {
+        DataURLStore: DataURLStoreOptions;
+    }
 }

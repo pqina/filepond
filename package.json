@@ -38,6 +38,10 @@
             "types": "./dist/types/elements/index.d.ts",
             "import": "./dist/esm/elements/index.js"
         },
+        "./templates": {
+            "types": "./dist/types/templates/index.d.ts",
+            "import": "./dist/esm/templates/index.js"
+        },
         "./locales": {
             "types": "./dist/types/locales/index.d.ts",
             "import": "./dist/esm/locales/index.js"

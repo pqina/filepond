@@ -1,28 +1,8 @@
 <script lang="ts">
-    interface ImageViewerOptions {
-        /** Class to set on root */
-        class?: string;
-
-        /** Image maximum size in pixels */
-        maximumPixels?: number;
-
-        /** Media height in pixels */
-        resizeQuality?: 'low' | 'medium' | 'high';
-
-        /** How to present image in viewer, defaults to 'cover', alternative is 'contain' */
-        objectSize?: 'cover' | 'contain';
-
-        /** The amount we should overflowAmount the image when we move it around */
-        overflowAmount?: number;
-
-        /** Enable parralax effects while dragging images */
-        enableParallax?: boolean;
-
-        /** Children to render on top of the image */
-        children: Snippet;
-    }
-
-    import { type Snippet, untrack } from 'svelte';
+    import { type Size } from '../../../../utils/size.js';
+    import { type FilePondFileEntry } from '../../../../types/index.js';
+    import { type MediaImageOptions } from './index.js';
+    import { untrack } from 'svelte';
     import { MediaPane } from '../MediaPane/index.js';
     import { arrayRemoveFalsy } from '../../../../utils/array.js';
     import { isImageFile, isString } from '../../../../utils/test.js';
@@ -30,8 +10,6 @@
     import { getEntryContext } from '../../../../elements/FilePondEntryList/contexts/entryContext.js';
     import { filesAreProbablyEqual } from '../../../../utils/file.js';
     import { Status } from '../../../../common/status.js';
-    import { type Size } from '../../../../utils/size.js';
-    import type { FilePondFileEntry } from '../../../../types/index.js';
     import BitmapRenderer from './components/BitmapRenderer.svelte';
 
     let {
@@ -41,7 +19,7 @@
         objectSize = undefined,
         overflowAmount = undefined,
         enableParallax = undefined,
-    }: ImageViewerOptions = $props();
+    }: MediaImageOptions = $props();
 
     // get app
     const { setEntryExtensionState, getEntryExtensionState } = getAppContext();
