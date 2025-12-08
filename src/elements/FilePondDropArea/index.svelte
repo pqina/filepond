@@ -21,7 +21,8 @@
     // is a state so it triggers pane redraw
     let rootRect = $state.raw() as Rect;
 
-    //  update animation preference when changes
+    // update animation preference when changes
+    // svelte-ignore state_referenced_locally
     const animationState = createAnimationState(animations);
     $effect(() => animationState.setPreference(animations));
     const enableAnimations = $derived(animationState.current);

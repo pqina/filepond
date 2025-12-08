@@ -38,7 +38,6 @@ const addBanner: any = {
             if (fileName.startsWith('svelte')) {
                 continue;
             }
-            console.log(fileName);
             file.code = banner + '\n' + file.code;
         }
     },

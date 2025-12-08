@@ -40,7 +40,8 @@
     const IndicatorSize = { width: 64, height: 64 };
     const IndicatorElasticity = 4;
 
-    //  update animation preference when changes
+    // update animation preference when changes
+    // svelte-ignore state_referenced_locally
     const animationState = createAnimationState(animations);
     $effect(() => animationState.setPreference(animations));
     const enableAnimations = $derived(animationState.current);

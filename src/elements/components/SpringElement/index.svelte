@@ -150,7 +150,9 @@
     const appContext = getAppContext();
     const currentSpringConfig = $derived(springConfig ?? appContext?.springConfig ?? {});
     const springedPosition = new Spring(undefined) as Spring<Vector | undefined>;
+    // svelte-ignore state_referenced_locally
     const springedScale = new Spring(scale || 1);
+    // svelte-ignore state_referenced_locally
     const springedOpacity = new Spring(opacity || 1);
 
     const computedTranslationSpringConfig = gate(
@@ -435,6 +437,7 @@
         });
     });
 
+    // svelte-ignore state_referenced_locally
     if (isNumber(scale) && scale === springedScale.current && scale !== 1) {
         dispatchSpringEnd();
     }
@@ -468,6 +471,7 @@
             .catch(noop);
     });
 
+    // svelte-ignore state_referenced_locally
     if (isNumber(opacity) && opacity === springedOpacity.current && opacity !== 1) {
         dispatchSpringEnd();
     }

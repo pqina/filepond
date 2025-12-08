@@ -88,7 +88,7 @@
     let currentSize: Size = $state() as Size;
 
     // the current disabled state
-    let disabledState = $state.raw(disabled);
+    let disabledState = $derived(disabled);
 
     /** Entries that are currently rendered */
     let currentEntries: FilePondEntry[] = $state.raw([]);
@@ -465,6 +465,7 @@
     });
 
     //  update animation preference when changes
+    // svelte-ignore state_referenced_locally
     const animationState = createAnimationState(animations);
     $effect(() => animationState.setPreference(animations));
     const enableAnimations = $derived(animationState.current);

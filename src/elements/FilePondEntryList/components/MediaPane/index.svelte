@@ -63,7 +63,10 @@
         precision: 0.01,
     };
 
+    // svelte-ignore state_referenced_locally
     const mediaOpacity = new Spring(mediaInitialOpacity, revealConfig);
+
+    // svelte-ignore state_referenced_locally
     const mediaScalar = new Spring(mediaInitialScalar, revealConfig);
 
     // context variables

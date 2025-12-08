@@ -55,7 +55,7 @@
     let isMute: boolean | null = $state.raw(null);
 
     /** Is true if the video is muted */
-    let isMuted: boolean = $state.raw(mute);
+    let isMuted: boolean = $derived(mute);
 
     /** Is true if the video is playing */
     let isPlaying: boolean = $state.raw(false);

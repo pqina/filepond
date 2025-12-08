@@ -70,9 +70,6 @@
     /** The element that renders the track */
     let trackElement: HTMLElement | undefined = $state.raw();
 
-    /** CSS Class name to apply to set on the component root */
-    const componentClassName: string | undefined = klass;
-
     const trackComputedStyles = $derived(trackElement && getComputedStyle(trackElement));
     const trackComputedBorderRadius = $derived(
         trackComputedStyles
@@ -206,7 +203,7 @@
 </script>
 
 <range-input
-    class={componentClassName}
+    class={klass}
     style:--track-border-radius={trackBorderRadius}
     {@attach resizable({
         onresize: handleResizeRoot,

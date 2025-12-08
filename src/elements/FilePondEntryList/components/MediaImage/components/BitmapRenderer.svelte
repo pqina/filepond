@@ -40,6 +40,7 @@
     const getObjectURL = () => createObjectURL(file);
 
     // read cache on init
+    // svelte-ignore state_referenced_locally
     const { size: cachedSize, canvas: cachedCanvas } = getBitmapCacheItem(file) ?? {};
 
     // we pass these to MediaPane so it can scale/animate media content
