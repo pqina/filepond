@@ -88,25 +88,27 @@ export interface NodeTree {
     find: (key: string) => NodeTree;
     remove: (key: string) => NodeTree;
     replace: (key: string, ...nodes: (NodeTree | TemplateNode)[]) => NodeTree;
-    update: (props: { [key: string]: any }) => NodeTree;
+    update: (key: string, updater: (node: TemplateNode) => void) => NodeTree;
     append: (...nodes: (NodeTree | TemplateNode)[]) => NodeTree;
     prepend: (...nodes: (NodeTree | TemplateNode)[]) => NodeTree;
     insert: (index: number, ...nodes: (NodeTree | TemplateNode)[]) => NodeTree;
 }
 
 export function nodeTree(tree: void | TemplateNode | TemplateNode[]): NodeTree {
+    function find(key: string) {
+        if (tree) {
+            const node = withNodeByKey(tree, key, (node: TemplateNode) => node);
+            return nodeTree(node);
+        }
+        // no results
+        return nodeTree(undefined);
+    }
+
     return {
         unwrap() {
             return tree;
         },
-        find(key: string) {
-            if (tree) {
-                const node = withNodeByKey(tree, key, (node: TemplateNode) => node);
-                return nodeTree(node);
-            }
-            // no results
-            return nodeTree(undefined);
-        },
+        find,
         remove(key: string) {
             // can't remove
             if (!tree) {
@@ -139,8 +141,16 @@ export function nodeTree(tree: void | TemplateNode | TemplateNode[]): NodeTree {
             // return tree, not node that was removed as we can no longer do anything with it
             return nodeTree(tree);
         },
-        update(props: { [key: string]: any }) {
-            return nodeTree(tree ? Object.assign(tree, props) : undefined);
+        update(key: string, updater: (currentProps: TemplateNode) => void) {
+            if (!tree) {
+                return nodeTree(undefined);
+            }
+            const hit = find(key);
+            if (!hit) {
+                return nodeTree(undefined);
+            }
+            updater(unwrap(hit));
+            return hit;
         },
         append(...nodes: (NodeTree | TemplateNode)[]) {
             if (tree) {

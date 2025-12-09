@@ -1,4 +1,4 @@
-import type { EntryListFunctions, TemplateNode } from '../types/index.js';
+import type { ComponentNode, EntryListFunctions, TemplateNode } from '../types/index.js';
 import { nodeTree, type NodeContext } from '../elements/common/nodeTree.js';
 
 import { isDataTransferEntry, isFileEntry, isNumber, isString } from '../utils/test.js';
@@ -18,8 +18,10 @@ import { SpringElement } from '../elements/components/SpringElement/index.js';
 import { EntryActivityIndicator } from '../elements/FilePondEntryList/components/EntryActivityIndicator/index.js';
 import { EntryStatus } from '../elements/FilePondEntryList/components/EntryStatus/index.js';
 import { EntryList } from '../elements/FilePondEntryList/components/EntryList/index.js';
+import { EntryListItem } from '../elements/FilePondEntryList/components/EntryListItem/index.js';
 import { Entry } from '../elements/FilePondEntryList/components/Entry/index.js';
-import { useEntryContext } from '../elements/FilePondEntryList/components/EntryContext/index.js';
+import { EntryListItemPlaceholder } from '../elements/FilePondEntryList/components/EntryListItemPlaceholder/index.js';
+import { toSpaceSeparatedString } from '../elements/common/string.js';
 
 export interface EntryListTemplateOptions {
     debug?: boolean;
@@ -36,18 +38,54 @@ export function createFilePondEntryList(options?: EntryListTemplateOptions): Tem
             component: EntryList,
             props: ({ entries }: NodeContext) => ({
                 part: 'list',
-                itemPart: 'list-item',
-                itemPlaceholderPart: 'list-item-placeholder',
                 entries,
             }),
             item: {
-                key: 'entry-context',
-                component: useEntryContext,
-                props: ({ entry }: NodeContext) => ({
-                    // pass entry list parameters as a prop to entry context
-                    entry,
-                }),
-                children: createFilePondEntry(options),
+                if: {
+                    test: ({ isPlaceholder }: NodeContext) => isPlaceholder,
+                    then: {
+                        component: EntryListItemPlaceholder,
+                        props: ({ onmeasureitem }) => ({
+                            part: 'entry-list-item-placeholder',
+                            onmeasureitem,
+                        }),
+                    },
+                },
+                else: {
+                    key: 'entry-list-item',
+                    component: EntryListItem,
+                    props: ({
+                        entry,
+                        spring,
+                        isDetached,
+                        isRemoving,
+                        isDraggable,
+                        isDragging,
+                        isLastDraggedItem,
+                        translation,
+                        springAnimation,
+                        onmeasureitem,
+                    }: NodeContext) => {
+                        // select entry list parameters to pass to entry item
+                        return {
+                            part: isDataTransferEntry(entry)
+                                ? 'entry-list-item data-transfer-item'
+                                : 'entry-list-item file-item',
+                            class: 'entry-list-item',
+                            entry,
+                            spring,
+                            isDetached,
+                            isRemoving,
+                            isDraggable,
+                            isDragging,
+                            isLastDraggedItem,
+                            springAnimation,
+                            translation,
+                            onmeasureitem,
+                        };
+                    },
+                    children: createFilePondEntry(options),
+                },
             },
         },
     ];
@@ -59,8 +97,7 @@ export function createFilePondEntry(options?: EntryTemplateOptions): TemplateNod
         component: Entry,
         props: ({ entry }) => {
             return {
-                part: 'entry',
-                class: isDataTransferEntry(entry) ? 'entry-data-transfer' : undefined,
+                part: isDataTransferEntry(entry) ? 'entry entry-data-transfer' : 'entry',
             };
         },
         children: [
@@ -140,10 +177,11 @@ export function createEntryInfo() {
 
 export function createEntryDataTransferInfo() {
     return {
-        key: 'datatransfer-info',
+        key: 'data-transfer-info',
         component: SpringElement,
         props: {
             class: 'entry-info',
+            part: 'entry-info data-transfer-info',
             subtag: 'element-stack',
             subattrs: {
                 layout: 'col',
@@ -160,7 +198,7 @@ export function createEntryDataTransferInfo() {
         },
         children: [
             {
-                key: 'datatransfer-info-main',
+                key: 'data-transfer-info-main',
                 tag: 'div',
                 attrs: {
                     class: 'entry-info-main',
@@ -168,7 +206,7 @@ export function createEntryDataTransferInfo() {
                 children: 'loadDataTranserProgress',
             },
             {
-                key: 'datatransfer-info-sub',
+                key: 'data-transfer-info-sub',
                 tag: 'div',
                 attrs: {
                     class: 'entry-info-sub',
@@ -491,20 +529,23 @@ export function appendEntryCheckbox(template: TemplateNode[]) {
     nodeTree(template)
         .remove('entry-store-state')
         .replace('entry-load-state', createEntryCheckbox())
-        .find('entry')
-        .update({
-            props: ({ entry }: NodeContext) => ({
-                part: 'entry',
-                class: isDataTransferEntry(entry) ? 'entry-data-transfer' : undefined,
-                dataset: {
-                    selected: entry.state.checked ? '' : undefined,
-                },
-            }),
+        .update('entry-list-item', (node: any) => {
+            const existingProps = node.props as (context: NodeContext) => { [key: string]: any };
+            node.props = (context: NodeContext) => {
+                const computedProps = existingProps(context);
+                return {
+                    ...computedProps,
+                    part: toSpaceSeparatedString(
+                        computedProps.part,
+                        context.entry.state.checked ? 'selected' : undefined
+                    ),
+                };
+            };
         });
 }
 
 export function appendEntryRenameInput(template: TemplateNode[]) {
-    nodeTree(template).find('file-info-main').update({
-        children: createFileRenameInput(),
+    nodeTree(template).update('file-info-main', (node: any) => {
+        node.children = createFileRenameInput();
     });
 }

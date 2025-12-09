@@ -7,7 +7,7 @@ import { hasOwnProp } from '../../utils/object.js';
 import { cache } from '../../utils/cache.js';
 
 /** Removes falsy values, concatenated strings, returns undefined if results in empty string */
-export function toClassName(...names: (string | undefined)[]) {
+export function toSpaceSeparatedString(...names: (string | undefined)[]) {
     return arrayRemoveFalsy(names).join(' ') || undefined;
 }
 

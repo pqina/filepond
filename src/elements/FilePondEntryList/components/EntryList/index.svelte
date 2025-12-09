@@ -2,39 +2,51 @@
     interface EntryListOptions {
         entries: FilePondEntry[];
         part?: string;
-        itemPart?: string;
-        itemPlaceholderPart?: string;
-        children: Snippet<[{ entry: FilePondEntry }]>;
+        children: Snippet<
+            [
+                {
+                    entry: FilePondEntry;
+                    isPlaceholder: boolean;
+                    isDetached: boolean;
+                    isRemoving: boolean;
+                    isDraggable: boolean;
+                    isDragging: boolean;
+                    isLastDraggedItem: boolean;
+                    springAnimation: EntrySpringAnimation;
+                    translation: Vector;
+                    onmeasureitem: (rect: Rect) => void;
+                },
+            ]
+        >;
+    }
+
+    interface EntrySpringAnimation {
+        opacityFrom?: number;
+        opacity?: number;
+        opacitySpringConfig?: SpringOptions;
+        scaleFrom?: number;
+        scale?: number;
+        scaleSpringConfig?: SpringOptions;
+        translationFrom?: Vector;
+        translation?: Vector;
+        translationSpringConfig?: SpringOptions;
+        onspringcancel?: () => void;
+        onspringcomplete?: (spring: { opacity: number; scale: number }) => void;
     }
 
     import { type Snippet } from 'svelte';
+    import { type FilePondEntry, type SpringOptions } from '../../../../types/index.js';
+    import { type Size, sizeFromRect } from '../../../../utils/size.js';
+    import { type Rect } from '../../../../utils/rect.js';
     import { SvelteMap } from 'svelte/reactivity';
     import { vectorAdd, vectorCreate, type Vector } from '../../../../utils/vector.js';
-    import {
-        rectCreate,
-        rectFromBounds,
-        rectIntersectWithRect,
-        type Rect,
-    } from '../../../../utils/rect.js';
     import { getAppContext } from '../../contexts/appContext.js';
     import { getDragContext } from '../../contexts/dragContext.js';
     import { getDropContext } from '../../contexts/dropContext.js';
-    import { measurable, VIEWPORT_MARGIN } from '../../../attachments/measurable.js';
     import { isNumber } from '../../../../utils/test.js';
     import { noop } from '../../../../utils/placeholder.js';
-    import type { FilePondEntry, SpringOptions } from '../../../../types/index.js';
-    import type { Bounds } from '../../../../utils/bounds.js';
-    import { type Size, sizeFromRect } from '../../../../utils/size.js';
-    import { toClassName } from '../../../common/string.js';
-    import { SpringElement } from '../../../components/SpringElement/index.js';
 
-    let {
-        entries,
-        part,
-        itemPart,
-        itemPlaceholderPart,
-        children: item,
-    }: EntryListOptions = $props();
+    let { entries, part, children: item }: EntryListOptions = $props();
 
     // app context
     const appContext = getAppContext();
@@ -133,20 +145,6 @@
         );
     }
 
-    interface EntrySpringAnimation {
-        opacityFrom?: number;
-        opacity?: number;
-        opacitySpringConfig?: SpringOptions;
-        scaleFrom?: number;
-        scale?: number;
-        scaleSpringConfig?: SpringOptions;
-        translationFrom?: Vector;
-        translation?: Vector;
-        translationSpringConfig?: SpringOptions;
-        onspringcancel?: () => void;
-        onspringcomplete?: (spring: { opacity: number; scale: number }) => void;
-    }
-
     function getEntryAnimationProps(
         entry: FilePondEntry,
         animationPropsConfig: any
@@ -224,21 +222,9 @@
         });
     }
 
-    let placeholderRect: Rect | undefined = $state.raw();
-    function handleMeasurePlaceholder(bounds: Bounds) {
-        placeholderRect = rectFromBounds(bounds);
-    }
-
-    $effect(() => {
-        updateEntryPlaceholderRect(
-            placeholderRect && dragState && !dragState.element ? placeholderRect : undefined
-        );
-    });
-
     /** Retains the last drag translation so we can use it when shattering items */
     let lastDragTranslation: Vector | null = null;
 
-    // let d;
     // compute entry visual locations
     const computedList: { entries: any[]; detachedItemSize: Size | null } = $derived.by(() => {
         /**
@@ -251,10 +237,9 @@
             const isDragging = index === dragState?.index;
             const isRemoving = !!isRetainedEntry(id);
             const isPlaceholder = dragState?.id === id;
-            const shouldRenderAbove = !isPlaceholder && lastDraggedItemId === id;
-            const shouldRenderBelow = isPlaceholder || isRemoving;
+            const isLastDraggedItem = lastDraggedItemId === id;
             const didDissolve = isRemoving && dropState?.remove && id === dropState?.id;
-            const shouldDetach = (isDragging && dragState?.outside) || didDissolve;
+            const isDetached = (isDragging && dragState?.outside) || didDissolve;
 
             // get stored index and rect for this entry
             let { rect: elementRect } = elementRects.get(id) ?? {};
@@ -286,40 +271,37 @@
             }
 
             // we need to know the size of the item so we can keep it the same size when it's detached, additionally this allows us to pad the end of the list so it doesn't affect the scroll of the parent
-            if (shouldDetach) {
+            if (isDetached) {
                 detachedItemSize = sizeFromRect(elementRect as Rect);
             }
 
             // get animation if visible
-            const { translation = dragTranslation, ...animationProps } =
-                getEntryAnimationProps(entry, entryAnimationProps) ?? {};
+            const {
+                translation = dragTranslation,
+
+                // filter out
+                onspringcancel,
+
+                // capture rest of props
+                ...springAnimation
+            } = getEntryAnimationProps(entry, entryAnimationProps) ?? {};
 
             return {
-                isPlaceholder,
                 id,
                 entry,
-                ...animationProps,
-                isDetached: shouldDetach,
-                translation: translation as Vector,
-                inert: isRemoving,
-                dataset: {
-                    // Makes it possible to drag this item
-                    draggable: true,
-
-                    // Detach so doesn't take up room in list
-                    detach: shouldDetach ? true : undefined,
-
-                    // When true will prevent hover effects on elements in subtree
-                    dragging: isDragging ? true : undefined,
-
-                    // When set to true will increase z-index so renders above other items
-                    renderAbove: shouldRenderAbove ? true : undefined,
-
-                    // When set to true will decrease z-index so renders below other items
-                    renderBelow: shouldRenderBelow ? true : undefined,
-                },
-                onelementmeasure(rect: Rect) {
-                    updateElementRects(id, index, rect);
+                isPlaceholder,
+                isRemoving,
+                isDetached,
+                isDragging,
+                isLastDraggedItem,
+                springAnimation,
+                translation,
+                onmeasureitem(rect?: Rect) {
+                    if (isPlaceholder) {
+                        updateEntryPlaceholderRect(rect);
+                    } else if (rect) {
+                        updateElementRects(id, index, rect);
+                    }
                 },
             };
         });
@@ -329,35 +311,6 @@
             detachedItemSize,
         };
     });
-
-    /** Window width used to calculate if element is visible or not */
-    let windowWidth = $state.raw() as number;
-
-    /** Window height used to calculate if element is visible or not */
-    let windowHeight = $state.raw() as number;
-
-    /**
-     * Only if element is this amount outside of viewport do we count it as invisible, this is so
-     * shadows are still drawn correctly, same as margin in measurable
-     */
-    const viewportMargin = VIEWPORT_MARGIN;
-    const viewportHasSize = $derived(!!(windowWidth && windowHeight));
-    const viewportRect = $derived(
-        viewportHasSize
-            ? rectCreate(0, -viewportMargin, windowWidth, windowHeight + viewportMargin * 2)
-            : undefined
-    );
-
-    /** This prevents rendering items that fall outside of the viewport */
-    function shouldRenderContent(rect: Rect, isDetached: boolean) {
-        // no rectangles so we need to assume the content is visible
-        // if the element is detached the rectangle will be positioned absolute (and as it's translated it will fall outside of the viewport) so we need to still render its contents
-        if (!rect || !viewportRect || isDetached) {
-            return true;
-        }
-
-        return rectIntersectWithRect(rect, viewportRect);
-    }
 
     // to get item gap
     let root: HTMLElement | undefined = $state.raw(undefined);
@@ -370,8 +323,6 @@
         didComputeStyle ? parseFloat(computedStyle.getPropertyValue('gap')) : 0
     );
 </script>
-
-<svelte:window bind:innerWidth={windowWidth} bind:innerHeight={windowHeight} />
 
 {#if computedList.entries.length}
     <ul
@@ -388,26 +339,19 @@
             ? `${computedList.detachedItemSize?.height}px`
             : null}
     >
-        {#each computedList.entries as { id, entry, isPlaceholder, isDetached, onspringcancel, ...springProps } (id)}
-            {#if !isPlaceholder}
-                <SpringElement
-                    tag="li"
-                    part={itemPart}
-                    class="entry-list-item"
-                    {...springProps}
-                    shouldRenderContent={(rect) => shouldRenderContent(rect, isDetached)}
-                    >{@render item({ entry })}</SpringElement
-                >
-            {:else}
-                <li
-                    part={toClassName(itemPart, itemPlaceholderPart)}
-                    class="entry-list-item"
-                    data-placeholder
-                    {@attach measurable({ onmeasure: handleMeasurePlaceholder })}
-                >
-                    <!-- placeholder -->
-                </li>
-            {/if}
+        {#each computedList.entries as { id, isPlaceholder, isDetached, isRemoving, isDragging, isLastDraggedItem, springAnimation, translation, onmeasureitem, entry } (id)}
+            {@render item({
+                isDraggable: true,
+                isPlaceholder,
+                isDetached,
+                isRemoving,
+                isDragging,
+                isLastDraggedItem,
+                springAnimation,
+                translation,
+                onmeasureitem,
+                entry,
+            })}
         {/each}
     </ul>
 {/if}

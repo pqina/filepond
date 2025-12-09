@@ -1,0 +1,45 @@
+.entry-list-item {
+    /* Creates new stacking context without explicit positioning */
+    isolation: isolate;
+
+    /* Auto compute different borders */
+    --entry-border-top: var(--entry-border);
+    --entry-border-right: var(--entry-border);
+    --entry-border-bottom: var(--entry-border);
+    --entry-border-left: var(--entry-border);
+
+    /* We remove the item from the flow so other elements take its place */
+    &[data-detached] {
+        position: fixed;
+        width: var(--_detached-entry-width);
+        height: var(--_detached-entry-height);
+    }
+
+    /* While dragging position on top of other items */
+    &[data-render-above] {
+        z-index: 1;
+    }
+
+    /* While removing position on top of other items */
+    &[data-render-below] {
+        z-index: -1;
+    }
+
+    /* While dragging */
+    &[data-dragging] {
+        /* Disable hover effects on elements in subtree */
+        & * {
+            pointer-events: none !important;
+        }
+
+        /* Item should be rendered on top */
+        & > div {
+            z-index: 2147483647;
+        }
+    }
+
+    /* Virtual list item */
+    &:empty {
+        min-height: var(--entry-min-height);
+    }
+}

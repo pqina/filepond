@@ -87,9 +87,6 @@
     let currentRectCenter: Vector = $state() as Vector;
     let currentSize: Size = $state() as Size;
 
-    // the current disabled state
-    let disabledState = $derived(disabled);
-
     /** Entries that are currently rendered */
     let currentEntries: FilePondEntry[] = $state.raw([]);
 
@@ -415,9 +412,6 @@
 
     /* Application context */
     setAppContext({
-        get disabledState() {
-            return disabledState;
-        },
         get enableAnimations() {
             return enableAnimations;
         },
@@ -732,7 +726,7 @@
                 return;
             }
 
-            // add datatransfer
+            // add data transfer
             callback.insertEntries(
                 {
                     id: getUniqueId(),
@@ -799,14 +793,6 @@
 
     // #endregion
 
-    //#region Disabled state
-
-    /** Handles disabled state changes */
-    function handleDisabledStateChange(currentState: string) {
-        disabledState = parseFloat(currentState) > 0;
-    }
-    //#endregion
-
     setDragContext({
         get current() {
             return dragState;
@@ -839,7 +825,7 @@
 
     // copy "disable" state to root attribute
     $effect(() => {
-        setBooleanAttribute(root, 'disabled', disabled);
+        setBooleanAttribute(root, 'data-disabled', disabled);
     });
 
     const entryListAPI = $derived({
@@ -911,7 +897,7 @@
         onmeasure: handleMeasureRoot,
     })}
     {@attach dragarea({
-        disabled: !drag,
+        disabled: !drag || disabled,
         grabTimeout: 100,
         itemSelector: '[data-draggable]',
         ongrabitem: handleGrabItem,
@@ -920,14 +906,11 @@
         ondropitem: handleDropItem,
     })}
     {@attach droparea({
-        disabled: !drop,
+        disabled: !drop || disabled,
         ondragitem: handleDragItem,
         ondragitemin: handleDragItemIn,
         ondragitemout: handleDragItemOut,
         ondropitem: handleDropItem,
-    })}
-    {@attach transitions({
-        '--disabled-state': handleDisabledStateChange,
     })}
 >
     <NodeList

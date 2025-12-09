@@ -144,8 +144,8 @@ export class FilePondElement extends FilePondBaseElement {
         // so we can set shared props on these lements
         this.#instances.push(filePondEntryList, filePondDropIndicator, filePondDropArea);
 
-        // this makes sure the parts defined in the entry list nodelist are automatically exported
-        const exportparts = new Set();
+        // this makes sure the parts defined in the entry list nodelist are automatically exported, default modifiers are always exported
+        const exportparts = new Set(['virtualized', 'dragged', 'selected', 'checked']);
         function syncExportparts(part?: string) {
             if (!part || exportparts.has(part)) {
                 return;
@@ -179,8 +179,6 @@ export class FilePondElement extends FilePondBaseElement {
                 beforeRenderNode(node: any) {
                     syncExportparts(node.props?.part || node.attrs?.part);
                     // TODO: improve this, list should render an item node, or a placeholder node that have their own `part` property
-                    syncExportparts(node.props?.itemPart);
-                    syncExportparts(node.props?.itemPlaceholderPart);
                     syncExportparts(node.props?.buttonPart);
                     return node;
                 },
@@ -231,6 +229,21 @@ export class FilePondElement extends FilePondBaseElement {
         // link up placeholder position with drop indicator
         addListener(filePondEntryList, 'updateplaceholder', (e) => {
             filePondDropIndicator.indicatorRect = e.detail;
+        });
+
+        // prevent interaction with slot content and attribution link while dragging
+        addListener(filePondEntryList, 'dragentrystart', () => {
+            this._slot.inert = true;
+            if (this.#attributionLink) {
+                this.#attributionLink.inert = true;
+            }
+        });
+        // restore interaction with slot content and attribution link while dragging
+        addListener(filePondEntryList, 'dragentryend', () => {
+            this._slot.inert = false;
+            if (this.#attributionLink) {
+                this.#attributionLink.inert = false;
+            }
         });
     }
 }

@@ -21,38 +21,11 @@
     }
 }
 
-/* slot and slotted element styles */
-::slotted(input[type='file']) {
-    position: absolute;
-    width: 100%;
-    padding: 0;
-    margin: 0;
-    z-index: -1;
-    pointer-events: none;
+:host([disabled]) {
     user-select: none;
-
-    /* hide from view */
-    mask: linear-gradient(transparent, transparent);
-
-    /* we align it to the top so Safari tooltip points to the field */
-    top: 0;
-    left: 0;
+    filter: grayscale(100%);
 }
 
-::slotted(label) {
-    --width-px: calc(var(--width) * 1px);
-    --center-px: calc((var(--width-px) - (2 * var(--default-padding))) * 0.5);
-
-    display: inline-block;
-    transform: translateX(calc(var(--center-px) - 50%));
-    align-self: flex-start;
-    text-align: center;
-
-    padding-top: var(--default-padding);
-    padding-bottom: var(--default-padding);
-}
-
-/* sub elements */
 file-pond-drop-area {
     --border-radius: var(--default-border-radius);
     --border: var(--default-border);
@@ -66,57 +39,47 @@ file-pond-drop-indicator {
 file-pond-entry-list {
     --entry-color: var(--default-color);
     --entry-background-color: var(--default-background-color);
-
-    --entry-shadow: 0 1px 4px rgb(0 0 0 / 0.2);
-    --entry-lifted-shadow: 0 4px 8px rgb(0 0 0 / 0.5);
-
+    --entry-shadow: 0 1px 3px rgb(0 0 0 / 0.05);
     --entry-button-outline: 0 0 0 1.5px currentColor;
+    --entry-border: 1px solid rgb(from FieldText r g b / 0.025);
 
     &[empty] {
         margin-top: calc(-1 * var(--default-padding));
-    }
-
-    &::part(entry-button) {
-        --btn-size: 1.5em;
-        --btn-border-radius: calc(var(--entry-border-radius) - var(--entry-padding) * 0.625);
-        --btn-background-color: rgb(from var(--entry-color) r g b / 0.15);
-        --btn-icon-stroke: 2.5;
-
-        box-shadow: 0 0 0 0 transparent;
-        transition:
-            box-shadow var(--_150ms, 0) ease-in-out,
-            background-color var(--_150ms, 0) ease-in-out;
-    }
-
-    &::part(entry-button):hover {
-        background-color: rgb(from var(--entry-color) r g b / 0.25);
-        box-shadow: var(--entry-button-outline);
-    }
-
-    &::part(entry-button):focus-visible {
-        box-shadow: var(--entry-button-outline);
-    }
-
-    &::part(media-button) {
-        --btn-border-radius: var(--panel-border-radius);
-        transition:
-            box-shadow var(--_150ms, 0) ease-in-out,
-            background-color var(--_150ms, 0) ease-in-out;
-    }
-
-    &::part(media-button):hover {
-        background-color: rgb(from currentColor r g b / 0.15);
-        box-shadow: var(--entry-button-outline);
-    }
-
-    &::part(media-button):focus-visible {
-        box-shadow: var(--entry-button-outline);
     }
 
     &::part(list) {
         display: flex;
         flex-direction: column;
         gap: calc(var(--default-padding) * 0.5);
+    }
+
+    &::part(entry-list-item) {
+    }
+
+    &::part(entry-list-item-placeholder) {
+        min-height: 1em;
+    }
+
+    &::part(entry-list-item virtualized) {
+        background-color: var(--entry-background-color);
+        border-radius: var(--entry-border-radius);
+    }
+
+    &::part(entry-list-item dragged) {
+        --entry-shadow: 0 3px 6px rgb(0 0 0 / 0.25);
+    }
+
+    &::part(entry-list-item selected) {
+        --entry-overlay-color: rgb(from var(--entry-accent-color) r g b / 0.25);
+        --entry-border: 2px solid var(--entry-accent-color);
+    }
+
+    &::part(data-transfer-item) {
+        --entry-border-top: 0;
+        --entry-border-right: 0;
+        --entry-border-bottom: 0;
+        --entry-border-left: 0;
+        --entry-shadow: none;
     }
 
     &::part(entry) {
@@ -134,6 +97,10 @@ file-pond-entry-list {
         grid-row: 1;
         grid-column: 1;
         padding: var(--entry-padding);
+    }
+
+    &::part(entry-checkbox checked) {
+        --input-background-color: var(--entry-accent-color);
     }
 
     &::part(entry-info) {
@@ -177,34 +144,91 @@ file-pond-entry-list {
         --panel-background-color: rgb(0 0 0 / 0.35);
         --panel-backdrop-filter: var(--default-backdrop-filter);
     }
+
+    &::part(entry-button) {
+        --btn-size: 1.5em;
+        --btn-border-radius: calc(var(--entry-border-radius) - var(--entry-padding) * 0.625);
+        --btn-background-color: rgb(from var(--entry-color) r g b / 0.15);
+        --btn-icon-stroke: 2.5;
+
+        box-shadow: 0 0 0 0 transparent;
+        transition:
+            box-shadow var(--_150ms, 0) ease-in-out,
+            background-color var(--_150ms, 0) ease-in-out;
+    }
+
+    &::part(entry-button):hover {
+        background-color: rgb(from var(--entry-color) r g b / 0.25);
+        box-shadow: var(--entry-button-outline);
+    }
+
+    &::part(entry-button):focus-visible {
+        box-shadow: var(--entry-button-outline);
+    }
+
+    &::part(media-button) {
+        --btn-border-radius: var(--panel-border-radius);
+        transition:
+            box-shadow var(--_150ms, 0) ease-in-out,
+            background-color var(--_150ms, 0) ease-in-out;
+    }
+
+    &::part(media-button):hover {
+        background-color: rgb(from currentColor r g b / 0.15);
+        box-shadow: var(--entry-button-outline);
+    }
+
+    &::part(media-button):focus-visible {
+        box-shadow: var(--entry-button-outline);
+    }
 }
 
-/* Entry layout where media underlays controls 
-.entry {
+:host([disabled]) file-pond-entry-list {
+    --entry-overlay-color: rgb(from var(--entry-background-color) r g b / 0.5);
+}
 
-    & .button {
-        --backdrop-filter: var(--media-backdrop-filter);
-        --background-color: rgb(from var(--media-background-color) r g b / 0.35);
-    }
-
-    & .media-overlay {
-        z-index: 1;
-        --border-radius: 0;
-        --backdrop-filter: var(--media-backdrop-filter);
-        --background-color: rgb(from var(--media-background-color) r g b / 0.35);
-        mask: linear-gradient(black 10%, transparent);
-        max-height: 4em !important;
-    }
-
-    & .entry-media {
+/* Entry layout where media underlays controls  
+file-pond-entry-list {
+    &::part(entry-media) {
         grid-row: 1 / 3;
         grid-column: 1 / 4;
         z-index: -1;
     }
+
+    &::part(media-overlay) {
+        z-index: 1;
+        mask: linear-gradient(
+            #000,
+            rgb(0 0 0 / 0.738) 19%,
+            rgb(0 0 0 / 0.541) 34%,
+            rgb(0 0 0 / 0.382) 47%,
+            rgb(0 0 0 / 0.278) 56%,
+            rgb(0 0 0 / 0.194) 65%,
+            rgb(0 0 0 / 0.126) 73%,
+            rgb(0 0 0 / 0.075) 80%,
+            rgb(0 0 0 / 0.042) 86%,
+            rgb(0 0 0 / 0.021) 91%,
+            rgb(0 0 0 / 0.008) 95%,
+            rgb(0 0 0 / 0.002) 98%,
+            transparent
+        );
+        max-height: 4em !important;
+        --border-radius: 0;
+        --background-color: rgb(from var(--media-background-color) r g b / 0.5);
+    }
+
+    &::part(entry-button) {
+        --btn-backdrop-filter: var(--default-backdrop-filter);
+        --btn-background-color: rgb(from var(--media-background-color) r g b / 0.35);
+    }
+
+    &::part(entry-button):hover {
+        --btn-background-color: rgb(from var(--media-background-color) r g b / 0.25);
+    }
 }
 */
 
-/* Powered by FilePond */
+/* Attribution link */
 :host a {
     --font-size: 0.625;
     --inset: calc(var(--default-padding) / var(--font-size));
@@ -227,5 +251,45 @@ file-pond-entry-list {
     &:hover {
         --text-opacity: 0.75;
         --line-opacity: 0.25;
+    }
+}
+
+/* Slotted element styles */
+::slotted(input[type='file']) {
+    position: absolute;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    z-index: -1;
+    pointer-events: none;
+    user-select: none;
+
+    /* hide from view */
+    mask: linear-gradient(transparent, transparent);
+
+    /* we align it to the top so Safari tooltip points to the field */
+    top: 0;
+    left: 0;
+}
+
+::slotted(label) {
+    --width-px: calc(var(--width) * 1px);
+    --center-px: calc((var(--width-px) - (2 * var(--default-padding))) * 0.5);
+
+    display: inline-block;
+    transform: translateX(calc(var(--center-px) - 50%));
+    align-self: flex-start;
+    text-align: center;
+
+    padding-top: var(--default-padding);
+    padding-bottom: var(--default-padding);
+
+    transition: opacity calc(150ms * var(--animate)) ease-in-out;
+}
+
+:host([disabled]) {
+    & ::slotted(label) {
+        opacity: 0.4;
+        pointer-events: none !important;
     }
 }

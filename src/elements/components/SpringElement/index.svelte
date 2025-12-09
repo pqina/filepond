@@ -65,6 +65,9 @@
         /** Called when spring animation ends */
         onspringcomplete?: (state: { opacity: number; scale: number }) => void;
 
+        /** Called when children render state changes */
+        onchangerendercontent?: (shouldRenderContent: boolean) => void;
+
         /** Called before rendering content */
         shouldRenderContent?: (rect: Rect) => boolean;
 
@@ -139,6 +142,7 @@
         onelementmeasure = undefined,
         onmeasure = undefined,
         onspringcomplete = noop,
+        onchangerendercontent = undefined,
         shouldRenderContent = undefined,
         children,
     }: SpringElementOptions = $props();
@@ -219,6 +223,10 @@
         shouldRenderChildrenPrev = !!(rootAbsoluteRect && shouldRenderContent(rootAbsoluteRect));
 
         return shouldRenderChildrenPrev;
+    });
+
+    $effect(() => {
+        onchangerendercontent?.(shouldRenderChildren);
     });
 
     /** Visual element absolute rectangle */

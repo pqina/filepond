@@ -70,7 +70,7 @@ export const FileInputSource = createExtension(
                     return;
                 }
 
-                // reset by assigning empty datatransfer filelist
+                // reset by assigning empty data transfer filelist
                 element.files = new DataTransfer().files;
             }
 

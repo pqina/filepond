@@ -13,7 +13,12 @@ import {
 import { RangeInput } from '../elements/components/RangeInput/index.js';
 import { supportsRequestFullscreen } from '../utils/support.js';
 import { toTime } from '../utils/date.js';
-import { type NodeContext, type TemplateNode, nodeTree } from '../elements/common/nodeTree.js';
+import {
+    type NodeContext,
+    type TemplateNode,
+    type ComponentNode,
+    nodeTree,
+} from '../elements/common/nodeTree.js';
 import { boolToAttributeValue } from '../utils/dom.js';
 import { MediaVideo } from '../elements/FilePondEntryList/components/MediaVideo/index.js';
 import { MediaTimeIndicator } from '../elements/FilePondEntryList/components/MediaTimeIndicator/index.js';
@@ -112,7 +117,11 @@ export function createImageView(options?: MediaImageOptions) {
                     }),
                 },
             },
-            createSpringPane({ key: 'entry-image-overlay', class: 'media-overlay' }),
+            createSpringPane({
+                key: 'entry-image-overlay',
+                class: 'media-overlay',
+                part: 'media-overlay',
+            }),
         ],
     };
 }
@@ -149,7 +158,11 @@ export function createVideoView(options?: MediaVideoOptions) {
                     }),
                 },
             },
-            createSpringPane({ key: 'entry-video-overlay', class: 'media-overlay' }),
+            createSpringPane({
+                key: 'entry-video-overlay',
+                class: 'media-overlay',
+                part: 'media-overlay',
+            }),
         ],
     };
 }
@@ -357,7 +370,14 @@ export function appendEntryVideoView(
 ) {
     const { videoViewOptions } = options ?? {};
     nodeTree(template)
-        .find('entry')
+        .update('entry', (node: any) => {
+            node.routes = {
+                'toggle-playback:click': 'entry-video.togglePlayback',
+                'toggle-audio:click': 'entry-video.toggleAudio',
+                'toggle-fullscreen:click': 'entry-video.toggleFullscreen',
+                'media-scrubber:input': 'entry-video.setCurrentTime',
+            };
+        })
         .append(
             whenEntryIs('video').append(
                 createVideoView(videoViewOptions),
@@ -376,13 +396,5 @@ export function appendEntryVideoView(
                     )
                 )
             )
-        )
-        .update({
-            routes: {
-                'toggle-playback:click': 'entry-video.togglePlayback',
-                'toggle-audio:click': 'entry-video.toggleAudio',
-                'toggle-fullscreen:click': 'entry-video.toggleFullscreen',
-                'media-scrubber:input': 'entry-video.setCurrentTime',
-            },
-        });
+        );
 }

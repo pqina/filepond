@@ -77,13 +77,14 @@ export function createElementStack(options: { layout?: 'row' | 'stack' | 'pile';
     });
 }
 
-export function createSpringPane(options: { key: string; class: string }) {
-    const { key, class: klass } = options || {};
+export function createSpringPane(options: { key: string; class: string; part?: string }) {
+    const { key, class: klass, part } = options || {};
     return {
         key,
         component: ElementPane,
         props: ({ visualRect }: NodeContext) => {
             return {
+                part,
                 class: klass,
                 width: visualRect.width,
                 height: visualRect.height,

@@ -155,7 +155,7 @@ export const DataTransferLoader = createExtension(
                 code: 'LOAD_COMPLETE',
             });
 
-            // @ts-ignore replace datatransfer entry with a list of entries
+            // @ts-ignore replace data transfer entry with a list of entries
             replaceEntry(entry, entries);
         }
 

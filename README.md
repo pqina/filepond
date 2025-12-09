@@ -12,7 +12,7 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 TODO:
 
 -   Docs are on the way
--   Naming of some types
+-   Naming of various types
 -   Safari flashing of video while dragging
 -   Run more tests on mobile devices
 -   Add basic image manipulation extensions

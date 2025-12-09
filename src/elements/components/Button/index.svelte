@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { onMount, type Snippet } from 'svelte';
+    import { type Snippet } from 'svelte';
     import { createDefaultIcon } from '../../common/html.js';
-    import { toClassName } from '../../common/string.js';
+    import { toSpaceSeparatedString } from '../../common/string.js';
     import { updateDataset, updateStyles } from '../../../utils/dom.js';
     import { noop } from '../../../utils/placeholder.js';
 
@@ -72,7 +72,7 @@
 
     // combine css classes
     const currentClass = $derived(klass);
-    const buttonClass = $derived(toClassName('button', currentClass));
+    const buttonClass = $derived(toSpaceSeparatedString('button', currentClass));
 </script>
 
 <button

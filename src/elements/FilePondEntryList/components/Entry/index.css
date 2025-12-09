@@ -5,31 +5,21 @@
     /* Use border box so we don't have to subtract padding from min-height */
     box-sizing: border-box;
 
-    /* Minimum height so height animation is less extreme on load */
+    /* Minimum height so height animation is less extreme on load, this also makes sure the entry takes up space when rendering */
     min-height: var(--entry-min-height);
 
-    /* so we respect max-height set on entry item */
+    /* So we respect max-height set on entry item */
     max-height: inherit;
     height: inherit;
 
-    /* masking */
-    clip-path: inset(var(--mask) round var(--entry-border-radius));
-
-    /* line height for text items */
+    /* Line height for text items */
     line-height: 1.15;
 
-    /* use entry color */
+    /* Use default entry color for text */
     color: var(--entry-color);
 
-    /* entry selected state */
-    &[data-selected] ~ .entry-front {
-        --background-color: rgb(from var(--entry-accent-color) r g b / 0.25);
-        --s: 2px solid var(--entry-accent-color);
-        --border-top: var(--s);
-        --border-right: var(--s);
-        --border-bottom: var(--s);
-        --border-left: var(--s);
-    }
+    /* Masking set by the component */
+    clip-path: inset(var(--mask) round var(--entry-border-radius));
 }
 
 /* entry info items */
@@ -66,8 +56,7 @@
 
 /* entry decorative elements */
 .entry-back,
-.entry-front,
-.entry-disabled-overlay {
+.entry-front {
     --border-radius: var(--entry-border-radius);
 }
 
@@ -80,30 +69,19 @@
 .entry-front {
     z-index: 1;
     --transition-duration: var(--_100ms);
-    --transition: border var(--transition-duration) ease-out,
+    --transition: border var(--transition-duration) ease-in-out,
         background-color var(--transition-duration) ease-in-out;
     --border-top: var(--entry-border-top);
     --border-right: var(--entry-border-right);
     --border-bottom: var(--entry-border-bottom);
     --border-left: var(--entry-border-left);
-}
-
-.entry-disabled {
-    --background-color: color-mix(
-        in srgb,
-        var(--entry-background-color) calc(var(--disabled-state) * 40%),
-        transparent
-    );
+    --background-color: var(--entry-overlay-color);
 }
 
 /* Default entry layout */
 .entry {
     container-type: inline-size;
     container-name: entry;
-
-    &[data-selected] .entry-checkbox {
-        --input-background-color: var(--entry-accent-color);
-    }
 
     & .entry-info {
         pointer-events: none;
@@ -185,24 +163,5 @@
         & .media-scrubber {
             display: none;
         }
-    }
-}
-
-/* Data Transfer layout */
-.entry.entry-data-transfer {
-    & ~ .entry-back {
-        --border: none;
-        --box-shadow: none;
-        --background-color: var(--data-transfer-background-color);
-    }
-
-    & ~ .entry-front {
-        display: none;
-    }
-
-    & .entry-info {
-        grid-row: 1;
-        grid-column: 2/4;
-        padding-right: var(--entry-padding);
     }
 }

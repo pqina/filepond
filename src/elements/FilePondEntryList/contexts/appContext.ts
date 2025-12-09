@@ -4,7 +4,6 @@ import type { Rect } from '../../../utils/rect.js';
 import type { AnimatedEntry, AppCallbacks } from '../index.js';
 
 export interface AppContext extends AppCallbacks {
-    readonly disabledState: boolean;
     readonly enableAnimations: boolean;
     readonly locale: Locale;
     readonly assets: { [key: string]: string };

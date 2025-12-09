@@ -2,6 +2,7 @@
     import { createDefaultIcon } from '../../common/html.js';
     import { stopPropagation, updateDataset } from '../../../utils/dom.js';
     import { getUniqueId } from '../../../utils/string.js';
+    import { toSpaceSeparatedString } from '../../common/string.js';
 
     interface BooleanInputOptions {
         class?: string;
@@ -48,9 +49,11 @@
     function handleOnChange(e: Event) {
         onchange?.((e.target as HTMLInputElement).checked);
     }
+
+    const computedParts = $derived(toSpaceSeparatedString(part, checked ? 'checked' : undefined));
 </script>
 
-<boolean-input {part} class={klass} bind:this={root}>
+<boolean-input part={computedParts} class={klass} bind:this={root}>
     <label for={id} class={labelIsImplicit ? 'implicit' : undefined}>{label}</label>
     <input
         {type}

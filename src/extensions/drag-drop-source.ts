@@ -21,9 +21,9 @@ export const DragDropSource = createExtension(
             /** This just needs to be prevent default to be able to handle drop */
             const handleDragOver = (e: DragEvent) => e.preventDefault();
 
-            /** Gets the file tree info from the datatransfer entries */
+            /** Gets the file tree info from the data transfer entries */
             const handleDrop = async (e: DragEvent) => {
-                // exit if no datatransfer
+                // exit if no data transfer
                 if (!e.dataTransfer || !e.target) {
                     return;
                 }

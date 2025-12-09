@@ -30,7 +30,7 @@ export const core = {
     // file status
     loadError: 'Failed to load file.',
 
-    // datatransfer status
+    // data transfer status
     loadDataTranserProgress: 'Loading files',
     loadDataTranserInfo: 'Processed {{processedFiles}} of {{totalFiles}} files',
 

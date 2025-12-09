@@ -1,10 +1,9 @@
 <script lang="ts">
     import type { Size } from '../../../../utils/size.js';
     import { ElementPane } from '../../../components/ElementPane/index.js';
-    import { getAppContext } from '../../contexts/appContext.js';
     import { getEntryContext } from '../../contexts/entryContext.js';
     import { getSpringElementTreeContext } from '../../contexts/springElementTreeContext.js';
-    import { toClassName } from '../../../common/string.js';
+    import { toSpaceSeparatedString } from '../../../common/string.js';
     import { updateDataset } from '../../../../utils/dom.js';
 
     // props
@@ -19,7 +18,7 @@
 
     // combined classes
     const currentClass = $derived(klass);
-    const entryClass = $derived(toClassName('entry', currentClass));
+    const entryClass = $derived(toSpaceSeparatedString('entry', currentClass));
 
     // get spring context
     const springContext = getSpringElementTreeContext();
@@ -32,18 +31,11 @@
     const entryContext = getEntryContext();
     const name = $derived(entryContext.current.name);
 
-    // file disabled overlay opacity
-    const { disabledState: isDisabled } = $derived(getAppContext());
-
     // calculate clip mask so we can nicely scale content
     const hasSize = $derived(currentSize && targetSize);
     const maskRight = $derived(hasSize ? targetSize!.width - currentSize!.width : 0);
     const maskBottom = $derived(hasSize ? targetSize!.height - currentSize!.height : 0);
     const maskStyle = $derived(`0px ${maskRight}px ${maskBottom}px 0px`);
-
-    // CSS classes
-    const additionalFrontPaneClass = $derived(isDisabled ? 'entry-disabled' : undefined);
-    const frontPaneClass = $derived(toClassName('entry-front', additionalFrontPaneClass));
 </script>
 
 <!-- Render entry item-->
@@ -54,4 +46,4 @@
 
 <!-- Draw panels outside mask -->
 <ElementPane class="entry-back" {...currentSize} />
-<ElementPane class={frontPaneClass} {...currentSize} />
+<ElementPane class="entry-front" {...currentSize} />

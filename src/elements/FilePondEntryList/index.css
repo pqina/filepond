@@ -1,12 +1,4 @@
 /* No nested styles in this CSS file as for some weird reason this crashed Safari (tested on 17.6 Sonoma) */
-
-/* Used to animate disabled between true/false */
-@property --disabled-state {
-    syntax: '<number>';
-    inherits: true;
-    initial-value: 0;
-}
-
 .root {
     /* create new stacking context for FilePondEntryList and its subtree */
     isolation: isolate;
@@ -14,28 +6,23 @@
     /* Default styles */
     text-align: left;
     font-weight: 500;
+
+    /* Disabled state */
+    &[data-disabled] * {
+        pointer-events: none !important;
+    }
 }
 
 :host {
+    --entry-min-height: 2.5em;
     --entry-padding: calc(var(--default-padding) * 0.5);
     --entry-shadow: none;
-    --entry-lifted-shadow: none;
-    --entry-min-height: 2.5em;
     --entry-color: currentColor;
     --entry-background-color: inherit;
+    --entry-overlay-color: none;
     --entry-border-radius: calc(var(--default-border-radius, 0) * 0.5);
     --entry-border: var(--default-border, none);
-    --entry-border-top: var(--entry-border);
-    --entry-border-right: var(--entry-border);
-    --entry-border-bottom: var(--entry-border);
-    --entry-border-left: var(--entry-border);
     --entry-accent-color: var(--default-accent-color);
-
-    --data-transfer-background-color: color-mix(
-        in srgb,
-        var(--entry-color) 10%,
-        var(--entry-background-color)
-    );
 
     --media-background-color: black;
 
@@ -101,22 +88,6 @@ element-stack[layout='pile'] {
 
 element-stack[layout='pile'] > * {
     grid-area: 1 / 1;
-}
-
-/* disabled state */
-.root {
-    --disabled-state: 0;
-    --disabled-state-duration: var(--_150ms);
-    transition: --disabled-state var(--disabled-state-duration) ease-in-out;
-}
-
-.root[disabled] {
-    --disabled-state: 1;
-    filter: grayscale(var(--disabled-state));
-}
-
-.root[disabled] * {
-    pointer-events: none !important;
 }
 
 /* Hide element from screen but still leave accessible to screenreader */

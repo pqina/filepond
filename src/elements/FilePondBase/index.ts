@@ -104,7 +104,7 @@ function formatEntry(entry: FilePondEntrySource): FilePondEntry {
     partialEntry.origin = partialEntry.origin ?? 'api';
     partialEntry.containerId = partialEntry.containerId ?? null;
 
-    // if the source is a datatransfer there's nothing left to format
+    // if the source is a data transfer there's nothing left to format
     if (isDataTransfer(partialEntry.src)) {
         return partialEntry as FilePondDataTransferEntry;
     }
