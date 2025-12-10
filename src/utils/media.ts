@@ -28,20 +28,21 @@ export async function getImageSize(
     const view = new DataView(buffer);
 
     // try to read size from bytes
+    let size;
     if (isJPEG(view)) {
-        return getSizeFromJPEG(view);
+        size = getSizeFromJPEG(view);
     } else if (isPNG(view)) {
-        return getSizeFromPNG(view);
+        size = getSizeFromPNG(view);
     } else if (isWEBP(view)) {
-        return getSizeFromWEBP(view);
+        size = getSizeFromWEBP(view);
     } else if (isGIF(view)) {
-        return getSizeFromGIF(view);
+        size = getSizeFromGIF(view);
     } else if (isHEIC(view) || isAVIF(view)) {
-        return getSizeFromBMFF(view);
+        size = getSizeFromBMFF(view);
     }
 
     // fallback to decoding the image and getting the natural width and height
-    return getImageSizeWithElement(file);
+    return size || getImageSizeWithElement(file);
 }
 
 /** Tests if data view is of type JPEG */
@@ -250,12 +251,13 @@ export async function getVideoSize(
     const view = new DataView(buffer);
 
     // try to read size from bytes
+    let size;
     if (isMP4(view)) {
-        return getSizeFromMP4(view);
+        size = getSizeFromMP4(view);
     }
 
     // use video element
-    return getVideoSizeWithElement(file);
+    return size || getVideoSizeWithElement(file);
 }
 
 /** Tests if data view is of type MP4 */

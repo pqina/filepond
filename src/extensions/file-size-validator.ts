@@ -2,11 +2,12 @@ import type { FilePondEntry } from '../types/index.js';
 import {
     createValidatorExtension,
     type ValidationResultInvalid,
+    type ValidatorExtensionOptions,
 } from './common/createValidatorExtension.js';
 import { isBlobOrFile, isFileEntry } from '../utils/test.js';
 import { bytesToNaturalFileSize, naturalFileSizeToBytes } from '../utils/file.js';
 
-export interface FileSizeValidatorOptions {
+export interface FileSizeValidatorOptions extends ValidatorExtensionOptions {
     /** Min file size in bytes or a natural file size. Defaults to `0` */
     minSize?: number | string;
 

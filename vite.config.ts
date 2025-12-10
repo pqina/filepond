@@ -11,7 +11,7 @@ const fullReloadAlways = {
     },
 };
 
-const fixSvelteDollarCollisions: any = {
+export const fixSvelteDollarCollisions: any = {
     name: 'replace-dollars',
     generateBundle(options: any, bundle: any[]) {
         for (const [fileName, file] of Object.entries(bundle)) {
@@ -31,7 +31,7 @@ const banner = `/*!
 * https://filepond.com
 */`;
 
-const addBanner: any = {
+export const addBanner: any = {
     name: 'banner',
     generateBundle(_: any, bundle: any[]) {
         for (const [fileName, file] of Object.entries(bundle)) {
@@ -73,14 +73,15 @@ export default defineConfig({
         outDir: 'dist/esm',
         cssMinify: true,
         lib: {
+            name: 'filepond',
             formats: ['es'],
             entry: {
                 index: resolve(__dirname, './src/index.ts'),
-                'assets/index': resolve(__dirname, './src/assets/index.js'),
+                // 'assets/index': resolve(__dirname, './src/assets/index.js'),
                 'locales/index': resolve(__dirname, './src/locales/index.js'),
                 'extensions/index': resolve(__dirname, './src/extensions/index.ts'),
                 'templates/index': resolve(__dirname, './src/templates/index.ts'),
-                'dev/index': resolve(__dirname, './src/dev/index.ts'),
+                // 'dev/index': resolve(__dirname, './src/dev/index.ts'),
             },
         },
         rollupOptions: {

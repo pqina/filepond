@@ -117,37 +117,38 @@ export const validationFileSize = {
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Total file size is too small. Minimum required is {minListSize}.',
-    validationListSizeOverflow: 'Total file size is too large. Maximum allowed is {maxListSize}.',
+    validationListSizeUnderflow:
+        'Total file size is too small. Minimum required is {{minListSize}}.',
+    validationListSizeOverflow: 'Total file size is too large. Maximum allowed is {{maxListSize}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Failed to read media size.',
 
     validationMediaWidthRangeMismatch:
-        'The {{fileMainType}} width is invalid. Width must be between {{minWidth}} and {{maxWidth}}.',
+        'The {{fileMainType}} width is invalid. Width must be between {{minWidth}} and {{maxWidth}} pixels.',
 
     validationMediaWidthUnderflow:
-        'The {{fileMainType}} is too small. Minimum width is {{minWidth}}.',
+        'The {{fileMainType}} is too small. Minimum width is {{minWidth}} pixels.',
     validationMediaWidthOverflow:
-        'The {{fileMainType}} is too large. Maximum width is {{maxWidth}}.',
+        'The {{fileMainType}} is too large. Maximum width is {{maxWidth}} pixels.',
 
     validationMediaHeightRangeMismatch:
-        'The {{fileMainType}} height is invalid. Height must be between {{minHeight}} and {{maxHeight}}.',
+        'The {{fileMainType}} height is invalid. Height must be between {{minHeight}} and {{maxHeight}} pixels.',
 
     validationMediaHeightUnderflow:
-        'The {{fileMainType}} is too small. Minimum height is {{minHeight}}.',
+        'The {{fileMainType}} is too small. Minimum height is {{minHeight}} pixels.',
     validationMediaHeightOverflow:
-        'The {{fileMainType}} is too large. Maximum height is {{maxHeight}}.',
+        'The {{fileMainType}} is too large. Maximum height is {{maxHeight}} pixels.',
 
     validationMediaResolutionRangeMismatch:
-        'The {{fileMainType}} resolution is invalid. Resolution must be between {{minResolution}} and {maxResolution}.',
+        'The {{fileMainType}} resolution is invalid. Resolution must be between {{minResolution}}MP and {{maxResolution}}MP.',
 
     validationMediaResolutionUnderflow:
-        'The {{fileMainType}} resolution is invalid. Minimum resolution is {{minResolution}}.',
+        'The {{fileMainType}} resolution is invalid. Minimum resolution is {{minResolution}}MP.',
 
     validationMediaResolutionOverflow:
-        'The {{fileMainType}} resolution is invalid. Maximum resolution is {{maxResolution}}.',
+        'The {{fileMainType}} resolution is invalid. Maximum resolution is {{maxResolution}}MP.',
 };
 
 export const validationListCount = {

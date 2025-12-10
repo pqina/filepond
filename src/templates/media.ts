@@ -13,12 +13,7 @@ import {
 import { RangeInput } from '../elements/components/RangeInput/index.js';
 import { supportsRequestFullscreen } from '../utils/support.js';
 import { toTime } from '../utils/date.js';
-import {
-    type NodeContext,
-    type TemplateNode,
-    type ComponentNode,
-    nodeTree,
-} from '../elements/common/nodeTree.js';
+import { type NodeContext, type TemplateNode, nodeTree } from '../elements/common/nodeTree.js';
 import { boolToAttributeValue } from '../utils/dom.js';
 import { MediaVideo } from '../elements/FilePondEntryList/components/MediaVideo/index.js';
 import { MediaTimeIndicator } from '../elements/FilePondEntryList/components/MediaTimeIndicator/index.js';

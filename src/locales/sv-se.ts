@@ -106,29 +106,37 @@ export const validationFileSize = {
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Total filstorlek är för liten. Minimikravet är {minListSize}.',
-    validationListSizeOverflow: 'Total filstorlek är för stor. Maxgränsen är {maxListSize}.',
+    validationListSizeUnderflow: 'Total filstorlek är för liten. Minimikravet är {{minListSize}}.',
+    validationListSizeOverflow: 'Total filstorlek är för stor. Maxgränsen är {{maxListSize}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Det gick inte att läsa mediestorleken.',
 
     validationMediaWidthRangeMismatch:
-        'Bredden på {{fileMainType}} är ogiltig. Den måste vara mellan {{minWidth}} och {{maxWidth}}.',
-    validationMediaWidthUnderflow: '{{fileMainType}} är för smal. Minsta bredd är {{minWidth}}.',
-    validationMediaWidthOverflow: '{{fileMainType}} är för bred. Största bredd är {{maxWidth}}.',
+        '{{fileMainType}} har ogiltig bredd. Bredden måste vara mellan {{minWidth}} och {{maxWidth}} pixlar.',
+
+    validationMediaWidthUnderflow:
+        '{{fileMainType}} är för liten. Minsta bredd är {{minWidth}} pixlar.',
+    validationMediaWidthOverflow:
+        '{{fileMainType}} är för stor. Största bredd är {{maxWidth}} pixlar.',
 
     validationMediaHeightRangeMismatch:
-        'Höjden på {{fileMainType}} är ogiltig. Den måste vara mellan {{minHeight}} och {{maxHeight}}.',
-    validationMediaHeightUnderflow: '{{fileMainType}} är för låg. Minsta höjd är {{minHeight}}.',
-    validationMediaHeightOverflow: '{{fileMainType}} är för hög. Största höjd är {{maxHeight}}.',
+        '{{fileMainType}} har ogiltig höjd. Höjden måste vara mellan {{minHeight}} och {{maxHeight}} pixlar.',
+
+    validationMediaHeightUnderflow:
+        '{{fileMainType}} är för liten. Minsta höjd är {{minHeight}} pixlar.',
+    validationMediaHeightOverflow:
+        '{{fileMainType}} är för stor. Största höjd är {{maxHeight}} pixlar.',
 
     validationMediaResolutionRangeMismatch:
-        'Upplösningen för {{fileMainType}} är ogiltig. Den måste vara mellan {{minResolution}} och {maxResolution}.',
+        '{{fileMainType}} har ogiltig upplösning. Den måste vara mellan {{minResolution}}MP och {{maxResolution}}MP.',
+
     validationMediaResolutionUnderflow:
-        'Upplösningen för {{fileMainType}} är ogiltig. Minsta upplösning är {{minResolution}}.',
+        '{{fileMainType}} har ogiltig upplösning. Minsta upplösning är {{minResolution}}MP.',
+
     validationMediaResolutionOverflow:
-        'Upplösningen för {{fileMainType}} är ogiltig. Största upplösning är {{maxResolution}}.',
+        '{{fileMainType}} har ogiltig upplösning. Största upplösning är {{maxResolution}}MP.',
 };
 
 export const validationListCount = {

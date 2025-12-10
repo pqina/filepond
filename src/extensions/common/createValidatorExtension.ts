@@ -18,10 +18,15 @@ export interface ValidationResultInvalid {
     values?: { [key: string]: any } | null;
 }
 
-export interface ValidatorExtensionOptions {}
+export interface ValidatorExtensionOptions {
+    /**
+     * Determines if we should validate the entry, if returns `false`, the entry is skipped
+     */
+    shouldValidate?: (entry: FilePondEntry) => Promise<boolean>;
+}
 
 export interface ValidatorExtensionFunctions {
-    /** Returns `true` when can filter this entry */
+    /** Returns `true` when can run validation logic on this entry */
     canValidateEntry?: (entry: FilePondEntry) => Promise<boolean> | boolean;
 
     /** Returns `string` when error state, returns `null` when all is fine */
@@ -36,7 +41,7 @@ export function createValidatorExtension(
     validatorFactory: ValidatorFactory
 ): (pond: ExtensionManagerAPI) => ExtensionInstance {
     return createExtension(extensionName, validatorProps, (state, pond) => {
-        const { didSetProps } = state;
+        const { didSetProps, props } = state;
 
         const {
             setExtensionStatus,
@@ -82,6 +87,9 @@ export function createValidatorExtension(
             setEntryExtensionState(entry, {
                 // null means it's undetermined if we can validate, need to retest
                 canValidate: null,
+
+                // null means it's undetermined if we should validate, need to retest
+                shouldValidate: null,
 
                 // reset status
                 status: {
@@ -148,6 +156,29 @@ export function createValidatorExtension(
             }
         }
 
+        async function taskShouldValidate(entry: FilePondEntry) {
+            const { shouldValidate } = props;
+
+            // exit if shouldValidate not defined
+            if (!shouldValidate) {
+                return;
+            }
+
+            //determine if we _should_ activate validation
+            const result = await shouldValidate(entry);
+
+            // udpate activation status
+            setEntryExtensionState(entry, {
+                shouldValidate: result,
+
+                // have determined if we should validate, switch to idle
+                status: {
+                    type: Status.System,
+                    code: 'VALIDATION_IDLE',
+                },
+            });
+        }
+
         async function taskCanValidate(entry: FilePondEntry) {
             // determine if we can activate the validation logic
             let canValidate;
@@ -195,7 +226,7 @@ export function createValidatorExtension(
 
         function handleUpdateEntry(entry: FilePondEntry) {
             // get props to help determine what next step to take
-            const { canValidate, status } = getEntryExtensionState(entry);
+            const { canValidate, shouldValidate, status } = getEntryExtensionState(entry);
 
             // completed validation
             const didValidate = status?.code === 'VALIDATION_COMPLETE';
@@ -207,13 +238,20 @@ export function createValidatorExtension(
             // - something failed
             // - we already didValidate once (in which case we wait for a data change)
             // - we've determined we can't run validate task
-            if (hasFailed || didValidate || canValidate === false) {
+            // - we've determined we shouldn't run validate task
+            if (hasFailed || didValidate || canValidate === false || shouldValidate === false) {
                 return;
             }
 
             // we don't know if can activate, need to test
             if (canValidate === null) {
                 pushTask(entry.id, taskCanValidate);
+                return;
+            }
+
+            // we don't know if should activate, need to test
+            if (props.shouldValidate && shouldValidate === null) {
+                pushTask(entry.id, taskShouldValidate);
                 return;
             }
 
@@ -229,14 +267,17 @@ export function createValidatorExtension(
             // test if any error entries
             for (const entry of entries) {
                 const status = getEntryExtensionStatus(entry);
+
                 if (status.type !== Status.Error) {
                     continue;
                 }
+
                 setExtensionStatus({
                     type: Status.Error,
                     code: 'VALIDATION_INVALID_ENTRIES',
                     meta: status.meta,
                 });
+
                 return;
             }
 

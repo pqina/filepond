@@ -106,32 +106,37 @@ export const validationFileSize = {
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'कुल फ़ाइल आकार बहुत कम है। न्यूनतम आवश्यक {minListSize} है।',
-    validationListSizeOverflow: 'कुल फ़ाइल आकार बहुत अधिक है। अधिकतम अनुमत {maxListSize} है।',
+    validationListSizeUnderflow: 'कुल फ़ाइल आकार बहुत कम है। न्यूनतम आवश्यक {{minListSize}} है।',
+    validationListSizeOverflow: 'कुल फ़ाइल आकार बहुत अधिक है। अधिकतम अनुमत {{maxListSize}} है।',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'मीडिया का आकार पढ़ा नहीं जा सका।',
 
     validationMediaWidthRangeMismatch:
-        '{{fileMainType}} की चौड़ाई अमान्य है। इसे {{minWidth}} और {{maxWidth}} के बीच होना चाहिए।',
+        '{{fileMainType}} की चौड़ाई मान्य नहीं है। चौड़ाई {{minWidth}} और {{maxWidth}} पिक्सल के बीच होनी चाहिए।',
+
     validationMediaWidthUnderflow:
-        '{{fileMainType}} बहुत संकीर्ण है। न्यूनतम चौड़ाई {{minWidth}} है।',
-    validationMediaWidthOverflow: '{{fileMainType}} बहुत चौड़ी है। अधिकतम चौड़ाई {{maxWidth}} है।',
+        '{{fileMainType}} बहुत छोटा है। न्यूनतम चौड़ाई {{minWidth}} पिक्सल है।',
+    validationMediaWidthOverflow:
+        '{{fileMainType}} बहुत बड़ा है। अधिकतम चौड़ाई {{maxWidth}} पिक्सल है।',
 
     validationMediaHeightRangeMismatch:
-        '{{fileMainType}} की ऊँचाई अमान्य है। इसे {{minHeight}} और {{maxHeight}} के बीच होना चाहिए।',
+        '{{fileMainType}} की ऊंचाई मान्य नहीं है। ऊंचाई {{minHeight}} और {{maxHeight}} पिक्सल के बीच होनी चाहिए।',
+
     validationMediaHeightUnderflow:
-        '{{fileMainType}} बहुत कम ऊँची है। न्यूनतम ऊँचाई {{minHeight}} है।',
+        '{{fileMainType}} बहुत छोटा है। न्यूनतम ऊंचाई {{minHeight}} पिक्सल है।',
     validationMediaHeightOverflow:
-        '{{fileMainType}} बहुत अधिक ऊँची है। अधिकतम ऊँचाई {{maxHeight}} है।',
+        '{{fileMainType}} बहुत बड़ा है। अधिकतम ऊंचाई {{maxHeight}} पिक्सल है।',
 
     validationMediaResolutionRangeMismatch:
-        '{{fileMainType}} का रेज़ोल्यूशन अमान्य है। इसे {{minResolution}} और {maxResolution} के बीच होना चाहिए।',
+        '{{fileMainType}} का रिज़ॉल्यूशन मान्य नहीं है। रिज़ॉल्यूशन {{minResolution}}MP और {{maxResolution}}MP के बीच होना चाहिए।',
+
     validationMediaResolutionUnderflow:
-        '{{fileMainType}} का रेज़ोल्यूशन अमान्य है। न्यूनतम रेज़ोल्यूशन {{minResolution}} है।',
+        '{{fileMainType}} का रिज़ॉल्यूशन मान्य नहीं है। न्यूनतम रिज़ॉल्यूशन {{minResolution}}MP है।',
+
     validationMediaResolutionOverflow:
-        '{{fileMainType}} का रेज़ोल्यूशन अमान्य है। अधिकतम रेज़ोल्यूशन {{maxResolution}} है।',
+        '{{fileMainType}} का रिज़ॉल्यूशन मान्य नहीं है। अधिकतम रिज़ॉल्यूशन {{maxResolution}}MP है।',
 };
 
 export const validationListCount = {

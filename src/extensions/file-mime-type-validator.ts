@@ -2,10 +2,11 @@ import type { FilePondEntry } from '../types/index.js';
 import {
     createValidatorExtension,
     type ValidationResultInvalid,
+    type ValidatorExtensionOptions,
 } from './common/createValidatorExtension.js';
 import { isBlobOrFile, isFileEntry, isString } from '../utils/test.js';
 
-export interface FileMimeTypeValidatorOptions {
+export interface FileMimeTypeValidatorOptions extends ValidatorExtensionOptions {
     /** An array of accepted file mimetypes, also accepts wildcard character for example ['image/*'] */
     accept?: string | (string | RegExp)[];
 

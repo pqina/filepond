@@ -106,29 +106,33 @@ export const validationFileSize = {
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: '文件总大小太小。最小要求为 {minListSize}。',
-    validationListSizeOverflow: '文件总大小太大。最大允许为 {maxListSize}。',
+    validationListSizeUnderflow: '文件总大小太小。最小要求为 {{minListSize}}。',
+    validationListSizeOverflow: '文件总大小太大。最大允许为 {{maxListSize}}。',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: '无法读取媒体尺寸。',
 
     validationMediaWidthRangeMismatch:
-        '{{fileMainType}} 的宽度无效。必须在 {{minWidth}} 和 {{maxWidth}} 之间。',
-    validationMediaWidthUnderflow: '{{fileMainType}} 的宽度太小。最小宽度为 {{minWidth}}。',
-    validationMediaWidthOverflow: '{{fileMainType}} 的宽度太大。最大宽度为 {{maxWidth}}。',
+        '{{fileMainType}} 的宽度无效。宽度必须介于 {{minWidth}} 和 {{maxWidth}} 像素之间。',
+
+    validationMediaWidthUnderflow: '{{fileMainType}} 太小。最小宽度为 {{minWidth}} 像素。',
+    validationMediaWidthOverflow: '{{fileMainType}} 太大。最大宽度为 {{maxWidth}} 像素。',
 
     validationMediaHeightRangeMismatch:
-        '{{fileMainType}} 的高度无效。必须在 {{minHeight}} 和 {{maxHeight}} 之间。',
-    validationMediaHeightUnderflow: '{{fileMainType}} 的高度太小。最小高度为 {{minHeight}}。',
-    validationMediaHeightOverflow: '{{fileMainType}} 的高度太大。最大高度为 {{maxHeight}}。',
+        '{{fileMainType}} 的高度无效。高度必须介于 {{minHeight}} 和 {{maxHeight}} 像素之间。',
+
+    validationMediaHeightUnderflow: '{{fileMainType}} 太小。最小高度为 {{minHeight}} 像素。',
+    validationMediaHeightOverflow: '{{fileMainType}} 太大。最大高度为 {{maxHeight}} 像素。',
 
     validationMediaResolutionRangeMismatch:
-        '{{fileMainType}} 的分辨率无效。必须在 {{minResolution}} 和 {maxResolution} 之间。',
+        '{{fileMainType}} 的分辨率无效。必须介于 {{minResolution}}MP 和 {{maxResolution}}MP 之间。',
+
     validationMediaResolutionUnderflow:
-        '{{fileMainType}} 的分辨率无效。最小分辨率为 {{minResolution}}。',
+        '{{fileMainType}} 的分辨率无效。最小分辨率为 {{minResolution}}MP。',
+
     validationMediaResolutionOverflow:
-        '{{fileMainType}} 的分辨率无效。最大分辨率为 {{maxResolution}}。',
+        '{{fileMainType}} 的分辨率无效。最大分辨率为 {{maxResolution}}MP。',
 };
 
 export const validationListCount = {

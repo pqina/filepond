@@ -1,14 +1,13 @@
 import type { FilePondEntry } from '../types/index.js';
-import type { Extension, ExtensionStatus } from './common/createExtension.js';
 import {
     createValidatorExtension,
     type ValidationResultInvalid,
+    type ValidatorExtensionOptions,
 } from './common/createValidatorExtension.js';
 import { isFile, isFileEntry, isImageFile, isVideoFile } from '../utils/test.js';
-import { Status } from '../common/status.js';
 import { getMediaSize } from '../utils/media.js';
 
-export interface MediaResolutionValidatorOptions {
+export interface MediaResolutionValidatorOptions extends ValidatorExtensionOptions {
     /** Min media width. Defaults to `1` */
     minWidth?: number;
 
@@ -29,7 +28,7 @@ export interface MediaResolutionValidatorOptions {
 
     /**
      * Function used to convert pixels (resolution) to natural resolution. Defaults to `(pixels) =>
-     * `${Math.round(pixels / 1000000)}MP``
+     * `${Math.round(pixels / 1000000)}``
      */
     toNaturalResolution?: (pixels: number) => string;
 }
@@ -38,7 +37,7 @@ export const MediaResolutionValidator = createValidatorExtension(
     'MediaResolutionValidator',
     {
         toNaturalResolution: (pixels) => {
-            return `${Math.round(pixels / 1000000)}MP`;
+            return `${Math.round(pixels / 1000000)}`;
         },
     } as MediaResolutionValidatorOptions,
     ({ props, didSetProps }, { updateEntry }) => {

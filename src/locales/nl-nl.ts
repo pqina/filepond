@@ -118,38 +118,38 @@ export const validationFileSize = {
 
 export const validationListSize = {
     validationListSizeUnderflow:
-        'Totale bestandsgrootte is te klein. Minimum vereist is {minListSize}.',
+        'Totale bestandsgrootte is te klein. Minimum vereist is {{minListSize}}.',
     validationListSizeOverflow:
-        'Totale bestandsgrootte is te groot. Maximum toegestaan is {maxListSize}.',
+        'Totale bestandsgrootte is te groot. Maximum toegestaan is {{maxListSize}}.',
 };
 
 export const validationMediaResolution = {
-    validationMediaSizeUnavailable: 'Mediaformaat kon niet worden gelezen.',
+    validationMediaSizeUnavailable: 'Kon mediagrootte niet lezen.',
 
     validationMediaWidthRangeMismatch:
-        'De breedte van de {{fileMainType}} is ongeldig. Breedte moet tussen {{minWidth}} en {{maxWidth}} liggen.',
+        'De breedte van de {{fileMainType}} is ongeldig. De breedte moet tussen {{minWidth}} en {{maxWidth}} pixels liggen.',
 
     validationMediaWidthUnderflow:
-        'De {{fileMainType}} is te smal. Minimale breedte is {{minWidth}}.',
+        'De {{fileMainType}} is te klein. Minimale breedte is {{minWidth}} pixels.',
     validationMediaWidthOverflow:
-        'De {{fileMainType}} is te breed. Maximale breedte is {{maxWidth}}.',
+        'De {{fileMainType}} is te groot. Maximale breedte is {{maxWidth}} pixels.',
 
     validationMediaHeightRangeMismatch:
-        'De hoogte van de {{fileMainType}} is ongeldig. Hoogte moet tussen {{minHeight}} en {{maxHeight}} liggen.',
+        'De hoogte van de {{fileMainType}} is ongeldig. De hoogte moet tussen {{minHeight}} en {{maxHeight}} pixels liggen.',
 
     validationMediaHeightUnderflow:
-        'De {{fileMainType}} is te laag. Minimale hoogte is {{minHeight}}.',
+        'De {{fileMainType}} is te klein. Minimale hoogte is {{minHeight}} pixels.',
     validationMediaHeightOverflow:
-        'De {{fileMainType}} is te hoog. Maximale hoogte is {{maxHeight}}.',
+        'De {{fileMainType}} is te groot. Maximale hoogte is {{maxHeight}} pixels.',
 
     validationMediaResolutionRangeMismatch:
-        'De resolutie van de {{fileMainType}} is ongeldig. Resolutie moet tussen {{minResolution}} en {maxResolution} liggen.',
+        'De resolutie van de {{fileMainType}} is ongeldig. De resolutie moet tussen {{minResolution}}MP en {{maxResolution}}MP liggen.',
 
     validationMediaResolutionUnderflow:
-        'De resolutie van de {{fileMainType}} is ongeldig. Minimale resolutie is {{minResolution}}.',
+        'De resolutie van de {{fileMainType}} is ongeldig. Minimale resolutie is {{minResolution}}MP.',
 
     validationMediaResolutionOverflow:
-        'De resolutie van de {{fileMainType}} is ongeldig. Maximale resolutie is {{maxResolution}}.',
+        'De resolutie van de {{fileMainType}} is ongeldig. Maximale resolutie is {{maxResolution}}MP.',
 };
 
 export const validationListCount = {

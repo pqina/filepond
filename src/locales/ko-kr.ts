@@ -106,33 +106,37 @@ export const validationFileSize = {
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: '전체 파일 크기가 너무 작습니다. 최소값은 {minListSize}입니다.',
-    validationListSizeOverflow: '전체 파일 크기가 너무 큽니다. 최대값은 {maxListSize}입니다.',
+    validationListSizeUnderflow: '전체 파일 크기가 너무 작습니다. 최소값은 {{minListSize}}입니다.',
+    validationListSizeOverflow: '전체 파일 크기가 너무 큽니다. 최대값은 {{maxListSize}}입니다.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: '미디어 크기를 읽을 수 없습니다.',
 
     validationMediaWidthRangeMismatch:
-        '{{fileMainType}}의 가로 크기가 유효하지 않습니다. {{minWidth}}에서 {{maxWidth}} 사이여야 합니다.',
+        '{{fileMainType}}의 너비가 잘못되었습니다. 너비는 {{minWidth}}에서 {{maxWidth}} 픽셀 사이여야 합니다.',
+
     validationMediaWidthUnderflow:
-        '{{fileMainType}}의 가로 크기가 너무 작습니다. 최소 가로 크기는 {{minWidth}}입니다.',
+        '{{fileMainType}}가 너무 작습니다. 최소 너비는 {{minWidth}} 픽셀입니다.',
     validationMediaWidthOverflow:
-        '{{fileMainType}}의 가로 크기가 너무 큽니다. 최대 가로 크기는 {{maxWidth}}입니다.',
+        '{{fileMainType}}가 너무 큽니다. 최대 너비는 {{maxWidth}} 픽셀입니다.',
 
     validationMediaHeightRangeMismatch:
-        '{{fileMainType}}의 세로 크기가 유효하지 않습니다. {{minHeight}}에서 {{maxHeight}} 사이여야 합니다.',
+        '{{fileMainType}}의 높이가 잘못되었습니다. 높이는 {{minHeight}}에서 {{maxHeight}} 픽셀 사이여야 합니다.',
+
     validationMediaHeightUnderflow:
-        '{{fileMainType}}의 세로 크기가 너무 작습니다. 최소 세로 크기는 {{minHeight}}입니다.',
+        '{{fileMainType}}가 너무 작습니다. 최소 높이는 {{minHeight}} 픽셀입니다.',
     validationMediaHeightOverflow:
-        '{{fileMainType}}의 세로 크기가 너무 큽니다. 최대 세로 크기는 {{maxHeight}}입니다.',
+        '{{fileMainType}}가 너무 큽니다. 최대 높이는 {{maxHeight}} 픽셀입니다.',
 
     validationMediaResolutionRangeMismatch:
-        '{{fileMainType}}의 해상도가 유효하지 않습니다. {{minResolution}}에서 {maxResolution} 사이여야 합니다.',
+        '{{fileMainType}}의 해상도가 잘못되었습니다. 해상도는 {{minResolution}}MP에서 {{maxResolution}}MP 사이여야 합니다.',
+
     validationMediaResolutionUnderflow:
-        '{{fileMainType}}의 해상도가 유효하지 않습니다. 최소 해상도는 {{minResolution}}입니다.',
+        '{{fileMainType}}의 해상도가 잘못되었습니다. 최소 해상도는 {{minResolution}}MP입니다.',
+
     validationMediaResolutionOverflow:
-        '{{fileMainType}}의 해상도가 유효하지 않습니다. 최대 해상도는 {{maxResolution}}입니다.',
+        '{{fileMainType}}의 해상도가 잘못되었습니다. 최대 해상도는 {{maxResolution}}MP입니다.',
 };
 
 export const validationListCount = {

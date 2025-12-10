@@ -1,12 +1,13 @@
 import type { FilePondEntry } from '../types/index.js';
 import {
     type ValidationResultInvalid,
+    type ValidatorExtensionOptions,
     createValidatorExtension,
 } from './common/createValidatorExtension.js';
 import { isBlobOrFile, isFile, isFileEntry, isString } from '../utils/test.js';
 import { getExtensionFromFilename } from '../utils/file.js';
 
-export interface FileExtensionValidatorOptions {
+export interface FileExtensionValidatorOptions extends ValidatorExtensionOptions {
     /** An array of case-insensitive filename extensions, starting with a period (".") character */
     accept?: string | string[];
 

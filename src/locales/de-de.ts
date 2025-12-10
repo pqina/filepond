@@ -104,29 +104,37 @@ export const validationFileSize = {
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Gesamtgröße zu klein. Mindestwert: {minListSize}.',
-    validationListSizeOverflow: 'Gesamtgröße zu groß. Maximalwert: {maxListSize}.',
+    validationListSizeUnderflow: 'Gesamtgröße zu klein. Mindestwert: {{minListSize}}.',
+    validationListSizeOverflow: 'Gesamtgröße zu groß. Maximalwert: {{maxListSize}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Mediagröße konnte nicht gelesen werden.',
 
     validationMediaWidthRangeMismatch:
-        'Die Breite der {{fileMainType}} ist ungültig. Muss zwischen {{minWidth}} und {{maxWidth}} liegen.',
+        'Die Breite des {{fileMainType}} ist ungültig. Die Breite muss zwischen {{minWidth}} und {{maxWidth}} Pixel liegen.',
+
     validationMediaWidthUnderflow:
-        'Die {{fileMainType}} ist zu schmal. Mindestbreite: {{minWidth}}.',
-    validationMediaWidthOverflow: 'Die {{fileMainType}} ist zu breit. Maximalbreite: {{maxWidth}}.',
+        'Der {{fileMainType}} ist zu klein. Die minimale Breite beträgt {{minWidth}} Pixel.',
+    validationMediaWidthOverflow:
+        'Der {{fileMainType}} ist zu groß. Die maximale Breite beträgt {{maxWidth}} Pixel.',
 
     validationMediaHeightRangeMismatch:
-        'Die Höhe der {{fileMainType}} ist ungültig. Muss zwischen {{minHeight}} und {{maxHeight}} liegen.',
+        'Die Höhe des {{fileMainType}} ist ungültig. Die Höhe muss zwischen {{minHeight}} und {{maxHeight}} Pixel liegen.',
+
     validationMediaHeightUnderflow:
-        'Die {{fileMainType}} ist zu niedrig. Mindesthöhe: {{minHeight}}.',
-    validationMediaHeightOverflow: 'Die {{fileMainType}} ist zu hoch. Maximalhöhe: {{maxHeight}}.',
+        'Der {{fileMainType}} ist zu klein. Die minimale Höhe beträgt {{minHeight}} Pixel.',
+    validationMediaHeightOverflow:
+        'Der {{fileMainType}} ist zu groß. Die maximale Höhe beträgt {{maxHeight}} Pixel.',
 
     validationMediaResolutionRangeMismatch:
-        'Die Auflösung der {{fileMainType}} ist ungültig. Muss zwischen {{minResolution}} und {maxResolution} liegen.',
-    validationMediaResolutionUnderflow: 'Ungültige Auflösung. Mindestwert: {{minResolution}}.',
-    validationMediaResolutionOverflow: 'Ungültige Auflösung. Maximalwert: {{maxResolution}}.',
+        'Die Auflösung des {{fileMainType}} ist ungültig. Die Auflösung muss zwischen {{minResolution}}MP und {{maxResolution}}MP liegen.',
+
+    validationMediaResolutionUnderflow:
+        'Die Auflösung des {{fileMainType}} ist ungültig. Die minimale Auflösung beträgt {{minResolution}}MP.',
+
+    validationMediaResolutionOverflow:
+        'Die Auflösung des {{fileMainType}} ist ungültig. Die maximale Auflösung beträgt {{maxResolution}}MP.',
 };
 
 export const validationListCount = {

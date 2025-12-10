@@ -108,34 +108,38 @@ export const validationFileSize = {
 
 export const validationListSize = {
     validationListSizeUnderflow:
-        'La dimensione totale dei file è troppo piccola. Il minimo richiesto è {minListSize}.',
+        'La dimensione totale dei file è troppo piccola. Il minimo richiesto è {{minListSize}}.',
     validationListSizeOverflow:
-        'La dimensione totale dei file è troppo grande. Il massimo consentito è {maxListSize}.',
+        'La dimensione totale dei file è troppo grande. Il massimo consentito è {{maxListSize}}.',
 };
 
 export const validationMediaResolution = {
-    validationMediaSizeUnavailable: 'Impossibile leggere le dimensioni del media.',
+    validationMediaSizeUnavailable: 'Impossibile leggere la dimensione del file.',
 
     validationMediaWidthRangeMismatch:
-        'La larghezza della {{fileMainType}} non è valida. Deve essere tra {{minWidth}} e {{maxWidth}}.',
+        'La larghezza del {{fileMainType}} non è valida. Deve essere tra {{minWidth}} e {{maxWidth}} pixel.',
+
     validationMediaWidthUnderflow:
-        'La {{fileMainType}} è troppo stretta. La larghezza minima è {{minWidth}}.',
+        'Il {{fileMainType}} è troppo piccolo. La larghezza minima è {{minWidth}} pixel.',
     validationMediaWidthOverflow:
-        'La {{fileMainType}} è troppo larga. La larghezza massima è {{maxWidth}}.',
+        'Il {{fileMainType}} è troppo grande. La larghezza massima è {{maxWidth}} pixel.',
 
     validationMediaHeightRangeMismatch:
-        'L’altezza della {{fileMainType}} non è valida. Deve essere tra {{minHeight}} e {{maxHeight}}.',
+        'L’altezza del {{fileMainType}} non è valida. Deve essere tra {{minHeight}} e {{maxHeight}} pixel.',
+
     validationMediaHeightUnderflow:
-        'La {{fileMainType}} è troppo bassa. L’altezza minima è {{minHeight}}.',
+        'Il {{fileMainType}} è troppo piccolo. L’altezza minima è {{minHeight}} pixel.',
     validationMediaHeightOverflow:
-        'La {{fileMainType}} è troppo alta. L’altezza massima è {{maxHeight}}.',
+        'Il {{fileMainType}} è troppo grande. L’altezza massima è {{maxHeight}} pixel.',
 
     validationMediaResolutionRangeMismatch:
-        'La risoluzione della {{fileMainType}} non è valida. Deve essere tra {{minResolution}} e {maxResolution}.',
+        'La risoluzione del {{fileMainType}} non è valida. Deve essere tra {{minResolution}}MP e {{maxResolution}}MP.',
+
     validationMediaResolutionUnderflow:
-        'La risoluzione della {{fileMainType}} non è valida. La risoluzione minima è {{minResolution}}.',
+        'La risoluzione del {{fileMainType}} non è valida. La risoluzione minima è {{minResolution}}MP.',
+
     validationMediaResolutionOverflow:
-        'La risoluzione della {{fileMainType}} non è valida. La risoluzione massima è {{maxResolution}}.',
+        'La risoluzione del {{fileMainType}} non è valida. La risoluzione massima è {{maxResolution}}MP.',
 };
 
 export const validationListCount = {

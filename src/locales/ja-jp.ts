@@ -107,33 +107,38 @@ export const validationFileSize = {
 
 export const validationListSize = {
     validationListSizeUnderflow:
-        'ファイルの合計サイズが小さすぎます。最小値は {minListSize} です。',
-    validationListSizeOverflow: 'ファイルの合計サイズが大きすぎます。最大値は {maxListSize} です。',
+        'ファイルの合計サイズが小さすぎます。最小値は {{minListSize}} です。',
+    validationListSizeOverflow:
+        'ファイルの合計サイズが大きすぎます。最大値は {{maxListSize}} です。',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'メディアサイズを読み取れませんでした。',
 
     validationMediaWidthRangeMismatch:
-        '{{fileMainType}} の幅が無効です。{{minWidth}} から {{maxWidth}} の間である必要があります。',
+        '{{fileMainType}} の幅が無効です。幅は {{minWidth}} 〜 {{maxWidth}} ピクセルである必要があります。',
+
     validationMediaWidthUnderflow:
-        '{{fileMainType}} の幅が小さすぎます。最小幅は {{minWidth}} です。',
+        '{{fileMainType}} が小さすぎます。最小幅は {{minWidth}} ピクセルです。',
     validationMediaWidthOverflow:
-        '{{fileMainType}} の幅が大きすぎます。最大幅は {{maxWidth}} です。',
+        '{{fileMainType}} が大きすぎます。最大幅は {{maxWidth}} ピクセルです。',
 
     validationMediaHeightRangeMismatch:
-        '{{fileMainType}} の高さが無効です。{{minHeight}} から {{maxHeight}} の間である必要があります。',
+        '{{fileMainType}} の高さが無効です。高さは {{minHeight}} 〜 {{maxHeight}} ピクセルである必要があります。',
+
     validationMediaHeightUnderflow:
-        '{{fileMainType}} の高さが低すぎます。最小高さは {{minHeight}} です。',
+        '{{fileMainType}} が小さすぎます。最小高さは {{minHeight}} ピクセルです。',
     validationMediaHeightOverflow:
-        '{{fileMainType}} の高さが高すぎます。最大高さは {{maxHeight}} です。',
+        '{{fileMainType}} が大きすぎます。最大高さは {{maxHeight}} ピクセルです。',
 
     validationMediaResolutionRangeMismatch:
-        '{{fileMainType}} の解像度が無効です。{{minResolution}} から {maxResolution} の間である必要があります。',
+        '{{fileMainType}} の解像度が無効です。解像度は {{minResolution}}MP 〜 {{maxResolution}}MP の範囲である必要があります。',
+
     validationMediaResolutionUnderflow:
-        '{{fileMainType}} の解像度が無効です。最小解像度は {{minResolution}} です。',
+        '{{fileMainType}} の解像度が無効です。最小解像度は {{minResolution}}MP です。',
+
     validationMediaResolutionOverflow:
-        '{{fileMainType}} の解像度が無効です。最大解像度は {{maxResolution}} です。',
+        '{{fileMainType}} の解像度が無効です。最大解像度は {{maxResolution}}MP です。',
 };
 
 export const validationListCount = {

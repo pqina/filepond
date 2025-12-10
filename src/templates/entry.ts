@@ -1,4 +1,4 @@
-import type { ComponentNode, EntryListFunctions, TemplateNode } from '../types/index.js';
+import type { EntryListFunctions, TemplateNode } from '../types/index.js';
 import { nodeTree, type NodeContext } from '../elements/common/nodeTree.js';
 
 import { isDataTransferEntry, isFileEntry, isNumber, isString } from '../utils/test.js';

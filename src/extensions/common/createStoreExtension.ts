@@ -42,6 +42,13 @@ export interface StoreExtensionOptions {
 
     /** Action to run to trigger the abort operation, defaults to "abort" */
     actionAbort?: string;
+
+    /**
+     * Determines if we should store the entry, if returns true, the `actionStore` prop is set
+     * automatically. When this prop is set the `actionStore` prop cannot be set to `false` to
+     * reset the store operation
+     */
+    shouldStore: (entry: FilePondEntry) => Promise<boolean>;
 }
 
 export type FunctionStore = (
@@ -84,7 +91,6 @@ export function createStoreExtension(
             actionLoad: 'load',
             actionAbort: 'abort',
             valueKey: 'value',
-            shouldStore: undefined,
             ...storeOptions,
         },
         (state, pond) => {
