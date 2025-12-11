@@ -1,4 +1,3 @@
-import { supportsUserAgentData } from './support.js';
 import type { FilePondFileEntry, FilePondDirectoryEntry } from '../types/index.js';
 
 /** Stores test results locally */
@@ -183,6 +182,6 @@ export const isIOS = createTest(() => {
 /** Tests if current environment is Mac */
 export const isMac = createTest(() => {
     // @ts-ignore
-    const { platform } = supportsUserAgentData() ? navigator.userAgentData : navigator;
+    const { platform } = 'userAgentData' in navigator ? navigator.userAgentData : navigator;
     return /^mac/i.test(platform);
 });

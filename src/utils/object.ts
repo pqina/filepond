@@ -1,5 +1,4 @@
-import { arrayItemsOverlap } from './array.js';
-import { isArray, isBlobOrFile, isFunction, isObject } from './test.js';
+import { isArray, isBlobOrFile, isFunction, isObject, isObjectOrArray } from './test.js';
 
 /**
  * Test if object "a" property values are equal to object "b" property values, doesn't deep compare,
@@ -58,6 +57,26 @@ export function deepOverlap(props: { [key: string]: any }, target: { [key: strin
             return false;
         }
     }
+    return true;
+}
+
+/**
+ * Tests if array items in a overlap with items in b, will also return true if b has items but a has
+ * no items
+ */
+export function arrayItemsOverlap(a: any, b: any) {
+    if (!isArray(a) || !isArray(b)) {
+        return false;
+    }
+
+    for (let i = 0; i < a.length; i++) {
+        if (isObjectOrArray(a[i]) && isObjectOrArray(b[i])) {
+            return deepOverlap(a, b);
+        } else if (a[i] !== b[i]) {
+            return false;
+        }
+    }
+
     return true;
 }
 

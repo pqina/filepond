@@ -1,7 +1,10 @@
-import packageJson from './package.json' with { type: 'json' };
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
+import { banner } from './banner.js';
+
+const srcDir = './src';
+const destDir = './esm';
 
 const fullReloadAlways = {
     name: 'full-reload-always',
@@ -11,7 +14,7 @@ const fullReloadAlways = {
     },
 };
 
-export const fixSvelteDollarCollisions: any = {
+const fixSvelteDollarCollisions: any = {
     name: 'replace-dollars',
     generateBundle(options: any, bundle: any[]) {
         for (const [fileName, file] of Object.entries(bundle)) {
@@ -24,14 +27,7 @@ export const fixSvelteDollarCollisions: any = {
     },
 };
 
-const banner = `/*!
-* FilePond v${packageJson.version}
-* Copyright (c) 2017-${new Date().getFullYear()} Pqina B.V.
-* Released under the MIT License
-* https://filepond.com
-*/`;
-
-export const addBanner: any = {
+const addBanner: any = {
     name: 'banner',
     generateBundle(_: any, bundle: any[]) {
         for (const [fileName, file] of Object.entries(bundle)) {
@@ -44,6 +40,19 @@ export const addBanner: any = {
 };
 
 export default defineConfig({
+    // dev
+    resolve: {
+        alias: {
+            'filepond/locales/en-gb.js': resolve(__dirname, srcDir + '/locales/en-gb.js'),
+            'filepond/locales': resolve(__dirname, srcDir + '/locales/index.js'),
+            'filepond/assets': resolve(__dirname, srcDir + '/assets/index.js'),
+            'filepond/extensions': resolve(__dirname, srcDir + '/extensions/index.js'),
+            'filepond/templates': resolve(__dirname, srcDir + '/templates/index.js'),
+            'filepond/dev': resolve(__dirname, srcDir + '/dev/index.js'),
+            filepond: resolve(__dirname, srcDir + '/index.js'),
+        },
+    },
+
     plugins: [
         svelte({
             compilerOptions: {
@@ -51,37 +60,25 @@ export default defineConfig({
             },
         }),
         fixSvelteDollarCollisions,
-        addBanner,
         fullReloadAlways,
+        addBanner,
     ],
 
-    resolve: {
-        // for dev/index.html
-        alias: {
-            'filepond/locales/en-gb.js': resolve(__dirname, './src/locales/en-gb.js'),
-            'filepond/locales': resolve(__dirname, './src/locales/index.js'),
-            'filepond/assets': resolve(__dirname, './src/assets/index.js'),
-            'filepond/extensions': resolve(__dirname, './src/extensions/index.js'),
-            'filepond/templates': resolve(__dirname, './src/templates/index.js'),
-            'filepond/dev': resolve(__dirname, './src/dev/index.js'),
-            filepond: resolve(__dirname, './src/index.js'),
-        },
-    },
-
+    // build
     build: {
         minify: true,
-        outDir: 'dist/esm',
+        outDir: destDir,
         cssMinify: true,
         lib: {
             name: 'filepond',
             formats: ['es'],
             entry: {
-                index: resolve(__dirname, './src/index.ts'),
-                // 'assets/index': resolve(__dirname, './src/assets/index.js'),
-                'locales/index': resolve(__dirname, './src/locales/index.js'),
-                'extensions/index': resolve(__dirname, './src/extensions/index.ts'),
-                'templates/index': resolve(__dirname, './src/templates/index.ts'),
-                // 'dev/index': resolve(__dirname, './src/dev/index.ts'),
+                index: srcDir + '/index.ts',
+                'locales/index': srcDir + '/locales/index.js',
+                'extensions/index': srcDir + '/extensions/index.ts',
+                'templates/index': srcDir + '/templates/index.ts',
+                // 'assets/index': srcDir + '/assets/index.js',
+                // 'dev/index':  srcDir + '/dev/index.ts',
             },
         },
         rollupOptions: {

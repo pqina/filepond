@@ -6,7 +6,7 @@
         "declarationMap": false,
         "emitDeclarationOnly": true,
         "rootDir": "src",
-        "outDir": "dist/types",
+        "outDir": "types",
         "target": "esnext",
         "module": "NodeNext",
         "moduleResolution": "NodeNext",

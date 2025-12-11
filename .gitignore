@@ -27,5 +27,7 @@ _*.md
 
 # Various temp private folders
 /_*/
-/dist/
+/types/
+/esm/
+/cdn/
 /_TODO.md

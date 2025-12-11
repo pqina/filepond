@@ -12,49 +12,52 @@
         "dev": "vite --host",
         "dev-optimal": "NODE_ENV=production vite --host",
         "test": "vite --port 5175 --open /test/",
-        "build": "npm run clean && vite build && npm run types && npm run cdn",
-        "clean": "rm -rf ./dist",
-        "types": "tsc -p ./tsconfig.build.json && cp src/types/*.d.ts dist/types && echo 'import \"./custom-element.js\";\nimport \"./default-extensions.js\";' >> dist/types/index.d.ts",
-        "cdn": "rollup -c rollup.config.js",
+        "build": "npm run esm && npm run cdn && npm run types",
+        "esm": "rm -rf ./esm && vite build",
+        "types": "rm -rf ./types && tsc -p ./tsconfig.build.json && cp src/types/*.d.ts types && echo 'import \"./custom-element.js\";\nimport \"./default-extensions.js\";' >> types/index.d.ts",
+        "cdn": "rm -rf ./cdn && rollup -c rollup.config.js",
         "prepublishOnly": "npm run build && node prepublish.js"
     },
     "files": [
-        "./dist"
+        "./esm",
+        "./cdn",
+        "./types"
     ],
-    "module": "./dist/esm/index.js",
-    "types": "./dist/types/index.d.ts",
+    "browser": "./cdn/index.js",
+    "module": "./esm/index.js",
+    "types": "./types/index.d.ts",
     "exports": {
         ".": {
-            "types": "./dist/types/index.d.ts",
-            "import": "./dist/esm/index.js"
+            "types": "./types/index.d.ts",
+            "import": "./esm/index.js"
         },
         "./extensions": {
-            "types": "./dist/types/extensions/index.d.ts",
-            "import": "./dist/esm/extensions/index.js"
+            "types": "./types/extensions/index.d.ts",
+            "import": "./esm/extensions/index.js"
         },
         "./extensions/*": {
-            "types": "./dist/types/extensions/*.d.ts",
-            "import": "./dist/esm/extensions/*.js"
+            "types": "./types/extensions/*.d.ts",
+            "import": "./esm/extensions/*.js"
         },
         "./elements": {
-            "types": "./dist/types/elements/index.d.ts",
-            "import": "./dist/esm/elements/index.js"
+            "types": "./types/elements/index.d.ts",
+            "import": "./esm/elements/index.js"
         },
         "./templates": {
-            "types": "./dist/types/templates/index.d.ts",
-            "import": "./dist/esm/templates/index.js"
+            "types": "./types/templates/index.d.ts",
+            "import": "./esm/templates/index.js"
         },
         "./locales": {
-            "types": "./dist/types/locales/index.d.ts",
-            "import": "./dist/esm/locales/index.js"
+            "types": "./types/locales/index.d.ts",
+            "import": "./esm/locales/index.js"
         },
         "./locales/*": {
-            "types": "./dist/types/locales/*.d.ts",
-            "import": "./dist/esm/locales/*"
+            "types": "./types/locales/*.d.ts",
+            "import": "./esm/locales/*"
         },
         "./assets": {
-            "types": "./dist/types/locales/index.d.ts",
-            "import": "./dist/esm/assets/index.js"
+            "types": "./types/locales/index.d.ts",
+            "import": "./esm/assets/index.js"
         }
     },
     "devDependencies": {
@@ -72,6 +75,7 @@
         "replace-in-files-cli": "^3.0.0",
         "rollup": "^4.53.3",
         "rollup-plugin-esbuild-minify": "^1.3.0",
+        "rollup-plugin-license": "^3.6.0",
         "sinon": "^15.0.1",
         "svelte": "^5.45.6",
         "svelte-check": "^4.3.1",

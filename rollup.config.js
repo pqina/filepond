@@ -2,9 +2,11 @@ import { writeFileSync, mkdirSync, cpSync, existsSync } from 'node:fs';
 import { defineConfig } from 'rollup';
 import { globSync } from 'glob';
 import { minify } from 'rollup-plugin-esbuild-minify';
+import { default as license } from 'rollup-plugin-license';
+import { banner } from './banner.js';
 
-const srcDir = './dist/esm';
-const destDir = './dist/cdn';
+const srcDir = './esm';
+const destDir = './cdn';
 
 const VIRTUAL_INDEX_ID = '\0virtual-index';
 
@@ -51,7 +53,20 @@ export default defineConfig([
             file: destDir + '/index.js',
             format: 'esm',
         },
-        plugins: [virtualIndex(), minify()],
+        plugins: [
+            virtualIndex(),
+            minify(),
+            license({
+                banner,
+            }),
+        ],
+        onwarn: function (warning, warn) {
+            if (warning.code === 'CIRCULAR_DEPENDENCY') {
+                return;
+            }
+
+            warn(message);
+        },
     },
 ]);
 
@@ -62,9 +77,6 @@ function createMicroFiles(src, dest) {
     const extensions = globSync(src);
     for (const extension of extensions) {
         const filename = extension.split('/').pop();
-        if (filename === 'index.js') {
-            continue;
-        }
         writeFileSync(`${dest}/${filename}`, `export * from '../index.js'`);
     }
 }

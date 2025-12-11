@@ -1,6 +1,3 @@
-import { deepOverlap } from './object.js';
-import { isArray, isObjectOrArray } from './test.js';
-
 export enum SortOrder {
     ASCENDING,
     DESCENDING,
@@ -94,26 +91,6 @@ export function arrayItemsEqual(a: any[], b: any[]) {
             return false;
         }
     }
-    return true;
-}
-
-/**
- * Tests if array items in a overlap with items in b, will also return true if b has items but a has
- * no items
- */
-export function arrayItemsOverlap(a: any, b: any) {
-    if (!isArray(a) || !isArray(b)) {
-        return false;
-    }
-
-    for (let i = 0; i < a.length; i++) {
-        if (isObjectOrArray(a[i]) && isObjectOrArray(b[i])) {
-            return deepOverlap(a, b);
-        } else if (a[i] !== b[i]) {
-            return false;
-        }
-    }
-
     return true;
 }
 
