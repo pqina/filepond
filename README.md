@@ -11,10 +11,9 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 
 TODO:
 
--   Docs are on the way
+-   [Docs are in development](https://v5.filepond.com/)
 -   Naming of various types
--   Safari flashing of video while dragging
--   Run more tests on mobile devices
+-   Run additional tests on mobile devices
 -   Add basic image manipulation extensions
 -   default styles for `:valid`, `:invalid`, and `:focus`
 
@@ -45,7 +44,7 @@ We wrap an `<input type="file">` with the `<file-pond>` custom element and then 
     import { locale } from 'filepond/locales/en-gb.js';
 
     const elements = defineFilePond({
-        locale
+        locale,
     });
 </script>
 ```
