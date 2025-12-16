@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'বাতিল করতে ট্যাপ করুন',
     assistUndo: 'পূর্বাবস্থায় ফেরত যেতে ট্যাপ করুন',
 
+    dropAreaLabel: 'ফাইলগুলো এখানে টেনে আনুন, অথবা <u>ব্রাউজ</u> করুন',
+
     loadError: 'ফাইল লোড করা যায়নি।',
 
     loadDataTranserProgress: 'ফাইল লোড হচ্ছে',

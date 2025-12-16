@@ -23,6 +23,8 @@ export const core = {
     assistAbort: '탭하여 취소',
     assistUndo: '탭하여 실행 취소',
 
+    dropAreaLabel: '파일을 여기에 놓거나 <u>찾아보기</u>',
+
     loadError: '파일을 불러올 수 없습니다.',
 
     loadDataTranserProgress: '파일을 불러오는 중',

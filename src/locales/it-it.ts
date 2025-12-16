@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'Tocca per annullare',
     assistUndo: 'Tocca per annullare l’azione',
 
+    dropAreaLabel: 'Trascina i file qui o <u>sfoglia</u>',
+
     loadError: 'Impossibile caricare il file.',
 
     loadDataTranserProgress: 'Caricamento dei file',

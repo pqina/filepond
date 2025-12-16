@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'اضغط للإلغاء',
     assistUndo: 'اضغط للتراجع',
 
+    dropAreaLabel: 'اسحب الملفات هنا، أو <u>تصفح</u>',
+
     loadError: 'تعذر تحميل الملف.',
 
     loadDataTranserProgress: 'جارٍ تحميل الملفات',

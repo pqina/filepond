@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'タップして中止',
     assistUndo: 'タップして元に戻す',
 
+    dropAreaLabel: 'ここにファイルをドロップ、または<u>参照</u>',
+
     loadError: 'ファイルを読み込めませんでした。',
 
     loadDataTranserProgress: 'ファイルを読み込み中',

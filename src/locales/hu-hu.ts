@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'Koppintson a megszakításhoz',
     assistUndo: 'Koppintson a visszavonáshoz',
 
+    dropAreaLabel: 'Húzza ide a fájlokat, vagy <u>tallózzon</u>',
+
     loadError: 'A fájl betöltése nem sikerült.',
 
     loadDataTranserProgress: 'Fájlok betöltése',

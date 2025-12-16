@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'Tippen zum Abbrechen',
     assistUndo: 'Tippen zum Rückgängig machen',
 
+    dropAreaLabel: 'Dateien hier ablegen oder <u>durchsuchen</u>',
+
     loadError: 'Datei konnte nicht geladen werden.',
 
     loadDataTranserProgress: 'Dateien werden geladen',

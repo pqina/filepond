@@ -40,8 +40,8 @@ import {
     isDirectoryEntry,
 } from '../../utils/test.js';
 import { anyToInt } from '../../utils/number.js';
-import { stringReplaceVariables, statusToLabel } from '../common/string.js';
-import { toCamelCase } from '../../utils/string.js';
+import { stringReplaceVariables, statusToLabel, statusCodeToLocaleKey } from '../common/string.js';
+import { getUniqueId, toCamelCase } from '../../utils/string.js';
 import { debounce } from '../../utils/debounce.js';
 import { copyFilePropsToObject } from '../../utils/file.js';
 import { dispatchCustomEvent } from '../../utils/dom.js';
@@ -201,6 +201,9 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
     /** Source input */
     #input: null | HTMLInputElement = null;
 
+    /** Observes if a label is added */
+    #labelObserver: MutationObserver;
+
     /** Locale object reference */
     #locale: null | Locale = null;
 
@@ -269,6 +272,21 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
         const prop = toCamelCase(name);
         value = BooleanAttributes.includes(name) && value === '' ? true : value;
         this.#extensionManager.propagateExtensionProperty(prop, value);
+    }
+
+    /** Sets the inner input element id */
+    set inputId(value: string) {
+        // We know the input is defined at this point
+        (this.#input as HTMLInputElement).id = value;
+
+        // If there's a single label, we set its for attribute
+        this.querySelector('label:only-of-type:not([for])')?.setAttribute('for', value);
+    }
+
+    /** Returns the inner input element id */
+    get inputId(): string {
+        // We know the input is defined at this point
+        return (this.#input as HTMLInputElement).id;
     }
 
     /** Disable the field and sets the disabled attribute */
@@ -585,19 +603,21 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
             return;
         }
 
-        // search for soure file input to enhance
+        // search for soure file input to enhance, or create one
         const input: HTMLInputElement =
             this.querySelector('input[type="file"]') ||
             (h('input', { type: 'file' }) as HTMLInputElement);
 
-        // sync custom element and source input states
+        // copy source input attributes to custom elements
         const syncedAttributes = [...GenericAttributes, ...InteractionAttributes];
         for (const attr of syncedAttributes) {
             const value = getAttributeFromElements(attr, input, this);
+
             // not set, so skip
             if (value === undefined) {
                 continue;
             }
+
             // @ts-ignore
             this[attr] = value;
         }
@@ -616,6 +636,12 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
             }
             // @ts-ignore
             this.#syncAttributeToInput(attr, this[attr]);
+        }
+
+        // we assign an id so a label can be linked
+        if (!input.id) {
+            // if a <label> is present and it has no `for` attribute, this sets the `for` attribute, it also sets this id to the input
+            this.inputId = `file-pond-${getUniqueId()}`;
         }
 
         // by default we hide the source file input, if it's not appended yet we append it now
@@ -639,6 +665,21 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
     connectedCallback() {
         // this sets up the file input state
         this.#connectInput();
+
+        // so when label is added its for attribute is synced with the input
+        this.#labelObserver = new MutationObserver(([mutation]) => {
+            const [addedNode] = mutation.addedNodes;
+
+            // check if added label
+            if (!(addedNode instanceof HTMLLabelElement) || addedNode.hasAttribute('for')) {
+                return;
+            }
+            addedNode.setAttribute('for', this.inputId);
+        });
+        this.#labelObserver.observe(this, {
+            childList: true,
+            attributes: false,
+        });
 
         /**
          * When the callback store changes we assign the value to the form internals for the custom
@@ -749,6 +790,9 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
 
     /** Called each time the element is removed from the document. */
     disconnectedCallback() {
+        // stop observing
+        this.#labelObserver.disconnect();
+
         // unsub subscriptions created when connecting to the DOM
         this.#connectedSubs.forEach((unsub) => unsub());
         this.#connectedSubs = [];
@@ -826,13 +870,8 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
 
     /** Validates the current state of the field */
     checkValidity(): boolean | undefined {
-        // have to wait for locale
-        if (!this.#locale) {
-            return;
-        }
-
         // get labels
-        const { validationInvalidBusy = '', validationInvalidState = '' } = this.#locale;
+        const { validationInvalidBusy = '', validationInvalidState = '' } = this.#locale || {};
 
         // need to know if extensions are currently working on files, if so, we show busy validity state
         if (hasBusyEntries(this.entries)) {
@@ -865,7 +904,9 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
             const { flag = 'customError' }: { flag?: string } = status?.meta ?? {};
 
             // set flag message
-            const validationMessage = statusToLabel(status, this.#locale, { debug: false });
+            const validationMessage = this.#locale
+                ? statusToLabel(status, this.#locale, { debug: false })
+                : statusCodeToLocaleKey(status.code);
 
             // render validation message or fallback to invalid state label
             messages[flag] = validationMessage ?? stringReplaceVariables(validationInvalidState);

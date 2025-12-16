@@ -27,6 +27,9 @@ export const core = {
     assistAbort: 'Tap to cancel',
     assistUndo: 'Tap to undo',
 
+    // drop area label
+    dropAreaLabel: 'Drop files here, or <u>browse</u>',
+
     // file status
     loadError: 'Failed to load file.',
 

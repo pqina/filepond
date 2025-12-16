@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'Πατήστε για ακύρωση',
     assistUndo: 'Πατήστε για αναίρεση',
 
+    dropAreaLabel: 'Σύρετε αρχεία εδώ ή <u>περιηγηθείτε</u>',
+
     loadError: 'Αποτυχία φόρτωσης αρχείου.',
 
     loadDataTranserProgress: 'Φόρτωση αρχείων',

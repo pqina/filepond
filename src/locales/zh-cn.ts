@@ -23,6 +23,8 @@ export const core = {
     assistAbort: '点击取消',
     assistUndo: '点击撤销',
 
+    dropAreaLabel: '将文件拖到此处，或<u>浏览</u>',
+
     loadError: '无法加载文件。',
 
     loadDataTranserProgress: '正在加载文件',

@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'Tryk for at annullere',
     assistUndo: 'Tryk for at fortryde',
 
+    dropAreaLabel: 'Træk filer hertil, eller <u>gennemse</u>',
+
     loadError: 'Kunne ikke indlæse filen.',
 
     loadDataTranserProgress: 'Indlæser filer',

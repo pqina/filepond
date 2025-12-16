@@ -31,18 +31,19 @@ import defaultStyles from './index.css?inline';
 
 // template
 import { createFilePondEntryList } from '../../templates/entry.js';
+import type { FilePondSvelteComponentElement } from '../FilePondSvelteComponent/index.svelte.js';
 
 /** Auto assigns props to just created file-pond elements */
-function autoAssignFilePondProperties(tag: string, options: unknown) {
-    if (!isBrowser()) {
-        return;
-    }
-    const elements = Array.from(document.querySelectorAll(tag));
-    for (const element of elements) {
-        Object.assign(element, options);
-    }
-    return elements;
-}
+// function autoAssignFilePondProperties(tag: string, options: unknown) {
+//     if (!isBrowser()) {
+//         return;
+//     }
+//     const elements = Array.from(document.querySelectorAll(tag));
+//     for (const element of elements) {
+//         Object.assign(element, options);
+//     }
+//     return elements;
+// }
 
 /** Wraps a set of extensions in with the default FilePond custom element extensions */
 export function createFilePondExtensionSet(extensions: ExtensionFactory[] = []) {
@@ -57,22 +58,28 @@ export function createFilePondExtensionSet(extensions: ExtensionFactory[] = []) 
 
 const SharedProps = ['springConfig', 'animations'];
 
+// This holds the initial options object passed to `defineFilePond`, we store this value so we can assign the initialOptions to FilePond elements created _after_ the first `defineFilePond` call.
+let globalInitialOptions: defineFilePondOptions | undefined;
+
 export class FilePondElement extends FilePondBaseElement {
-    #instances: any[] = [];
+    #elements: { [key: string]: any } = {};
 
     /** Set to `true` to remove the attribution link */
     #attributionLink: HTMLAnchorElement | undefined;
 
+    /** Holds references to event subscriptions so we can more easily unsub */
+    #connectedSubs: (() => void)[] = [];
+
     /** Pass spring and animaton config to children */
     set springConfig(value: SpringOptions) {
-        this.#instances.forEach((instance) => {
-            instance.springConfig = value;
+        Object.values(this.#elements).forEach((element) => {
+            element.springConfig = value;
         });
     }
 
     set animations(value: AnimationMode) {
-        this.#instances.forEach((instance) => {
-            instance.animations = value;
+        Object.values(this.#elements).forEach((element) => {
+            element.animations = value;
         });
     }
 
@@ -123,26 +130,26 @@ export class FilePondElement extends FilePondBaseElement {
         super({
             styles: [defaultStyles],
         });
-    }
-
-    connectedCallback() {
-        super.connectedCallback();
 
         // create items list
-        const filePondEntryList = h('file-pond-entry-list', {
+        const entryList = h('file-pond-entry-list', {
             part: 'entry-list',
         }) as FilePondEntryListElement;
 
-        const filePondDropIndicator = h('file-pond-drop-indicator', {
-            part: 'drop-indicator',
-        }) as FilePondDropIndicatorElement;
-
-        const filePondDropArea = h('file-pond-drop-area', {
+        const dropArea = h('file-pond-drop-area', {
             part: 'drop-area',
         }) as FilePondDropAreaElement;
 
+        const dropIndicator = h('file-pond-drop-indicator', {
+            part: 'drop-indicator',
+        }) as FilePondDropIndicatorElement;
+
         // so we can set shared props on these lements
-        this.#instances.push(filePondEntryList, filePondDropIndicator, filePondDropArea);
+        this.#elements = {
+            entryList,
+            dropArea,
+            dropIndicator,
+        };
 
         // this makes sure the parts defined in the entry list nodelist are automatically exported, default modifiers are always exported
         const exportparts = new Set(['virtualized', 'dragged', 'selected', 'checked']);
@@ -151,7 +158,7 @@ export class FilePondElement extends FilePondBaseElement {
                 return;
             }
             const parts = Array.from(exportparts.add(part)).join(',');
-            filePondEntryList.setAttribute('exportparts', parts);
+            entryList.setAttribute('exportparts', parts);
         }
 
         // assign default options
@@ -162,10 +169,10 @@ export class FilePondElement extends FilePondBaseElement {
             // set up items view extension
             EntryListView: {
                 // the element that the item list will be appended to
-                element: filePondEntryList,
+                element: entryList,
 
                 // the root element to use for dragging and dropping elements, defaults to the list itself
-                dropRoot: filePondDropArea,
+                dropRoot: dropArea,
 
                 // assets to use, these contain icons
                 assets,
@@ -196,7 +203,7 @@ export class FilePondElement extends FilePondBaseElement {
         // set initial values to children
         SharedProps.forEach((key) => {
             // @ts-ignore
-            this[key] = filePondEntryList[key];
+            this[key] = entryList[key];
         });
 
         // optionally insert link to filepond.com
@@ -205,46 +212,74 @@ export class FilePondElement extends FilePondBaseElement {
         });
 
         // add components
-        this._root.prepend(filePondDropArea, filePondDropIndicator);
-        this._root.append(filePondEntryList);
+        this._root.prepend(dropArea, dropIndicator);
+        this._root.append(entryList);
         this.#attributionLink &&
             !this.hasAttribute('noattribution') &&
             this._root.append(this.#attributionLink);
 
-        // @ts-ignore
-        addListener(filePondDropArea, 'updaterect', (e: CustomEvent) => {
-            if (!e.detail) {
-                return;
-            }
+        // apply intial options
+        Object.assign(this, globalInitialOptions);
+    }
 
-            // we use this information to center the label with transforms
-            this._slot.style.setProperty('--width', e.detail.width);
-            this._slot.style.setProperty('--height', e.detail.height);
+    connectedCallback() {
+        super.connectedCallback();
 
-            // we position the attribution link with transforms
-            this.#attributionLink?.style.setProperty('--x', e.detail.width);
-            this.#attributionLink?.style.setProperty('--y', e.detail.height);
-        });
+        // if doesn't have label, set default label (its id synced with input by `FilePondBase`)
+        if (!this.querySelector('label')) {
+            const labelKey = 'dropAreaLabel';
+            this.append(
+                h('label', {
+                    innerHTML: (this.locale ? this.locale[labelKey] : labelKey) as string,
+                })
+            );
+        }
 
-        // link up placeholder position with drop indicator
-        addListener(filePondEntryList, 'updateplaceholder', (e) => {
-            filePondDropIndicator.indicatorRect = e.detail;
-        });
+        // listen to events
+        this.#connectedSubs.push(
+            // @ts-ignore
+            addListener(this.#elements.dropArea, 'updaterect', (e: CustomEvent) => {
+                if (!e.detail) {
+                    return;
+                }
 
-        // prevent interaction with slot content and attribution link while dragging
-        addListener(filePondEntryList, 'dragentrystart', () => {
-            this._slot.inert = true;
-            if (this.#attributionLink) {
-                this.#attributionLink.inert = true;
-            }
-        });
-        // restore interaction with slot content and attribution link while dragging
-        addListener(filePondEntryList, 'dragentryend', () => {
-            this._slot.inert = false;
-            if (this.#attributionLink) {
-                this.#attributionLink.inert = false;
-            }
-        });
+                // we use this information to center the label with transforms
+                this._slot.style.setProperty('--width', e.detail.width);
+                this._slot.style.setProperty('--height', e.detail.height);
+
+                // we position the attribution link with transforms
+                this.#attributionLink?.style.setProperty('--x', e.detail.width);
+                this.#attributionLink?.style.setProperty('--y', e.detail.height);
+            }),
+
+            // link up placeholder position with drop indicator
+            addListener(this.#elements.entryList, 'updateplaceholder', (e) => {
+                this.#elements.dropIndicator.indicatorRect = e.detail;
+            }),
+
+            // prevent interaction with slot content and attribution link while dragging
+            addListener(this.#elements.entryList, 'dragentrystart', () => {
+                this._slot.inert = true;
+                if (this.#attributionLink) {
+                    this.#attributionLink.inert = true;
+                }
+            }),
+
+            // restore interaction with slot content and attribution link while dragging
+            addListener(this.#elements.entryList, 'dragentryend', () => {
+                this._slot.inert = false;
+                if (this.#attributionLink) {
+                    this.#attributionLink.inert = false;
+                }
+            })
+        );
+    }
+
+    /** Called each time the element is removed from the document. */
+    disconnectedCallback() {
+        // unsub subscriptions created when connecting to the DOM
+        this.#connectedSubs.forEach((unsub) => unsub());
+        this.#connectedSubs = [];
     }
 }
 
@@ -285,9 +320,12 @@ export interface defineFilePondOptions {
 export function defineFilePond(initialOptions?: defineFilePondOptions): FilePondElement[] {
     const tag = 'file-pond';
 
+    // remember these options
+    globalInitialOptions = initialOptions;
+
     // Already defined this custom element
     if (hasDefinedTag(tag)) {
-        return [];
+        return Array.from(document.querySelectorAll(tag)) as FilePondElement[];
     }
 
     // When using the default version of the FilePond we need to define these custom elements as well
@@ -301,8 +339,10 @@ export function defineFilePond(initialOptions?: defineFilePondOptions): FilePond
     defineCustomElement(tag, FilePondElement);
 
     // let's automatically assign the passed options to all created file-pond elements
-    const elements = autoAssignFilePondProperties(tag, initialOptions) as unknown[];
+    // const elements = autoAssignFilePondProperties(tag, initialOptions) as unknown[];
+
+    return Array.from(document.querySelectorAll(tag)) as FilePondElement[];
 
     // we return all elements
-    return elements as FilePondElement[];
+    // return elements as FilePondElement[];
 }

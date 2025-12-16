@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'Napauta peruuttaaksesi',
     assistUndo: 'Napauta kumotaksesi',
 
+    dropAreaLabel: 'Pudota tiedostot tähän tai <u>selaa</u>',
+
     loadError: 'Tiedostoa ei voitu ladata.',
 
     loadDataTranserProgress: 'Ladataan tiedostoja',

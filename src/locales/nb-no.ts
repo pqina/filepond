@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'Trykk for å avbryte',
     assistUndo: 'Trykk for å angre',
 
+    dropAreaLabel: 'Dra filer hit, eller <u>bla gjennom</u>',
+
     loadError: 'Kunne ikke laste inn filen.',
 
     loadDataTranserProgress: 'Laster filer',

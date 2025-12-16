@@ -27,6 +27,8 @@ export const core = {
     assistAbort: 'Tik om te annuleren',
     assistUndo: 'Tik om ongedaan te maken',
 
+    dropAreaLabel: 'Sleep bestanden hierheen of <u>blader</u>',
+
     // file status
     loadError: 'Bestand kon niet worden geladen.',
 

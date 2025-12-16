@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'Klepněte pro zrušení',
     assistUndo: 'Klepněte pro vrácení',
 
+    dropAreaLabel: 'Přetáhněte soubory sem nebo <u>procházejte</u>',
+
     loadError: 'Soubor se nepodařilo načíst.',
 
     loadDataTranserProgress: 'Načítání souborů',

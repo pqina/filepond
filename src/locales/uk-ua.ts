@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'Натисніть, щоб скасувати',
     assistUndo: 'Натисніть, щоб повернути',
 
+    dropAreaLabel: 'Перетягніть файли сюди або <u>перегляньте</u>',
+
     loadError: 'Не вдалося завантажити файл.',
 
     loadDataTranserProgress: 'Завантаження файлів',

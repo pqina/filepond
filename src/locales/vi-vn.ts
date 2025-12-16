@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'Chạm để hủy',
     assistUndo: 'Chạm để hoàn tác',
 
+    dropAreaLabel: 'Thả tệp vào đây hoặc <u>duyệt</u>',
+
     loadError: 'Không thể tải tệp.',
 
     loadDataTranserProgress: 'Đang tải tệp',

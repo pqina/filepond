@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'İptal etmek için dokun',
     assistUndo: 'Geri almak için dokun',
 
+    dropAreaLabel: 'Dosyaları buraya bırakın veya <u>göz atın</u>',
+
     loadError: 'Dosya yüklenemedi.',
 
     loadDataTranserProgress: 'Dosyalar yükleniyor',

@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'Toque para cancelar',
     assistUndo: 'Toque para anular',
 
+    dropAreaLabel: 'Largue ficheiros aqui ou <u>procurar</u>',
+
     loadError: 'Não foi possível carregar o ficheiro.',
 
     loadDataTranserProgress: 'A carregar ficheiros',

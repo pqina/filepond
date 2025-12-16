@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'Dotknij, aby anulować',
     assistUndo: 'Dotknij, aby cofnąć',
 
+    dropAreaLabel: 'Upuść pliki tutaj lub <u>przeglądaj</u>',
+
     loadError: 'Nie udało się załadować pliku.',
 
     loadDataTranserProgress: 'Ładowanie plików',

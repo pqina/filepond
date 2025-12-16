@@ -23,6 +23,8 @@ export const core = {
     assistAbort: 'Ýttu til að hætta við',
     assistUndo: 'Ýttu til að afturkalla',
 
+    dropAreaLabel: 'Slepptu skrám hér eða <u>fletta</u>',
+
     loadError: 'Tókst ekki að hlaða skránni.',
 
     loadDataTranserProgress: 'Hleð inn skrám',
