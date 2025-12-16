@@ -202,7 +202,7 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
     #input: null | HTMLInputElement = null;
 
     /** Observes if a label is added */
-    #labelObserver: MutationObserver;
+    #labelObserver: null | MutationObserver = null;
 
     /** Locale object reference */
     #locale: null | Locale = null;
@@ -791,7 +791,7 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
     /** Called each time the element is removed from the document. */
     disconnectedCallback() {
         // stop observing
-        this.#labelObserver.disconnect();
+        this.#labelObserver?.disconnect();
 
         // unsub subscriptions created when connecting to the DOM
         this.#connectedSubs.forEach((unsub) => unsub());
