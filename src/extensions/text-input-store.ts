@@ -6,7 +6,7 @@ import { debounce } from '../utils/debounce.js';
 import { warn } from '../common/console.js';
 
 export interface TextInputStoreOptions {
-    /** An HTML Element or a QueryString selector */
+    /** An HTMLInputElement or a QueryString selector */
     element?: HTMLInputElement | string;
 }
 

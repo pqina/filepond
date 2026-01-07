@@ -14,13 +14,13 @@ export interface SimulatedStoreOptions extends StoreExtensionOptions {
     /** Delay in milliseconds between load ticks. Defaults to `250` */
     tickrate?: number;
 
-    /** Delay before starting load. Defaults to `250` */
+    /** Delay in milliseconds before starting load. Defaults to `250` */
     connectionDelay?: number;
 
     /** Total parallel load operations. Defaults to `4` */
     parallel?: number;
 
-    /** Fetches an actual stored file to use. */
+    /** Fetches an actual stored file to use for demo purposes. */
     fetchStoredFile?: (
         storageId: string,
         entry: FilePondEntry,
@@ -32,7 +32,7 @@ export interface SimulatedStoreOptions extends StoreExtensionOptions {
     ) => Promise<File>;
 
     /** Logs stored files to console. Defaults to `true` */
-    debug?: true;
+    debug?: boolean;
 }
 
 export const SimulatedStore = createStoreExtension(

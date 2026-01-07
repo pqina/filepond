@@ -1,5 +1,5 @@
 import type { ExtensionFactory } from '../../core/extensionManager.ts';
-import type { AnimationMode, Locale, SpringOptions, TemplateNode } from '../../types/index.js';
+import type { AnimationMode, Locale, SpringOptions } from '../../types/index.js';
 import { FilePondBaseElement } from '../FilePondBase/index.js';
 import { FilePondEntryListElement } from '../FilePondEntryList/index.js';
 import { FilePondDropAreaElement } from '../FilePondDropArea/index.js';
@@ -31,19 +31,6 @@ import defaultStyles from './index.css?inline';
 
 // template
 import { createFilePondEntryList } from '../../templates/entry.js';
-import type { FilePondSvelteComponentElement } from '../FilePondSvelteComponent/index.svelte.js';
-
-/** Auto assigns props to just created file-pond elements */
-// function autoAssignFilePondProperties(tag: string, options: unknown) {
-//     if (!isBrowser()) {
-//         return;
-//     }
-//     const elements = Array.from(document.querySelectorAll(tag));
-//     for (const element of elements) {
-//         Object.assign(element, options);
-//     }
-//     return elements;
-// }
 
 /** Wraps a set of extensions in with the default FilePond custom element extensions */
 export function createFilePondExtensionSet(extensions: ExtensionFactory[] = []) {
@@ -338,11 +325,6 @@ export function defineFilePond(initialOptions?: defineFilePondOptions): FilePond
     // Define the element
     defineCustomElement(tag, FilePondElement);
 
-    // let's automatically assign the passed options to all created file-pond elements
-    // const elements = autoAssignFilePondProperties(tag, initialOptions) as unknown[];
-
+    // return found elements
     return Array.from(document.querySelectorAll(tag)) as FilePondElement[];
-
-    // we return all elements
-    // return elements as FilePondElement[];
 }

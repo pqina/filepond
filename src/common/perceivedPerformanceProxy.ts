@@ -58,8 +58,7 @@ function createPerceivedPerformanceProcess(
 }
 
 /**
- * Simulate progress, we'll look at progress from actual upload and compare to simulated progress,
- * we'll use the lower progress value
+ * Simulate progress, we'll look at progress from actual upload and compare to simulated progress, we'll use the lower progress value
  */
 export function createPerceivedPerformanceProxy(fn: any, options: any) {
     // this is a simulated progress operation

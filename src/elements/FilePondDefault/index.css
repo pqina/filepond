@@ -1,13 +1,13 @@
 /* Default FilePond Styles */
 :host {
     /*  Default colors */
-    --default-color: FieldText;
-    --default-background-color: color-mix(in srgb, FieldText 10%, Canvas 100%);
+    --default-color: CanvasText;
+    --default-background-color: color-mix(in srgb, CanvasText 10%, Canvas 100%);
     --default-padding: 1em;
     --default-border-radius: 1.25em;
     --default-backdrop-filter: blur(20px) saturate(1.25);
     --default-accent-color: #007aff;
-    --default-border: 1px solid rgb(from FieldText r g b / 0.1);
+    --default-border: 1px solid rgb(from CanvasText r g b / 0.1);
 
     /* Layout */
     display: flex;
@@ -41,7 +41,7 @@ file-pond-entry-list {
     --entry-background-color: var(--default-background-color);
     --entry-shadow: 0 1px 3px rgb(0 0 0 / 0.05);
     --entry-button-outline: 0 0 0 1.5px currentColor;
-    --entry-border: 1px solid rgb(from FieldText r g b / 0.025);
+    --entry-border: 1px solid rgb(from CanvasText r g b / 0.025);
 
     &[empty] {
         margin-top: calc(-1 * var(--default-padding));

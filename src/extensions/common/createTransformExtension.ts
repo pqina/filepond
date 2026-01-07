@@ -41,7 +41,7 @@ export interface TransformExtensionFunctions {
 }
 
 export interface TransformExtensionOptions {
-    /** Action to run to trigger this extension, defaults to "transform" */
+    /** Action to run to trigger this extension, defaults to 'transform' */
     actionTransform?: string;
 
     /** Action to run to trigger file load */

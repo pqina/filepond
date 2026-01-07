@@ -13,7 +13,17 @@ import { flattenTree } from '../utils/tree.js';
 import { createPerceivedPerformanceProxy } from '../common/perceivedPerformanceProxy.js';
 
 export interface DataTransferLoaderOptions {
-    /** Should we show the progress indicator for a minimum amount of time */
+    /** Should we show the progress indicator for a minimum amount of time, configure with `PerceivedPerformanceOptions`, defaults to `true` which sets this configuration object:
+    
+    ```js
+    {
+        minDuration: 500,
+        maxDuration: 750,
+        minStep: 50,
+        maxStep: 150
+    }
+    ```
+    */
     perceivedPerformance?: boolean | PerceivedPerformanceOptions;
 
     /** Action to run to trigger the load operation, defaults to `'load'` */
@@ -23,8 +33,7 @@ export interface DataTransferLoaderOptions {
     actionAbort?: string;
 
     /**
-     * How we deal with directory structures, defaults to `'flatten'`, doesn't support other values
-     * for now
+     * How we deal with directory structures, defaults to `'flatten'`. Currently doesn't support other values.
      */
     mode: 'flatten';
 }

@@ -6,11 +6,13 @@ import { warn } from '../common/console.js';
 import { mapTree } from '../utils/tree.js';
 
 export interface FileInputSourceOptions {
-    /** An HTML Element or a QueryString selector */
+    /** An HTMLInputElement or a QueryString selector */
     element?: HTMLInputElement | string;
 
+    /** Should we reset the input everytime a `FileList` is added */
     resetFilesOnAdd?: boolean;
 
+    /** Where to add new files, defaults to index `0` */
     insertIndex?: number;
 }
 

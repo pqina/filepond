@@ -34,13 +34,13 @@ export interface StoreExtensionOptions {
     /** The key to use when setting the storage id */
     valueKey?: string;
 
-    /** Action to run to trigger the store operation, defaults to "store" */
+    /** Action to run to trigger the store operation, defaults to 'store' */
     actionStore?: string;
 
-    /** Action to run to trigger the load operation, defaults to "load" */
+    /** Action to run to trigger the load operation, defaults to 'load' */
     actionLoad?: string;
 
-    /** Action to run to trigger the abort operation, defaults to "abort" */
+    /** Action to run to trigger the abort operation, defaults to 'abort' */
     actionAbort?: string;
 
     /**
@@ -70,10 +70,18 @@ export type FunctionRelease = (
     }
 ) => Promise<boolean | void>;
 
+/** Used to simulate load or store progress, the progress duration will be random between `minDuration` and `maxDuration` the progress step length will be random between `minStep` and `maxStep` */
 export interface PerceivedPerformanceOptions {
+    /** The minimum duration of the operation in milliseconds */
     minDuration: number;
+
+    /** The maximum duration of the operation in milliseconds  */
     maxDuration: number;
+
+    /** The minimum duration till next step in milliseconds  */
     minStep: number;
+
+    /** The maximum duration till next step in milliseconds  */
     maxStep: number;
 }
 

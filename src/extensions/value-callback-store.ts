@@ -15,8 +15,7 @@ export interface ValueCallbackStoreOptions {
     valueKey: string;
 
     /**
-     * Custom function to map an entry object to a value for use in FormData. By default will use
-     * `valueKey` to get a storage id from the `entry.state`, else will return `entry.file` if set.
+     * Custom function to map an entry object to a value for use in FormData. By default will use `valueKey` to get a storage id from the `entry.state`, else will return `entry.file` if set.
      */
     entryToValue?: (entry: FilePondEntry) => File | string | void;
 

@@ -5,7 +5,6 @@ import type {
 } from './common/createStoreExtension.js';
 
 import type { XHRResponse } from '../utils/xhr.js';
-import type { Extension } from './common/createExtension.js';
 import { createStoreExtension } from './common/createStoreExtension.js';
 import { blobToFile } from '../utils/file.js';
 import { isFile, isFileEntry } from '../utils/test.js';
@@ -14,19 +13,29 @@ import { xhr, getResponseHeaders, getFilenameFromResponseHeaders } from '../util
 import type { RequestHook, FilePondEntry } from '../types/index.js';
 
 export interface FormPostStoreOptions extends StoreExtensionOptions {
-    /** Server URL, defaults to `''` */
+    /** Server URL, defaults to empty string */
     url?: string;
 
-    /** The name of the form field being submitted with the form post, defaults to `'entry'` */
+    /** The name of the form field being submitted with the form POST, defaults to `'entry'` */
     name?: string;
 
     /** when restoring a file will first do request head so we have file info, defaults to `true` */
     fetchHead?: boolean;
 
-    /** If an upload is really fast, will show simulated progress to instill confidence in upload */
+    /** If an upload is really fast, will show simulated progress to instill confidence in upload, configure with `PerceivedPerformanceOptions`. By default isn't set, when set to `true` the following settings are used:
+    
+    ```js
+    {
+        minDuration: 500,
+        maxDuration: 750,
+        minStep: 50,
+        maxStep: 150
+    }
+    ```
+    */
     perceivedPerformance?: boolean | PerceivedPerformanceOptions;
 
-    /** Intercept options sent to XMLHttpRequest */
+    /** Intercept options sent to `XMLHttpRequest` */
     willRequestWithOptions?: RequestHook;
 }
 

@@ -15,28 +15,28 @@ import { createExtension } from './common/createExtension.js';
 import { Status } from '../common/status.js';
 
 export interface URLLoaderOptions {
-    /** Action to run to trigger the load operation, defaults to `"load"` */
+    /** Action to run to trigger the load operation, defaults to `'load'`. */
     actionLoad?: string;
 
-    /** Action to run to abort the load operation, defaults to `"abort"` */
+    /** Action to run to abort the load operation, defaults to `'abort'`. */
     actionAbort?: string;
 
-    /** Hook that runs when determining the name for a file */
+    /** Hook that runs when determining the name for a file. Defaults to `() => 'Untitled'`. */
     getBaseName?: (entry: FilePondEntry, blob: Blob) => string;
 
-    /** An object with key value pairs describing mime type relation to extension */
+    /** An object with key value pairs describing mime type relation to extension. */
     mimeTypeMap?: { [key: string]: string };
 
-    /** Set to true to fetch remote HEAD to get content lenght and type so view is updated sooner */
+    /** Fetch remote HEAD to get file content length and type so meta data is updated sooner, defaults to `true`. */
     fetchHead?: boolean;
 
-    /** Maximum number of URLs to load in parallel */
+    /** Maximum number of URLs to load in parallel, defaults to `2`. */
     parallel?: number;
 
-    /** Should we use WebWorkers for the XMLHttpRequest */
+    /** Determines if we should use WebWorkers for the `XMLHttpRequest`, defaults to `true`. */
     useWebWorkers?: boolean;
 
-    /** Intercept options sent to XMLHttpRequest with `RequestHook` */
+    /** Intercept options sent to XMLHttpRequest with `RequestHook`. */
     willRequestWithOptions?: RequestHook;
 }
 
@@ -47,7 +47,7 @@ function willRequestWithOptions(src: string, options: any, entry: FilePondFileEn
 export const URLLoader = createExtension(
     'URLLoader',
     {
-        getBaseName: () => 'untitled',
+        getBaseName: () => 'Untitled',
         mimeTypeMap: undefined,
         parallel: 2,
         fetchHead: true,

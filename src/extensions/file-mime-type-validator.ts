@@ -7,10 +7,10 @@ import {
 import { isBlobOrFile, isFileEntry, isString } from '../utils/test.js';
 
 export interface FileMimeTypeValidatorOptions extends ValidatorExtensionOptions {
-    /** An array of accepted file mimetypes, also accepts wildcard character for example ['image/*'] */
+    /** An array of accepted file mime types, also accepts the wildcard character for example `['image/*']` */
     accept?: string | (string | RegExp)[];
 
-    /** Formats the extensions for presentation in a validation message */
+    /** Formats the mime types for presentation in a validation message. By default will use the uppercased last part of the mime types joined with ',' */
     format?: (mimeTypes: string[]) => string;
 }
 

@@ -27,8 +27,7 @@ export interface MediaResolutionValidatorOptions extends ValidatorExtensionOptio
     maxResolution?: number;
 
     /**
-     * Function used to convert pixels (resolution) to natural resolution. Defaults to `(pixels) =>
-     * `${Math.round(pixels / 1000000)}``
+     * Function used to convert pixels (resolution) to natural resolution. Defaults to `(pixels) => Math.round(pixels / 1000000)`
      */
     toNaturalResolution?: (pixels: number) => string;
 }

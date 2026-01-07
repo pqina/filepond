@@ -9,10 +9,10 @@ import { sleep } from '../utils/sleep.js';
 import { log } from '../common/console.js';
 
 export interface SimulatedLoaderOptions {
-    /** Action to run to trigger the load operation. Defaults to "load" */
+    /** Action to run to trigger the load operation. Defaults to 'load' */
     actionLoad?: string;
 
-    /** Action to run to abort the load operation. Defaults to "abort" */
+    /** Action to run to abort the load operation. Defaults to 'abort' */
     actionAbort?: string;
 
     /** Maximum simulated load speed. Defaults to `1024000` */
