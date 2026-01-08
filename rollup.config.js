@@ -1,9 +1,11 @@
 import { writeFileSync, mkdirSync, cpSync, existsSync } from 'node:fs';
 import { defineConfig } from 'rollup';
 import { globSync } from 'glob';
-import { minify } from 'rollup-plugin-esbuild-minify';
 import { default as license } from 'rollup-plugin-license';
 import { banner } from './banner.js';
+import cleanup from 'rollup-plugin-cleanup';
+// using terser for now, for some reason "rollup-plugin-esbuild-minify" causes an error when appending the image view and loading an image
+import terser from '@rollup/plugin-terser';
 
 const srcDir = './esm';
 const destDir = './cdn';
@@ -55,7 +57,10 @@ export default defineConfig([
         },
         plugins: [
             virtualIndex(),
-            minify(),
+            terser(),
+            cleanup({
+                comments: 'none',
+            }),
             license({
                 banner,
             }),

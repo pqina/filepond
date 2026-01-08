@@ -77,8 +77,6 @@ export default defineConfig({
                 'locales/index': srcDir + '/locales/index.js',
                 'extensions/index': srcDir + '/extensions/index.ts',
                 'templates/index': srcDir + '/templates/index.ts',
-                // 'assets/index': srcDir + '/assets/index.js',
-                // 'dev/index':  srcDir + '/dev/index.ts',
             },
         },
         rollupOptions: {

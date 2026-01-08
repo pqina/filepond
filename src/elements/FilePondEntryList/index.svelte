@@ -38,7 +38,6 @@
     import { setAppContext } from './contexts/appContext.js';
     import { setDragContext } from './contexts/dragContext.js';
     import { setDropContext } from './contexts/dropContext.js';
-    import { transitions } from '../attachments/transitions.js';
     import { getUniqueId } from '../../utils/string.js';
     import { dispatchCustomEvent } from '../../utils/dom.js';
     import { setSpringElementTreeContext } from './contexts/springElementTreeContext.js';

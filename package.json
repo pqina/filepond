@@ -3,7 +3,7 @@
         "tag": "alpha"
     },
     "name": "filepond",
-    "version": "5.0.0-alpha.12",
+    "version": "5.0.0-alpha.13",
     "description": "FilePond, where files go to stretch their bits.",
     "author": "Rik Schennink",
     "license": "MIT",
@@ -61,6 +61,7 @@
         }
     },
     "devDependencies": {
+        "@rollup/plugin-terser": "^0.4.4",
         "@sveltejs/vite-plugin-svelte": "^6.0.0",
         "@typescript-eslint/types": "^8.48.1",
         "chai": "^4.3.7",
@@ -74,7 +75,7 @@
         "prettier-plugin-svelte": "^3.4.0",
         "replace-in-files-cli": "^3.0.0",
         "rollup": "^4.53.3",
-        "rollup-plugin-esbuild-minify": "^1.3.0",
+        "rollup-plugin-cleanup": "^3.2.1",
         "rollup-plugin-license": "^3.6.0",
         "sinon": "^15.0.1",
         "svelte": "^5.45.6",
