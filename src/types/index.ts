@@ -11,7 +11,7 @@ import type { TaskArgs, TaskOptions } from '../core/taskScheduler.js';
 
 import type { FilePondElement } from '../elements/FilePondDefault/index.js';
 
-import type { FilePondBaseElement } from '../elements/FilePondBase/index.js';
+import type { FilePondInputElement } from '../elements/FilePondInput/index.js';
 
 import type { Needle } from '../core/entryTree.js';
 
@@ -34,7 +34,7 @@ export type {
     ComponentNode,
     NodeContext,
     FilePondElement,
-    FilePondBaseElement,
+    FilePondInputElement,
     Extension,
     ExtensionInstance,
     ExtensionState,

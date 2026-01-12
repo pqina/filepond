@@ -170,10 +170,10 @@ const InteractionAttributes = ['disabled', 'multiple', 'accept'];
 
 const BooleanAttributes = ['disabled', 'multiple', 'required'];
 
-export interface FilePondBaseElementEvents {
+export interface FilePondInputElementEvents {
     addEventListener<K extends keyof HTMLElementEventMap>(
         type: K | 'change' | 'update' | 'connected',
-        listener: (this: FilePondBaseElement, ev: HTMLElementEventMap[K]) => any,
+        listener: (this: FilePondInputElement, ev: HTMLElementEventMap[K]) => any,
         options?: boolean | AddEventListenerOptions
     ): void;
 }
@@ -185,7 +185,7 @@ export interface FilePondBaseElementEvents {
  * @event {CustomEvent} 'update' - emitted when entries list updated
  * @event {CustomEvent} 'connected' - emitted when connected to the DOM
  */
-export class FilePondBaseElement extends HTMLElementSafe implements FilePondBaseElementEvents {
+export class FilePondInputElement extends HTMLElementSafe implements FilePondInputElementEvents {
     /** FilePond element shadowRoot */
     #root: ShadowRoot;
 
@@ -200,9 +200,7 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
 
     /** Source input */
     #input: null | HTMLInputElement = null;
-
-    /** Observes if a label is added */
-    #labelObserver: null | MutationObserver = null;
+    #inputGenerated: null | HTMLInputElement = null;
 
     /** Locale object reference */
     #locale: null | Locale = null;
@@ -267,6 +265,17 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
         this.#syncAttributeToExtensions(name, value);
     }
 
+    /** Syncs file-pond interaction attributes to source input attributes */
+    #syncAttributeToInput(name: string, value: string | boolean) {
+        // no source input defined yet (it's only there when connected)
+        if (!this.#input || !InteractionAttributes.includes(name)) {
+            return;
+        }
+
+        // @ts-ignore set attribute value
+        this.#input[name] = value;
+    }
+
     /** Looks up the extension(s) linked to this attribute and assigns the matched props */
     #syncAttributeToExtensions(name: string, value: string | boolean) {
         const prop = toCamelCase(name);
@@ -278,9 +287,6 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
     set inputId(value: string) {
         // We know the input is defined at this point
         (this.#input as HTMLInputElement).id = value;
-
-        // If there's a single label, we set its for attribute
-        this.querySelector('label:only-of-type:not([for])')?.setAttribute('for', value);
     }
 
     /** Returns the inner input element id */
@@ -596,19 +602,39 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
         });
     }
 
-    /** Connects or creates the source input field */
-    #connectInput() {
-        // already connected source input
-        if (this.#input) {
-            return;
+    #syncSlottedInput() {
+        // we're only interested in file inputs
+        const inputs = this.#slot
+            .assignedElements({ flatten: true })
+            .filter((element) => element.matches('input[type="file"]'));
+
+        // current input
+        let input: HTMLInputElement;
+
+        // no inputs found, we'll create one automatically
+        if (!inputs.length) {
+            input = h('input', { type: 'file' }) as HTMLInputElement;
+            this.#inputGenerated = input;
+            this.append(input);
+        }
+        // when inputs found
+        else {
+            // if there's more than one file input we remove the generated on
+            for (const input of inputs) {
+                if (input === this.#inputGenerated && inputs.length > 1) {
+                    this.#inputGenerated = null;
+                    input.remove();
+
+                    // as removing the generated input triggers a re-run of #syncSlottedInput we can exit here
+                    return;
+                }
+            }
+
+            // use last input as our main input
+            input = inputs.at(-1) as HTMLInputElement;
         }
 
-        // search for soure file input to enhance, or create one
-        const input: HTMLInputElement =
-            this.querySelector('input[type="file"]') ||
-            (h('input', { type: 'file' }) as HTMLInputElement);
-
-        // copy source input attributes to custom elements
+        // copy source input attributes to custom element
         const syncedAttributes = [...GenericAttributes, ...InteractionAttributes];
         for (const attr of syncedAttributes) {
             const value = getAttributeFromElements(attr, input, this);
@@ -638,52 +664,24 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
             this.#syncAttributeToInput(attr, this[attr]);
         }
 
-        // we assign an id so a label can be linked
-        if (!input.id) {
-            // if a <label> is present and it has no `for` attribute, this sets the `for` attribute, it also sets this id to the input
-            this.inputId = `file-pond-${getUniqueId()}`;
-        }
+        // Loads files selected by the user in the source input
+        this.#extensionManager.setExtensionProperties('FileInputSource', {
+            element: this.#input,
+        });
 
-        // by default we hide the source file input, if it's not appended yet we append it now
-        if (!input.parentNode) {
-            this.append(input);
-        }
-    }
-
-    /** Syncs file-pond interaction attributes to source input attributes */
-    #syncAttributeToInput(name: string, value: string | boolean) {
-        // no source input defined yet (it's only there when connected)
-        if (!this.#input || !InteractionAttributes.includes(name)) {
+        // we always assign an id so labels can be linked
+        if (input.id) {
             return;
         }
 
-        // @ts-ignore set attribute value
-        this.#input[name] = value;
+        // set unique id
+        this.inputId = `file-pond-${getUniqueId()}`;
     }
 
     /** Called each time the element is added to the document */
     connectedCallback() {
-        // this sets up the file input state
-        this.#connectInput();
-
-        // so when label is added its for attribute is synced with the input
-        this.#labelObserver = new MutationObserver(([mutation]) => {
-            const [addedNode] = mutation.addedNodes;
-
-            // check if added label
-            if (!(addedNode instanceof HTMLLabelElement) || addedNode.hasAttribute('for')) {
-                return;
-            }
-            addedNode.setAttribute('for', this.inputId);
-        });
-        this.#labelObserver.observe(this, {
-            childList: true,
-            attributes: false,
-        });
-
         /**
-         * When the callback store changes we assign the value to the form internals for the custom
-         * element
+         * When the callback store changes we assign the value to the form internals for the custom element
          */
         const handleCallbackStoreChange = (value: any) => {
             // if receives a value set formdata
@@ -706,7 +704,6 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
 
         // Loads files selected by the user in the source input
         this.#extensionManager.setExtensionProperties('FileInputSource', {
-            element: this.#input,
             resetFilesOnAdd: true,
         });
 
@@ -716,6 +713,9 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
             onChange: handleCallbackStoreChange,
         });
 
+        // sync slotted chidlren for first time
+        this.#syncSlottedInput();
+
         // handle state updates so we can set custom validity if state is invalid, we also validate now so we know the current state
         this.#attachValidaton();
 
@@ -724,7 +724,11 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
 
         // this listens for events on child elements
         this.#connectedSubs.push(
-            // this toggles the dragging attribute to the file-pond element, we do this so we can move the file-pond element that is being interacted with to the front, so the dragged item also renders on top
+            // this file input elements are handled correctly
+            addListener(this.#slot, 'slotchange', () => {
+                this.#syncSlottedInput();
+            }),
+            // these two listeners toggle the dragging attribute to the file-pond element, we do this so we can move the file-pond element that is being interacted with to the front, so the dragged item also renders on top
             addListener(this, 'dragStart', () => {
                 setBooleanAttribute(this, 'dragging', true);
             }),
@@ -790,9 +794,6 @@ export class FilePondBaseElement extends HTMLElementSafe implements FilePondBase
 
     /** Called each time the element is removed from the document. */
     disconnectedCallback() {
-        // stop observing
-        this.#labelObserver?.disconnect();
-
         // unsub subscriptions created when connecting to the DOM
         this.#connectedSubs.forEach((unsub) => unsub());
         this.#connectedSubs = [];

@@ -1,6 +1,6 @@
 import type { ExtensionFactory } from '../../core/extensionManager.ts';
 import type { AnimationMode, Locale, SpringOptions } from '../../types/index.js';
-import { FilePondBaseElement } from '../FilePondBase/index.js';
+import { FilePondInputElement } from '../FilePondInput/index.js';
 import { FilePondEntryListElement } from '../FilePondEntryList/index.js';
 import { FilePondDropAreaElement } from '../FilePondDropArea/index.js';
 import { FilePondDropIndicatorElement } from '../FilePondDropIndicator/index.js';
@@ -22,8 +22,9 @@ import {
     defineCustomElements,
     hasDefinedTag,
     addListener,
+    dispatchCustomEvent,
 } from '../../utils/dom.js';
-import { isBrowser, isString } from '../../utils/test.js';
+import { isString } from '../../utils/test.js';
 import { assets } from '../../assets/index.js';
 
 // default FilePond styles
@@ -48,7 +49,7 @@ const SharedProps = ['springConfig', 'animations'];
 // This holds the initial options object passed to `defineFilePond`, we store this value so we can assign the initialOptions to FilePond elements created _after_ the first `defineFilePond` call.
 let globalInitialOptions: defineFilePondOptions | undefined;
 
-export class FilePondElement extends FilePondBaseElement {
+export class FilePondElement extends FilePondInputElement {
     #elements: { [key: string]: any } = {};
 
     /** Set to `true` to remove the attribution link */
@@ -209,10 +210,18 @@ export class FilePondElement extends FilePondBaseElement {
         Object.assign(this, globalInitialOptions);
     }
 
+    #syncSlottedLabels() {
+        this._slot
+            .assignedElements()
+            .filter((element) => element.tagName === 'LABEL')
+            .forEach((label) => label.setAttribute('for', this.inputId));
+    }
+
     connectedCallback() {
+        // run super connected now
         super.connectedCallback();
 
-        // if doesn't have label, set default label (its id synced with input by `FilePondBase`)
+        // if doesn't have label, add default label
         if (!this.querySelector('label')) {
             const labelKey = 'dropAreaLabel';
             this.append(
@@ -222,8 +231,15 @@ export class FilePondElement extends FilePondBaseElement {
             );
         }
 
+        // sync labels with file input
+        this.#syncSlottedLabels();
+
         // listen to events
         this.#connectedSubs.push(
+            // label elements for attributes are synced with file input
+            addListener(this._slot, 'slotchange', () => {
+                this.#syncSlottedLabels();
+            }),
             // @ts-ignore
             addListener(this.#elements.dropArea, 'updaterect', (e: CustomEvent) => {
                 if (!e.detail) {
@@ -237,6 +253,9 @@ export class FilePondElement extends FilePondBaseElement {
                 // we position the attribution link with transforms
                 this.#attributionLink?.style.setProperty('--x', e.detail.width);
                 this.#attributionLink?.style.setProperty('--y', e.detail.height);
+
+                // did compute rect
+                dispatchCustomEvent(this, 'updaterect', { detail: e.detail });
             }),
 
             // link up placeholder position with drop indicator

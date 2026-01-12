@@ -1,5 +1,8 @@
 /* Default FilePond Styles */
 :host {
+    /* toggles animations */
+    --animate: 1;
+
     /*  Default colors */
     --default-color: CanvasText;
     --default-background-color: color-mix(in srgb, CanvasText 10%, Canvas 100%);
@@ -21,8 +24,13 @@
     }
 }
 
+/* apply "never" animation state */
+:host([animations='never']) {
+    --animate: 0;
+}
+
+/* gray out elements when disabled */
 :host([disabled]) {
-    user-select: none;
     filter: grayscale(100%);
 }
 

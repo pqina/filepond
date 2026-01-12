@@ -1,7 +1,4 @@
 :host {
-    /* default effects duration */
-    --animate: 1;
-
     /* improve font rendering */
     -webkit-font-smoothing: antialiased;
 
@@ -16,18 +13,18 @@
     /* needs to have a height for form validation to work */
     min-height: 1px;
 
-    /*  */
+    /* default slot rendering */
     & slot {
         display: block;
     }
 }
 
-/* apply "never" animation state */
-:host([animations='never']) {
-    --animate: 0;
+/* disable user selection when disabled */
+:host([disabled]) {
+    user-select: none;
 }
 
-/* move to top when dragging */
+/* move to top when dragging children */
 :host([dragging]) {
     z-index: 2147483647;
 }

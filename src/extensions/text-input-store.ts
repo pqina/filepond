@@ -58,12 +58,11 @@ export const TextInputStore = createExtension(
             targetElement.value = filteredEntries.length ? JSON.stringify(filteredEntries) : '';
         }
 
-        // when an entry is updated we check if it's a Blob, if so we queue our Blob to File task, else we ignore
-        const unsubUpdateEntry = on('updateEntries', debounce(handleUpdateEntries));
+        const unsubUpdateEntries = on('updateEntries', debounce(handleUpdateEntries));
 
         return {
             destroy: () => {
-                unsubUpdateEntry();
+                unsubUpdateEntries();
             },
         };
     }
