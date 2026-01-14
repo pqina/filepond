@@ -1,7 +1,7 @@
 progress-indicator {
     --progress-color: var(--progress-color, currentColor);
 
-    --track-color: rgb(from var(--progress-color) r g b / 0.25);
+    --track-color: color-mix(in srgb, var(--progress-color) 25%, transparent);
     --track-size: var(--size, 1.5em);
     --track-border-radius: var(--border-radius, 0);
 

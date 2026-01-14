@@ -51,7 +51,7 @@
     --skeleton-max-width: 50%;
     font-size: var(--font-size-xs);
     font-weight: 400;
-    color: rgb(from currentColor r g b / 0.5);
+    color: color-mix(in srgb, currentColor 50%, transparent);
 }
 
 /* entry decorative elements */
@@ -95,8 +95,13 @@
     }
 
     & .entry-media {
+        /* 
+        `0` didn't work on Safari 17.x, the entry would not expand, so switched to `auto` value instead
         min-width: 0;
         min-height: 0;
+        */
+        min-width: auto;
+        min-height: auto;
     }
 
     & .entry-media-controls {

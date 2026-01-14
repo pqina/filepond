@@ -28,3 +28,23 @@
 :host([dragging]) {
     z-index: 2147483647;
 }
+
+/* Slotted element styles */
+::slotted(input[type='file']) {
+    position: absolute;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    z-index: -1;
+    pointer-events: none;
+    user-select: none;
+
+    /* hide from view, use -webkit- prefix because otherwise looks completely broken */
+    --mask: linear-gradient(transparent, transparent);
+    -webkit-mask: var(--mask);
+    mask: var(--mask);
+
+    /* we align it to the top so Safari tooltip points to the field */
+    top: 0;
+    left: 0;
+}

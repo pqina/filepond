@@ -10,7 +10,7 @@
     --default-border-radius: 1.25em;
     --default-backdrop-filter: blur(20px) saturate(1.25);
     --default-accent-color: #007aff;
-    --default-border: 1px solid rgb(from CanvasText r g b / 0.1);
+    --default-border: 1px solid color-mix(in srgb, CanvasText 10%, transparent);
 
     /* Layout */
     display: flex;
@@ -41,7 +41,7 @@ file-pond-drop-area {
 
 file-pond-drop-indicator {
     --border-radius: var(--default-border-radius);
-    --background-color: rgb(from var(--default-color) r g b / 0.1);
+    --background-color: color-mix(in srgb, var(--default-color) 10%, transparent);
 }
 
 file-pond-entry-list {
@@ -156,7 +156,7 @@ file-pond-entry-list {
     &::part(entry-button) {
         --btn-size: 1.5em;
         --btn-border-radius: calc(var(--entry-border-radius) - var(--entry-padding) * 0.625);
-        --btn-background-color: rgb(from var(--entry-color) r g b / 0.15);
+        --btn-background-color: color-mix(in srgb, var(--entry-color) 15%, transparent);
         --btn-icon-stroke: 2.5;
 
         box-shadow: 0 0 0 0 transparent;
@@ -166,7 +166,7 @@ file-pond-entry-list {
     }
 
     &::part(entry-button):hover {
-        background-color: rgb(from var(--entry-color) r g b / 0.25);
+        background-color: color-mix(in srgb, var(--entry-color) 25%, transparent);
         box-shadow: var(--entry-button-outline);
     }
 
@@ -182,7 +182,7 @@ file-pond-entry-list {
     }
 
     &::part(media-button):hover {
-        background-color: rgb(from currentColor r g b / 0.15);
+        background-color: color-mix(in srgb, currentColor 15%, transparent);
         box-shadow: var(--entry-button-outline);
     }
 
@@ -260,24 +260,6 @@ file-pond-entry-list {
         --text-opacity: 0.75;
         --line-opacity: 0.25;
     }
-}
-
-/* Slotted element styles */
-::slotted(input[type='file']) {
-    position: absolute;
-    width: 100%;
-    padding: 0;
-    margin: 0;
-    z-index: -1;
-    pointer-events: none;
-    user-select: none;
-
-    /* hide from view */
-    mask: linear-gradient(transparent, transparent);
-
-    /* we align it to the top so Safari tooltip points to the field */
-    top: 0;
-    left: 0;
 }
 
 ::slotted(label) {

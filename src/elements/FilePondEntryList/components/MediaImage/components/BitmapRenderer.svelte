@@ -39,6 +39,9 @@
     // so we only generate one object url
     const getObjectURL = () => createObjectURL(file);
 
+    // so we can skip decoding in worker
+    const isBitmap = () => file.type !== 'image/svg+xml';
+
     // read cache on init
     // svelte-ignore state_referenced_locally
     const { size: cachedSize, canvas: cachedCanvas } = getBitmapCacheItem(file) ?? {};
@@ -162,7 +165,7 @@
     }
 
     /** Determine which image drawing function to run */
-    const taskDrawImage = isFirefox() ? drawImageInMainThread : drawImageInWorker;
+    const taskDrawImage = isFirefox() || !isBitmap() ? drawImageInMainThread : drawImageInWorker;
 
     /** Need to read the image size so we can scale the media container */
     async function taskLoadImageSize() {
@@ -183,13 +186,14 @@
 
         // scale the image size to fit to the maximum allowed pixels
         const requiredPixels = size.width * size.height;
-        if (maximumPixels && requiredPixels > maximumPixels) {
+        if (maximumPixels && (requiredPixels > maximumPixels || !isBitmap())) {
             imageScalar = Math.sqrt(maximumPixels) / Math.sqrt(requiredPixels);
         }
 
         // so we can center image
         width = Math.floor(size.width * imageScalar);
         height = Math.floor(size.height * imageScalar);
+
         onload?.({
             width,
             height,

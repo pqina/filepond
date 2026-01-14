@@ -11,7 +11,7 @@ filename-input {
         transition: background-color var(--input-transition-duration) ease-out;
         &:focus,
         &:hover {
-            background-color: rgb(from currentColor r g b / 0.15);
+            background-color: color-mix(in srgb, currentColor 15%, transparent);
         }
     }
 

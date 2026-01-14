@@ -2,7 +2,7 @@ range-input {
     --transition-duration: var(--_150ms);
     --thumb-size: 0.5em;
     --thumb-color: currentColor;
-    --track-color: rgb(from currentColor r g b / 0.25);
+    --track-color: color-mix(in srgb, currentColor 25%, transparent);
     --track-size: 0.1875em;
     --track-interaction-size: 1.25em;
     --progress-color: currentColor;

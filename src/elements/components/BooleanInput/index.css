@@ -10,7 +10,10 @@ boolean-input {
     --input-focus-width: 2px;
 
     --input-font-size: 0.75em;
-    --input-background-color: var(--background-color, rgb(from currentColor r g b / 0.15));
+    --input-background-color: var(
+        --background-color,
+        color-mix(in srgb, currentColor 15%, transparent)
+    );
 
     --input-transition-duration: var(--_100ms);
 
