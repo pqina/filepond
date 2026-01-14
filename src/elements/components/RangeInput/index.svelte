@@ -34,7 +34,7 @@
 
         enableAnimations?: boolean;
 
-        springConfig?: SpringOptions;
+        springDefaults?: SpringOptions;
 
         oninput?: (detail: number) => void;
 
@@ -52,16 +52,16 @@
         precision = 2,
         children,
         enableAnimations = true,
-        springConfig,
+        springDefaults,
     }: RangeInputOptions = $props();
 
     // @ts-ignore so we can animate back pane
     const animatedWidth: Spring<number | undefined> = new Spring(undefined);
     $effect(() => {
-        if (!springConfig) {
+        if (!springDefaults) {
             return;
         }
-        Object.assign(animatedWidth, springConfig);
+        Object.assign(animatedWidth, springDefaults);
     });
 
     /** The iInput[type="range"] element */

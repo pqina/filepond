@@ -8,7 +8,7 @@
     import type { FilePondSvelteComponentOptions } from '../../types/index.js';
     import type { Bounds } from '../../utils/bounds.js';
 
-    let { animations = 'auto', springConfig }: FilePondSvelteComponentOptions = $props();
+    let { animations = 'auto', springDefaults }: FilePondSvelteComponentOptions = $props();
 
     const callbacks = {
         updateRect: (rect: Rect) => {},
@@ -32,11 +32,11 @@
         precision: 1,
     }) as Spring<Rect>;
     $effect(() => {
-        if (!springConfig) {
+        if (!springDefaults) {
             return;
         }
 
-        Object.assign(rootRectSpring, springConfig);
+        Object.assign(rootRectSpring, springDefaults);
     });
     $effect(() => {
         rootRectSpring.set(rootRect, { instant: !enableAnimations });

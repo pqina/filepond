@@ -77,9 +77,9 @@
     let animatedPath: SVGGeometryElement | undefined = $state.raw(undefined);
 
     // animation stores
-    const progressIndiactorSpringConfig = { stiffness: 0.1, damping: 0.7, precision: 0.001 };
+    const progressIndiactorSpringOptions = { stiffness: 0.1, damping: 0.7, precision: 0.001 };
     const easedValue = new Spring(undefined, { precision: 0.01 }) as Spring<number | undefined>;
-    const easedOffset = new Spring(0, progressIndiactorSpringConfig) as Spring<number>;
+    const easedOffset = new Spring(0, progressIndiactorSpringOptions) as Spring<number>;
 
     // to determine if we switched from determinate to indeterminate or vice versa
     let wasDeterminate: boolean | undefined = $state.raw(undefined);

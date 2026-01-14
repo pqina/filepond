@@ -85,7 +85,7 @@ export const COMPONENT_PROPS = [
     'entryAnimationProps',
     'entryAnimationOriginMap',
     'entryAnimationStaggerInterval',
-    'springConfig',
+    'springDefaults',
 ];
 
 const COMPONENT_METHODS = [
@@ -142,7 +142,7 @@ export function getDefaultEntryAnimationOriginMap() {
     };
 }
 
-export function getDefaultSpringConfig() {
+export function getDefaultSpringOptions() {
     return {
         stiffness: 0.1,
         damping: 0.495,
@@ -159,8 +159,8 @@ export function getDefaultEntryAnimationProps() {
         },
         // spring state while dragging
         lift: {
-            translationSpringConfig: { stiffness: 0.1, damping: 0.4 },
-            scaleSpringConfig: { stiffness: 0.1, damping: 0.35 },
+            translationSpringOptions: { stiffness: 0.1, damping: 0.4 },
+            scaleSpringOptions: { stiffness: 0.1, damping: 0.35 },
             scale: 1.025,
             opacity: 1,
         },
@@ -170,41 +170,41 @@ export function getDefaultEntryAnimationProps() {
         },
         // spring target when removed
         fall: {
-            scaleSpringConfig: { stiffness: 0.1, damping: 0.9 },
+            scaleSpringOptions: { stiffness: 0.1, damping: 0.9 },
             scale: 0.95,
-            opacitySpringConfig: { stiffness: 0.25, damping: 0.95 },
+            opacitySpringOptions: { stiffness: 0.25, damping: 0.95 },
             opacity: 0,
         },
         // fade in from smaller size
         rise: {
             translationFrom: { x: 0, y: -5 },
-            scaleSpringConfig: { stiffness: 0.1, damping: 0.31 },
+            scaleSpringOptions: { stiffness: 0.1, damping: 0.31 },
             scaleFrom: 0.95,
             scale: 1,
-            opacitySpringConfig: { stiffness: 0.1, damping: 0.6 },
+            opacitySpringOptions: { stiffness: 0.1, damping: 0.6 },
             opacityFrom: 0,
             opacity: 1,
         },
         // fade in from bigger size
         drop: {
-            scaleSpringConfig: { stiffness: 0.1, damping: 0.31 },
+            scaleSpringOptions: { stiffness: 0.1, damping: 0.31 },
             scaleFrom: 1.05,
             scale: 1,
-            opacitySpringConfig: { stiffness: 0.1, damping: 0.6 },
+            opacitySpringOptions: { stiffness: 0.1, damping: 0.6 },
             opacityFrom: 0,
             opacity: 1,
         },
         // animating in from the top
         slide: {
-            translationSpringConfig: { stiffness: 0.05, damping: 0.5 },
+            translationSpringOptions: { stiffness: 0.05, damping: 0.5 },
             translationFrom: {
                 x: 0,
                 y: -15,
             },
-            scaleSpringConfig: { stiffness: 0.1, damping: 0.31 },
+            scaleSpringOptions: { stiffness: 0.1, damping: 0.31 },
             scaleFrom: 0.95,
             scale: 1,
-            opacitySpringConfig: { stiffness: 0.1, damping: 0.6 },
+            opacitySpringOptions: { stiffness: 0.1, damping: 0.6 },
             opacityFrom: 0,
             opacity: 1,
         },

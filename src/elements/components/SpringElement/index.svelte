@@ -51,10 +51,10 @@
         /** Set to `true` if can't be interacted with */
         inert?: boolean | null;
 
-        springConfig?: { stiffness?: number; damping?: number; precision?: number };
-        scaleSpringConfig?: { stiffness?: number; damping?: number; precision?: number };
-        opacitySpringConfig?: { stiffness?: number; damping?: number; precision?: number };
-        translationSpringConfig?: { stiffness?: number; damping?: number; precision?: number };
+        springDefaults?: SpringOptions;
+        scaleSpringOptions?: SpringOptions;
+        opacitySpringOptions?: SpringOptions;
+        translationSpringOptions?: SpringOptions;
 
         /** Called on element measure */
         onelementmeasure?: (rect: Rect) => void;
@@ -114,7 +114,7 @@
     import { roundPrecision } from '../../../utils/math.js';
 
     let {
-        springConfig = undefined,
+        springDefaults = undefined,
 
         tag = 'div',
         part = undefined,
@@ -127,17 +127,17 @@
         styles = undefined,
         inert = null,
 
-        scaleSpringConfig = undefined,
+        scaleSpringOptions = undefined,
         scaleFrom = undefined,
         scale = undefined,
 
-        opacitySpringConfig = undefined,
+        opacitySpringOptions = undefined,
         opacityFrom = undefined,
         opacity = undefined,
 
         translation = vectorCreate(),
         translationFrom = undefined,
-        translationSpringConfig = undefined,
+        translationSpringOptions = undefined,
 
         onelementmeasure = undefined,
         onmeasure = undefined,
@@ -152,48 +152,48 @@
 
     /** Spring configuration */
     const appContext = getAppContext();
-    const currentSpringConfig = $derived(springConfig ?? appContext?.springConfig ?? {});
+    const currentSpringOptions = $derived(springDefaults ?? appContext?.springDefaults ?? {});
     const springedPosition = new Spring(undefined) as Spring<Vector | undefined>;
     // svelte-ignore state_referenced_locally
     const springedScale = new Spring(scale || 1);
     // svelte-ignore state_referenced_locally
     const springedOpacity = new Spring(opacity || 1);
 
-    const computedTranslationSpringConfig = gate(
+    const computedTranslationSpringOptions = gate(
         (prev: any, curr: any) => prev !== curr,
-        () => translationSpringConfig
+        () => translationSpringOptions
     ) as { current: SpringOptions };
 
-    const computedScaleSpringConfig = gate(
+    const computedScaleSpringOptions = gate(
         (prev: any, curr: any) => prev !== curr,
-        () => scaleSpringConfig
+        () => scaleSpringOptions
     ) as { current: SpringOptions };
 
-    const computedOpacitySpringConfig = gate(
+    const computedOpacitySpringOptions = gate(
         (prev: any, curr: any) => prev !== curr,
-        () => opacitySpringConfig
+        () => opacitySpringOptions
     ) as { current: SpringOptions };
 
     $effect(() => {
         Object.assign(springedPosition, {
-            ...currentSpringConfig,
-            ...computedTranslationSpringConfig.current,
+            ...currentSpringOptions,
+            ...computedTranslationSpringOptions.current,
             precision: 0.0001,
         });
     });
 
     $effect(() => {
         Object.assign(springedScale, {
-            ...currentSpringConfig,
-            ...computedScaleSpringConfig.current,
+            ...currentSpringOptions,
+            ...computedScaleSpringOptions.current,
             precision: 0.0001,
         });
     });
 
     $effect(() => {
         Object.assign(springedOpacity, {
-            ...currentSpringConfig,
-            ...computedOpacitySpringConfig.current,
+            ...currentSpringOptions,
+            ...computedOpacitySpringOptions.current,
             precision: 0.01,
         });
     });
@@ -244,7 +244,7 @@
     const springedSize = new Spring(undefined) as Spring<Size>;
 
     $effect(() => {
-        Object.assign(springedSize, currentSpringConfig);
+        Object.assign(springedSize, currentSpringOptions);
     });
 
     let sizePrev: Size | null;

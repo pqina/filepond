@@ -4,7 +4,7 @@ import { addListener, createStyleSheet, dispatchCustomEvent } from '../../utils/
 import { arrayRemoveFalsy } from '../../utils/array.js';
 
 const ObservedAttributes = ['animations'];
-const SharedProperties = ['animations', 'springConfig'];
+const SharedProperties = ['animations', 'springDefaults'];
 
 export class FilePondSvelteComponentElement extends HTMLElementSafe {
     #root: ShadowRoot;
@@ -57,7 +57,7 @@ export class FilePondSvelteComponentElement extends HTMLElementSafe {
         // so we can reference it elsewhere in this class (for internal svelte reason we can't assign directly to this.#props with $state)
         this.#props = $state({
             root: this,
-            springConfig: undefined,
+            springDefaults: undefined,
             animations: this.getAttribute('animations') || undefined,
         });
 

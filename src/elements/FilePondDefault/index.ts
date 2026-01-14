@@ -11,7 +11,7 @@ import { ValueCallbackStore } from '../../extensions/value-callback-store.js';
 import {
     getDefaultEntryAnimationOriginMap,
     getDefaultEntryAnimationProps,
-    getDefaultSpringConfig,
+    getDefaultSpringOptions,
 } from '../FilePondEntryList/index.js';
 
 import { EntryListView, type EntryListViewOptions } from '../../extensions/entry-list-view.js';
@@ -44,7 +44,7 @@ export function createFilePondExtensionSet(extensions: ExtensionFactory[] = []) 
     ] as ExtensionFactory[];
 }
 
-const SharedProps = ['springConfig', 'animations'];
+const SharedProps = ['springDefaults', 'animations'];
 
 // This holds the initial options object passed to `defineFilePond`, we store this value so we can assign the initialOptions to FilePond elements created _after_ the first `defineFilePond` call.
 let globalInitialOptions: defineFilePondOptions | undefined;
@@ -59,9 +59,9 @@ export class FilePondElement extends FilePondInputElement {
     #connectedSubs: (() => void)[] = [];
 
     /** Pass spring and animaton config to children */
-    set springConfig(value: SpringOptions) {
+    set springDefaults(value: SpringOptions) {
         Object.values(this.#elements).forEach((element) => {
-            element.springConfig = value;
+            element.springDefaults = value;
         });
     }
 
@@ -181,12 +181,12 @@ export class FilePondElement extends FilePondInputElement {
                 // animations
                 entryAnimationProps: getDefaultEntryAnimationProps(),
                 entryAnimationOriginMap: getDefaultEntryAnimationOriginMap(),
-                springConfig: getDefaultSpringConfig(),
+                springDefaults: getDefaultSpringOptions(),
             } as EntryListViewOptions,
         });
 
         // set default springconfig to this element and it's children
-        this.springConfig = getDefaultSpringConfig();
+        this.springDefaults = getDefaultSpringOptions();
 
         // set initial values to children
         SharedProps.forEach((key) => {
@@ -315,7 +315,7 @@ export interface defineFilePondOptions {
     extensions?: ExtensionFactory[];
 
     /** Initial Spring configuration */
-    springConfig?: SpringOptions;
+    springDefaults?: SpringOptions;
 }
 
 /**

@@ -69,7 +69,7 @@
         entryAnimationOriginMap = {},
         entryAnimationProps = {},
         entryAnimationStaggerInterval = 50,
-        springConfig,
+        springDefaults,
     }: FilePondEntryListOptions = $props();
 
     // we update the template like this as when we set it via $props() Svelte creates a proxy which makes it difficult to update the template via beforeAssignTemplate
@@ -426,8 +426,8 @@
                 assets,
             };
         },
-        get springConfig() {
-            return springConfig;
+        get springDefaults() {
+            return springDefaults;
         },
         get propResourceMap() {
             return propResourceMap;
@@ -918,6 +918,6 @@
         sharedContext={entryListAPI}
         beforeRenderNode={(node, context, sharedContext) =>
             beforeRenderNode(node, context, sharedContext)}
-        beforeSetProps={(props) => ({ ...props, enableAnimations, springConfig })}
+        beforeSetProps={(props) => ({ ...props, enableAnimations, springDefaults })}
     />
 </div>

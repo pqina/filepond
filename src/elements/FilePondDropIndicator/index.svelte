@@ -17,7 +17,7 @@
     import type { FilePondSvelteComponentOptions } from '../../types/index.js';
     import type { Bounds } from '../../utils/bounds.js';
 
-    let { animations = 'auto', springConfig }: FilePondSvelteComponentOptions = $props();
+    let { animations = 'auto', springDefaults }: FilePondSvelteComponentOptions = $props();
 
     export function setIndicatorRect(rect: Rect) {
         // no rect so let's stop showing the placeholder indicator
@@ -84,10 +84,10 @@
     //
     const indicatorPositionSpring = new Spring(undefined) as Spring<Vector | undefined>;
     $effect(() => {
-        if (!springConfig) {
+        if (!springDefaults) {
             return;
         }
-        Object.assign(indicatorPositionSpring, springConfig);
+        Object.assign(indicatorPositionSpring, springDefaults);
     });
 
     let didNotHaveCoordinates = false;
@@ -106,10 +106,10 @@
 
     const indicatorOpacitySpring = new Spring(1);
     $effect(() => {
-        if (!springConfig) {
+        if (!springDefaults) {
             return;
         }
-        Object.assign(indicatorOpacitySpring, springConfig);
+        Object.assign(indicatorOpacitySpring, springDefaults);
     });
 
     $effect(() => {
@@ -123,10 +123,10 @@
 
     const indicatorSizeSpring = new Spring(IndicatorSize);
     $effect(() => {
-        if (!springConfig) {
+        if (!springDefaults) {
             return;
         }
-        Object.assign(indicatorSizeSpring, springConfig);
+        Object.assign(indicatorSizeSpring, springDefaults);
     });
 
     $effect(() => {

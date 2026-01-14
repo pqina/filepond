@@ -220,13 +220,13 @@ export interface EntryListFunctions {
 export type Template = (api: EntryListFunctions) => TemplateNode[];
 
 export interface EntryAnimation {
-    opacitySpringConfig?: any;
+    opacitySpringOptions?: any;
     opacityFrom?: number;
     opacity?: number;
-    scaleSpringConfig?: any;
+    scaleSpringOptions?: any;
     scaleFrom?: number;
     scale?: number;
-    translationSpringConfig?: any;
+    translationSpringOptions?: any;
     translationFrom?: Vector;
     translation?: Vector;
 }
@@ -243,7 +243,7 @@ export interface FilePondSvelteComponentOptions {
     animations?: AnimationMode;
 
     /** Generic Spring configuration to use */
-    springConfig?: SpringOptions;
+    springDefaults?: SpringOptions;
 }
 
 export interface FilePondEntryListOptions extends Omit<FilePondSvelteComponentOptions, 'root'> {
@@ -283,7 +283,7 @@ export interface FilePondEntryListOptions extends Omit<FilePondSvelteComponentOp
 
     /**
      * The distance from the root element after which the element will be removed when dropped,
-     * defaults to `80`
+     * defaults to `80`, set to `Infinity` to prevent removal by dragging
      */
     dragSafetyMargin?: number;
 

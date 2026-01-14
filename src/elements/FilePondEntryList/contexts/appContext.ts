@@ -11,7 +11,7 @@ export interface AppContext extends AppCallbacks {
         locale: Locale;
         assets: { [key: string]: string };
     };
-    readonly springConfig: SpringOptions | undefined;
+    readonly springDefaults: SpringOptions | undefined;
     readonly propResourceMap: {
         [componentProperty: string]: string;
     };

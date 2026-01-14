@@ -52,6 +52,7 @@ import { HTMLElementSafe } from '../../common/ssr.js';
 import { getFilenameFromURL } from '../../utils/url.js';
 import { arrayRemoveFalsy } from '../../utils/array.js';
 import defaultStyles from './index.css?inline';
+import { supportsURLPattern } from '../../utils/support.js';
 
 // https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals/setValidity#flags
 // validity flag order
@@ -948,9 +949,10 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         }
 
         /*
-        It's unclear why Safari 17.6 doesn't want to focus the custom element itself. It throws "An invalid form control with name='...' is not focusable." when clicking the form submit button. It does work correctly when the anchor is set to the input 
+        It's unclear why Safari <= 18 doesn't want to focus the custom element itself. It throws "An invalid form control with name='...' is not focusable." when clicking the form submit button. It does work correctly when the anchor is set to the input 
         */
-        const anchor = (isSafari() && this.#input) || undefined;
+        const anchor =
+            isSafari() && !supportsURLPattern() ? (this.#input as HTMLInputElement) : undefined;
         this.#internals?.setValidity(flags, message, anchor);
         return false;
     }

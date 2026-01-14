@@ -25,3 +25,5 @@ export const supportsYieldScheduler = createTest(
     // @ts-ignore
     () => !!globalThis.scheduler?.yield
 );
+
+export const supportsURLPattern = createTest(() => 'URLPattern' in window);

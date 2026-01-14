@@ -70,7 +70,7 @@
     const mediaScalar = new Spring(mediaInitialScalar, revealConfig);
 
     // context variables
-    const { springConfig, enableAnimations } = $derived(getAppContext());
+    const { springDefaults, enableAnimations } = $derived(getAppContext());
     const springContext = getSpringElementTreeContext();
     const { currentScale } = $derived(springContext);
 
@@ -80,10 +80,10 @@
     // @ts-ignore
     const mediaPaneCurrentRect: Spring<Rect> = new Spring(undefined);
     $effect(() => {
-        if (!springConfig) {
+        if (!springDefaults) {
             return;
         }
-        Object.assign(mediaPaneCurrentRect, springConfig);
+        Object.assign(mediaPaneCurrentRect, springDefaults);
     });
 
     const springUpdateConfig = $derived({

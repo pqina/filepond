@@ -23,13 +23,13 @@
     interface EntrySpringAnimation {
         opacityFrom?: number;
         opacity?: number;
-        opacitySpringConfig?: SpringOptions;
+        opacitySpringOptions?: SpringOptions;
         scaleFrom?: number;
         scale?: number;
-        scaleSpringConfig?: SpringOptions;
+        scaleSpringOptions?: SpringOptions;
         translationFrom?: Vector;
         translation?: Vector;
-        translationSpringConfig?: SpringOptions;
+        translationSpringOptions?: SpringOptions;
         onspringcancel?: () => void;
         onspringcomplete?: (spring: { opacity: number; scale: number }) => void;
     }
@@ -166,9 +166,9 @@
             opacityFrom,
             scaleFrom,
             translationFrom,
-            translationSpringConfig,
-            scaleSpringConfig,
-            opacitySpringConfig,
+            translationSpringOptions,
+            scaleSpringOptions,
+            opacitySpringOptions,
         } = animationPropsConfig[animation];
 
         // base spring
@@ -176,9 +176,9 @@
             scale: undefined,
             opacity: undefined,
             translation: undefined,
-            translationSpringConfig,
-            scaleSpringConfig,
-            opacitySpringConfig,
+            translationSpringOptions,
+            scaleSpringOptions,
+            opacitySpringOptions,
             onspringcancel() {
                 oncancel();
             },
