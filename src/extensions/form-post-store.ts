@@ -22,19 +22,6 @@ export interface FormPostStoreOptions extends StoreExtensionOptions {
     /** when restoring a file will first do request head so we have file info, defaults to `true` */
     fetchHead?: boolean;
 
-    /** If an upload is really fast, will show simulated progress to instill confidence in upload, configure with `PerceivedPerformanceOptions`. By default isn't set, when set to `true` the following settings are used:
-    
-    ```js
-    {
-        minDuration: 500,
-        maxDuration: 750,
-        minStep: 50,
-        maxStep: 150
-    }
-    ```
-    */
-    perceivedPerformance?: boolean | PerceivedPerformanceOptions;
-
     /** Intercept options sent to `XMLHttpRequest` */
     willRequestWithOptions?: RequestHook;
 }

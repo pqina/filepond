@@ -25,7 +25,17 @@ export interface StoreExtensionFunctions {
 }
 
 export interface StoreExtensionOptions {
-    /** Should we show the progress indicator for a minimum amount of time */
+    /** If an upload is really fast, will show simulated progress to instill confidence in upload, configure with `PerceivedPerformanceOptions`. By default isn't set, when set to `true` the following settings are used:
+    
+    ```js
+    {
+        minDuration: 500,
+        maxDuration: 750,
+        minStep: 50,
+        maxStep: 150
+    }
+    ```
+    */
     perceivedPerformance?: boolean | PerceivedPerformanceOptions;
 
     /** How many of these store operations can run in parallel */

@@ -29,9 +29,6 @@ export interface ChunkedUploadStoreOptions extends StoreExtensionOptions {
     /** Allow pause/resume */
     resume?: boolean;
 
-    /** If an upload is really fast, will show simulated progress to instill confidence in upload */
-    perceivedPerformance?: boolean | PerceivedPerformanceOptions;
-
     /** Intercept options sent to XMLHttpRequest */
     willRequestWithOptions?: RequestHook;
 }

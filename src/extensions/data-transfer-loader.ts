@@ -13,7 +13,7 @@ import { flattenTree } from '../utils/tree.js';
 import { createPerceivedPerformanceProxy } from '../common/perceivedPerformanceProxy.js';
 
 export interface DataTransferLoaderOptions {
-    /** Should we show the progress indicator for a minimum amount of time, configure with `PerceivedPerformanceOptions`, defaults to `true` which sets this configuration object:
+    /** Should we show the progress indicator for a minimum amount of time, configure with `PerceivedPerformanceOptions`. By default isn't set, when set to `true` the following settings are used:
     
     ```js
     {
@@ -41,7 +41,6 @@ export interface DataTransferLoaderOptions {
 export const DataTransferLoader = createExtension(
     'DataTransferLoader',
     {
-        perceivedPerformance: true,
         actionLoad: 'load',
         actionAbort: 'abort',
         mode: 'flatten',

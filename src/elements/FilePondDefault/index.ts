@@ -154,6 +154,11 @@ export class FilePondElement extends FilePondInputElement {
             // add items view
             extensions: createFilePondExtensionSet(this.extensions),
 
+            // show progress indicator for data transfers
+            DataTransferLoader: {
+                perceivedPerformance: true,
+            },
+
             // set up items view extension
             EntryListView: {
                 // the element that the item list will be appended to
