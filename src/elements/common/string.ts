@@ -92,11 +92,7 @@ export function getValueByKeyFromData(
     return isString(key) ? (data[key] ?? key) : defaultValue;
 }
 
-export function statusToLabel(
-    { code, subcode, values }: any,
-    locale: Locale,
-    { debug }: { debug: boolean }
-) {
+export function statusToLabel({ code, subcode, values }: any, locale: Locale) {
     // if a subcode is supplied we use that instead of the main status code
     const localeCode = subcode ?? code;
 
@@ -104,30 +100,13 @@ export function statusToLabel(
     const labelKey = cache(statusCodeToLocaleKey, [localeCode]);
     const hasLabel = !isNullOrUndefined(locale[labelKey]);
 
-    // if no label and we're not debuggin we don't display this status
-    if (!hasLabel && !debug) {
+    // if no label we don't display this status
+    if (!hasLabel) {
         return;
     }
 
     // get label
-    const label = hasLabel ? stringReplaceVariables(locale[labelKey], values, locale) : undefined;
-
-    // not debugging
-    if (!debug) {
-        return label;
-    }
-
-    // in debug mode log object
-    let valuesStr = '';
-    if (values) {
-        valuesStr = `{${Object.entries(values)
-            .map(([key, value]) => `${key}: "${value}"`)
-            .join(', ')}}`;
-    }
-
-    return hasLabel
-        ? `${label} ${code}${subcode ? ` ${subcode}` : ''} ${valuesStr}`
-        : `${code}${subcode ? ` ${subcode}` : ''} ${valuesStr}`;
+    return hasLabel ? stringReplaceVariables(locale[labelKey], values, locale) : undefined;
 }
 
 export function statusToIcon(

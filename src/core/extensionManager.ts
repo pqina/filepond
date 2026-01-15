@@ -81,7 +81,7 @@ export function createExtensionManager(tree: ReturnType<typeof createEntryTree>)
     const { insertEntries, replaceEntry, updateEntry, removeEntries } = tree;
 
     // schedule tasks
-    const taskScheduler = createTaskScheduler({ debug: false });
+    const taskScheduler = createTaskScheduler({ logState: false });
 
     /** Current Entry manager public state */
     const state: ExtensionManagerState = {

@@ -32,7 +32,7 @@ export interface SimulatedStoreOptions extends StoreExtensionOptions {
     ) => Promise<File>;
 
     /** Logs stored files to console. Defaults to `true` */
-    debug?: boolean;
+    log?: boolean;
 }
 
 export const SimulatedStore = createStoreExtension(
@@ -42,7 +42,7 @@ export const SimulatedStore = createStoreExtension(
         tickrate: 250,
         connectionDelay: 250,
         fetchStoredFile: undefined,
-        debug: true,
+        log: true,
     } as SimulatedStoreOptions,
     ({ extensionName, props, didSetProps }) => {
         let bytesPerTick: number;
@@ -71,7 +71,7 @@ export const SimulatedStore = createStoreExtension(
                 onabort();
             };
 
-            const { debug, connectionDelay, tickrate } = props;
+            const { log, connectionDelay, tickrate } = props;
             await sleep(connectionDelay);
 
             // aborted while sleeping
@@ -103,7 +103,7 @@ export const SimulatedStore = createStoreExtension(
                         SimulatedStore.set(id, entry);
 
                         // log current store state
-                        debug && logState(['did store', id]);
+                        log && logState(['did store', id]);
 
                         clearInterval(intervalId);
                         resolve(id);
@@ -118,13 +118,13 @@ export const SimulatedStore = createStoreExtension(
             options: StoreTaskFnOptions
         ) {
             const {
-                debug,
+                log,
                 connectionDelay,
                 fetchStoredFile = () =>
                     new File(['Simulated'], 'Untitled.txt', { type: 'plain/text' }),
             } = props;
 
-            debug && logState(['did restore', storageId]);
+            log && logState(['did restore', storageId]);
 
             // we return the file we stored in our local cache
             if (SimulatedStore.has(storageId)) {
@@ -137,12 +137,12 @@ export const SimulatedStore = createStoreExtension(
         }
 
         async function releaseEntry(storageId: string): Promise<boolean> {
-            const { debug, connectionDelay } = props;
+            const { log, connectionDelay } = props;
             await sleep(connectionDelay);
             SimulatedStore.delete(storageId);
 
             // log current store state
-            debug && logState(['did release', storageId]);
+            log && logState(['did release', storageId]);
 
             return true;
         }

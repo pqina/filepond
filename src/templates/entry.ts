@@ -24,11 +24,11 @@ import { EntryListItemPlaceholder } from '../elements/FilePondEntryList/componen
 import { toSpaceSeparatedString } from '../elements/common/string.js';
 
 export interface EntryListTemplateOptions {
-    debug?: boolean;
+    //
 }
 
 export interface EntryTemplateOptions {
-    debug?: boolean;
+    //
 }
 
 export function createFilePondEntryList(options?: EntryListTemplateOptions): TemplateNode[] {
@@ -218,14 +218,12 @@ export function createEntryDataTransferInfo() {
 }
 
 export function createEntryStatus(options?: EntryTemplateOptions) {
-    const { debug } = options ?? {};
     return {
         key: 'entry-status',
         component: EntryStatus,
         props: {
             part: 'entry-status',
             class: 'entry-status',
-            debug,
         },
     };
 }

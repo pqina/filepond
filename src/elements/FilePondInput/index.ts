@@ -54,6 +54,49 @@ import { arrayRemoveFalsy } from '../../utils/array.js';
 import defaultStyles from './index.css?inline';
 import { supportsURLPattern } from '../../utils/support.js';
 
+//
+export function createFilePondEntryTree() {
+    return createEntryTree({
+        // formats the entry so all entries in the dataset follow the same data structure
+        beforeAddEntry(entry) {
+            // filter invalid entries
+            if (!shouldAddEntry(entry)) {
+                return false;
+            }
+
+            // sanitize and filter
+            return formatEntry(entry);
+        },
+
+        // makes modifications to the props the entry is updated with
+        beforeUpdateEntryWithProps(entry, props, isUpdatingData) {
+            // only handle file entries in this part, if data is being updated we need to update history
+            if (isFileEntry(entry) && isUpdatingData) {
+                // we update both the source and new entry with the file props
+                copyFilePropsToObject(props.file, props);
+            }
+
+            // not updating extension, exit
+            if (props.extension) {
+                // we're updating an extension status, let's remove progress if it's not part of the status update so it doesn't stick around when moving from one status to another
+                const extensionUpdates: { status: ExtensionStatus }[] = Object.values(
+                    props.extension
+                );
+
+                for (const { status } of extensionUpdates) {
+                    if (!status) {
+                        continue;
+                    }
+
+                    // clear value and progress if it's not passed
+                    status.values = status.values ?? null;
+                    status.progress = isNumber(status.progress) ? status.progress : null;
+                }
+            }
+        },
+    });
+}
+
 // https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals/setValidity#flags
 // validity flag order
 const VALIDATION_FLAGS_ORDER = [
@@ -166,9 +209,7 @@ function toFormData(fieldName: string, value: string | File | (string | File)[])
 
 // We have two groups of attributes so we know which ones to sync to the source input
 const GenericAttributes = ['required', 'name'];
-
 const InteractionAttributes = ['disabled', 'multiple', 'accept'];
-
 const BooleanAttributes = ['disabled', 'multiple', 'required'];
 
 export interface FilePondInputElementEvents {
@@ -523,44 +564,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         this.#internals = this.attachInternals();
 
         // the pond "bridge" handles all comms between extensions
-        this.#entryTree = createEntryTree({
-            // formats the entry so all entries in the dataset follow the same data structure
-            beforeAddEntry(entry) {
-                // filter invalid entries
-                if (!shouldAddEntry(entry)) {
-                    return false;
-                }
-
-                // sanitize and filter
-                return formatEntry(entry);
-            },
-
-            // makes modifications to the props the entry is updated with
-            beforeUpdateEntryWithProps(entry, props, isUpdatingData) {
-                // only handle file entries in this part, if data is being updated we need to update history
-                if (isFileEntry(entry) && isUpdatingData) {
-                    // we update both the source and new entry with the file props
-                    copyFilePropsToObject(props.file, props);
-                }
-
-                // not updating extension, exit
-                if (props.extension) {
-                    // we're updating an extension status, let's remove progress if it's not part of the status update so it doesn't stick around when moving from one status to another
-                    const extensionUpdates: { status: ExtensionStatus }[] = Object.values(
-                        props.extension
-                    );
-                    for (const { status } of extensionUpdates) {
-                        if (!status) {
-                            continue;
-                        }
-
-                        // clear value and progress if it's not passed
-                        status.values = status.values ?? null;
-                        status.progress = isNumber(status.progress) ? status.progress : null;
-                    }
-                }
-            },
-        });
+        this.#entryTree = createFilePondEntryTree();
 
         // create the core file manager and make sure we can store results in the custom element
         this.#extensionManager = createExtensionManager(this.#entryTree);
@@ -907,7 +911,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
             // set flag message
             const validationMessage = this.#locale
-                ? statusToLabel(status, this.#locale, { debug: false })
+                ? statusToLabel(status, this.#locale)
                 : statusCodeToLocaleKey(status.code);
 
             // render validation message or fallback to invalid state label

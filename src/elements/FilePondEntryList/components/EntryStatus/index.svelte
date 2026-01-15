@@ -12,16 +12,9 @@
         class?: string;
 
         part?: string;
-
-        /** Enable debug mode, defaults to `false` */
-        debug?: boolean;
     }
 
-    let {
-        class: klass = undefined,
-        part = undefined,
-        debug = false,
-    }: EntryStatusOptions = $props();
+    let { class: klass = undefined, part = undefined }: EntryStatusOptions = $props();
 
     // get locale and assets
     const appContext = getAppContext();
@@ -45,10 +38,9 @@
     function mapStatusProps(
         { code, subcode, type, values }: ExtensionStatus,
         locale: Locale,
-        assets: { [key: string]: string },
-        { debug }: { debug: boolean }
+        assets: { [key: string]: string }
     ) {
-        const text = statusToLabel({ code, subcode, values }, locale, { debug });
+        const text = statusToLabel({ code, subcode, values }, locale);
         const icon = statusToIcon({ type }, locale, assets);
 
         // no status to show
@@ -68,7 +60,7 @@
     const messages = $derived(
         arrayRemoveFalsy(
             arrayRemoveFalsy(getExtensionStatusItems(extensions)).map((status) =>
-                mapStatusProps(status, locale, assets, { debug })
+                mapStatusProps(status, locale, assets)
             )
         ).sort((a, b) => {
             return a.weight < b.weight ? 1 : -1;

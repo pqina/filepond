@@ -2,10 +2,9 @@ import { arrayRemoveInPlace } from '../utils/array.js';
 import { pubsub } from '../utils/pubsub.js';
 import { isFunction, isString } from '../utils/test.js';
 import { log } from '../common/console.js';
-import { supportsYieldScheduler } from '../utils/support.js';
 
 export interface TaskSchedulerOptions {
-    debug?: boolean;
+    logState?: boolean;
 }
 
 export interface TaskFnOptions {
@@ -64,7 +63,7 @@ const TaskState = {
 };
 
 export function createTaskScheduler(options: TaskSchedulerOptions) {
-    const { debug = false } = options ?? {};
+    const { logState = false } = options ?? {};
 
     // pubsub
     const { on, pub } = pubsub();
@@ -263,13 +262,13 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
         // no more tasks to run
         if (!hasQueuedTasks()) {
             // so we can see what's going on
-            debug && logTasks();
+            logState && logTasks();
             pub('idle');
             return;
         }
 
         // so we can see what's going on
-        debug && logTasks();
+        logState && logTasks();
 
         // loop over groups
         const taskGroups = getTaskGroupsSortedByPriority();
