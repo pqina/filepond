@@ -146,7 +146,7 @@ export function nodeTree(tree: void | TemplateNode | TemplateNode[]): NodeTree {
                 return nodeTree(undefined);
             }
             const hit = find(key);
-            if (!hit) {
+            if (!hit || !unwrap(hit)) {
                 return nodeTree(undefined);
             }
             updater(unwrap(hit));

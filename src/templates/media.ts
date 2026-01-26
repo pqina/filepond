@@ -24,6 +24,10 @@ import {
 } from '../elements/FilePondEntryList/components/MediaImage/index.js';
 import { SpringElement } from '../elements/components/SpringElement/index.js';
 
+export type VideoViewOptions = Omit<MediaVideoOptions, 'class' | 'children'>;
+
+export type ImageViewOptions = Omit<MediaImageOptions, 'class'>;
+
 export function createEditMediaButton(options?: { action?: string }) {
     const { action = 'editMedia' } = options ?? {};
 
@@ -87,7 +91,7 @@ export function createResetMediaButton(options?: { action?: string }) {
     });
 }
 
-export function createImageView(options?: MediaImageOptions) {
+export function createImageView(options?: ImageViewOptions) {
     const { objectSize = undefined } = options ?? {};
 
     return {
@@ -129,7 +133,7 @@ function getMediaContextReference({ entry }: NodeContext): NodeContext {
     };
 }
 
-export function createVideoView(options?: MediaVideoOptions) {
+export function createVideoView(options?: VideoViewOptions) {
     const { objectSize = undefined } = options ?? {};
     return {
         key: 'entry-video-spring',
@@ -361,7 +365,7 @@ export function appendEntryImageView(
 
 export function appendEntryVideoView(
     template: TemplateNode[],
-    options?: { videoViewOptions?: MediaVideoOptions }
+    options?: { videoViewOptions?: VideoViewOptions }
 ) {
     const { videoViewOptions } = options ?? {};
     nodeTree(template)

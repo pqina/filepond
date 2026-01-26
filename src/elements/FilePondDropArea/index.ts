@@ -17,18 +17,23 @@ export class FilePondDropAreaElement extends FilePondSvelteComponentElement {
 
         let lastHeight: number | null;
         let lastWidth: number | null;
-        this._app.setUpdateRectCallback((rect: Rect | undefined) => {
+
+        this._app.setComputeRectCallback((rect: Rect | undefined) => {
             if (!rect) {
                 return;
             }
+            this.dispatchEvent(new CustomEvent('computerect', { detail: rect }));
+        });
 
+        this._app.setAnimateRectCallback((rect: Rect | undefined) => {
+            if (!rect) {
+                return;
+            }
             const width = rect ? roundPrecision(rect.width, 1) : null;
             const height = rect ? roundPrecision(rect.height, 1) : null;
             if (width === lastWidth && height === lastHeight) {
                 return;
             }
-
-            // update!
             lastWidth = width;
             lastHeight = height;
             this.dispatchEvent(new CustomEvent('updaterect', { detail: rect }));

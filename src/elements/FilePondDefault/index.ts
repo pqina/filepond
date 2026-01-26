@@ -149,7 +149,7 @@ export class FilePondElement extends FilePondInputElement {
             entryList.setAttribute('exportparts', parts);
         }
 
-        // assign default options
+        // assign default options, anything view related we assign in connectedCallback()
         Object.assign(this, {
             // add items view
             extensions: createFilePondExtensionSet(this.extensions),
@@ -161,19 +161,8 @@ export class FilePondElement extends FilePondInputElement {
 
             // set up items view extension
             EntryListView: {
-                // the element that the item list will be appended to
-                element: entryList,
-
-                // the root element to use for dragging and dropping elements, defaults to the list itself
-                dropRoot: dropArea,
-
-                // assets to use, these contain icons
+                // assets to use
                 assets,
-
-                // the template to render
-                template: createFilePondEntryList({
-                    // debug: false,
-                }),
 
                 // called before rendering a node, allows dynamically modifying a node or adding nodes
                 beforeRenderNode(node: any) {
@@ -226,6 +215,20 @@ export class FilePondElement extends FilePondInputElement {
         // run super connected now
         super.connectedCallback();
 
+        // connect entry list to extension
+        Object.assign(this, {
+            EntryListView: {
+                // the element that the item list will be appended to
+                element: this.#elements.entryList,
+
+                // the root element to use for dragging and dropping elements, defaults to the list itself
+                dropRoot: this.#elements.dropArea,
+
+                // the template to render
+                template: createFilePondEntryList({}),
+            },
+        });
+
         // if doesn't have label, add default label
         if (!this.querySelector('label')) {
             const labelKey = 'dropAreaLabel';
@@ -245,22 +248,37 @@ export class FilePondElement extends FilePondInputElement {
             addListener(this._slot, 'slotchange', () => {
                 this.#syncSlottedLabels();
             }),
+
+            // @ts-ignore
+            addListener(this.#elements.dropArea, 'computerect', (e: CustomEvent) => {
+                if (!e.detail) {
+                    return;
+                }
+
+                const computedRect = e.detail;
+
+                // did compute rect
+                dispatchCustomEvent(this, 'computerect', { detail: computedRect });
+            }),
+
             // @ts-ignore
             addListener(this.#elements.dropArea, 'updaterect', (e: CustomEvent) => {
                 if (!e.detail) {
                     return;
                 }
 
+                const animatedRect = e.detail;
+
                 // we use this information to center the label with transforms
-                this._slot.style.setProperty('--width', e.detail.width);
-                this._slot.style.setProperty('--height', e.detail.height);
+                this._slot.style.setProperty('--width', animatedRect.width);
+                this._slot.style.setProperty('--height', animatedRect.height);
 
                 // we position the attribution link with transforms
-                this.#attributionLink?.style.setProperty('--x', e.detail.width);
-                this.#attributionLink?.style.setProperty('--y', e.detail.height);
+                this.#attributionLink?.style.setProperty('--x', animatedRect.width);
+                this.#attributionLink?.style.setProperty('--y', animatedRect.height);
 
                 // did compute rect
-                dispatchCustomEvent(this, 'updaterect', { detail: e.detail });
+                dispatchCustomEvent(this, 'updaterect', { detail: animatedRect });
             }),
 
             // link up placeholder position with drop indicator
@@ -288,6 +306,16 @@ export class FilePondElement extends FilePondInputElement {
 
     /** Called each time the element is removed from the document. */
     disconnectedCallback() {
+        // run super connected now
+        super.disconnectedCallback();
+
+        // disconnect from entry list
+        Object.assign(this, {
+            EntryListView: {
+                element: null,
+            },
+        });
+
         // unsub subscriptions created when connecting to the DOM
         this.#connectedSubs.forEach((unsub) => unsub());
         this.#connectedSubs = [];

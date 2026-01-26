@@ -11,11 +11,16 @@
     let { animations = 'auto', springDefaults }: FilePondSvelteComponentOptions = $props();
 
     const callbacks = {
-        updateRect: (rect: Rect) => {},
+        animateRect: (rect: Rect) => {},
+        computeRect: (rect: Rect) => {},
     };
 
-    export function setUpdateRectCallback(cb: (rect: Rect) => void) {
-        callbacks.updateRect = cb;
+    export function setAnimateRectCallback(cb: (rect: Rect) => void) {
+        callbacks.animateRect = cb;
+    }
+
+    export function setComputeRectCallback(cb: (rect: Rect) => void) {
+        callbacks.computeRect = cb;
     }
 
     // is a state so it triggers pane redraw
@@ -47,7 +52,11 @@
     }
 
     $effect(() => {
-        callbacks.updateRect(rootRectSpring.current);
+        callbacks.computeRect(rootRect);
+    });
+
+    $effect(() => {
+        callbacks.animateRect(rootRectSpring.current);
     });
 </script>
 

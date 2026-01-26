@@ -10,6 +10,7 @@ export class FilePondSvelteComponentElement extends HTMLElementSafe {
     #root: ShadowRoot;
     #app: any;
     #props: any;
+    #queue: [string, any[]][] = [];
     #events: string[];
     #listeners: (() => void)[] = [];
     #Component: Component<any, any, any>;
@@ -78,9 +79,9 @@ export class FilePondSvelteComponentElement extends HTMLElementSafe {
                 instance[key] = {
                     value: function (...args: any[]) {
                         if (!this.#app) {
+                            this.#queue.push([key, args]);
                             return;
                         }
-
                         this.#app[key](...args);
                     },
                     writable: false,
@@ -93,16 +94,21 @@ export class FilePondSvelteComponentElement extends HTMLElementSafe {
         // assign events
         this.#events = events;
 
-        // create the app
-        this.#createApp();
+        // // create the app
+        // this.#createApp();
     }
 
-    #createApp() {
-        // already created app
-        if (this.#app) {
-            return;
-        }
+    // #createApp() {
 
+    // }
+
+    addListener(type: string, cb: (e: CustomEvent) => void) {
+        const unsub = addListener(this._root.children[0], type, cb);
+        this.#listeners.push(unsub);
+        return unsub;
+    }
+
+    connectedCallback() {
         this.#app = mount(this.#Component, {
             target: this.#root,
             props: this.#props,
@@ -118,16 +124,11 @@ export class FilePondSvelteComponentElement extends HTMLElementSafe {
 
             this.#listeners.push(unsub);
         });
-    }
 
-    addListener(type: string, cb: (e: CustomEvent) => void) {
-        const unsub = addListener(this._root.children[0], type, cb);
-        this.#listeners.push(unsub);
-        return unsub;
-    }
-
-    connectedCallback() {
-        this.#createApp();
+        this.#queue.forEach(([key, args]) => {
+            this.#app[key](...args);
+        });
+        this.#queue.length = 0;
     }
 
     disconnectedCallback() {
