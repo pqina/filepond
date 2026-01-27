@@ -7,7 +7,7 @@
 
 A JavaScript library that can upload anything you throw at it, optimizes images for faster uploads, and offers a great, accessible, silky smooth user experience.
 
-**This is the v5 alpha/beta branch. [Take me to the v4 branch](https://github.com/pqina/filepond)**
+**This is the v5 beta branch. [Take me to the v4 branch](https://github.com/pqina/filepond)**
 
 TODO:
 
@@ -24,7 +24,7 @@ If you're trying out v5, please share your feedback on [Discord](https://discord
 We can install the `filepond` package by running the following command in our terminal:
 
 ```
-npm install filepond@alpha
+npm install filepond@beta
 ```
 
 We wrap an `<input type="file">` with the `<file-pond>` custom element and then register the custom element using the `defineFilePond` function.
