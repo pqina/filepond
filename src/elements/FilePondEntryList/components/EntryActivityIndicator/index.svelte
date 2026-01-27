@@ -4,14 +4,15 @@
     import { getUniqueId } from '../../../../utils/string.js';
     import { getExtensionStateByStatusCode } from '../../../../common/entry.js';
     import { isObjectValuesEqual } from '../../../../utils/object.js';
-    import { getValueByKeyFromData, withResources } from '../../../common/string.js';
+    import { getValueByKeyFromData } from '../../../common/string.js';
     import { getAppContext } from '../../contexts/appContext.js';
     import { getEntryContext } from '../../contexts/entryContext.js';
     import { gate } from '../../../common/store.svelte.js';
     import { SpringElement } from '../../../components/SpringElement/index.js';
     import { Button } from '../../../components/Button/index.js';
     import { ProgressIndicator } from '../../../components/ProgressIndicator/index.js';
-    import type { ExtensionState } from '../../../../types/index.js';
+    import { type ExtensionState } from '../../../../types/index.js';
+    import { NodeList, type NodeListOptions } from '../../../components/NodeList/index.js';
 
     interface EntryActivityIndicatorOptions {
         /** Class to set on the entry-activity-indicator element */
@@ -20,25 +21,25 @@
         /** The part name to assign to this component */
         part?: string;
 
+        states: any;
+
         /** The part name to assign to buttons inside this component */
         buttonPart?: string;
 
-        /** Disable inner controls */
-        disabled?: boolean;
-
-        states: any;
+        /** Context for the local nodelist */
+        nodeContext: Omit<NodeListOptions, 'nodes'>;
     }
 
     let {
         class: klass = undefined,
         part = undefined,
         buttonPart = undefined,
-        disabled = false,
         states = [],
+        nodeContext,
     }: EntryActivityIndicatorOptions = $props();
 
     // get locale and assets
-    const { resources, locale, propResourceMap, enableAnimations } = $derived(getAppContext());
+    const { locale, enableAnimations } = $derived(getAppContext());
 
     // get store
     const entryContext = getEntryContext();
@@ -83,7 +84,7 @@
     // get progress value
     const currentProgress = $derived(currentState?.progress);
 
-    const currentButton = $derived(getButtonComponent(currentState?.button, resources));
+    const currentButton = $derived(getButtonComponent(currentState?.button));
 
     // current button, we only update if props change
     const activeButton: { current: any } = gate(
@@ -100,35 +101,16 @@
         }
     );
 
-    function getButtonComponent(button: any, resources: any) {
+    function getButtonComponent(button: any) {
         if (!button) {
             return;
         }
 
-        let styles = undefined;
-        if (button.transforms) {
-            const { intro, idle, outro } = button.transforms;
-            const key = '--indicator-button-';
-            styles = {
-                [`${key}intro`]: intro,
-                [`${key}idle`]: idle,
-                [`${key}outro`]: outro,
-            };
-        }
-
+        const props = { part: buttonPart, ...button.props };
         return {
             component: Button,
-            props: withResources(
-                {
-                    ...button,
-                    icon: button.icon,
-                    title: button.title ?? button.icon,
-                    label: button.label ?? button.icon,
-                    styles,
-                },
-                propResourceMap,
-                resources
-            ),
+            ...button,
+            props,
         };
     }
 
@@ -161,38 +143,41 @@
         }
     });
 
-    function lastButtonControlHasSameIcon(nextButton: any) {
-        const willReplaceButton = !!buttonControls.at(-1);
+    function lastButtonNodeHasSameIcon(nextButton: any) {
+        const willReplaceButton = !!buttonNodes.at(-1);
         if (!willReplaceButton) {
             return false;
         }
-        return (buttonControls.at(-1) as any)?.props.icon !== nextButton.props.icon;
+
+        return (buttonNodes.at(-1) as any)?.props.icon !== nextButton.props.icon;
     }
 
     function lastButtonIsSameButton(nextButton: any) {
-        if (!buttonControls.length) {
+        if (!buttonNodes.length) {
             return false;
         }
-        const currentButton = buttonControls.at(-1);
+
+        const { props: currentProps } = buttonNodes.at(-1);
+        const { props: nextProps } = nextButton;
 
         return (
-            currentButton.props.icon === nextButton.props.icon &&
-            currentButton.props.title === nextButton.props.title &&
-            currentButton.props.label === nextButton.props.label &&
-            currentButton.props.onclick.toString() === nextButton.props.onclick.toString()
+            currentProps.icon === nextProps.icon &&
+            currentProps.title === nextProps.title &&
+            currentProps.label === nextProps.label &&
+            currentProps.onclick.toString() === nextProps.onclick.toString()
         );
     }
 
-    let buttonControls: any[] = $state.raw([]);
+    let buttonNodes: any[] = $state.raw([]);
     $effect(() => {
         // no control, no need to update
-        if (!activeButton.current && !buttonControls.length) {
+        if (!activeButton.current && !buttonNodes.length) {
             return;
         }
 
         // no more controls
         if (!activeButton.current) {
-            buttonControls = [];
+            buttonNodes = [];
             return;
         }
 
@@ -203,9 +188,9 @@
             }
 
             // if last button icon is the same as new button icon, we don't crossfade
-            const shouldCrossfade = lastButtonControlHasSameIcon(activeButton.current);
+            const shouldCrossfade = lastButtonNodeHasSameIcon(activeButton.current);
 
-            buttonControls = buttonControls
+            buttonNodes = buttonNodes
                 // old controls now inert
                 .map((control) => ({
                     ...control,
@@ -219,11 +204,10 @@
                 .filter((_, index, arr) => index > arr.length - 2);
 
             // add new control
-            buttonControls = [
-                ...buttonControls,
+            buttonNodes = [
+                ...buttonNodes,
                 {
                     ...activeButton.current,
-                    key: getUniqueId(),
                     props: {
                         ...activeButton.current.props,
                         inert: shouldCrossfade,
@@ -236,7 +220,7 @@
             if (shouldCrossfade) {
                 // this triggers intro animation on newly added control
                 requestAnimationFrame(() => {
-                    buttonControls = buttonControls.map((control, index, arr) => ({
+                    buttonNodes = buttonNodes.map((control, index, arr) => ({
                         ...control,
                         props: {
                             ...control.props,
@@ -257,11 +241,9 @@
     subattrs={{ layout: 'pile' }}
     {part}
 >
-    {#if buttonControls.length}
+    {#if buttonNodes.length}
         <element-stack class="button-pile" layout="pile" part={buttonPart}>
-            {#each buttonControls as { component: Component, props, key } (key)}
-                <Component {...props} {disabled} />
-            {/each}
+            <NodeList nodes={buttonNodes} {...nodeContext}></NodeList>
         </element-stack>
     {/if}<!-- no return here as we use element-pile:empty in css -->{#if currentProgressIndicatorControlOpacity.current > 0}
         <div style:opacity={currentProgressIndicatorControlOpacity.current} part={buttonPart}>

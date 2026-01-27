@@ -2,9 +2,9 @@ entry-activity-indicator {
     display: block;
 
     /* the file background color is moved to the button container */
-    & .button {
-        --btn-background-color: transparent;
-        --btn-backdrop-filter: none;
+    & .button-pile .button {
+        --btn-background-color: transparent !important;
+        --btn-backdrop-filter: none !important;
     }
 
     & .button[data-state='intro'] {

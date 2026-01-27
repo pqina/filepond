@@ -167,8 +167,6 @@ export class FilePondElement extends FilePondInputElement {
                 // called before rendering a node, allows dynamically modifying a node or adding nodes
                 beforeRenderNode(node: any) {
                     syncExportparts(node.props?.part || node.attrs?.part);
-                    // TODO: improve this, list should render an item node, or a placeholder node that have their own `part` property
-                    syncExportparts(node.props?.buttonPart);
                     return node;
                 },
 
@@ -250,6 +248,7 @@ export class FilePondElement extends FilePondInputElement {
             }),
 
             // @ts-ignore
+            // did compute target rect
             addListener(this.#elements.dropArea, 'computerect', (e: CustomEvent) => {
                 if (!e.detail) {
                     return;
@@ -257,11 +256,11 @@ export class FilePondElement extends FilePondInputElement {
 
                 const computedRect = e.detail;
 
-                // did compute rect
                 dispatchCustomEvent(this, 'computerect', { detail: computedRect });
             }),
 
             // @ts-ignore
+            // did update visual rect
             addListener(this.#elements.dropArea, 'updaterect', (e: CustomEvent) => {
                 if (!e.detail) {
                     return;

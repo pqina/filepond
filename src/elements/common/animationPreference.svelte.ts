@@ -47,7 +47,7 @@ function handleScrollInteraction() {
 // global listeners
 let shouldReduceMotion = $state(false);
 if (isBrowser()) {
-    window.addEventListener('scroll', handleScrollInteraction);
+    // window.addEventListener('scroll', handleScrollInteraction);
     window.addEventListener('resize', handleWindowInteraction);
 
     // listen for reduce motion changes

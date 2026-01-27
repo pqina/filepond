@@ -457,7 +457,7 @@
         }, {} as AppCallbacks),
     });
 
-    //  update animation preference when changes
+    // update animation preference when changes
     // svelte-ignore state_referenced_locally
     const animationState = createAnimationState(animations);
     $effect(() => animationState.setPreference(animations));

@@ -6,6 +6,7 @@ import { bytesToNaturalFileSize } from '../utils/file.js';
 import { fade } from '../elements/common/transition.js';
 import { quadInOut } from 'svelte/easing';
 import {
+    createButton,
     getExtensionStatusWithCode,
     hasExtensionWithAction,
     hasExtensionWithStatusCode,
@@ -352,16 +353,16 @@ export function createEntryLoadState() {
             class: 'entry-load-state',
             part: 'entry-load-state',
             buttonPart: 'entry-button',
-            disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
             states: [
                 {
                     codes: ['LOAD_QUEUED', 'LOAD_BUSY', 'RESTORE_BUSY'],
                     progress: true,
-                    button: {
+                    button: createButton('button-load-abort', {
                         title: 'abort',
                         icon: 'remove',
+                        disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
                         onclick: () => updateEntryState(id, { abort: true }),
-                    },
+                    }),
                 },
                 {
                     codes: [
@@ -372,10 +373,11 @@ export function createEntryLoadState() {
                         'RESTORE_COMPLETE',
                         'RESTORE_ERROR',
                     ],
-                    button: {
+                    button: createButton('button-entry-remove', {
                         icon: 'remove',
+                        disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
                         onclick: () => removeEntries(id),
-                    },
+                    }),
                 },
             ],
         }),
@@ -390,7 +392,6 @@ export function createEntryStoreState() {
             class: 'entry-store-state',
             part: 'entry-store-state',
             buttonPart: 'entry-button',
-            disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
             states: [
                 {
                     codes: [
@@ -400,60 +401,73 @@ export function createEntryStoreState() {
                         'RELEASE_COMPLETE',
                         'RELEASE_ABORT',
                     ],
-                    button: {
+                    button: createButton('button-store-idle', {
                         icon: 'store',
-                        transforms: {
+                        disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
+                        styles: createIndicatorButtonTransforms({
                             intro: 'translateY(0.125em)',
                             idle: 'translateY(0)',
                             outro: 'translateY(-0.125em)',
-                        },
+                        }),
                         onclick: () =>
                             updateEntryState(id, {
                                 store: true,
                             }),
-                    },
+                    }),
                 },
                 {
                     codes: ['STORE_QUEUED', 'STORE_BUSY'],
                     progress: true,
-                    button: {
+                    button: createButton('button-store-busy', {
                         icon: 'abort',
+                        disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
                         onclick: () =>
                             updateEntryState(id, {
                                 abort: true,
                             }),
-                    },
+                    }),
                 },
                 {
                     codes: ['RELEASE_BUSY'],
                     progress: {
                         direction: 'reverse',
                     },
-                    button: {
+                    button: createButton('button-store-busy', {
                         icon: 'abort',
+                        disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
                         onclick: () =>
                             updateEntryState(id, {
                                 abort: true,
                             }),
-                    },
+                    }),
                 },
                 {
                     codes: ['STORE_COMPLETE', 'RESTORE_COMPLETE', 'RELEASE_ABORT'],
-                    button: {
+                    button: createButton('button-store-complete', {
                         icon: 'revert',
-                        transforms: {
+                        styles: createIndicatorButtonTransforms({
                             intro: 'rotateZ(45deg)',
                             idle: 'rotateZ(0)',
                             outro: 'rotaetZ(-45deg)',
-                        },
+                        }),
+                        disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
                         onclick: () =>
                             updateEntryState(id, {
                                 store: false,
                             }),
-                    },
+                    }),
                 },
             ],
         }),
+    };
+}
+
+function createIndicatorButtonTransforms({ intro, idle, outro }: any) {
+    const key = '--indicator-button-';
+    return {
+        [`${key}intro`]: intro,
+        [`${key}idle`]: idle,
+        [`${key}outro`]: outro,
     };
 }
 

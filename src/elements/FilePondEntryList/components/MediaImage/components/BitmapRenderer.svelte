@@ -12,7 +12,7 @@
         resizeQuality?: MediaResizeQuality;
         oninit?: () => void;
         onload?: (size: { width: number; height: number }) => void;
-        onrender?: () => void;
+        onrender?: (options: { didRestore: boolean }) => void;
         onerror?: (error: Error) => void;
     }
 
@@ -61,7 +61,7 @@
             return;
         }
 
-        onrender?.();
+        onrender?.({ didRestore: !!cachedCanvas });
     });
 
     // get app methods

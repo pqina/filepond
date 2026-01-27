@@ -5,7 +5,6 @@
     import { SpringElement } from '../../../components/SpringElement/index.js';
     import { type Rect, rectCreate, rectIntersectWithRect } from '../../../../utils/rect.js';
     import { VIEWPORT_MARGIN } from '../../../attachments/measurable.js';
-    import { noop } from '../../../../utils/placeholder.js';
     import { toSpaceSeparatedString } from '../../../common/string.js';
 
     interface EntryItemOptions {

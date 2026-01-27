@@ -36,11 +36,6 @@ export function createEditMediaButton(options?: { action?: string }) {
         component: EntryActivityIndicator,
         props: ({ id, entry }: NodeContext, { updateEntryState }: EntryListFunctions) => ({
             buttonPart: 'media-button',
-            disabled: hasExtensionWithStatusCode(entry, [
-                'STORE_QUEUED',
-                'STORE_BUSY',
-                'TRANSFORM_BUSY',
-            ]),
             states: [
                 {
                     // waiting for transform
@@ -50,21 +45,31 @@ export function createEditMediaButton(options?: { action?: string }) {
                         'TRANSFORM_COMPLETE',
                         'TRANSFORM_BUSY',
                     ],
-                    button: {
+                    button: createButton('button-transform-activate', {
                         icon: 'mediaEdit',
                         onclick: () => updateEntryState?.(id, { [action]: true }),
-                    },
+                        disabled: hasExtensionWithStatusCode(entry, [
+                            'STORE_QUEUED',
+                            'STORE_BUSY',
+                            'TRANSFORM_BUSY',
+                        ]),
+                    }),
                 },
                 {
                     codes: ['TRANSFORM_PREPARE'],
                     progress: true,
-                    button: {
+                    button: createButton('button-transform-abort', {
                         icon: 'abort',
                         onclick: () =>
                             updateEntryState(id, {
                                 [action]: null,
                             }),
-                    },
+                        disabled: hasExtensionWithStatusCode(entry, [
+                            'STORE_QUEUED',
+                            'STORE_BUSY',
+                            'TRANSFORM_BUSY',
+                        ]),
+                    }),
                 },
             ],
         }),

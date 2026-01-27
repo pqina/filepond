@@ -18,6 +18,8 @@
         mediaHeight?: number;
         /** Set to true when ready to show media */
         mediaVisible?: boolean;
+        /** Set to true to animate media into view */
+        mediaAnimateIn?: boolean;
         /** Set to 'contain' to present image in container instead of covering the container */
         mediaObjectSize?: 'cover' | 'contain';
         /** Initial media scale, defaults to `1` */
@@ -37,7 +39,7 @@
                 {
                     onInitMedia: () => void;
                     onLoadMedia: (size: Size) => void;
-                    onRenderMedia: () => void;
+                    onRenderMedia: (options?: { instant: boolean }) => void;
                 },
             ]
         >;
@@ -51,6 +53,7 @@
         mediaObjectSize = 'cover',
         mediaInitialScalar = 1,
         mediaInitialOpacity = 1,
+        mediaAnimateIn = true,
         overflowAmount = 10,
         enableParallax = true,
         children,
@@ -93,9 +96,6 @@
     // adjust page offset for parralax effect
     let windowWidth: number = $state.raw() as number;
     let windowHeight: number = $state.raw() as number;
-
-    // is true while we're waiting for the media to load
-    // let mediaLoading = $state(true);
 
     // test if media is ready
     const mediaReady = $derived(!mediaLoading && !!(mediaWidth && mediaHeight));
@@ -155,11 +155,15 @@
     );
 
     $effect(() => {
-        mediaOpacity.set(mediaVisible ? 1 : mediaInitialOpacity, springUpdateConfig);
+        mediaOpacity.set(mediaVisible ? 1 : mediaInitialOpacity, {
+            instant: mediaAnimateIn ? springUpdateConfig.instant : true,
+        });
     });
 
     $effect(() => {
-        mediaScalar.set(mediaVisible ? 1 : mediaInitialScalar, springUpdateConfig);
+        mediaScalar.set(mediaVisible ? 1 : mediaInitialScalar, {
+            instant: mediaAnimateIn ? springUpdateConfig.instant : true,
+        });
     });
 
     function getOffsetByAspectRatio(
@@ -273,7 +277,9 @@
             mediaHeight = size.height;
             mediaLoading = false;
         },
-        onRenderMedia: () => {
+        onRenderMedia: (options) => {
+            const { instant = false } = options || {};
+            mediaAnimateIn = !instant;
             mediaVisible = true;
         },
     })}

@@ -1,8 +1,6 @@
 <script lang="ts">
     import {
         type TemplateNode,
-        type ElementNode,
-        type ComponentNode,
         type NodeContext,
         type SwitchNode,
         isSwitchNode,
@@ -11,39 +9,15 @@
         isElementNode,
     } from '../../common/nodeTree.js';
     import { type Component, untrack } from 'svelte';
-    import NodeList from './index.svelte';
-    import { isArray, isFunction, isString } from '../../../utils/test.js';
+    import { type Locale } from '../../../types/index.js';
+    import { type NodeListOptions } from './index.js';
+    import { isFunction, isString } from '../../../utils/test.js';
     import { stringReplaceVariables, withResources } from '../../common/string.js';
     import { getAppContext } from '../../FilePondEntryList/contexts/appContext.js';
     import { noop, passthrough } from '../../../utils/placeholder.js';
     import { Spring } from 'svelte/motion';
     import { arrayWrap } from '../../../utils/array.js';
-    import { hasOwnProp } from '../../../utils/object.js';
-    import type { Locale } from '../../../types/index.js';
-
-    interface NodeListOptions {
-        /** The nodes to render */
-        nodes: TemplateNode[];
-
-        /** The context available to the current items as received by the parent */
-        context: NodeContext;
-
-        /** Context shared by all nodes */
-        sharedContext: NodeContext;
-
-        /** Routes between nodes */
-        routes?: { [key: string]: { [event: string]: () => void } };
-
-        /** Allows manipulating the component props */
-        beforeSetProps: (node: { [key: string]: any }) => { [key: string]: any };
-
-        /** Allows node manipulation before rendering */
-        beforeRenderNode: (
-            node: TemplateNode,
-            context: NodeContext,
-            sharedContext: NodeContext
-        ) => TemplateNode | false | void;
-    }
+    import NodeList from './index.svelte';
 
     let {
         nodes,
@@ -369,6 +343,13 @@
         <Component
             {...beforeSetProps(props)}
             {...routes}
+            nodeContext={{
+                context,
+                routes: contextRoutes,
+                sharedContext,
+                beforeSetProps,
+                beforeRenderNode,
+            }}
             bind:this={
                 noop,
                 function (ref) {

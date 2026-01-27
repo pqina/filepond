@@ -204,12 +204,12 @@
                                 // let MediaPane know that we loaded
                                 onLoadMedia(size);
                             }}
-                            onrender={() => {
+                            onrender={({ didRestore }) => {
                                 // now showing media
                                 mediaVisible = true;
 
                                 // media is now visible
-                                onRenderMedia();
+                                onRenderMedia({ instant: didRestore });
                             }}
                             onerror={handleError}
                         />

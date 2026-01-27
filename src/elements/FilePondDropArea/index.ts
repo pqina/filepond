@@ -25,7 +25,7 @@ export class FilePondDropAreaElement extends FilePondSvelteComponentElement {
             this.dispatchEvent(new CustomEvent('computerect', { detail: rect }));
         });
 
-        this._app.setAnimateRectCallback((rect: Rect | undefined) => {
+        this._app.setUpdateRectCallback((rect: Rect | undefined) => {
             if (!rect) {
                 return;
             }

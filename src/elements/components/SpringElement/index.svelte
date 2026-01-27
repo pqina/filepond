@@ -112,6 +112,7 @@
     import { noop } from '../../../utils/placeholder.js';
     import { gate } from '../../common/store.svelte.js';
     import { roundPrecision } from '../../../utils/math.js';
+    import { Entry } from '../../FilePondEntryList/components/Entry/index.js';
 
     let {
         springDefaults = undefined,
@@ -395,7 +396,7 @@
     // position adjusted with translation
     let translatedPositionPrev: null | Vector;
     const translatedPosition = $derived.by(() => {
-        if (!shouldRenderChildren || !position) {
+        if (!position) {
             return;
         }
 
@@ -416,6 +417,13 @@
     let currentTranslationFrom: Vector;
     $effect(() => {
         if (!translatedPosition) {
+            return;
+        }
+
+        if (!shouldRenderChildren) {
+            springedPosition.set(translatedPosition, {
+                instant: true,
+            });
             return;
         }
 

@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { onDestroy } from 'svelte';
     import { Spring } from 'svelte/motion';
     import { measurable } from '../attachments/measurable.js';
     import { createAnimationState } from '../common/animationPreference.svelte.js';
@@ -11,12 +10,12 @@
     let { animations = 'auto', springDefaults }: FilePondSvelteComponentOptions = $props();
 
     const callbacks = {
-        animateRect: (rect: Rect) => {},
+        updateRect: (rect: Rect) => {},
         computeRect: (rect: Rect) => {},
     };
 
-    export function setAnimateRectCallback(cb: (rect: Rect) => void) {
-        callbacks.animateRect = cb;
+    export function setUpdateRectCallback(cb: (rect: Rect) => void) {
+        callbacks.updateRect = cb;
     }
 
     export function setComputeRectCallback(cb: (rect: Rect) => void) {
@@ -56,7 +55,7 @@
     });
 
     $effect(() => {
-        callbacks.animateRect(rootRectSpring.current);
+        callbacks.updateRect(rootRectSpring.current);
     });
 </script>
 
