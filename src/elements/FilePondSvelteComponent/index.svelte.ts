@@ -93,14 +93,7 @@ export class FilePondSvelteComponentElement extends HTMLElementSafe {
 
         // assign events
         this.#events = events;
-
-        // // create the app
-        // this.#createApp();
     }
-
-    // #createApp() {
-
-    // }
 
     addListener(type: string, cb: (e: CustomEvent) => void) {
         const unsub = addListener(this._root.children[0], type, cb);

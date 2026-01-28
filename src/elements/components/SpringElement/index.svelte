@@ -623,7 +623,13 @@
             const measuredRight = updatedRootRelativeRect.x + updatedRootRelativeRect.width;
             const rightDist = Math.abs(previousRight - measuredRight);
 
-            shouldAnimatePositionUpdate = !(rightDist < 0.0001 && widthDist > 0.0001);
+            const topDist = Math.abs(rootRelativeRect.y - updatedRootRelativeRect.y);
+
+            shouldAnimatePositionUpdate = !(
+                rightDist < 0.0001 &&
+                widthDist > 0.0001 &&
+                topDist < 0.0001
+            );
         }
 
         // make sure we only update on changes
