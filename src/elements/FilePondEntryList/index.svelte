@@ -34,7 +34,11 @@
     import { noop, passthrough } from '../../utils/placeholder.js';
     import { measurable } from '../attachments/measurable.js';
     import { setBooleanAttribute } from '../../utils/dom.js';
-    import { createAnimationState } from '../common/animationPreference.svelte.js';
+    import {
+        computeAnimationPreference,
+        getGlobalPreventAnimations,
+        getShouldReduceMotion,
+    } from '../common/animationPreference.svelte.js';
     import { setAppContext } from './contexts/appContext.js';
     import { setDragContext } from './contexts/dragContext.js';
     import { setDropContext } from './contexts/dropContext.js';
@@ -77,6 +81,13 @@
     export function setTemplate(newTemplate: TemplateNode[]) {
         template = newTemplate;
     }
+
+    // update animation preference when changes
+    const globalPreventState = getGlobalPreventAnimations();
+    const reduceMotionState = getShouldReduceMotion();
+    const enableAnimations = $derived(
+        computeAnimationPreference(animations, globalPreventState, reduceMotionState)
+    );
 
     // the maximum animations that can run
     const MAX_ANIMATIONS = 50;
@@ -456,12 +467,6 @@
             return res;
         }, {} as AppCallbacks),
     });
-
-    // update animation preference when changes
-    // svelte-ignore state_referenced_locally
-    const animationState = createAnimationState(animations);
-    $effect(() => animationState.setPreference(animations));
-    const enableAnimations = $derived(animationState.current);
 
     //#endregion
 

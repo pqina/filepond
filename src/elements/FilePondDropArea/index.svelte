@@ -1,7 +1,11 @@
 <script lang="ts">
     import { Spring } from 'svelte/motion';
     import { measurable } from '../attachments/measurable.js';
-    import { createAnimationState } from '../common/animationPreference.svelte.js';
+    import {
+        computeAnimationPreference,
+        getGlobalPreventAnimations,
+        getShouldReduceMotion,
+    } from '../common/animationPreference.svelte.js';
     import { rectFromBounds, type Rect } from '../../utils/rect.js';
     import { ElementPane } from '../components/ElementPane/index.js';
     import type { FilePondSvelteComponentOptions } from '../../types/index.js';
@@ -26,10 +30,11 @@
     let rootRect = $state.raw() as Rect;
 
     // update animation preference when changes
-    // svelte-ignore state_referenced_locally
-    const animationState = createAnimationState(animations);
-    $effect(() => animationState.setPreference(animations));
-    const enableAnimations = $derived(animationState.current);
+    const globalPreventState = getGlobalPreventAnimations();
+    const reduceMotionState = getShouldReduceMotion();
+    const enableAnimations = $derived(
+        computeAnimationPreference(animations, globalPreventState, reduceMotionState)
+    );
 
     // update spring
     const rootRectSpring = new Spring<Rect | undefined>(undefined, {

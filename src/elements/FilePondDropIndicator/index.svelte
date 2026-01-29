@@ -1,6 +1,5 @@
 <script lang="ts">
     import { Spring } from 'svelte/motion';
-    import { onDestroy, onMount } from 'svelte';
     import { rectCenter, rectContainsPoint, rectFromBounds, rectPad } from '../../utils/rect.js';
     import {
         vectorElastify,
@@ -11,7 +10,11 @@
     import { type Rect } from '../../utils/rect.js';
     import { droparea, type DropEventDetail } from '../attachments/droparea.js';
     import { measurable } from '../attachments/measurable.js';
-    import { createAnimationState } from '../common/animationPreference.svelte.js';
+    import {
+        computeAnimationPreference,
+        getGlobalPreventAnimations,
+        getShouldReduceMotion,
+    } from '../common/animationPreference.svelte.js';
     import { sizeFromRect } from '../../utils/size.js';
     import { ElementPane } from '../components/ElementPane/index.js';
     import type { FilePondSvelteComponentOptions } from '../../types/index.js';
@@ -41,10 +44,11 @@
     const IndicatorElasticity = 4;
 
     // update animation preference when changes
-    // svelte-ignore state_referenced_locally
-    const animationState = createAnimationState(animations);
-    $effect(() => animationState.setPreference(animations));
-    const enableAnimations = $derived(animationState.current);
+    const globalPreventState = getGlobalPreventAnimations();
+    const reduceMotionState = getShouldReduceMotion();
+    const enableAnimations = $derived(
+        computeAnimationPreference(animations, globalPreventState, reduceMotionState)
+    );
 
     //
     // geom

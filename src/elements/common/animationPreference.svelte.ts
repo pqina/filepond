@@ -32,17 +32,18 @@ function handleWindowInteraction() {
 }
 
 // we need two scroll to prevent animations, otherwise a content change in the window while a scrollbar is active (for example when removing an item) will stop animations from running
-let scrollCounter = 0;
-function handleScrollInteraction() {
-    if (activePointers.size > 0) {
-        return;
-    }
-    scrollCounter++;
-    if (scrollCounter > 1) {
-        scrollCounter = 0;
-        windowGuard.prevent();
-    }
-}
+// currently disabled because this causes some issues with images not fading in when scrolling into view
+// let scrollCounter = 0;
+// function handleScrollInteraction() {
+//     if (activePointers.size > 0) {
+//         return;
+//     }
+//     scrollCounter++;
+//     if (scrollCounter > 1) {
+//         scrollCounter = 0;
+//         windowGuard.prevent();
+//     }
+// }
 
 // global listeners
 let shouldReduceMotion = $state(false);
@@ -58,34 +59,31 @@ if (isBrowser()) {
     });
 }
 
-export function createAnimationState(initial: 'auto' | 'always' | 'never' = 'auto') {
-    // current perference
-    let preference = $state(initial);
+export function getGlobalPreventAnimations() {
+    return globalPreventAnimations;
+}
 
-    // determines if should animate
-    const animationState = $derived.by(() => {
-        const shouldAnimate = !globalPreventAnimations;
-        const mayAnimate = !shouldReduceMotion;
+export function getShouldReduceMotion() {
+    return shouldReduceMotion;
+}
 
-        // auto
-        if (preference === 'auto') {
-            return mayAnimate && shouldAnimate;
-        }
-        // always
-        else if (preference === 'always') {
-            return shouldAnimate;
-        }
+export function computeAnimationPreference(
+    preference: 'auto' | 'always' | 'never' = 'auto',
+    preventGlobal: boolean | null,
+    reduceMotion: boolean
+) {
+    const shouldAnimate = !preventGlobal;
+    const mayAnimate = !reduceMotion;
 
-        // never
-        return false;
-    });
+    // auto
+    if (preference === 'auto') {
+        return mayAnimate && shouldAnimate;
+    }
+    // always
+    else if (preference === 'always') {
+        return shouldAnimate;
+    }
 
-    return {
-        setPreference(value: 'auto' | 'always' | 'never') {
-            preference = value;
-        },
-        get current() {
-            return animationState;
-        },
-    };
+    // never
+    return false;
 }
