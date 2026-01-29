@@ -376,7 +376,9 @@ export function createEntryLoadState() {
                     button: createButton('button-entry-remove', {
                         icon: 'remove',
                         disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
-                        onclick: () => removeEntries(id),
+                        onclick: () => {
+                            removeEntries(id);
+                        },
                     }),
                 },
             ],

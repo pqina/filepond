@@ -15,6 +15,11 @@ export class FilePondDropAreaElement extends FilePondSvelteComponentElement {
     connectedCallback() {
         super.connectedCallback();
 
+        // const didRunConnect = super.connectedCallback();
+        // if (didRunConnect === false) {
+        //     return false;
+        // }
+
         let lastHeight: number | null;
         let lastWidth: number | null;
 

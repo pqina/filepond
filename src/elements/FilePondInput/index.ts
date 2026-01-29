@@ -228,6 +228,9 @@ export interface FilePondInputElementEvents {
  * @event {CustomEvent} 'connected' - emitted when connected to the DOM
  */
 export class FilePondInputElement extends HTMLElementSafe implements FilePondInputElementEvents {
+    /** Is this Element really disconnected */
+    #disconnected: boolean = true;
+
     /** FilePond element shadowRoot */
     #root: ShadowRoot;
 
@@ -792,6 +795,9 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
                 dispatchCustomEvent(this, 'update');
             })
         );
+
+        // is no longer disconnected
+        this.#disconnected = false;
 
         // the custom element logic is now connected
         dispatchCustomEvent(this, 'connected');

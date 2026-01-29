@@ -141,11 +141,13 @@ export class FilePondEntryListElement extends FilePondSvelteComponentElement {
             setBooleanAttribute(this, 'empty', e.detail === 0);
         });
 
-        if (!this.#template) {
-            // no template
+        // no template
+        if (this.#template) {
+            this._app.setTemplate(this.#template);
         }
 
-        this._app.setTemplate(this.#template);
+        // did run connect logic
+        return true;
     }
 }
 

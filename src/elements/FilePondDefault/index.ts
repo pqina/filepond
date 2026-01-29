@@ -191,13 +191,6 @@ export class FilePondElement extends FilePondInputElement {
             caption: 'Powered by FilePond',
         });
 
-        // add components
-        this._root.prepend(dropArea, dropIndicator);
-        this._root.append(entryList);
-        this.#attributionLink &&
-            !this.hasAttribute('noattribution') &&
-            this._root.append(this.#attributionLink);
-
         // apply intial options
         Object.assign(this, globalInitialOptions);
     }
@@ -210,8 +203,14 @@ export class FilePondElement extends FilePondInputElement {
     }
 
     connectedCallback() {
-        // run super connected now
         super.connectedCallback();
+
+        // add sub components
+        this._root.prepend(this.#elements.dropArea, this.#elements.dropIndicator);
+        this._root.append(this.#elements.entryList);
+        if (this.#attributionLink && !this.hasAttribute('noattribution')) {
+            this._root.append(this.#attributionLink);
+        }
 
         // connect entry list to extension
         Object.assign(this, {
@@ -308,12 +307,8 @@ export class FilePondElement extends FilePondInputElement {
         // run super connected now
         super.disconnectedCallback();
 
-        // disconnect from entry list
-        Object.assign(this, {
-            EntryListView: {
-                element: null,
-            },
-        });
+        Object.values(this.#elements).forEach((element) => element.remove());
+        this.#attributionLink?.remove();
 
         // unsub subscriptions created when connecting to the DOM
         this.#connectedSubs.forEach((unsub) => unsub());
