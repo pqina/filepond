@@ -736,14 +736,6 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
             addListener(this.#slot, 'slotchange', () => {
                 this.#syncSlottedInput();
             }),
-            // these two listeners toggle the dragging attribute to the file-pond element, we do this so we can move the file-pond element that is being interacted with to the front, so the dragged item also renders on top
-            addListener(this, 'dragStart', () => {
-                setBooleanAttribute(this, 'dragging', true);
-            }),
-
-            addListener(this, 'dragEnd', () => {
-                setBooleanAttribute(this, 'dragging', false);
-            }),
 
             // set up enter/spacebar press when file-pond is activeElement
             addListener(this, 'keypress', (e) => {

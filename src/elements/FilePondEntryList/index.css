@@ -7,9 +7,6 @@
     text-align: left;
     font-weight: 500;
 
-    /* Fix pull-to-refresh on Chrome Android */
-    touch-action: none;
-
     /* Disabled state */
     &[data-disabled] * {
         pointer-events: none !important;
@@ -44,6 +41,11 @@
     --_200ms: calc(200ms * var(--animate));
     --_250ms: calc(250ms * var(--animate));
     --_500ms: calc(500ms * var(--animate));
+}
+
+/* move to top when dragging children */
+:host([dragging]) {
+    z-index: 2147483647;
 }
 
 /* basic style reset */

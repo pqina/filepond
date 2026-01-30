@@ -27,6 +27,12 @@
 .entry-info-sub {
     word-break: break-word;
     font-variant-numeric: tabular-nums;
+
+    /* clamp lines */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: var(--entry-name-max-lines, 1);
+    overflow: hidden;
 }
 
 .entry-info-main + .entry-info-sub {
@@ -39,12 +45,6 @@
     /* skeleton sizing */
     --skeleton-width: 8em;
     --skeleton-max-width: 100%;
-
-    /* clamp lines */
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: var(--entry-name-max-lines, 1);
-    overflow: hidden;
 }
 
 .entry-info-sub {

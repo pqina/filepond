@@ -33,7 +33,11 @@
     const globalPreventState = getGlobalPreventAnimations();
     const reduceMotionState = getShouldReduceMotion();
     const enableAnimations = $derived(
-        computeAnimationPreference(animations, globalPreventState, reduceMotionState)
+        computeAnimationPreference(
+            animations,
+            globalPreventState.current,
+            reduceMotionState.current
+        )
     );
 
     // update spring

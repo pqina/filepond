@@ -24,11 +24,6 @@
     user-select: none;
 }
 
-/* move to top when dragging children */
-:host([dragging]) {
-    z-index: 2147483647;
-}
-
 /* Slotted element styles */
 ::slotted(input[type='file']) {
     position: absolute;

@@ -3,7 +3,7 @@ import { isBrowser } from '../../utils/test.js';
 import { addListener } from '../../utils/dom.js';
 
 // shared
-let globalPreventAnimations: boolean | null = $state(null);
+let globalPreventAnimations: { current: boolean | null } = $state({ current: null });
 
 // we track if user is dragging something, if so we still animate while scrolling
 const activePointers = new Set();
@@ -23,7 +23,7 @@ if (isBrowser()) {
 const animationGuard = createAnimationGuard();
 animationGuard.on('change', handleAnimationGuardStateChange);
 function handleAnimationGuardStateChange(allowAnimations: boolean) {
-    globalPreventAnimations = !allowAnimations;
+    globalPreventAnimations.current = !allowAnimations;
 }
 
 const windowGuard = animationGuard.register('window');
@@ -46,16 +46,16 @@ function handleWindowInteraction() {
 // }
 
 // global listeners
-let shouldReduceMotion = $state(false);
+let shouldReduceMotion = $state({ current: false });
 if (isBrowser()) {
     // window.addEventListener('scroll', handleScrollInteraction);
     window.addEventListener('resize', handleWindowInteraction);
 
     // listen for reduce motion changes
     const reducedMotionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    shouldReduceMotion = reducedMotionMediaQuery.matches;
+    shouldReduceMotion.current = reducedMotionMediaQuery.matches;
     reducedMotionMediaQuery.addEventListener('change', () => {
-        shouldReduceMotion = reducedMotionMediaQuery.matches;
+        shouldReduceMotion.current = reducedMotionMediaQuery.matches;
     });
 }
 

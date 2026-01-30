@@ -23,6 +23,7 @@ import {
     hasDefinedTag,
     addListener,
     dispatchCustomEvent,
+    setBooleanAttribute,
 } from '../../utils/dom.js';
 import { isString } from '../../utils/test.js';
 import { assets } from '../../assets/index.js';
@@ -284,17 +285,22 @@ export class FilePondElement extends FilePondInputElement {
                 this.#elements.dropIndicator.indicatorRect = e.detail;
             }),
 
-            // prevent interaction with slot content and attribution link while dragging
+            // these two listeners toggle the dragging attribute to the file-pond element, we do this so we can move the file-pond element that is being interacted with to the front, so the dragged item also renders on top. Additionally they prevent interaction with slot content and attribution link while dragging
             addListener(this.#elements.entryList, 'dragentrystart', () => {
+                setBooleanAttribute(this, 'dragging', true);
+
                 this._slot.inert = true;
+
                 if (this.#attributionLink) {
                     this.#attributionLink.inert = true;
                 }
             }),
 
-            // restore interaction with slot content and attribution link while dragging
             addListener(this.#elements.entryList, 'dragentryend', () => {
+                setBooleanAttribute(this, 'dragging', false);
+
                 this._slot.inert = false;
+
                 if (this.#attributionLink) {
                     this.#attributionLink.inert = false;
                 }

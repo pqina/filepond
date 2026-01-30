@@ -24,6 +24,7 @@ entry-activity-indicator {
     /* this mimics the button fill */
     & .button-pile {
         z-index: 1;
+        align-self: flex-start;
         background-color: var(--btn-background-color);
         border-radius: var(--btn-border-radius);
         backdrop-filter: var(--btn-backdrop-filter);
