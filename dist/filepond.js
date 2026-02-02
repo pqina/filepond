@@ -950,7 +950,7 @@
 
         rect.scrollTop = element.scrollTop;
 
-        rect.hidden = element.offsetParent === null;
+        rect.hidden = element.offsetParent === null || style.visibility === 'hidden';
 
         return rect;
     };
@@ -11605,7 +11605,11 @@
 
                 if (isHidden && isResting) {
                     // test if is no longer hidden
-                    isResting = view.element.offsetParent === null;
+                    // check both display:none (offsetParent) and visibility:hidden
+                    var el = view.element;
+                    var isStillHidden =
+                        el.offsetParent === null || getComputedStyle(el).visibility === 'hidden';
+                    isResting = isStillHidden;
                 }
 
                 // if resting, no need to read as numbers will still all be correct
