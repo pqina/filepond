@@ -19,7 +19,7 @@ export const updateRect = (rect = {}, element = {}, style = {}) => {
 
     rect.scrollTop = element.scrollTop;
 
-    rect.hidden = element.offsetParent === null;
+    rect.hidden = element.offsetParent === null || style.visibility === 'hidden';
 
     return rect;
 };

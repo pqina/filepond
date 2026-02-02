@@ -833,7 +833,7 @@ const updateRect = (rect = {}, element = {}, style = {}) => {
 
     rect.scrollTop = element.scrollTop;
 
-    rect.hidden = element.offsetParent === null;
+    rect.hidden = element.offsetParent === null || style.visibility === 'hidden';
 
     return rect;
 };
@@ -8734,7 +8734,11 @@ const createApp = (initialOptions = {}) => {
 
             if (isHidden && isResting) {
                 // test if is no longer hidden
-                isResting = view.element.offsetParent === null;
+                // check both display:none (offsetParent) and visibility:hidden
+                const el = view.element;
+                const isStillHidden =
+                    el.offsetParent === null || getComputedStyle(el).visibility === 'hidden';
+                isResting = isStillHidden;
             }
 
             // if resting, no need to read as numbers will still all be correct
