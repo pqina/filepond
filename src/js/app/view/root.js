@@ -163,26 +163,27 @@ const write = ({ root, props, actions }) => {
     // action used to add item
     const addAction = actions.find(action => action.type === 'DID_ADD_ITEM');
 
-    // if reached max capacity and we've just reached it
-    if (atMaxCapacity && addAction) {
-        // get interaction type
-        const interactionMethod = addAction.data.interactionMethod;
-
-        // hide label
+    // hide label when at max capacity
+    if (atMaxCapacity) {
         label.opacity = 0;
 
-        if (isMultiItem) {
-            label.translateY = -40;
-        } else {
-            if (interactionMethod === InteractionMethod.API) {
-                label.translateX = 40;
-            } else if (interactionMethod === InteractionMethod.BROWSE) {
-                label.translateY = 40;
+        // only animate translation when item is being added
+        if (addAction) {
+            const interactionMethod = addAction.data.interactionMethod;
+
+            if (isMultiItem) {
+                label.translateY = -40;
             } else {
-                label.translateY = 30;
+                if (interactionMethod === InteractionMethod.API) {
+                    label.translateX = 40;
+                } else if (interactionMethod === InteractionMethod.BROWSE) {
+                    label.translateY = 40;
+                } else {
+                    label.translateY = 30;
+                }
             }
         }
-    } else if (!atMaxCapacity) {
+    } else {
         label.opacity = 1;
         label.translateX = 0;
         label.translateY = 0;
