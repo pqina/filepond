@@ -146,7 +146,7 @@ export class FilePondEntryListElement extends FilePondSvelteComponentElement {
         // }
 
         // did run connect logic
-        return true;
+        // return true;
     }
 }
 

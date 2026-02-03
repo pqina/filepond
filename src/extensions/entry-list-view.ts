@@ -48,33 +48,36 @@ export const EntryListView = createExtension(
                 // remember new element
                 currentElement = element;
 
-                // set callbacks
-                currentElement.setSetEntriesCallback(setEntries);
-                currentElement.setInsertEntriesCallback(insertEntries);
-                currentElement.setRemoveEntriesCallback(removeEntries);
-                currentElement.setUpdateEntryCallback(updateEntry);
-                currentElement.setSetEntryExtensionStateCallback(setEntryExtensionState);
-                currentElement.setGetEntryExtensionStateCallback(getEntryExtensionState);
-                currentElement.setPushTaskCallback(pushTask);
-                currentElement.setAbortTaskCallback(abortTask);
-
                 // update props on the element
                 Object.assign(currentElement, {
                     ...viewProps,
                 });
 
-                // pass entries to view
-                currentElement.onSetEntries(getEntries());
+                // reconnect element/app for first time
+                connect();
 
-                // when element reconnects we need to re-set entries
-                if (unsubConnectListener) {
-                    return;
-                }
+                // setup auto-reconnect if element/app when was disconnected/destroyed
+                unsubConnectListener?.();
                 unsubConnectListener = addListener(currentElement, 'connected', () => {
-                    currentElement.onSetEntries(getEntries());
+                    connect();
                 });
             }
         );
+
+        function connect() {
+            // set callbacks
+            currentElement.setSetEntriesCallback(setEntries);
+            currentElement.setInsertEntriesCallback(insertEntries);
+            currentElement.setRemoveEntriesCallback(removeEntries);
+            currentElement.setUpdateEntryCallback(updateEntry);
+            currentElement.setSetEntryExtensionStateCallback(setEntryExtensionState);
+            currentElement.setGetEntryExtensionStateCallback(getEntryExtensionState);
+            currentElement.setPushTaskCallback(pushTask);
+            currentElement.setAbortTaskCallback(abortTask);
+
+            // pass entries to view
+            currentElement.onSetEntries(getEntries());
+        }
 
         function handleRemoveEntry(detail: { entry: FilePondEntry; index: number[] }) {
             currentElement?.onRemoveEntry(detail);
@@ -96,6 +99,10 @@ export const EntryListView = createExtension(
         // api
         return {
             destroy() {
+                if (unsubConnectListener) {
+                    unsubConnectListener();
+                }
+
                 if (unsubUpdateEntries) {
                     unsubUpdateEntries();
                 }
