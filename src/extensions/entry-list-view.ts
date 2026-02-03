@@ -1,6 +1,7 @@
 import type { FilePondEntry, FilePondEntryListOptions } from '../types/index.js';
 import { createExtension } from './common/createExtension.js';
 import { COMPONENT_PROPS } from '../elements/FilePondEntryList/index.js';
+import { addListener } from '../utils/dom.js';
 
 export interface EntryListViewOptions extends FilePondEntryListOptions {}
 
@@ -35,6 +36,7 @@ export const EntryListView = createExtension(
         } = pond;
 
         let currentElement: any;
+        let unsubConnectListener: any;
 
         didSetProps(
             ({ element, ...viewProps }: EntryListViewOptions & { element: HTMLElement }) => {
@@ -63,6 +65,14 @@ export const EntryListView = createExtension(
 
                 // pass entries to view
                 currentElement.onSetEntries(getEntries());
+
+                // when element reconnects we need to re-set entries
+                if (unsubConnectListener) {
+                    return;
+                }
+                unsubConnectListener = addListener(currentElement, 'connected', () => {
+                    currentElement.onSetEntries(getEntries());
+                });
             }
         );
 

@@ -54,10 +54,9 @@
 
     let {
         disabled = false,
-        beforeAssignTemplate = passthrough,
-        beforeRenderNode = passthrough,
         assets = {},
         locale = {},
+        template = [],
         propResourceMap = {
             title: 'locale',
             label: 'locale',
@@ -74,13 +73,8 @@
         entryAnimationProps = {},
         entryAnimationStaggerInterval = 50,
         springDefaults,
+        beforeRenderNode = passthrough,
     }: FilePondEntryListOptions = $props();
-
-    // we update the template like this as when we set it via $props() Svelte creates a proxy which makes it difficult to update the template via beforeAssignTemplate
-    let template: TemplateNode[] = $state.raw([]);
-    export function setTemplate(newTemplate: TemplateNode[]) {
-        template = newTemplate;
-    }
 
     // update animation preference when changes
     const globalPreventState = getGlobalPreventAnimations();
@@ -922,7 +916,7 @@
     })}
 >
     <NodeList
-        nodes={beforeAssignTemplate(template)}
+        nodes={template}
         context={{ entries: computedEntries }}
         sharedContext={entryListAPI}
         beforeRenderNode={(node, context, sharedContext) =>

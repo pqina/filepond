@@ -162,8 +162,17 @@ export class FilePondElement extends FilePondInputElement {
 
             // set up items view extension
             EntryListView: {
+                // the element that the item list will be appended to
+                element: this.#elements.entryList,
+
+                // the root element to use for dragging and dropping elements, defaults to the list itself
+                dropRoot: this.#elements.dropArea,
+
                 // assets to use
                 assets,
+
+                // the nodes to render
+                template: createFilePondEntryList(),
 
                 // called before rendering a node, allows dynamically modifying a node or adding nodes
                 beforeRenderNode(node: any) {
@@ -206,26 +215,12 @@ export class FilePondElement extends FilePondInputElement {
     connectedCallback() {
         super.connectedCallback();
 
-        // add sub components
+        // re-add sub components
         this._root.prepend(this.#elements.dropArea, this.#elements.dropIndicator);
         this._root.append(this.#elements.entryList);
         if (this.#attributionLink && !this.hasAttribute('noattribution')) {
             this._root.append(this.#attributionLink);
         }
-
-        // connect entry list to extension
-        Object.assign(this, {
-            EntryListView: {
-                // the element that the item list will be appended to
-                element: this.#elements.entryList,
-
-                // the root element to use for dragging and dropping elements, defaults to the list itself
-                dropRoot: this.#elements.dropArea,
-
-                // the template to render
-                template: createFilePondEntryList({}),
-            },
-        });
 
         // if doesn't have label, add default label
         if (!this.querySelector('label')) {

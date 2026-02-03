@@ -351,6 +351,7 @@ export function appendEntryImageView(
     options?: { imageViewOptions?: MediaImageOptions }
 ) {
     const { imageViewOptions } = options ?? {};
+
     nodeTree(template)
         .find('entry')
         .append(
@@ -366,6 +367,8 @@ export function appendEntryImageView(
                 )
             )
         );
+
+    return template;
 }
 
 export function appendEntryVideoView(
@@ -401,4 +404,5 @@ export function appendEntryVideoView(
                 )
             )
         );
+    return template;
 }

@@ -24,15 +24,7 @@ import { Entry } from '../elements/FilePondEntryList/components/Entry/index.js';
 import { EntryListItemPlaceholder } from '../elements/FilePondEntryList/components/EntryListItemPlaceholder/index.js';
 import { toSpaceSeparatedString } from '../elements/common/string.js';
 
-export interface EntryListTemplateOptions {
-    //
-}
-
-export interface EntryTemplateOptions {
-    //
-}
-
-export function createFilePondEntryList(options?: EntryListTemplateOptions): TemplateNode[] {
+export function createFilePondEntryList(): TemplateNode[] {
     return [
         {
             key: 'entry-list',
@@ -85,14 +77,14 @@ export function createFilePondEntryList(options?: EntryListTemplateOptions): Tem
                             onmeasureitem,
                         };
                     },
-                    children: createFilePondEntry(options),
+                    children: createFilePondEntry(),
                 },
             },
         },
     ];
 }
 
-export function createFilePondEntry(options?: EntryTemplateOptions): TemplateNode {
+export function createFilePondEntry(): TemplateNode {
     return {
         key: 'entry',
         component: Entry,
@@ -114,7 +106,7 @@ export function createFilePondEntry(options?: EntryTemplateOptions): TemplateNod
                 },
             },
             createEntryStoreState(),
-            createEntryStatus(options),
+            createEntryStatus(),
         ],
     };
 }
@@ -218,7 +210,7 @@ export function createEntryDataTransferInfo() {
     };
 }
 
-export function createEntryStatus(options?: EntryTemplateOptions) {
+export function createEntryStatus() {
     return {
         key: 'entry-status',
         component: EntryStatus,
@@ -556,10 +548,14 @@ export function appendEntryCheckbox(template: TemplateNode[]) {
                 };
             };
         });
+
+    return template;
 }
 
 export function appendEntryRenameInput(template: TemplateNode[]) {
     nodeTree(template).update('file-info-main', (node: any) => {
         node.children = createFileRenameInput();
     });
+
+    return template;
 }

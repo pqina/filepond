@@ -68,12 +68,10 @@ export interface AppCallbacks {
 
 // Props to create getters and setters for, the defaults for these props are set in the FilePondEntryList component
 export const COMPONENT_PROPS = [
-    // We don't include 'template' as it's handled with a manual setter, this prevents Svelte from creating a proxy when the template is passed to the `beforeAssignTemplate` function
     'disabled',
-    'beforeAssignTemplate',
-    'beforeRenderNode',
     'assets',
     'locale',
+    'template',
     'propResourceMap',
     'drag',
     'dragDetachMargin',
@@ -86,6 +84,7 @@ export const COMPONENT_PROPS = [
     'entryAnimationOriginMap',
     'entryAnimationStaggerInterval',
     'springDefaults',
+    'beforeRenderNode',
 ];
 
 const COMPONENT_METHODS = [
@@ -109,19 +108,19 @@ const COMPONENT_EVENTS = ['dragentry', 'dragentrystart', 'dragentryend', 'update
 
 /** FilePond EntryList Element */
 export class FilePondEntryListElement extends FilePondSvelteComponentElement {
-    #template: TemplateNode[] | undefined;
+    // #template: TemplateNode[] | undefined;
 
-    set template(value: TemplateNode[]) {
-        this.#template = value;
+    // set template(value: TemplateNode[]) {
+    //     this.#template = value;
 
-        // no app
-        if (!this._app) {
-            return;
-        }
+    //     // no app
+    //     if (!this._app) {
+    //         return;
+    //     }
 
-        // update app template
-        this._app.setTemplate(value);
-    }
+    //     // update app template
+    //     this._app.setTemplate(value);
+    // }
 
     constructor() {
         super(FilePondEntryListApp, {
@@ -142,9 +141,9 @@ export class FilePondEntryListElement extends FilePondSvelteComponentElement {
         });
 
         // no template
-        if (this.#template) {
-            this._app.setTemplate(this.#template);
-        }
+        // if (this.#template) {
+        //     this._app.setTemplate(this.#template);
+        // }
 
         // did run connect logic
         return true;

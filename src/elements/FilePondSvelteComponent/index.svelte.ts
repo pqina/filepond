@@ -122,6 +122,8 @@ export class FilePondSvelteComponentElement extends HTMLElementSafe {
             this.#app[key](...args);
         });
         this.#queue.length = 0;
+
+        this.dispatchEvent(new CustomEvent('connected'));
     }
 
     disconnectedCallback() {

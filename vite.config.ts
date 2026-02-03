@@ -39,8 +39,9 @@ const addBanner: any = {
     },
 };
 
-export default defineConfig({
+export default defineConfig(({ command }) => ({
     // dev
+    root: command === 'serve' ? './dev' : './',
     resolve: {
         alias: {
             'filepond/locales/en-gb.js': resolve(__dirname, srcDir + '/locales/en-gb.js'),
@@ -93,4 +94,4 @@ export default defineConfig({
             },
         },
     },
-});
+}));
