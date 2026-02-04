@@ -23,6 +23,7 @@ import {
     MediaImage,
 } from '../elements/FilePondEntryList/components/MediaImage/index.js';
 import { SpringElement } from '../elements/components/SpringElement/index.js';
+import { ElementPane } from '../elements/components/ElementPane/index.js';
 
 export type VideoViewOptions = Omit<MediaVideoOptions, 'class' | 'children'>;
 
@@ -96,8 +97,36 @@ export function createResetMediaButton(options?: { action?: string }) {
     });
 }
 
+function createMediaSpringPane(key: string) {
+    return {
+        key,
+        component: ElementPane,
+        spring: ({ visualRect }: NodeContext) => {
+            return {
+                opacity: {
+                    value: visualRect.height > 0 ? 1 : 0,
+                    config: {
+                        stiffness: 0.02,
+                        damping: 0.85,
+                        precision: 0.1,
+                    },
+                },
+            };
+        },
+        props: ({ visualRect, opacity }: NodeContext) => {
+            return {
+                part: 'media-pane',
+                class: 'media-pane',
+                width: visualRect.width,
+                height: visualRect.height,
+                opacity,
+            };
+        },
+    };
+}
+
 export function createImageView(options?: ImageViewOptions) {
-    const { objectSize = undefined } = options ?? {};
+    const { objectFit = undefined } = options ?? {};
 
     return {
         key: 'entry-image-spring',
@@ -114,11 +143,8 @@ export function createImageView(options?: ImageViewOptions) {
             },
             {
                 if: {
-                    test: () => objectSize === 'contain',
-                    then: createSpringPane({
-                        key: 'entry-image-pane',
-                        class: 'media-pane',
-                    }),
+                    test: () => objectFit === 'contain',
+                    then: createMediaSpringPane('entry-image-pane'),
                 },
             },
             createSpringPane({
@@ -139,7 +165,7 @@ function getMediaContextReference({ entry }: NodeContext): NodeContext {
 }
 
 export function createVideoView(options?: VideoViewOptions) {
-    const { objectSize = undefined } = options ?? {};
+    const { objectFit = undefined } = options ?? {};
     return {
         key: 'entry-video-spring',
         component: SpringElement,
@@ -155,11 +181,8 @@ export function createVideoView(options?: VideoViewOptions) {
             },
             {
                 if: {
-                    test: () => objectSize === 'contain',
-                    then: createSpringPane({
-                        key: 'entry-video-pane',
-                        class: 'media-pane',
-                    }),
+                    test: () => objectFit === 'contain',
+                    then: createMediaSpringPane('entry-video-pane'),
                 },
             },
             createSpringPane({

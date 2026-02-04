@@ -16,7 +16,7 @@
         class: klass = undefined,
         overflowAmount = undefined,
         enableParallax = undefined,
-        objectSize = undefined,
+        objectFit = undefined,
         mute = true,
         children = undefined,
     }: MediaVideoOptions = $props();
@@ -358,7 +358,7 @@
             {overflowAmount}
             mediaInitialOpacity={0}
             mediaInitialScalar={0}
-            mediaObjectSize={objectSize}
+            mediaObjectFit={objectFit}
             mediaWidth={videoWidth}
             mediaHeight={videoHeight}
             mediaVisible={videoVisible}

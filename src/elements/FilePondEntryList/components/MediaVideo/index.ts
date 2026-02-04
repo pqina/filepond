@@ -9,7 +9,7 @@ export interface MediaVideoOptions {
     overflowAmount?: number;
 
     /** How to present image in viewer, defaults to 'cover', alternative is 'contain' */
-    objectSize?: 'cover' | 'contain';
+    objectFit?: 'cover' | 'contain';
 
     /** Enable parallax on media */
     enableParallax?: boolean;

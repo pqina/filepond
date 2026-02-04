@@ -16,7 +16,7 @@
         class: klass = undefined,
         maximumPixels = undefined,
         resizeQuality = undefined,
-        objectSize = undefined,
+        objectFit = undefined,
         overflowAmount = undefined,
         enableParallax = undefined,
     }: MediaImageOptions = $props();
@@ -184,7 +184,7 @@
                 <MediaPane
                     {enableParallax}
                     {overflowAmount}
-                    mediaObjectSize={objectSize}
+                    mediaObjectFit={objectFit}
                     mediaInitialOpacity={replacesPoster ? 1 : 0}
                     mediaInitialScalar={replacesPoster ? 1 : computedFiles.length > 1 ? 1 : 0}
                 >

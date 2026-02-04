@@ -13,7 +13,7 @@ export interface MediaImageOptions {
     resizeQuality?: MediaResizeQuality;
 
     /** How to present image in viewer, defaults to 'cover', alternative is 'contain' */
-    objectSize?: 'cover' | 'contain';
+    objectFit?: 'cover' | 'contain';
 
     /** The amount we should overflowAmount the image when we move it around */
     overflowAmount?: number;

@@ -47,6 +47,31 @@ We wrap an `<input type="file">` with the `<file-pond>` custom element and then 
 </script>
 ```
 
+When using a framework like React, Svelte, or Vue we can use the `<file-pond>` custom element as if it were a Component.
+
+```jsx
+import { useState } from 'react';
+
+import { defineFilePond } from 'filepond';
+import { locale } from 'filepond/locales/en-gb.js';
+
+defineFilePond({
+    locale,
+});
+
+export default function App() {
+    const [myEntries, setMyEntries] = useState([]);
+    return (
+        <file-pond entries={myEntries}>
+            <label htmlFor="my-file">
+                Drop files here, or <u>browse</u>
+            </label>
+            <input id="my-file" type="file" name="docs" />
+        </file-pond>
+    );
+}
+```
+
 ## License
 
 [MIT](LICENSE.md)

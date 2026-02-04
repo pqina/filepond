@@ -170,14 +170,6 @@
             }
 
             preparedNodes.push(node);
-
-            // handle tag and component node
-            // const resultingNode = beforeRenderNode(node, treeContext, sharedContext);
-            // if (!resultingNode) {
-            //     continue;
-            // }
-
-            // preparedNodes.push(resultingNode);
         }
 
         return preparedNodes

@@ -21,7 +21,7 @@
         /** Set to true to animate media into view */
         mediaAnimateIn?: boolean;
         /** Set to 'contain' to present image in container instead of covering the container */
-        mediaObjectSize?: 'cover' | 'contain';
+        mediaObjectFit?: 'cover' | 'contain';
         /** Initial media scale, defaults to `1` */
         mediaInitialScalar?: number;
         /** Initial media opacity, defaults to `1` */
@@ -50,7 +50,7 @@
         mediaHeight = undefined,
         mediaVisible = undefined,
         mediaLoading = true,
-        mediaObjectSize = 'cover',
+        mediaObjectFit = 'cover',
         mediaInitialScalar = 1,
         mediaInitialOpacity = 1,
         mediaAnimateIn = true,
@@ -117,14 +117,14 @@
         mediaReady ? (mediaPaneHeight as number) * 0.5 - (mediaHeight as number) * 0.5 : 0
     );
 
-    function getMathMinOrMaxFunction(objectSize: 'contain' | 'cover') {
-        return Math[objectSize === 'cover' ? 'max' : 'min'];
+    function getMathMinOrMaxFunction(objectFit: 'contain' | 'cover') {
+        return Math[objectFit === 'cover' ? 'max' : 'min'];
     }
 
     // scale value covers panel with media
     const mediaScale = $derived(
         mediaReady
-            ? getMathMinOrMaxFunction(mediaObjectSize)(
+            ? getMathMinOrMaxFunction(mediaObjectFit)(
                   (mediaPaneWidth as number) / (mediaWidth as number),
                   (mediaPaneHeight as number) / (mediaHeight as number)
               )
@@ -133,7 +133,7 @@
 
     const mediaOverflowScale = $derived(
         mediaReady
-            ? getMathMinOrMaxFunction(mediaObjectSize)(
+            ? getMathMinOrMaxFunction(mediaObjectFit)(
                   ((mediaPaneWidth as number) + overflowAmount * 2) / (mediaWidth as number),
                   ((mediaPaneHeight as number) + overflowAmount * 2) / (mediaHeight as number)
               ) - (mediaScale as number)
@@ -200,7 +200,7 @@
 
     const mediaMaskRect = $derived(
         mediaReady
-            ? mediaObjectSize === 'contain'
+            ? mediaObjectFit === 'contain'
                 ? getOffsetByAspectRatio(
                       mediaPaneWidth as number,
                       mediaPaneHeight as number,
@@ -227,15 +227,10 @@
 
     /** Handle media pane resized */
     function handleMeasure(bounds: Bounds) {
-        if (!mediaReady) {
-            return;
-        }
-
         const measuredRect = rectFromBounds(bounds);
         if (!measuredRect.width || !measuredRect.height) {
             return;
         }
-
         updateMediaPaneRect(measuredRect);
     }
 
