@@ -7365,7 +7365,7 @@
             ABORT_ITEM_PROCESSING: getItemByQueryFromState(state, function(item) {
                 // test if is already processed
                 if (item.serverId) {
-                    dispatch('REVERT_ITEM_PROCESSING', { id: item.id });
+                    dispatch('REVERT_ITEM_PROCESSING', { query: item.id });
                     return;
                 }
 
