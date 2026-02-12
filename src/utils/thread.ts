@@ -80,8 +80,9 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
 
             // none found, let's create one
             if (!pooledWorker) {
-                // if none found and all worker spots are taken up by busy workers we wait for a spot to free up
-                if (workerPool.filter((worker) => !worker.busy).length >= MAX_WORKERS) {
+                // if no pooled worker found found and all worker spots are taken up by busy workers
+                // we wait for a spot to free up
+                if (workerPool.filter((worker) => worker.busy).length >= MAX_WORKERS) {
                     // need to queue tasks for when workers become available
                     const task: Task = {
                         fn,
@@ -97,7 +98,6 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                     // if aborter earlier, remove task from queue
                     abortController.signal.onabort = () => {
                         arrayRemoveInPlace(taskQueue, (queuedTask: Task) => queuedTask === task);
-
                         if (onabort) {
                             onabort();
                         }
@@ -122,7 +122,7 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                     worker,
                     terminationTimeout: undefined,
                     terminate: () => {
-                        // no need to handle idle termination
+                        // now it's no longer needed to handle terminationtimeout
                         clearTimeout((pooledWorker as PooledWorker).terminationTimeout);
                         (pooledWorker as PooledWorker).worker.terminate();
 
@@ -174,12 +174,11 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                 // resolve or reject message based on response from worker
                 error ? promise.reject(error) : promise.resolve(content);
 
-                // no longer busy
-                pooledWorker.busy = false;
-
                 // no similar tasks in queue
                 const similarTasks = taskQueue.filter((task) => task.fnStr === pooledWorker.fnStr);
                 if (!similarTasks.length) {
+                    // we're no longer busy
+                    pooledWorker.busy = false;
                     return;
                 }
 
@@ -187,10 +186,12 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                 const nextTask = similarTasks.shift() as Task;
 
                 // remove from queue
-                arrayRemoveInPlace(taskQueue, (task: Task) => task.fn === nextTask.fn);
+                arrayRemoveInPlace(taskQueue, (task: Task) => task === nextTask);
 
                 // run the similar task
                 requestIdleCallback(() => {
+                    // as runtask is next in line this reserves this pooled worker for the next task
+                    pooledWorker.busy = false;
                     runTask(nextTask);
                 });
             };
@@ -202,7 +203,6 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
             if (abortController) {
                 abortController.signal.onabort = () => {
                     pooledWorker.terminate();
-
                     if (onabort) {
                         onabort();
                     }

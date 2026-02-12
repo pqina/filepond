@@ -34,7 +34,7 @@
         onspringcomplete?: (spring: { opacity: number; scale: number }) => void;
     }
 
-    import { type Snippet } from 'svelte';
+    import { untrack, type Snippet } from 'svelte';
     import { type FilePondEntry, type SpringOptions } from '../../../../types/index.js';
     import { type Size, sizeFromRect } from '../../../../utils/size.js';
     import { type Rect } from '../../../../utils/rect.js';

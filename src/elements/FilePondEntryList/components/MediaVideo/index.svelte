@@ -221,8 +221,6 @@
     function handleVideoError() {
         const { error } = videoElement;
 
-        console.error(error);
-
         // load error
         setEntryExtensionState(entryContext.current, {
             status: {

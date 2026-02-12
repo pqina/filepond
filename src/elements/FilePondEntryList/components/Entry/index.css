@@ -95,11 +95,8 @@
     }
 
     & .entry-media {
-        /* 
-        `min-width: 0` didn't work on Safari 17.x, the entry would not expand, so switched to `auto` value instead
-        */
         min-width: auto;
-        min-height: 0;
+        min-height: auto;
     }
 
     & .entry-media-controls {

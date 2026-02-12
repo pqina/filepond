@@ -31,7 +31,7 @@ export interface SimulatedStoreOptions extends StoreExtensionOptions {
         }
     ) => Promise<File>;
 
-    /** Logs stored files to console. Defaults to `true` */
+    /** Logs stored files to the developer console. Defaults to `true` */
     log?: boolean;
 }
 

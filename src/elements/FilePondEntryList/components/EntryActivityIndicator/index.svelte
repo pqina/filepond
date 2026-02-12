@@ -184,7 +184,13 @@
         // set outro states for existing buttons, add new button in "idle" state
         untrack(() => {
             if (lastButtonIsSameButton(activeButton.current)) {
-                return;
+                // only update button props
+                return (buttonNodes = buttonNodes.map((control) => {
+                    if (control.key === activeButton.current.key) {
+                        return activeButton.current;
+                    }
+                    return control;
+                }));
             }
 
             // if last button icon is the same as new button icon, we don't crossfade
@@ -232,6 +238,23 @@
             }
         });
     });
+
+    const buttonsTemplate = $derived.by(() => {
+        if (!buttonNodes.length) {
+            return [];
+        }
+        return [
+            {
+                tag: 'element-stack',
+                attrs: {
+                    layout: 'pile',
+                    class: 'button-pile',
+                    part: `${buttonPart}-pile`,
+                },
+                children: buttonNodes,
+            },
+        ];
+    });
 </script>
 
 <SpringElement
@@ -241,12 +264,13 @@
     subattrs={{ layout: 'pile' }}
     {part}
 >
-    {#if buttonNodes.length}
-        <element-stack class="button-pile" layout="pile" part={buttonPart}>
-            <NodeList nodes={buttonNodes} {...nodeContext}></NodeList>
-        </element-stack>
+    {#if buttonsTemplate.length}
+        <NodeList nodes={buttonsTemplate} {...nodeContext}></NodeList>
     {/if}<!-- no return here as we use element-pile:empty in css -->{#if currentProgressIndicatorControlOpacity.current > 0}
-        <div style:opacity={currentProgressIndicatorControlOpacity.current} part={buttonPart}>
+        <div
+            style:opacity={currentProgressIndicatorControlOpacity.current}
+            part={`${buttonPart}-pile`}
+        >
             <ProgressIndicator {...lastProgressIndicatorControlState} {enableAnimations} />
         </div>
     {/if}

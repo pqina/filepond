@@ -92,7 +92,8 @@ file-pond-entry-list {
 
     &::part(entry) {
         display: grid;
-        grid: min-content 1fr min-content / min-content 1fr min-content;
+        grid: min-content minmax(0, 1fr) min-content / min-content minmax(0, 1fr) min-content;
+        /* use `minmax(0, 1fr)` instead of `1fr` to prevent media content from expanding the height of the item, mainly an issue with Safari. `min-width:0; min-height:0;` on the `.entry-media` worked on Chrome and Firefox but didn't on Safari.  */
     }
 
     &::part(entry-load-state) {
@@ -165,7 +166,12 @@ file-pond-entry-list {
             background-color var(--_150ms, 0) ease-in-out;
     }
 
-    &::part(entry-button):hover {
+    &::part(entry-button-pile) {
+        --btn-border-radius: calc(var(--entry-border-radius) - var(--entry-padding) * 0.625);
+        --btn-background-color: color-mix(in srgb, var(--entry-color) 15%, transparent);
+    }
+
+    &::part(entry-button):not(:disabled):hover {
         background-color: color-mix(in srgb, var(--entry-color) 25%, transparent);
         box-shadow: var(--entry-button-outline);
     }
@@ -181,7 +187,11 @@ file-pond-entry-list {
             background-color var(--_150ms, 0) ease-in-out;
     }
 
-    &::part(media-button):hover {
+    &::part(media-button-pile) {
+        --btn-border-radius: var(--panel-border-radius);
+    }
+
+    &::part(media-button):not(:disabled):hover {
         background-color: color-mix(in srgb, currentColor 15%, transparent);
         box-shadow: var(--entry-button-outline);
     }

@@ -48,12 +48,12 @@ export function createEditMediaButton(options?: { action?: string }) {
                     ],
                     button: createButton('button-transform-activate', {
                         icon: 'mediaEdit',
-                        onclick: () => updateEntryState?.(id, { [action]: true }),
                         disabled: hasExtensionWithStatusCode(entry, [
                             'STORE_QUEUED',
                             'STORE_BUSY',
                             'TRANSFORM_BUSY',
                         ]),
+                        onclick: () => updateEntryState?.(id, { [action]: true }),
                     }),
                 },
                 {
@@ -61,15 +61,15 @@ export function createEditMediaButton(options?: { action?: string }) {
                     progress: true,
                     button: createButton('button-transform-abort', {
                         icon: 'abort',
-                        onclick: () =>
-                            updateEntryState(id, {
-                                [action]: null,
-                            }),
                         disabled: hasExtensionWithStatusCode(entry, [
                             'STORE_QUEUED',
                             'STORE_BUSY',
                             'TRANSFORM_BUSY',
                         ]),
+                        onclick: () =>
+                            updateEntryState(id, {
+                                [action]: null,
+                            }),
                     }),
                 },
             ],
@@ -81,7 +81,7 @@ export function createResetMediaButton(options?: { action?: string }) {
     const { action = 'editMedia' } = options ?? {};
     return createButton('button-media-reset', {
         props: ({ id, entry }: NodeContext, { updateEntryState }: EntryListFunctions) => ({
-            buttonPart: 'media-button',
+            part: 'media-button',
             disabled:
                 hasExtensionWithStatusCode(entry, [
                     'STORE_QUEUED',

@@ -93,8 +93,8 @@
     }
 
     /* This _individual_ button is disabled */
-    &[disabled] {
-        pointer-events: none;
+    &:disabled {
+        cursor: default;
         & .icon,
         & .label {
             opacity: calc(var(--btn-opacity, 1) * 0.3);
