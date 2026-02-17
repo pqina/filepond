@@ -691,27 +691,31 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     }
 
     #syncBrowseButton() {
+        const totalEntries = this.#entryTree.entries.length;
+
+        const localeData = {
+            multiple: `${this.multiple}`,
+            name: totalEntries === 1 ? this.#entryTree.entries[0].name || 'untitled' : null,
+            count: totalEntries,
+        };
+
         // accessibility attributes
         if (this.#locale) {
+            const localeKey =
+                totalEntries === 0
+                    ? 'ariaNoEntries'
+                    : totalEntries === 1
+                      ? 'ariaSingleEntry'
+                      : 'ariaMultipleEntries';
+
             setAttributes(this.#browseButton, {
                 // aria label is always base browse button
-                'aria-label': stringReplaceVariables(
-                    this.#locale.browse,
-                    { multiple: `${this.multiple}` },
-                    this.#locale
-                ),
+                'aria-label': stringReplaceVariables(this.#locale.browse, localeData, this.#locale),
 
                 // aria description is always base browse button
                 'aria-description': stringReplaceVariables(
-                    this.#locale.ariaInputDescription,
-                    {
-                        multiple: `${this.multiple}`,
-                        name:
-                            this.#entryTree.entries.length === 1
-                                ? this.#entryTree.entries[0].name || 'untitled'
-                                : null,
-                        count: this.#entryTree.entries.length,
-                    },
+                    this.#locale[localeKey],
+                    localeData,
                     this.#locale
                 ),
             });
@@ -720,7 +724,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         // normal button is different based
         this.#browseButton.innerHTML = stringReplaceVariables(
             this.#locale ? this.#locale[this.#browseButtonLabelKey] : this.#browseButtonLabelKey,
-            { multiple: `${this.multiple}` },
+            localeData,
             this.#locale
         );
     }

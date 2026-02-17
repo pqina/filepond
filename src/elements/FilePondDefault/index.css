@@ -3,6 +3,12 @@
     /* toggles animations */
     --animate: 1;
 
+    /* focus outline */
+    --outline: Highlight auto 1px;
+    @supports (outline: -webkit-focus-ring-color auto 1px) {
+        --outline: -webkit-focus-ring-color auto 1px;
+    }
+
     /*  Default colors */
     --default-color: CanvasText;
     --default-background-color: color-mix(in srgb, CanvasText 10%, Canvas 100%);
@@ -88,9 +94,8 @@ file-pond-entry-list {
     }
 
     &::part(entry-list-item):focus-visible {
-        outline: -webkit-focus-ring-color auto 1px;
-        outline: Highlight auto 1px;
         border-radius: var(--entry-border-radius);
+        outline: var(--outline);
     }
 
     &::part(data-transfer-item) {
@@ -188,8 +193,7 @@ file-pond-entry-list {
     }
 
     &::part(entry-button):focus-visible {
-        outline: -webkit-focus-ring-color auto 1px;
-        outline: Highlight auto 1px;
+        outline: var(--outline);
     }
 
     &::part(media-button) {
@@ -301,6 +305,7 @@ file-pond-entry-list {
     background: transparent;
     border: none;
     font-size: 0.875em;
+
     & u {
         cursor: pointer;
         text-decoration-color: color-mix(in srgb, currentColor 25%, transparent);
@@ -308,6 +313,13 @@ file-pond-entry-list {
 
     &:focus-visible {
         border-radius: calc(var(--default-border-radius) - var(--default-padding) * 0.75);
+        outline: var(--outline);
+        &:has(u) {
+            outline: none;
+            & u {
+                outline: var(--outline);
+            }
+        }
     }
 }
 

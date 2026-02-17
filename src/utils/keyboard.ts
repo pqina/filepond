@@ -22,5 +22,6 @@ const Directions = {
 };
 
 export function getDirectionFromKeyboardEvent(e: KeyboardEvent): 'up' | 'down' | 'left' | 'right' {
+    // @ts-ignore
     return Directions[e.key];
 }

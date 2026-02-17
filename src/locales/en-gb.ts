@@ -36,7 +36,7 @@ export const core = {
 
     // validaton fallback if no subscode set
     validationInvalid: 'Invalid file.',
-    validationFileNameMissing: 'File name missing',
+    validationFileNameMissing: 'File name missing.',
 
     // file list status
     validationInvalidEntries: 'The file list contains invalid items.',
@@ -57,28 +57,15 @@ export const core = {
 
     // browse button labels
     browse: {
-        template: 'Choose {{multiple}}',
+        template: 'Choose {{files}}',
         variables: {
-            map: {
-                true: 'files',
-                false: 'file',
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'files',
+                    false: 'file',
+                },
             },
-        },
-        // variables: {
-        //     files: {
-        //         context: 'multiple',
-        //         map: {
-        //             true: 'files',
-        //             false: 'file',
-        //         },
-        //     },
-        // },
-    },
-    files: {
-        context: 'multiple',
-        map: {
-            true: 'files',
-            false: 'file',
         },
     },
     browseAndDrop: {
@@ -95,7 +82,7 @@ export const core = {
     },
 
     // screenreader accessibility
-    ariaEmpty: {
+    ariaNoEntries: {
         template: 'No {{files}} selected',
         variables: {
             files: {
@@ -107,19 +94,8 @@ export const core = {
             },
         },
     },
-    ariaInputDescription: {
-        template: '{{currentFiles}}',
-        variables: {
-            currentFiles: {
-                context: 'count',
-                map: {
-                    0: 'ariaEmpty',
-                    1: 'Selected {{name}}',
-                    else: '{{count}} files selected',
-                },
-            },
-        },
-    },
+    ariaSingleEntry: 'Selected {{name}}',
+    ariaMultipleEntries: '{{count}} files selected',
     ariaItemRoleDescription: 'Sortable',
     ariaDragDescription:
         'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
@@ -176,9 +152,9 @@ export const validationFileMimeType = {
 
 export const validationFileExtension = {
     validationFileExtensionMismatch: {
-        template: 'This file extension is not allowed. {{details}}.',
+        template: 'This file extension is not allowed. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'File must have the {{accept}} extension',
