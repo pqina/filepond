@@ -1,4 +1,4 @@
-import { isURL } from './test.js';
+import { isBrowser, isURL } from './test.js';
 
 export function getFilenameFromURL(v = '') {
     const url = toURL(v);
@@ -18,5 +18,6 @@ export function toURL(v: string | URL): URL {
     if (isURL(v)) {
         return v instanceof URL ? v : new URL(v);
     }
-    return new URL(v, location.href);
+
+    return new URL(v, location?.href);
 }

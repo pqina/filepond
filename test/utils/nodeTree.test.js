@@ -1,3 +1,4 @@
+import { it, describe, expect } from 'vitest';
 import { nodeTree } from '../../src/elements/common/nodeTree';
 
 describe('nodeTree', () => {
@@ -123,8 +124,8 @@ describe('nodeTree', () => {
             },
         ];
 
-        nodeTree(nodes).find('bar').update({
-            hello: 'world',
+        nodeTree(nodes).update('bar', (node) => {
+            node.hello = 'world';
         });
 
         expect(nodes[0].children[0].hello).to.equal('world');
@@ -146,9 +147,8 @@ describe('nodeTree', () => {
         ];
 
         nodeTree(nodes)
-            .find('bar')
-            .update({
-                hello: 'world',
+            .update('bar', (node) => {
+                node.hello = 'world';
             })
             .append({
                 key: 'subbar',

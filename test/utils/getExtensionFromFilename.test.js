@@ -1,3 +1,4 @@
+import { it, describe, expect } from 'vitest';
 import { getExtensionFromFilename } from '../../src/utils/file.js';
 
 describe('getExtensionFromFilename', function () {

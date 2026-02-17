@@ -22,10 +22,15 @@ export interface AnimatedEntry {
 export interface DragInteraction {
     id: string;
     element: HTMLElement | undefined;
-    offset: Vector;
-    translation: Vector;
-    vector: Vector;
-    viewPosition: Vector;
+
+    // for pointer interaction
+    offset?: Vector;
+    translation?: Vector;
+    vector?: Vector;
+    viewPosition?: Vector;
+
+    // for keyboard interaction
+    direction?: 'none' | 'up' | 'down' | 'left' | 'right';
 }
 
 export interface DropState {
@@ -37,10 +42,10 @@ export interface DragState {
     id: string;
     index: number;
     element: HTMLElement | undefined;
-    offset: Vector;
-    translation: Vector;
-    parentTranslation: Vector;
-    outside: boolean;
+    offset?: Vector;
+    translation?: Vector;
+    parentTranslation?: Vector;
+    outside?: boolean;
 }
 
 export interface AppCallbacks {

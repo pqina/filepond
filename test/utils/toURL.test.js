@@ -1,6 +1,7 @@
+import { it, describe, expect, beforeEach, afterEach } from 'vitest';
 import { toURL } from '../../src/utils/url.js';
 
-const host = 'http://' + window.location.host;
+const host = 'http://' + location.host;
 
 describe('toURL', () => {
     it('should return URL if input is already URL', () => {
@@ -30,7 +31,7 @@ describe('toURL', () => {
     it('should convert relative ./path to URL', () => {
         const input = './path';
         const output = toURL(input);
-        expect(output.href).to.equal(host + '/test/path');
+        expect(output.href).to.equal(host + '/path');
     });
 
     it('should convert relative ../path to URL', () => {

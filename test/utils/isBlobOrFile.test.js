@@ -1,3 +1,4 @@
+import { it, describe, expect } from 'vitest';
 import { isBlobOrFile } from '../../src/utils/test.js';
 
 describe('isBlobOrFile', () => {

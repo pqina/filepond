@@ -323,9 +323,13 @@ export function setStringAttribute(
 
 export function setBooleanAttribute(element: HTMLElement, name: string, value: boolean) {
     if (value) {
-        element.setAttribute(name, '');
+        if (!element.hasAttribute(name)) {
+            element.setAttribute(name, '');
+        }
     } else {
-        element.removeAttribute(name);
+        if (element.hasAttribute(name)) {
+            element.removeAttribute(name);
+        }
     }
 }
 

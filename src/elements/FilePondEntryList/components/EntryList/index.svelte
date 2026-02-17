@@ -235,6 +235,7 @@
         const res = entries.map((entry, index) => {
             const id = entry.id;
             const isDragging = index === dragState?.index;
+            const isTranslating = dragState?.translation;
             const isRemoving = !!isRetainedEntry(id);
             const isPlaceholder = dragState?.id === id;
             const isLastDraggedItem = lastDraggedItemId === id;
@@ -249,17 +250,23 @@
 
             // if we have a rect and are dragging this item calculate element translation
             let dragTranslation: Vector | undefined = undefined;
-            if (isDragging && !isPlaceholder && hasElementRect && hasElementStartRect) {
+            if (
+                isDragging &&
+                isTranslating &&
+                !isPlaceholder &&
+                hasElementRect &&
+                hasElementStartRect
+            ) {
                 // busy with, elementRect changes when dragging
                 dragTranslation = getEntryTranslation(
                     elementDragStartRect as Rect,
                     elementRect,
-                    dragState.offset,
-                    dragState.translation
+                    dragState.offset as Vector,
+                    dragState.translation as Vector
                 );
 
                 // adjust for parent offset
-                dragTranslation = vectorAdd(dragTranslation, dragState.parentTranslation);
+                dragTranslation = vectorAdd(dragTranslation, dragState.parentTranslation as Vector);
 
                 // we retain last translation so dissolving element stays in place
                 lastDragTranslation = { ...dragTranslation };
@@ -327,6 +334,7 @@
 {#if computedList.entries.length}
     <ul
         bind:this={root}
+        role="list"
         class="entry-list"
         {part}
         style:--_detached-entry-spacing={computedList.detachedItemSize

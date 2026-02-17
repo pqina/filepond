@@ -8,13 +8,12 @@
     isolation: isolate;
     line-height: var(--default-line-height, 1.5);
     font-family: var(--default-font-family, inherit);
-    padding: var(--default-padding, 0);
 
     /* needs to have a height for form validation to work */
     min-height: 1px;
 
     /* default slot rendering */
-    & slot {
+    & slot:not(:empty) {
         display: block;
     }
 }
@@ -22,24 +21,4 @@
 /* disable user selection when disabled */
 :host([disabled]) {
     user-select: none;
-}
-
-/* Slotted element styles */
-::slotted(input[type='file']) {
-    position: absolute;
-    width: 100%;
-    padding: 0;
-    margin: 0;
-    z-index: -1;
-    pointer-events: none;
-    user-select: none;
-
-    /* hide from view, use -webkit- prefix because otherwise looks completely broken */
-    --mask: linear-gradient(transparent, transparent);
-    -webkit-mask: var(--mask);
-    mask: var(--mask);
-
-    /* we align it to the top so Safari tooltip points to the field */
-    top: 0;
-    left: 0;
 }

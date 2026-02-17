@@ -27,9 +27,6 @@ export const core = {
     assistAbort: 'Tap to cancel',
     assistUndo: 'Tap to undo',
 
-    // drop area label
-    dropAreaLabel: 'Drop files here, or <u>browse</u>',
-
     // file status
     loadError: 'Failed to load file.',
 
@@ -45,7 +42,90 @@ export const core = {
     validationInvalidEntries: 'The file list contains invalid items.',
     validationInvalidState: 'The file list is in an invalid state.',
     validationInvalidBusy: 'The file list is busy.',
-    validationInvalidEmpty: 'Please fill in this field.',
+    validationInvalidEmpty: {
+        template: 'Please select {{files}}.',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    false: 'a file',
+                    true: 'one or more files',
+                },
+            },
+        },
+    },
+
+    // browse button labels
+    browse: {
+        template: 'Choose {{multiple}}',
+        variables: {
+            map: {
+                true: 'files',
+                false: 'file',
+            },
+        },
+        // variables: {
+        //     files: {
+        //         context: 'multiple',
+        //         map: {
+        //             true: 'files',
+        //             false: 'file',
+        //         },
+        //     },
+        // },
+    },
+    files: {
+        context: 'multiple',
+        map: {
+            true: 'files',
+            false: 'file',
+        },
+    },
+    browseAndDrop: {
+        template: 'Drop {{files}} here, or <u>browse</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'files',
+                    false: 'file',
+                },
+            },
+        },
+    },
+
+    // screenreader accessibility
+    ariaEmpty: {
+        template: 'No {{files}} selected',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'files',
+                    false: 'file',
+                },
+            },
+        },
+    },
+    ariaInputDescription: {
+        template: '{{currentFiles}}',
+        variables: {
+            currentFiles: {
+                context: 'count',
+                map: {
+                    0: 'ariaEmpty',
+                    1: 'Selected {{name}}',
+                    else: '{{count}} files selected',
+                },
+            },
+        },
+    },
+    ariaItemRoleDescription: 'Sortable',
+    ariaDragDescription:
+        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
+    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
+    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
+    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
 };
 
 export const media = {
@@ -81,9 +161,9 @@ export const transform = {
 
 export const validationFileMimeType = {
     validationFileMimeTypeMismatch: {
-        template: 'This file type is not allowed. {{details}}.',
+        template: 'This file type is not allowed. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'File must by of type {{accept}}',

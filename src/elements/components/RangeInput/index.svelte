@@ -14,6 +14,9 @@
         /** Class to add to the root element */
         class?: string;
 
+        /** The name part to assign to this element */
+        part?: string;
+
         /** Min value, defaults to `0` */
         min?: number;
 
@@ -43,6 +46,7 @@
 
     let {
         class: klass = undefined,
+        part = undefined,
         min = 0,
         max = 1,
         value = 0,
@@ -204,6 +208,7 @@
 
 <range-input
     class={klass}
+    {part}
     style:--track-border-radius={trackBorderRadius}
     {@attach resizable({
         onresize: handleResizeRoot,

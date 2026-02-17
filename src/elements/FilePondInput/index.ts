@@ -26,33 +26,29 @@ import {
     removeAttributes,
     addListener,
     createStyleSheet,
+    setAttributes,
 } from '../../utils/dom.js';
 import {
     isFile,
     isFileEntry,
     isNumber,
     isObject,
-    isSafari,
     isString,
     isBlobOrFile,
     isCanvas,
     isDataTransfer,
     isDirectoryEntry,
 } from '../../utils/test.js';
-import { anyToInt } from '../../utils/number.js';
 import { stringReplaceVariables, statusToLabel, statusCodeToLocaleKey } from '../common/string.js';
-import { getUniqueId, toCamelCase } from '../../utils/string.js';
+import { toCamelCase } from '../../utils/string.js';
 import { debounce } from '../../utils/debounce.js';
 import { copyFilePropsToObject } from '../../utils/file.js';
 import { dispatchCustomEvent } from '../../utils/dom.js';
 import { Status } from '../../common/status.js';
-
-// inline styles
 import { HTMLElementSafe } from '../../common/ssr.js';
 import { getFilenameFromURL } from '../../utils/url.js';
 import { arrayRemoveFalsy } from '../../utils/array.js';
 import defaultStyles from './index.css?inline';
-import { supportsURLPattern } from '../../utils/support.js';
 
 //
 export function createFilePondEntryTree() {
@@ -207,9 +203,13 @@ function toFormData(fieldName: string, value: string | File | (string | File)[])
     return formData;
 }
 
-// We have two groups of attributes so we know which ones to sync to the source input
-const GenericAttributes = ['required', 'name'];
+// These attributes are synced from the file input to the custom element
+const GenericAttributes = ['required', 'name', 'id'];
+
+// These attributes are assigend to the hidden file input so it correctly responds when calling browse()
 const InteractionAttributes = ['disabled', 'multiple', 'accept'];
+
+// these attributes have their boolean values (which read as '') auto-converted to `true`
 const BooleanAttributes = ['disabled', 'multiple', 'required'];
 
 export interface FilePondInputElementEvents {
@@ -228,14 +228,23 @@ export interface FilePondInputElementEvents {
  * @event {CustomEvent} 'connected' - emitted when connected to the DOM
  */
 export class FilePondInputElement extends HTMLElementSafe implements FilePondInputElementEvents {
-    /** Is this Element really disconnected */
-    #disconnected: boolean = true;
-
     /** FilePond element shadowRoot */
     #root: ShadowRoot;
 
+    /** Div element that wraps styleable children */
+    #wrapper: HTMLDivElement;
+
     /** FilePond element slot */
     #slot: HTMLSlotElement;
+
+    /** This Has a reference to the element form internals */
+    #internals: ElementInternals;
+
+    /** Source input */
+    #fileInput: HTMLInputElement;
+
+    /** Browse button */
+    #browseButton: HTMLButtonElement;
 
     /** FilePond extension manager reference */
     #extensionManager: ReturnType<typeof createExtensionManager>;
@@ -243,12 +252,11 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     /** FilePond core instance reference */
     #entryTree: ReturnType<typeof createEntryTree>;
 
-    /** Source input */
-    #input: null | HTMLInputElement = null;
-    #inputGenerated: null | HTMLInputElement = null;
-
     /** Locale object reference */
-    #locale: null | Locale = null;
+    #locale: undefined | Locale = undefined;
+
+    /** Key to use for the browse button label */
+    #browseButtonLabelKey = 'browse';
 
     /** Holds Names of extensions we've currently set up proxies for */
     #extensionProxies: string[] = [];
@@ -265,7 +273,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     //#region getters and setters for <file-pond> custom element attributes
     /** Returns a reference to the shadow root element */
     get _root() {
-        return this.#root;
+        return this.#wrapper;
     }
 
     /** Returns a reference to the slot element */
@@ -288,6 +296,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
             'max-size',
             'min-list-size',
             'max-list-size',
+            'nobrowse',
 
             //
             // changes to `disabled` attribute are handled by `formDisabledCallback`
@@ -303,22 +312,34 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
             return;
         }
 
+        // nobrowse
+        if (name === 'nobrowse') {
+            this.noBrowse = isString(value);
+            return;
+        }
+
         // make sure source input attributes are in sync with file-pond root
-        this.#syncAttributeToInput(name, value);
+        this.#syncAttributeToFileInput(name, value);
 
         // some attributes are linked to extension properties, let's update those now
         this.#syncAttributeToExtensions(name, value);
     }
 
-    /** Syncs file-pond interaction attributes to source input attributes */
-    #syncAttributeToInput(name: string, value: string | boolean) {
-        // no source input defined yet (it's only there when connected)
-        if (!this.#input || !InteractionAttributes.includes(name)) {
+    /** Syncs file-pond interaction attributes (attributes that impact file system file selection UX) to source input attributes */
+    #syncAttributeToFileInput(name: string, value: string | boolean) {
+        // no need to sync to input
+        if (!InteractionAttributes.includes(name)) {
             return;
         }
 
-        // @ts-ignore set attribute value
-        this.#input[name] = value;
+        // if is boolean attribute
+        if (BooleanAttributes.includes(name)) {
+            setBooleanAttribute(this.#fileInput, name, value === true || value === '');
+            return;
+        }
+
+        // string attribute
+        setStringAttribute(this.#fileInput, name, value);
     }
 
     /** Looks up the extension(s) linked to this attribute and assigns the matched props */
@@ -326,18 +347,6 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         const prop = toCamelCase(name);
         value = BooleanAttributes.includes(name) && value === '' ? true : value;
         this.#extensionManager.propagateExtensionProperty(prop, value);
-    }
-
-    /** Sets the inner input element id */
-    set inputId(value: string) {
-        // We know the input is defined at this point
-        (this.#input as HTMLInputElement).id = value;
-    }
-
-    /** Returns the inner input element id */
-    get inputId(): string {
-        // We know the input is defined at this point
-        return (this.#input as HTMLInputElement).id;
     }
 
     /** Disable the field and sets the disabled attribute */
@@ -353,6 +362,9 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     /** Toggle the field multiple state */
     set multiple(value: boolean) {
         setBooleanAttribute(this, 'multiple', value);
+
+        // need to update browse button label as it is different for multiple mode
+        this.#syncBrowseButton();
     }
 
     /** Gets the field multiple state */
@@ -399,8 +411,25 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         setStringAttribute(this, 'animations', value);
     }
 
+    /** Returns the current animation mode */
     get animations(): AnimationMode {
         return (getAttribute(this, 'animations') ?? 'auto') as AnimationMode;
+    }
+
+    /** Toggle browse button */
+    set noBrowse(value: boolean) {
+        if (value) {
+            setBooleanAttribute(this, 'nobrowse', true);
+            this.#browseButton.remove();
+        } else {
+            setBooleanAttribute(this, 'nobrowse', false);
+            this.#slot.prepend(this.#browseButton);
+        }
+    }
+
+    /** Returns the current browse button state */
+    get noBrowse() {
+        return !this.#browseButton.parentNode;
     }
 
     /** Min file size setter, accepts a number of bytes or a natural filesize string like 1MB */
@@ -486,12 +515,15 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         // pass to view extension props
         this.#extensionManager.propagateExtensionProperty('locale', value);
 
+        // update browse button label
+        this.#syncBrowseButton();
+
         // so validity labels update to new language
         this.checkValidity();
     }
 
     /** Returns the current locale object, so it's easier to extend */
-    get locale(): Locale | null {
+    get locale(): Locale | undefined {
         return this.#locale;
     }
 
@@ -503,6 +535,18 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     //#endregion
 
     //#region Element methods
+
+    /** Browse files */
+    browse() {
+        // can only browse if browsing enabled
+        if (this.noBrowse) {
+            return;
+        }
+
+        // this follows default browser file input interactions, when we click a label linked to a file inupt the file input is focussed and then the browse interaction starts.
+        this.#browseButton.focus();
+        this.#fileInput.click();
+    }
 
     /** Listen for events */
     on(type: string, handler: (...args: any[]) => void) {
@@ -560,8 +604,30 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         // attach shadow DOM and inner slot
         this.#root = this.attachShadow({ mode: 'open' });
         this.#root.adoptedStyleSheets = [defaultStyles, ...styles].map(createStyleSheet);
-        this.#slot = document.createElement('slot');
-        this.#root.append(this.#slot);
+
+        // attach wrapper, this is used for custom styles
+        this.#wrapper = h('div') as HTMLDivElement;
+        this.#root.append(this.#wrapper);
+
+        // create slot
+        this.#slot = h('slot') as HTMLSlotElement;
+        this.#wrapper.append(this.#slot);
+
+        // create hidden file input
+        this.#fileInput = h('input', {
+            type: 'file',
+            'aria-hidden': true,
+            hidden: true,
+            tabIndex: -1,
+        }) as HTMLInputElement;
+        this.#wrapper.prepend(this.#fileInput);
+
+        // set up browse button
+        this.#browseButton = h('button', {
+            type: 'button',
+            part: 'browse-button',
+        }) as HTMLButtonElement;
+        this.#wrapper.prepend(this.#browseButton);
 
         // attach element internals, we'll assign getters from root the private internals prop
         this.#internals = this.attachInternals();
@@ -608,44 +674,67 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
             // new extensions could mean stricter validation rules
             this.checkValidity();
         });
-    }
 
-    #syncSlottedInput() {
-        // we're only interested in file inputs
-        const inputs = this.#slot
-            .assignedElements({ flatten: true })
-            .filter((element) => element.matches('input[type="file"]'));
-
-        // current input
-        let input: HTMLInputElement;
-
-        // no inputs found, we'll create one automatically
-        if (!inputs.length) {
-            input = h('input', { type: 'file' }) as HTMLInputElement;
-            this.#inputGenerated = input;
-            this.append(input);
-        }
-        // when inputs found
-        else {
-            // if there's more than one file input we remove the generated on
-            for (const input of inputs) {
-                if (input === this.#inputGenerated && inputs.length > 1) {
-                    this.#inputGenerated = null;
-                    input.remove();
-
-                    // as removing the generated input triggers a re-run of #syncSlottedInput we can exit here
-                    return;
-                }
+        // update aria label
+        this.#entryTree.on('updateEntries', (entries) => {
+            if (!this.locale) {
+                return;
             }
 
-            // use last input as our main input
-            input = inputs.at(-1) as HTMLInputElement;
+            this.#syncBrowseButton();
+        });
+    }
+
+    setBrowseButtonLabelKey(key: string) {
+        this.#browseButtonLabelKey = key;
+        this.#syncBrowseButton();
+    }
+
+    #syncBrowseButton() {
+        // accessibility attributes
+        if (this.#locale) {
+            setAttributes(this.#browseButton, {
+                // aria label is always base browse button
+                'aria-label': stringReplaceVariables(
+                    this.#locale.browse,
+                    { multiple: `${this.multiple}` },
+                    this.#locale
+                ),
+
+                // aria description is always base browse button
+                'aria-description': stringReplaceVariables(
+                    this.#locale.ariaInputDescription,
+                    {
+                        multiple: `${this.multiple}`,
+                        name:
+                            this.#entryTree.entries.length === 1
+                                ? this.#entryTree.entries[0].name || 'untitled'
+                                : null,
+                        count: this.#entryTree.entries.length,
+                    },
+                    this.#locale
+                ),
+            });
         }
 
-        // copy source input attributes to custom element
+        // normal button is different based
+        this.#browseButton.innerHTML = stringReplaceVariables(
+            this.#locale ? this.#locale[this.#browseButtonLabelKey] : this.#browseButtonLabelKey,
+            { multiple: `${this.multiple}` },
+            this.#locale
+        );
+    }
+
+    #syncSlottedElements() {
+        // get all slotted file inputs, there should probably be only one, but *shrug*
+        const inputs = this.#slot
+            .assignedElements({ flatten: true })
+            .filter((element) => element.matches('input[type="file"]')) as HTMLInputElement[];
+
+        // copy relevant attributes to web-component (this will also assign relevant attributes to shadow #fileInput), when done we remove any slotted inputs
         const syncedAttributes = [...GenericAttributes, ...InteractionAttributes];
         for (const attr of syncedAttributes) {
-            const value = getAttributeFromElements(attr, input, this);
+            const value = getAttributeFromElements(attr, ...inputs, this);
 
             // not set, so skip
             if (value === undefined) {
@@ -656,44 +745,21 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
             this[attr] = value;
         }
 
-        // clean up source input attributes
-        removeAttributes(input, syncedAttributes);
-
-        // store field reference for later usage
-        this.#input = input;
-
-        // sync interaction attributes to source input
-        for (const attr of InteractionAttributes) {
-            // @ts-ignore
-            if (this[attr] === undefined) {
-                continue;
-            }
-            // @ts-ignore
-            this.#syncAttributeToInput(attr, this[attr]);
-        }
-
-        // Loads files selected by the user in the source input
-        this.#extensionManager.setExtensionProperties('FileInputSource', {
-            element: this.#input,
-        });
-
-        // we always assign an id so labels can be linked
-        if (input.id) {
-            return;
-        }
-
-        // set unique id
-        this.inputId = `file-pond-${getUniqueId()}`;
+        // remove inputs
+        inputs.forEach((input) => input.remove());
     }
 
     /** Called each time the element is added to the document */
     connectedCallback() {
+        // sync slotted chidlren for first time
+        this.#syncSlottedElements();
+
         /**
          * When the callback store changes we assign the value to the form internals for the custom element
          */
         const handleCallbackStoreChange = (value: any) => {
             // if receives a value set formdata
-            this.#internals?.setFormValue(
+            this.#internals.setFormValue(
                 value.length > 0 ? toFormData(this.name ?? 'filepond', value) : null
             );
 
@@ -712,6 +778,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
         // Loads files selected by the user in the source input
         this.#extensionManager.setExtensionProperties('FileInputSource', {
+            element: this.#fileInput,
             resetFilesOnAdd: true,
         });
 
@@ -721,25 +788,20 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
             onChange: handleCallbackStoreChange,
         });
 
-        // sync slotted chidlren for first time
-        this.#syncSlottedInput();
-
         // handle state updates so we can set custom validity if state is invalid, we also validate now so we know the current state
         this.#attachValidaton();
 
-        // holds the last element that the pointer was down on, we use this to determine if pointer down was on the same element as pointerup when trying to browse for files
-        let pointerCancelClick: null | boolean | EventTarget = null;
-
         // this listens for events on child elements
         this.#connectedSubs.push(
-            // this file input elements are handled correctly
-            addListener(this.#slot, 'slotchange', () => {
-                this.#syncSlottedInput();
-            }),
+            addListener(this, 'click', (e) => {
+                const target = e.composedPath()[0];
 
-            // set up enter/spacebar press when file-pond is activeElement
-            addListener(this, 'keypress', (e) => {
-                if (e.target !== this || !/ | Enter/.test(e.key)) {
+                // if not root element or browse button is origin (this follows default browser file input behaviour, also when label clicked the file input browse function is called)
+                if (
+                    target !== this &&
+                    target !== this.#browseButton &&
+                    !this.#browseButton.contains(target)
+                ) {
                     return;
                 }
 
@@ -748,38 +810,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
                 e.preventDefault();
 
                 // delegate click to source input
-                this.#input?.click();
-            }),
-
-            // set up browse file on click interaction
-            addListener(this, 'pointerdown', (e) => {
-                pointerCancelClick = e.target;
-            }),
-
-            addListener(this, 'pointerup', (e) => {
-                pointerCancelClick = e.target !== pointerCancelClick;
-                // this auto resets the pointerCancelClick when the click right after the 'click' is handled
-                setTimeout(() => {
-                    pointerCancelClick = null;
-                }, 0);
-            }),
-
-            addListener(this, 'click', (e) => {
-                // don't handle if should be cancelled (when down target and up target differ)
-                if (pointerCancelClick === true) {
-                    return;
-                }
-
-                // get current target using pointer x,y as that also handles situations where we're dragging an entry and we're releasing it while our cursor is on top of the file input label
-                const target = document.elementFromPoint(e.x, e.y);
-
-                // need to have been a click on root
-                if (target !== this || target?.nodeName !== 'FILE-POND-DROP-AREA') {
-                    return;
-                }
-
-                // delegate click to source input
-                this.#input?.click();
+                this.browse();
             }),
 
             // fire update events
@@ -787,9 +818,6 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
                 dispatchCustomEvent(this, 'update');
             })
         );
-
-        // is no longer disconnected
-        this.#disconnected = false;
 
         // the custom element logic is now connected
         dispatchCustomEvent(this, 'connected');
@@ -806,9 +834,6 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     /** This makes the element associateable with its parent form */
     static formAssociated = true;
 
-    /** This Has a reference to the element form internals */
-    #internals: ElementInternals | null = null;
-
     /** Sets the current field name */
     set name(value: string) {
         setStringAttribute(this, 'name', value);
@@ -821,7 +846,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
     /** Proxy for Element internals `form` getter */
     get form(): HTMLFormElement | undefined {
-        return this.#internals?.form ?? undefined;
+        return this.#internals.form ?? undefined;
     }
 
     /**
@@ -867,9 +892,6 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         );
 
         this.checkValidity();
-
-        // make focusable so validation messages are revealed correctly
-        this.tabIndex = anyToInt(this.getAttribute('tabindex')) || 0;
     }
 
     /** Validates the current state of the field */
@@ -880,7 +902,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         // need to know if extensions are currently working on files, if so, we show busy validity state
         if (hasBusyEntries(this.entries)) {
             // already in custom busy state
-            if (this.#internals?.validity.customError === true) {
+            if (this.#internals.validity.customError === true) {
                 return;
             }
 
@@ -909,7 +931,19 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
             // set flag message
             const validationMessage = this.#locale
-                ? statusToLabel(status, this.#locale)
+                ? statusToLabel(
+                      {
+                          ...status,
+                          values: {
+                              // error state values
+                              ...status.values,
+
+                              // append input state
+                              multiple: this.multiple,
+                          },
+                      },
+                      this.#locale
+                  )
                 : statusCodeToLocaleKey(status.code);
 
             // render validation message or fallback to invalid state label
@@ -946,32 +980,34 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     #setValidity(flags?: void | ValidityStateFlags, message?: string): boolean {
         // field is valid
         if (!flags) {
-            this.#internals?.setValidity({});
+            this.#internals.setValidity({});
             return true;
         }
 
-        /*
-        It's unclear why Safari <= 18 doesn't want to focus the custom element itself. It throws "An invalid form control with name='...' is not focusable." when clicking the form submit button. It does work correctly when the anchor is set to the input 
-        */
-        const anchor =
-            isSafari() && !supportsURLPattern() ? (this.#input as HTMLInputElement) : undefined;
-        this.#internals?.setValidity(flags, message, anchor);
+        const anchor = this.#browseButton.parentNode ? this.#browseButton : undefined;
+        // if (this.#browseButton.parentNode) {
+        // please select a file
+        this.#internals.setValidity(flags, message, anchor);
+        // }
+
+        // use other anchor
+
         return false;
     }
 
     /** Proxy for element internals `reportValidity()` method */
     reportValidity() {
-        this.#internals?.reportValidity();
+        this.#internals.reportValidity();
     }
 
     /** Proxy for element internals `validity` getter */
     get validity() {
-        return this.#internals?.validity;
+        return this.#internals.validity;
     }
 
     /** Proxy for element internals `validationMessage` getter */
     get validationMessage() {
-        return this.#internals?.validationMessage;
+        return this.#internals.validationMessage;
     }
 
     /** Called when element or parent element (for example a `<fieldset>`) is set to disabled */
@@ -982,11 +1018,8 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         // copy to entry manager so we can disable ui in view extensions
         this.#extensionManager.propagateExtensionProperty('disabled', isDisabled);
 
-        // copy to internal file input element if it's defined
-        if (!this.#input) {
-            return;
-        }
-        this.#input.disabled = isDisabled;
+        // copy to internal file input element
+        this.#fileInput.disabled = isDisabled;
     }
 
     /**

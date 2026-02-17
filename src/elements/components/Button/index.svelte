@@ -9,7 +9,7 @@
         /** Onclick handler */
         onclick?: () => void;
 
-        /** The name part to assign to this button*/
+        /** The name part to assign to this button */
         part?: string;
 
         /** Class to set on the button element */

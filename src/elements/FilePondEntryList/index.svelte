@@ -51,6 +51,15 @@
     import { NodeList } from '../components/NodeList/index.js';
     import { hasOwnProp } from '../../utils/object.js';
     import { getDragTargetIndex, getDropTargetIndex } from '../common/dragDrop.js';
+    import { clamp } from '../../utils/math.js';
+    import {
+        getDirectionFromKeyboardEvent,
+        isActivationKeyboardEvent,
+        isArrowKeyboardEvent,
+        isCancelKeyboardEvent,
+        isTabKeyboardEvent,
+    } from '../../utils/keyboard.js';
+    import { stringReplaceVariables } from '../common/string.js';
 
     let {
         disabled = false,
@@ -66,7 +75,7 @@
         dragDetachMargin = 40,
         dragSafetyMargin = 80,
         drop = true,
-        dropRoot,
+        dropRoot = undefined,
         dropPadding = 20,
         animations = 'auto',
         entryAnimationOriginMap = {},
@@ -418,8 +427,14 @@
         };
     }
 
+    // generate unique id's
+    const ariaDragDescriptionId = `aria-drag-description-${getUniqueId()}`;
+
     /* Application context */
     setAppContext({
+        get ariaDragDescriptionId() {
+            return ariaDragDescriptionId;
+        },
         get enableAnimations() {
             return enableAnimations;
         },
@@ -497,8 +512,12 @@
             return;
         }
 
-        // test if we're dragging inside or outside of the drop area
+        // test if we're dragging inside or outside of the drop area (not applicable for keyboard powered dragging)
         const { viewPosition } = dragInteraction;
+        if (!viewPosition) {
+            return;
+        }
+
         const interactionRect = rectPad(
             untrack(() => dropRootRect),
             dragSafetyMargin
@@ -572,7 +591,15 @@
         }
 
         // calculate drag state
-        const { id, element, offset, translation, vector, viewPosition } = dragInteraction;
+        const {
+            id,
+            element,
+            offset,
+            translation,
+            vector = vectorCreate(),
+            viewPosition = vectorCreate(),
+            direction,
+        } = dragInteraction;
 
         // test if is drop operation is close enough to FilePond
         if (!element && acceptsDrop && dropPadding < Infinity) {
@@ -584,6 +611,57 @@
                 dragState = undefined;
                 return;
             }
+        }
+
+        // dragging with keyboard
+        if (element && direction) {
+            let index;
+
+            const elementList = element.closest('ul') as HTMLUListElement;
+            const children = elementList.children;
+            const currentIndex = Array.from(children).indexOf(element);
+
+            if (direction !== 'none') {
+                let targetIndex = currentIndex;
+                if (direction === 'up') {
+                    targetIndex--;
+                } else if (direction === 'down') {
+                    targetIndex++;
+                }
+                targetIndex = clamp(targetIndex, 0, children.length - 1);
+                untrack(() => {
+                    callback.setEntries(arrayMove([...currentEntries], currentIndex, targetIndex));
+                });
+                index = targetIndex;
+
+                untrack(() => {
+                    currentAction = {
+                        key: 'ariaDragStateSort',
+                        name: currentEntries[targetIndex].name,
+                        position: targetIndex + 1,
+                        total: children.length,
+                    };
+                });
+            } else {
+                index = currentIndex;
+
+                untrack(() => {
+                    currentAction = {
+                        key: 'ariaDragStateGrab',
+                        name: currentEntries[currentIndex].name,
+                        position: currentIndex + 1,
+                    };
+                });
+            }
+
+            // new dragState
+            dragState = {
+                id,
+                index,
+                element,
+            };
+
+            return;
         }
 
         // is outside of filepond drop area
@@ -884,6 +962,98 @@
         }
         e.preventDefault();
     }
+
+    /** Keyboard drag interaction */
+
+    // if we're dragging this cancels the interaction
+    function cancelKeyboardDragInteraction() {
+        if (!dragInteraction) {
+            return false;
+        }
+        dragInteraction = undefined;
+
+        currentAction = {
+            key: 'ariaDragStateDrop',
+            name: currentAction.name,
+            position: currentAction.position,
+        };
+
+        return true;
+    }
+
+    // handlers here for repeated actions while held down
+    function handleKeyDown(e: KeyboardEvent) {
+        //
+        if (!dragInteraction) {
+            return;
+        }
+
+        if (isArrowKeyboardEvent(e)) {
+            dragInteraction = {
+                ...dragInteraction,
+                direction: getDirectionFromKeyboardEvent(e),
+            };
+
+            e.preventDefault();
+            return;
+        }
+    }
+
+    // handlers here for non-repeating actions
+    function handleKeyUp(e: KeyboardEvent) {
+        // handle tabbing while dragging
+        if (isTabKeyboardEvent(e)) {
+            cancelKeyboardDragInteraction();
+            return;
+        }
+
+        // activate dragging of an item
+        if (isActivationKeyboardEvent(e)) {
+            // test if can drag
+            const element = e.target as HTMLElement;
+            const canDrag = element?.dataset.draggable === '';
+            if (!canDrag) {
+                return;
+            }
+
+            // we're handling this event
+            e.preventDefault();
+
+            // should we toggle dragging off
+            if (cancelKeyboardDragInteraction()) {
+                return;
+            }
+
+            // set drag interaction state
+            dragInteraction = {
+                id: getUniqueId(),
+                element,
+                direction: 'none',
+            };
+
+            return;
+        }
+
+        // cancel current operation
+        if (isCancelKeyboardEvent(e)) {
+            if (cancelKeyboardDragInteraction()) {
+                e.preventDefault();
+                return;
+            }
+        }
+    }
+
+    // aria updates
+    let currentAction: any = $state.raw();
+    const ariaStatus = $derived.by(() => {
+        // no action to echo
+        if (!currentAction) {
+            return '';
+        }
+        const { key, ...props } = currentAction;
+        return stringReplaceVariables(locale[key], props, locale);
+    });
+    const ariaDragDescription = $derived(locale.ariaDragDescription);
 </script>
 
 <svelte:window
@@ -892,6 +1062,7 @@
     oncontextmenu={handleContextMenu}
 />
 
+<!-- svelte-ignore a11y_no_static_element_interactions we're handling events from children -->
 <div
     class="root"
     bind:this={root}
@@ -914,7 +1085,11 @@
         ondragitemout: handleDragItemOut,
         ondropitem: handleDropItem,
     })}
+    onkeydown={handleKeyDown}
+    onkeyup={handleKeyUp}
 >
+    <div role="status" aria-live="polite" class="implicit">{ariaStatus}</div>
+    <div id={ariaDragDescriptionId} style="display:none">{ariaDragDescription}</div>
     <NodeList
         nodes={template}
         context={{ entries: computedEntries }}

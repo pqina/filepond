@@ -1,3 +1,4 @@
+import { it, describe, expect } from 'vitest';
 import { eachTree, mapTree, filterTree } from '../../src/utils/tree.js';
 
 describe('tree', () => {

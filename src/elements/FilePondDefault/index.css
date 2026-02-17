@@ -12,15 +12,20 @@
     --default-accent-color: #007aff;
     --default-border: 1px solid color-mix(in srgb, CanvasText 10%, transparent);
 
-    /* Layout */
-    display: flex;
-    flex-direction: column;
-    gap: var(--default-padding);
-
     /* Slot layout */
     & slot {
         position: relative;
         isolation: isolate;
+    }
+}
+
+:host(:not([nodrop])) {
+    padding: var(--default-padding, 0);
+
+    & > div {
+        display: flex;
+        flex-direction: column;
+        gap: var(--default-padding);
     }
 }
 
@@ -80,6 +85,12 @@ file-pond-entry-list {
     &::part(entry-list-item selected) {
         --entry-overlay-color: rgb(from var(--entry-accent-color) r g b / 0.25);
         --entry-border: 2px solid var(--entry-accent-color);
+    }
+
+    &::part(entry-list-item):focus-visible {
+        outline: -webkit-focus-ring-color auto 1px;
+        outline: Highlight auto 1px;
+        border-radius: var(--entry-border-radius);
     }
 
     &::part(data-transfer-item) {
@@ -177,7 +188,8 @@ file-pond-entry-list {
     }
 
     &::part(entry-button):focus-visible {
-        box-shadow: var(--entry-button-outline);
+        outline: -webkit-focus-ring-color auto 1px;
+        outline: Highlight auto 1px;
     }
 
     &::part(media-button) {
@@ -197,7 +209,8 @@ file-pond-entry-list {
     }
 
     &::part(media-button):focus-visible {
-        box-shadow: var(--entry-button-outline);
+        outline: -webkit-focus-ring-color auto 1px;
+        outline: Highlight auto 1px;
     }
 }
 
@@ -247,20 +260,12 @@ file-pond-entry-list {
 */
 
 /* Attribution link */
-:host a {
+:host a[part='attribution-link'] {
     --font-size: 0.625;
-    --inset: calc(var(--default-padding) / var(--font-size));
     --text-opacity: 0.5;
     --line-opacity: 0.2;
-    position: absolute;
-    z-index: -1;
-    top: 0;
-    left: 0;
-    line-height: 2;
-    transform: translate(calc(var(--x, 0) * 1px), calc(var(--y, 0) * 1px))
-        translateX(calc(-100% - var(--inset)));
-    font-size: calc(var(--font-size) * 1em);
     color: rgb(from var(--default-color) r g b / var(--text-opacity));
+    font-size: calc(var(--font-size) * 1em);
     text-underline-offset: 1px;
     text-decoration-color: rgb(from var(--default-color) r g b / var(--line-opacity));
     text-transform: lowercase;
@@ -272,24 +277,45 @@ file-pond-entry-list {
     }
 }
 
-::slotted(label) {
+:host(:not([nodrop])) a[part='attribution-link'] {
+    --inset: calc(var(--default-padding) / var(--font-size));
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    line-height: 2;
+    transform: translate(calc(var(--width, 0) * 1px), calc(var(--height, 0) * 1px))
+        translateX(calc(-100% - var(--inset)));
+}
+
+/* Browse button */
+:host(:not([nodrop])) button[part='browse-button'] {
     --width-px: calc(var(--width) * 1px);
     --center-px: calc((var(--width-px) - (2 * var(--default-padding))) * 0.5);
-
     display: inline-block;
     transform: translateX(calc(var(--center-px) - 50%));
     align-self: flex-start;
     text-align: center;
-
-    padding-top: var(--default-padding);
-    padding-bottom: var(--default-padding);
-
+    padding: var(--default-padding);
     transition: opacity calc(150ms * var(--animate)) ease-in-out;
+    background: transparent;
+    border: none;
+    font-size: 0.875em;
+    & u {
+        cursor: pointer;
+        text-decoration-color: color-mix(in srgb, currentColor 25%, transparent);
+    }
+
+    &:focus-visible {
+        border-radius: calc(var(--default-border-radius) - var(--default-padding) * 0.75);
+    }
 }
 
-:host([disabled]) {
-    & ::slotted(label) {
-        opacity: 0.4;
-        pointer-events: none !important;
-    }
+:host([nodrop]) button[part='browse-button'] {
+    align-self: flex-start;
+}
+
+:host([disabled]) button[part='browse-button'] {
+    opacity: 0.4;
+    pointer-events: none !important;
 }

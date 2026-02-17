@@ -23,6 +23,8 @@ export interface AppContext extends AppCallbacks {
         [animation: string]: EntryAnimation;
     };
 
+    readonly ariaDragDescriptionId: string;
+
     updateEntryPlaceholderRect: (rect?: Rect) => void;
 }
 

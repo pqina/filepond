@@ -90,7 +90,7 @@ range-input {
         transition: transform var(--transition-duration) ease-out;
         content: '';
         position: absolute;
-        background: var(--thumb-background-color);
+        background: var(--thumb-color);
         border-radius: 9999px;
         width: var(--thumb-size);
         height: var(--thumb-size);
@@ -114,6 +114,7 @@ range-input:hover .range-input-hover {
     opacity: 0.5;
 }
 
+range-input input:focus-visible ~ .range-input-knob::after,
 range-input:hover .range-input-knob::after {
     transform: scale(1);
 }

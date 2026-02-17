@@ -1,3 +1,4 @@
+import { it, describe, expect } from 'vitest';
 import { getFilenameFromResponseHeaders } from '../../src/utils/xhr.js';
 
 describe('getFilenameFromResponseHeaders', function () {

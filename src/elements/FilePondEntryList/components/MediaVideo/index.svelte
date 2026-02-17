@@ -54,9 +54,6 @@
     /** Is true if the video element has an audio track, is false if not, is null when undetermined */
     let isMute: boolean | null = $state.raw(null);
 
-    /** Is true if the video is muted */
-    let isMuted: boolean = $derived(mute);
-
     /** Is true if the video is playing */
     let isPlaying: boolean = $state.raw(false);
 
@@ -115,8 +112,7 @@
             return;
         }
 
-        videoElement.muted = !videoElement.muted;
-        isMuted = videoElement.muted;
+        mute = !videoElement.muted;
     }
 
     export function toggleFullscreen() {
@@ -303,7 +299,7 @@
     $effect(() => {
         const videoState = {
             isMute: isMute,
-            isMuted: isMuted,
+            isMuted: mute,
             isPaused: !isPlaying,
             isPlaying,
             isFullscreen: isFullscreen,
@@ -365,7 +361,7 @@
             <video
                 bind:this={videoElement}
                 playsinline
-                muted={isMuted}
+                muted={mute}
                 onplay={handleVideoPlay}
                 onpause={handleVideoPause}
                 onerror={handleVideoError}

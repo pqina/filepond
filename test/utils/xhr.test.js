@@ -1,29 +1,37 @@
+import { it, describe, expect, beforeEach, afterEach } from 'vitest';
 import { xhr } from '../../src/utils/xhr.js';
+import { MockXhr } from 'mock-xmlhttprequest';
 
 describe('xhr', function () {
+    let mockXhr;
+
     beforeEach(function () {
-        this.xmlHttpRequest = sinon.useFakeXMLHttpRequest();
+        mockXhr = MockXhr;
+        globalThis.XMLHttpRequest = mockXhr;
     });
 
     afterEach(function () {
-        this.xmlHttpRequest.restore();
+        delete globalThis.XMLHttpRequest;
+        mockXhr.onSend = null;
     });
 
-    it('should kebab case request header name', function (done) {
-        this.xmlHttpRequest.onCreate = (xhr) => {
-            setTimeout(() => {
-                const { requestHeaders } = xhr;
-
-                expect(requestHeaders['foo-bar']).to.equal('baz');
-
+    it('should kebab case request header name', () =>
+        new Promise((done) => {
+            mockXhr.onSend = (req) => {
+                expect(
+                    req.requestHeaders
+                        .getAll()
+                        .split(':')
+                        .map((s) => s.trim())
+                        .pop()
+                ).to.equal('baz');
                 done();
-            }, 0);
-        };
+            };
 
-        xhr('./', {
-            headers: {
-                fooBar: 'baz',
-            },
-        });
-    });
+            xhr('http://test', {
+                headers: {
+                    fooBar: 'baz',
+                },
+            });
+        }));
 });

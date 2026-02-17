@@ -1,3 +1,4 @@
+import { it, describe, expect } from 'vitest';
 import { naturalFileSizeToBytes } from '../../src/utils/file.js';
 
 describe('naturalFileSizeToBytes', () => {

@@ -1,3 +1,4 @@
+import { it, describe, expect, beforeEach } from 'vitest';
 import { CanvasLoader } from '../../src/extensions/canvas-loader.js';
 import { createExtensionManager } from '../../src/core/extensionManager.js';
 import { isFile } from '../../src/utils/test.js';
@@ -13,29 +14,30 @@ describe('CanvasLoader', () => {
         extensionManager.extensions = [CanvasLoader];
     });
 
-    it('should turn a Canvas into a Blob', function (done) {
-        const unsub = entryTree.on('updateEntry', (entry) => {
-            const { status } = entry?.extension?.CanvasLoader || {};
+    it('should turn a Canvas into a Blob', () =>
+        new Promise((done) => {
+            const unsub = entryTree.on('updateEntry', (entry) => {
+                const { status } = entry?.extension?.CanvasLoader || {};
 
-            if (status?.code !== 'LOAD_COMPLETE') {
-                return;
-            }
+                if (status?.code !== 'LOAD_COMPLETE') {
+                    return;
+                }
 
-            expect(isFile(entry.file)).to.equal(true);
+                expect(isFile(entry.file)).to.equal(true);
 
-            unsub();
-            done();
-        });
+                unsub();
+                done();
+            });
 
-        entryTree.entries = [
-            {
-                src: (() => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 64;
-                    canvas.height = 64;
-                    return canvas;
-                })(),
-            },
-        ];
-    });
+            entryTree.entries = [
+                {
+                    src: (() => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = 64;
+                        canvas.height = 64;
+                        return canvas;
+                    })(),
+                },
+            ];
+        }));
 });

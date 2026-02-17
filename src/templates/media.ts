@@ -275,6 +275,7 @@ export function createTogglePlaybackButton() {
             class: 'toggle-playback',
         },
         children: createButton('toggle-playback', ({ video }: NodeContext) => ({
+            part: 'media-button',
             icon: video?.isPaused ? 'mediaPlay' : 'mediaPause',
         })),
     };
@@ -287,10 +288,13 @@ export function createToggleAudioButton() {
         props: {
             class: 'toggle-audio',
         },
-        children: createButton('toggle-audio', ({ video }: NodeContext) => ({
-            icon: video?.isMute ? 'mediaSilent' : video?.isMuted ? 'mediaUnmute' : 'mediaMute',
-            disabled: video?.isMute,
-        })),
+        children: createButton('toggle-audio', ({ video }: NodeContext) => {
+            return {
+                part: 'media-button',
+                icon: video?.isMute ? 'mediaSilent' : video?.isMuted ? 'mediaUnmute' : 'mediaMute',
+                disabled: video?.isMute,
+            };
+        }),
     };
 }
 
@@ -306,6 +310,7 @@ export function createToggleFullscreenButton() {
                     class: 'toggle-fullscreen',
                 },
                 children: createButton('toggle-fullscreen', {
+                    part: 'media-button',
                     icon: 'mediaFullscreen',
                 }),
             },
@@ -325,6 +330,7 @@ export function createMediaScrubber() {
                 key: 'media-scrubber',
                 component: RangeInput,
                 props: ({ video }: NodeContext) => ({
+                    part: 'media-scrubber',
                     step: video?.framesPerSecond,
                     value: video?.time,
                     min: 0,

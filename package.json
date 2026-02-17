@@ -11,7 +11,7 @@
     "scripts": {
         "dev": "vite --host",
         "dev-optimal": "NODE_ENV=production vite --host",
-        "test": "vite --port 5175 --open /test/",
+        "test": "vitest --config vitest.config.ts",
         "build": "npm run esm && npm run cdn && npm run types",
         "esm": "rm -rf ./esm && vite build",
         "types": "rm -rf ./types && tsc -p ./tsconfig.build.json && cp src/types/*.d.ts types && echo 'import \"./custom-element.js\";\nimport \"./default-extensions.js\";' >> types/index.d.ts",
@@ -64,6 +64,7 @@
         "@rollup/plugin-terser": "^0.4.4",
         "@sveltejs/vite-plugin-svelte": "^6.0.0",
         "@typescript-eslint/types": "^8.48.1",
+        "@vitest/browser-playwright": "^4.0.18",
         "chai": "^4.3.7",
         "chokidar-cli": "^3.0.0",
         "eslint-plugin-svelte": "^2.46.1",
@@ -71,6 +72,7 @@
         "http-server": "^14.1.1",
         "mocha": "^10.2.0",
         "mocha-headless-chrome": "^4.0.0",
+        "mock-xmlhttprequest": "^8.4.1",
         "prettier-plugin-jsdoc": "^1.3.0",
         "prettier-plugin-svelte": "^3.4.0",
         "replace-in-files-cli": "^3.0.0",
@@ -84,6 +86,7 @@
         "unplugin-dts": "^1.0.0-beta.0",
         "vite": "^7.2.6",
         "vite-plugin-dts": "^4.5.4",
-        "vite-plugin-static-copy": "^3.1.2"
+        "vite-plugin-static-copy": "^3.1.2",
+        "vitest": "^4.0.18"
     }
 }

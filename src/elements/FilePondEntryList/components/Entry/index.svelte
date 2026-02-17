@@ -36,14 +36,13 @@
     const maskRight = $derived(hasSize ? targetSize!.width - currentSize!.width : 0);
     const maskBottom = $derived(hasSize ? targetSize!.height - currentSize!.height : 0);
     const maskStyle = $derived(`0px ${maskRight}px ${maskBottom}px 0px`);
+
+    // drag interaction
 </script>
 
-<!-- Render entry item-->
 <fieldset class={entryClass} bind:this={root} style:--mask={maskStyle} {part}>
     <legend class="implicit">{name}</legend>
     {@render children()}
 </fieldset>
-
-<!-- Draw panels outside mask -->
 <ElementPane class="entry-back" {...currentSize} />
 <ElementPane class="entry-front" {...currentSize} />

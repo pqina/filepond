@@ -162,14 +162,14 @@ export interface DynamicLocaleMap {
      *
      * 1: "1 file"
      */
-    [key: number]: string;
+    [key: number]: string | boolean | number | null;
 
     /**
      * The default placeholder to use for this key.
      *
      * "{{minFiles}} files"
      */
-    else: string;
+    else: string | boolean | number | null;
 }
 
 export interface DynamicLocale {

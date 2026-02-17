@@ -1,12 +1,13 @@
+import { it, describe, expect } from 'vitest';
 import { getImageSize, getVideoSize } from '../../src/utils/media.js';
 
 async function getImageSizeFromURL(image) {
-    const blob = await fetch(`./assets/images/${image}`).then((res) => res.blob());
+    const blob = await fetch(`/test/assets/images/${image}`).then((res) => res.blob());
     return await getImageSize(blob);
 }
 
 async function getVideoSizeFromURL(video) {
-    const blob = await fetch(`./assets/videos/${video}`).then((res) => res.blob());
+    const blob = await fetch(`/test/assets/videos/${video}`).then((res) => res.blob());
     return await getVideoSize(blob);
 }
 

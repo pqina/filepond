@@ -56,6 +56,9 @@
         opacitySpringOptions?: SpringOptions;
         translationSpringOptions?: SpringOptions;
 
+        /** Called when root element created */
+        onroot?: (root: HTMLElement) => void;
+
         /** Called on element measure */
         onelementmeasure?: (rect: Rect) => void;
 
@@ -112,7 +115,6 @@
     import { noop } from '../../../utils/placeholder.js';
     import { gate } from '../../common/store.svelte.js';
     import { roundPrecision } from '../../../utils/math.js';
-    import { Entry } from '../../FilePondEntryList/components/Entry/index.js';
 
     let {
         springDefaults = undefined,
@@ -140,6 +142,7 @@
         translationFrom = undefined,
         translationSpringOptions = undefined,
 
+        onroot = undefined,
         onelementmeasure = undefined,
         onmeasure = undefined,
         onspringcomplete = noop,
@@ -728,6 +731,10 @@
             return;
         }
         updateStyles(root, styles);
+    });
+
+    $effect(() => {
+        onroot?.(root);
     });
 
     //#endregion

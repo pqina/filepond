@@ -1,3 +1,4 @@
+import { it, describe, expect } from 'vitest';
 import { stringReplaceVariables } from '../../src/elements/common/string.js';
 
 describe('stringReplaceVariables', () => {
@@ -95,7 +96,7 @@ describe('stringReplaceVariables', () => {
         expect(res).to.equal('Hello World Test');
     });
 
-    it('should replace multiple conditional placeholders using a selector', () => {
+    it('should replace multiple conditional placeholders using a context selector', () => {
         const res = stringReplaceVariables(
             {
                 template: 'Hello {{a}} {{b}}',

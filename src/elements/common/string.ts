@@ -39,7 +39,7 @@ export function getObjectValueByString(selector: string, value: any) {
 
 export function stringReplaceVariables(
     label: string | DynamicLocale,
-    data?: { [key: string]: string },
+    data?: { [key: string]: string | number | boolean | null },
     locale: Locale = {}
 ) {
     if (isString(label)) {
@@ -49,6 +49,7 @@ export function stringReplaceVariables(
 
         // find all variables in label can be {{name}} or {{object.name}} or {{object.name.foo}}
         const variables = Array.from(label.matchAll(/\{{[\.a-z]+\}}/gi));
+
         for (const { 0: variable } of variables) {
             const value = getValueByVariable(variable, data);
 
@@ -78,7 +79,7 @@ export function stringReplaceVariables(
 
         const labelValue = isNullOrUndefined(map[dataValue]) ? map.else : map[dataValue];
 
-        return template.replace(`{{${variable}}}`, labelValue);
+        return template.replace(`{{${variable}}}`, `${labelValue}`);
     }, template);
 
     return stringReplaceVariables(res, data, locale);

@@ -6,7 +6,7 @@ export function createDefaultIcon(shapes: string, options?: { title: string }): 
 
     const { title } = options ?? {};
 
-    return `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-linecap="round">${
+    return `<svg viewBox="0 0 24 24" width="24" height="24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="none" stroke="currentColor" stroke-linejoin="round" stroke-linecap="round">${
         title ? `<title>${title}</title>` : ''
     }${shapes}</svg>`;
 }

@@ -1,3 +1,4 @@
+import { it, describe, expect, beforeEach } from 'vitest';
 import { createEntryTree } from '../../src/core/entryTree.js';
 
 describe('entryTree', function () {

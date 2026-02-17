@@ -6,6 +6,7 @@
     import { type Rect, rectCreate, rectIntersectWithRect } from '../../../../utils/rect.js';
     import { VIEWPORT_MARGIN } from '../../../attachments/measurable.js';
     import { toSpaceSeparatedString } from '../../../common/string.js';
+    import { getAppContext } from '../../contexts/appContext.js';
 
     interface EntryItemOptions {
         tag?: string;
@@ -45,6 +46,9 @@
             return entry;
         },
     });
+
+    // get app context map
+    const { locale, ariaDragDescriptionId } = $derived(getAppContext());
 
     /** Window width used to calculate if element is visible or not */
     let windowWidth = $state.raw() as number;
@@ -107,6 +111,26 @@
         // When set to true will decrease z-index so renders below other items
         renderBelow: isRemoving ? '' : undefined,
     });
+
+    // Related to keyboard navigation
+    const attrs = $derived(
+        isDraggable
+            ? {
+                  tabindex: 0,
+                  role: 'listitem',
+                  'aria-roledescription': locale.ariaItemRoleDescription,
+                  'aria-describedby': ariaDragDescriptionId,
+              }
+            : undefined
+    );
+
+    // Retain focus
+    function handleRootDefined(element: HTMLElement) {
+        if (!isDragging) {
+            return;
+        }
+        element.focus();
+    }
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} bind:innerHeight={windowHeight} />
@@ -115,11 +139,13 @@
     {tag}
     part={parts}
     {dataset}
+    {attrs}
     class={klass}
     inert={isRemoving}
     {...springAnimation}
     {translation}
     shouldRenderContent={(rect) => shouldRenderContent(rect, isDetached)}
+    onroot={handleRootDefined}
     onchangerendercontent={handleChangeRenderContent}
     onelementmeasure={onmeasureitem}
 >

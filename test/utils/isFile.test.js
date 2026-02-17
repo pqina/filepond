@@ -1,3 +1,4 @@
+import { it, describe, expect } from 'vitest';
 import { isFile } from '../../src/utils/test.js';
 
 describe('isFile', () => {

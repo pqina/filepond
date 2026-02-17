@@ -1,3 +1,4 @@
+import { it, describe, expect, beforeEach } from 'vitest';
 import { pubsub } from '../../src/utils/pubsub.js';
 
 describe('pubsub', () => {
@@ -15,16 +16,17 @@ describe('pubsub', () => {
         expect(unsub).to.not.be.undefined;
     });
 
-    it('should pub', (done) => {
-        let pubbed = false;
-        bus.on('test', () => {
-            pubbed = true;
-            expect(pubbed).to.be.true;
-            done();
-        });
+    it('should pub', () =>
+        new Promise((done) => {
+            let pubbed = false;
+            bus.on('test', () => {
+                pubbed = true;
+                expect(pubbed).to.be.true;
+                done();
+            });
 
-        bus.pub('test');
-    });
+            bus.pub('test');
+        }));
 
     it('should unsub', () => {
         let called = false;

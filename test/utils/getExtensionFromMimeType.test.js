@@ -1,3 +1,4 @@
+import { it, describe, expect } from 'vitest';
 import { getExtensionFromMimeType } from '../../src/utils/file.js';
 
 describe('getExtensionFromMimeType', function () {
