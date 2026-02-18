@@ -78,7 +78,7 @@ export const core = {
     },
 
     // screenreader accessibility
-    ariaRequired: 'обов'язково',
+    ariaRequired: 'обовязково',
     ariaNoEntries: {
         template: 'Не вибрано {{files}}',
         variables: {
