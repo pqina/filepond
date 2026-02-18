@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: '中止',
     remove: '删除',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: '点击取消',
     assistUndo: '点击撤销',
-
-    browseAndDrop: '将文件拖到此处，或<u>浏览</u>',
+    browse: {
+        template: '选择{{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: '文件',
+                    false: '文件',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: '将{{files}}拖到此处，或<u>浏览</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: '文件',
+                    false: '一个文件',
+                },
+            },
+        },
+    },
 
     loadError: '无法加载文件。',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: '列表中包含无效项目。',
     validationInvalidState: '文件列表处于无效状态。',
     validationInvalidBusy: '文件列表正忙。',
-    validationInvalidEmpty: '请填写此字段。',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: '请选择{{files}}。',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: '一个文件',
+                    true: '一个或多个文件',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: '必填',
+    ariaNoEntries: {
+        template: '未选择{{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: '文件',
+                    false: '文件',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: '已选择 {{name}}',
+    ariaMultipleEntries: '已选择 {{count}} 个文件',
+    ariaItemRoleDescription: '可排序',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        '按空格键可拾取并放下此项。使用上下方向键将其移动到新位置。',
+    ariaDragStateDrop: '已将 {{name}} 放到位置 {{position}}',
+    ariaDragStateGrab: '已在位置 {{position}} 拾取 {{name}}',
+    ariaDragStateSort: '已将 {{name}} 移动到第 {{position}} 位，共 {{total}} 项',
 };
 
 export const media = {

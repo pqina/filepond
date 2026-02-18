@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: 'Avbryt',
     remove: 'Fjern',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: 'Trykk for å avbryte',
     assistUndo: 'Trykk for å angre',
-
-    browseAndDrop: 'Dra filer hit, eller <u>bla gjennom</u>',
+    browse: {
+        template: 'Velg {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'filer',
+                    false: 'fil',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: 'Dra {{files}} hit, eller <u>bla gjennom</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'filer',
+                    false: 'en fil',
+                },
+            },
+        },
+    },
 
     loadError: 'Kunne ikke laste inn filen.',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: 'Listen inneholder ugyldige elementer.',
     validationInvalidState: 'Fillisten er i en ugyldig tilstand.',
     validationInvalidBusy: 'Fillisten er opptatt.',
-    validationInvalidEmpty: 'Fyll ut dette feltet.',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: 'Velg {{files}}.',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: 'en fil',
+                    true: 'en eller flere filer',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: 'obligatorisk',
+    ariaNoEntries: {
+        template: 'Ingen {{files}} valgt',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'filer',
+                    false: 'fil',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Valgt {{name}}',
+    ariaMultipleEntries: '{{count}} filer valgt',
+    ariaItemRoleDescription: 'Sorterbar',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        'Trykk mellomrom for å plukke opp og slippe dette elementet. Bruk pil opp og pil ned for å flytte det til en ny posisjon.',
+    ariaDragStateDrop: 'Slapp {{name}} på posisjon {{position}}',
+    ariaDragStateGrab: 'Plukket opp {{name}} på posisjon {{position}}',
+    ariaDragStateSort: 'Flyttet {{name}} til posisjon {{position}} av {{total}}',
 };
 
 export const media = {

@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: 'বন্ধ করুন',
     remove: 'মুছে ফেলুন',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: 'বাতিল করতে ট্যাপ করুন',
     assistUndo: 'পূর্বাবস্থায় ফেরত যেতে ট্যাপ করুন',
-
-    browseAndDrop: 'ফাইলগুলো এখানে টেনে আনুন, অথবা <u>ব্রাউজ</u> করুন',
+    browse: {
+        template: '{{files}} নির্বাচন করুন',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'ফাইলগুলো',
+                    false: 'ফাইল',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: '{{files}} এখানে ছেড়ে দিন, অথবা <u>ব্রাউজ</u> করুন',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'ফাইলগুলো',
+                    false: 'একটি ফাইল',
+                },
+            },
+        },
+    },
 
     loadError: 'ফাইল লোড করা যায়নি।',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: 'ফাইল তালিকায় অকার্যকর আইটেম রয়েছে।',
     validationInvalidState: 'ফাইল তালিকা অকার্যকর অবস্থায় রয়েছে।',
     validationInvalidBusy: 'ফাইল তালিকা ব্যস্ত।',
-    validationInvalidEmpty: 'এই ক্ষেত্রটি পূরণ করুন।',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: 'অনুগ্রহ করে {{files}} নির্বাচন করুন।',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: 'একটি ফাইল',
+                    true: 'এক বা একাধিক ফাইল',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: 'প্রয়োজনীয়',
+    ariaNoEntries: {
+        template: 'কোনো {{files}} নির্বাচিত নয়',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'ফাইল',
+                    false: 'ফাইল',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'নির্বাচিত {{name}}',
+    ariaMultipleEntries: '{{count}}টি ফাইল নির্বাচিত',
+    ariaItemRoleDescription: 'সাজানো যায়',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        'এই আইটেমটি তুলতে এবং ফেলতে স্পেস চাপুন। নতুন অবস্থানে নিতে উপরের এবং নিচের তীর কী ব্যবহার করুন।',
+    ariaDragStateDrop: '{{position}} অবস্থানে {{name}} ফেলা হয়েছে',
+    ariaDragStateGrab: '{{position}} অবস্থান থেকে {{name}} তোলা হয়েছে',
+    ariaDragStateSort: '{{total}} এর মধ্যে {{position}} অবস্থানে {{name}} সরানো হয়েছে',
 };
 
 export const media = {

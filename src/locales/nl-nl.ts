@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     // default
     abort: 'Afbreken',
@@ -26,8 +32,30 @@ export const core = {
     // assist
     assistAbort: 'Tik om te annuleren',
     assistUndo: 'Tik om ongedaan te maken',
-
-    browseAndDrop: 'Sleep bestanden hierheen of <u>blader</u>',
+    browse: {
+        template: 'Kies {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'bestanden',
+                    false: 'bestand',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: 'Sleep {{files}} hierheen of <u>blader</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'bestanden',
+                    false: 'een bestand',
+                },
+            },
+        },
+    },
 
     // file status
     loadError: 'Bestand kon niet worden geladen.',
@@ -44,30 +72,41 @@ export const core = {
     validationInvalidEntries: 'De lijst bevat ongeldige items.',
     validationInvalidState: 'De lijst is in een ongeldige staat.',
     validationInvalidBusy: 'De lijst is bezig.',
-    validationInvalidEmpty: 'Vul dit veld in.',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: 'Selecteer {{files}}.',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: 'een bestand',
+                    true: 'een of meer bestanden',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: 'verplicht',
+    ariaNoEntries: {
+        template: 'Geen {{files}} geselecteerd',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'bestanden',
+                    false: 'bestand',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Geselecteerd {{name}}',
+    ariaMultipleEntries: '{{count}} bestanden geselecteerd',
+    ariaItemRoleDescription: 'Sorteerbaar',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        'Druk op spatie om dit item op te pakken en neer te zetten. Gebruik de pijltoetsen omhoog en omlaag om het naar een nieuwe positie te verplaatsen.',
+    ariaDragStateDrop: '{{name}} neergezet op positie {{position}}',
+    ariaDragStateGrab: '{{name}} opgepakt op positie {{position}}',
+    ariaDragStateSort: '{{name}} verplaatst naar positie {{position}} van {{total}}',
 };
 
 export const media = {

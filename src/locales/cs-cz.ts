@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: 'Zrušit',
     remove: 'Odstranit',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: 'Klepněte pro zrušení',
     assistUndo: 'Klepněte pro vrácení',
-
-    browseAndDrop: 'Přetáhněte soubory sem nebo <u>procházejte</u>',
+    browse: {
+        template: 'Vybrat {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'soubory',
+                    false: 'soubor',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: 'Přetáhněte sem {{files}} nebo <u>procházejte</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'soubory',
+                    false: 'soubor',
+                },
+            },
+        },
+    },
 
     loadError: 'Soubor se nepodařilo načíst.',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: 'Seznam obsahuje neplatné položky.',
     validationInvalidState: 'Seznam souborů je v neplatném stavu.',
     validationInvalidBusy: 'Seznam souborů je zaneprázdněn.',
-    validationInvalidEmpty: 'Vyplňte toto pole.',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: 'Vyberte {{files}}.',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: 'soubor',
+                    true: 'jeden nebo více souborů',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: 'povinné',
+    ariaNoEntries: {
+        template: 'Nebyly vybrány žádné {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'soubory',
+                    false: 'soubor',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Vybráno {{name}}',
+    ariaMultipleEntries: 'Vybráno {{count}} souborů',
+    ariaItemRoleDescription: 'Seřaditelné',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        'Stisknutím mezerníku tuto položku zvednete a upustíte. Pomocí šipek nahoru a dolů ji přesunete na novou pozici.',
+    ariaDragStateDrop: 'Položka {{name}} byla umístěna na pozici {{position}}',
+    ariaDragStateGrab: 'Položka {{name}} byla uchopena na pozici {{position}}',
+    ariaDragStateSort: 'Položka {{name}} byla přesunuta na pozici {{position}} z {{total}}',
 };
 
 export const media = {

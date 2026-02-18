@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: 'Keskeytä',
     remove: 'Poista',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: 'Napauta peruuttaaksesi',
     assistUndo: 'Napauta kumotaksesi',
-
-    browseAndDrop: 'Pudota tiedostot tähän tai <u>selaa</u>',
+    browse: {
+        template: 'Valitse {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'tiedostot',
+                    false: 'tiedosto',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: 'Pudota {{files}} tähän tai <u>selaa</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'tiedostot',
+                    false: 'tiedosto',
+                },
+            },
+        },
+    },
 
     loadError: 'Tiedostoa ei voitu ladata.',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: 'Tiedostolistassa on virheellisiä kohteita.',
     validationInvalidState: 'Tiedostolista on virheellisessä tilassa.',
     validationInvalidBusy: 'Tiedostolista on varattu.',
-    validationInvalidEmpty: 'Täytä tämä kenttä.',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: 'Valitse {{files}}.',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: 'tiedosto',
+                    true: 'yksi tai useampi tiedosto',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: 'pakollinen',
+    ariaNoEntries: {
+        template: 'Yhtään {{files}} ei ole valittu',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'tiedostoa',
+                    false: 'tiedostoa',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Valittu {{name}}',
+    ariaMultipleEntries: '{{count}} tiedostoa valittu',
+    ariaItemRoleDescription: 'Lajiteltava',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        'Nosta ja pudota tämä kohde painamalla välilyöntiä. Siirrä sitä uuteen sijaintiin ylä- ja alanuolinäppäimillä.',
+    ariaDragStateDrop: '{{name}} pudotettu sijaintiin {{position}}',
+    ariaDragStateGrab: '{{name}} nostettu sijainnista {{position}}',
+    ariaDragStateSort: '{{name}} siirretty sijaintiin {{position}} / {{total}}',
 };
 
 export const media = {

@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: 'Durdur',
     remove: 'Kaldır',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: 'İptal etmek için dokun',
     assistUndo: 'Geri almak için dokun',
-
-    browseAndDrop: 'Dosyaları buraya bırakın veya <u>göz atın</u>',
+    browse: {
+        template: '{{files}} seçin',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'dosyalar',
+                    false: 'dosya',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: '{{files}} buraya bırakın veya <u>göz atın</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'dosyaları',
+                    false: 'bir dosya',
+                },
+            },
+        },
+    },
 
     loadError: 'Dosya yüklenemedi.',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: 'Dosya listesinde geçersiz öğeler var.',
     validationInvalidState: 'Dosya listesi geçersiz durumda.',
     validationInvalidBusy: 'Dosya listesi meşgul.',
-    validationInvalidEmpty: 'Lütfen bu alanı doldurun.',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: 'Lütfen {{files}} seçin.',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: 'bir dosya',
+                    true: 'bir veya daha fazla dosya',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: 'gerekli',
+    ariaNoEntries: {
+        template: 'Hiç {{files}} seçilmedi',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'dosya',
+                    false: 'dosya',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Seçilen {{name}}',
+    ariaMultipleEntries: '{{count}} dosya seçildi',
+    ariaItemRoleDescription: 'Sıralanabilir',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        'Bu öğeyi almak ve bırakmak için boşluk tuşuna basın. Yeni bir konuma taşımak için yukarı ve aşağı ok tuşlarını kullanın.',
+    ariaDragStateDrop: '{{name}} {{position}} konumuna bırakıldı',
+    ariaDragStateGrab: '{{name}} {{position}} konumunda alındı',
+    ariaDragStateSort: '{{name}}, {{total}} içinde {{position}} konumuna taşındı',
 };
 
 export const media = {

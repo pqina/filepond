@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: 'Hætta við',
     remove: 'Fjarlægja',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: 'Ýttu til að hætta við',
     assistUndo: 'Ýttu til að afturkalla',
-
-    browseAndDrop: 'Slepptu skrám hér eða <u>fletta</u>',
+    browse: {
+        template: 'Velja {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'skrár',
+                    false: 'skrá',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: 'Slepptu {{files}} hér eða <u>fletta</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'skrám',
+                    false: 'skrá',
+                },
+            },
+        },
+    },
 
     loadError: 'Tókst ekki að hlaða skránni.',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: 'Skráalistinn inniheldur ógilda hluti.',
     validationInvalidState: 'Skráalistinn er í ógildu ástandi.',
     validationInvalidBusy: 'Skráalistinn er upptekinn.',
-    validationInvalidEmpty: 'Vinsamlegast fylltu út þetta svæði.',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: 'Vinsamlegast veldu {{files}}.',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: 'eina skrá',
+                    true: 'eina eða fleiri skrár',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: 'nauðsynlegt',
+    ariaNoEntries: {
+        template: 'Engar {{files}} valdar',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'skrár',
+                    false: 'skrá',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Valið {{name}}',
+    ariaMultipleEntries: '{{count}} skrár valdar',
+    ariaItemRoleDescription: 'Raðanlegt',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        'Ýttu á bilslá til að taka upp og sleppa þessu atriði. Notaðu örvar upp og niður til að færa það í nýja stöðu.',
+    ariaDragStateDrop: '{{name}} sleppt á stöðu {{position}}',
+    ariaDragStateGrab: '{{name}} tekið upp á stöðu {{position}}',
+    ariaDragStateSort: '{{name}} fært í stöðu {{position}} af {{total}}',
 };
 
 export const media = {

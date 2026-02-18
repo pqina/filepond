@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: 'Ακύρωση',
     remove: 'Αφαίρεση',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: 'Πατήστε για ακύρωση',
     assistUndo: 'Πατήστε για αναίρεση',
-
-    browseAndDrop: 'Σύρετε αρχεία εδώ ή <u>περιηγηθείτε</u>',
+    browse: {
+        template: 'Επιλέξτε {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'αρχεία',
+                    false: 'αρχείο',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: 'Αποθέστε {{files}} εδώ ή <u>περιηγηθείτε</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'αρχεία',
+                    false: 'ένα αρχείο',
+                },
+            },
+        },
+    },
 
     loadError: 'Αποτυχία φόρτωσης αρχείου.',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: 'Η λίστα αρχείων περιέχει μη έγκυρα στοιχεία.',
     validationInvalidState: 'Η λίστα αρχείων βρίσκεται σε μη έγκυρη κατάσταση.',
     validationInvalidBusy: 'Η λίστα αρχείων είναι απασχολημένη.',
-    validationInvalidEmpty: 'Συμπληρώστε αυτό το πεδίο.',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: 'Επιλέξτε {{files}}.',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: 'ένα αρχείο',
+                    true: 'ένα ή περισσότερα αρχεία',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: 'υποχρεωτικό',
+    ariaNoEntries: {
+        template: 'Δεν έχουν επιλεγεί {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'αρχεία',
+                    false: 'αρχείο',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Επιλέχθηκε το {{name}}',
+    ariaMultipleEntries: 'Επιλέχθηκαν {{count}} αρχεία',
+    ariaItemRoleDescription: 'Δυνατότητα ταξινόμησης',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        'Πατήστε το κενό για να σηκώσετε και να αποθέσετε αυτό το στοιχείο. Χρησιμοποιήστε τα πλήκτρα πάνω και κάτω βέλους για να το μετακινήσετε σε νέα θέση.',
+    ariaDragStateDrop: 'Το {{name}} αποτέθηκε στη θέση {{position}}',
+    ariaDragStateGrab: 'Το {{name}} σηκώθηκε από τη θέση {{position}}',
+    ariaDragStateSort: 'Το {{name}} μετακινήθηκε στη θέση {{position}} από {{total}}',
 };
 
 export const media = {

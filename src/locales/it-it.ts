@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: 'Interrompi',
     remove: 'Rimuovi',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: 'Tocca per annullare',
     assistUndo: 'Tocca per annullare l’azione',
-
-    browseAndDrop: 'Trascina i file qui o <u>sfoglia</u>',
+    browse: {
+        template: 'Scegli {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'file',
+                    false: 'file',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: 'Trascina {{files}} qui o <u>sfoglia</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'file',
+                    false: 'un file',
+                },
+            },
+        },
+    },
 
     loadError: 'Impossibile caricare il file.',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: 'L’elenco contiene elementi non validi.',
     validationInvalidState: 'L’elenco dei file è in uno stato non valido.',
     validationInvalidBusy: 'L’elenco dei file è occupato.',
-    validationInvalidEmpty: 'Compila questo campo.',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: 'Seleziona {{files}}.',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
+                    false: 'un file',
+                    true: 'uno o più file',
+                },
+            },
+        },
+    },
+
+    // screenreader accessibility
+    ariaRequired: 'obbligatorio',
+    ariaNoEntries: {
+        template: 'Nessun {{files}} selezionato',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'file',
                     false: 'file',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+    ariaSingleEntry: 'Selezionato {{name}}',
+    ariaMultipleEntries: '{{count}} file selezionati',
+    ariaItemRoleDescription: 'Ordinabile',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        'Premi spazio per prendere e rilasciare questo elemento. Usa i tasti freccia su e giù per spostarlo in una nuova posizione.',
+    ariaDragStateDrop: '{{name}} rilasciato nella posizione {{position}}',
+    ariaDragStateGrab: '{{name}} preso nella posizione {{position}}',
+    ariaDragStateSort: '{{name}} spostato nella posizione {{position}} di {{total}}',
 };
 
 export const media = {

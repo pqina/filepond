@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: 'Скасувати',
     remove: 'Видалити',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: 'Натисніть, щоб скасувати',
     assistUndo: 'Натисніть, щоб повернути',
-
-    browseAndDrop: 'Перетягніть файли сюди або <u>перегляньте</u>',
+    browse: {
+        template: 'Вибрати {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'файли',
+                    false: 'файл',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: 'Перетягніть сюди {{files}} або <u>перегляньте</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'файли',
+                    false: 'файл',
+                },
+            },
+        },
+    },
 
     loadError: 'Не вдалося завантажити файл.',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: 'Список файлів містить недійсні елементи.',
     validationInvalidState: 'Список файлів у недійсному стані.',
     validationInvalidBusy: 'Список файлів зайнятий.',
-    validationInvalidEmpty: 'Будь ласка, заповніть це поле.',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: 'Виберіть {{files}}.',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: 'файл',
+                    true: 'один або кілька файлів',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: 'обов'язково',
+    ariaNoEntries: {
+        template: 'Не вибрано {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'файлів',
+                    false: 'файл',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Вибрано {{name}}',
+    ariaMultipleEntries: 'Вибрано {{count}} файлів',
+    ariaItemRoleDescription: 'Можна сортувати',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        'Натисніть пробіл, щоб підхопити й відпустити цей елемент. Використовуйте стрілки вгору та вниз, щоб перемістити його на нову позицію.',
+    ariaDragStateDrop: '{{name}} відпущено на позиції {{position}}',
+    ariaDragStateGrab: '{{name}} підхоплено на позиції {{position}}',
+    ariaDragStateSort: '{{name}} переміщено на позицію {{position}} з {{total}}',
 };
 
 export const media = {

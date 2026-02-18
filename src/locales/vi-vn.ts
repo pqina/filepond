@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: 'Hủy',
     remove: 'Xóa',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: 'Chạm để hủy',
     assistUndo: 'Chạm để hoàn tác',
-
-    browseAndDrop: 'Thả tệp vào đây hoặc <u>duyệt</u>',
+    browse: {
+        template: 'Chọn {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'tệp',
+                    false: 'tệp',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: 'Thả {{files}} vào đây hoặc <u>duyệt</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'tệp',
+                    false: 'một tệp',
+                },
+            },
+        },
+    },
 
     loadError: 'Không thể tải tệp.',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: 'Danh sách tệp chứa mục không hợp lệ.',
     validationInvalidState: 'Danh sách tệp không hợp lệ.',
     validationInvalidBusy: 'Danh sách tệp đang bận.',
-    validationInvalidEmpty: 'Vui lòng nhập trường này.',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: 'Vui lòng chọn {{files}}.',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: 'một tệp',
+                    true: 'một hoặc nhiều tệp',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: 'bắt buộc',
+    ariaNoEntries: {
+        template: 'Chưa chọn {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'tệp',
+                    false: 'tệp',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Đã chọn {{name}}',
+    ariaMultipleEntries: 'Đã chọn {{count}} tệp',
+    ariaItemRoleDescription: 'Có thể sắp xếp',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        'Nhấn phím cách để nhấc và thả mục này. Dùng phím mũi tên lên và xuống để di chuyển nó đến vị trí mới.',
+    ariaDragStateDrop: 'Đã thả {{name}} vào vị trí {{position}}',
+    ariaDragStateGrab: 'Đã nhấc {{name}} ở vị trí {{position}}',
+    ariaDragStateSort: 'Đã di chuyển {{name}} đến vị trí {{position}} trên tổng {{total}}',
 };
 
 export const media = {

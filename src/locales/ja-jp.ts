@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: '中止',
     remove: '削除',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: 'タップして中止',
     assistUndo: 'タップして元に戻す',
-
-    browseAndDrop: 'ここにファイルをドロップ、または<u>参照</u>',
+    browse: {
+        template: '{{files}}を選択',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'ファイル',
+                    false: 'ファイル',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: 'ここに{{files}}をドロップ、または<u>参照</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'ファイル',
+                    false: 'ファイル',
+                },
+            },
+        },
+    },
 
     loadError: 'ファイルを読み込めませんでした。',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: 'リストに無効な項目があります。',
     validationInvalidState: 'ファイルリストが無効な状態です。',
     validationInvalidBusy: 'ファイルリストは使用中です。',
-    validationInvalidEmpty: 'このフィールドを入力してください。',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: '{{files}}を選択してください。',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: 'ファイル',
+                    true: '1つ以上のファイル',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: '必須',
+    ariaNoEntries: {
+        template: '{{files}}が選択されていません',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'ファイル',
+                    false: 'ファイル',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: '{{name}} を選択しました',
+    ariaMultipleEntries: '{{count}} 個のファイルを選択しました',
+    ariaItemRoleDescription: '並べ替え可能',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        'この項目を持ち上げてドロップするにはスペースキーを押します。上下の矢印キーで新しい位置に移動します。',
+    ariaDragStateDrop: '位置 {{position}} に {{name}} をドロップしました',
+    ariaDragStateGrab: '位置 {{position}} で {{name}} を持ち上げました',
+    ariaDragStateSort: '{{name}} を {{total}} 個中 {{position}} 番目に移動しました',
 };
 
 export const media = {

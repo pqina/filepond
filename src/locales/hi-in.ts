@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: 'रद्द करें',
     remove: 'हटाएं',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: 'रद्द करने के लिए टैप करें',
     assistUndo: 'पूर्ववत करने के लिए टैप करें',
-
-    browseAndDrop: 'फ़ाइलें यहाँ छोड़ें, या <u>ब्राउज़</u> करें',
+    browse: {
+        template: '{{files}} चुनें',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'फ़ाइलें',
+                    false: 'फ़ाइल',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: '{{files}} यहाँ छोड़ें, या <u>ब्राउज़</u> करें',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'फ़ाइलें',
+                    false: 'फ़ाइल',
+                },
+            },
+        },
+    },
 
     loadError: 'फ़ाइल लोड नहीं हो सकी।',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: 'सूची में अमान्य आइटम हैं।',
     validationInvalidState: 'फ़ाइल सूची अमान्य स्थिति में है।',
     validationInvalidBusy: 'फ़ाइल सूची व्यस्त है।',
-    validationInvalidEmpty: 'यह फ़ील्ड भरें।',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: 'कृपया {{files}} चुनें।',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: 'एक फ़ाइल',
+                    true: 'एक या अधिक फ़ाइलें',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: 'आवश्यक',
+    ariaNoEntries: {
+        template: 'कोई {{files}} चयनित नहीं',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'फाइलें',
+                    false: 'फाइल',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'चयनित {{name}}',
+    ariaMultipleEntries: '{{count}} फाइलें चयनित',
+    ariaItemRoleDescription: 'क्रमबद्ध करने योग्य',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        'इस आइटम को उठाने और छोड़ने के लिए स्पेस दबाएं। इसे नई स्थिति में ले जाने के लिए ऊपर और नीचे तीर कुंजियों का उपयोग करें।',
+    ariaDragStateDrop: '{{name}} को {{position}} स्थान पर छोड़ा गया',
+    ariaDragStateGrab: '{{name}} को {{position}} स्थान से उठाया गया',
+    ariaDragStateSort: '{{name}} को {{total}} में से {{position}} स्थान पर ले जाया गया',
 };
 
 export const media = {

@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: 'إيقاف',
     remove: 'إزالة',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: 'اضغط للإلغاء',
     assistUndo: 'اضغط للتراجع',
-
-    browseAndDrop: 'اسحب الملفات هنا، أو <u>تصفح</u>',
+    browse: {
+        template: 'اختر {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'ملفات',
+                    false: 'ملفًا',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: 'أسقط {{files}} هنا، أو <u>تصفح</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'الملفات',
+                    false: 'ملفًا',
+                },
+            },
+        },
+    },
 
     loadError: 'تعذر تحميل الملف.',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: 'تحتوي قائمة الملفات على عناصر غير صالحة.',
     validationInvalidState: 'قائمة الملفات في حالة غير صالحة.',
     validationInvalidBusy: 'قائمة الملفات مشغولة.',
-    validationInvalidEmpty: 'يرجى ملء هذا الحقل.',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: 'يرجى تحديد {{files}}.',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: 'ملفًا',
+                    true: 'ملفًا واحدًا أو أكثر',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: 'مطلوب',
+    ariaNoEntries: {
+        template: 'لم يتم تحديد {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'ملفات',
+                    false: 'ملف',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'تم تحديد {{name}}',
+    ariaMultipleEntries: 'تم تحديد {{count}} ملفات',
+    ariaItemRoleDescription: 'قابل للترتيب',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        'اضغط مفتاح المسافة لالتقاط هذا العنصر وإفلاته. استخدم مفتاحي السهم للأعلى والأسفل لنقله إلى موضع جديد.',
+    ariaDragStateDrop: 'تم إسقاط {{name}} في الموضع {{position}}',
+    ariaDragStateGrab: 'تم التقاط {{name}} في الموضع {{position}}',
+    ariaDragStateSort: 'تم نقل {{name}} إلى الموضع {{position}} من {{total}}',
 };
 
 export const media = {

@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: 'Megszakítás',
     remove: 'Eltávolítás',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: 'Koppintson a megszakításhoz',
     assistUndo: 'Koppintson a visszavonáshoz',
-
-    browseAndDrop: 'Húzza ide a fájlokat, vagy <u>tallózzon</u>',
+    browse: {
+        template: '{{files}} kiválasztása',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'fájlok',
+                    false: 'fájl',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: 'Húzza ide {{files}} vagy <u>tallózzon</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'fájlokat',
+                    false: 'egy fájlt',
+                },
+            },
+        },
+    },
 
     loadError: 'A fájl betöltése nem sikerült.',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: 'A fájllista érvénytelen elemeket tartalmaz.',
     validationInvalidState: 'A fájllista érvénytelen állapotban van.',
     validationInvalidBusy: 'A fájllista foglalt.',
-    validationInvalidEmpty: 'Töltse ki ezt a mezőt.',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: 'Kérjük, válasszon {{files}}.',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: 'egy fájlt',
+                    true: 'egy vagy több fájlt',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: 'kötelező',
+    ariaNoEntries: {
+        template: 'Nincs kiválasztott {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'fájlok',
+                    false: 'fájl',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Kiválasztva: {{name}}',
+    ariaMultipleEntries: '{{count}} fájl kiválasztva',
+    ariaItemRoleDescription: 'Rendezhető',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        'A szóköz megnyomásával felveheti és leteheti ezt az elemet. Az új pozícióba mozgatáshoz használja a fel és le nyílbillentyűket.',
+    ariaDragStateDrop: 'A(z) {{name}} lerakva a(z) {{position}}. pozícióban',
+    ariaDragStateGrab: 'A(z) {{name}} felvéve a(z) {{position}}. pozícióban',
+    ariaDragStateSort: 'A(z) {{name}} áthelyezve a(z) {{position}}. pozícióba, összesen {{total}} közül',
 };
 
 export const media = {

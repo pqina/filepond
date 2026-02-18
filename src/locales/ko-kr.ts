@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: '중단',
     remove: '제거',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: '탭하여 취소',
     assistUndo: '탭하여 실행 취소',
-
-    browseAndDrop: '파일을 여기에 놓거나 <u>찾아보기</u>',
+    browse: {
+        template: '{{files}} 선택',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: '파일',
+                    false: '파일',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: '{{files}}을(를) 여기에 놓거나 <u>찾아보기</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: '파일',
+                    false: '파일',
+                },
+            },
+        },
+    },
 
     loadError: '파일을 불러올 수 없습니다.',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: '목록에 유효하지 않은 항목이 있습니다.',
     validationInvalidState: '파일 목록 상태가 유효하지 않습니다.',
     validationInvalidBusy: '파일 목록이 사용 중입니다.',
-    validationInvalidEmpty: '이 필드를 입력해 주세요.',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: '{{files}}을(를) 선택해 주세요.',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: '파일',
+                    true: '하나 이상의 파일',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: '필수',
+    ariaNoEntries: {
+        template: '선택된 {{files}}이(가) 없습니다',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: '파일',
+                    false: '파일',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: '{{name}} 선택됨',
+    ariaMultipleEntries: '{{count}}개 파일 선택됨',
+    ariaItemRoleDescription: '정렬 가능',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        '이 항목을 집어서 놓으려면 스페이스 키를 누르세요. 위쪽 및 아래쪽 화살표 키로 새 위치로 이동할 수 있습니다.',
+    ariaDragStateDrop: '{{name}}을(를) {{position}} 위치에 놓았습니다',
+    ariaDragStateGrab: '{{name}}을(를) {{position}} 위치에서 집었습니다',
+    ariaDragStateSort: '{{name}}을(를) {{total}}개 중 {{position}} 위치로 이동했습니다',
 };
 
 export const media = {

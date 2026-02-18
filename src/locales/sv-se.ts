@@ -1,3 +1,9 @@
+/**
+ * This locale file was generated using automated translation tools. It may contain inaccuracies or unnatural phrasing.
+ *
+ * If you're a native speaker, a pull request to improve these translations is very welcome.
+ */
+
 export const core = {
     abort: 'Avbryt',
     remove: 'Ta bort',
@@ -22,8 +28,30 @@ export const core = {
 
     assistAbort: 'Tryck för att avbryta',
     assistUndo: 'Tryck för att ångra',
-
-    browseAndDrop: 'Släpp filer här eller <u>bläddra</u>',
+    browse: {
+        template: 'Välj {{files}}',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'filer',
+                    false: 'fil',
+                },
+            },
+        },
+    },
+    browseAndDrop: {
+        template: 'Släpp {{files}} här eller <u>bläddra</u>',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'filer',
+                    false: 'en fil',
+                },
+            },
+        },
+    },
 
     loadError: 'Det gick inte att ladda filen.',
 
@@ -36,30 +64,41 @@ export const core = {
     validationInvalidEntries: 'Listan innehåller ogiltiga objekt.',
     validationInvalidState: 'Fillistan är i ett ogiltigt tillstånd.',
     validationInvalidBusy: 'Fillistan är upptagen.',
-    validationInvalidEmpty: 'Fyll i det här fältet.',
-
-    // screenreader accessibility
-    ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
+    validationInvalidEmpty: {
+        template: 'Välj {{files}}.',
         variables: {
             files: {
                 context: 'multiple',
                 map: {
-                    true: 'files',
-                    false: 'file',
+                    false: 'en fil',
+                    true: 'en eller flera filer',
                 },
             },
         },
     },
-    ariaSingleEntry: 'Selected {{name}}',
-    ariaMultipleEntries: '{{count}} files selected',
-    ariaItemRoleDescription: 'Sortable',
+
+    // screenreader accessibility
+    ariaRequired: 'obligatoriskt',
+    ariaNoEntries: {
+        template: 'Inga {{files}} valda',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'filer',
+                    false: 'fil',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Vald {{name}}',
+    ariaMultipleEntries: '{{count}} filer valda',
+    ariaItemRoleDescription: 'Sorterbar',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
-    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
-    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
-    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
+        'Tryck på mellanslag för att plocka upp och släppa det här objektet. Använd upp- och nedpilarna för att flytta det till en ny position.',
+    ariaDragStateDrop: 'Släppte {{name}} på position {{position}}',
+    ariaDragStateGrab: 'Plockade upp {{name}} på position {{position}}',
+    ariaDragStateSort: 'Flyttade {{name}} till position {{position}} av {{total}}',
 };
 
 export const media = {
