@@ -38,6 +38,9 @@
         nodeContext,
     }: EntryActivityIndicatorOptions = $props();
 
+    // root element so we can determine if children have focus
+    let root: HTMLElement;
+
     // get locale and assets
     const { locale, enableAnimations } = $derived(getAppContext());
 
@@ -203,6 +206,7 @@
                     props: {
                         ...control.props,
                         inert: true,
+                        autofocus: false,
                         dataset: { state: shouldCrossfade ? 'outro' : 'idle' },
                     },
                 }))
@@ -217,6 +221,7 @@
                     props: {
                         ...activeButton.current.props,
                         inert: shouldCrossfade,
+                        autofocus: root.matches(':focus-within'),
                         dataset: { state: shouldCrossfade ? 'intro' : 'idle' },
                     },
                 },
@@ -231,6 +236,7 @@
                         props: {
                             ...control.props,
                             inert: index < arr.length - 1,
+                            autofocus: root.matches(':focus-within'),
                             dataset: { state: index < arr.length - 1 ? 'outro' : 'idle' },
                         },
                     }));
@@ -262,6 +268,7 @@
     class={klass}
     subtag="element-stack"
     subattrs={{ layout: 'pile' }}
+    onroot={(el) => (root = el)}
     {part}
 >
     {#if buttonsTemplate.length}

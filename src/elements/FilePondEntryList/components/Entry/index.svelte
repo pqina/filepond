@@ -29,6 +29,7 @@
 
     // get entry context
     const entryContext = getEntryContext();
+    const ariaId = $derived(entryContext.ariaId);
     const name = $derived(entryContext.current.name);
 
     // calculate clip mask so we can nicely scale content
@@ -36,12 +37,10 @@
     const maskRight = $derived(hasSize ? targetSize!.width - currentSize!.width : 0);
     const maskBottom = $derived(hasSize ? targetSize!.height - currentSize!.height : 0);
     const maskStyle = $derived(`0px ${maskRight}px ${maskBottom}px 0px`);
-
-    // drag interaction
 </script>
 
 <fieldset class={entryClass} bind:this={root} style:--mask={maskStyle} {part}>
-    <legend class="implicit">{name}</legend>
+    <legend class="implicit" id={ariaId}>{name}</legend>
     {@render children()}
 </fieldset>
 <ElementPane class="entry-back" {...currentSize} />

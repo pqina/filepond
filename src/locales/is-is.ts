@@ -23,7 +23,7 @@ export const core = {
     assistAbort: 'Ýttu til að hætta við',
     assistUndo: 'Ýttu til að afturkalla',
 
-    dropAreaLabel: 'Slepptu skrám hér eða <u>fletta</u>',
+    browseAndDrop: 'Slepptu skrám hér eða <u>fletta</u>',
 
     loadError: 'Tókst ekki að hlaða skránni.',
 
@@ -37,6 +37,29 @@ export const core = {
     validationInvalidState: 'Skráalistinn er í ógildu ástandi.',
     validationInvalidBusy: 'Skráalistinn er upptekinn.',
     validationInvalidEmpty: 'Vinsamlegast fylltu út þetta svæði.',
+
+    // screenreader accessibility
+    ariaRequired: 'required',
+    ariaNoEntries: {
+        template: 'No {{files}} selected',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'files',
+                    false: 'file',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Selected {{name}}',
+    ariaMultipleEntries: '{{count}} files selected',
+    ariaItemRoleDescription: 'Sortable',
+    ariaDragDescription:
+        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
+    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
+    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
+    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
 };
 
 export const media = {

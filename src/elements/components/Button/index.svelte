@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { type Snippet } from 'svelte';
+    import { onMount, type Snippet } from 'svelte';
     import { createDefaultIcon } from '../../common/html.js';
     import { toSpaceSeparatedString } from '../../common/string.js';
     import { updateDataset, updateStyles } from '../../../utils/dom.js';
@@ -36,6 +36,12 @@
         /** Defaults to undefined */
         styles?: { [key: string]: string };
 
+        /** id of element that describes this button in more detail */
+        ariaDescribedby?: string;
+
+        /** Should move focus to this button when created */
+        autofocus?: boolean;
+
         /** Children to render in the button */
         children?: Snippet;
     }
@@ -51,6 +57,8 @@
         inert = false,
         dataset = undefined,
         styles = undefined,
+        ariaDescribedby = undefined,
+        autofocus = false,
     }: ButtonOptions = $props();
 
     // svg to use for icon
@@ -70,6 +78,12 @@
         updateStyles(root, styles);
     });
 
+    $effect(() => {
+        if (autofocus) {
+            root.focus();
+        }
+    });
+
     // combine css classes
     const currentClass = $derived(klass);
     const buttonClass = $derived(toSpaceSeparatedString('button', currentClass));
@@ -83,6 +97,7 @@
     {disabled}
     {inert}
     {onclick}
+    aria-describedby={ariaDescribedby}
     title={title?.length ? title : undefined}
 >
     {#if svg}<span class="icon">{@html svg}</span>{/if}

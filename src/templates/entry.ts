@@ -339,7 +339,7 @@ export function createEntryLoadState() {
         key: 'entry-load-state',
         component: EntryActivityIndicator,
         props: (
-            { id, entry }: NodeContext,
+            { id, ariaId, entry }: NodeContext,
             { updateEntryState, removeEntries }: EntryListFunctions
         ) => ({
             class: 'entry-load-state',
@@ -354,6 +354,7 @@ export function createEntryLoadState() {
                         icon: 'remove',
                         disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
                         onclick: () => updateEntryState(id, { abort: true }),
+                        ariaDescribedby: ariaId,
                     }),
                 },
                 {
@@ -368,9 +369,8 @@ export function createEntryLoadState() {
                     button: createButton('button-entry-remove', {
                         icon: 'remove',
                         disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
-                        onclick: () => {
-                            removeEntries(id);
-                        },
+                        onclick: () => removeEntries(id),
+                        ariaDescribedby: ariaId,
                     }),
                 },
             ],
@@ -382,7 +382,7 @@ export function createEntryStoreState() {
     return {
         key: 'entry-store-state',
         component: EntryActivityIndicator,
-        props: ({ id, entry }: NodeContext, { updateEntryState }: EntryListFunctions) => ({
+        props: ({ id, ariaId, entry }: NodeContext, { updateEntryState }: EntryListFunctions) => ({
             class: 'entry-store-state',
             part: 'entry-store-state',
             buttonPart: 'entry-button',
@@ -407,6 +407,7 @@ export function createEntryStoreState() {
                             updateEntryState(id, {
                                 store: true,
                             }),
+                        ariaDescribedby: ariaId,
                     }),
                 },
                 {
@@ -419,6 +420,7 @@ export function createEntryStoreState() {
                             updateEntryState(id, {
                                 abort: true,
                             }),
+                        ariaDescribedby: ariaId,
                     }),
                 },
                 {
@@ -433,6 +435,7 @@ export function createEntryStoreState() {
                             updateEntryState(id, {
                                 abort: true,
                             }),
+                        ariaDescribedby: ariaId,
                     }),
                 },
                 {
@@ -449,6 +452,7 @@ export function createEntryStoreState() {
                             updateEntryState(id, {
                                 store: false,
                             }),
+                        ariaDescribedby: ariaId,
                     }),
                 },
             ],

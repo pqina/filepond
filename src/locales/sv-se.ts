@@ -23,7 +23,7 @@ export const core = {
     assistAbort: 'Tryck för att avbryta',
     assistUndo: 'Tryck för att ångra',
 
-    dropAreaLabel: 'Släpp filer här eller <u>bläddra</u>',
+    browseAndDrop: 'Släpp filer här eller <u>bläddra</u>',
 
     loadError: 'Det gick inte att ladda filen.',
 
@@ -37,6 +37,29 @@ export const core = {
     validationInvalidState: 'Fillistan är i ett ogiltigt tillstånd.',
     validationInvalidBusy: 'Fillistan är upptagen.',
     validationInvalidEmpty: 'Fyll i det här fältet.',
+
+    // screenreader accessibility
+    ariaRequired: 'required',
+    ariaNoEntries: {
+        template: 'No {{files}} selected',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'files',
+                    false: 'file',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Selected {{name}}',
+    ariaMultipleEntries: '{{count}} files selected',
+    ariaItemRoleDescription: 'Sortable',
+    ariaDragDescription:
+        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
+    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
+    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
+    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
 };
 
 export const media = {

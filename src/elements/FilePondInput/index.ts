@@ -713,11 +713,11 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
                 'aria-label': stringReplaceVariables(this.#locale.browse, localeData, this.#locale),
 
                 // aria description is always base browse button
-                'aria-description': stringReplaceVariables(
-                    this.#locale[localeKey],
-                    localeData,
-                    this.#locale
-                ),
+                'aria-description': arrayRemoveFalsy([
+                    stringReplaceVariables(this.#locale[localeKey], localeData, this.#locale),
+                    this.#locale.ariaRequired,
+                    this.validationMessage,
+                ]).join(', '),
             });
         }
 
@@ -982,21 +982,23 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
     /** Sets the validity state on the element internals. Returns `true` if valid, `false` if invalid */
     #setValidity(flags?: void | ValidityStateFlags, message?: string): boolean {
+        let valid = true;
+
         // field is valid
         if (!flags) {
             this.#internals.setValidity({});
-            return true;
         }
+        // field is invalid
+        else {
+            const anchor = this.#browseButton.parentNode ? this.#browseButton : undefined;
+            this.#internals.setValidity(flags, message, anchor);
+            valid = false;
+        }
+        // validity is reflected in browse button description for screenreader users
+        this.#syncBrowseButton();
 
-        const anchor = this.#browseButton.parentNode ? this.#browseButton : undefined;
-        // if (this.#browseButton.parentNode) {
-        // please select a file
-        this.#internals.setValidity(flags, message, anchor);
-        // }
-
-        // use other anchor
-
-        return false;
+        // return resulting state
+        return valid;
     }
 
     /** Proxy for element internals `reportValidity()` method */
@@ -1024,6 +1026,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
         // copy to internal file input element
         this.#fileInput.disabled = isDisabled;
+        this.#browseButton.disabled = isDisabled;
     }
 
     /**

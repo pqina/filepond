@@ -5,6 +5,7 @@ const key = {};
 
 interface EntryContext {
     readonly current: FilePondEntry;
+    readonly ariaId: string;
 }
 
 export function setEntryContext(value: EntryContext) {

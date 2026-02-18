@@ -23,7 +23,7 @@ export const core = {
     assistAbort: 'Touchez pour annuler',
     assistUndo: 'Touchez pour annuler l’action',
 
-    dropAreaLabel: 'Déposez des fichiers ici ou <u>parcourir</u>',
+    browseAndDrop: 'Déposez des fichiers ici ou <u>parcourir</u>',
 
     loadError: 'Le fichier n’a pas pu être chargé.',
 
@@ -37,6 +37,29 @@ export const core = {
     validationInvalidState: 'La liste de fichiers est dans un état invalide.',
     validationInvalidBusy: 'La liste de fichiers est occupée.',
     validationInvalidEmpty: 'Veuillez remplir ce champ.',
+
+    // screenreader accessibility
+    ariaRequired: 'required',
+    ariaNoEntries: {
+        template: 'No {{files}} selected',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'files',
+                    false: 'file',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Selected {{name}}',
+    ariaMultipleEntries: '{{count}} files selected',
+    ariaItemRoleDescription: 'Sortable',
+    ariaDragDescription:
+        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
+    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
+    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
+    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
 };
 
 export const media = {

@@ -23,7 +23,7 @@ export const core = {
     assistAbort: 'Klepněte pro zrušení',
     assistUndo: 'Klepněte pro vrácení',
 
-    dropAreaLabel: 'Přetáhněte soubory sem nebo <u>procházejte</u>',
+    browseAndDrop: 'Přetáhněte soubory sem nebo <u>procházejte</u>',
 
     loadError: 'Soubor se nepodařilo načíst.',
 
@@ -37,6 +37,29 @@ export const core = {
     validationInvalidState: 'Seznam souborů je v neplatném stavu.',
     validationInvalidBusy: 'Seznam souborů je zaneprázdněn.',
     validationInvalidEmpty: 'Vyplňte toto pole.',
+
+    // screenreader accessibility
+    ariaRequired: 'required',
+    ariaNoEntries: {
+        template: 'No {{files}} selected',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'files',
+                    false: 'file',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Selected {{name}}',
+    ariaMultipleEntries: '{{count}} files selected',
+    ariaItemRoleDescription: 'Sortable',
+    ariaDragDescription:
+        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
+    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
+    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
+    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
 };
 
 export const media = {

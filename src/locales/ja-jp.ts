@@ -23,7 +23,7 @@ export const core = {
     assistAbort: 'タップして中止',
     assistUndo: 'タップして元に戻す',
 
-    dropAreaLabel: 'ここにファイルをドロップ、または<u>参照</u>',
+    browseAndDrop: 'ここにファイルをドロップ、または<u>参照</u>',
 
     loadError: 'ファイルを読み込めませんでした。',
 
@@ -37,6 +37,29 @@ export const core = {
     validationInvalidState: 'ファイルリストが無効な状態です。',
     validationInvalidBusy: 'ファイルリストは使用中です。',
     validationInvalidEmpty: 'このフィールドを入力してください。',
+
+    // screenreader accessibility
+    ariaRequired: 'required',
+    ariaNoEntries: {
+        template: 'No {{files}} selected',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'files',
+                    false: 'file',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Selected {{name}}',
+    ariaMultipleEntries: '{{count}} files selected',
+    ariaItemRoleDescription: 'Sortable',
+    ariaDragDescription:
+        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
+    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
+    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
+    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
 };
 
 export const media = {

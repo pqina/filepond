@@ -82,6 +82,7 @@ export const core = {
     },
 
     // screenreader accessibility
+    ariaRequired: 'required',
     ariaNoEntries: {
         template: 'No {{files}} selected',
         variables: {

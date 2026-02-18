@@ -23,7 +23,7 @@ export const core = {
     assistAbort: 'Chạm để hủy',
     assistUndo: 'Chạm để hoàn tác',
 
-    dropAreaLabel: 'Thả tệp vào đây hoặc <u>duyệt</u>',
+    browseAndDrop: 'Thả tệp vào đây hoặc <u>duyệt</u>',
 
     loadError: 'Không thể tải tệp.',
 
@@ -37,6 +37,29 @@ export const core = {
     validationInvalidState: 'Danh sách tệp không hợp lệ.',
     validationInvalidBusy: 'Danh sách tệp đang bận.',
     validationInvalidEmpty: 'Vui lòng nhập trường này.',
+
+    // screenreader accessibility
+    ariaRequired: 'required',
+    ariaNoEntries: {
+        template: 'No {{files}} selected',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'files',
+                    false: 'file',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Selected {{name}}',
+    ariaMultipleEntries: '{{count}} files selected',
+    ariaItemRoleDescription: 'Sortable',
+    ariaDragDescription:
+        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
+    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
+    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
+    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
 };
 
 export const media = {

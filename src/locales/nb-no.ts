@@ -23,7 +23,7 @@ export const core = {
     assistAbort: 'Trykk for å avbryte',
     assistUndo: 'Trykk for å angre',
 
-    dropAreaLabel: 'Dra filer hit, eller <u>bla gjennom</u>',
+    browseAndDrop: 'Dra filer hit, eller <u>bla gjennom</u>',
 
     loadError: 'Kunne ikke laste inn filen.',
 
@@ -37,6 +37,29 @@ export const core = {
     validationInvalidState: 'Fillisten er i en ugyldig tilstand.',
     validationInvalidBusy: 'Fillisten er opptatt.',
     validationInvalidEmpty: 'Fyll ut dette feltet.',
+
+    // screenreader accessibility
+    ariaRequired: 'required',
+    ariaNoEntries: {
+        template: 'No {{files}} selected',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'files',
+                    false: 'file',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Selected {{name}}',
+    ariaMultipleEntries: '{{count}} files selected',
+    ariaItemRoleDescription: 'Sortable',
+    ariaDragDescription:
+        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
+    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
+    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
+    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
 };
 
 export const media = {

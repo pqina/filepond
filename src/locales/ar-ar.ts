@@ -23,7 +23,7 @@ export const core = {
     assistAbort: 'اضغط للإلغاء',
     assistUndo: 'اضغط للتراجع',
 
-    dropAreaLabel: 'اسحب الملفات هنا، أو <u>تصفح</u>',
+    browseAndDrop: 'اسحب الملفات هنا، أو <u>تصفح</u>',
 
     loadError: 'تعذر تحميل الملف.',
 
@@ -37,6 +37,29 @@ export const core = {
     validationInvalidState: 'قائمة الملفات في حالة غير صالحة.',
     validationInvalidBusy: 'قائمة الملفات مشغولة.',
     validationInvalidEmpty: 'يرجى ملء هذا الحقل.',
+
+    // screenreader accessibility
+    ariaRequired: 'required',
+    ariaNoEntries: {
+        template: 'No {{files}} selected',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'files',
+                    false: 'file',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Selected {{name}}',
+    ariaMultipleEntries: '{{count}} files selected',
+    ariaItemRoleDescription: 'Sortable',
+    ariaDragDescription:
+        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
+    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
+    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
+    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
 };
 
 export const media = {

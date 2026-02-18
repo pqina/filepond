@@ -21,7 +21,7 @@
         springAnimation?: any;
         onmeasureitem: (rect: Rect) => void;
         entry: FilePondEntry;
-        children: Snippet<[{ id: string; entry: FilePondEntry }]>;
+        children: Snippet<[{ id: string; ariaId: string; entry: FilePondEntry }]>;
     }
 
     let {
@@ -44,6 +44,9 @@
     setEntryContext({
         get current() {
             return entry;
+        },
+        get ariaId() {
+            return `entry-${entry.id}`;
         },
     });
 
@@ -149,5 +152,5 @@
     onchangerendercontent={handleChangeRenderContent}
     onelementmeasure={onmeasureitem}
 >
-    {@render children({ id: entry.id, entry })}
+    {@render children({ id: entry.id, ariaId: `entry-${entry.id}`, entry })}
 </SpringElement>

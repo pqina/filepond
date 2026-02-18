@@ -23,7 +23,7 @@ export const core = {
     assistAbort: 'বাতিল করতে ট্যাপ করুন',
     assistUndo: 'পূর্বাবস্থায় ফেরত যেতে ট্যাপ করুন',
 
-    dropAreaLabel: 'ফাইলগুলো এখানে টেনে আনুন, অথবা <u>ব্রাউজ</u> করুন',
+    browseAndDrop: 'ফাইলগুলো এখানে টেনে আনুন, অথবা <u>ব্রাউজ</u> করুন',
 
     loadError: 'ফাইল লোড করা যায়নি।',
 
@@ -37,6 +37,29 @@ export const core = {
     validationInvalidState: 'ফাইল তালিকা অকার্যকর অবস্থায় রয়েছে।',
     validationInvalidBusy: 'ফাইল তালিকা ব্যস্ত।',
     validationInvalidEmpty: 'এই ক্ষেত্রটি পূরণ করুন।',
+
+    // screenreader accessibility
+    ariaRequired: 'required',
+    ariaNoEntries: {
+        template: 'No {{files}} selected',
+        variables: {
+            files: {
+                context: 'multiple',
+                map: {
+                    true: 'files',
+                    false: 'file',
+                },
+            },
+        },
+    },
+    ariaSingleEntry: 'Selected {{name}}',
+    ariaMultipleEntries: '{{count}} files selected',
+    ariaItemRoleDescription: 'Sortable',
+    ariaDragDescription:
+        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
+    ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
+    ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
+    ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',
 };
 
 export const media = {

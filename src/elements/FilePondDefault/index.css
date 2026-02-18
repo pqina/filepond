@@ -218,8 +218,15 @@ file-pond-entry-list {
     }
 }
 
-:host([disabled]) file-pond-entry-list {
-    --entry-overlay-color: rgb(from var(--entry-background-color) r g b / 0.5);
+:host([disabled]) {
+    & file-pond-entry-list {
+        --entry-overlay-color: rgb(from var(--entry-background-color) r g b / 0.5);
+    }
+
+    & button[part='browse-button'] {
+        pointer-events: none;
+        color: light-dark(rgb(84, 84, 84), rgb(170, 170, 170));
+    }
 }
 
 /* Entry layout where media underlays controls  
@@ -314,20 +321,10 @@ file-pond-entry-list {
     &:focus-visible {
         border-radius: calc(var(--default-border-radius) - var(--default-padding) * 0.75);
         outline: var(--outline);
-        &:has(u) {
-            outline: none;
-            & u {
-                outline: var(--outline);
-            }
-        }
+        outline-offset: calc(-0.875 * var(--default-padding));
     }
 }
 
 :host([nodrop]) button[part='browse-button'] {
     align-self: flex-start;
-}
-
-:host([disabled]) button[part='browse-button'] {
-    opacity: 0.4;
-    pointer-events: none !important;
 }
