@@ -132,7 +132,9 @@
         if (!isDragging) {
             return;
         }
-        element.focus();
+        element.focus({
+            preventScroll: true,
+        });
     }
 </script>
 

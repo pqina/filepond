@@ -9,7 +9,7 @@ filename-input {
     & input {
         width: min(var(--value-width), 100%);
         transition: background-color var(--input-transition-duration) ease-out;
-        &:focus,
+        &:focus-visible,
         &:hover {
             background-color: color-mix(in srgb, currentColor 15%, transparent);
         }
@@ -30,7 +30,7 @@ filename-input {
         }
 
         /* show extension when focussed */
-        & input:focus + span {
+        & input:focus-visible + span {
             visibility: visible;
         }
     }

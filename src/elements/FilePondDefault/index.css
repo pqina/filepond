@@ -1,5 +1,10 @@
 /* Default FilePond Styles */
 :host {
+    /* default block style */
+    display: block;
+    margin-top: 0.25em;
+    margin-bottom: 1.25em;
+
     /* toggles animations */
     --animate: 1;
 
@@ -96,6 +101,7 @@ file-pond-entry-list {
     &::part(entry-list-item):focus-visible {
         border-radius: var(--entry-border-radius);
         outline: var(--outline);
+        outline: none;
     }
 
     &::part(data-transfer-item) {

@@ -80,7 +80,9 @@
 
     $effect(() => {
         if (autofocus) {
-            root.focus();
+            root.focus({
+                preventScroll: true,
+            });
         }
     });
 

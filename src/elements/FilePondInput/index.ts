@@ -544,7 +544,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         }
 
         // this follows default browser file input interactions, when we click a label linked to a file inupt the file input is focussed and then the browse interaction starts.
-        this.#browseButton.focus();
+        this.#browseButton.focus({ preventScroll: true });
         this.#fileInput.click();
     }
 
