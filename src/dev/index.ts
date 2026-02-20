@@ -162,7 +162,7 @@ export async function generateDocument(options?: GenerateFileOptions): Promise<F
 
     // generate a txt file
     if (type === 'text/plain') {
-        return new File([content], `${name}.txt`, {
+        return new File([content], name.endsWith('.txt') ? name : `${name}.txt`, {
             type,
             lastModified,
         });

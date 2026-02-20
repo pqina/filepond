@@ -101,7 +101,11 @@ file-pond-entry-list {
     &::part(entry-list-item):focus-visible {
         border-radius: var(--entry-border-radius);
         outline: var(--outline);
-        outline: none;
+
+        /* Remove outline on Mobile Safari Only */
+        @supports (-webkit-touch-callout: none) {
+            outline: none;
+        }
     }
 
     &::part(data-transfer-item) {
@@ -223,6 +227,13 @@ file-pond-entry-list {
         outline: Highlight auto 1px;
     }
 }
+
+/* Remove outline on Mobile Safari Only */
+/* @supports (-webkit-touch-callout: none) {
+    file-pond-entry-list::part(entry-list-item):focus-visible {
+        outline: none;
+    }
+} */
 
 :host([disabled]) {
     & file-pond-entry-list {

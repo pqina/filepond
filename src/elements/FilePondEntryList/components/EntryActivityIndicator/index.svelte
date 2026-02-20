@@ -13,6 +13,7 @@
     import { ProgressIndicator } from '../../../components/ProgressIndicator/index.js';
     import { type ExtensionState } from '../../../../types/index.js';
     import { NodeList, type NodeListOptions } from '../../../components/NodeList/index.js';
+    import { addListener } from '../../../../utils/dom.js';
 
     interface EntryActivityIndicatorOptions {
         /** Class to set on the entry-activity-indicator element */
@@ -184,6 +185,9 @@
             return;
         }
 
+        // need to update when loses focus
+        hasFocus;
+
         // set outro states for existing buttons, add new button in "idle" state
         untrack(() => {
             if (lastButtonIsSameButton(activeButton.current)) {
@@ -221,7 +225,7 @@
                     props: {
                         ...activeButton.current.props,
                         inert: shouldCrossfade,
-                        autofocus: root.matches(':focus-within'),
+                        autofocus: hasFocus,
                         dataset: { state: shouldCrossfade ? 'intro' : 'idle' },
                     },
                 },
@@ -236,7 +240,7 @@
                         props: {
                             ...control.props,
                             inert: index < arr.length - 1,
-                            autofocus: root.matches(':focus-within'),
+                            autofocus: hasFocus,
                             dataset: { state: index < arr.length - 1 ? 'outro' : 'idle' },
                         },
                     }));
@@ -245,6 +249,7 @@
         });
     });
 
+    // build nodelist template from button nodes
     const buttonsTemplate = $derived.by(() => {
         if (!buttonNodes.length) {
             return [];
@@ -260,6 +265,21 @@
                 children: buttonNodes,
             },
         ];
+    });
+
+    // so we can move focus from button to button
+    let hasFocus = $state(false);
+    $effect(() => {
+        if (!root) {
+            return;
+        }
+        const unsubs = [
+            addListener(root, 'focusin', () => (hasFocus = true)),
+            addListener(root, 'focusout', () => (hasFocus = false)),
+        ];
+        return () => {
+            unsubs.forEach((unsub) => unsub());
+        };
     });
 </script>
 

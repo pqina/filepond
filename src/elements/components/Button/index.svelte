@@ -79,10 +79,13 @@
     });
 
     $effect(() => {
-        if (autofocus) {
+        if (autofocus && !inert) {
             root.focus({
                 preventScroll: true,
             });
+
+            // reset
+            autofocus = false;
         }
     });
 
