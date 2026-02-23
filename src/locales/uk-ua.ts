@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: 'Вибрано {{count}} файлів',
     ariaItemRoleDescription: 'Можна сортувати',
     ariaDragDescription:
-        'Натисніть пробіл, щоб підхопити й відпустити цей елемент. Використовуйте стрілки вгору та вниз, щоб перемістити його на нову позицію.',
+        'Натисніть пробіл, щоб підхопити й відпустити елемент. Використовуйте стрілки вгору та вниз, щоб перемістити його на нову позицію.',
     ariaDragStateDrop: '{{name}} відпущено на позиції {{position}}',
     ariaDragStateGrab: '{{name}} підхоплено на позиції {{position}}',
     ariaDragStateSort: '{{name}} переміщено на позицію {{position}} з {{total}}',

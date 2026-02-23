@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: '{{count}}개 파일 선택됨',
     ariaItemRoleDescription: '정렬 가능',
     ariaDragDescription:
-        '이 항목을 집어서 놓으려면 스페이스 키를 누르세요. 위쪽 및 아래쪽 화살표 키로 새 위치로 이동할 수 있습니다.',
+        '항목을 집어서 놓으려면 스페이스 키를 누르세요. 위쪽 및 아래쪽 화살표 키로 새 위치로 이동할 수 있습니다.',
     ariaDragStateDrop: '{{name}}을(를) {{position}} 위치에 놓았습니다',
     ariaDragStateGrab: '{{name}}을(를) {{position}} 위치에서 집었습니다',
     ariaDragStateSort: '{{name}}을(를) {{total}}개 중 {{position}} 위치로 이동했습니다',

@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: '{{count}} fichiers sélectionnés',
     ariaItemRoleDescription: 'Triable',
     ariaDragDescription:
-        'Appuyez sur espace pour prendre et déposer cet élément. Utilisez les flèches haut et bas pour le déplacer vers une nouvelle position.',
+        'Appuyez sur espace pour prendre et déposer un élément. Utilisez les flèches haut et bas pour le déplacer vers une nouvelle position.',
     ariaDragStateDrop: '{{name}} déposé à la position {{position}}',
     ariaDragStateGrab: '{{name}} pris à la position {{position}}',
     ariaDragStateSort: '{{name}} déplacé à la position {{position}} sur {{total}}',

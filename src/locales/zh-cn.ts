@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: '已选择 {{count}} 个文件',
     ariaItemRoleDescription: '可排序',
     ariaDragDescription:
-        '按空格键可拾取并放下此项。使用上下方向键将其移动到新位置。',
+        '按空格键可拾取并放下一个项目。使用上下方向键将其移动到新位置。',
     ariaDragStateDrop: '已将 {{name}} 放到位置 {{position}}',
     ariaDragStateGrab: '已在位置 {{position}} 拾取 {{name}}',
     ariaDragStateSort: '已将 {{name}} 移动到第 {{position}} 位，共 {{total}} 项',

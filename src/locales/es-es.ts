@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: '{{count}} archivos seleccionados',
     ariaItemRoleDescription: 'Ordenable',
     ariaDragDescription:
-        'Pulsa espacio para recoger y soltar este elemento. Usa las teclas de flecha arriba y abajo para moverlo a una nueva posición.',
+        'Pulsa espacio para recoger y soltar un elemento. Usa las teclas de flecha arriba y abajo para moverlo a una nueva posición.',
     ariaDragStateDrop: 'Se soltó {{name}} en la posición {{position}}',
     ariaDragStateGrab: 'Se recogió {{name}} en la posición {{position}}',
     ariaDragStateSort: 'Se movió {{name}} a la posición {{position}} de {{total}}',

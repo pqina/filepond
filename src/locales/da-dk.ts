@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: '{{count}} filer valgt',
     ariaItemRoleDescription: 'Kan sorteres',
     ariaDragDescription:
-        'Tryk på mellemrum for at tage og slippe dette element. Brug pil op og pil ned for at flytte det til en ny position.',
+        'Tryk på mellemrum for at tage og slippe et element. Brug pil op og pil ned for at flytte det til en ny position.',
     ariaDragStateDrop: 'Placerede {{name}} på position {{position}}',
     ariaDragStateGrab: 'Tog fat i {{name}} på position {{position}}',
     ariaDragStateSort: 'Flyttede {{name}} til position {{position}} af {{total}}',

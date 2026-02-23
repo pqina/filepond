@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: '{{count}} Dateien ausgewählt',
     ariaItemRoleDescription: 'Sortierbar',
     ariaDragDescription:
-        'Drücke die Leertaste, um dieses Element aufzunehmen und abzulegen. Verwende die Pfeiltasten nach oben und unten, um es an eine neue Position zu verschieben.',
+        'Drücke die Leertaste, um ein Element aufzunehmen und abzulegen. Verwende die Pfeiltasten nach oben und unten, um es an eine neue Position zu verschieben.',
     ariaDragStateDrop: '„{{name}}“ an Position {{position}} abgelegt',
     ariaDragStateGrab: '„{{name}}“ an Position {{position}} aufgenommen',
     ariaDragStateSort: '„{{name}}“ an Position {{position}} von {{total}} verschoben',

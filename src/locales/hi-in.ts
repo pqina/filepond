@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: '{{count}} फाइलें चयनित',
     ariaItemRoleDescription: 'क्रमबद्ध करने योग्य',
     ariaDragDescription:
-        'इस आइटम को उठाने और छोड़ने के लिए स्पेस दबाएं। इसे नई स्थिति में ले जाने के लिए ऊपर और नीचे तीर कुंजियों का उपयोग करें।',
+        'किसी आइटम को उठाने और छोड़ने के लिए स्पेस दबाएं। इसे नई स्थिति में ले जाने के लिए ऊपर और नीचे तीर कुंजियों का उपयोग करें।',
     ariaDragStateDrop: '{{name}} को {{position}} स्थान पर छोड़ा गया',
     ariaDragStateGrab: '{{name}} को {{position}} स्थान से उठाया गया',
     ariaDragStateSort: '{{name}} को {{total}} में से {{position}} स्थान पर ले जाया गया',

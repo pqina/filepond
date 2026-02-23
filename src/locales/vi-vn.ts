@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: 'Đã chọn {{count}} tệp',
     ariaItemRoleDescription: 'Có thể sắp xếp',
     ariaDragDescription:
-        'Nhấn phím cách để nhấc và thả mục này. Dùng phím mũi tên lên và xuống để di chuyển nó đến vị trí mới.',
+        'Nhấn phím cách để nhấc và thả một mục. Dùng phím mũi tên lên và xuống để di chuyển nó đến vị trí mới.',
     ariaDragStateDrop: 'Đã thả {{name}} vào vị trí {{position}}',
     ariaDragStateGrab: 'Đã nhấc {{name}} ở vị trí {{position}}',
     ariaDragStateSort: 'Đã di chuyển {{name}} đến vị trí {{position}} trên tổng {{total}}',

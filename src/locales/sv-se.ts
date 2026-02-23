@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: '{{count}} filer valda',
     ariaItemRoleDescription: 'Sorterbar',
     ariaDragDescription:
-        'Tryck på mellanslag för att plocka upp och släppa det här objektet. Använd upp- och nedpilarna för att flytta det till en ny position.',
+        'Tryck på mellanslag för att plocka upp och släppa ett objekt. Använd upp- och nedpilarna för att flytta det till en ny position.',
     ariaDragStateDrop: 'Släppte {{name}} på position {{position}}',
     ariaDragStateGrab: 'Plockade upp {{name}} på position {{position}}',
     ariaDragStateSort: 'Flyttade {{name}} till position {{position}} av {{total}}',

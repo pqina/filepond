@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: '{{count}} skrár valdar',
     ariaItemRoleDescription: 'Raðanlegt',
     ariaDragDescription:
-        'Ýttu á bilslá til að taka upp og sleppa þessu atriði. Notaðu örvar upp og niður til að færa það í nýja stöðu.',
+        'Ýttu á bilslá til að taka upp og sleppa atriði. Notaðu örvar upp og niður til að færa það í nýja stöðu.',
     ariaDragStateDrop: '{{name}} sleppt á stöðu {{position}}',
     ariaDragStateGrab: '{{name}} tekið upp á stöðu {{position}}',
     ariaDragStateSort: '{{name}} fært í stöðu {{position}} af {{total}}',

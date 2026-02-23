@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: '{{count}} 個のファイルを選択しました',
     ariaItemRoleDescription: '並べ替え可能',
     ariaDragDescription:
-        'この項目を持ち上げてドロップするにはスペースキーを押します。上下の矢印キーで新しい位置に移動します。',
+        '項目を持ち上げてドロップするにはスペースキーを押します。上下の矢印キーで新しい位置に移動します。',
     ariaDragStateDrop: '位置 {{position}} に {{name}} をドロップしました',
     ariaDragStateGrab: '位置 {{position}} で {{name}} を持ち上げました',
     ariaDragStateSort: '{{name}} を {{total}} 個中 {{position}} 番目に移動しました',

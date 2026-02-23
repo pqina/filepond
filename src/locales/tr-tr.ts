@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: '{{count}} dosya seçildi',
     ariaItemRoleDescription: 'Sıralanabilir',
     ariaDragDescription:
-        'Bu öğeyi almak ve bırakmak için boşluk tuşuna basın. Yeni bir konuma taşımak için yukarı ve aşağı ok tuşlarını kullanın.',
+        'Bir öğeyi almak ve bırakmak için boşluk tuşuna basın. Yeni bir konuma taşımak için yukarı ve aşağı ok tuşlarını kullanın.',
     ariaDragStateDrop: '{{name}} {{position}} konumuna bırakıldı',
     ariaDragStateGrab: '{{name}} {{position}} konumunda alındı',
     ariaDragStateSort: '{{name}}, {{total}} içinde {{position}} konumuna taşındı',

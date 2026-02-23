@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: 'Wybrano {{count}} plików',
     ariaItemRoleDescription: 'Możliwe sortowanie',
     ariaDragDescription:
-        'Naciśnij spację, aby podnieść i upuścić ten element. Użyj klawiszy strzałek w górę i w dół, aby przenieść go na nową pozycję.',
+        'Naciśnij spację, aby podnieść i upuścić element. Użyj klawiszy strzałek w górę i w dół, aby przenieść go na nową pozycję.',
     ariaDragStateDrop: 'Upuszczono {{name}} na pozycji {{position}}',
     ariaDragStateGrab: 'Podniesiono {{name}} na pozycji {{position}}',
     ariaDragStateSort: 'Przeniesiono {{name}} na pozycję {{position}} z {{total}}',

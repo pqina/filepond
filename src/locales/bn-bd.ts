@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: '{{count}}টি ফাইল নির্বাচিত',
     ariaItemRoleDescription: 'সাজানো যায়',
     ariaDragDescription:
-        'এই আইটেমটি তুলতে এবং ফেলতে স্পেস চাপুন। নতুন অবস্থানে নিতে উপরের এবং নিচের তীর কী ব্যবহার করুন।',
+        'একটি আইটেম তুলতে এবং ফেলতে স্পেস চাপুন। নতুন অবস্থানে নিতে উপরের এবং নিচের তীর কী ব্যবহার করুন।',
     ariaDragStateDrop: '{{position}} অবস্থানে {{name}} ফেলা হয়েছে',
     ariaDragStateGrab: '{{position}} অবস্থান থেকে {{name}} তোলা হয়েছে',
     ariaDragStateSort: '{{total}} এর মধ্যে {{position}} অবস্থানে {{name}} সরানো হয়েছে',

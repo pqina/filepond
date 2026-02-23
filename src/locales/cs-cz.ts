@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: 'Vybráno {{count}} souborů',
     ariaItemRoleDescription: 'Seřaditelné',
     ariaDragDescription:
-        'Stisknutím mezerníku tuto položku zvednete a upustíte. Pomocí šipek nahoru a dolů ji přesunete na novou pozici.',
+        'Stisknutím mezerníku položku zvednete a upustíte. Pomocí šipek nahoru a dolů ji přesunete na novou pozici.',
     ariaDragStateDrop: 'Položka {{name}} byla umístěna na pozici {{position}}',
     ariaDragStateGrab: 'Položka {{name}} byla uchopena na pozici {{position}}',
     ariaDragStateSort: 'Položka {{name}} byla přesunuta na pozici {{position}} z {{total}}',

@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: '{{count}} tiedostoa valittu',
     ariaItemRoleDescription: 'Lajiteltava',
     ariaDragDescription:
-        'Nosta ja pudota tämä kohde painamalla välilyöntiä. Siirrä sitä uuteen sijaintiin ylä- ja alanuolinäppäimillä.',
+        'Nosta ja pudota kohde painamalla välilyöntiä. Siirrä sitä uuteen sijaintiin ylä- ja alanuolinäppäimillä.',
     ariaDragStateDrop: '{{name}} pudotettu sijaintiin {{position}}',
     ariaDragStateGrab: '{{name}} nostettu sijainnista {{position}}',
     ariaDragStateSort: '{{name}} siirretty sijaintiin {{position}} / {{total}}',

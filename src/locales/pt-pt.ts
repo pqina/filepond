@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: '{{count}} ficheiros selecionados',
     ariaItemRoleDescription: 'Ordenável',
     ariaDragDescription:
-        'Prima espaço para pegar e largar este item. Use as teclas de seta para cima e para baixo para movê-lo para uma nova posição.',
+        'Prima espaço para pegar e largar um item. Use as teclas de seta para cima e para baixo para movê-lo para uma nova posição.',
     ariaDragStateDrop: '{{name}} largado na posição {{position}}',
     ariaDragStateGrab: '{{name}} agarrado na posição {{position}}',
     ariaDragStateSort: '{{name}} movido para a posição {{position}} de {{total}}',

@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: '{{count}} fájl kiválasztva',
     ariaItemRoleDescription: 'Rendezhető',
     ariaDragDescription:
-        'A szóköz megnyomásával felveheti és leteheti ezt az elemet. Az új pozícióba mozgatáshoz használja a fel és le nyílbillentyűket.',
+        'A szóköz megnyomásával felvehet és letehet egy elemet. Az új pozícióba mozgatáshoz használja a fel és le nyílbillentyűket.',
     ariaDragStateDrop: 'A(z) {{name}} lerakva a(z) {{position}}. pozícióban',
     ariaDragStateGrab: 'A(z) {{name}} felvéve a(z) {{position}}. pozícióban',
     ariaDragStateSort: 'A(z) {{name}} áthelyezve a(z) {{position}}. pozícióba, összesen {{total}} közül',

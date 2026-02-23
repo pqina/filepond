@@ -103,7 +103,7 @@ export const core = {
     ariaMultipleEntries: '{{count}} bestanden geselecteerd',
     ariaItemRoleDescription: 'Sorteerbaar',
     ariaDragDescription:
-        'Druk op spatie om dit item op te pakken en neer te zetten. Gebruik de pijltoetsen omhoog en omlaag om het naar een nieuwe positie te verplaatsen.',
+        'Druk op spatie om een item op te pakken en neer te zetten. Gebruik de pijltoetsen omhoog en omlaag om het naar een nieuwe positie te verplaatsen.',
     ariaDragStateDrop: '{{name}} neergezet op positie {{position}}',
     ariaDragStateGrab: '{{name}} opgepakt op positie {{position}}',
     ariaDragStateSort: '{{name}} verplaatst naar positie {{position}} van {{total}}',

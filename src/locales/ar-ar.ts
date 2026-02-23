@@ -95,7 +95,7 @@ export const core = {
     ariaMultipleEntries: 'تم تحديد {{count}} ملفات',
     ariaItemRoleDescription: 'قابل للترتيب',
     ariaDragDescription:
-        'اضغط مفتاح المسافة لالتقاط هذا العنصر وإفلاته. استخدم مفتاحي السهم للأعلى والأسفل لنقله إلى موضع جديد.',
+        'اضغط مفتاح المسافة لالتقاط عنصر وإفلاته. استخدم مفتاحي السهم للأعلى والأسفل لنقله إلى موضع جديد.',
     ariaDragStateDrop: 'تم إسقاط {{name}} في الموضع {{position}}',
     ariaDragStateGrab: 'تم التقاط {{name}} في الموضع {{position}}',
     ariaDragStateSort: 'تم نقل {{name}} إلى الموضع {{position}} من {{total}}',
