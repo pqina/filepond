@@ -7,6 +7,7 @@ import { arrayRemoveFalsy } from '../utils/array.js';
 import { clear, log } from '../common/console.js';
 import type { FilePondEntry, FilePondFileEntry, FilePondDirectoryEntry } from '../types/index.js';
 import type { ExtensionState, ExtensionStatus } from './common/createExtension.js';
+import { toSpaceSeparatedString } from '../elements/common/string.js';
 
 export interface ConsoleViewOptions {
     /** Clear console before logging, defaults to `false` */
@@ -152,9 +153,9 @@ export const ConsoleView = createExtension(
                 })
                 .flat();
 
-            let str = `%c%s %o\t  %c${prefix}%c${label}%c${info} ${labels
-                .map(({ label }) => `%c ${label}`)
-                .join(' ')}`;
+            let str = `%c%s %o\t  %c${prefix}%c${label}%c${info} ${toSpaceSeparatedString(
+                ...labels.map(({ label }) => `%c ${label}`)
+            )}`;
 
             // pad string
             str += ' '.repeat(Math.max(0, 60 - str.length)) + '';

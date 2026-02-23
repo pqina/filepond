@@ -9,19 +9,22 @@
     import { ElementPane } from '../../../components/ElementPane/index.js';
 
     interface EntryStatusOptions {
+        id?: string;
         class?: string;
-
         part?: string;
     }
 
-    let { class: klass = undefined, part = undefined }: EntryStatusOptions = $props();
+    let {
+        class: klass = undefined,
+        part = undefined,
+        id = undefined,
+    }: EntryStatusOptions = $props();
 
     // get locale and assets
     const appContext = getAppContext();
     const assets = $derived(appContext.assets);
     const locale = $derived(appContext.locale);
 
-    // get store
     const entryContext = getEntryContext();
 
     // list of extension objects
@@ -69,7 +72,7 @@
 </script>
 
 {#if messages.length}
-    <entry-status class={klass} {part}>
+    <entry-status class={klass} {part} {id}>
         <ul>
             <!-- we don't use a key because it's fine if status is overwritten -->
             {#each messages as { icon, text, type }}

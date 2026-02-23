@@ -99,7 +99,7 @@ export const core = {
     ariaMultipleEntries: '{{count}} files selected',
     ariaItemRoleDescription: 'Sortable',
     ariaDragDescription:
-        'Press space to pick up and drop this item. Use the up and down arrow keys to move it to a new position.',
+        'Press space to pick up and drop an item. Use the up and down arrow keys to move it to a new position.',
     ariaDragStateDrop: 'Dropped {{name}} at position {{position}}',
     ariaDragStateGrab: 'Picked up {{name}} at position {{position}}',
     ariaDragStateSort: 'Moved {{name}} to position {{position}} of {{total}}',

@@ -1,4 +1,4 @@
-import type { EntryListFunctions, TemplateNode } from '../types/index.js';
+import type { EntryListFunctions, ElementNode, TemplateNode } from '../types/index.js';
 import { nodeTree, type NodeContext } from '../elements/common/nodeTree.js';
 
 import { isDataTransferEntry, isFileEntry, isNumber, isString } from '../utils/test.js';
@@ -49,6 +49,7 @@ export function createFilePondEntryList(): TemplateNode[] {
                     component: EntryListItem,
                     props: ({
                         entry,
+                        ariaId,
                         spring,
                         isDetached,
                         isRemoving,
@@ -75,6 +76,10 @@ export function createFilePondEntryList(): TemplateNode[] {
                             springAnimation,
                             translation,
                             onmeasureitem,
+                            ariaDescribedby: toSpaceSeparatedString(
+                                `${ariaId}-status`,
+                                `${ariaId}-store-info`
+                            ),
                         };
                     },
                     children: createFilePondEntry(),
@@ -88,8 +93,9 @@ export function createFilePondEntry(): TemplateNode {
     return {
         key: 'entry',
         component: Entry,
-        props: ({ entry }) => {
+        props: ({ entry, ariaId }) => {
             return {
+                nameId: `${ariaId}-name`,
                 part: isDataTransferEntry(entry) ? 'entry entry-data-transfer' : 'entry',
             };
         },
@@ -214,10 +220,11 @@ export function createEntryStatus() {
     return {
         key: 'entry-status',
         component: EntryStatus,
-        props: {
+        props: ({ ariaId }: NodeContext) => ({
             part: 'entry-status',
             class: 'entry-status',
-        },
+            id: `${ariaId}-status`,
+        }),
     };
 }
 
@@ -277,6 +284,11 @@ export function createFileLoadInfo() {
     };
 }
 
+const createFileStoreMainAttributes = ({ ariaId }: NodeContext) => ({
+    id: `${ariaId}-store-info`,
+    class: 'entry-info-main',
+});
+
 export function createFileStoreInfo() {
     return {
         key: 'file-store-spring',
@@ -301,7 +313,12 @@ export function createFileStoreInfo() {
         },
         children: [
             createEntryInfoBlock('file-store-queued-info', ['STORE_QUEUED'], {
-                main: 'storeStorageQueued',
+                main: {
+                    key: 'file-store-queued-info-main',
+                    tag: 'div',
+                    attrs: createFileStoreMainAttributes,
+                    children: 'storeStorageQueued',
+                },
                 sub: 'assistAbort',
             }),
             createEntryInfoBlock('file-store-busy-info', ['STORE_BUSY'], {
@@ -309,15 +326,11 @@ export function createFileStoreInfo() {
                 main: {
                     key: 'file-store-busy-info-main',
                     tag: 'div',
-                    attrs: {
-                        class: 'entry-info-main',
-                    },
+                    attrs: createFileStoreMainAttributes,
                     spring: ({ entry }: NodeContext) => {
                         const { progress } = getExtensionStatusWithCode(entry, 'STORE_BUSY') ?? {};
-
                         return {
                             progress: {
-                                // the current value
                                 value: progress === Infinity ? 0 : progress,
                                 transform: (v: number) => Math.round(v * 100),
                             },
@@ -327,7 +340,12 @@ export function createFileStoreInfo() {
                 },
             }),
             createEntryInfoBlock('file-store-complete-info', ['STORE_COMPLETE'], {
-                main: 'storeStorageComplete',
+                main: {
+                    key: 'file-store-complete-info-main',
+                    tag: 'div',
+                    attrs: createFileStoreMainAttributes,
+                    children: 'storeStorageComplete',
+                },
                 sub: 'assistUndo',
             }),
         ],
@@ -354,7 +372,7 @@ export function createEntryLoadState() {
                         icon: 'remove',
                         disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
                         onclick: () => updateEntryState(id, { abort: true }),
-                        ariaDescribedby: ariaId,
+                        ariaDescribedby: `${ariaId}-name`,
                     }),
                 },
                 {
@@ -370,7 +388,10 @@ export function createEntryLoadState() {
                         icon: 'remove',
                         disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
                         onclick: () => removeEntries(id),
-                        ariaDescribedby: ariaId,
+                        ariaDescribedby: toSpaceSeparatedString(
+                            `${ariaId}-name`,
+                            `${ariaId}-status`
+                        ),
                     }),
                 },
             ],
@@ -407,7 +428,7 @@ export function createEntryStoreState() {
                             updateEntryState(id, {
                                 store: true,
                             }),
-                        ariaDescribedby: ariaId,
+                        ariaDescribedby: `${ariaId}-name`,
                     }),
                 },
                 {
@@ -420,7 +441,10 @@ export function createEntryStoreState() {
                             updateEntryState(id, {
                                 abort: true,
                             }),
-                        ariaDescribedby: ariaId,
+                        ariaDescribedby: toSpaceSeparatedString(
+                            `${ariaId}-name`,
+                            `${ariaId}-store-info`
+                        ),
                     }),
                 },
                 {
@@ -435,7 +459,7 @@ export function createEntryStoreState() {
                             updateEntryState(id, {
                                 abort: true,
                             }),
-                        ariaDescribedby: ariaId,
+                        ariaDescribedby: `${ariaId}-name`,
                     }),
                 },
                 {
@@ -452,7 +476,11 @@ export function createEntryStoreState() {
                             updateEntryState(id, {
                                 store: false,
                             }),
-                        ariaDescribedby: ariaId,
+                        ariaDescribedby: toSpaceSeparatedString(
+                            `${ariaId}-name`,
+                            `${ariaId}-status`,
+                            `${ariaId}-store-info`
+                        ),
                     }),
                 },
             ],

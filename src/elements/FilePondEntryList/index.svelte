@@ -427,14 +427,8 @@
         };
     }
 
-    // generate unique id's
-    const ariaDragDescriptionId = `aria-drag-description-${getUniqueId()}`;
-
     /* Application context */
     setAppContext({
-        get ariaDragDescriptionId() {
-            return ariaDragDescriptionId;
-        },
         get enableAnimations() {
             return enableAnimations;
         },
@@ -983,7 +977,7 @@
 
     // handlers here for repeated actions while held down
     function handleKeyDown(e: KeyboardEvent) {
-        //
+        // we're not dragging
         if (!dragInteraction) {
             return;
         }
@@ -1053,7 +1047,6 @@
         const { key, ...props } = currentAction;
         return stringReplaceVariables(locale[key], props, locale);
     });
-    const ariaDragDescription = $derived(locale.ariaDragDescription);
 </script>
 
 <svelte:window
@@ -1088,8 +1081,6 @@
     onkeydown={handleKeyDown}
     onkeyup={handleKeyUp}
 >
-    <div role="status" aria-live="polite" class="implicit">{ariaStatus}</div>
-    <div id={ariaDragDescriptionId} style="display:none">{ariaDragDescription}</div>
     <NodeList
         nodes={template}
         context={{ entries: computedEntries }}
@@ -1098,4 +1089,5 @@
             beforeRenderNode(node, context, sharedContext)}
         beforeSetProps={(props) => ({ ...props, enableAnimations, springDefaults })}
     />
+    <div role="status" aria-live="polite" class="implicit">{ariaStatus}</div>
 </div>

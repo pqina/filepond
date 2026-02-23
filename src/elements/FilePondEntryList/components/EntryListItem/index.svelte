@@ -21,7 +21,8 @@
         springAnimation?: any;
         onmeasureitem: (rect: Rect) => void;
         entry: FilePondEntry;
-        children: Snippet<[{ id: string; ariaId: string; entry: FilePondEntry }]>;
+        ariaDescribedby: string;
+        children: Snippet<[{ id: string; entry: FilePondEntry }]>;
     }
 
     let {
@@ -37,6 +38,7 @@
         springAnimation,
         onmeasureitem,
         entry,
+        ariaDescribedby,
         children,
     }: EntryItemOptions = $props();
 
@@ -51,7 +53,7 @@
     });
 
     // get app context map
-    const { locale, ariaDragDescriptionId } = $derived(getAppContext());
+    const { locale } = $derived(getAppContext());
 
     /** Window width used to calculate if element is visible or not */
     let windowWidth = $state.raw() as number;
@@ -122,9 +124,12 @@
                   tabindex: 0,
                   role: 'listitem',
                   'aria-roledescription': locale.ariaItemRoleDescription,
-                  'aria-describedby': ariaDragDescriptionId,
+                  'aria-describedby': ariaDescribedby,
               }
-            : undefined
+            : {
+                  role: 'listitem',
+                  'aria-describedby': ariaDescribedby,
+              }
     );
 
     // Retain focus
@@ -154,5 +159,5 @@
     onchangerendercontent={handleChangeRenderContent}
     onelementmeasure={onmeasureitem}
 >
-    {@render children({ id: entry.id, ariaId: `entry-${entry.id}`, entry })}
+    {@render children({ id: entry.id, entry })}
 </SpringElement>

@@ -14,6 +14,7 @@
                     isLastDraggedItem: boolean;
                     springAnimation: EntrySpringAnimation;
                     translation: Vector;
+                    ariaId: string;
                     onmeasureitem: (rect: Rect) => void;
                 },
             ]
@@ -34,7 +35,7 @@
         onspringcomplete?: (spring: { opacity: number; scale: number }) => void;
     }
 
-    import { untrack, type Snippet } from 'svelte';
+    import { type Snippet } from 'svelte';
     import { type FilePondEntry, type SpringOptions } from '../../../../types/index.js';
     import { type Size, sizeFromRect } from '../../../../utils/size.js';
     import { type Rect } from '../../../../utils/rect.js';
@@ -45,12 +46,14 @@
     import { getDropContext } from '../../contexts/dropContext.js';
     import { isNumber } from '../../../../utils/test.js';
     import { noop } from '../../../../utils/placeholder.js';
+    import { getUniqueId } from '../../../../utils/string.js';
 
     let { entries, part, children: item }: EntryListOptions = $props();
 
     // app context
     const appContext = getAppContext();
     const animatedEntries = $derived(appContext.animatedEntries);
+    const locale = $derived(appContext.locale);
     const { updateEntryPlaceholderRect, entryAnimationProps } = getAppContext();
 
     // current drag state
@@ -329,6 +332,9 @@
     const itemGap = $derived(
         didComputeStyle ? parseFloat(computedStyle.getPropertyValue('gap')) : 0
     );
+
+    // aria
+    const ariaDragDescriptionId = `aria-drag-description-${getUniqueId()}`;
 </script>
 
 {#if computedList.entries.length}
@@ -336,6 +342,7 @@
         bind:this={root}
         role="list"
         class="entry-list"
+        aria-describedby={ariaDragDescriptionId}
         {part}
         style:--_detached-entry-spacing={computedList.detachedItemSize
             ? `${computedList.detachedItemSize?.height + itemGap}px`
@@ -359,7 +366,9 @@
                 translation,
                 onmeasureitem,
                 entry,
+                ariaId: `entry-${id}`,
             })}
         {/each}
     </ul>
+    <div id={ariaDragDescriptionId} style="display:none">{locale.ariaDragDescription}</div>
 {/if}

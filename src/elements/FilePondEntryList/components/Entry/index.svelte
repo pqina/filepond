@@ -7,7 +7,13 @@
     import { updateDataset } from '../../../../utils/dom.js';
 
     // props
-    const { children, part = undefined, class: klass = undefined, dataset } = $props();
+    const {
+        children,
+        part = undefined,
+        class: klass = undefined,
+        nameId = undefined,
+        dataset,
+    } = $props();
 
     let root: HTMLFieldSetElement;
 
@@ -29,7 +35,6 @@
 
     // get entry context
     const entryContext = getEntryContext();
-    const ariaId = $derived(entryContext.ariaId);
     const name = $derived(entryContext.current.name);
 
     // calculate clip mask so we can nicely scale content
@@ -40,7 +45,7 @@
 </script>
 
 <fieldset class={entryClass} bind:this={root} style:--mask={maskStyle} {part}>
-    <legend class="implicit" id={ariaId}>{name}</legend>
+    <legend class="implicit" id={nameId}>{name}</legend>
     {@render children()}
 </fieldset>
 <ElementPane class="entry-back" {...currentSize} />
