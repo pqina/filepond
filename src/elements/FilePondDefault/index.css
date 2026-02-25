@@ -89,23 +89,22 @@ file-pond-entry-list {
         border-radius: var(--entry-border-radius);
     }
 
-    &::part(entry-list-item dragged) {
-        --entry-shadow: 0 3px 6px rgb(0 0 0 / 0.25);
-    }
-
     &::part(entry-list-item selected) {
         --entry-overlay-color: rgb(from var(--entry-accent-color) r g b / 0.25);
         --entry-border: 2px solid var(--entry-accent-color);
     }
 
+    &::part(entry-list-item) {
+        outline: none;
+    }
+
     &::part(entry-list-item):focus-visible {
         border-radius: var(--entry-border-radius);
         outline: var(--outline);
+    }
 
-        /* Remove outline on Mobile Safari Only */
-        @supports (-webkit-touch-callout: none) {
-            outline: none;
-        }
+    &::part(entry-list-item dragging) {
+        --entry-shadow: 0 3px 6px rgb(0 0 0 / 0.25);
     }
 
     &::part(data-transfer-item) {

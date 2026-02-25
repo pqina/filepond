@@ -176,7 +176,7 @@ export class FilePondElement extends FilePondInputElement {
         };
 
         // this makes sure the parts defined in the entry list nodelist are automatically exported, default modifiers are always exported
-        const exportparts = new Set(['virtualized', 'dragged', 'selected', 'checked']);
+        const exportparts = new Set(['dragging', 'virtualized', 'selected', 'checked']);
         function syncExportparts(part?: string) {
             if (!part || exportparts.has(part)) {
                 return;

@@ -9,7 +9,6 @@
         DragState,
         DropState,
     } from './index.js';
-    import type { TemplateNode } from '../common/nodeTree.js';
     import type { Needle, FilePondEntryListOptions } from '../../types/index.js';
     import { type Bounds } from '../../utils/bounds.js';
 
@@ -121,6 +120,7 @@
     /** Height of current window */
     let windowHeight: number = $state(0);
 
+    /** Computed bounds object */
     const windowBounds: Bounds = $derived({
         top: 0,
         right: windowWidth,
@@ -431,6 +431,9 @@
     setAppContext({
         get enableAnimations() {
             return enableAnimations;
+        },
+        get enableDrag() {
+            return drag;
         },
         get locale() {
             return locale;
@@ -977,17 +980,18 @@
 
     // handlers here for repeated actions while held down
     function handleKeyDown(e: KeyboardEvent) {
-        // we're not dragging
-        if (!dragInteraction) {
-            return;
+        // if we're pressing an activaction key when a draggable target is focussed we have to prevent on keydown to prevent the window from scrolling
+        const target = e.target as HTMLElement;
+        if (target.dataset.draggable === '' && isActivationKeyboardEvent(e)) {
+            e.preventDefault();
         }
 
-        if (isArrowKeyboardEvent(e)) {
+        // handle moving the item
+        if (dragInteraction && isArrowKeyboardEvent(e)) {
             dragInteraction = {
                 ...dragInteraction,
                 direction: getDirectionFromKeyboardEvent(e),
             };
-
             e.preventDefault();
             return;
         }
@@ -1087,7 +1091,11 @@
         sharedContext={entryListAPI}
         beforeRenderNode={(node, context, sharedContext) =>
             beforeRenderNode(node, context, sharedContext)}
-        beforeSetProps={(props) => ({ ...props, enableAnimations, springDefaults })}
+        beforeSetProps={(props) => ({
+            ...props,
+            enableAnimations,
+            springDefaults,
+        })}
     />
     <div role="status" aria-live="polite" class="implicit">{ariaStatus}</div>
 </div>

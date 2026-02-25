@@ -5,6 +5,7 @@ import type { AnimatedEntry, AppCallbacks } from '../index.js';
 
 export interface AppContext extends AppCallbacks {
     readonly enableAnimations: boolean;
+    readonly enableDrag: boolean;
     readonly locale: Locale;
     readonly assets: { [key: string]: string };
     readonly resources: {

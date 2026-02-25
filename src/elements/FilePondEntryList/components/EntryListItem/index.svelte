@@ -80,7 +80,7 @@
         toSpaceSeparatedString(
             part,
             isVirtual ? 'virtualized' : undefined,
-            isDragging ? 'dragged' : undefined
+            isDragging ? 'dragging' : undefined
         )
     );
 
@@ -137,8 +137,12 @@
         if (!isDragging) {
             return;
         }
+
         element.focus({
             preventScroll: true,
+
+            // @ts-ignore, we hide the focus ring because it looks horrible on mobile devices, when a user drags the item with keyboard interaction it should be clear from the item being lifted that the item has focus.
+            focusVisible: false,
         });
     }
 </script>

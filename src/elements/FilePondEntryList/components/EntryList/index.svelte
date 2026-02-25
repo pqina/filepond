@@ -2,6 +2,7 @@
     interface EntryListOptions {
         entries: FilePondEntry[];
         part?: string;
+        enableDrag?: boolean;
         children: Snippet<
             [
                 {
@@ -54,6 +55,7 @@
     const appContext = getAppContext();
     const animatedEntries = $derived(appContext.animatedEntries);
     const locale = $derived(appContext.locale);
+    const enableDrag = $derived(appContext.enableDrag);
     const { updateEntryPlaceholderRect, entryAnimationProps } = getAppContext();
 
     // current drag state
@@ -335,6 +337,19 @@
 
     // aria
     const ariaDragDescriptionId = `aria-drag-description-${getUniqueId()}`;
+
+    // detached entry
+    const styleDetachedEntrySpacing = $derived(
+        computedList.detachedItemSize
+            ? `${computedList.detachedItemSize?.height + itemGap}px`
+            : null
+    );
+    const styleDetachedEntryWidth = $derived(
+        computedList.detachedItemSize ? `${computedList.detachedItemSize?.width}px` : null
+    );
+    const styleDetachedEntryHeight = $derived(
+        computedList.detachedItemSize ? `${computedList.detachedItemSize?.height}px` : null
+    );
 </script>
 
 {#if computedList.entries.length}
@@ -342,21 +357,15 @@
         bind:this={root}
         role="list"
         class="entry-list"
+        style:--_detached-entry-spacing={styleDetachedEntrySpacing}
+        style:--_detached-entry-width={styleDetachedEntryWidth}
+        style:--_detached-entry-height={styleDetachedEntryHeight}
         aria-describedby={ariaDragDescriptionId}
         {part}
-        style:--_detached-entry-spacing={computedList.detachedItemSize
-            ? `${computedList.detachedItemSize?.height + itemGap}px`
-            : null}
-        style:--_detached-entry-width={computedList.detachedItemSize
-            ? `${computedList.detachedItemSize?.width}px`
-            : null}
-        style:--_detached-entry-height={computedList.detachedItemSize
-            ? `${computedList.detachedItemSize?.height}px`
-            : null}
     >
         {#each computedList.entries as { id, isPlaceholder, isDetached, isRemoving, isDragging, isLastDraggedItem, springAnimation, translation, onmeasureitem, entry } (id)}
             {@render item({
-                isDraggable: true,
+                isDraggable: enableDrag,
                 isPlaceholder,
                 isDetached,
                 isRemoving,

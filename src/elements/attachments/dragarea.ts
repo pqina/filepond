@@ -5,7 +5,7 @@ import { addListener } from '../../utils/dom.js';
 import { debounce } from '../../utils/debounce.js';
 import { getUniqueId } from '../../utils/string.js';
 import { vectorCreate, vectorLengthSquared } from '../../utils/vector.js';
-import { isElement } from '../../utils/test.js';
+import { isElement, isIOS } from '../../utils/test.js';
 import { noop } from '../../utils/placeholder.js';
 
 export interface DragEventDetail {
@@ -40,17 +40,35 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
         itemSelector = 'li',
     } = options;
 
+    // just a shortcut
+    const documentElement = document.documentElement;
+
     return (element) => {
         // do nothing
         if (disabled) {
             return;
         }
 
+        // prevent scrolling with touch
+        let shouldPreventTouchMove = false;
+        const touchMoveUnsub = addListener(
+            documentElement,
+            'touchmove',
+            (e: TouchEvent) => {
+                if (!e.cancelable || !shouldPreventTouchMove) {
+                    return;
+                }
+                e.preventDefault();
+            },
+            {
+                passive: false,
+            }
+        );
+
         // unsubs
         let pointerMoveUnsub: (() => void) | void;
         let pointerUpUnsub: (() => void) | void;
         let pointerCancelUnsub: (() => void) | void;
-        let touchMoveUnsub: (() => void) | void;
 
         // holds timeout for when we consider something a grab action
         let grabAttemptTimeout: ReturnType<typeof setTimeout>;
@@ -64,13 +82,15 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
         let vector: Vector | undefined;
         let offset: Vector | undefined;
 
-        /** Prevents scrolling while dragging on iOS */
-        const preventScroll = (e: TouchEvent) => {
-            e.preventDefault();
-        };
-
         /** Resets the drag state when cancelled or dropped */
-        const reset = () => {
+        const reset = (e: PointerEvent) => {
+            // reset touch move prevention
+            shouldPreventTouchMove = false;
+
+            // stop capturing
+            element.releasePointerCapture(e.pointerId);
+
+            // reset state
             target = undefined;
             vector = undefined;
             startPosition = undefined;
@@ -88,9 +108,6 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
 
             // unsub from cancel
             pointerCancelUnsub = pointerCancelUnsub && pointerCancelUnsub();
-
-            // restore scroll on ios
-            touchMoveUnsub = touchMoveUnsub && touchMoveUnsub();
         };
 
         /** Update the drag state based on passed pointer event */
@@ -205,19 +222,17 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
             dispatchEvent('grabitemattempt');
 
             // if pointer up in this phase we cancel the grab
-            pointerUpUnsub = addListener(document.documentElement, 'pointerup', handleGrabCancel);
+            pointerUpUnsub && pointerUpUnsub();
+            pointerUpUnsub = addListener(documentElement, 'pointerup', handleGrabCancel);
 
             // if pointer move in this phase we cancel the grab
-            pointerMoveUnsub = addListener(
-                document.documentElement,
-                'pointermove',
-                handleGrabCancel
-            );
+            pointerMoveUnsub && pointerMoveUnsub();
+            pointerMoveUnsub = addListener(documentElement, 'pointermove', handleGrabCancel);
 
             // will consider a drag attempt if no pointer-up within x ms
             clearTimeout(grabAttemptTimeout);
             grabAttemptTimeout = setTimeout(() => {
-                handleGrab();
+                handleGrab(e.pointerId);
             }, grabTimeout);
         };
 
@@ -242,31 +257,28 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
             dispatchEvent('grabitemcancel');
 
             // clean up!
-            reset();
+            reset(e);
         };
 
         /** Handle grabbing elements */
-        const handleGrab = () => {
+        const handleGrab = (pointerId: number) => {
+            // prevent moving viewport with touch
+            shouldPreventTouchMove = true;
+
+            // we're now handling these events
+            element.setPointerCapture(pointerId);
+
             // grab can no longer be cancelled
             pointerUpUnsub && pointerUpUnsub();
-            pointerUpUnsub = addListener(document.documentElement, 'pointerup', handleDrop);
+            pointerUpUnsub = addListener(element, 'pointerup', handleDrop);
 
             // listen for move events
             pointerMoveUnsub && pointerMoveUnsub();
-            pointerMoveUnsub = addListener(document.documentElement, 'pointermove', handleDrag);
-
-            // prevent scroll on ios
-            touchMoveUnsub && touchMoveUnsub();
-            touchMoveUnsub = addListener(document.documentElement, 'touchmove', preventScroll, {
-                passive: false,
-            });
+            pointerMoveUnsub = addListener(element, 'pointermove', handleDrag);
 
             // handles cancel event
-            pointerCancelUnsub = addListener(
-                document.documentElement,
-                'pointercancel',
-                handleDragCancel
-            );
+            pointerCancelUnsub && pointerCancelUnsub();
+            pointerCancelUnsub = addListener(element, 'pointercancel', handleDragCancel);
 
             // get unique id for this drag operation
             id = getUniqueId();
@@ -286,7 +298,7 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
             dispatchEvent('dragitemcancel');
 
             // clean up!
-            reset();
+            reset(e);
         };
 
         /** Handle dragging elements */
@@ -320,7 +332,7 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
             dispatchEvent('dropitem');
 
             // clean up!
-            reset();
+            reset(e);
         };
 
         // listen to events
@@ -328,6 +340,7 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
 
         // unlisten when destroyed
         return () => {
+            touchMoveUnsub();
             pointerUnsub();
         };
     };
