@@ -182,7 +182,7 @@ export class FilePondElement extends FilePondInputElement {
                 return;
             }
             const parts = Array.from(exportparts.add(part)).join(',');
-            entryList.setAttribute('exportparts', parts);
+            entryList.setAttribute('exportparts', parts.replace(/ /g, ','));
         }
 
         // assign default options, anything view related we assign in connectedCallback()
