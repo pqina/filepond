@@ -24,7 +24,7 @@ export interface FileNameTransformOptions extends TransformExtensionOptions {
     /** Allows requesting a new filename. */
     renameEntry?: (
         entry: FilePondFileEntry,
-        options: { basename: string; extentsion: string; history: string[] }
+        options: { basename: string; extension: string; history: string[] }
     ) => Promise<string>;
 }
 
