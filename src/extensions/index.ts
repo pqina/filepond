@@ -38,6 +38,7 @@ export { SimulatedStore } from './simulated-store.js';
 
 // transforms
 export { FileNameTransform } from './file-name-transform.js';
+export { ImageBitmapTransform } from './image-bitmap-transform.js';
 
 // views
 export { ConsoleView } from './console-view.js';

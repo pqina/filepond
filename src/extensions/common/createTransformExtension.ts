@@ -52,7 +52,7 @@ export interface TransformExtensionOptions {
      * automatically. When this prop is set the `actionTransform` prop cannot be set to `false` to
      * reset the transform
      */
-    shouldTransform?: (entry: FilePondEntry) => Promise<boolean>;
+    shouldTransform?: (entry: FilePondEntry) => Promise<boolean> | boolean;
 
     /** How many transform operations can run in parallel, defaults to `1` */
     parallel?: number;

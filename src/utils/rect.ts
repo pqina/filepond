@@ -1,6 +1,6 @@
 import type { Vector } from './vector.js';
 import type { Bounds } from './bounds.js';
-
+import type { Size } from './size.js';
 import { vectorCreate } from './vector.js';
 
 /** A rectangle */
@@ -133,4 +133,20 @@ export function rectPad(rect: Rect, padding: number): Rect {
         width: rect.width + padding * 2,
         height: rect.height + padding * 2,
     };
+}
+
+/** Creates a rectangle inside a given size optionally based on an aspect raito */
+export function rectFromSize(size: Size, aspectRatio: number = size.width / size.height): Rect {
+    let { width } = size;
+    let height = width / aspectRatio;
+    if (height > size.height) {
+        height = size.height;
+        width = height * aspectRatio;
+    }
+    return rectCreate((size.width - width) * 0.5, (size.height - height) * 0.5, width, height);
+}
+
+/** Applies a function to each Rect property and returns a new Rect */
+export function rectApply(rect: Rect, fn: (value: number) => number): Rect {
+    return rectCreate(fn(rect.x), fn(rect.y), fn(rect.width), fn(rect.height));
 }
