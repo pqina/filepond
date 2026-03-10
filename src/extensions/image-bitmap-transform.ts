@@ -12,22 +12,22 @@ import {
 } from './common/createTransformExtension.js';
 
 export interface ImageBitmapTransformOptions extends TransformExtensionOptions {
-    /** Target width, defaults to `undefined` */
+    /** Image target width, defaults to `undefined` */
     width?: number;
 
-    /** Target height, defaults to `undefined` */
+    /** Image target height, defaults to `undefined` */
     height?: number;
 
-    /** How to fit image if different aspect ratio, defaults to `'contain'` */
+    /** How to fit image in target size bounds, defaults to `'contain'` */
     fit?: 'cover' | 'contain' | 'force';
 
-    /** Should we upscale smaller images, defaults to `false` */
+    /** Should we upscale images, defaults to `false` */
     upscale?: boolean;
 
-    /** Output aspect ratio, defaults to input aspect ratio */
+    /** Output aspect ratio, defaults to input image aspect ratio */
     aspectRatio?: number;
 
-    /** Output type, defaults to input file type */
+    /** Output format type, defaults to input image type, some example types are `'image/jpeg'`, `'image/wepb'`, and `'image/png'`, limited to what the canvas `toBlob` method can output for the current browser */
     type?: string;
 
     /** Resize quality. Defaults to `'medium'` */
