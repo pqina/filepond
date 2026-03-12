@@ -389,10 +389,8 @@ export function appendEntryImageView(
     nodeTree(template)
         .find('entry')
         .append(
-            whenEntryIs((entry) => {
-                return (
-                    entryIsImage(entry) || hasExtensionWithProp(entry as FilePondEntry, 'poster')
-                );
+            whenEntryIs((entry: any) => {
+                return entryIsImage(entry) || hasExtensionWithProp(entry, 'poster');
             }).append(
                 createImageView(imageViewOptions),
                 whenEntryNotHasStatus('error').append(
