@@ -29,8 +29,8 @@ media-pane {
     /* Media itself */
     & canvas,
     & video {
-        /* This dramatically improves render performance, pixelation doesn't really show because we're scaling with transforms */
-        image-rendering: pixelated;
+        /* This dramatically improves render performance, pixelation doesn't really show with photo's, can set to `smooth` to improve picture quality */
+        image-rendering: var(--image-rendering, pixelated);
 
         /* So we can transform this element */
         position: absolute;

@@ -3,7 +3,7 @@ import { isFile } from '../../src/utils/test.js';
 
 export function createDefaultEntryTree() {
     return createEntryTree({
-        beforeAddEntry: (entry) => {
+        beforeOnboardEntry: (entry) => {
             if (isFile(entry.src)) {
                 entry.file = entry.src;
             }

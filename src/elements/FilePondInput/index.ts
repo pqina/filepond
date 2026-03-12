@@ -15,7 +15,7 @@ import type { ExtensionFactory } from '../../core/extensionManager.js';
 
 // import modules
 import { createExtensionManager } from '../../core/extensionManager.js';
-import { createEntryTree, type Needle } from '../../core/entryTree.js';
+import { createEntryTree, type EntryTreeOptions, type Needle } from '../../core/entryTree.js';
 import {
     h,
     getAttribute,
@@ -23,7 +23,6 @@ import {
     setBooleanAttribute,
     setStringAttribute,
     getAttributeFromElements,
-    removeAttributes,
     addListener,
     createStyleSheet,
     setAttributes,
@@ -50,11 +49,19 @@ import { getFilenameFromURL } from '../../utils/url.js';
 import { arrayRemoveFalsy } from '../../utils/array.js';
 import defaultStyles from './index.css?inline';
 
-//
-export function createFilePondEntryTree() {
+export type createFilePondEntryTreeOptions = Omit<
+    EntryTreeOptions,
+    'beforeOnboardEntry' | 'beforeUpdateEntryWithProps'
+>;
+
+export function createFilePondEntryTree(options?: createFilePondEntryTreeOptions) {
+    const { beforeInsertEntries } = options || {};
     return createEntryTree({
+        // allows limiting the total entries added
+        beforeInsertEntries,
+
         // formats the entry so all entries in the dataset follow the same data structure
-        beforeAddEntry(entry) {
+        beforeOnboardEntry(entry) {
             // filter invalid entries
             if (!shouldAddEntry(entry)) {
                 return false;
@@ -203,14 +210,14 @@ function toFormData(fieldName: string, value: string | File | (string | File)[])
     return formData;
 }
 
-// These attributes are synced from the file input to the custom element
+// Along with the InteractionAttributes these attributes are synced from an optional slotted file input to the custom element
 const GenericAttributes = ['required', 'name', 'id'];
 
-// These attributes are assigend to the hidden file input so it correctly responds when calling browse()
-const InteractionAttributes = ['disabled', 'multiple', 'accept'];
+// These attributes are assigend to the hidden file input so it correctly responds when calling `browse()` the 'multiple' attribute isn't in this list as it can't be set on the file-pond element
+const InteractionAttributes = ['disabled', 'accept', 'capture', 'webkitdirectory'];
 
-// these attributes have their boolean values (which read as '') auto-converted to `true`
-const BooleanAttributes = ['disabled', 'multiple', 'required'];
+// these attributes when set on the custom element have their boolean values (which read as '') auto-converted to `true`
+const BooleanAttributes = ['disabled', 'required', 'webkitdirectory'];
 
 export interface FilePondInputElementEvents {
     addEventListener<K extends keyof HTMLElementEventMap>(
@@ -284,22 +291,31 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     /** Attributes being observed for changes */
     static get observedAttributes() {
         return [
+            'animations',
             'value',
-            'multiple',
             'readonly',
             'required',
-            'animations',
+            'webkitdirectory',
+            'capture',
             'accept',
+            'nobrowse',
+
+            //
+            // apart from 'max-files' these are convenience attributes for validation extensions
+            //
             'min-files',
             'max-files',
             'min-size',
             'max-size',
             'min-list-size',
             'max-list-size',
-            'nobrowse',
 
             //
-            // changes to `disabled` attribute are handled by `formDisabledCallback`
+            // the root doesn't have the 'multiple' attribute it uses 'min-files' / 'max-files'
+            //
+
+            //
+            // changes to 'disabled' attribute are handled by `formDisabledCallback`
             //
         ];
     }
@@ -312,17 +328,58 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
             return;
         }
 
-        // nobrowse
-        if (name === 'nobrowse') {
-            this.noBrowse = isString(value);
-            return;
-        }
+        // // nobrowse
+        // if (name === 'nobrowse') {
+        //     this.noBrowse = isString(value);
+        //     return;
+        // }
+
+        // make sure internal state is updated based on attribute changes
+        this.#syncAttributeToInternals(name, value);
 
         // make sure source input attributes are in sync with file-pond root
         this.#syncAttributeToFileInput(name, value);
 
         // some attributes are linked to extension properties, let's update those now
         this.#syncAttributeToExtensions(name, value);
+    }
+
+    /** Syncs attribute to internal element state */
+    #syncAttributeToInternals(name: string, value: string | boolean) {
+        // sync noBrowse
+        if (name === 'nobrowse') {
+            // enabled
+            if (isString(value)) {
+                this.#browseButton.remove();
+            }
+            // disabled
+            else {
+                this.#slot.prepend(this.#browseButton);
+            }
+
+            return;
+        }
+
+        // sync max files
+        if (name === 'max-files') {
+            const maxFiles = parseInt(value as string, 10);
+
+            // auto limit entries to max amount when updating max files
+            if (this.#entryTree.entries.length > maxFiles) {
+                this.#entryTree.entries = this.#entryTree.entries.toSpliced(maxFiles);
+            }
+
+            // can have more than one file, set multiple
+            this.#fileInput.multiple = maxFiles > 1;
+
+            // need to update browse button label as it is different when allowing multiple files
+            this.#syncBrowseButton();
+
+            // retest validity
+            this.checkValidity();
+
+            return;
+        }
     }
 
     /** Syncs file-pond interaction attributes (attributes that impact file system file selection UX) to source input attributes */
@@ -359,17 +416,29 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         return !!getAttribute(this, 'disabled');
     }
 
-    /** Toggle the field multiple state */
-    set multiple(value: boolean) {
-        setBooleanAttribute(this, 'multiple', value);
+    /** Set the field webkitdirectory state */
+    set webkitdirectory(value: boolean) {
+        setBooleanAttribute(this, 'webkitdirectory', value);
+    }
 
-        // need to update browse button label as it is different for multiple mode
-        this.#syncBrowseButton();
+    /** Gets the field webkitdirectory state */
+    get webkitdirectory() {
+        return !!getAttribute(this, 'webkitdirectory');
+    }
+
+    /** Toggle the field multiple state */
+    set multiple(allowMultiple: boolean) {
+        if (allowMultiple && this.maxFiles === 1) {
+            this.maxFiles = Infinity;
+        }
+        if (!allowMultiple && this.maxFiles !== 1) {
+            this.maxFiles = 1;
+        }
     }
 
     /** Gets the field multiple state */
     get multiple() {
-        return !!getAttribute(this, 'multiple');
+        return this.maxFiles !== 1;
     }
 
     /**
@@ -420,10 +489,10 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     set noBrowse(value: boolean) {
         if (value) {
             setBooleanAttribute(this, 'nobrowse', true);
-            this.#browseButton.remove();
+            // this.#browseButton.remove();
         } else {
             setBooleanAttribute(this, 'nobrowse', false);
-            this.#slot.prepend(this.#browseButton);
+            // this.#slot.prepend(this.#browseButton);
         }
     }
 
@@ -484,7 +553,11 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
     /** Max total entries setter, an integer, defaults to `Infinity` */
     set maxFiles(value: number) {
-        setStringAttribute(this, 'max-files', value);
+        if (value === Infinity) {
+            this.removeAttribute('max-files');
+        } else {
+            setStringAttribute(this, 'max-files', value);
+        }
     }
 
     /** Returns the currently set max total entries */
@@ -602,11 +675,12 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         const { styles = [] } = options || {};
 
         // attach shadow DOM and inner slot
-        this.#root = this.attachShadow({ mode: 'open' });
+        this.#root = this.attachShadow({ mode: 'open', delegatesFocus: true });
         this.#root.adoptedStyleSheets = [defaultStyles, ...styles].map(createStyleSheet);
 
         // attach wrapper, this is used for custom styles
         this.#wrapper = h('div') as HTMLDivElement;
+        this.#wrapper.tabIndex = -1;
         this.#root.append(this.#wrapper);
 
         // create slot
@@ -618,6 +692,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
             type: 'file',
             'aria-hidden': true,
             hidden: true,
+            multiple: true,
             tabIndex: -1,
         }) as HTMLInputElement;
         this.#wrapper.prepend(this.#fileInput);
@@ -632,8 +707,25 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         // attach element internals, we'll assign getters from root the private internals prop
         this.#internals = this.attachInternals();
 
-        // the pond "bridge" handles all comms between extensions
-        this.#entryTree = createFilePondEntryTree();
+        // manages all the entries
+        this.#entryTree = createFilePondEntryTree({
+            // handles one or multiple files state
+            beforeInsertEntries: (
+                entriesToInsert: FilePondEntry[],
+                currentEntries: FilePondEntry[]
+            ) => {
+                // there's a limit imposed on the amount of files, let's prevent adding more
+                if (
+                    this.maxFiles < Infinity &&
+                    currentEntries.length + entriesToInsert.length > this.maxFiles
+                ) {
+                    return entriesToInsert.toSpliced(this.maxFiles - currentEntries.length);
+                }
+
+                // insert all files
+                return entriesToInsert;
+            },
+        });
 
         // create the core file manager and make sure we can store results in the custom element
         this.#extensionManager = createExtensionManager(this.#entryTree);
@@ -680,7 +772,6 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
             if (!this.locale) {
                 return;
             }
-
             this.#syncBrowseButton();
         });
     }
@@ -747,6 +838,11 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
             // @ts-ignore
             this[attr] = value;
+        }
+
+        // handle multiple
+        if (inputs.length) {
+            this.multiple = !!getAttributeFromElements('multiple', ...inputs);
         }
 
         // remove inputs
@@ -990,10 +1086,10 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         }
         // field is invalid
         else {
-            const anchor = this.#browseButton.parentNode ? this.#browseButton : undefined;
-            this.#internals.setValidity(flags, message, anchor);
+            this.#internals.setValidity(flags, message, this.#wrapper);
             valid = false;
         }
+
         // validity is reflected in browse button description for screenreader users
         this.#syncBrowseButton();
 

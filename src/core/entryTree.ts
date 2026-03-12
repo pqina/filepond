@@ -17,13 +17,22 @@ import {
     isObject,
 } from '../utils/test.js';
 import { getUniqueId } from '../utils/string.js';
+import { passthrough } from '../utils/placeholder.js';
 
 export interface EntryTreeOptions {
     /**
-     * Called before an entry is added to the tree, allows manipulating the entry, or returning
-     * false to prevent adding it
+     * Called before inserting entries into the tree, allows limiting the amount of entries inserted
      */
-    beforeAddEntry?: (entry: FilePondEntrySource) => false | FilePondEntry;
+    beforeInsertEntries?: (
+        entriesToInsert: FilePondEntry[],
+        currentEntries: FilePondEntry[]
+    ) => FilePondEntry[];
+
+    /**
+     * Called before an entry is added to the tree, allows manipulating the entry, or returning
+     * false to prevent adding it, can be called multiple times
+     */
+    beforeOnboardEntry?: (entry: FilePondEntrySource) => false | FilePondEntry;
 
     /** Called before an `entry` is updated with `props`, allows manipulating the props */
     beforeUpdateEntryWithProps?: (
@@ -46,7 +55,11 @@ interface FilePondEntryTree {
 
 /** Lean headless file processor */
 export function createEntryTree(options: EntryTreeOptions) {
-    const { beforeAddEntry, beforeUpdateEntryWithProps } = options ?? {};
+    const {
+        beforeInsertEntries = passthrough,
+        beforeOnboardEntry,
+        beforeUpdateEntryWithProps,
+    } = options ?? {};
 
     // pubsub
     const { on, pub } = pubsub();
@@ -65,8 +78,8 @@ export function createEntryTree(options: EntryTreeOptions) {
     /** Assigns an id to the entry if */
     function onboardEntry(entry: FilePondEntrySource): FilePondEntry | undefined {
         // allow manipulating the entry
-        const sanitizedEntry = beforeAddEntry
-            ? beforeAddEntry(entry)
+        const sanitizedEntry = beforeOnboardEntry
+            ? beforeOnboardEntry(entry)
             : isFileEntry(entry) || isDirectoryEntry(entry)
               ? entry
               : false;
@@ -339,8 +352,9 @@ export function createEntryTree(options: EntryTreeOptions) {
         }
 
         // sanitized
-        const sanitizedEntries = arrayRemoveFalsy(
-            entriesToInsert.map((entry) => onboardEntry(entry))
+        const sanitizedEntries = beforeInsertEntries(
+            arrayRemoveFalsy(entriesToInsert.map((entry) => onboardEntry(entry))),
+            parent.entries
         );
 
         willCallUpdateEntries = true;
@@ -352,7 +366,7 @@ export function createEntryTree(options: EntryTreeOptions) {
         computeIndexes();
 
         // let others know the entries were added
-        sanitizedEntries.forEach((entry) => didInsertEntry(entry));
+        sanitizedEntries.forEach((entry: FilePondEntry) => didInsertEntry(entry));
 
         // did update tree
         didUpdateEntries();
@@ -378,11 +392,14 @@ export function createEntryTree(options: EntryTreeOptions) {
 
         willCallUpdateEntries = true;
 
-        // we sanitized these entries
-        const sanitizedEntries = arrayRemoveFalsy(rawEntries.flat().map(onboardEntry));
-
         // the entry we'll replace
         const entryToReplace = getEntryByIndexPath(path) as FilePondEntry;
+
+        // we sanitized these entries
+        const sanitizedEntries = beforeInsertEntries(
+            arrayRemoveFalsy(rawEntries.flat().map(onboardEntry)),
+            parent.entries.filter((entry) => entry.id !== entryToReplace.id)
+        );
 
         // add the new entries
         parent.entries = parent.entries.toSpliced(index, 1, ...sanitizedEntries);
@@ -617,6 +634,7 @@ export function createEntryTree(options: EntryTreeOptions) {
             });
 
         // set new tree
+        // tree.entries = beforeInsertEntries(sanitizedEntries, []);
         tree.entries = sanitizedEntries;
 
         // compute new indexes for this tree
@@ -673,7 +691,7 @@ export function createEntryTree(options: EntryTreeOptions) {
 
         willCallUpdateEntries = true;
 
-        // TODO: fire remove event
+        // fire remove event
         eachTree(tree.entries, (entry, _) => handleRemoveEntry({ entry, index: [-1] }));
 
         // set empty array

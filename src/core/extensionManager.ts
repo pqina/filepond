@@ -13,6 +13,12 @@ import type { createEntryTree, Needle } from './entryTree.js';
 
 export type ExtensionFactory = Extension | [Extension, { [key: string]: unknown }];
 
+export type ExtensionFactoryInsertInstructions =
+    | Extension
+    | [Extension, { [key: string]: unknown }]
+    | [Extension, { [key: string]: unknown }, { before: string; after?: undefined }]
+    | [Extension, { [key: string]: unknown }, { before?: undefined; after: string }];
+
 export interface LoadedExtension {
     current?: any;
     index: number;

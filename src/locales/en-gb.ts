@@ -17,7 +17,7 @@ export const core = {
     info: 'Info',
     system: 'System',
 
-    // file types
+    // file types (these also match with image/*, video/*, and audio/*)
     fileMainTypeImage: 'image',
     fileMainTypeVideo: 'video',
     fileMainTypeAudio: 'audio',
@@ -143,7 +143,7 @@ export const validationFileMimeType = {
             accepted: {
                 context: 'count',
                 map: {
-                    1: 'File must by of type {{accept}}',
+                    1: 'File must be of type {{accept}}',
                     else: 'Accepted types are: {{accept}}',
                 },
             },
@@ -167,7 +167,7 @@ export const validationFileExtension = {
 };
 
 export const validationFileName = {
-    validationFileNameMissing: 'File name missing',
+    validationFileNameMissing: 'File name missing.',
     validationFileNameMismatch: 'This file name is invalid.',
 };
 
@@ -178,8 +178,9 @@ export const validationFileSize = {
 
 export const validationListSize = {
     validationListSizeUnderflow:
-        'Total file size is too small. Minimum required is {{minListSize}}.',
-    validationListSizeOverflow: 'Total file size is too large. Maximum allowed is {{maxListSize}}.',
+        'Total file size is too small. Minimum total size is {{minListSize}}.',
+    validationListSizeOverflow:
+        'Total file size is too large. Maximum total size is {{maxListSize}}.',
 };
 
 export const validationMediaResolution = {
@@ -213,7 +214,7 @@ export const validationMediaResolution = {
 
 export const validationListCount = {
     validationListEntryCountUnderflow: {
-        template: 'Too few files in the list. Minimum required is {{minFiles}} {{files}}.',
+        template: 'Too few files in the list. Minimum amount is {{minFiles}} {{files}}.',
         variables: {
             files: {
                 context: 'minFiles',
@@ -226,10 +227,10 @@ export const validationListCount = {
     },
 
     validationListEntryCountOverflow: {
-        template: 'Too many files in the list. Maximum required is {{maxFiles}} {{files}}.',
+        template: 'Too many files in the list. Maximum amount is {{maxFiles}} {{files}}.',
         variables: {
             files: {
-                context: 'minFiles',
+                context: 'maxFiles',
                 map: {
                     1: 'file',
                     else: 'files',

@@ -29,7 +29,7 @@ describe('entryTree', function () {
         };
 
         tree = createEntryTree({
-            beforeAddEntry(entry) {
+            beforeOnboardEntry(entry) {
                 return entry;
             },
         });

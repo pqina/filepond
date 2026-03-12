@@ -28,7 +28,7 @@ describe('FileExtensionValidator', () => {
                 if (status?.type !== 'error') return;
 
                 unsub();
-                expect(status.code).to.equal('VALIDATION_INVALID');
+                expect(status.code).toEqual('VALIDATION_INVALID');
                 done();
             });
 

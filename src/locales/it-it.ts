@@ -221,7 +221,7 @@ export const validationListCount = {
         template: 'Troppi file. Il massimo consentito è {{maxFiles}} {{files}}.',
         variables: {
             files: {
-                context: 'minFiles',
+                context: 'maxFiles',
                 map: { 1: 'file', else: 'file' },
             },
         },

@@ -222,7 +222,7 @@ export const validationListCount = {
         template: 'Πάρα πολλά αρχεία στη λίστα. Μέγιστο {{maxFiles}} {{files}}.',
         variables: {
             files: {
-                context: 'minFiles',
+                context: 'maxFiles',
                 map: {
                     1: 'αρχείο',
                     else: 'αρχεία',

@@ -218,7 +218,7 @@ export const validationListCount = {
         template: 'बहुत अधिक फ़ाइलें। अधिकतम {{maxFiles}} {{files}} अनुमत हैं।',
         variables: {
             files: {
-                context: 'minFiles',
+                context: 'maxFiles',
                 map: { 1: 'फ़ाइल', else: 'फ़ाइलें' },
             },
         },

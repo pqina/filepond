@@ -5,6 +5,7 @@ import {
     type ValidatorExtensionOptions,
 } from './common/createValidatorExtension.js';
 import { isBlobOrFile, isFileEntry, isString } from '../utils/test.js';
+import { upperCaseFirstLetter } from '../utils/string.js';
 
 export interface FileMimeTypeValidatorOptions extends ValidatorExtensionOptions {
     /** An array of accepted file mime types, also accepts the wildcard character for example `['image/*']` */
@@ -20,9 +21,13 @@ export const FileMimeTypeValidator = createValidatorExtension(
         accept: [],
         format: (mimeTypes: string[]) =>
             mimeTypes
-                .map((mimeType) => mimeType.split('/')[1])
-                .join(', ')
-                .toUpperCase(),
+                .map((mimeType) => {
+                    const [group, type] = mimeType.split('/');
+                    return type === '*'
+                        ? `fileMainType${upperCaseFirstLetter(group)}`
+                        : type.toUpperCase();
+                })
+                .join(', '),
     } as FileMimeTypeValidatorOptions,
     ({ props, didSetProps }) => {
         /** Filter out non mimetype values */

@@ -25,12 +25,13 @@ export function toPascalCase(str: string, separator = '-') {
     return str.replace(new RegExp(`${separator}.`, 'g'), (sub) => sub.charAt(1).toUpperCase());
 }
 
+export function toCamelParts(str: string) {
+    return str.split(/[\s_\b]|(?=[A-Z])/);
+}
+
 /** Turns a camelCase string into a kebab-case string, already kebab case strings aren't modified */
 export function toKebabCase(str: string) {
-    return str
-        .split(/[\s_\b]|(?=[A-Z])/)
-        .join('-')
-        .toLowerCase();
+    return toCamelParts(str).join('-').toLowerCase();
 }
 
 /** Returns the default locale for the current client, this is used when no locale is supplied */

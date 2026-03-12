@@ -219,7 +219,7 @@ export const validationListCount = {
         template: 'Liikaa tiedostoja. Enintään {{maxFiles}} {{files}}.',
         variables: {
             files: {
-                context: 'minFiles',
+                context: 'maxFiles',
                 map: {
                     1: 'tiedosto',
                     else: 'tiedostoa',

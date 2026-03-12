@@ -98,7 +98,8 @@ export const core = {
         'A szóköz megnyomásával felvehet és letehet egy elemet. Az új pozícióba mozgatáshoz használja a fel és le nyílbillentyűket.',
     ariaDragStateDrop: 'A(z) {{name}} lerakva a(z) {{position}}. pozícióban',
     ariaDragStateGrab: 'A(z) {{name}} felvéve a(z) {{position}}. pozícióban',
-    ariaDragStateSort: 'A(z) {{name}} áthelyezve a(z) {{position}}. pozícióba, összesen {{total}} közül',
+    ariaDragStateSort:
+        'A(z) {{name}} áthelyezve a(z) {{position}}. pozícióba, összesen {{total}} közül',
 };
 
 export const media = {
@@ -218,7 +219,7 @@ export const validationListCount = {
         template: 'Túl sok fájl a listában. Maximum {{maxFiles}} {{files}}.',
         variables: {
             files: {
-                context: 'minFiles',
+                context: 'maxFiles',
                 map: {
                     1: 'fájl',
                     else: 'fájl',

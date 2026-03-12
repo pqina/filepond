@@ -72,7 +72,7 @@ export function createExtension(
     props: any,
     factory: ExtensionFactoryFunction
 ): Extension {
-    return (pond): ExtensionInstance => {
+    const fn = (pond: ExtensionManagerAPI): ExtensionInstance => {
         if (!isString(extensionName) || !extensionName) {
             warn('Extension name missing or invalid');
         }
@@ -185,4 +185,8 @@ export function createExtension(
             },
         });
     };
+
+    Object.defineProperty(fn, 'name', { value: extensionName, writable: false });
+
+    return fn;
 }

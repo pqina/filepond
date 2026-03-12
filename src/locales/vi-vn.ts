@@ -215,7 +215,7 @@ export const validationListCount = {
         template: 'Danh sách có quá nhiều tệp. Tối đa {{maxFiles}} {{files}}.',
         variables: {
             files: {
-                context: 'minFiles',
+                context: 'maxFiles',
                 map: {
                     1: 'tệp',
                     else: 'tệp',

@@ -1,5 +1,8 @@
-import type { ExtensionFactory } from '../../core/extensionManager.ts';
-import type { AnimationMode, Locale, SpringOptions } from '../../types/index.js';
+import type {
+    ExtensionFactory,
+    ExtensionFactoryInsertInstructions,
+} from '../../core/extensionManager.ts';
+import type { AnimationMode, Extension, Locale, SpringOptions } from '../../types/index.js';
 import { FilePondInputElement } from '../FilePondInput/index.js';
 import { FilePondEntryListElement } from '../FilePondEntryList/index.js';
 import { FilePondDropAreaElement } from '../FilePondDropArea/index.js';
@@ -7,6 +10,8 @@ import { FilePondDropIndicatorElement } from '../FilePondDropIndicator/index.js'
 import { FileInputSource } from '../../extensions/file-input-source.js';
 import { DataTransferLoader } from '../../extensions/data-transfer-loader.js';
 import { ValueCallbackStore } from '../../extensions/value-callback-store.js';
+import { FileExtensionValidator } from '../../extensions/file-extension-validator.js';
+import { FileMimeTypeValidator } from '../../extensions/file-mime-type-validator.js';
 
 import {
     getDefaultEntryAnimationOriginMap,
@@ -25,7 +30,7 @@ import {
     dispatchCustomEvent,
     setBooleanAttribute,
 } from '../../utils/dom.js';
-import { isString } from '../../utils/test.js';
+import { isArray, isString } from '../../utils/test.js';
 import { assets } from '../../assets/index.js';
 
 // default FilePond styles
@@ -33,16 +38,70 @@ import defaultStyles from './index.css?inline';
 
 // template
 import { createFilePondEntryList } from '../../templates/entry.js';
+import { toCamelParts } from '../../utils/string.js';
+import { arrayInsertAtIndex } from '../../utils/array.js';
 
-/** Wraps a set of extensions in with the default FilePond custom element extensions */
+// Related to managing default extensions
+function getExtensionName(extension: ExtensionFactory | { name: string }) {
+    return (isArray(extension) ? extension[0] : extension).name;
+}
+
+function getExtensionInsertInstructions(extension: ExtensionFactoryInsertInstructions) {
+    return isArray(extension) ? extension[2] : undefined;
+}
+
+/** Wraps a set of extensions in with the default FilePond custom element extensions, this extension selection makes switching from a default input to a file-pond element as frictionless as possible */
 export function createFilePondExtensionSet(extensions: ExtensionFactory[] = []) {
-    return [
+    // Where to insert transform extensions
+    const _TransformSlot = { name: 'Transform' };
+
+    // default extension set
+    let extensionSet = [
         FileInputSource,
-        ...extensions,
         DataTransferLoader,
+        FileExtensionValidator,
+        FileMimeTypeValidator,
+        // the default extension set doesn't have a Transform extension, so we create a slot so we can auto insert transform extensions there, the slot is removed when we return the extension set
+        _TransformSlot,
         ValueCallbackStore,
         EntryListView,
-    ] as ExtensionFactory[];
+    ];
+
+    // now we loop over extensions and insert them after the index of a current extension (source types after FileInputSource, validator types after FileExtensionValidator, etc.)
+    for (const extension of extensions) {
+        let name = getExtensionName(extension);
+        let needle: string;
+        let indexOffset = 1;
+        let instructions = getExtensionInsertInstructions(extension);
+
+        // no insert instructions, we use type part of extension name
+        if (!instructions) {
+            needle = toCamelParts(name).pop() as string;
+        }
+        // use the supplied insert instructions
+        else {
+            indexOffset = instructions.before ? 0 : 1;
+            needle = (instructions.before || instructions.after) as string;
+        }
+
+        // find where to insert the extension
+        const index = extensionSet.findIndex((extension) =>
+            getExtensionName(extension).endsWith(needle)
+        );
+        if (index === -1) {
+            // TODO: insert warning and instructions on how to name extension so it can be inserted automatically
+            continue;
+        }
+
+        // insert the extension
+        extensionSet = arrayInsertAtIndex(
+            extensionSet,
+            index + indexOffset,
+            extension as Extension
+        );
+    }
+
+    return extensionSet.filter((fn) => fn !== _TransformSlot) as Extension[];
 }
 
 const SharedProps = ['springDefaults', 'animations'];
@@ -188,7 +247,7 @@ export class FilePondElement extends FilePondInputElement {
         // assign default options, anything view related we assign in connectedCallback()
         Object.assign(this, {
             // add items view
-            extensions: createFilePondExtensionSet(this.extensions),
+            extensions: this.extensions,
 
             // show progress indicator for data transfers
             DataTransferLoader: {

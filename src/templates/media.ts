@@ -1,9 +1,12 @@
+import { type FilePondEntry } from '../types/index.js';
 import { type EntryListFunctions } from '../types/index.js';
 import { type MediaVideoOptions } from '../elements/FilePondEntryList/components/MediaVideo/index.js';
 import {
     createButton,
+    createEntryMatcher,
     createSpringPane,
     getExtensionByAction,
+    hasExtensionWithProp,
     hasExtensionWithStatusCode,
     hasExtensionWithStatusType,
     whenEntryHasAction,
@@ -375,6 +378,8 @@ export function createMediaTimeIndicator() {
     };
 }
 
+const entryIsImage = createEntryMatcher('image');
+
 export function appendEntryImageView(
     template: TemplateNode[],
     options?: { imageViewOptions?: MediaImageOptions }
@@ -384,7 +389,11 @@ export function appendEntryImageView(
     nodeTree(template)
         .find('entry')
         .append(
-            whenEntryIs('image').append(
+            whenEntryIs((entry) => {
+                return (
+                    entryIsImage(entry) || hasExtensionWithProp(entry as FilePondEntry, 'poster')
+                );
+            }).append(
                 createImageView(imageViewOptions),
                 whenEntryNotHasStatus('error').append(
                     whenEntryHasAction('editMedia').append(

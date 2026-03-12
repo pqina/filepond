@@ -5,7 +5,7 @@
     import { untrack } from 'svelte';
     import { MediaPane } from '../MediaPane/index.js';
     import { arrayRemoveFalsy } from '../../../../utils/array.js';
-    import { isImageFile, isString } from '../../../../utils/test.js';
+    import { isBlobOrFile, isImageFile, isString } from '../../../../utils/test.js';
     import { getAppContext } from '../../../../elements/FilePondEntryList/contexts/appContext.js';
     import { getEntryContext } from '../../../../elements/FilePondEntryList/contexts/entryContext.js';
     import { filesAreProbablyEqual } from '../../../../utils/file.js';
@@ -68,17 +68,25 @@
         }
 
         // load 'poster'
-        else if (isString(poster)) {
-            fetch(poster)
-                .then((res) => res.blob())
-                .then((blob) => {
-                    currentFile = {
-                        file: blob,
-                        isComplete: false,
-                        isPoster: true,
-                    };
-                })
-                .catch(handleError);
+        else if (poster) {
+            if (isBlobOrFile(poster)) {
+                currentFile = {
+                    file: poster,
+                    isComplete: false,
+                    isPoster: true,
+                };
+            } else {
+                fetch(poster)
+                    .then((res) => res.blob())
+                    .then((blob) => {
+                        currentFile = {
+                            file: blob,
+                            isComplete: false,
+                            isPoster: true,
+                        };
+                    })
+                    .catch(handleError);
+            }
         }
     });
 

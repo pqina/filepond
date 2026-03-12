@@ -218,7 +218,7 @@ export const validationListCount = {
         template: '파일이 너무 많습니다. 최대 {{maxFiles}} {{files}}까지 허용됩니다.',
         variables: {
             files: {
-                context: 'minFiles',
+                context: 'maxFiles',
                 map: { 1: '파일', else: '파일' },
             },
         },

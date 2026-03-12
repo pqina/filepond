@@ -1,11 +1,10 @@
 import type { FilePondEntry, FilePondFileEntry } from '../types/index.js';
 import { blobToFile } from '../utils/file.js';
-import { getImageSize, getMediaSize } from '../utils/media.js';
+import { getImageSize } from '../utils/media.js';
 import { rectApply, rectFromSize } from '../utils/rect.js';
 import { sizeFromRect } from '../utils/size.js';
-import { isFile, isFileEntry, isImageFile } from '../utils/test.js';
+import { isFileEntry, isImageFile } from '../utils/test.js';
 import { thread } from '../utils/thread.js';
-import type { Extension } from './common/createExtension.js';
 import {
     createTransformExtension,
     type TransformExtensionOptions,

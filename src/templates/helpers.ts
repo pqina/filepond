@@ -23,6 +23,7 @@ import { arrayWrap } from '../utils/array.js';
 import { Button } from '../elements/components/Button/index.js';
 import { ElementPane } from '../elements/components/ElementPane/index.js';
 import { Entry } from '../elements/FilePondEntryList/components/Entry/index.js';
+import { hasOwnProp } from '../utils/object.js';
 
 export function getEntryExtensionsAsArray(entry: FilePondEntry): ExtensionState[] {
     if (!entry || !entry.extension) {
@@ -31,9 +32,18 @@ export function getEntryExtensionsAsArray(entry: FilePondEntry): ExtensionState[
     return Object.values(entry.extension);
 }
 
+export function getExtensionByProp(entry: FilePondEntry, prop: string): ExtensionState | void {
+    const extensions = getEntryExtensionsAsArray(entry);
+    return extensions.find((extension) => hasOwnProp(extension, prop));
+}
+
 export function getExtensionByAction(entry: FilePondEntry, action: string): ExtensionState | void {
     const extensions = getEntryExtensionsAsArray(entry);
     return extensions.find((extension) => extension.actions?.includes(action));
+}
+
+export function hasExtensionWithProp(entry: FilePondEntry, prop: string) {
+    return !!getExtensionByProp(entry, prop);
 }
 
 export function hasExtensionWithAction(entry: FilePondEntry, action: string) {
@@ -141,7 +151,7 @@ function createNodeTreeWithTest(test: (context: NodeContext) => boolean): NodeTr
     });
 }
 
-function createEntryMatcher(matches: string | string[] | RegExp): (entry: Entry) => boolean {
+export function createEntryMatcher(matches: string | string[] | RegExp): (entry: Entry) => boolean {
     // regexp is easy test against file type
     if (isRegExp(matches)) {
         return (entry: Entry) =>
@@ -201,6 +211,13 @@ export function whenEntryIs(matches: string | string[] | RegExp | ((entry: Entry
     return createNodeTreeWithTest(({ entry }: NodeContext) => matchEntry(entry));
 }
 
+export function whenEntryHasExtensionProp(props: string | string[]) {
+    const matches = arrayWrap(props);
+    return createNodeTreeWithTest(({ entry }: NodeContext) =>
+        matches.some((prop) => hasExtensionWithProp(entry, prop))
+    );
+}
+
 export function whenEntryHasAction(actions: string | string[]) {
     const matches = arrayWrap(actions);
     return createNodeTreeWithTest(({ entry }: NodeContext) =>
@@ -208,14 +225,14 @@ export function whenEntryHasAction(actions: string | string[]) {
     );
 }
 
-export function whenEntryNotHasStatus(...status: ExtensionStatusType[]) {
-    return createNodeTreeWithTest(
-        ({ entry }: NodeContext) => !hasExtensionWithStatusType(entry, status)
-    );
-}
-
 export function whenEntryHasStatus(...status: ExtensionStatusType[]) {
     return createNodeTreeWithTest(({ entry }: NodeContext) =>
         hasExtensionWithStatusType(entry, status)
+    );
+}
+
+export function whenEntryNotHasStatus(...status: ExtensionStatusType[]) {
+    return createNodeTreeWithTest(
+        ({ entry }: NodeContext) => !hasExtensionWithStatusType(entry, status)
     );
 }

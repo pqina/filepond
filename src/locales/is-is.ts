@@ -215,7 +215,7 @@ export const validationListCount = {
         template: 'Of margar skrár í lista. Hámark {{maxFiles}} {{files}}.',
         variables: {
             files: {
-                context: 'minFiles',
+                context: 'maxFiles',
                 map: {
                     1: 'skrá',
                     else: 'skrár',

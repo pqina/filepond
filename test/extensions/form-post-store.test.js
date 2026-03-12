@@ -265,8 +265,6 @@ describe('FormPostStore', function () {
 
                 const { value } = entry.state;
 
-                console.log('HELLO', status.code, value);
-
                 if (!status.code.endsWith('RELEASE_COMPLETE')) {
                     return;
                 }
@@ -279,7 +277,6 @@ describe('FormPostStore', function () {
             // reverted
             mockXhr.onSend = (xhr) => {
                 setTimeout(() => {
-                    console.log('respond');
                     xhr.respond(200);
                 }, 0);
             };
