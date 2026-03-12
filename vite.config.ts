@@ -4,6 +4,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { banner } from './banner.js';
 
 const srcDir = './src';
+const cdnDir = './cdn';
 const destDir = './esm';
 
 const fullReloadAlways = {

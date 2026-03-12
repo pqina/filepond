@@ -56,7 +56,8 @@
     const animatedEntries = $derived(appContext.animatedEntries);
     const locale = $derived(appContext.locale);
     const enableDrag = $derived(appContext.enableDrag);
-    const { updateEntryPlaceholderRect, entryAnimationProps } = getAppContext();
+    const updateEntryPlaceholderRect = $derived(appContext.updateEntryPlaceholderRect);
+    const entryAnimationProps = $derived(appContext.entryAnimationProps);
 
     // current drag state
     const dragContext = getDragContext();

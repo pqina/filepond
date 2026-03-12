@@ -14,7 +14,11 @@
     import { isFunction, isString } from '../../../utils/test.js';
     import { stringReplaceVariables, withResources } from '../../common/string.js';
     import { getAppContext } from '../../FilePondEntryList/contexts/appContext.js';
-    import { noop, passthrough } from '../../../utils/placeholder.js';
+    import {
+        // is used
+        noop,
+        passthrough,
+    } from '../../../utils/placeholder.js';
     import { Spring } from 'svelte/motion';
     import { arrayWrap } from '../../../utils/array.js';
     import NodeList from './index.svelte';

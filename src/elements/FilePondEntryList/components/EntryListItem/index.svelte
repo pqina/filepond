@@ -53,7 +53,8 @@
     });
 
     // get app context map
-    const { locale } = $derived(getAppContext());
+    const appContext = getAppContext();
+    const locale = $derived(appContext.locale);
 
     /** Window width used to calculate if element is visible or not */
     let windowWidth = $state.raw() as number;

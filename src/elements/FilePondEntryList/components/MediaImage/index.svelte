@@ -5,7 +5,7 @@
     import { untrack } from 'svelte';
     import { MediaPane } from '../MediaPane/index.js';
     import { arrayRemoveFalsy } from '../../../../utils/array.js';
-    import { isBlobOrFile, isImageFile, isString } from '../../../../utils/test.js';
+    import { isBlobOrFile, isImageFile } from '../../../../utils/test.js';
     import { getAppContext } from '../../../../elements/FilePondEntryList/contexts/appContext.js';
     import { getEntryContext } from '../../../../elements/FilePondEntryList/contexts/entryContext.js';
     import { filesAreProbablyEqual } from '../../../../utils/file.js';

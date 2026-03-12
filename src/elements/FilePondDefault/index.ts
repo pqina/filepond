@@ -40,6 +40,7 @@ import defaultStyles from './index.css?inline';
 import { createFilePondEntryList } from '../../templates/entry.js';
 import { toCamelParts } from '../../utils/string.js';
 import { arrayInsertAtIndex } from '../../utils/array.js';
+import { warn } from '../../common/console.js';
 
 // Related to managing default extensions
 function getExtensionName(extension: ExtensionFactory | { name: string }) {
@@ -89,7 +90,9 @@ export function createFilePondExtensionSet(extensions: ExtensionFactory[] = []) 
             getExtensionName(extension).endsWith(needle)
         );
         if (index === -1) {
-            // TODO: insert warning and instructions on how to name extension so it can be inserted automatically
+            warn(
+                `No valid insertion index found for extension "${name}", make sure its name ends with an extension types: "Source", "Loader", "Validator", "Transform", or "Store".`
+            );
             continue;
         }
 
