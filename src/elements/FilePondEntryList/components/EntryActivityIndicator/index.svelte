@@ -1,7 +1,7 @@
 <script lang="ts">
-    import { untrack } from 'svelte';
+    import { type ExtensionState } from '../../../../types/index.js';
+    import { onMount, untrack } from 'svelte';
     import { Spring } from 'svelte/motion';
-    import { getUniqueId } from '../../../../utils/string.js';
     import { getExtensionStateByStatusCode } from '../../../../common/entry.js';
     import { isObjectValuesEqual } from '../../../../utils/object.js';
     import { getValueByKeyFromData } from '../../../common/string.js';
@@ -11,7 +11,6 @@
     import { SpringElement } from '../../../components/SpringElement/index.js';
     import { Button } from '../../../components/Button/index.js';
     import { ProgressIndicator } from '../../../components/ProgressIndicator/index.js';
-    import { type ExtensionState } from '../../../../types/index.js';
     import { NodeList, type NodeListOptions } from '../../../components/NodeList/index.js';
     import { addListener } from '../../../../utils/dom.js';
 
@@ -269,14 +268,20 @@
 
     // so we can move focus from button to button
     let hasFocus = $state(false);
-    $effect(() => {
+    onMount(() => {
         if (!root) {
             return;
         }
+
         const unsubs = [
-            addListener(root, 'focusin', () => (hasFocus = true)),
-            addListener(root, 'focusout', () => (hasFocus = false)),
+            addListener(root, 'focusin', () => {
+                hasFocus = true;
+            }),
+            addListener(root, 'focusout', () => {
+                hasFocus = false;
+            }),
         ];
+
         return () => {
             unsubs.forEach((unsub) => unsub());
         };

@@ -16,6 +16,7 @@
         "esm": "rm -rf ./esm && vite build",
         "types": "rm -rf ./types && tsc -p ./tsconfig.build.json && cp src/types/*.d.ts types && echo 'import \"./custom-element.js\";\nimport \"./default-extensions.js\";' >> types/index.d.ts",
         "cdn": "rm -rf ./cdn && rollup -c rollup.config.js",
+        "dev-cdn": "npx ws --stack lws-redirect lws-static --redirect 'http://localhost:8000/cdn-redirect/ -> http://localhost:8000/cdn/'",
         "prepublishOnly": "npm run build && node prepublish.js"
     },
     "files": [
@@ -74,7 +75,7 @@
         "rollup": "^4.53.3",
         "rollup-plugin-cleanup": "^3.2.1",
         "rollup-plugin-license": "^3.6.0",
-        "svelte": "^5.45.6",
+        "svelte": "^5.53.12",
         "svelte-check": "^4.3.1",
         "typescript": "^5.9.2",
         "vite": "^7.2.6",

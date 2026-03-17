@@ -4,6 +4,7 @@ import { globSync } from 'glob';
 import { default as license } from 'rollup-plugin-license';
 import { banner } from './banner.js';
 import cleanup from 'rollup-plugin-cleanup';
+
 // using terser for now, for some reason "rollup-plugin-esbuild-minify" causes an error when appending the image view and loading an image
 import terser from '@rollup/plugin-terser';
 
@@ -28,9 +29,11 @@ function virtualIndex() {
                 return;
             }
 
-            return `export * from '${srcDir}/index.js'
-export * from '${srcDir}/extensions/index.js';
-export * from '${srcDir}/templates/index.js';`;
+            return `
+            export * from '${srcDir}/extensions/index.js';
+            export * from '${srcDir}/templates/index.js';
+            export * from '${srcDir}/index.js';
+            `;
         },
     };
 }
@@ -40,6 +43,9 @@ cpSync(srcDir + '/locales', destDir + '/locales', { recursive: true });
 
 // assets
 cpSync(srcDir + '/assets', destDir + '/assets', { recursive: true });
+
+// index file
+createIndex(destDir);
 
 // extensions
 createMicroFiles(srcDir + '/extensions/*.js', destDir + '/extensions');
@@ -52,7 +58,7 @@ export default defineConfig([
     {
         input: VIRTUAL_INDEX_ID,
         output: {
-            file: destDir + '/index.js',
+            file: destDir + '/main.js',
             format: 'esm',
         },
         plugins: [
@@ -75,6 +81,14 @@ export default defineConfig([
     },
 ]);
 
+function createIndex(dest) {
+    if (!existsSync(dest)) {
+        mkdirSync(dest);
+    }
+    console.log(`Write ${dest}/index.js`);
+    writeFileSync(`${dest}/index.js`, `export * from './main.js'`);
+}
+
 function createMicroFiles(src, dest) {
     if (!existsSync(dest)) {
         mkdirSync(dest);
@@ -82,6 +96,7 @@ function createMicroFiles(src, dest) {
     const extensions = globSync(src);
     for (const extension of extensions) {
         const filename = extension.split('/').pop();
-        writeFileSync(`${dest}/${filename}`, `export * from '../index.js'`);
+        console.log(`Write ${dest}/${filename}`);
+        writeFileSync(`${dest}/${filename}`, `export * from '../main.js'`);
     }
 }

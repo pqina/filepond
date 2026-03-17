@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount, type Snippet } from 'svelte';
+    import { type Snippet } from 'svelte';
     import { createDefaultIcon } from '../../common/html.js';
     import { toSpaceSeparatedString } from '../../common/string.js';
     import { updateDataset, updateStyles } from '../../../utils/dom.js';

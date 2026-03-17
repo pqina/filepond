@@ -269,7 +269,8 @@ export class FilePondElement extends FilePondInputElement {
                 assets,
 
                 // the nodes to render
-                template: createFilePondEntryList(),
+                template:
+                    globalInitialOptions?.EntryListView?.template || createFilePondEntryList(),
 
                 // called before rendering a node, allows dynamically modifying a node or adding nodes
                 beforeRenderNode(node: any) {

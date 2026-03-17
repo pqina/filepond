@@ -5,7 +5,7 @@
     import { untrack } from 'svelte';
     import { MediaPane } from '../MediaPane/index.js';
     import { arrayRemoveFalsy } from '../../../../utils/array.js';
-    import { isBlobOrFile, isImageFile } from '../../../../utils/test.js';
+    import { isBlobOrFile, isImageFile, isURL } from '../../../../utils/test.js';
     import { getAppContext } from '../../../../elements/FilePondEntryList/contexts/appContext.js';
     import { getEntryContext } from '../../../../elements/FilePondEntryList/contexts/entryContext.js';
     import { filesAreProbablyEqual } from '../../../../utils/file.js';
@@ -69,21 +69,35 @@
 
         // load 'poster'
         else if (poster) {
-            if (isBlobOrFile(poster)) {
+            // if is a file, this could happen for example when a poster is generated from a PDF
+            if (isBlobOrFile(poster) && isImageFile(poster)) {
                 currentFile = {
                     file: poster,
                     isComplete: false,
                     isPoster: true,
                 };
-            } else {
+            }
+            // if is a URL to an image
+            else if (isURL(poster)) {
                 fetch(poster)
-                    .then((res) => res.blob())
+                    .then((res) => {
+                        if (!res.ok) {
+                            throw new Error('Failed to load poster');
+                        }
+                        return res.blob();
+                    })
                     .then((blob) => {
-                        currentFile = {
+                        if (!isImageFile(blob)) {
+                            throw new Error('Poster is not an image');
+                        }
+                        return {
                             file: blob,
                             isComplete: false,
                             isPoster: true,
                         };
+                    })
+                    .then((file) => {
+                        currentFile = file;
                     })
                     .catch(handleError);
             }

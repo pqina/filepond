@@ -38,7 +38,7 @@
         getGlobalPreventAnimations,
         getShouldReduceMotion,
     } from '../common/animationPreference.svelte.js';
-    import { setAppContext } from './contexts/appContext.js';
+    import { getAppContext, setAppContext } from './contexts/appContext.js';
     import { setDragContext } from './contexts/dragContext.js';
     import { setDropContext } from './contexts/dropContext.js';
     import { getUniqueId } from '../../utils/string.js';

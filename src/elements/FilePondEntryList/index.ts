@@ -113,20 +113,6 @@ const COMPONENT_EVENTS = ['dragentry', 'dragentrystart', 'dragentryend', 'update
 
 /** FilePond EntryList Element */
 export class FilePondEntryListElement extends FilePondSvelteComponentElement {
-    // #template: TemplateNode[] | undefined;
-
-    // set template(value: TemplateNode[]) {
-    //     this.#template = value;
-
-    //     // no app
-    //     if (!this._app) {
-    //         return;
-    //     }
-
-    //     // update app template
-    //     this._app.setTemplate(value);
-    // }
-
     constructor() {
         super(FilePondEntryListApp, {
             properties: COMPONENT_PROPS,
@@ -144,14 +130,6 @@ export class FilePondEntryListElement extends FilePondSvelteComponentElement {
         this.addListener('updateentries', (e) => {
             setBooleanAttribute(this, 'empty', e.detail === 0);
         });
-
-        // no template
-        // if (this.#template) {
-        //     this._app.setTemplate(this.#template);
-        // }
-
-        // did run connect logic
-        // return true;
     }
 }
 
