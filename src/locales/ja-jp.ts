@@ -15,6 +15,30 @@ export const core = {
     busy: '処理中',
     loading: '読み込み中',
 
+    // units
+    unitB: {
+        1: 'バイト',
+        else: 'バイト',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: 'ピクセル',
+        else: 'ピクセル',
+    },
+    unitFiles: {
+        1: 'ファイル',
+        else: 'ファイル',
+    },
+
     error: 'エラー',
     warning: '警告',
     success: '完了',
@@ -28,30 +52,9 @@ export const core = {
 
     assistAbort: 'タップして中止',
     assistUndo: 'タップして元に戻す',
-    browse: {
-        template: '{{files}}を選択',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'ファイル',
-                    false: 'ファイル',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: 'ここに{{files}}をドロップ、または<u>参照</u>',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'ファイル',
-                    false: 'ファイル',
-                },
-            },
-        },
-    },
+    // browse button labels
+    browse: '{{maxFilesUnit}}を選択',
+    browseAndDrop: 'ここに{{maxFilesUnit}}をドロップ、または<u>参照</u>',
 
     loadError: 'ファイルを読み込めませんでした。',
 
@@ -79,18 +82,7 @@ export const core = {
 
     // screenreader accessibility
     ariaRequired: '必須',
-    ariaNoEntries: {
-        template: '{{files}}が選択されていません',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'ファイル',
-                    false: 'ファイル',
-                },
-            },
-        },
-    },
+    ariaNoEntries: '{{maxFilesUnit}}が選択されていません',
     ariaSingleEntry: '{{name}} を選択しました',
     ariaMultipleEntries: '{{count}} 個のファイルを選択しました',
     ariaItemRoleDescription: '並べ替え可能',
@@ -165,35 +157,27 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'このファイルは小さすぎます。最小サイズは {{minSize}} です。',
-    validationFileSizeOverflow: 'このファイルは大きすぎます。最大サイズは {{maxSize}} です。',
+    validationFileSizeUnderflow: 'このファイルは小さすぎます。最小サイズは {{minSize}} {{minSizeUnit}} です。',
+    validationFileSizeOverflow: 'このファイルは大きすぎます。最大サイズは {{maxSize}} {{maxSizeUnit}} です。',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow:
-        'ファイルの合計サイズが小さすぎます。最小値は {{minListSize}} です。',
-    validationListSizeOverflow:
-        'ファイルの合計サイズが大きすぎます。最大値は {{maxListSize}} です。',
+    validationListSizeUnderflow: 'ファイルの合計サイズが小さすぎます。最小合計サイズは {{minSize}} {{minSizeUnit}} です。',
+    validationListSizeOverflow: 'ファイルの合計サイズが大きすぎます。最大合計サイズは {{maxSize}} {{maxSizeUnit}} です。',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'メディアサイズを読み取れませんでした。',
 
-    validationMediaWidthRangeMismatch:
-        '{{fileMainType}} の幅が無効です。幅は {{minWidth}} 〜 {{maxWidth}} ピクセルである必要があります。',
+    validationMediaWidthRangeMismatch: '{{fileMainType}} の幅が無効です。幅は {{minWidth}} 〜 {{maxWidth}} {{maxWidthUnit}} である必要があります。',
 
-    validationMediaWidthUnderflow:
-        '{{fileMainType}} が小さすぎます。最小幅は {{minWidth}} ピクセルです。',
-    validationMediaWidthOverflow:
-        '{{fileMainType}} が大きすぎます。最大幅は {{maxWidth}} ピクセルです。',
+    validationMediaWidthUnderflow: '{{fileMainType}} が小さすぎます。最小幅は {{minWidth}} {{minWidthUnit}} です。',
+    validationMediaWidthOverflow: '{{fileMainType}} が大きすぎます。最大幅は {{maxWidth}} {{maxWidthUnit}} です。',
 
-    validationMediaHeightRangeMismatch:
-        '{{fileMainType}} の高さが無効です。高さは {{minHeight}} 〜 {{maxHeight}} ピクセルである必要があります。',
+    validationMediaHeightRangeMismatch: '{{fileMainType}} の高さが無効です。高さは {{minHeight}} 〜 {{maxHeight}} {{maxHeightUnit}} である必要があります。',
 
-    validationMediaHeightUnderflow:
-        '{{fileMainType}} が小さすぎます。最小高さは {{minHeight}} ピクセルです。',
-    validationMediaHeightOverflow:
-        '{{fileMainType}} が大きすぎます。最大高さは {{maxHeight}} ピクセルです。',
+    validationMediaHeightUnderflow: '{{fileMainType}} が小さすぎます。最小高さは {{minHeight}} {{minHeightUnit}} です。',
+    validationMediaHeightOverflow: '{{fileMainType}} が大きすぎます。最大高さは {{maxHeight}} {{maxHeightUnit}} です。',
 
     validationMediaResolutionRangeMismatch:
         '{{fileMainType}} の解像度が無効です。解像度は {{minResolution}}MP 〜 {{maxResolution}}MP の範囲である必要があります。',
@@ -206,25 +190,10 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: 'ファイル数が少なすぎます。最低 {{minFiles}} {{files}} が必要です。',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: { 1: 'ファイル', else: 'ファイル' },
-            },
-        },
-    },
-
-    validationListEntryCountOverflow: {
-        template: 'ファイル数が多すぎます。最大 {{maxFiles}} {{files}} までです。',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: { 1: 'ファイル', else: 'ファイル' },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        'リスト内のファイル数が少なすぎます。最小数は {{minFiles}} {{minFilesUnit}} です。',
+    validationListEntryCountOverflow:
+        'リスト内のファイル数が多すぎます。最大数は {{maxFiles}} {{maxFilesUnit}} です。',
 };
 
 export const validation = {

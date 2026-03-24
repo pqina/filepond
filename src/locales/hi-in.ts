@@ -15,6 +15,30 @@ export const core = {
     busy: 'प्रक्रिया में',
     loading: 'लोड हो रहा है',
 
+    // units
+    unitB: {
+        1: 'बाइट',
+        else: 'बाइट',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: 'पिक्सेल',
+        else: 'पिक्सेल',
+    },
+    unitFiles: {
+        1: 'फ़ाइल',
+        else: 'फ़ाइलें',
+    },
+
     error: 'त्रुटि',
     warning: 'चेतावनी',
     success: 'सफल',
@@ -28,30 +52,9 @@ export const core = {
 
     assistAbort: 'रद्द करने के लिए टैप करें',
     assistUndo: 'पूर्ववत करने के लिए टैप करें',
-    browse: {
-        template: '{{files}} चुनें',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'फ़ाइलें',
-                    false: 'फ़ाइल',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: '{{files}} यहाँ छोड़ें, या <u>ब्राउज़</u> करें',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'फ़ाइलें',
-                    false: 'फ़ाइल',
-                },
-            },
-        },
-    },
+    // browse button labels
+    browse: '{{maxFilesUnit}} चुनें',
+    browseAndDrop: '{{maxFilesUnit}} यहां छोड़ें, या <u>ब्राउज़</u> करें',
 
     loadError: 'फ़ाइल लोड नहीं हो सकी।',
 
@@ -79,18 +82,7 @@ export const core = {
 
     // screenreader accessibility
     ariaRequired: 'आवश्यक',
-    ariaNoEntries: {
-        template: 'कोई {{files}} चयनित नहीं',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'फाइलें',
-                    false: 'फाइल',
-                },
-            },
-        },
-    },
+    ariaNoEntries: 'कोई {{maxFilesUnit}} चयनित नहीं है',
     ariaSingleEntry: 'चयनित {{name}}',
     ariaMultipleEntries: '{{count}} फाइलें चयनित',
     ariaItemRoleDescription: 'क्रमबद्ध करने योग्य',
@@ -165,33 +157,27 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'यह फ़ाइल बहुत छोटी है। न्यूनतम आकार {{minSize}} है।',
-    validationFileSizeOverflow: 'यह फ़ाइल बहुत बड़ी है। अधिकतम आकार {{maxSize}} है।',
+    validationFileSizeUnderflow: 'यह फ़ाइल बहुत छोटी है। न्यूनतम आकार {{minSize}} {{minSizeUnit}} है।',
+    validationFileSizeOverflow: 'यह फ़ाइल बहुत बड़ी है। अधिकतम आकार {{maxSize}} {{maxSizeUnit}} है।',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'कुल फ़ाइल आकार बहुत कम है। न्यूनतम आवश्यक {{minListSize}} है।',
-    validationListSizeOverflow: 'कुल फ़ाइल आकार बहुत अधिक है। अधिकतम अनुमत {{maxListSize}} है।',
+    validationListSizeUnderflow: 'फ़ाइलों का कुल आकार बहुत छोटा है। न्यूनतम कुल आकार {{minSize}} {{minSizeUnit}} है।',
+    validationListSizeOverflow: 'फ़ाइलों का कुल आकार बहुत बड़ा है। अधिकतम कुल आकार {{maxSize}} {{maxSizeUnit}} है।',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'मीडिया का आकार पढ़ा नहीं जा सका।',
 
-    validationMediaWidthRangeMismatch:
-        '{{fileMainType}} की चौड़ाई मान्य नहीं है। चौड़ाई {{minWidth}} और {{maxWidth}} पिक्सल के बीच होनी चाहिए।',
+    validationMediaWidthRangeMismatch: '{{fileMainType}} की चौड़ाई अमान्य है। चौड़ाई {{minWidth}} और {{maxWidth}} {{maxWidthUnit}} के बीच होनी चाहिए।',
 
-    validationMediaWidthUnderflow:
-        '{{fileMainType}} बहुत छोटा है। न्यूनतम चौड़ाई {{minWidth}} पिक्सल है।',
-    validationMediaWidthOverflow:
-        '{{fileMainType}} बहुत बड़ा है। अधिकतम चौड़ाई {{maxWidth}} पिक्सल है।',
+    validationMediaWidthUnderflow: '{{fileMainType}} बहुत छोटा है। न्यूनतम चौड़ाई {{minWidth}} {{minWidthUnit}} है।',
+    validationMediaWidthOverflow: '{{fileMainType}} बहुत बड़ा है। अधिकतम चौड़ाई {{maxWidth}} {{maxWidthUnit}} है।',
 
-    validationMediaHeightRangeMismatch:
-        '{{fileMainType}} की ऊंचाई मान्य नहीं है। ऊंचाई {{minHeight}} और {{maxHeight}} पिक्सल के बीच होनी चाहिए।',
+    validationMediaHeightRangeMismatch: '{{fileMainType}} की ऊंचाई अमान्य है। ऊंचाई {{minHeight}} और {{maxHeight}} {{maxHeightUnit}} के बीच होनी चाहिए।',
 
-    validationMediaHeightUnderflow:
-        '{{fileMainType}} बहुत छोटा है। न्यूनतम ऊंचाई {{minHeight}} पिक्सल है।',
-    validationMediaHeightOverflow:
-        '{{fileMainType}} बहुत बड़ा है। अधिकतम ऊंचाई {{maxHeight}} पिक्सल है।',
+    validationMediaHeightUnderflow: '{{fileMainType}} बहुत छोटा है। न्यूनतम ऊंचाई {{minHeight}} {{minHeightUnit}} है।',
+    validationMediaHeightOverflow: '{{fileMainType}} बहुत बड़ा है। अधिकतम ऊंचाई {{maxHeight}} {{maxHeightUnit}} है।',
 
     validationMediaResolutionRangeMismatch:
         '{{fileMainType}} का रिज़ॉल्यूशन मान्य नहीं है। रिज़ॉल्यूशन {{minResolution}}MP और {{maxResolution}}MP के बीच होना चाहिए।',
@@ -204,25 +190,10 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: 'फ़ाइलें बहुत कम हैं। न्यूनतम {{minFiles}} {{files}} आवश्यक हैं।',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: { 1: 'फ़ाइल', else: 'फ़ाइलें' },
-            },
-        },
-    },
-
-    validationListEntryCountOverflow: {
-        template: 'बहुत अधिक फ़ाइलें। अधिकतम {{maxFiles}} {{files}} अनुमत हैं।',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: { 1: 'फ़ाइल', else: 'फ़ाइलें' },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        'सूची में फ़ाइलें बहुत कम हैं। न्यूनतम {{minFiles}} {{minFilesUnit}} है।',
+    validationListEntryCountOverflow:
+        'सूची में फ़ाइलें बहुत अधिक हैं। अधिकतम {{maxFiles}} {{maxFilesUnit}} है।',
 };
 
 export const validation = {

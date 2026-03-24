@@ -15,6 +15,30 @@ export const core = {
     busy: 'Zajęte',
     loading: 'Ładowanie',
 
+    // units
+    unitB: {
+        1: 'bajt',
+        else: 'bajty',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: 'piksel',
+        else: 'piksele',
+    },
+    unitFiles: {
+        1: 'plik',
+        else: 'pliki',
+    },
+
     error: 'Błąd',
     warning: 'Ostrzeżenie',
     success: 'Sukces',
@@ -28,30 +52,9 @@ export const core = {
 
     assistAbort: 'Dotknij, aby anulować',
     assistUndo: 'Dotknij, aby cofnąć',
-    browse: {
-        template: 'Wybierz {{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'pliki',
-                    false: 'plik',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: 'Upuść tutaj {{files}} lub <u>przeglądaj</u>',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'pliki',
-                    false: 'plik',
-                },
-            },
-        },
-    },
+    // browse button labels
+    browse: 'Wybierz {{maxFilesUnit}}',
+    browseAndDrop: 'Upuść tutaj {{maxFilesUnit}} lub <u>przeglądaj</u>',
 
     loadError: 'Nie udało się załadować pliku.',
 
@@ -79,18 +82,7 @@ export const core = {
 
     // screenreader accessibility
     ariaRequired: 'wymagane',
-    ariaNoEntries: {
-        template: 'Nie wybrano {{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'plików',
-                    false: 'pliku',
-                },
-            },
-        },
-    },
+    ariaNoEntries: 'Nie wybrano {{maxFilesUnit}}',
     ariaSingleEntry: 'Wybrano {{name}}',
     ariaMultipleEntries: 'Wybrano {{count}} plików',
     ariaItemRoleDescription: 'Możliwe sortowanie',
@@ -166,33 +158,27 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Plik jest za mały. Minimum to {{minSize}}.',
-    validationFileSizeOverflow: 'Plik jest za duży. Maksimum to {{maxSize}}.',
+    validationFileSizeUnderflow: 'Ten plik jest za mały. Minimalny rozmiar to {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow: 'Ten plik jest za duży. Maksymalny rozmiar to {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Łączny rozmiar plików jest za mały. Minimum to {{minListSize}}.',
-    validationListSizeOverflow: 'Łączny rozmiar plików jest za duży. Maksimum to {{maxListSize}}.',
+    validationListSizeUnderflow: 'Łączny rozmiar plików jest za mały. Minimalny łączny rozmiar to {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow: 'Łączny rozmiar plików jest za duży. Maksymalny łączny rozmiar to {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Nie udało się odczytać rozmiaru multimediów.',
 
-    validationMediaWidthRangeMismatch:
-        'Szerokość {{fileMainType}} jest nieprawidłowa. Musi być między {{minWidth}} a {{maxWidth}} pikseli.',
+    validationMediaWidthRangeMismatch: 'Szerokość {{fileMainType}} jest nieprawidłowa. Szerokość musi mieścić się między {{minWidth}} a {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow:
-        '{{fileMainType}} jest za mały. Minimalna szerokość to {{minWidth}} pikseli.',
-    validationMediaWidthOverflow:
-        '{{fileMainType}} jest za duży. Maksymalna szerokość to {{maxWidth}} pikseli.',
+    validationMediaWidthUnderflow: '{{fileMainType}} jest za mały. Minimalna szerokość to {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow: '{{fileMainType}} jest za duży. Maksymalna szerokość to {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch:
-        'Wysokość {{fileMainType}} jest nieprawidłowa. Musi być między {{minHeight}} a {{maxHeight}} pikseli.',
+    validationMediaHeightRangeMismatch: 'Wysokość {{fileMainType}} jest nieprawidłowa. Wysokość musi mieścić się między {{minHeight}} a {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow:
-        '{{fileMainType}} jest za mały. Minimalna wysokość to {{minHeight}} pikseli.',
-    validationMediaHeightOverflow:
-        '{{fileMainType}} jest za duży. Maksymalna wysokość to {{maxHeight}} pikseli.',
+    validationMediaHeightUnderflow: '{{fileMainType}} jest za mały. Minimalna wysokość to {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow: '{{fileMainType}} jest za duży. Maksymalna wysokość to {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'Rozdzielczość jest nieprawidłowa. Musi być między {{minResolution}}MP a {{maxResolution}}MP.',
@@ -204,31 +190,10 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: 'Za mało plików na liście. Minimum to {{minFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: {
-                    1: 'plik',
-                    else: 'pliki',
-                },
-            },
-        },
-    },
-
-    validationListEntryCountOverflow: {
-        template: 'Za dużo plików na liście. Maksimum to {{maxFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: {
-                    1: 'plik',
-                    else: 'pliki',
-                },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        'Na liście jest za mało plików. Minimum to {{minFiles}} {{minFilesUnit}}.',
+    validationListEntryCountOverflow:
+        'Na liście jest za dużo plików. Maksimum to {{maxFiles}} {{maxFilesUnit}}.',
 };
 
 export const validation = {

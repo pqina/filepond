@@ -15,6 +15,30 @@ export const core = {
     busy: 'Upptekið',
     loading: 'Hleð inn',
 
+    // units
+    unitB: {
+        1: 'bæti',
+        else: 'bæti',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: 'pixill',
+        else: 'pixlar',
+    },
+    unitFiles: {
+        1: 'skrá',
+        else: 'skrár',
+    },
+
     error: 'Villa',
     warning: 'Aðvörun',
     success: 'Tókst',
@@ -28,30 +52,9 @@ export const core = {
 
     assistAbort: 'Ýttu til að hætta við',
     assistUndo: 'Ýttu til að afturkalla',
-    browse: {
-        template: 'Velja {{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'skrár',
-                    false: 'skrá',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: 'Slepptu {{files}} hér eða <u>fletta</u>',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'skrám',
-                    false: 'skrá',
-                },
-            },
-        },
-    },
+    // browse button labels
+    browse: 'Velja {{maxFilesUnit}}',
+    browseAndDrop: 'Slepptu {{maxFilesUnit}} hér eða <u>flettu</u>',
 
     loadError: 'Tókst ekki að hlaða skránni.',
 
@@ -79,18 +82,7 @@ export const core = {
 
     // screenreader accessibility
     ariaRequired: 'nauðsynlegt',
-    ariaNoEntries: {
-        template: 'Engar {{files}} valdar',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'skrár',
-                    false: 'skrá',
-                },
-            },
-        },
-    },
+    ariaNoEntries: 'Engar {{maxFilesUnit}} valdar',
     ariaSingleEntry: 'Valið {{name}}',
     ariaMultipleEntries: '{{count}} skrár valdar',
     ariaItemRoleDescription: 'Raðanlegt',
@@ -166,29 +158,27 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Skráin er of lítil. Lágmark {{minSize}}.',
-    validationFileSizeOverflow: 'Skráin er of stór. Hámark {{maxSize}}.',
+    validationFileSizeUnderflow: 'Þessi skrá er of lítil. Lágmarksstærð er {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow: 'Þessi skrá er of stór. Hámarksstærð er {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Heildarstærð er of lítil. Lágmark {{minListSize}}.',
-    validationListSizeOverflow: 'Heildarstærð er of mikil. Hámark {{maxListSize}}.',
+    validationListSizeUnderflow: 'Heildarstærð skráa er of lítil. Lágmarksheildarstærð er {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow: 'Heildarstærð skráa er of stór. Hámarksheildarstærð er {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Tókst ekki að lesa fjölmiðlastærð.',
 
-    validationMediaWidthRangeMismatch:
-        'Breidd {{fileMainType}} er ógild. Hún þarf að vera á milli {{minWidth}} og {{maxWidth}} px.',
+    validationMediaWidthRangeMismatch: 'Breidd {{fileMainType}} er ógild. Breidd þarf að vera á milli {{minWidth}} og {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow: '{{fileMainType}} er of lítið. Lágmarksbreidd {{minWidth}} px.',
-    validationMediaWidthOverflow: '{{fileMainType}} er of stórt. Hámarksbreidd {{maxWidth}} px.',
+    validationMediaWidthUnderflow: '{{fileMainType}} er of lítil. Lágmarksbreidd er {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow: '{{fileMainType}} er of stór. Hámarksbreidd er {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch:
-        'Hæð {{fileMainType}} er ógild. Hún þarf að vera á milli {{minHeight}} og {{maxHeight}} px.',
+    validationMediaHeightRangeMismatch: 'Hæð {{fileMainType}} er ógild. Hæð þarf að vera á milli {{minHeight}} og {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow: '{{fileMainType}} er of lítið. Lágmarkshæð {{minHeight}} px.',
-    validationMediaHeightOverflow: '{{fileMainType}} er of stórt. Hámarkshæð {{maxHeight}} px.',
+    validationMediaHeightUnderflow: '{{fileMainType}} er of lítil. Lágmarkshæð er {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow: '{{fileMainType}} er of stór. Hámarkshæð er {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'Upplausn er ógild. Hún þarf að vera á milli {{minResolution}}MP og {{maxResolution}}MP.',
@@ -198,31 +188,10 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: 'Of fáar skrár í lista. Lágmark {{minFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: {
-                    1: 'skrá',
-                    else: 'skrár',
-                },
-            },
-        },
-    },
-
-    validationListEntryCountOverflow: {
-        template: 'Of margar skrár í lista. Hámark {{maxFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: {
-                    1: 'skrá',
-                    else: 'skrár',
-                },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        'Of fáar skrár á listanum. Lágmark er {{minFiles}} {{minFilesUnit}}.',
+    validationListEntryCountOverflow:
+        'Of margar skrár á listanum. Hámark er {{maxFiles}} {{maxFilesUnit}}.',
 };
 
 export const validation = {

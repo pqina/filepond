@@ -15,6 +15,30 @@ export const core = {
     busy: 'Zaneprázdněno',
     loading: 'Načítání',
 
+    // units
+    unitB: {
+        1: 'bajt',
+        else: 'bajty',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: 'pixel',
+        else: 'pixely',
+    },
+    unitFiles: {
+        1: 'soubor',
+        else: 'soubory',
+    },
+
     error: 'Chyba',
     warning: 'Varování',
     success: 'Úspěch',
@@ -28,30 +52,9 @@ export const core = {
 
     assistAbort: 'Klepněte pro zrušení',
     assistUndo: 'Klepněte pro vrácení',
-    browse: {
-        template: 'Vybrat {{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'soubory',
-                    false: 'soubor',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: 'Přetáhněte sem {{files}} nebo <u>procházejte</u>',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'soubory',
-                    false: 'soubor',
-                },
-            },
-        },
-    },
+    // browse button labels
+    browse: 'Vybrat {{maxFilesUnit}}',
+    browseAndDrop: 'Přetáhněte sem {{maxFilesUnit}} nebo <u>procházejte</u>',
 
     loadError: 'Soubor se nepodařilo načíst.',
 
@@ -79,18 +82,7 @@ export const core = {
 
     // screenreader accessibility
     ariaRequired: 'povinné',
-    ariaNoEntries: {
-        template: 'Nebyly vybrány žádné {{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'soubory',
-                    false: 'soubor',
-                },
-            },
-        },
-    },
+    ariaNoEntries: 'Nebyly vybrány žádné {{maxFilesUnit}}',
     ariaSingleEntry: 'Vybráno {{name}}',
     ariaMultipleEntries: 'Vybráno {{count}} souborů',
     ariaItemRoleDescription: 'Seřaditelné',
@@ -166,33 +158,27 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Soubor je příliš malý. Minimum je {{minSize}}.',
-    validationFileSizeOverflow: 'Soubor je příliš velký. Maximum je {{maxSize}}.',
+    validationFileSizeUnderflow: 'Tento soubor je příliš malý. Minimální velikost je {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow: 'Tento soubor je příliš velký. Maximální velikost je {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Celková velikost je příliš malá. Minimum je {{minListSize}}.',
-    validationListSizeOverflow: 'Celková velikost je příliš velká. Maximum je {{maxListSize}}.',
+    validationListSizeUnderflow: 'Celková velikost souborů je příliš malá. Minimální celková velikost je {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow: 'Celková velikost souborů je příliš velká. Maximální celková velikost je {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Nelze přečíst velikost média.',
 
-    validationMediaWidthRangeMismatch:
-        'Šířka {{fileMainType}} je neplatná. Musí být mezi {{minWidth}} a {{maxWidth}} px.',
+    validationMediaWidthRangeMismatch: 'Šířka {{fileMainType}} není platná. Šířka musí být mezi {{minWidth}} a {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow:
-        '{{fileMainType}} je příliš malý. Minimální šířka je {{minWidth}} px.',
-    validationMediaWidthOverflow:
-        '{{fileMainType}} je příliš velký. Maximální šířka je {{maxWidth}} px.',
+    validationMediaWidthUnderflow: '{{fileMainType}} je příliš malý. Minimální šířka je {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow: '{{fileMainType}} je příliš velký. Maximální šířka je {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch:
-        'Výška {{fileMainType}} je neplatná. Musí být mezi {{minHeight}} a {{maxHeight}} px.',
+    validationMediaHeightRangeMismatch: 'Výška {{fileMainType}} není platná. Výška musí být mezi {{minHeight}} a {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow:
-        '{{fileMainType}} je příliš malý. Minimální výška je {{minHeight}} px.',
-    validationMediaHeightOverflow:
-        '{{fileMainType}} je příliš velký. Maximální výška je {{maxHeight}} px.',
+    validationMediaHeightUnderflow: '{{fileMainType}} je příliš malý. Minimální výška je {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow: '{{fileMainType}} je příliš velký. Maximální výška je {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'Rozlišení je neplatné. Musí být mezi {{minResolution}}MP a {{maxResolution}}MP.',
@@ -202,31 +188,10 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: 'Příliš málo souborů. Minimum {{minFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: {
-                    1: 'soubor',
-                    else: 'souborů',
-                },
-            },
-        },
-    },
-
-    validationListEntryCountOverflow: {
-        template: 'Příliš mnoho souborů. Maximum {{maxFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: {
-                    1: 'soubor',
-                    else: 'souborů',
-                },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        'V seznamu je příliš málo souborů. Minimální počet je {{minFiles}} {{minFilesUnit}}.',
+    validationListEntryCountOverflow:
+        'V seznamu je příliš mnoho souborů. Maximální počet je {{maxFiles}} {{maxFilesUnit}}.',
 };
 
 export const validation = {

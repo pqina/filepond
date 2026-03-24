@@ -15,6 +15,30 @@ export const core = {
     busy: 'Beschäftigt',
     loading: 'Laden',
 
+    // units
+    unitB: {
+        1: 'Byte',
+        else: 'Bytes',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: 'Pixel',
+        else: 'Pixel',
+    },
+    unitFiles: {
+        1: 'Datei',
+        else: 'Dateien',
+    },
+
     error: 'Fehler',
     warning: 'Warnung',
     success: 'Erfolgreich',
@@ -28,30 +52,9 @@ export const core = {
 
     assistAbort: 'Tippen zum Abbrechen',
     assistUndo: 'Tippen zum Rückgängig machen',
-    browse: {
-        template: '{{files}} auswählen',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'Dateien',
-                    false: 'Datei',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: '{{files}} hier ablegen oder <u>durchsuchen</u>',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'Dateien',
-                    false: 'eine Datei',
-                },
-            },
-        },
-    },
+    // browse button labels
+    browse: '{{maxFilesUnit}} auswählen',
+    browseAndDrop: '{{maxFilesUnit}} hier ablegen oder <u>durchsuchen</u>',
 
     loadError: 'Datei konnte nicht geladen werden.',
 
@@ -79,18 +82,7 @@ export const core = {
 
     // screenreader accessibility
     ariaRequired: 'erforderlich',
-    ariaNoEntries: {
-        template: 'Keine {{files}} ausgewählt',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'Dateien',
-                    false: 'Datei',
-                },
-            },
-        },
-    },
+    ariaNoEntries: 'Keine {{maxFilesUnit}} ausgewählt',
     ariaSingleEntry: 'Ausgewählt: {{name}}',
     ariaMultipleEntries: '{{count}} Dateien ausgewählt',
     ariaItemRoleDescription: 'Sortierbar',
@@ -163,33 +155,27 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Diese Datei ist zu klein. Mindestgröße: {{minSize}}.',
-    validationFileSizeOverflow: 'Diese Datei ist zu groß. Maximalgröße: {{maxSize}}.',
+    validationFileSizeUnderflow: 'Diese Datei ist zu klein. Mindestgröße: {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow: 'Diese Datei ist zu groß. Maximalgröße: {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Gesamtgröße zu klein. Mindestwert: {{minListSize}}.',
-    validationListSizeOverflow: 'Gesamtgröße zu groß. Maximalwert: {{maxListSize}}.',
+    validationListSizeUnderflow: 'Gesamtgröße zu klein. Die Mindestgesamtgröße beträgt {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow: 'Gesamtgröße zu groß. Die maximale Gesamtgröße beträgt {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Mediagröße konnte nicht gelesen werden.',
 
-    validationMediaWidthRangeMismatch:
-        'Die Breite des {{fileMainType}} ist ungültig. Die Breite muss zwischen {{minWidth}} und {{maxWidth}} Pixel liegen.',
+    validationMediaWidthRangeMismatch: 'Die Breite des {{fileMainType}} ist ungültig. Die Breite muss zwischen {{minWidth}} und {{maxWidth}} {{maxWidthUnit}} liegen.',
 
-    validationMediaWidthUnderflow:
-        'Der {{fileMainType}} ist zu klein. Die minimale Breite beträgt {{minWidth}} Pixel.',
-    validationMediaWidthOverflow:
-        'Der {{fileMainType}} ist zu groß. Die maximale Breite beträgt {{maxWidth}} Pixel.',
+    validationMediaWidthUnderflow: 'Der {{fileMainType}} ist zu klein. Die minimale Breite beträgt {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow: 'Der {{fileMainType}} ist zu groß. Die maximale Breite beträgt {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch:
-        'Die Höhe des {{fileMainType}} ist ungültig. Die Höhe muss zwischen {{minHeight}} und {{maxHeight}} Pixel liegen.',
+    validationMediaHeightRangeMismatch: 'Die Höhe des {{fileMainType}} ist ungültig. Die Höhe muss zwischen {{minHeight}} und {{maxHeight}} {{maxHeightUnit}} liegen.',
 
-    validationMediaHeightUnderflow:
-        'Der {{fileMainType}} ist zu klein. Die minimale Höhe beträgt {{minHeight}} Pixel.',
-    validationMediaHeightOverflow:
-        'Der {{fileMainType}} ist zu groß. Die maximale Höhe beträgt {{maxHeight}} Pixel.',
+    validationMediaHeightUnderflow: 'Der {{fileMainType}} ist zu klein. Die minimale Höhe beträgt {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow: 'Der {{fileMainType}} ist zu groß. Die maximale Höhe beträgt {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'Die Auflösung des {{fileMainType}} ist ungültig. Die Auflösung muss zwischen {{minResolution}}MP und {{maxResolution}}MP liegen.',
@@ -202,24 +188,10 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: 'Zu wenige Dateien. Minimum: {{minFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: { 1: 'Datei', else: 'Dateien' },
-            },
-        },
-    },
-    validationListEntryCountOverflow: {
-        template: 'Zu viele Dateien. Maximum: {{maxFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: { 1: 'Datei', else: 'Dateien' },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        'Zu wenige Dateien in der Liste. Minimum: {{minFiles}} {{minFilesUnit}}.',
+    validationListEntryCountOverflow:
+        'Zu viele Dateien in der Liste. Maximum: {{maxFiles}} {{maxFilesUnit}}.',
 };
 
 export const validation = {

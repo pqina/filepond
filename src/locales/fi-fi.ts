@@ -15,6 +15,30 @@ export const core = {
     busy: 'Varattu',
     loading: 'Ladataan',
 
+    // units
+    unitB: {
+        1: 'tavu',
+        else: 'tavua',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: 'pikseli',
+        else: 'pikseliä',
+    },
+    unitFiles: {
+        1: 'tiedosto',
+        else: 'tiedostoa',
+    },
+
     error: 'Virhe',
     warning: 'Varoitus',
     success: 'Onnistui',
@@ -28,30 +52,9 @@ export const core = {
 
     assistAbort: 'Napauta peruuttaaksesi',
     assistUndo: 'Napauta kumotaksesi',
-    browse: {
-        template: 'Valitse {{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'tiedostot',
-                    false: 'tiedosto',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: 'Pudota {{files}} tähän tai <u>selaa</u>',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'tiedostot',
-                    false: 'tiedosto',
-                },
-            },
-        },
-    },
+    // browse button labels
+    browse: 'Valitse {{maxFilesUnit}}',
+    browseAndDrop: 'Pudota {{maxFilesUnit}} tähän tai <u>selaa</u>',
 
     loadError: 'Tiedostoa ei voitu ladata.',
 
@@ -79,18 +82,7 @@ export const core = {
 
     // screenreader accessibility
     ariaRequired: 'pakollinen',
-    ariaNoEntries: {
-        template: 'Yhtään {{files}} ei ole valittu',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'tiedostoa',
-                    false: 'tiedostoa',
-                },
-            },
-        },
-    },
+    ariaNoEntries: '{{maxFilesUnit}} ei ole valittu',
     ariaSingleEntry: 'Valittu {{name}}',
     ariaMultipleEntries: '{{count}} tiedostoa valittu',
     ariaItemRoleDescription: 'Lajiteltava',
@@ -166,33 +158,27 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Tiedosto on liian pieni. Vähintään {{minSize}}.',
-    validationFileSizeOverflow: 'Tiedosto on liian suuri. Enintään {{maxSize}}.',
+    validationFileSizeUnderflow: 'Tämä tiedosto on liian pieni. Vähimmäiskoko on {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow: 'Tämä tiedosto on liian suuri. Enimmäiskoko on {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Kokonaiskoko on liian pieni. Vähintään {{minListSize}}.',
-    validationListSizeOverflow: 'Kokonaiskoko on liian suuri. Enintään {{maxListSize}}.',
+    validationListSizeUnderflow: 'Tiedostojen kokonaiskoko on liian pieni. Vähimmäiskokonaiskoko on {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow: 'Tiedostojen kokonaiskoko on liian suuri. Enimmäiskokonaiskoko on {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Mediakokoa ei voitu lukea.',
 
-    validationMediaWidthRangeMismatch:
-        '{{fileMainType}} leveys on virheellinen. Sen tulee olla {{minWidth}}–{{maxWidth}} pikseliä.',
+    validationMediaWidthRangeMismatch: '{{fileMainType}}n leveys ei kelpaa. Leveyden on oltava välillä {{minWidth}} ja {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow:
-        '{{fileMainType}} on liian pieni. Minimileveys {{minWidth}} pikseliä.',
-    validationMediaWidthOverflow:
-        '{{fileMainType}} on liian suuri. Maksimileveys {{maxWidth}} pikseliä.',
+    validationMediaWidthUnderflow: '{{fileMainType}} on liian pieni. Vähimmäisleveys on {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow: '{{fileMainType}} on liian suuri. Enimmäisleveys on {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch:
-        '{{fileMainType}} korkeus on virheellinen. Sen tulee olla {{minHeight}}–{{maxHeight}} pikseliä.',
+    validationMediaHeightRangeMismatch: '{{fileMainType}}n korkeus ei kelpaa. Korkeuden on oltava välillä {{minHeight}} ja {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow:
-        '{{fileMainType}} on liian pieni. Minimipituus {{minHeight}} pikseliä.',
-    validationMediaHeightOverflow:
-        '{{fileMainType}} on liian suuri. Maksimipituus {{maxHeight}} pikseliä.',
+    validationMediaHeightUnderflow: '{{fileMainType}} on liian pieni. Vähimmäiskorkeus on {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow: '{{fileMainType}} on liian suuri. Enimmäiskorkeus on {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'Tarkkuus on virheellinen. Sen tulee olla {{minResolution}}–{{maxResolution}} MP.',
@@ -202,31 +188,10 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: 'Liian vähän tiedostoja. Vähintään {{minFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: {
-                    1: 'tiedosto',
-                    else: 'tiedostoa',
-                },
-            },
-        },
-    },
-
-    validationListEntryCountOverflow: {
-        template: 'Liikaa tiedostoja. Enintään {{maxFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: {
-                    1: 'tiedosto',
-                    else: 'tiedostoa',
-                },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        'Luettelossa on liian vähän tiedostoja. Vähimmäismäärä on {{minFiles}} {{minFilesUnit}}.',
+    validationListEntryCountOverflow:
+        'Luettelossa on liikaa tiedostoja. Enimmäismäärä on {{maxFiles}} {{maxFilesUnit}}.',
 };
 
 export const validation = {

@@ -15,6 +15,30 @@ export const core = {
     busy: '처리 중',
     loading: '불러오는 중',
 
+    // units
+    unitB: {
+        1: '바이트',
+        else: '바이트',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: '픽셀',
+        else: '픽셀',
+    },
+    unitFiles: {
+        1: '파일',
+        else: '파일',
+    },
+
     error: '오류',
     warning: '경고',
     success: '완료',
@@ -28,30 +52,9 @@ export const core = {
 
     assistAbort: '탭하여 취소',
     assistUndo: '탭하여 실행 취소',
-    browse: {
-        template: '{{files}} 선택',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: '파일',
-                    false: '파일',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: '{{files}}을(를) 여기에 놓거나 <u>찾아보기</u>',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: '파일',
-                    false: '파일',
-                },
-            },
-        },
-    },
+    // browse button labels
+    browse: '{{maxFilesUnit}} 선택',
+    browseAndDrop: '{{maxFilesUnit}}을(를) 여기에 놓거나 <u>찾아보기</u>',
 
     loadError: '파일을 불러올 수 없습니다.',
 
@@ -79,18 +82,7 @@ export const core = {
 
     // screenreader accessibility
     ariaRequired: '필수',
-    ariaNoEntries: {
-        template: '선택된 {{files}}이(가) 없습니다',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: '파일',
-                    false: '파일',
-                },
-            },
-        },
-    },
+    ariaNoEntries: '선택된 {{maxFilesUnit}}이(가) 없습니다',
     ariaSingleEntry: '{{name}} 선택됨',
     ariaMultipleEntries: '{{count}}개 파일 선택됨',
     ariaItemRoleDescription: '정렬 가능',
@@ -165,33 +157,27 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: '파일 크기가 너무 작습니다. 최소 크기는 {{minSize}}입니다.',
-    validationFileSizeOverflow: '파일 크기가 너무 큽니다. 최대 크기는 {{maxSize}}입니다.',
+    validationFileSizeUnderflow: '이 파일은 너무 작습니다. 최소 크기는 {{minSize}} {{minSizeUnit}}입니다.',
+    validationFileSizeOverflow: '이 파일은 너무 큽니다. 최대 크기는 {{maxSize}} {{maxSizeUnit}}입니다.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: '전체 파일 크기가 너무 작습니다. 최소값은 {{minListSize}}입니다.',
-    validationListSizeOverflow: '전체 파일 크기가 너무 큽니다. 최대값은 {{maxListSize}}입니다.',
+    validationListSizeUnderflow: '전체 파일 크기가 너무 작습니다. 최소 총 크기는 {{minSize}} {{minSizeUnit}}입니다.',
+    validationListSizeOverflow: '전체 파일 크기가 너무 큽니다. 최대 총 크기는 {{maxSize}} {{maxSizeUnit}}입니다.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: '미디어 크기를 읽을 수 없습니다.',
 
-    validationMediaWidthRangeMismatch:
-        '{{fileMainType}}의 너비가 잘못되었습니다. 너비는 {{minWidth}}에서 {{maxWidth}} 픽셀 사이여야 합니다.',
+    validationMediaWidthRangeMismatch: '{{fileMainType}} 너비가 올바르지 않습니다. 너비는 {{minWidth}}에서 {{maxWidth}} {{maxWidthUnit}} 사이여야 합니다.',
 
-    validationMediaWidthUnderflow:
-        '{{fileMainType}}가 너무 작습니다. 최소 너비는 {{minWidth}} 픽셀입니다.',
-    validationMediaWidthOverflow:
-        '{{fileMainType}}가 너무 큽니다. 최대 너비는 {{maxWidth}} 픽셀입니다.',
+    validationMediaWidthUnderflow: '{{fileMainType}}이(가) 너무 작습니다. 최소 너비는 {{minWidth}} {{minWidthUnit}}입니다.',
+    validationMediaWidthOverflow: '{{fileMainType}}이(가) 너무 큽니다. 최대 너비는 {{maxWidth}} {{maxWidthUnit}}입니다.',
 
-    validationMediaHeightRangeMismatch:
-        '{{fileMainType}}의 높이가 잘못되었습니다. 높이는 {{minHeight}}에서 {{maxHeight}} 픽셀 사이여야 합니다.',
+    validationMediaHeightRangeMismatch: '{{fileMainType}} 높이가 올바르지 않습니다. 높이는 {{minHeight}}에서 {{maxHeight}} {{maxHeightUnit}} 사이여야 합니다.',
 
-    validationMediaHeightUnderflow:
-        '{{fileMainType}}가 너무 작습니다. 최소 높이는 {{minHeight}} 픽셀입니다.',
-    validationMediaHeightOverflow:
-        '{{fileMainType}}가 너무 큽니다. 최대 높이는 {{maxHeight}} 픽셀입니다.',
+    validationMediaHeightUnderflow: '{{fileMainType}}이(가) 너무 작습니다. 최소 높이는 {{minHeight}} {{minHeightUnit}}입니다.',
+    validationMediaHeightOverflow: '{{fileMainType}}이(가) 너무 큽니다. 최대 높이는 {{maxHeight}} {{maxHeightUnit}}입니다.',
 
     validationMediaResolutionRangeMismatch:
         '{{fileMainType}}의 해상도가 잘못되었습니다. 해상도는 {{minResolution}}MP에서 {{maxResolution}}MP 사이여야 합니다.',
@@ -204,25 +190,10 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: '파일이 너무 적습니다. 최소 {{minFiles}} {{files}}가 필요합니다.',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: { 1: '파일', else: '파일' },
-            },
-        },
-    },
-
-    validationListEntryCountOverflow: {
-        template: '파일이 너무 많습니다. 최대 {{maxFiles}} {{files}}까지 허용됩니다.',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: { 1: '파일', else: '파일' },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        '목록의 파일 수가 너무 적습니다. 최소값은 {{minFiles}} {{minFilesUnit}}입니다.',
+    validationListEntryCountOverflow:
+        '목록의 파일 수가 너무 많습니다. 최대값은 {{maxFiles}} {{maxFilesUnit}}입니다.',
 };
 
 export const validation = {

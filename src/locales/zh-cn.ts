@@ -15,6 +15,30 @@ export const core = {
     busy: '处理中',
     loading: '正在加载',
 
+    // units
+    unitB: {
+        1: '字节',
+        else: '字节',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: '像素',
+        else: '像素',
+    },
+    unitFiles: {
+        1: '文件',
+        else: '文件',
+    },
+
     error: '错误',
     warning: '警告',
     success: '完成',
@@ -28,30 +52,9 @@ export const core = {
 
     assistAbort: '点击取消',
     assistUndo: '点击撤销',
-    browse: {
-        template: '选择{{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: '文件',
-                    false: '文件',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: '将{{files}}拖到此处，或<u>浏览</u>',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: '文件',
-                    false: '一个文件',
-                },
-            },
-        },
-    },
+    // browse button labels
+    browse: '选择{{maxFilesUnit}}',
+    browseAndDrop: '将{{maxFilesUnit}}拖放到此处，或<u>浏览</u>',
 
     loadError: '无法加载文件。',
 
@@ -79,18 +82,7 @@ export const core = {
 
     // screenreader accessibility
     ariaRequired: '必填',
-    ariaNoEntries: {
-        template: '未选择{{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: '文件',
-                    false: '文件',
-                },
-            },
-        },
-    },
+    ariaNoEntries: '未选择{{maxFilesUnit}}',
     ariaSingleEntry: '已选择 {{name}}',
     ariaMultipleEntries: '已选择 {{count}} 个文件',
     ariaItemRoleDescription: '可排序',
@@ -164,29 +156,27 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: '文件太小。最小大小为 {{minSize}}。',
-    validationFileSizeOverflow: '文件太大。最大大小为 {{maxSize}}。',
+    validationFileSizeUnderflow: '此文件过小。最小大小为 {{minSize}} {{minSizeUnit}}。',
+    validationFileSizeOverflow: '此文件过大。最大大小为 {{maxSize}} {{maxSizeUnit}}。',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: '文件总大小太小。最小要求为 {{minListSize}}。',
-    validationListSizeOverflow: '文件总大小太大。最大允许为 {{maxListSize}}。',
+    validationListSizeUnderflow: '文件总大小过小。最小总大小为 {{minSize}} {{minSizeUnit}}。',
+    validationListSizeOverflow: '文件总大小过大。最大总大小为 {{maxSize}} {{maxSizeUnit}}。',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: '无法读取媒体尺寸。',
 
-    validationMediaWidthRangeMismatch:
-        '{{fileMainType}} 的宽度无效。宽度必须介于 {{minWidth}} 和 {{maxWidth}} 像素之间。',
+    validationMediaWidthRangeMismatch: '{{fileMainType}}宽度无效。宽度必须在 {{minWidth}} 到 {{maxWidth}} {{maxWidthUnit}} 之间。',
 
-    validationMediaWidthUnderflow: '{{fileMainType}} 太小。最小宽度为 {{minWidth}} 像素。',
-    validationMediaWidthOverflow: '{{fileMainType}} 太大。最大宽度为 {{maxWidth}} 像素。',
+    validationMediaWidthUnderflow: '{{fileMainType}}过小。最小宽度为 {{minWidth}} {{minWidthUnit}}。',
+    validationMediaWidthOverflow: '{{fileMainType}}过大。最大宽度为 {{maxWidth}} {{maxWidthUnit}}。',
 
-    validationMediaHeightRangeMismatch:
-        '{{fileMainType}} 的高度无效。高度必须介于 {{minHeight}} 和 {{maxHeight}} 像素之间。',
+    validationMediaHeightRangeMismatch: '{{fileMainType}}高度无效。高度必须在 {{minHeight}} 到 {{maxHeight}} {{maxHeightUnit}} 之间。',
 
-    validationMediaHeightUnderflow: '{{fileMainType}} 太小。最小高度为 {{minHeight}} 像素。',
-    validationMediaHeightOverflow: '{{fileMainType}} 太大。最大高度为 {{maxHeight}} 像素。',
+    validationMediaHeightUnderflow: '{{fileMainType}}过小。最小高度为 {{minHeight}} {{minHeightUnit}}。',
+    validationMediaHeightOverflow: '{{fileMainType}}过大。最大高度为 {{maxHeight}} {{maxHeightUnit}}。',
 
     validationMediaResolutionRangeMismatch:
         '{{fileMainType}} 的分辨率无效。必须介于 {{minResolution}}MP 和 {{maxResolution}}MP 之间。',
@@ -199,25 +189,10 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: '文件过少。至少需要 {{minFiles}} 个{{files}}。',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: { 1: '文件', else: '文件' },
-            },
-        },
-    },
-
-    validationListEntryCountOverflow: {
-        template: '文件过多。最多允许 {{maxFiles}} 个{{files}}。',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: { 1: '文件', else: '文件' },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        '列表中的文件过少。最少为 {{minFiles}} {{minFilesUnit}}。',
+    validationListEntryCountOverflow:
+        '列表中的文件过多。最多为 {{maxFiles}} {{maxFilesUnit}}。',
 };
 
 export const validation = {

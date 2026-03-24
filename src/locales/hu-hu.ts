@@ -15,6 +15,30 @@ export const core = {
     busy: 'Foglalt',
     loading: 'Betöltés',
 
+    // units
+    unitB: {
+        1: 'bájt',
+        else: 'bájt',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: 'képpont',
+        else: 'képpont',
+    },
+    unitFiles: {
+        1: 'fájl',
+        else: 'fájlok',
+    },
+
     error: 'Hiba',
     warning: 'Figyelmeztetés',
     success: 'Siker',
@@ -28,30 +52,9 @@ export const core = {
 
     assistAbort: 'Koppintson a megszakításhoz',
     assistUndo: 'Koppintson a visszavonáshoz',
-    browse: {
-        template: '{{files}} kiválasztása',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'fájlok',
-                    false: 'fájl',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: 'Húzza ide {{files}} vagy <u>tallózzon</u>',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'fájlokat',
-                    false: 'egy fájlt',
-                },
-            },
-        },
-    },
+    // browse button labels
+    browse: '{{maxFilesUnit}} kiválasztása',
+    browseAndDrop: 'Dobja ide: {{maxFilesUnit}}, vagy <u>böngésszen</u>',
 
     loadError: 'A fájl betöltése nem sikerült.',
 
@@ -79,18 +82,7 @@ export const core = {
 
     // screenreader accessibility
     ariaRequired: 'kötelező',
-    ariaNoEntries: {
-        template: 'Nincs kiválasztott {{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'fájlok',
-                    false: 'fájl',
-                },
-            },
-        },
-    },
+    ariaNoEntries: 'Nincs kiválasztva {{maxFilesUnit}}',
     ariaSingleEntry: 'Kiválasztva: {{name}}',
     ariaMultipleEntries: '{{count}} fájl kiválasztva',
     ariaItemRoleDescription: 'Rendezhető',
@@ -167,32 +159,27 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'A fájl túl kicsi. Minimum: {{minSize}}.',
-    validationFileSizeOverflow: 'A fájl túl nagy. Maximum: {{maxSize}}.',
+    validationFileSizeUnderflow: 'Ez a fájl túl kicsi. A minimális méret {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow: 'Ez a fájl túl nagy. A maximális méret {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'A teljes fájlméret túl kicsi. Minimum: {{minListSize}}.',
-    validationListSizeOverflow: 'A teljes fájlméret túl nagy. Maximum: {{maxListSize}}.',
+    validationListSizeUnderflow: 'A fájlok teljes mérete túl kicsi. A minimális összméret {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow: 'A fájlok teljes mérete túl nagy. A maximális összméret {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'A média mérete nem olvasható.',
 
-    validationMediaWidthRangeMismatch:
-        '{{fileMainType}} szélessége érvénytelen. {{minWidth}} és {{maxWidth}} px között kell lennie.',
+    validationMediaWidthRangeMismatch: 'A(z) {{fileMainType}} szélessége érvénytelen. A szélességnek {{minWidth}} és {{maxWidth}} {{maxWidthUnit}} között kell lennie.',
 
-    validationMediaWidthUnderflow:
-        '{{fileMainType}} túl kicsi. Minimális szélesség {{minWidth}} px.',
-    validationMediaWidthOverflow: '{{fileMainType}} túl nagy. Maximális szélesség {{maxWidth}} px.',
+    validationMediaWidthUnderflow: 'A(z) {{fileMainType}} túl kicsi. A minimális szélesség {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow: 'A(z) {{fileMainType}} túl nagy. A maximális szélesség {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch:
-        '{{fileMainType}} magassága érvénytelen. {{minHeight}} és {{maxHeight}} px között kell lennie.',
+    validationMediaHeightRangeMismatch: 'A(z) {{fileMainType}} magassága érvénytelen. A magasságnak {{minHeight}} és {{maxHeight}} {{maxHeightUnit}} között kell lennie.',
 
-    validationMediaHeightUnderflow:
-        '{{fileMainType}} túl kicsi. Minimális magasság {{minHeight}} px.',
-    validationMediaHeightOverflow:
-        '{{fileMainType}} túl nagy. Maximális magasság {{maxHeight}} px.',
+    validationMediaHeightUnderflow: 'A(z) {{fileMainType}} túl kicsi. A minimális magasság {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow: 'A(z) {{fileMainType}} túl nagy. A maximális magasság {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'A felbontás érvénytelen. {{minResolution}}–{{maxResolution}} MP között kell lennie.',
@@ -202,31 +189,10 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: 'Túl kevés fájl a listában. Minimum {{minFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: {
-                    1: 'fájl',
-                    else: 'fájl',
-                },
-            },
-        },
-    },
-
-    validationListEntryCountOverflow: {
-        template: 'Túl sok fájl a listában. Maximum {{maxFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: {
-                    1: 'fájl',
-                    else: 'fájl',
-                },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        'Túl kevés fájl van a listában. A minimum {{minFiles}} {{minFilesUnit}}.',
+    validationListEntryCountOverflow:
+        'Túl sok fájl van a listában. A maximum {{maxFiles}} {{maxFilesUnit}}.',
 };
 
 export const validation = {

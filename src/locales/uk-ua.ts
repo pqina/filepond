@@ -15,6 +15,30 @@ export const core = {
     busy: 'Зайнято',
     loading: 'Завантаження',
 
+    // units
+    unitB: {
+        1: 'байт',
+        else: 'байти',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: 'піксель',
+        else: 'пікселі',
+    },
+    unitFiles: {
+        1: 'файл',
+        else: 'файли',
+    },
+
     error: 'Помилка',
     warning: 'Попередження',
     success: 'Успіх',
@@ -28,30 +52,9 @@ export const core = {
 
     assistAbort: 'Натисніть, щоб скасувати',
     assistUndo: 'Натисніть, щоб повернути',
-    browse: {
-        template: 'Вибрати {{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'файли',
-                    false: 'файл',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: 'Перетягніть сюди {{files}} або <u>перегляньте</u>',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'файли',
-                    false: 'файл',
-                },
-            },
-        },
-    },
+    // browse button labels
+    browse: 'Вибрати {{maxFilesUnit}}',
+    browseAndDrop: 'Перетягніть сюди {{maxFilesUnit}} або <u>перегляньте</u>',
 
     loadError: 'Не вдалося завантажити файл.',
 
@@ -79,18 +82,7 @@ export const core = {
 
     // screenreader accessibility
     ariaRequired: 'обовязково',
-    ariaNoEntries: {
-        template: 'Не вибрано {{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'файлів',
-                    false: 'файл',
-                },
-            },
-        },
-    },
+    ariaNoEntries: 'Не вибрано {{maxFilesUnit}}',
     ariaSingleEntry: 'Вибрано {{name}}',
     ariaMultipleEntries: 'Вибрано {{count}} файлів',
     ariaItemRoleDescription: 'Можна сортувати',
@@ -166,33 +158,27 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Файл надто малий. Мінімум {{minSize}}.',
-    validationFileSizeOverflow: 'Файл надто великий. Максимум {{maxSize}}.',
+    validationFileSizeUnderflow: 'Цей файл замалий. Мінімальний розмір: {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow: 'Цей файл завеликий. Максимальний розмір: {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Загальний розмір файлів надто малий. Мінімум {{minListSize}}.',
-    validationListSizeOverflow: 'Загальний розмір файлів надто великий. Максимум {{maxListSize}}.',
+    validationListSizeUnderflow: 'Загальний розмір файлів замалий. Мінімальний загальний розмір: {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow: 'Загальний розмір файлів завеликий. Максимальний загальний розмір: {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Не вдалося прочитати розмір медіа.',
 
-    validationMediaWidthRangeMismatch:
-        'Ширина {{fileMainType}} недійсна. Має бути від {{minWidth}} до {{maxWidth}} пікселів.',
+    validationMediaWidthRangeMismatch: 'Ширина {{fileMainType}} недійсна. Ширина має бути від {{minWidth}} до {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow:
-        '{{fileMainType}} надто малий. Мінімальна ширина {{minWidth}} пікселів.',
-    validationMediaWidthOverflow:
-        '{{fileMainType}} надто великий. Максимальна ширина {{maxWidth}} пікселів.',
+    validationMediaWidthUnderflow: '{{fileMainType}} замалий. Мінімальна ширина: {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow: '{{fileMainType}} завеликий. Максимальна ширина: {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch:
-        'Висота {{fileMainType}} недійсна. Має бути від {{minHeight}} до {{maxHeight}} пікселів.',
+    validationMediaHeightRangeMismatch: 'Висота {{fileMainType}} недійсна. Висота має бути від {{minHeight}} до {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow:
-        '{{fileMainType}} надто малий. Мінімальна висота {{minHeight}} пікселів.',
-    validationMediaHeightOverflow:
-        '{{fileMainType}} надто великий. Максимальна висота {{maxHeight}} пікселів.',
+    validationMediaHeightUnderflow: '{{fileMainType}} замалий. Мінімальна висота: {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow: '{{fileMainType}} завеликий. Максимальна висота: {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'Недійсна роздільна здатність. Має бути від {{minResolution}}MP до {{maxResolution}}MP.',
@@ -204,31 +190,10 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: 'У списку надто мало файлів. Мінімум {{minFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: {
-                    1: 'файл',
-                    else: 'файлів',
-                },
-            },
-        },
-    },
-
-    validationListEntryCountOverflow: {
-        template: 'У списку надто багато файлів. Максимум {{maxFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: {
-                    1: 'файл',
-                    else: 'файлів',
-                },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        'У списку замало файлів. Мінімум: {{minFiles}} {{minFilesUnit}}.',
+    validationListEntryCountOverflow:
+        'У списку забагато файлів. Максимум: {{maxFiles}} {{maxFilesUnit}}.',
 };
 
 export const validation = {

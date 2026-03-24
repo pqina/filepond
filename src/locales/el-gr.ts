@@ -15,6 +15,30 @@ export const core = {
     busy: 'Απασχολημένο',
     loading: 'Φόρτωση',
 
+    // units
+    unitB: {
+        1: 'byte',
+        else: 'bytes',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: 'pixel',
+        else: 'pixels',
+    },
+    unitFiles: {
+        1: 'αρχείο',
+        else: 'αρχεία',
+    },
+
     error: 'Σφάλμα',
     warning: 'Προειδοποίηση',
     success: 'Επιτυχία',
@@ -28,30 +52,9 @@ export const core = {
 
     assistAbort: 'Πατήστε για ακύρωση',
     assistUndo: 'Πατήστε για αναίρεση',
-    browse: {
-        template: 'Επιλέξτε {{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'αρχεία',
-                    false: 'αρχείο',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: 'Αποθέστε {{files}} εδώ ή <u>περιηγηθείτε</u>',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'αρχεία',
-                    false: 'ένα αρχείο',
-                },
-            },
-        },
-    },
+    // browse button labels
+    browse: 'Επιλέξτε {{maxFilesUnit}}',
+    browseAndDrop: 'Αποθέστε {{maxFilesUnit}} εδώ ή <u>περιηγηθείτε</u>',
 
     loadError: 'Αποτυχία φόρτωσης αρχείου.',
 
@@ -79,18 +82,7 @@ export const core = {
 
     // screenreader accessibility
     ariaRequired: 'υποχρεωτικό',
-    ariaNoEntries: {
-        template: 'Δεν έχουν επιλεγεί {{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'αρχεία',
-                    false: 'αρχείο',
-                },
-            },
-        },
-    },
+    ariaNoEntries: 'Δεν έχουν επιλεγεί {{maxFilesUnit}}',
     ariaSingleEntry: 'Επιλέχθηκε το {{name}}',
     ariaMultipleEntries: 'Επιλέχθηκαν {{count}} αρχεία',
     ariaItemRoleDescription: 'Δυνατότητα ταξινόμησης',
@@ -166,35 +158,27 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Το αρχείο είναι πολύ μικρό. Ελάχιστο {{minSize}}.',
-    validationFileSizeOverflow: 'Το αρχείο είναι πολύ μεγάλο. Μέγιστο {{maxSize}}.',
+    validationFileSizeUnderflow: 'Αυτό το αρχείο είναι πολύ μικρό. Το ελάχιστο μέγεθος είναι {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow: 'Αυτό το αρχείο είναι πολύ μεγάλο. Το μέγιστο μέγεθος είναι {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow:
-        'Το συνολικό μέγεθος αρχείων είναι πολύ μικρό. Ελάχιστο {{minListSize}}.',
-    validationListSizeOverflow:
-        'Το συνολικό μέγεθος αρχείων είναι πολύ μεγάλο. Μέγιστο {{maxListSize}}.',
+    validationListSizeUnderflow: 'Το συνολικό μέγεθος αρχείων είναι πολύ μικρό. Το ελάχιστο συνολικό μέγεθος είναι {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow: 'Το συνολικό μέγεθος αρχείων είναι πολύ μεγάλο. Το μέγιστο συνολικό μέγεθος είναι {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Αδύνατη η ανάγνωση μεγέθους πολυμέσων.',
 
-    validationMediaWidthRangeMismatch:
-        'Το πλάτος του {{fileMainType}} δεν είναι έγκυρο. Πρέπει να είναι μεταξύ {{minWidth}} και {{maxWidth}} px.',
+    validationMediaWidthRangeMismatch: 'Το πλάτος του {{fileMainType}} δεν είναι έγκυρο. Το πλάτος πρέπει να είναι μεταξύ {{minWidth}} και {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow:
-        'Το {{fileMainType}} είναι πολύ μικρό. Ελάχιστο πλάτος {{minWidth}} px.',
-    validationMediaWidthOverflow:
-        'Το {{fileMainType}} είναι πολύ μεγάλο. Μέγιστο πλάτος {{maxWidth}} px.',
+    validationMediaWidthUnderflow: 'Το {{fileMainType}} είναι πολύ μικρό. Το ελάχιστο πλάτος είναι {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow: 'Το {{fileMainType}} είναι πολύ μεγάλο. Το μέγιστο πλάτος είναι {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch:
-        'Το ύψος του {{fileMainType}} δεν είναι έγκυρο. Πρέπει να είναι μεταξύ {{minHeight}} και {{maxHeight}} px.',
+    validationMediaHeightRangeMismatch: 'Το ύψος του {{fileMainType}} δεν είναι έγκυρο. Το ύψος πρέπει να είναι μεταξύ {{minHeight}} και {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow:
-        'Το {{fileMainType}} είναι πολύ μικρό. Ελάχιστο ύψος {{minHeight}} px.',
-    validationMediaHeightOverflow:
-        'Το {{fileMainType}} είναι πολύ μεγάλο. Μέγιστο ύψος {{maxHeight}} px.',
+    validationMediaHeightUnderflow: 'Το {{fileMainType}} είναι πολύ μικρό. Το ελάχιστο ύψος είναι {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow: 'Το {{fileMainType}} είναι πολύ μεγάλο. Το μέγιστο ύψος είναι {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'Η ανάλυση δεν είναι έγκυρη. Πρέπει να είναι μεταξύ {{minResolution}}MP και {{maxResolution}}MP.',
@@ -205,31 +189,10 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: 'Πολύ λίγα αρχεία στη λίστα. Ελάχιστο {{minFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: {
-                    1: 'αρχείο',
-                    else: 'αρχεία',
-                },
-            },
-        },
-    },
-
-    validationListEntryCountOverflow: {
-        template: 'Πάρα πολλά αρχεία στη λίστα. Μέγιστο {{maxFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: {
-                    1: 'αρχείο',
-                    else: 'αρχεία',
-                },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        'Υπάρχουν πολύ λίγα αρχεία στη λίστα. Το ελάχιστο είναι {{minFiles}} {{minFilesUnit}}.',
+    validationListEntryCountOverflow:
+        'Υπάρχουν πάρα πολλά αρχεία στη λίστα. Το μέγιστο είναι {{maxFiles}} {{maxFilesUnit}}.',
 };
 
 export const validation = {

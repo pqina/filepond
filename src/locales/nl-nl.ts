@@ -16,6 +16,30 @@ export const core = {
     busy: 'Bezig',
     loading: 'Laden',
 
+    // units
+    unitB: {
+        1: 'byte',
+        else: 'bytes',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: 'pixel',
+        else: 'pixels',
+    },
+    unitFiles: {
+        1: 'bestand',
+        else: 'bestanden',
+    },
+
     // extension status
     error: 'Fout',
     warning: 'Waarschuwing',
@@ -32,32 +56,10 @@ export const core = {
     // assist
     assistAbort: 'Tik om te annuleren',
     assistUndo: 'Tik om ongedaan te maken',
-    browse: {
-        template: 'Kies {{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'bestanden',
-                    false: 'bestand',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: 'Sleep {{files}} hierheen of <u>blader</u>',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'bestanden',
-                    false: 'een bestand',
-                },
-            },
-        },
-    },
+    // browse button labels
+    browse: 'Kies {{maxFilesUnit}}',
+    browseAndDrop: 'Sleep {{maxFilesUnit}} hierheen of <u>blader</u>',
 
-    // file status
     loadError: 'Bestand kon niet worden geladen.',
 
     // data transfer status
@@ -87,18 +89,7 @@ export const core = {
 
     // screenreader accessibility
     ariaRequired: 'verplicht',
-    ariaNoEntries: {
-        template: 'Geen {{files}} geselecteerd',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'bestanden',
-                    false: 'bestand',
-                },
-            },
-        },
-    },
+    ariaNoEntries: 'Geen {{maxFilesUnit}} geselecteerd',
     ariaSingleEntry: 'Geselecteerd {{name}}',
     ariaMultipleEntries: '{{count}} bestanden geselecteerd',
     ariaItemRoleDescription: 'Sorteerbaar',
@@ -176,35 +167,27 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Dit bestand is te klein. Minimale grootte is {{minSize}}.',
-    validationFileSizeOverflow: 'Dit bestand is te groot. Maximale grootte is {{maxSize}}.',
+    validationFileSizeUnderflow: 'Dit bestand is te klein. Minimale grootte is {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow: 'Dit bestand is te groot. Maximale grootte is {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow:
-        'Totale bestandsgrootte is te klein. Minimum vereist is {{minListSize}}.',
-    validationListSizeOverflow:
-        'Totale bestandsgrootte is te groot. Maximum toegestaan is {{maxListSize}}.',
+    validationListSizeUnderflow: 'Totale bestandsgrootte is te klein. Minimale totale grootte is {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow: 'Totale bestandsgrootte is te groot. Maximale totale grootte is {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Kon mediagrootte niet lezen.',
 
-    validationMediaWidthRangeMismatch:
-        'De breedte van de {{fileMainType}} is ongeldig. De breedte moet tussen {{minWidth}} en {{maxWidth}} pixels liggen.',
+    validationMediaWidthRangeMismatch: 'De breedte van de {{fileMainType}} is ongeldig. De breedte moet tussen {{minWidth}} en {{maxWidth}} {{maxWidthUnit}} liggen.',
 
-    validationMediaWidthUnderflow:
-        'De {{fileMainType}} is te klein. Minimale breedte is {{minWidth}} pixels.',
-    validationMediaWidthOverflow:
-        'De {{fileMainType}} is te groot. Maximale breedte is {{maxWidth}} pixels.',
+    validationMediaWidthUnderflow: 'De {{fileMainType}} is te klein. Minimale breedte is {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow: 'De {{fileMainType}} is te groot. Maximale breedte is {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch:
-        'De hoogte van de {{fileMainType}} is ongeldig. De hoogte moet tussen {{minHeight}} en {{maxHeight}} pixels liggen.',
+    validationMediaHeightRangeMismatch: 'De hoogte van de {{fileMainType}} is ongeldig. De hoogte moet tussen {{minHeight}} en {{maxHeight}} {{maxHeightUnit}} liggen.',
 
-    validationMediaHeightUnderflow:
-        'De {{fileMainType}} is te klein. Minimale hoogte is {{minHeight}} pixels.',
-    validationMediaHeightOverflow:
-        'De {{fileMainType}} is te groot. Maximale hoogte is {{maxHeight}} pixels.',
+    validationMediaHeightUnderflow: 'De {{fileMainType}} is te klein. Minimale hoogte is {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow: 'De {{fileMainType}} is te groot. Maximale hoogte is {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'De resolutie van de {{fileMainType}} is ongeldig. De resolutie moet tussen {{minResolution}}MP en {{maxResolution}}MP liggen.',
@@ -217,31 +200,10 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: 'Te weinig bestanden. Minimum vereist is {{minFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: {
-                    1: 'bestand',
-                    else: 'bestanden',
-                },
-            },
-        },
-    },
-
-    validationListEntryCountOverflow: {
-        template: 'Te veel bestanden. Maximum toegestaan is {{maxFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: {
-                    1: 'bestand',
-                    else: 'bestanden',
-                },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        'Te weinig bestanden in de lijst. Minimum aantal is {{minFiles}} {{minFilesUnit}}.',
+    validationListEntryCountOverflow:
+        'Te veel bestanden in de lijst. Maximum aantal is {{maxFiles}} {{maxFilesUnit}}.',
 };
 
 export const validation = {

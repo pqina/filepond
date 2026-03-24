@@ -15,6 +15,30 @@ export const core = {
     busy: 'Upptagen',
     loading: 'Laddar',
 
+    // units
+    unitB: {
+        1: 'byte',
+        else: 'byte',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: 'pixel',
+        else: 'pixlar',
+    },
+    unitFiles: {
+        1: 'fil',
+        else: 'filer',
+    },
+
     error: 'Fel',
     warning: 'Varning',
     success: 'Klart',
@@ -28,30 +52,9 @@ export const core = {
 
     assistAbort: 'Tryck för att avbryta',
     assistUndo: 'Tryck för att ångra',
-    browse: {
-        template: 'Välj {{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'filer',
-                    false: 'fil',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: 'Släpp {{files}} här eller <u>bläddra</u>',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'filer',
-                    false: 'en fil',
-                },
-            },
-        },
-    },
+    // browse button labels
+    browse: 'Välj {{maxFilesUnit}}',
+    browseAndDrop: 'Släpp {{maxFilesUnit}} här eller <u>bläddra</u>',
 
     loadError: 'Det gick inte att ladda filen.',
 
@@ -79,18 +82,7 @@ export const core = {
 
     // screenreader accessibility
     ariaRequired: 'obligatoriskt',
-    ariaNoEntries: {
-        template: 'Inga {{files}} valda',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'filer',
-                    false: 'fil',
-                },
-            },
-        },
-    },
+    ariaNoEntries: 'Inga {{maxFilesUnit}} valda',
     ariaSingleEntry: 'Vald {{name}}',
     ariaMultipleEntries: '{{count}} filer valda',
     ariaItemRoleDescription: 'Sorterbar',
@@ -165,33 +157,27 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Denna fil är för liten. Minimistorlek är {{minSize}}.',
-    validationFileSizeOverflow: 'Denna fil är för stor. Maximal storlek är {{maxSize}}.',
+    validationFileSizeUnderflow: 'Den här filen är för liten. Minsta storlek är {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow: 'Den här filen är för stor. Största storlek är {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Total filstorlek är för liten. Minimikravet är {{minListSize}}.',
-    validationListSizeOverflow: 'Total filstorlek är för stor. Maxgränsen är {{maxListSize}}.',
+    validationListSizeUnderflow: 'Den totala filstorleken är för liten. Minsta totala storlek är {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow: 'Den totala filstorleken är för stor. Största totala storlek är {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Det gick inte att läsa mediestorleken.',
 
-    validationMediaWidthRangeMismatch:
-        '{{fileMainType}} har ogiltig bredd. Bredden måste vara mellan {{minWidth}} och {{maxWidth}} pixlar.',
+    validationMediaWidthRangeMismatch: '{{fileMainType}}-bredden är ogiltig. Bredden måste vara mellan {{minWidth}} och {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow:
-        '{{fileMainType}} är för liten. Minsta bredd är {{minWidth}} pixlar.',
-    validationMediaWidthOverflow:
-        '{{fileMainType}} är för stor. Största bredd är {{maxWidth}} pixlar.',
+    validationMediaWidthUnderflow: '{{fileMainType}} är för liten. Minsta bredd är {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow: '{{fileMainType}} är för stor. Största bredd är {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch:
-        '{{fileMainType}} har ogiltig höjd. Höjden måste vara mellan {{minHeight}} och {{maxHeight}} pixlar.',
+    validationMediaHeightRangeMismatch: '{{fileMainType}}-höjden är ogiltig. Höjden måste vara mellan {{minHeight}} och {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow:
-        '{{fileMainType}} är för liten. Minsta höjd är {{minHeight}} pixlar.',
-    validationMediaHeightOverflow:
-        '{{fileMainType}} är för stor. Största höjd är {{maxHeight}} pixlar.',
+    validationMediaHeightUnderflow: '{{fileMainType}} är för liten. Minsta höjd är {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow: '{{fileMainType}} är för stor. Största höjd är {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         '{{fileMainType}} har ogiltig upplösning. Den måste vara mellan {{minResolution}}MP och {{maxResolution}}MP.',
@@ -204,25 +190,10 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: 'För få filer. Minimikravet är {{minFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: { 1: 'fil', else: 'filer' },
-            },
-        },
-    },
-
-    validationListEntryCountOverflow: {
-        template: 'För många filer. Maxgränsen är {{maxFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: { 1: 'fil', else: 'filer' },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        'För få filer i listan. Minsta antal är {{minFiles}} {{minFilesUnit}}.',
+    validationListEntryCountOverflow:
+        'För många filer i listan. Högsta antal är {{maxFiles}} {{maxFilesUnit}}.',
 };
 
 export const validation = {

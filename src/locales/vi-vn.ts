@@ -15,6 +15,30 @@ export const core = {
     busy: 'Đang bận',
     loading: 'Đang tải',
 
+    // units
+    unitB: {
+        1: 'byte',
+        else: 'byte',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: 'pixel',
+        else: 'pixel',
+    },
+    unitFiles: {
+        1: 'tệp',
+        else: 'tệp',
+    },
+
     error: 'Lỗi',
     warning: 'Cảnh báo',
     success: 'Thành công',
@@ -28,30 +52,9 @@ export const core = {
 
     assistAbort: 'Chạm để hủy',
     assistUndo: 'Chạm để hoàn tác',
-    browse: {
-        template: 'Chọn {{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'tệp',
-                    false: 'tệp',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: 'Thả {{files}} vào đây hoặc <u>duyệt</u>',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'tệp',
-                    false: 'một tệp',
-                },
-            },
-        },
-    },
+    // browse button labels
+    browse: 'Chọn {{maxFilesUnit}}',
+    browseAndDrop: 'Thả {{maxFilesUnit}} vào đây hoặc <u>duyệt</u>',
 
     loadError: 'Không thể tải tệp.',
 
@@ -79,18 +82,7 @@ export const core = {
 
     // screenreader accessibility
     ariaRequired: 'bắt buộc',
-    ariaNoEntries: {
-        template: 'Chưa chọn {{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'tệp',
-                    false: 'tệp',
-                },
-            },
-        },
-    },
+    ariaNoEntries: 'Chưa chọn {{maxFilesUnit}} nào',
     ariaSingleEntry: 'Đã chọn {{name}}',
     ariaMultipleEntries: 'Đã chọn {{count}} tệp',
     ariaItemRoleDescription: 'Có thể sắp xếp',
@@ -166,29 +158,27 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Tệp quá nhỏ. Tối thiểu {{minSize}}.',
-    validationFileSizeOverflow: 'Tệp quá lớn. Tối đa {{maxSize}}.',
+    validationFileSizeUnderflow: 'Tệp này quá nhỏ. Kích thước tối thiểu là {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow: 'Tệp này quá lớn. Kích thước tối đa là {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Tổng dung lượng quá nhỏ. Tối thiểu {{minListSize}}.',
-    validationListSizeOverflow: 'Tổng dung lượng quá lớn. Tối đa {{maxListSize}}.',
+    validationListSizeUnderflow: 'Tổng kích thước tệp quá nhỏ. Tổng kích thước tối thiểu là {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow: 'Tổng kích thước tệp quá lớn. Tổng kích thước tối đa là {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Không đọc được kích thước phương tiện.',
 
-    validationMediaWidthRangeMismatch:
-        'Chiều rộng {{fileMainType}} không hợp lệ. Cần trong khoảng {{minWidth}} đến {{maxWidth}} px.',
+    validationMediaWidthRangeMismatch: 'Chiều rộng của {{fileMainType}} không hợp lệ. Chiều rộng phải nằm trong khoảng từ {{minWidth}} đến {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow: '{{fileMainType}} quá nhỏ. Tối thiểu {{minWidth}} px.',
-    validationMediaWidthOverflow: '{{fileMainType}} quá lớn. Tối đa {{maxWidth}} px.',
+    validationMediaWidthUnderflow: '{{fileMainType}} quá nhỏ. Chiều rộng tối thiểu là {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow: '{{fileMainType}} quá lớn. Chiều rộng tối đa là {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch:
-        'Chiều cao {{fileMainType}} không hợp lệ. Cần trong khoảng {{minHeight}} đến {{maxHeight}} px.',
+    validationMediaHeightRangeMismatch: 'Chiều cao của {{fileMainType}} không hợp lệ. Chiều cao phải nằm trong khoảng từ {{minHeight}} đến {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow: '{{fileMainType}} quá nhỏ. Tối thiểu {{minHeight}} px.',
-    validationMediaHeightOverflow: '{{fileMainType}} quá lớn. Tối đa {{maxHeight}} px.',
+    validationMediaHeightUnderflow: '{{fileMainType}} quá nhỏ. Chiều cao tối thiểu là {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow: '{{fileMainType}} quá lớn. Chiều cao tối đa là {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'Độ phân giải không hợp lệ. Cần trong khoảng {{minResolution}}MP đến {{maxResolution}}MP.',
@@ -198,31 +188,10 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: 'Danh sách có quá ít tệp. Tối thiểu {{minFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: {
-                    1: 'tệp',
-                    else: 'tệp',
-                },
-            },
-        },
-    },
-
-    validationListEntryCountOverflow: {
-        template: 'Danh sách có quá nhiều tệp. Tối đa {{maxFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: {
-                    1: 'tệp',
-                    else: 'tệp',
-                },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        'Có quá ít tệp trong danh sách. Tối thiểu là {{minFiles}} {{minFilesUnit}}.',
+    validationListEntryCountOverflow:
+        'Có quá nhiều tệp trong danh sách. Tối đa là {{maxFiles}} {{maxFilesUnit}}.',
 };
 
 export const validation = {

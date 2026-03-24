@@ -15,6 +15,30 @@ export const core = {
     busy: 'Meşgul',
     loading: 'Yükleniyor',
 
+    // units
+    unitB: {
+        1: 'bayt',
+        else: 'bayt',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: 'piksel',
+        else: 'piksel',
+    },
+    unitFiles: {
+        1: 'dosya',
+        else: 'dosyalar',
+    },
+
     error: 'Hata',
     warning: 'Uyarı',
     success: 'Başarılı',
@@ -28,30 +52,9 @@ export const core = {
 
     assistAbort: 'İptal etmek için dokun',
     assistUndo: 'Geri almak için dokun',
-    browse: {
-        template: '{{files}} seçin',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'dosyalar',
-                    false: 'dosya',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: '{{files}} buraya bırakın veya <u>göz atın</u>',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'dosyaları',
-                    false: 'bir dosya',
-                },
-            },
-        },
-    },
+    // browse button labels
+    browse: '{{maxFilesUnit}} seç',
+    browseAndDrop: '{{maxFilesUnit}} buraya bırakın veya <u>göz atın</u>',
 
     loadError: 'Dosya yüklenemedi.',
 
@@ -79,18 +82,7 @@ export const core = {
 
     // screenreader accessibility
     ariaRequired: 'gerekli',
-    ariaNoEntries: {
-        template: 'Hiç {{files}} seçilmedi',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'dosya',
-                    false: 'dosya',
-                },
-            },
-        },
-    },
+    ariaNoEntries: 'Seçili {{maxFilesUnit}} yok',
     ariaSingleEntry: 'Seçilen {{name}}',
     ariaMultipleEntries: '{{count}} dosya seçildi',
     ariaItemRoleDescription: 'Sıralanabilir',
@@ -166,33 +158,27 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Bu dosya çok küçük. Minimum boyut {{minSize}}.',
-    validationFileSizeOverflow: 'Bu dosya çok büyük. Maksimum boyut {{maxSize}}.',
+    validationFileSizeUnderflow: 'Bu dosya çok küçük. Minimum boyut {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow: 'Bu dosya çok büyük. Maksimum boyut {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Toplam dosya boyutu çok küçük. Minimum {{minListSize}}.',
-    validationListSizeOverflow: 'Toplam dosya boyutu çok büyük. Maksimum {{maxListSize}}.',
+    validationListSizeUnderflow: 'Toplam dosya boyutu çok küçük. Minimum toplam boyut {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow: 'Toplam dosya boyutu çok büyük. Maksimum toplam boyut {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Ortam boyutu okunamadı.',
 
-    validationMediaWidthRangeMismatch:
-        '{{fileMainType}} genişliği geçersiz. {{minWidth}} - {{maxWidth}} piksel olmalıdır.',
+    validationMediaWidthRangeMismatch: '{{fileMainType}} genişliği geçersiz. Genişlik {{minWidth}} ile {{maxWidth}} {{maxWidthUnit}} arasında olmalıdır.',
 
-    validationMediaWidthUnderflow:
-        '{{fileMainType}} çok küçük. Minimum genişlik {{minWidth}} piksel.',
-    validationMediaWidthOverflow:
-        '{{fileMainType}} çok büyük. Maksimum genişlik {{maxWidth}} piksel.',
+    validationMediaWidthUnderflow: '{{fileMainType}} çok küçük. Minimum genişlik {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow: '{{fileMainType}} çok büyük. Maksimum genişlik {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch:
-        '{{fileMainType}} yüksekliği geçersiz. {{minHeight}} - {{maxHeight}} piksel olmalıdır.',
+    validationMediaHeightRangeMismatch: '{{fileMainType}} yüksekliği geçersiz. Yükseklik {{minHeight}} ile {{maxHeight}} {{maxHeightUnit}} arasında olmalıdır.',
 
-    validationMediaHeightUnderflow:
-        '{{fileMainType}} çok küçük. Minimum yükseklik {{minHeight}} piksel.',
-    validationMediaHeightOverflow:
-        '{{fileMainType}} çok büyük. Maksimum yükseklik {{maxHeight}} piksel.',
+    validationMediaHeightUnderflow: '{{fileMainType}} çok küçük. Minimum yükseklik {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow: '{{fileMainType}} çok büyük. Maksimum yükseklik {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         '{{fileMainType}} çözünürlüğü geçersiz. {{minResolution}}MP - {{maxResolution}}MP aralığında olmalıdır.',
@@ -204,31 +190,10 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: 'Listedeki dosya sayısı çok az. Minimum {{minFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: {
-                    1: 'dosya',
-                    else: 'dosya',
-                },
-            },
-        },
-    },
-
-    validationListEntryCountOverflow: {
-        template: 'Listedeki dosya sayısı çok fazla. Maksimum {{maxFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: {
-                    1: 'dosya',
-                    else: 'dosya',
-                },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        'Listede çok az dosya var. Minimum {{minFiles}} {{minFilesUnit}}.',
+    validationListEntryCountOverflow:
+        'Listede çok fazla dosya var. Maksimum {{maxFiles}} {{maxFilesUnit}}.',
 };
 
 export const validation = {
