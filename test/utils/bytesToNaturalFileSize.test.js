@@ -23,14 +23,14 @@ describe('bytesToNaturalFileSize', () => {
         ],
         [[1000 * 1000 * 1000], '1 GB'],
         [[1000 * 1000 * 1000 * 1000], '1 TB'],
-        [[1024 * 1024, { format: 'mebi' }], '1 MiB'],
-        [[1024 * 1024 * 1024, { format: 'mebi' }], '1 GiB'],
+        [[1024 * 1024, { byteUnits: 'mebi' }], '1 MiB'],
+        [[1024 * 1024 * 1024, { byteUnits: 'mebi' }], '1 GiB'],
         [
             [
                 1500 * 1000,
                 {
                     locale: 'us',
-                    format: 'mebi',
+                    byteUnits: 'mebi',
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
                 },
