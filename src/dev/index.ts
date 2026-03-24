@@ -1,6 +1,7 @@
 import { h } from '../utils/dom.js';
 import { blobToFile } from '../utils/file.js';
 import { createRandomish, randomNumberBetween } from '../utils/math.js';
+import { sleep } from '../utils/sleep.js';
 
 const RANDOMISH_SEED = 1;
 
@@ -18,6 +19,14 @@ export interface GenerateImageOptions extends GenerateFileOptions {
     width?: number;
     height?: number;
     quality?: number;
+    fillStyle?: string | CanvasGradient | CanvasPattern;
+}
+
+export interface GenerateVideoOptions extends GenerateFileOptions {
+    width?: number;
+    height?: number;
+    fps?: number;
+    frames?: number;
     fillStyle?: string | CanvasGradient | CanvasPattern;
 }
 
@@ -69,11 +78,43 @@ export async function generateFile(options?: GenerateFileOptions): Promise<File 
     return null;
 }
 
+// draws a colorful frame
+function drawFrame(
+    ctx: CanvasRenderingContext2D,
+    fillStyle: undefined | string | CanvasGradient | CanvasPattern,
+    fileType: string
+) {
+    const { width, height } = ctx.canvas;
+
+    // create gradient
+    const gradient = ctx.createLinearGradient(
+        width * generateRandomishNumber(),
+        0,
+        width * generateRandomishNumber(),
+        height
+    );
+
+    const stops = 3;
+    const HueStepMin = 30;
+    let hue = Math.round(randomNumberBetween(0, 360 - HueStepMin, generateRandomishNumber));
+    for (let i = 0; i < stops; i++) {
+        hue += Math.round(randomNumberBetween(HueStepMin, 90, generateRandomishNumber));
+        gradient.addColorStop(i / (stops - 1), `hsl(${hue} 90% 50%)`);
+    }
+
+    // use fillStyle or gradient
+    ctx.fillStyle = fillStyle || gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    ctx.fillStyle = 'rgba(0,0,0,.35)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `bold ${width / 16}px sans-serif`;
+    ctx.fillText(`${fileType} ${width} × ${height}`, width * 0.5, height * 0.5);
+}
+
 /**
  * Generates a mock image file with a colorful gradient and type information overlay.
- *
- * Creates a canvas-based image with random gradient colors and text showing the file type and
- * dimensions. Useful for testing image handling functionality.
  */
 export async function generateImage(options?: GenerateImageOptions): Promise<File> {
     const {
@@ -99,30 +140,7 @@ export async function generateImage(options?: GenerateImageOptions): Promise<Fil
     }) as HTMLCanvasElement;
 
     const ctx = canvas.getContext('2d')!;
-
-    const gradient = ctx.createLinearGradient(
-        width * generateRandomishNumber(),
-        0,
-        width * generateRandomishNumber(),
-        height
-    );
-
-    const stops = 3;
-    const HueStepMin = 30;
-    let hue = Math.round(randomNumberBetween(0, 360 - HueStepMin, generateRandomishNumber));
-    for (let i = 0; i < stops; i++) {
-        hue += Math.round(randomNumberBetween(HueStepMin, 90, generateRandomishNumber));
-        gradient.addColorStop(i / (stops - 1), `hsl(${hue} 90% 50%)`);
-    }
-
-    ctx.fillStyle = fillStyle || gradient;
-    ctx.fillRect(0, 0, width, height);
-
-    ctx.fillStyle = 'rgba(0,0,0,.35)';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.font = `bold ${width / 16}px sans-serif`;
-    ctx.fillText(`${type} ${width} × ${height}`, width * 0.5, height * 0.5);
+    drawFrame(ctx, fillStyle, type);
 
     const blob = await new Promise<Blob>((resolve, reject) => {
         try {
@@ -144,6 +162,50 @@ export async function generateImage(options?: GenerateImageOptions): Promise<Fil
 
     const filename = /\./.test(name) ? name : `${name}.${type.split('/').pop()}`;
     return blobToFile(blob, filename, { type, lastModified });
+}
+
+/**
+ * Generates a mock video file with silver frames and type information overlay.
+ */
+export async function generateVideo(options?: GenerateVideoOptions): Promise<File | null> {
+    const {
+        name = 'Untitled',
+        width = 1280,
+        height = 720,
+        fps = 10,
+        fillStyle = 'silver',
+        lastModified = Date.now(),
+    } = options ?? {};
+
+    const frames = 10;
+    const type = 'video/webp';
+
+    const canvas = h('canvas', { width, height }) as HTMLCanvasElement;
+    const ctx = canvas.getContext('2d')!;
+
+    const chunks: Blob[] = [];
+
+    const recorder: MediaRecorder = new MediaRecorder(canvas.captureStream(fps), {
+        mimeType: 'video/webm',
+    });
+    recorder.ondataavailable = (e) => {
+        e.data.size && chunks.push(e.data);
+    };
+    recorder.start();
+
+    for (let i = 0; i < frames; i++) {
+        drawFrame(ctx, fillStyle, type);
+        await sleep(1000 / fps);
+    }
+
+    await new Promise((resolve) => {
+        recorder.onstop = resolve;
+        setTimeout(() => {
+            recorder.stop();
+        }, 1000 / fps);
+    });
+
+    return new File(chunks, `${name}.${type.split('/').pop()}`, { type, lastModified });
 }
 
 /**

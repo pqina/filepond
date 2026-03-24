@@ -1,18 +1,19 @@
 import { isString, isNumber, isBlob, isFile } from './test.js';
 import { numberToFloat } from './number.js';
 
-export const DEFAULT_BYTE_SIZES = {
-    byte: 0,
-    bytes: 0,
-    KB: 1,
-    MB: 2,
-    GB: 3,
-    TB: 4,
-    PB: 5,
-    EB: 6,
-    ZB: 7,
-    YB: 8,
+const DIGITAL_STORAGE_UNITS = {
+    B: 0, // B
+    K: 1, // KB
+    M: 2, // MB
+    G: 3, // GB
+    T: 4, // TB
+    P: 5, // PB
+    E: 6, // EB
+    Z: 7, // ZB
+    Y: 8, // YB
 };
+
+const DIGITAL_STORAGE_UNIT_KEYS = Object.keys(DIGITAL_STORAGE_UNITS);
 
 const FILE_PROPS = ['name', 'size', 'type', 'lastModified'];
 
@@ -112,10 +113,12 @@ export function blobReadAsArrayBuffer(blob: Blob, options?: { slice: number[] })
 
 export function naturalFileSizeToBytes(
     str: string | number,
-    useBytes = false,
-    locale: string | string[] | undefined = undefined,
-    sizes: { [key: string]: number } = DEFAULT_BYTE_SIZES
+    options?: {
+        locale?: string | string[] | undefined;
+    }
 ) {
+    const { locale = undefined } = options || {};
+
     // already is bytes
     if (isNumber(str)) {
         return str;
@@ -129,32 +132,47 @@ export function naturalFileSizeToBytes(
         throw new Error(`naturalFileSizeToBytes: Invalid natural file size ${str}`);
     }
 
-    // get size unit by removing found size from string
-    const unit = str.replace(size, '').trim();
-
     // get as float based on locale
     const f = numberToFloat(size, locale);
 
-    // now convert to bytes
-    return f * Math.pow(useBytes ? 1024 : 1000, sizes[unit]);
+    // get size unit by removing found size from string
+    const storageUnit = str.replace(size, '').trim();
+
+    // choose base value Mebibyte
+    const baseValue = storageUnit[1] === 'i' ? 1024 : 1000;
+
+    // @ts-ignore get the exponent
+    const exponent = DIGITAL_STORAGE_UNITS[storageUnit[0]];
+
+    // now convert to value
+    return f * Math.pow(baseValue, exponent);
 }
 
 /** Returns a string representing a natural file size, for example 24 KB */
 export function bytesToNaturalFileSize(
     size: number,
-    useBytes = false,
-    options: Intl.NumberFormatOptions = {
-        maximumFractionDigits: 0,
-    },
-    locale: string | string[] | undefined = undefined,
-    sizes: string[] = Object.keys(DEFAULT_BYTE_SIZES)
+    options?: Intl.NumberFormatOptions & {
+        byteUnits?: 'mega' | 'mebi';
+        locale?: string | string[] | undefined;
+    }
 ) {
-    const d = useBytes ? 1024 : 1000;
+    const { locale = undefined, byteUnits = 'mega', ...numberFormatOptions } = options || {};
+    const isMega = byteUnits === 'mega';
+    const d = isMega ? 1000 : 1024;
     const i = size === 0 ? 0 : Math.floor(Math.log(size) / Math.log(d));
-    const v = new Intl.NumberFormat(locale, { style: 'decimal', ...options }).format(
-        size / Math.pow(d, i)
-    );
-    return `${v} ${sizes[size === 1 ? 0 : i + 1]}`;
+    const v = new Intl.NumberFormat(locale, {
+        style: 'decimal',
+        maximumFractionDigits: 0,
+        ...numberFormatOptions,
+    }).format(size / Math.pow(d, i));
+    return `${v} ${DIGITAL_STORAGE_UNIT_KEYS[i] + (isMega ? '' : 'i') + (i > 0 ? 'B' : '')}`;
+}
+
+export function getFormatFromFileSize(size: string | number | undefined) {
+    if (isNumber(size) || !size) {
+        return undefined;
+    }
+    return /i/.test(size) ? 'mebi' : 'mega';
 }
 
 const runTest = (bytes: Uint8Array, expected: number[]) =>

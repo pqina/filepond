@@ -1,6 +1,10 @@
 import type { FilePondEntry } from '../types/index.js';
 import { createExtension } from './common/createExtension.js';
-import { bytesToNaturalFileSize, naturalFileSizeToBytes } from '../utils/file.js';
+import {
+    bytesToNaturalFileSize,
+    getFormatFromFileSize,
+    naturalFileSizeToBytes,
+} from '../utils/file.js';
 import { flattenTree } from '../utils/tree.js';
 import { Status } from '../common/status.js';
 import { isBlobOrFile } from '../utils/test.js';
@@ -11,6 +15,9 @@ export interface ListSizeValidatorOptions {
 
     /** Max total file size in bytes or in natural file size. Defaults to `Infinity` */
     maxListSize?: number | string;
+
+    /** The natural file size format to use, defaults to `'mega'` if no natural file size supplied for `minSize` or `maxSize` */
+    byteUnits?: 'mega' | 'mebi';
 }
 
 export const ListSizeValidator = createExtension(
@@ -18,6 +25,7 @@ export const ListSizeValidator = createExtension(
     {
         minListSize: 0,
         maxListSize: Infinity,
+        byteUnits: undefined,
     } as ListSizeValidatorOptions,
     ({ didSetProps }, { on, setExtensionStatus, getEntries }) => {
         // default byte range
@@ -27,22 +35,40 @@ export const ListSizeValidator = createExtension(
         };
 
         /** Derived Range for labels */
-        const rangeNatural: { min: null | string; max: null | string } = {
+        const rangeNatural: {
+            min: null | string;
+            minUnit: null | string;
+            max: null | string;
+            maxUnit: null | string;
+        } = {
             min: null,
+            minUnit: null,
             max: null,
+            maxUnit: null,
         };
 
         // state of range
         let hasLimitedRange = false;
 
-        didSetProps(({ minListSize, maxListSize }: ListSizeValidatorOptions) => {
+        didSetProps(({ minListSize, maxListSize, byteUnits }: ListSizeValidatorOptions) => {
+            byteUnits =
+                byteUnits ||
+                getFormatFromFileSize(maxListSize) ||
+                getFormatFromFileSize(minListSize) ||
+                'mega';
+
             // update byte ranges
             range.min = naturalFileSizeToBytes(minListSize || 0);
             range.max = naturalFileSizeToBytes(maxListSize || Infinity);
 
             // update natural sizes
-            rangeNatural.min = bytesToNaturalFileSize(range.min);
-            rangeNatural.max = bytesToNaturalFileSize(range.max);
+            const [min, minUnit] = bytesToNaturalFileSize(range.min, { byteUnits }).split(' ');
+            const [max, maxUnit] = bytesToNaturalFileSize(range.max, { byteUnits }).split(' ');
+
+            rangeNatural.min = min;
+            rangeNatural.minUnit = minUnit;
+            rangeNatural.max = max;
+            rangeNatural.maxUnit = maxUnit;
 
             // update range state
             hasLimitedRange = range.min !== 0 || range.max !== Infinity;
@@ -70,7 +96,10 @@ export const ListSizeValidator = createExtension(
                     type: Status.Error,
                     code: 'VALIDATION_INVALID',
                     subcode: 'VALIDATION_LIST_SIZE_UNDERFLOW',
-                    values: { minListSize: rangeNatural.min },
+                    values: {
+                        minSize: rangeNatural.min,
+                        minSizeUnit: `unit${rangeNatural.minUnit}`,
+                    },
                 });
             }
 
@@ -79,7 +108,10 @@ export const ListSizeValidator = createExtension(
                     type: Status.Error,
                     code: 'VALIDATION_INVALID',
                     subcode: 'VALIDATION_LIST_SIZE_OVERFLOW',
-                    values: { maxListSize: rangeNatural.max },
+                    values: {
+                        maxSize: rangeNatural.max,
+                        maxSizeUnit: `unit${rangeNatural.maxUnit}`,
+                    },
                 });
             }
 

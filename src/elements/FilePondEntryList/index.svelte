@@ -80,8 +80,9 @@
         entryAnimationOriginMap = {},
         entryAnimationProps = {},
         entryAnimationStaggerInterval = 50,
-        springDefaults,
         beforeRenderNode = passthrough,
+        byteUnits = undefined,
+        springDefaults,
     }: FilePondEntryListOptions = $props();
 
     // update animation preference when changes
@@ -1093,6 +1094,7 @@
             beforeRenderNode(node, context, sharedContext)}
         beforeSetProps={(props) => ({
             ...props,
+            byteUnits,
             enableAnimations,
             springDefaults,
         })}

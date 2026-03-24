@@ -6,11 +6,7 @@ import { noop } from '../utils/placeholder.js';
 import { sleep } from '../utils/sleep.js';
 import { xhr, createProgressEvent, getResponseHeaders } from '../utils/xhr.js';
 import { warn } from '../common/console.js';
-import type {
-    StoreTaskFnOptions,
-    StoreExtensionOptions,
-    PerceivedPerformanceOptions,
-} from './common/createStoreExtension.js';
+import type { StoreTaskFnOptions, StoreExtensionOptions } from './common/createStoreExtension.js';
 import type { RequestHook, FilePondEntry, FilePondFileEntry } from '../types/index.js';
 
 export interface ChunkedUploadStoreOptions extends StoreExtensionOptions {

@@ -10,6 +10,30 @@ export const core = {
     busy: 'Busy',
     loading: 'Loading',
 
+    // units
+    unitB: {
+        1: 'byte',
+        else: 'bytes',
+    },
+    unitKB: 'KB',
+    unitMB: 'MB',
+    unitGB: 'GB',
+    unitTB: 'TB',
+    unitPB: 'PB',
+    unitKiB: 'KiB',
+    unitMiB: 'MiB',
+    unitGiB: 'GiB',
+    unitTiB: 'TiB',
+    unitPiB: 'PiB',
+    unitPixels: {
+        1: 'pixel',
+        else: 'pixels',
+    },
+    unitFiles: {
+        1: 'file',
+        else: 'files',
+    },
+
     // extension status
     error: 'Error',
     warning: 'Warning',
@@ -56,45 +80,12 @@ export const core = {
     },
 
     // browse button labels
-    browse: {
-        template: 'Choose {{files}}',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'files',
-                    false: 'file',
-                },
-            },
-        },
-    },
-    browseAndDrop: {
-        template: 'Drop {{files}} here, or <u>browse</u>',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'files',
-                    false: 'file',
-                },
-            },
-        },
-    },
+    browse: 'Choose {{maxFilesUnit}}',
+    browseAndDrop: 'Drop {{maxFilesUnit}} here, or <u>browse</u>',
 
     // screenreader accessibility
     ariaRequired: 'required',
-    ariaNoEntries: {
-        template: 'No {{files}} selected',
-        variables: {
-            files: {
-                context: 'multiple',
-                map: {
-                    true: 'files',
-                    false: 'file',
-                },
-            },
-        },
-    },
+    ariaNoEntries: 'No {{maxFilesUnit}} selected',
     ariaSingleEntry: 'Selected {{name}}',
     ariaMultipleEntries: '{{count}} files selected',
     ariaItemRoleDescription: 'Sortable',
@@ -144,7 +135,7 @@ export const validationFileMimeType = {
                 context: 'count',
                 map: {
                     1: 'File must be of type {{accept}}',
-                    else: 'Accepted types are: {{accept}}',
+                    else: 'Accepted file types are: {{accept}}',
                 },
             },
         },
@@ -172,72 +163,46 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'This file is too small. Minimum size is {{minSize}}.',
-    validationFileSizeOverflow: 'This file is too large. Maximum size is {{maxSize}}.',
+    validationFileSizeUnderflow:
+        'This file is too small. Minimum size is {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow:
+        'This file is too large. Maximum size is {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
     validationListSizeUnderflow:
-        'Total file size is too small. Minimum total size is {{minListSize}}.',
+        'Total file size is too small. Minimum total size is {{minSize}} {{minSizeUnit}}.',
     validationListSizeOverflow:
-        'Total file size is too large. Maximum total size is {{maxListSize}}.',
+        'Total file size is too large. Maximum total size is {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Failed to read media size.',
-
     validationMediaWidthRangeMismatch:
-        'The {{fileMainType}} width is invalid. Width must be between {{minWidth}} and {{maxWidth}} pixels.',
-
+        'The {{fileMainType}} width is invalid. Width must be between {{minWidth}} and {{maxWidth}} {{maxWidthUnit}}.',
     validationMediaWidthUnderflow:
-        'The {{fileMainType}} is too small. Minimum width is {{minWidth}} pixels.',
+        'The {{fileMainType}} is too small. Minimum width is {{minWidth}} {{minWidthUnit}}.',
     validationMediaWidthOverflow:
-        'The {{fileMainType}} is too large. Maximum width is {{maxWidth}} pixels.',
-
+        'The {{fileMainType}} is too large. Maximum width is {{maxWidth}} {{maxWidthUnit}}.',
     validationMediaHeightRangeMismatch:
-        'The {{fileMainType}} height is invalid. Height must be between {{minHeight}} and {{maxHeight}} pixels.',
-
+        'The {{fileMainType}} height is invalid. Height must be between {{minHeight}} and {{maxHeight}} {{maxHeightUnit}}.',
     validationMediaHeightUnderflow:
-        'The {{fileMainType}} is too small. Minimum height is {{minHeight}} pixels.',
+        'The {{fileMainType}} is too small. Minimum height is {{minHeight}} {{minHeightUnit}}.',
     validationMediaHeightOverflow:
-        'The {{fileMainType}} is too large. Maximum height is {{maxHeight}} pixels.',
-
+        'The {{fileMainType}} is too large. Maximum height is {{maxHeight}} {{maxHeightUnit}}.',
     validationMediaResolutionRangeMismatch:
         'The {{fileMainType}} resolution is invalid. Resolution must be between {{minResolution}}MP and {{maxResolution}}MP.',
-
     validationMediaResolutionUnderflow:
         'The {{fileMainType}} resolution is invalid. Minimum resolution is {{minResolution}}MP.',
-
     validationMediaResolutionOverflow:
         'The {{fileMainType}} resolution is invalid. Maximum resolution is {{maxResolution}}MP.',
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow: {
-        template: 'Too few files in the list. Minimum amount is {{minFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'minFiles',
-                map: {
-                    1: 'file',
-                    else: 'files',
-                },
-            },
-        },
-    },
-
-    validationListEntryCountOverflow: {
-        template: 'Too many files in the list. Maximum amount is {{maxFiles}} {{files}}.',
-        variables: {
-            files: {
-                context: 'maxFiles',
-                map: {
-                    1: 'file',
-                    else: 'files',
-                },
-            },
-        },
-    },
+    validationListEntryCountUnderflow:
+        'Too few files in the list. Minimum amount is {{minFiles}} {{minFilesUnit}}.',
+    validationListEntryCountOverflow:
+        'Too many files in the list. Maximum amount is {{maxFiles}} {{maxFilesUnit}}.',
 };
 
 export const validation = {

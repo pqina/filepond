@@ -380,5 +380,5 @@
             })}
         {/each}
     </ul>
-    <div id={ariaDragDescriptionId} style="display:none">{locale.ariaDragDescription}</div>
+    <div id={ariaDragDescriptionId} class="implicit">{locale.ariaDragDescription}</div>
 {/if}

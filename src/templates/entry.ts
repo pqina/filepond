@@ -1,4 +1,4 @@
-import type { EntryListFunctions, ElementNode, TemplateNode } from '../types/index.js';
+import type { EntryListFunctions, TemplateNode } from '../types/index.js';
 import { nodeTree, type NodeContext } from '../elements/common/nodeTree.js';
 
 import { isDataTransferEntry, isFileEntry, isNumber, isString } from '../utils/test.js';
@@ -270,15 +270,19 @@ export function createFileLoadInfo() {
                     isWaiting,
                     isFrozen,
                 }),
-                context: ({ entry }: NodeContext) => {
+                context: ({ entry, byteUnits }: NodeContext) => {
+                    const naturalFileSize = isNumber(entry.size)
+                        ? cache(bytesToNaturalFileSize, [entry.size, { byteUnits }])
+                        : null;
+
+                    const [fileSize, fileSizeUnit] = naturalFileSize?.split(' ');
+
                     return {
-                        naturalSize: isNumber(entry.size)
-                            ? // bytesToNaturalFileSize(entry.size)
-                              cache(bytesToNaturalFileSize, [entry.size])
-                            : null,
+                        size: fileSize,
+                        sizeUnit: `unit${fileSizeUnit}`,
                     };
                 },
-                children: `{{naturalSize}}`,
+                children: `{{size}} {{sizeUnit}}`,
             },
         ],
     };

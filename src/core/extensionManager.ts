@@ -76,7 +76,31 @@ export interface ExtensionManagerAPI {
     getExtensionStatus: () => ExtensionStatus;
 }
 
-export function createExtensionManager(tree: ReturnType<typeof createEntryTree>) {
+export interface ExtensionMangerInstance {
+    on: (event: string, callback: (detail?: any) => void) => () => void;
+    get extensions(): Extension[];
+    set extensions(newExtensionFactories: ExtensionFactory[]);
+    propagateExtensionProperty: (propertyName: string, value: any) => void;
+    setExtensionProperties: (
+        extensionName: string,
+        props: {
+            [key: string]: any;
+        }
+    ) => void;
+    getExtensionProperties: (extensionName: string) =>
+        | {
+              [key: string]: any;
+          }
+        | undefined;
+    getState(): {
+        [name: string]: ExtensionState;
+    };
+    destroy(): void;
+}
+
+export function createExtensionManager(
+    tree: ReturnType<typeof createEntryTree>
+): ExtensionMangerInstance {
     // pubsub
     const { on, pub } = pubsub();
 
@@ -322,9 +346,13 @@ export function createExtensionManager(tree: ReturnType<typeof createEntryTree>)
                     return extensionFactory === extension.factory;
                 });
 
-                // update index based on location of extension in factory array
+                // update index and props based on location of extension in factory array
                 if (loadedExtension) {
                     loadedExtension.index = i;
+                    if (Array.isArray(newExtensionFactories[i])) {
+                        const newExtensionProps = newExtensionFactories[i][1];
+                        attemptSetExtensionInstanceProps(loadedExtension, newExtensionProps);
+                    }
                     continue;
                 }
 

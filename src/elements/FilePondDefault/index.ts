@@ -54,10 +54,10 @@ function getExtensionInsertInstructions(extension: ExtensionFactoryInsertInstruc
 /** Wraps a set of extensions in with the default FilePond custom element extensions, this extension selection makes switching from a default input to a file-pond element as frictionless as possible */
 export function createFilePondExtensionSet(extensions: ExtensionFactory[] = []) {
     // Where to insert transform extensions
-    const _TransformSlot = { name: 'Transform' };
+    const _TransformSlot = { name: 'Transform' } as ExtensionFactory;
 
     // default extension set
-    let extensionSet = [
+    let extensionSet: ExtensionFactory[] = [
         FileInputSource,
         DataTransferLoader,
         FileExtensionValidator,
@@ -71,6 +71,14 @@ export function createFilePondExtensionSet(extensions: ExtensionFactory[] = []) 
     // now we loop over extensions and insert them after the index of a current extension (source types after FileInputSource, validator types after FileExtensionValidator, etc.)
     for (const extension of extensions) {
         let name = getExtensionName(extension);
+
+        // test if is already in extensionSet, else replace
+        let index = extensionSet.findIndex((extension) => getExtensionName(extension) === name);
+        if (index > -1) {
+            extensionSet[index] = extension;
+            continue;
+        }
+
         let needle: string;
         let indexOffset = 1;
         let instructions = getExtensionInsertInstructions(extension);
@@ -86,7 +94,7 @@ export function createFilePondExtensionSet(extensions: ExtensionFactory[] = []) 
         }
 
         // find where to insert the extension
-        const index = extensionSet.findIndex((extension) =>
+        index = extensionSet.findLastIndex((extension) =>
             getExtensionName(extension).endsWith(needle)
         );
         if (index === -1) {

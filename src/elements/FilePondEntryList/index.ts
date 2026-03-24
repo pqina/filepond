@@ -89,6 +89,7 @@ export const COMPONENT_PROPS = [
     'entryAnimationOriginMap',
     'entryAnimationStaggerInterval',
     'springDefaults',
+    'byteUnits',
     'beforeRenderNode',
 ];
 

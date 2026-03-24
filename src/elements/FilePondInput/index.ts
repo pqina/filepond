@@ -14,7 +14,10 @@ import type { ExtensionStatus } from '../../extensions/common/createExtension.js
 import type { ExtensionFactory } from '../../core/extensionManager.js';
 
 // import modules
-import { createExtensionManager } from '../../core/extensionManager.js';
+import {
+    createExtensionManager,
+    type ExtensionMangerInstance,
+} from '../../core/extensionManager.js';
 import { createEntryTree, type EntryTreeOptions, type Needle } from '../../core/entryTree.js';
 import {
     h,
@@ -254,7 +257,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     #browseButton: HTMLButtonElement;
 
     /** FilePond extension manager reference */
-    #extensionManager: ReturnType<typeof createExtensionManager>;
+    #extensionManager: ExtensionMangerInstance;
 
     /** FilePond core instance reference */
     #entryTree: ReturnType<typeof createEntryTree>;
@@ -786,8 +789,13 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
         const localeData = {
             multiple: `${this.multiple}`,
+            //
             name: totalEntries === 1 ? this.#entryTree.entries[0].name || 'untitled' : null,
             count: totalEntries,
+
+            //
+            maxFiles: this.maxFiles,
+            maxFilesUnit: 'unitFiles',
         };
 
         // accessibility attributes

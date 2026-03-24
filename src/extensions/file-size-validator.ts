@@ -4,8 +4,12 @@ import {
     type ValidationResultInvalid,
     type ValidatorExtensionOptions,
 } from './common/createValidatorExtension.js';
-import { isBlobOrFile, isFileEntry } from '../utils/test.js';
-import { bytesToNaturalFileSize, naturalFileSizeToBytes } from '../utils/file.js';
+import { isBlobOrFile, isFileEntry, isString } from '../utils/test.js';
+import {
+    bytesToNaturalFileSize,
+    getFormatFromFileSize,
+    naturalFileSizeToBytes,
+} from '../utils/file.js';
 
 export interface FileSizeValidatorOptions extends ValidatorExtensionOptions {
     /** Min file size in bytes or a natural file size. Defaults to `0` */
@@ -13,6 +17,9 @@ export interface FileSizeValidatorOptions extends ValidatorExtensionOptions {
 
     /** Max file size in bytes or a natural file size. Defaults to `Infinity` */
     maxSize?: number | string;
+
+    /** The natural file size format to use, defaults to `'mega'` if no natural file size supplied for `minSize` or `maxSize` */
+    byteUnits?: 'mega' | 'mebi';
 }
 
 export const FileSizeValidator = createValidatorExtension(
@@ -20,6 +27,7 @@ export const FileSizeValidator = createValidatorExtension(
     {
         minSize: 0,
         maxSize: Infinity,
+        byteUnits: undefined,
     } as FileSizeValidatorOptions,
     ({ didSetProps }) => {
         const range = {
@@ -27,17 +35,35 @@ export const FileSizeValidator = createValidatorExtension(
             max: Infinity,
         };
 
-        const rangeNatural: { min: null | string; max: null | string } = {
+        const rangeNatural: {
+            min: null | string;
+            minUnit: null | string;
+            max: null | string;
+            maxUnit: null | string;
+        } = {
             min: null,
+            minUnit: null,
             max: null,
+            maxUnit: null,
         };
 
-        didSetProps(({ minSize, maxSize }) => {
+        didSetProps(({ minSize, maxSize, byteUnits }) => {
+            byteUnits =
+                byteUnits ||
+                getFormatFromFileSize(maxSize) ||
+                getFormatFromFileSize(minSize) ||
+                'mega';
+
             range.min = naturalFileSizeToBytes(minSize);
             range.max = naturalFileSizeToBytes(maxSize);
 
-            rangeNatural.min = bytesToNaturalFileSize(range.min);
-            rangeNatural.max = bytesToNaturalFileSize(range.max);
+            const [min, minUnit] = bytesToNaturalFileSize(range.min, { byteUnits }).split(' ');
+            const [max, maxUnit] = bytesToNaturalFileSize(range.max, { byteUnits }).split(' ');
+
+            rangeNatural.min = min;
+            rangeNatural.minUnit = minUnit;
+            rangeNatural.max = max;
+            rangeNatural.maxUnit = maxUnit;
         });
 
         function validateEntry(entry: FilePondEntry): null | ValidationResultInvalid {
@@ -48,14 +74,20 @@ export const FileSizeValidator = createValidatorExtension(
             if (size < range.min) {
                 return {
                     code: 'VALIDATION_FILE_SIZE_UNDERFLOW',
-                    values: { minSize: rangeNatural.min },
+                    values: {
+                        minSize: rangeNatural.min,
+                        minSizeUnit: `unit${rangeNatural.minUnit}`,
+                    },
                 };
             }
 
             if (size > range.max) {
                 return {
                     code: 'VALIDATION_FILE_SIZE_OVERFLOW',
-                    values: { maxSize: rangeNatural.max },
+                    values: {
+                        maxSize: rangeNatural.max,
+                        maxSizeUnit: `unit${rangeNatural.maxUnit}`,
+                    },
                 };
             }
 

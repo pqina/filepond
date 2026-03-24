@@ -111,21 +111,26 @@ export const MediaResolutionValidator = createValidatorExtension(
                 if (outsideRange) {
                     return {
                         code: 'VALIDATION_MEDIA_WIDTH_RANGE_MISMATCH',
-                        values: { minWidth, maxWidth },
+                        values: {
+                            minWidth,
+                            minWidthUnit: 'unitPixels',
+                            maxWidth,
+                            maxWidthUnit: 'unitPixels',
+                        },
                     };
                 }
 
                 if (tooSmall) {
                     return {
                         code: 'VALIDATION_MEDIA_WIDTH_UNDERFLOW',
-                        values: { minWidth },
+                        values: { minWidth, minWidthUnit: 'unitPixels' },
                     };
                 }
 
                 if (tooLarge) {
                     return {
                         code: 'VALIDATION_MEDIA_WIDTH_OVERFLOW',
-                        values: { maxWidth },
+                        values: { maxWidth, maxWidthUnit: 'unitPixels' },
                     };
                 }
             }
@@ -138,21 +143,26 @@ export const MediaResolutionValidator = createValidatorExtension(
                 if (outsideRange) {
                     return {
                         code: 'VALIDATION_MEDIA_HEIGHT_RANGE_MISMATCH',
-                        values: { minHeight, maxHeight },
+                        values: {
+                            minHeight,
+                            minHeightUnit: 'unitPixels',
+                            maxHeight,
+                            maxHeightUnit: 'unitPixels',
+                        },
                     };
                 }
 
                 if (tooSmall) {
                     return {
                         code: 'VALIDATION_MEDIA_HEIGHT_UNDERFLOW',
-                        values: { minHeight },
+                        values: { minHeight, minHeightUnit: 'unitPixels' },
                     };
                 }
 
                 if (tooLarge) {
                     return {
                         code: 'VALIDATION_MEDIA_HEIGHT_OVERFLOW',
-                        values: { maxHeight },
+                        values: { maxHeight, maxHeightUnit: 'unitPixels' },
                     };
                 }
             }

@@ -42,7 +42,7 @@ export const ListCountValidator = createExtension(
                 return setExtensionStatus({
                     type: Status.Error,
                     code: 'VALIDATION_LIST_ENTRY_COUNT_UNDERFLOW',
-                    values: { minFiles },
+                    values: { minFiles, minFilesUnit: 'unitFiles' },
                 });
             }
 
@@ -51,7 +51,7 @@ export const ListCountValidator = createExtension(
                 return setExtensionStatus({
                     type: Status.Error,
                     code: 'VALIDATION_LIST_ENTRY_COUNT_OVERFLOW',
-                    values: { maxFiles },
+                    values: { maxFiles, maxFilesUnit: 'unitFiles' },
                 });
             }
 

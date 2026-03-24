@@ -42,10 +42,14 @@ const addBanner: any = {
 
 export default defineConfig(({ command }) => ({
     // dev
+    html: {
+        cspNonce: '1234',
+    },
     root: command === 'serve' ? './dev' : './',
     resolve: {
         alias: {
             'filepond/locales/en-gb.js': resolve(__dirname, srcDir + '/locales/en-gb.js'),
+            'filepond/locales/fr-fr.js': resolve(__dirname, srcDir + '/locales/fr-fr.js'),
             'filepond/locales': resolve(__dirname, srcDir + '/locales/index.js'),
             'filepond/assets': resolve(__dirname, srcDir + '/assets/index.js'),
             'filepond/extensions': resolve(__dirname, srcDir + '/extensions/index.js'),

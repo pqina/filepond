@@ -39,6 +39,28 @@ export interface ImageBitmapTransformOptions extends TransformExtensionOptions {
     actionTransform?: string;
 }
 
+/** Converts the passed file into a scaled image bitmap in a separate thread */
+function transformImageWorker(
+    file: Blob,
+    sx: number,
+    sy: number,
+    sw: number,
+    sh: number,
+    width: number,
+    height: number,
+    quality: 'pixelated' | 'low' | 'medium' | 'high',
+    done: (err?: string | null, content?: any, transferList?: any[]) => void
+) {
+    createImageBitmap(file, sx, sy, sw, sh, {
+        resizeWidth: width,
+        resizeHeight: height,
+        resizeQuality: quality,
+        imageOrientation: 'from-image',
+    }).then((bitmap) => {
+        done(null, bitmap, [bitmap]);
+    });
+}
+
 export const ImageBitmapTransform = createTransformExtension(
     'ImageBitmapTransform',
     {
@@ -57,28 +79,6 @@ export const ImageBitmapTransform = createTransformExtension(
         /** Tests if we can transform this entry */
         function canTransformEntry(entry: FilePondEntry): boolean | Promise<boolean> {
             return isFileEntry(entry) && isImageFile(entry.file) && !/svg/.test(entry.file.type);
-        }
-
-        /** Converts the passed file into a scaled image bitmap */
-        function transformImageWorker(
-            file: Blob,
-            sx: number,
-            sy: number,
-            sw: number,
-            sh: number,
-            width: number,
-            height: number,
-            quality: 'pixelated' | 'low' | 'medium' | 'high',
-            done: (err?: string | null, content?: any, transferList?: any[]) => void
-        ) {
-            createImageBitmap(file, sx, sy, sw, sh, {
-                resizeWidth: width,
-                resizeHeight: height,
-                resizeQuality: quality,
-                imageOrientation: 'from-image',
-            }).then((bitmap) => {
-                done(null, bitmap, [bitmap]);
-            });
         }
 
         async function transformEntry(

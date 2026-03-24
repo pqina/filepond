@@ -302,6 +302,9 @@ export interface FilePondEntryListOptions extends Omit<FilePondSvelteComponentOp
     /** The locale resource props to use for text, defaults to `{}` */
     locale?: { [key: string]: string };
 
+    /** The data format to use in the templates */
+    byteUnits?: 'mega' | 'mebi';
+
     /**
      * Automatically maps a property name to a resource value in locale and/or assets, defaults to
      * `{ title: 'locale', label: 'locale', icon: 'assets' }` meaning that the value of a `label`

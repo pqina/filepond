@@ -110,13 +110,13 @@
         // auto replace props (label, icon, title) in string with locale values
         let { label } = withResources({ label: str }, propResourceMap, resources);
 
-        // test if might have to replace variables
-        if (label.includes('{')) {
+        // test if we have to replace variables
+        if (label.includes('{{')) {
             const resultingContext = context
                 ? computeObjectWithContext(context, { ...computedTreeContext })
                 : computedTreeContext;
 
-            return stringReplaceVariables(label, resultingContext);
+            return stringReplaceVariables(label, resultingContext, resources.locale);
         }
 
         return label;
@@ -357,7 +357,9 @@
                 <!-- if we'er rendering an item, we only pass children props for now -->
                 <NodeList
                     nodes={item ? [item] : content}
-                    context={item ? childrenProps : { ...context, ...childrenProps }}
+                    context={beforeSetProps(
+                        item ? childrenProps : { ...context, ...childrenProps }
+                    )}
                     routes={item ? {} : contextRoutes}
                     {sharedContext}
                     {beforeSetProps}

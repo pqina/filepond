@@ -1,7 +1,7 @@
 import type { Locale, DynamicLocale, DynamicLocaleMap } from '../../types/index.js';
 import { lowerCaseFirstLetter, upperCaseFirstLetter } from '../../utils/string.js';
 import { arrayRemoveFalsy } from '../../utils/array.js';
-import { isNullOrUndefined, isString } from '../../utils/test.js';
+import { isNullOrUndefined, isObject, isString } from '../../utils/test.js';
 import { createDefaultIcon } from './html.js';
 import { hasOwnProp } from '../../utils/object.js';
 import { cache } from '../../utils/cache.js';
@@ -49,18 +49,40 @@ export function stringReplaceVariables(
 
         // find all variables in label can be {{name}} or {{object.name}} or {{object.name.foo}}
         const variables = Array.from(label.matchAll(/\{{[\.a-z]+\}}/gi));
+        if (!variables.length) {
+            return label;
+        }
 
         for (const { 0: variable } of variables) {
             const value = getValueByVariable(variable, data);
 
-            // will try to find a localized representation for this value
-            const localValue = locale[value] ?? value;
+            // A variable value can also be a key in the locale, so we'll try to find a localized representation for this value.
+            let localValue = locale[value] ?? value;
+
+            // This is a unit (TODO improve)
+            if (isObject(localValue) && value.startsWith('unit')) {
+                const context = variable.substring(2, variable.length - 6);
+                localValue = stringReplaceVariables(
+                    {
+                        template: '{{v}}',
+                        variables: {
+                            v: {
+                                context,
+                                // @ts-ignore
+                                map: localValue,
+                            },
+                        },
+                    },
+                    data,
+                    locale
+                );
+            }
 
             // @ts-ignore replace each variable with values in entries object
             label = label.replace(variable, localValue);
         }
 
-        return label;
+        return stringReplaceVariables(label, data, locale);
     }
 
     const { variables, template } = label;
