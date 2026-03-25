@@ -59,6 +59,10 @@
         "./assets": {
             "types": "./types/locales/index.d.ts",
             "import": "./esm/assets/index.js"
+        },
+        "./dev": {
+            "types": "./types/dev/index.d.ts",
+            "import": "./esm/dev/index.js"
         }
     },
     "devDependencies": {

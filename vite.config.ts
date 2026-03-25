@@ -83,6 +83,7 @@ export default defineConfig(({ command }) => ({
                 'locales/index': srcDir + '/locales/index.js',
                 'extensions/index': srcDir + '/extensions/index.ts',
                 'templates/index': srcDir + '/templates/index.ts',
+                'dev/index': srcDir + '/dev/index.ts',
             },
         },
         rollupOptions: {
