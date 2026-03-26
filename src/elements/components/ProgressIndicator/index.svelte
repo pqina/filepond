@@ -296,19 +296,17 @@
                             /></g
                         >
                     {:else if computedShape === ProgressIndicatorShape.Rectangle}
-                        <defs>
-                            <mask id={maskId}>
-                                <rect width="100%" height="100%" fill="black" />
-                                <rect
-                                    x="0"
-                                    y="0"
-                                    width={size}
-                                    height={size}
-                                    rx={borderRadius}
-                                    stroke="white"
-                                />
-                            </mask>
-                        </defs>
+                        <mask id={maskId}>
+                            <rect width="100%" height="100%" fill="black" />
+                            <rect
+                                x="0"
+                                y="0"
+                                width={size}
+                                height={size}
+                                rx={borderRadius}
+                                stroke="white"
+                            />
+                        </mask>
                         <g><rect /><rect bind:this={animatedPath} pathLength="1" /></g>
                     {/if}
                 {/if}

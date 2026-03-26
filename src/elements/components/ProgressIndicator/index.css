@@ -162,7 +162,7 @@ progress-indicator {
             --_s: calc((var(--_size) - var(--_stroke-width)) * 1px);
             width: var(--_s);
             height: var(--_s);
-            rx: var(--_border-radius);
+            rx: calc(var(--_border-radius) * 1px);
         }
 
         /* state where we have a value */
@@ -170,8 +170,8 @@ progress-indicator {
             mask: none !important;
 
             & g rect:last-of-type {
-                stroke-dashoffset: calc(var(--_offset) + var(--_center));
-                stroke-dasharray: var(--_progress) calc(1 - var(--_progress));
+                stroke-dashoffset: calc((var(--_offset) + var(--_center)) * 1px);
+                stroke-dasharray: calc(var(--_progress) * 1px) calc((1 - var(--_progress)) * 1px);
             }
         }
 
