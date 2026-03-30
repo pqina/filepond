@@ -12,9 +12,7 @@ describe('taskScheduler', () => {
     let scheduler;
 
     beforeEach(() => {
-        scheduler = createTaskScheduler({
-            log: false,
-        });
+        scheduler = createTaskScheduler();
     });
 
     it('should run task', () =>
