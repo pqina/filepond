@@ -36,6 +36,9 @@ export interface URLLoaderOptions {
     /** Determines if we should use WebWorkers for the `XMLHttpRequest`, defaults to `true`. */
     useWebWorkers?: boolean;
 
+    /** Where the extension can find the WebWorker to use */
+    workersURL?: URL;
+
     /** Intercept options sent to XMLHttpRequest with `RequestHook`. */
     willRequestWithOptions?: RequestHook;
 }
@@ -52,6 +55,7 @@ export const URLLoader = createExtension(
         parallel: 2,
         fetchHead: true,
         useWebWorkers: true,
+        workersURL: undefined,
         actionLoad: 'load',
         actionAbort: 'abort',
         willRequestWithOptions,
@@ -135,7 +139,7 @@ export const URLLoader = createExtension(
                 }
 
                 // get settings
-                const { useWebWorkers, willRequestWithOptions } = props;
+                const { useWebWorkers, workersURL, willRequestWithOptions } = props;
 
                 // quickly try to get file metadata and update so user knows how much data is loaded
                 const headRequestOptions = { method: 'HEAD' };
@@ -144,6 +148,7 @@ export const URLLoader = createExtension(
                         headRequestOptions),
                     abortController,
                     useWebWorkers,
+                    workersURL,
                 });
 
                 // use this to prefill content type and length
@@ -178,7 +183,7 @@ export const URLLoader = createExtension(
                 }
 
                 // get settings
-                const { useWebWorkers, willRequestWithOptions } = props;
+                const { useWebWorkers, workersURL, willRequestWithOptions } = props;
 
                 const dataRequestOptions = { method: 'GET' };
                 const dataRequest = await xhr(src as string, {
@@ -187,6 +192,7 @@ export const URLLoader = createExtension(
                     responseType: 'arraybuffer',
                     abortController,
                     useWebWorkers,
+                    workersURL,
                     onprogress: createProgressHandler(entry),
                     onabort: () => {
                         // remove from list, as we can't load it after aborting load

@@ -275,7 +275,8 @@ export function createFileLoadInfo() {
                         ? cache(bytesToNaturalFileSize, [entry.size, { byteUnits }])
                         : null;
 
-                    const [fileSize, fileSizeUnit] = naturalFileSize?.split(' ');
+                    const [fileSize, fileSizeUnit] =
+                        naturalFileSize === null ? [] : naturalFileSize.split(' ');
 
                     return {
                         size: fileSize,

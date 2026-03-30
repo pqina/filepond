@@ -60,6 +60,10 @@
             "types": "./types/locales/index.d.ts",
             "import": "./esm/assets/index.js"
         },
+        "./workers": {
+            "types": "./types/workers/*.d.ts",
+            "import": "./esm/workers/*.js"
+        },
         "./dev": {
             "types": "./types/dev/index.d.ts",
             "import": "./esm/dev/index.js"

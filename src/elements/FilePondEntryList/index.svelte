@@ -71,6 +71,7 @@
             icon: 'assets',
         },
         drag = true,
+        dragGrabTimeout = 100,
         dragDetachMargin = 40,
         dragSafetyMargin = 80,
         drop = true,
@@ -1069,8 +1070,8 @@
     })}
     {@attach dragarea({
         disabled: !drag || disabled,
-        grabTimeout: 100,
         itemSelector: '[data-draggable]',
+        grabTimeout: dragGrabTimeout,
         ongrabitem: handleGrabItem,
         ongrabitemcancel: handleGrabItemCancel,
         ondragitem: handleDragItem,

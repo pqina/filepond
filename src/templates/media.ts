@@ -251,7 +251,8 @@ export function createMediaControls(options?: {
         if: {
             // don't render media controls if in error state
             test: ({ entry }: NodeContext) => {
-                return !hasExtensionWithStatusType(entry, ['error']);
+                const { media } = getMediaContextReference({ entry });
+                return media && media.isReady && !hasExtensionWithStatusType(entry, ['error']);
             },
             then: {
                 key,
@@ -382,9 +383,19 @@ const entryIsImage = createEntryMatcher('image');
 
 export function appendEntryImageView(
     template: TemplateNode[],
-    options?: { imageViewOptions?: MediaImageOptions }
+    options?: {
+        imageViewOptions?: MediaImageOptions;
+        imageEditOptions?: {
+            enableEdit: boolean;
+            enableReset: boolean;
+        };
+    }
 ) {
-    const { imageViewOptions } = options ?? {};
+    const { imageViewOptions, imageEditOptions } = options ?? {};
+
+    const { enableEdit = true, enableReset = true } = imageEditOptions ?? {};
+
+    const canTransform = enableEdit || enableReset;
 
     nodeTree(template)
         .find('entry')
@@ -393,14 +404,16 @@ export function appendEntryImageView(
                 return entryIsImage(entry) || hasExtensionWithProp(entry, 'poster');
             }).append(
                 createImageView(imageViewOptions),
-                whenEntryNotHasStatus('error').append(
-                    whenEntryHasAction('editMedia').append(
-                        createMediaControls({ justifyContent: 'end' }).append(
-                            createMediaControl().append(createResetMediaButton()),
-                            createMediaControl().append(createEditMediaButton())
+                canTransform &&
+                    whenEntryNotHasStatus('error').append(
+                        whenEntryHasAction('editMedia').append(
+                            createMediaControls({ justifyContent: 'end' }).append(
+                                enableReset &&
+                                    createMediaControl().append(createResetMediaButton()),
+                                enableEdit && createMediaControl().append(createEditMediaButton())
+                            )
                         )
                     )
-                )
             )
         );
 
@@ -409,9 +422,33 @@ export function appendEntryImageView(
 
 export function appendEntryVideoView(
     template: TemplateNode[],
-    options?: { videoViewOptions?: VideoViewOptions }
+    options?: {
+        videoViewOptions?: VideoViewOptions;
+        videoControlOptions?: {
+            enablePlay: boolean;
+            enableScrubber: boolean;
+            enableTime: boolean;
+            enableMute: boolean;
+        };
+        videoEditOptions?: {
+            enableEdit: boolean;
+            enableReset: boolean;
+        };
+    }
 ) {
-    const { videoViewOptions } = options ?? {};
+    const { videoViewOptions, videoEditOptions, videoControlOptions } = options ?? {};
+
+    const {
+        enablePlay = true,
+        enableScrubber = true,
+        enableTime = true,
+        enableMute = true,
+    } = videoControlOptions ?? {};
+
+    const { enableEdit = true, enableReset = true } = videoEditOptions ?? {};
+
+    const canTransform = enableEdit || enableReset;
+    const canControl = enablePlay || enableScrubber || enableTime || enableMute;
     nodeTree(template)
         .update('entry', (node: any) => {
             node.routes = {
@@ -424,20 +461,25 @@ export function appendEntryVideoView(
         .append(
             whenEntryIs('video').append(
                 createVideoView(videoViewOptions),
-                whenEntryNotHasStatus('error').append(
-                    createMediaControls().append(
-                        createMediaControlGroup({ key: 'video-controls' }).append(
-                            createTogglePlaybackButton(),
-                            createMediaScrubber(),
-                            createMediaTimeIndicator(),
-                            createToggleAudioButton()
-                        ),
-                        whenEntryHasAction('editMedia').append(
-                            createMediaControl().append(createResetMediaButton()),
-                            createMediaControl().append(createEditMediaButton())
+                (canTransform || canControl) &&
+                    whenEntryNotHasStatus('error').append(
+                        createMediaControls().append(
+                            canControl &&
+                                createMediaControlGroup({ key: 'video-controls' }).append(
+                                    enablePlay && createTogglePlaybackButton(),
+                                    enableScrubber && createMediaScrubber(),
+                                    enableTime && createMediaTimeIndicator(),
+                                    enableMute && createToggleAudioButton()
+                                ),
+                            canTransform &&
+                                whenEntryHasAction('editMedia').append(
+                                    enableReset &&
+                                        createMediaControl().append(createResetMediaButton()),
+                                    enableEdit &&
+                                        createMediaControl().append(createEditMediaButton())
+                                )
                         )
                     )
-                )
             )
         );
     return template;

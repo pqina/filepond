@@ -1,51 +1,49 @@
 import type { StoreExtensionOptions, StoreTaskFnOptions } from './common/createStoreExtension.js';
 import type { FilePondEntry } from '../types/index.js';
 import { createStoreExtension } from './common/createStoreExtension.js';
-import { thread } from '../utils/thread.js';
+import { createThreadWorker, thread } from '../utils/thread.js';
 import { isFileEntry } from '../utils/test.js';
+import { readFile } from '../workers/readFile.js';
 
 export interface DataURLStoreOptions extends StoreExtensionOptions {
-    /* no props for now */
+    /** Where the extension can find the WebWorker to use */
+    workersURL?: URL;
 }
 
-/** File encoding function that can run in a separate thread */
-const encodeFile = (
-    file: File,
-    cb: (error: ProgressEvent | null, res?: { dataURL: string }) => void,
-    { onprogress }: { onprogress: (e: ProgressEvent) => void }
-) => {
-    const reader = new FileReader();
-    reader.onprogress = onprogress;
-    reader.onloadend = () => cb(null, { dataURL: reader.result as string });
-    reader.onerror = (error) => cb(error);
-    reader.readAsDataURL(file);
-};
+export const DataURLStore = createStoreExtension(
+    'DataURLStore',
+    {
+        workersURL: undefined,
+    } as DataURLStoreOptions,
+    ({ props }) => {
+        async function storeEntry(
+            entry: FilePondEntry,
+            { abortController, onprogress, onabort }: StoreTaskFnOptions
+        ) {
+            // should we use a blob worker
+            const { workersURL } = props;
 
-export const DataURLStore = createStoreExtension('DataURLStore', {} as DataURLStoreOptions, () => {
-    async function storeEntry(
-        entry: FilePondEntry,
-        { abortController, onprogress, onabort }: StoreTaskFnOptions
-    ) {
-        // skip non files
-        if (!isFileEntry(entry)) {
-            return;
+            // skip non files
+            if (!isFileEntry(entry)) {
+                return;
+            }
+
+            // encode in separate thread so doesn't block UI animations
+            const res = (await thread(createThreadWorker(workersURL, readFile), [entry.file], {
+                abortController,
+                onprogress,
+                onabort,
+            })) as { dataURL: string };
+
+            // return as value
+            return res.dataURL;
         }
 
-        // encode in separate thread so doesn't block UI animations
-        const res = (await thread(encodeFile, [entry.file], {
-            abortController,
-            onprogress,
-            onabort,
-        })) as { dataURL: string };
-
-        // return as value
-        return res.dataURL;
+        return {
+            storeEntry,
+        };
     }
-
-    return {
-        storeEntry,
-    };
-});
+);
 
 declare module '../index.js' {
     interface FilePondElement {

@@ -45,6 +45,9 @@ cpSync(srcDir + '/locales', destDir + '/locales', { recursive: true });
 // assets
 cpSync(srcDir + '/assets', destDir + '/assets', { recursive: true });
 
+// workers
+cpSync(srcDir + '/workers', destDir + '/workers', { recursive: true });
+
 // index file
 createIndex(destDir);
 

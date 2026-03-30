@@ -89,7 +89,7 @@ export interface NodeTree {
     remove: (key: string) => NodeTree;
     replace: (key: string, ...nodes: (NodeTree | TemplateNode)[]) => NodeTree;
     update: (key: string, updater: (node: TemplateNode) => void) => NodeTree;
-    append: (...nodes: (NodeTree | TemplateNode)[]) => NodeTree;
+    append: (...nodes: (NodeTree | TemplateNode | false)[]) => NodeTree;
     prepend: (...nodes: (NodeTree | TemplateNode)[]) => NodeTree;
     insert: (index: number, ...nodes: (NodeTree | TemplateNode)[]) => NodeTree;
 }
@@ -152,10 +152,10 @@ export function nodeTree(tree: void | TemplateNode | TemplateNode[]): NodeTree {
             updater(unwrap(hit));
             return hit;
         },
-        append(...nodes: (NodeTree | TemplateNode)[]) {
+        append(...nodes: (NodeTree | TemplateNode | false | undefined)[]) {
             if (tree) {
                 let index = getAppendIndex(tree);
-                insertNode(tree, index, nodes);
+                insertNode(tree, index, arrayRemoveFalsy(nodes) as (NodeTree | TemplateNode)[]);
             }
             return nodeTree(tree);
         },

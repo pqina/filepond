@@ -4,11 +4,12 @@ import { getImageSize } from '../utils/media.js';
 import { rectApply, rectFromSize } from '../utils/rect.js';
 import { sizeFromRect } from '../utils/size.js';
 import { isFileEntry, isImageFile } from '../utils/test.js';
-import { thread } from '../utils/thread.js';
+import { createThreadWorker, thread } from '../utils/thread.js';
 import {
     createTransformExtension,
     type TransformExtensionOptions,
 } from './common/createTransformExtension.js';
+import { transformImage } from '../workers/transformImage.js';
 
 export interface ImageBitmapTransformOptions extends TransformExtensionOptions {
     /** Image target width, defaults to `undefined` */
@@ -35,30 +36,11 @@ export interface ImageBitmapTransformOptions extends TransformExtensionOptions {
     /** Compression quality. Value between `0` and `1`, defaults to `.98`, only applies to JPEG and WEBP output */
     compression?: number;
 
+    /** Where the extension can find the WebWorker to use */
+    workersURL?: URL;
+
     /** Action name to use for rename. Defaults to `'transformImage'` */
     actionTransform?: string;
-}
-
-/** Converts the passed file into a scaled image bitmap in a separate thread */
-function transformImageWorker(
-    file: Blob,
-    sx: number,
-    sy: number,
-    sw: number,
-    sh: number,
-    width: number,
-    height: number,
-    quality: 'pixelated' | 'low' | 'medium' | 'high',
-    done: (err?: string | null, content?: any, transferList?: any[]) => void
-) {
-    createImageBitmap(file, sx, sy, sw, sh, {
-        resizeWidth: width,
-        resizeHeight: height,
-        resizeQuality: quality,
-        imageOrientation: 'from-image',
-    }).then((bitmap) => {
-        done(null, bitmap, [bitmap]);
-    });
 }
 
 export const ImageBitmapTransform = createTransformExtension(
@@ -73,6 +55,7 @@ export const ImageBitmapTransform = createTransformExtension(
         type: undefined,
         quality: 'medium',
         compression: 0.98,
+        workersURL: undefined,
         shouldTransform: () => true,
     } as ImageBitmapTransformOptions,
     ({ props, extensionName }) => {
@@ -85,7 +68,17 @@ export const ImageBitmapTransform = createTransformExtension(
             entry: FilePondFileEntry & { file: File },
             { abortController }: { abortController: AbortController }
         ) {
-            const { aspectRatio, width, height, upscale, fit, quality, compression, type } = props;
+            const {
+                aspectRatio,
+                width,
+                height,
+                upscale,
+                fit,
+                quality,
+                compression,
+                type,
+                workersURL,
+            } = props;
             const { file } = entry;
 
             const entryExtension = entry.extension[extensionName];
@@ -158,16 +151,16 @@ export const ImageBitmapTransform = createTransformExtension(
             let bitmap: ImageBitmap;
             try {
                 bitmap = (await thread(
-                    transformImageWorker,
+                    createThreadWorker(workersURL, transformImage),
                     [
                         file,
-                        sourceRect.x,
-                        sourceRect.y,
-                        sourceRect.width,
-                        sourceRect.height,
-                        Math.round(targetSize.width),
-                        Math.round(targetSize.height),
-                        quality,
+                        sourceRect,
+                        {
+                            resizeWidth: Math.round(targetSize.width),
+                            resizeHeight: Math.round(targetSize.height),
+                            resizeQuality: quality,
+                            imageOrientation: 'from-image',
+                        },
                     ],
                     {
                         abortController,

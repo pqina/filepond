@@ -1,9 +1,4 @@
-import type {
-    Needle,
-    FilePondEntry,
-    FilePondEntrySource,
-    TemplateNode,
-} from '../../types/index.js';
+import type { Needle, FilePondEntry, FilePondEntrySource } from '../../types/index.js';
 import type { Vector } from '../../utils/vector.js';
 import { FilePondSvelteComponentElement } from '../FilePondSvelteComponent/index.svelte.js';
 import { setBooleanAttribute } from '../../utils/dom.js';
@@ -79,6 +74,7 @@ export const COMPONENT_PROPS = [
     'template',
     'propResourceMap',
     'drag',
+    'dragGrabTimeout',
     'dragDetachMargin',
     'dragSafetyMargin',
     'drop',

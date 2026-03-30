@@ -64,8 +64,8 @@ export function createFilePondExtensionSet(extensions: ExtensionFactory[] = []) 
         FileMimeTypeValidator,
         // the default extension set doesn't have a Transform extension, so we create a slot so we can auto insert transform extensions there, the slot is removed when we return the extension set
         _TransformSlot,
-        ValueCallbackStore,
         EntryListView,
+        ValueCallbackStore,
     ];
 
     // now we loop over extensions and insert them after the index of a current extension (source types after FileInputSource, validator types after FileExtensionValidator, etc.)
@@ -255,6 +255,9 @@ export class FilePondElement extends FilePondInputElement {
             entryList.setAttribute('exportparts', parts.replace(/ /g, ','));
         }
 
+        // template to use, if it's already supplied we don't have to set it again
+        const template = globalInitialOptions?.EntryListView?.template || createFilePondEntryList();
+
         // assign default options, anything view related we assign in connectedCallback()
         Object.assign(this, {
             // add items view
@@ -277,8 +280,7 @@ export class FilePondElement extends FilePondInputElement {
                 assets,
 
                 // the nodes to render
-                template:
-                    globalInitialOptions?.EntryListView?.template || createFilePondEntryList(),
+                template,
 
                 // called before rendering a node, allows dynamically modifying a node or adding nodes
                 beforeRenderNode(node: any) {
@@ -419,6 +421,9 @@ export interface defineFilePondOptions {
 
     /** Initial Spring configuration */
     springDefaults?: SpringOptions;
+
+    /** Location of web workers */
+    workersURL?: URL;
 }
 
 /**

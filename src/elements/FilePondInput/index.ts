@@ -608,6 +608,11 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         this.#extensionManager.extensions = extensions;
     }
 
+    /** Update worker url */
+    set workersURL(value: URL) {
+        this.#extensionManager.propagateExtensionProperty('workersURL', value);
+    }
+
     //#endregion
 
     //#region Element methods

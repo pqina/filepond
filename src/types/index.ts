@@ -272,16 +272,13 @@ export interface FilePondEntryListOptions extends Omit<FilePondSvelteComponentOp
     /** Toggle drag functionality on/off */
     drag?: boolean;
 
-    /**
-     * The distance from the root element after which the element will be detached from the list,
-     * defaults to `40`
-     */
+    /** User needs to hold down on item for this amount of milliseconds to start dragging operation. Defaults to `100` */
+    dragGrabTimeout?: number;
+
+    /** The distance from the root element after which the element will be detached from the list, defaults to `40` */
     dragDetachMargin?: number;
 
-    /**
-     * The distance from the root element after which the element will be removed when dropped,
-     * defaults to `80`, set to `Infinity` to prevent removal by dragging
-     */
+    /** The distance from the root element after which the element will be removed when dropped, defaults to `80`, set to `Infinity` to prevent removal by dragging */
     dragSafetyMargin?: number;
 
     /** Toggle the UI on/off */
@@ -306,9 +303,7 @@ export interface FilePondEntryListOptions extends Omit<FilePondSvelteComponentOp
     byteUnits?: 'mega' | 'mebi';
 
     /**
-     * Automatically maps a property name to a resource value in locale and/or assets, defaults to
-     * `{ title: 'locale', label: 'locale', icon: 'assets' }` meaning that the value of a `label`
-     * property is automatically looked up in the `locale` property
+     * Automatically maps a property name to a resource value in locale and/or assets, defaults to `{ title: 'locale', label: 'locale', icon: 'assets' }` meaning that the value of a `label` property is automatically looked up in the `locale` property
      */
     propResourceMap?: { [componentProperty: string]: string };
 }

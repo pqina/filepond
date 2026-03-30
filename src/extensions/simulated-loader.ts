@@ -30,6 +30,9 @@ export interface SimulatedLoaderOptions {
     /** Delay until fake error thrown. Defaults to `undefined` */
     errorDelay?: number;
 
+    /** Logs loading state to the developer console. Defaults to `true` */
+    log?: boolean;
+
     /** File to fetch. Defaults to `undefined` */
     fetchFile?: (
         entry: FilePondEntry,
@@ -51,6 +54,7 @@ export const SimulatedLoader = createExtension(
         connectionDelay: 250,
         errorDelay: undefined,
         parallel: 4,
+        log: true,
         fetchFile: undefined,
     } as SimulatedLoaderOptions,
     ({ extensionName, props, didSetProps }, pond) => {
@@ -81,7 +85,7 @@ export const SimulatedLoader = createExtension(
 
         async function taskUrlToInfoSimulation(entry: FilePondFileEntry) {
             const { src, size = 1024 * 1024 } = entry;
-            const { connectionDelay, errorDelay } = props;
+            const { log, connectionDelay, errorDelay } = props;
 
             setEntryExtensionStatus(entry, {
                 type: Status.System,
@@ -102,13 +106,13 @@ export const SimulatedLoader = createExtension(
                     values: { error },
                 });
 
-                logState(['did throw load info error', entry.id]);
+                log && logState(['did throw load info error', entry.id]);
 
                 // so scheduler aborts  rest of tasks
                 throw error;
             }
 
-            logState(['did load info', entry.id]);
+            log && logState(['did load info', entry.id]);
 
             // update entry so we know size, name, and type before the blob is loaded
             updateEntry(entry, {
@@ -124,8 +128,15 @@ export const SimulatedLoader = createExtension(
             { abortController }: TaskFnOptions
         ): Promise<void> {
             const { src, size = 1024 * 1024 } = entry;
-            const { actionLoad, actionAbort, tickrate, connectionDelay, fetchFile, errorDelay } =
-                props;
+            const {
+                log,
+                actionLoad,
+                actionAbort,
+                tickrate,
+                connectionDelay,
+                fetchFile,
+                errorDelay,
+            } = props;
 
             setEntryExtensionStatus(entry, {
                 type: Status.System,
@@ -148,7 +159,7 @@ export const SimulatedLoader = createExtension(
                     values: { error },
                 });
 
-                logState(['did throw load data error', entry.id]);
+                log && logState(['did throw load data error', entry.id]);
 
                 // so scheduler aborts  rest of tasks
                 throw error;
@@ -208,7 +219,7 @@ export const SimulatedLoader = createExtension(
                         },
                     });
 
-                    logState(['did load data', entry.id]);
+                    log && logState(['did load data', entry.id]);
 
                     // @ts-ignore done
                     resolve();
@@ -218,7 +229,7 @@ export const SimulatedLoader = createExtension(
                 abortController.signal.onabort = () => {
                     clearInterval(intervalId);
 
-                    logState(['did abort load data', entry.id]);
+                    log && logState(['did abort load data', entry.id]);
 
                     updateEntry(entry, {
                         state: {

@@ -182,13 +182,17 @@
 
     let hasError = $state(false);
 
+    // not yet loading media
+    let mediaReady = $state(false);
+
     // not yet rendering media
     let mediaVisible = $state(false);
 
     // add media state to extension so can be used by UI
     $effect(() => {
         const mediaState = {
-            isVisible: !!mediaVisible,
+            isReady: mediaReady,
+            isVisible: mediaVisible,
         };
 
         untrack(() => {
@@ -220,6 +224,8 @@
                                 onInitMedia();
                             }}
                             onload={(size: Size) => {
+                                mediaReady = true;
+
                                 // set image file `complete` state
                                 onLoadFile(file);
 

@@ -267,7 +267,7 @@
     });
 
     // so we can move focus from button to button
-    let hasFocus = $state(false);
+    let hasFocus = false;
     onMount(() => {
         if (!root) {
             return;

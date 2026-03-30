@@ -10,6 +10,8 @@
         maximumPixels?: number;
         /** Quality to resize the image with, defaults to `'medium'` */
         resizeQuality?: MediaResizeQuality;
+        /** Where to find web workers */
+        workersURL?: URL;
         oninit?: () => void;
         onload?: (size: { width: number; height: number }) => void;
         onrender?: (options: { didRestore: boolean }) => void;
@@ -22,14 +24,16 @@
     import { getImageSize } from '../../../../../utils/media.js';
     import { getAppContext } from '../../../contexts/appContext.js';
     import { setBitmapCacheItem, getBitmapCacheItem } from './BitmapRendererCache.js';
-    import { thread } from '../../../../../utils/thread.js';
+    import { createThreadWorker, thread } from '../../../../../utils/thread.js';
     import { type Size } from '../../../../../utils/size.js';
+    import { transformImage } from '../../../../../workers/transformImage.js';
 
     let {
         file,
         taskId,
         maximumPixels = 1024 * 1024,
         resizeQuality = 'medium',
+        workersURL = undefined,
         oninit = undefined,
         onload = undefined,
         onrender = undefined,
@@ -82,23 +86,6 @@
         hasCanvas && didReceiveImageSize && !didRequestDisplayImage
     );
 
-    /** Converts the passed file into a scaled image bitmap */
-    function drawImageWorker(
-        file: Blob,
-        width: number,
-        height: number,
-        quality: 'low' | 'medium' | 'high',
-        done: (err?: string | null, content?: any, transferList?: any[]) => void
-    ) {
-        createImageBitmap(file, {
-            resizeWidth: width,
-            resizeHeight: height,
-            resizeQuality: quality,
-        }).then((bitmap) => {
-            done(null, bitmap, [bitmap]);
-        });
-    }
-
     /** Load image bitmap with webworker */
     async function drawImageInWorker(
         _: any,
@@ -112,9 +99,22 @@
             // we need to run this in a thread
             // - Chrome will automatically run `createImageBitmap` in a thread
             // - Firefox and Safari won't
-            const bitmap = (await thread(drawImageWorker, [file, width, height, resizeQuality], {
-                abortController,
-            })) as ImageBitmap;
+            const bitmap = (await thread(
+                createThreadWorker(workersURL, transformImage),
+                [
+                    file,
+                    null,
+                    {
+                        resizeWidth: width,
+                        resizeHeight: height,
+                        resizeQuality,
+                        imageOrientation: 'from-image',
+                    },
+                ],
+                {
+                    abortController,
+                }
+            )) as ImageBitmap;
 
             // now render bitmap
             canvas.width = width;
@@ -218,7 +218,6 @@
         if (!shouldRequestImageSize) {
             return;
         }
-
         pushTask(taskId, taskLoadImageSize, { parallel: 1, isOptional: true });
     });
 
@@ -227,7 +226,6 @@
         if (!shouldDisplayImage) {
             return;
         }
-
         pushTask(taskId, taskDrawImage, { parallel: 1, isOptional: true });
     });
 
@@ -269,4 +267,4 @@
     });
 </script>
 
-<canvas bind:this={canvas}></canvas>
+<canvas width="0" height="0" bind:this={canvas}></canvas>

@@ -1,10 +1,10 @@
 import { arrayRemoveInPlace } from '../utils/array.js';
+import { noop } from '../utils/placeholder.js';
 import { pubsub } from '../utils/pubsub.js';
 import { isFunction, isString } from '../utils/test.js';
-import { log } from '../common/console.js';
 
 export interface TaskSchedulerOptions {
-    logState?: boolean;
+    log?: (tasks: Task[]) => void;
 }
 
 export interface TaskFnOptions {
@@ -37,7 +37,7 @@ export interface Task {
     /** Used to abort the task */
     abortController: AbortController;
 
-    /** Run this task even when an earlier task has a soft failure */
+    /** Run this task even when an earlier task has a soft failure (for example file failed to validate) */
     isOptional: boolean;
 }
 
@@ -63,34 +63,14 @@ const TaskState = {
 };
 
 export function createTaskScheduler(options: TaskSchedulerOptions) {
-    const { logState = false } = options ?? {};
+    const { log = undefined } = options ?? {};
 
-    // pubsub
     const { on, pub } = pubsub();
 
     const tasks: Task[] = [];
 
     /** This allows us to access tasks faster */
     const groupTasks: Map<string, Task[]> = new Map();
-
-    function logTasks() {
-        log(`Tasks: ${tasks.length}`);
-        for (const task of tasks) {
-            const { group, fn, order, parallel, state, ..._ } = task;
-            let icon = {
-                // queued
-                1: '📥',
-                // active
-                2: '👉',
-                // failed
-                3: '💥',
-                // halted
-                4: '🖐️',
-            }[state];
-            log(icon, group, fn.name, { parallel, order });
-        }
-        log('');
-    }
 
     function isRemainingTask(task: Task) {
         return task.state === TaskState.QUEUED || task.state === TaskState.ACTIVE;
@@ -262,13 +242,13 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
         // no more tasks to run
         if (!hasQueuedTasks()) {
             // so we can see what's going on
-            logState && logTasks();
+            log?.(tasks);
             pub('idle');
             return;
         }
 
         // so we can see what's going on
-        logState && logTasks();
+        log?.(tasks);
 
         // loop over groups
         const taskGroups = getTaskGroupsSortedByPriority();

@@ -1,4 +1,4 @@
-import { createTaskScheduler, type TaskOptions } from './taskScheduler.js';
+import { createTaskScheduler, type Task, type TaskOptions } from './taskScheduler.js';
 import { pubsub } from '../utils/pubsub.js';
 import { isArray } from '../utils/test.js';
 import { arrayItemsEqual, arrayRemoveInPlace, arraySortByItemProp } from '../utils/array.js';
@@ -98,6 +98,26 @@ export interface ExtensionMangerInstance {
     destroy(): void;
 }
 
+// for debugging task manager
+function logTasks(tasks: Task[]) {
+    console.log(`Tasks: ${tasks.length}`);
+    for (const task of tasks) {
+        const { group, fn, order, parallel, state, ..._ } = task;
+        let icon = {
+            // queued
+            1: '📥',
+            // active
+            2: '👉',
+            // failed
+            3: '💥',
+            // halted
+            4: '🖐️',
+        }[state];
+        console.log(icon, group, fn.name, { parallel, order });
+    }
+    console.log('');
+}
+
 export function createExtensionManager(
     tree: ReturnType<typeof createEntryTree>
 ): ExtensionMangerInstance {
@@ -111,7 +131,7 @@ export function createExtensionManager(
     const { insertEntries, replaceEntry, updateEntry, removeEntries } = tree;
 
     // schedule tasks
-    const taskScheduler = createTaskScheduler({ logState: false });
+    const taskScheduler = createTaskScheduler({ log: undefined });
 
     /** Current Entry manager public state */
     const state: ExtensionManagerState = {

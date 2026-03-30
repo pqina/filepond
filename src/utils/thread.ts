@@ -2,6 +2,7 @@ import functionToBlob from './functionToBlob.js';
 import { arrayRemoveInPlace } from './array.js';
 import { requestIdleCallback } from './poly.js';
 import { createObjectURL } from './objectURL.js';
+import { isString } from './test.js';
 
 /*
 function () {
@@ -23,6 +24,7 @@ function () {
     }
 }
 */
+
 const wrapFunction = (fn: Function | string) =>
     `function () {self.onmessage = function (message) {(${fn.toString()}).apply(null, message.data.concat([function (err, response, transferList = []) {const message = { content: response, error: err };return self.postMessage(message, transferList);},{onprogress: function({ lengthComputable, loaded, total }) {self.postMessage({ type: 'progress', content: { lengthComputable, loaded, total }, error: null })}}]))}}`;
 
@@ -59,6 +61,14 @@ const taskQueue: Task[] = [];
 // time till a idle worker is automatically terminated instead of re-used
 const WORKER_TERMINATION_TIMEOUT = 5000;
 
+/** Helper function to build thread worker */
+export function createThreadWorker(
+    url: URL | null | undefined,
+    worker: Function & { fileName: string }
+) {
+    return url ? `${url}/${worker.fileName}Worker.js` : worker;
+}
+
 /** Run this function in a thread */
 export function thread(fn: Function | string, args: any[], options: ThreadOptions = {}) {
     return new Promise((resolve, reject) => {
@@ -74,8 +84,11 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                 onprogress,
             } = options;
 
+            // test if we should use blob worker
+            const useBlob = !isString(fn);
+
             // find available worker (if worker is busy, create new worker, else has to wait for thread)
-            const fnStr = fn.toString();
+            const fnStr = useBlob ? fn.toString() : fn;
             let pooledWorker = workerPool.find((worker) => worker.fnStr === fnStr && !worker.busy);
 
             // none found, let's create one
@@ -107,12 +120,10 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                     return;
                 }
 
-                // create worker for this function
-                const workerFn = wrapFunction(fn);
-
                 // create a new Web Worker
-                const url = createObjectURL(functionToBlob(workerFn));
+                const url = useBlob ? createObjectURL(functionToBlob(wrapFunction(fn))) : fnStr;
                 const worker = new window.Worker(url);
+                worker.addEventListener('error', reject);
 
                 // create a pooled worker, this object will contain the worker and active messages
                 pooledWorker = {
@@ -126,8 +137,13 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                         clearTimeout((pooledWorker as PooledWorker).terminationTimeout);
                         (pooledWorker as PooledWorker).worker.terminate();
 
-                        // free memory
-                        URL.revokeObjectURL(url);
+                        // clean up event listeners
+                        worker.addEventListener('error', reject);
+
+                        // free memory when is blob URL
+                        if (url.startsWith('blob:')) {
+                            URL.revokeObjectURL(url);
+                        }
 
                         // remove from pool
                         arrayRemoveInPlace(
