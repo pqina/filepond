@@ -6,6 +6,7 @@
     "version": "5.0.0-beta.21",
     "description": "FilePond, where files go to stretch their bits.",
     "author": "Rik Schennink",
+    "funding": "https://filepond.com/funding",
     "license": "MIT",
     "type": "module",
     "scripts": {

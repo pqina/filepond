@@ -1,9 +1,4 @@
-import type {
-    StoreExtensionOptions,
-    PerceivedPerformanceOptions,
-    StoreTaskFnOptions,
-} from './common/createStoreExtension.js';
-
+import type { StoreExtensionOptions, StoreTaskFnOptions } from './common/createStoreExtension.js';
 import type { XHRResponse } from '../utils/xhr.js';
 import { createStoreExtension } from './common/createStoreExtension.js';
 import { blobToFile } from '../utils/file.js';

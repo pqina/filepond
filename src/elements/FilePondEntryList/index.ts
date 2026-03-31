@@ -61,7 +61,7 @@ export interface AppCallbacks {
     pushTask: (
         id: string,
         fn: Function,
-        options?: { parallel?: number; isOptional?: boolean }
+        options?: { parallel?: number; ignoreSoftFailure?: boolean }
     ) => void;
     abortTask: (id: string, fn: Function) => void;
 }

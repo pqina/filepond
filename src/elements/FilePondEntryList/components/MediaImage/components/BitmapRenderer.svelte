@@ -4,14 +4,23 @@
     interface BitmapRendererOptions {
         /** Image file to render */
         file: Blob;
+
         /** The id to use for tasks */
         taskId: string;
+
+        /** Should we still run task if other tasks are in soft failure mode */
+        taskIgnoreSoftFailure: boolean;
+
         /** Limit size of image, defaults to `1024 * 1024` */
         maximumPixels?: number;
+
         /** Quality to resize the image with, defaults to `'medium'` */
         resizeQuality?: MediaResizeQuality;
+
         /** Where to find web workers */
         workersURL?: URL;
+
+        /** Event handlers */
         oninit?: () => void;
         onload?: (size: { width: number; height: number }) => void;
         onrender?: (options: { didRestore: boolean }) => void;
@@ -31,6 +40,7 @@
     let {
         file,
         taskId,
+        taskIgnoreSoftFailure = false,
         maximumPixels = 1024 * 1024,
         resizeQuality = 'medium',
         workersURL = undefined,
@@ -218,7 +228,11 @@
         if (!shouldRequestImageSize) {
             return;
         }
-        pushTask(taskId, taskLoadImageSize, { parallel: 1, isOptional: true });
+
+        pushTask(taskId, taskLoadImageSize, {
+            parallel: 1,
+            ignoreSoftFailure: taskIgnoreSoftFailure,
+        });
     });
 
     // when should display image
@@ -226,7 +240,8 @@
         if (!shouldDisplayImage) {
             return;
         }
-        pushTask(taskId, taskDrawImage, { parallel: 1, isOptional: true });
+
+        pushTask(taskId, taskDrawImage, { parallel: 1, ignoreSoftFailure: taskIgnoreSoftFailure });
     });
 
     // replace canvas if we have a cached canvas

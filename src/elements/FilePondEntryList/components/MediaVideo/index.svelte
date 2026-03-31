@@ -284,13 +284,19 @@
             // going to use `src`
             if (src) {
                 // let's load media source
-                pushTask(entryContext.current.id, taskLoadMediaWithSrc, { parallel: 1 });
+                pushTask(entryContext.current.id, taskLoadMediaWithSrc, {
+                    parallel: 1,
+                    ignoreSoftFailure: false,
+                });
                 return;
             }
 
             // load media for iOS Safari
             if (srcObject) {
-                pushTask(entryContext.current.id, taskLoadMediaWithSrcObject, { parallel: 1 });
+                pushTask(entryContext.current.id, taskLoadMediaWithSrcObject, {
+                    parallel: 1,
+                    ignoreSoftFailure: false,
+                });
             }
         });
     });
@@ -322,6 +328,7 @@
     // add media state to extension so can be used by UI
     $effect(() => {
         const mediaState = {
+            isReady: !videoLoading,
             isVisible: videoVisible,
         };
 

@@ -6,6 +6,7 @@ import { getUniqueId } from '../utils/string.js';
 import { createProgressEvent } from '../utils/xhr.js';
 import { log } from '../common/console.js';
 import { sleep } from '../utils/sleep.js';
+import { noop } from '../utils/placeholder.js';
 
 export interface SimulatedStoreOptions extends StoreExtensionOptions {
     /** Maximum simulated load speed. Defaults to `1024000` */
@@ -19,6 +20,15 @@ export interface SimulatedStoreOptions extends StoreExtensionOptions {
 
     /** Total parallel load operations. Defaults to `4` */
     parallel?: number;
+
+    /** Store hooks so we can throw errors */
+    onstore?: (progress: number) => void;
+
+    /** Restore hook so we can throw errors */
+    onrestore?: (progress: number) => void;
+
+    /** Release hook so we can throw errors */
+    onrelease?: (progress: number) => void;
 
     /** Fetches an actual stored file to use for demo purposes. */
     fetchStoredFile?: (
@@ -71,7 +81,7 @@ export const SimulatedStore = createStoreExtension(
                 onabort();
             };
 
-            const { log, connectionDelay, tickrate } = props;
+            const { log, connectionDelay, tickrate, onstore = noop } = props;
             await sleep(connectionDelay);
 
             // aborted while sleeping
@@ -81,7 +91,7 @@ export const SimulatedStore = createStoreExtension(
 
             const size = entry.size as number;
 
-            return await new Promise((resolve) => {
+            return await new Promise((resolve, reject) => {
                 let bytesUploaded = 0;
 
                 intervalId = setInterval(() => {
@@ -92,6 +102,16 @@ export const SimulatedStore = createStoreExtension(
 
                     // we calculate total bytes uploaded
                     bytesUploaded = Math.min(size, bytesUploaded + bytesPerTick);
+
+                    // this allows us to throw an error after x amount of bytes
+                    try {
+                        onstore(bytesUploaded / size);
+                    } catch (error) {
+                        log && logState(['error during store operation']);
+                        clearInterval(intervalId);
+                        reject(error);
+                        return;
+                    }
 
                     // fire a progress event
                     onprogress(createProgressEvent(true, bytesUploaded, size));
@@ -122,13 +142,23 @@ export const SimulatedStore = createStoreExtension(
                 connectionDelay,
                 fetchStoredFile = () =>
                     new File(['Simulated'], 'Untitled.txt', { type: 'plain/text' }),
+                onrestore = noop,
             } = props;
 
-            log && logState(['did restore', storageId]);
+            await sleep(connectionDelay);
+
+            // this allows us to throw an error after x amount of bytes
+            try {
+                onrestore();
+            } catch (error) {
+                log && logState(['error during restore operation']);
+                throw error;
+            }
 
             // we return the file we stored in our local cache
             if (SimulatedStore.has(storageId)) {
-                await sleep(connectionDelay);
+                log && logState(['did restore', storageId]);
+
                 return SimulatedStore.get(storageId);
             }
 
@@ -137,8 +167,17 @@ export const SimulatedStore = createStoreExtension(
         }
 
         async function releaseEntry(storageId: string): Promise<boolean> {
-            const { log, connectionDelay } = props;
+            const { log, connectionDelay, onrelease = noop } = props;
             await sleep(connectionDelay);
+
+            // this allows us to throw an error after x amount of bytes
+            try {
+                onrelease();
+            } catch (error) {
+                log && logState(['error during release operation']);
+                throw error;
+            }
+
             SimulatedStore.delete(storageId);
 
             // log current store state

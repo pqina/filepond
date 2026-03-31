@@ -1,5 +1,4 @@
 import { arrayRemoveInPlace } from '../utils/array.js';
-import { noop } from '../utils/placeholder.js';
 import { pubsub } from '../utils/pubsub.js';
 import { isFunction, isString } from '../utils/test.js';
 
@@ -38,7 +37,7 @@ export interface Task {
     abortController: AbortController;
 
     /** Run this task even when an earlier task has a soft failure (for example file failed to validate) */
-    isOptional: boolean;
+    ignoreSoftFailure: boolean;
 }
 
 export interface TaskOptions {
@@ -51,8 +50,8 @@ export interface TaskOptions {
     /** Parameters to pass to task function */
     params?: TaskArgs;
 
-    /** Is this an optional task */
-    isOptional?: boolean;
+    /** Can this task ignore soft failures */
+    ignoreSoftFailure?: boolean;
 }
 
 const TaskState = {
@@ -180,12 +179,13 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
     function setTaskStateByGroupId(
         group: string,
         newTaskState: number,
-        options?: { ignoreOptional: boolean }
+        options?: { isSoftFailure: boolean }
     ) {
-        const { ignoreOptional = false } = options || {};
+        const { isSoftFailure = false } = options || {};
         const tasksInGroup = groupTasks.get(group) ?? [];
+
         for (const task of tasksInGroup) {
-            if (ignoreOptional && task.isOptional) {
+            if (isSoftFailure && task.ignoreSoftFailure) {
                 continue;
             }
             task.state = newTaskState;
@@ -257,12 +257,18 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
             if (!groupHasNextTaskWithState(group, TaskState.QUEUED)) {
                 // if next task is halted, we test if there are any optional tasks we can move to the front
                 if (groupHasNextTaskWithState(group, TaskState.HALTED)) {
-                    const nextOptionalGroupTask = getNextTaskByGroup(group);
-                    if (!nextOptionalGroupTask || !canRunTask(nextOptionalGroupTask)) {
+                    // get next task and test if may ignore softfailure state
+                    const nextGroupTask = getNextTaskByGroup(group);
+                    if (
+                        !nextGroupTask ||
+                        nextGroupTask.ignoreSoftFailure === false ||
+                        !canRunTask(nextGroupTask)
+                    ) {
                         continue;
                     }
 
-                    runTask(nextOptionalGroupTask);
+                    // we can run this task
+                    runTask(nextGroupTask);
                 }
 
                 // skip to next group
@@ -293,7 +299,7 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
             // get parameters for task
             const taskParameters = isFunction(params) ? params() : params;
 
-            // task can return `false` to prevent running additional tasks (only optional tasks will run), task can throw error to halt all task processing
+            // task can return `false` to prevent running additional tasks (only tasks that can ignore soft failures will run), task can throw error to halt all task processing
             const taskSuccess = await fn(...taskParameters, {
                 abortController: task.abortController,
             });
@@ -303,7 +309,7 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
 
             // task failed, we need to halt other tasks for this group
             if (taskSuccess === false) {
-                setTaskStateByGroupId(group, TaskState.HALTED, { ignoreOptional: true });
+                setTaskStateByGroupId(group, TaskState.HALTED, { isSoftFailure: true });
             }
         } catch (error) {
             // mark task as failed
@@ -339,7 +345,12 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
     /** Add a new task */
     function pushTask(group: string, fn: TaskFn, options?: TaskOptions) {
         // set defaults
-        const { parallel = Infinity, order = 0, params = [], isOptional = false } = options ?? {};
+        const {
+            parallel = Infinity,
+            order = 0,
+            params = [],
+            ignoreSoftFailure = false,
+        } = options ?? {};
 
         // already has scheduled this task, this allows us to call pushTask multiple times without pushing the same tasks
         if (!isValidTask(group, fn) || hasTask(group, fn)) {
@@ -353,7 +364,7 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
             params,
             order,
             parallel,
-            isOptional,
+            ignoreSoftFailure,
             state: TaskState.QUEUED,
             abortController: new AbortController(),
         });
