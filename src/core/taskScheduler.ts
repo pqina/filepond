@@ -289,20 +289,19 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
     }
 
     async function runTask(task: Task) {
-        const { group, fn, params } = task;
+        const { group, fn, params, abortController } = task;
+
+        // a task can spawn new tasks while it's being run
 
         // now busy with this task
         task.state = TaskState.ACTIVE;
 
-        // start task
         try {
             // get parameters for task
             const taskParameters = isFunction(params) ? params() : params;
 
             // task can return `false` to prevent running additional tasks (only tasks that can ignore soft failures will run), task can throw error to halt all task processing
-            const taskSuccess = await fn(...taskParameters, {
-                abortController: task.abortController,
-            });
+            const taskSuccess = await fn(...taskParameters, { abortController });
 
             // done!
             removeTask(task);
@@ -312,17 +311,19 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
                 setTaskStateByGroupId(group, TaskState.HALTED, { isSoftFailure: true });
             }
         } catch (error) {
-            // mark task as failed
-            task.state = TaskState.FAILED;
-
             // so others can handle it
             pub('error', error);
 
             // task failed, we need to halt other tasks for this group
             setTaskStateByGroupId(group, TaskState.HALTED);
+
+            console.log('set current task state to failed');
+
+            // mark this task as failed, it's not removed
+            task.state = TaskState.FAILED;
         }
 
-        // test if all tasks for this group have finished, if so remove all tasks for this group from the queue
+        // test if all tasks for this group have finished (or have been halted)
         if (!groupHasRemainingTasks(group)) {
             pub('complete', group);
         }
@@ -352,8 +353,18 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
             ignoreSoftFailure = false,
         } = options ?? {};
 
-        // already has scheduled this task, this allows us to call pushTask multiple times without pushing the same tasks
-        if (!isValidTask(group, fn) || hasTask(group, fn)) {
+        if (!isValidTask(group, fn)) {
+            return;
+        }
+
+        // already scheduled this task,
+        const queuedTask = getTask(group, fn);
+        if (queuedTask) {
+            // if this task is in a failed state, let's retry the task
+            if (queuedTask?.state === TaskState.FAILED) {
+                queuedTask.state = TaskState.QUEUED;
+                processNextTask();
+            }
             return;
         }
 

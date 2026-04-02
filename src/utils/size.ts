@@ -56,3 +56,8 @@ export function sizeUpdateWithSize(target: Size, source: Size): Size {
     target.height = source.height;
     return target;
 }
+
+/** Returns false if size defines zero pixels, either width or height is 0 */
+export function sizeIsEmpty(size: Size): boolean {
+    return size.width === 0 || size.height === 0;
+}

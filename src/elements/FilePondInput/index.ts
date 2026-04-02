@@ -199,6 +199,20 @@ function hasBusyEntries(entries: FilePondEntry[]) {
     });
 }
 
+function hasInvalidEntries(entries: FilePondEntry[]) {
+    return entries.some((entry) => {
+        return Object.values(entry.extension ?? {}).some(({ status }) => {
+            // no status, no error
+            if (!status) {
+                return false;
+            }
+
+            // has error status
+            return status.type === 'error';
+        });
+    });
+}
+
 /** Converst a passed value to a FormData object */
 function toFormData(fieldName: string, value: string | File | (string | File)[]) {
     const values = Array.isArray(value) ? value : [value];
@@ -927,7 +941,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
             }),
 
             // fire update events
-            this.#entryTree.on('update', () => {
+            this.#entryTree.on('updateEntries', () => {
                 dispatchCustomEvent(this, 'update');
             })
         );
@@ -995,11 +1009,11 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     #attachValidaton() {
         this.#connectedSubs.push(
             this.#entryTree.on(
-                'update',
+                'updateEntries',
                 debounce(() => this.checkValidity())
             ),
             this.#extensionManager.on(
-                'update',
+                'updateExtensionState',
                 debounce(() => this.checkValidity())
             )
         );
@@ -1026,8 +1040,24 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
             return;
         }
 
-        // get current extension states
-        const extensionStates = this.#extensionManager.getState();
+        // get current generic extension states, these are prioritized over generic invalid entry states
+        const extensionStates = {
+            // add generic item state, for when an extension doesn't set a generic state on the extension manager (this allows for more extension specific error messages like "not all items have been stored")
+            ...(hasInvalidEntries(this.entries)
+                ? {
+                      FilePondItemValidator: {
+                          status: {
+                              type: 'error',
+                              code: 'VALIDATION_INVALID_ENTRIES',
+                              meta: null,
+                              values: [],
+                          },
+                      },
+                  }
+                : {}),
+            // overwrite with specific extension states
+            ...this.#extensionManager.getState(),
+        };
 
         /** Message for each flag */
         const messages: { [key: string]: string } = {};

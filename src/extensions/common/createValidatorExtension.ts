@@ -261,40 +261,12 @@ export function createValidatorExtension(
             }
         }
 
-        function handleUpdateEntries(entries: FilePondEntry[]) {
-            // TODO: perhaps set IDLE or BUSY if not all entries validated yet
-
-            // test if any error entries
-            for (const entry of entries) {
-                const status = getEntryExtensionStatus(entry);
-
-                if (status.type !== Status.Error) {
-                    continue;
-                }
-
-                setExtensionStatus({
-                    type: Status.Error,
-                    code: 'VALIDATION_INVALID_ENTRIES',
-                    meta: status.meta,
-                });
-
-                return;
-            }
-
-            // all is well
-            setExtensionStatus({
-                type: Status.System,
-                code: 'VALIDATION_COMPLETE',
-            });
-        }
-
         const unsubUpdateEntryData = on('updateEntryData', handleUpdateEntryData);
         const unsubUpdateEntry = on('updateEntry', handleUpdateEntry);
-        const unsubUpdate = on('updateEntries', debounce(handleUpdateEntries));
 
         return {
             destroy() {
-                unsubUpdate();
+                // unsubUpdate();
                 unsubUpdateEntry();
                 unsubUpdateEntryData();
             },

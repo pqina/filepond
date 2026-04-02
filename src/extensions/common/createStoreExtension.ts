@@ -233,7 +233,7 @@ export function createStoreExtension(
                         values: { error },
                     });
 
-                    // pass to scheduler so other tasks are cancelled
+                    // pass to taskScheduler so other tasks are cancelled
                     throw error;
                 }
             }
@@ -700,7 +700,15 @@ export function createStoreExtension(
 
                 // queue first
                 const hasQueued = status?.code === 'STORE_QUEUED';
-                if (!hasStored && !hasQueued && !isStoring && store === true && canStore) {
+                const hasError = status?.code === 'STORE_ERROR';
+                if (
+                    !hasStored &&
+                    !hasQueued &&
+                    !hasError &&
+                    !isStoring &&
+                    store === true &&
+                    canStore
+                ) {
                     pushTask(entry.id, taskQueueEntry);
                     return;
                 }
@@ -740,7 +748,7 @@ export function createStoreExtension(
                 // all good!
                 setExtensionStatus({
                     type: Status.System,
-                    code: 'STORE_VALIDATION_COMPLETE',
+                    code: 'VALIDATION_COMPLETE',
                 });
             }
 

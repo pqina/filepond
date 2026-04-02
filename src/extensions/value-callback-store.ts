@@ -90,7 +90,7 @@ export const ValueCallbackStore = createExtension(
             } else {
                 setExtensionStatus({
                     type: Status.System,
-                    code: 'STORE_VALIDATION_COMPLETE',
+                    code: 'VALIDATION_COMPLETE',
                 });
             }
 

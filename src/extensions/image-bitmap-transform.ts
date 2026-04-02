@@ -2,7 +2,7 @@ import type { FilePondEntry, FilePondFileEntry } from '../types/index.js';
 import { blobToFile } from '../utils/file.js';
 import { getImageSize } from '../utils/media.js';
 import { rectApply, rectFromSize } from '../utils/rect.js';
-import { sizeFromRect } from '../utils/size.js';
+import { sizeFromRect, sizeIsEmpty } from '../utils/size.js';
 import { isFileEntry, isImageFile } from '../utils/test.js';
 import { createThreadWorker, thread } from '../utils/thread.js';
 import {
@@ -88,7 +88,7 @@ export const ImageBitmapTransform = createTransformExtension(
 
             // get media size so we can compute other sizes
             const imageSize = await getImageSize(file);
-            if (imageSize === null) {
+            if (imageSize === null || sizeIsEmpty(imageSize)) {
                 throw 'Failed to read image size';
             }
 

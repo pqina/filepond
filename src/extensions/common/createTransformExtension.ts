@@ -152,7 +152,12 @@ export function createTransformExtension(
                         values: { error },
                     });
 
-                    // don't pass to schedular, as that would block all other tasks, and the transform task can be retried
+                    // if is automated transform, we can't retry
+                    if (isFunction(shouldTransform)) {
+                        throw error;
+                    }
+
+                    // if not, the transform can be retried, else don't pass to schedular, as that would block all other tasks, and the transform task can be retried
 
                     return;
                 }

@@ -36,7 +36,7 @@ export function arrayRemove<T>(arr: T[], compare: (item: T) => boolean): T[] {
     return arr.filter((item) => !compare(item));
 }
 
-/** Remove item(s) from array in-place */
+/** Remove item(s) from array in-place, returns removed items */
 export function arrayRemoveInPlace<T>(
     arr: T[],
     predicate: (value: T, index: number, obj: any[]) => boolean

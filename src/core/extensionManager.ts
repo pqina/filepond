@@ -133,7 +133,7 @@ export function createExtensionManager(
     // schedule tasks
     const taskScheduler = createTaskScheduler({ log: undefined });
 
-    /** Current Entry manager public state */
+    /** Current extension manager public state, this allows extensions to set a specific overall state, this is optional so not all extensions end up in this list */
     const state: ExtensionManagerState = {
         extension: {},
     };
@@ -145,7 +145,7 @@ export function createExtensionManager(
         };
 
         // fire update event
-        pub('update', state.extension);
+        pub('updateExtensionState', state.extension);
     }
 
     function getExtensionState(name: string) {

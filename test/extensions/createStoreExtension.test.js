@@ -15,31 +15,44 @@ describe('createStoreExtension', () => {
     beforeEach(() => {
         entryTree = createDefaultEntryTree();
 
-        const StoreExtension = createStoreExtension('StoreExtension', {}, () => {
-            async function storeEntry(entry, { abortController, onprogress, onabort }) {
-                // returns the storage id
-                return '1234';
-            }
+        const TestStore = createStoreExtension(
+            'TestStore',
+            {
+                shouldThrow: false,
+            },
+            ({ props, didSetProps }) => {
+                async function storeEntry(entry, { abortController, onprogress, onabort }) {
+                    const { shouldThrow } = props;
 
-            async function releaseEntry(storageId) {
-                // returns true if release was a success
-                return true;
-            }
+                    if (shouldThrow) {
+                        console.log('in should throw');
+                        throw new Error('OH NO');
+                    }
 
-            async function restoreEntry(storageId) {
-                // returns the stored file object
-                return new File(['Hello World'], 'file.txt', { type: 'plain/text' });
-            }
+                    // returns the storage id
+                    return '1234';
+                }
 
-            return {
-                storeEntry,
-                releaseEntry,
-                restoreEntry,
-            };
-        });
+                async function releaseEntry(storageId) {
+                    // returns true if release was a success
+                    return true;
+                }
+
+                async function restoreEntry(storageId) {
+                    // returns the stored file object
+                    return new File(['Hello World'], 'file.txt', { type: 'plain/text' });
+                }
+
+                return {
+                    storeEntry,
+                    releaseEntry,
+                    restoreEntry,
+                };
+            }
+        );
 
         extensionManager = createExtensionManager(entryTree);
-        extensionManager.extensions = [StoreExtension];
+        extensionManager.extensions = [TestStore];
     });
 
     it('should set "canStore" to "true" when "file" property set', () =>
@@ -47,7 +60,7 @@ describe('createStoreExtension', () => {
             //
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
-                    StoreExtension: { status, canStore },
+                    TestStore: { status, canStore },
                 } = entry.extension;
 
                 if (status.code !== 'STORE_READY' && canStore) {
@@ -73,7 +86,7 @@ describe('createStoreExtension', () => {
 
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
-                    StoreExtension: { status, canStore },
+                    TestStore: { status, canStore },
                 } = entry.extension;
 
                 // record statuscodes in order
@@ -108,11 +121,83 @@ describe('createStoreExtension', () => {
             ];
         }));
 
+    it('should store a file when previous store operation failed', () =>
+        new Promise((done) => {
+            const statusCodes = new Set();
+
+            extensionManager.setExtensionProperties('TestStore', { shouldThrow: true });
+
+            const unsub = entryTree.on('updateEntry', (entry) => {
+                const {
+                    TestStore: { status, canStore },
+                } = entry.extension;
+
+                // record statuscodes in order
+                statusCodes.add(status.code);
+
+                // wait for store id to be set
+                if (status.code !== 'STORE_ERROR') {
+                    return;
+                }
+
+                unsub();
+
+                extensionManager.setExtensionProperties('TestStore', { shouldThrow: false });
+
+                // listen
+                const unsubInner = entryTree.on('updateEntry', (entry) => {
+                    const {
+                        TestStore: { status, canStore },
+                    } = entry.extension;
+
+                    // record statuscodes in order
+                    statusCodes.add(status.code);
+
+                    // wait for store id to be set
+                    if (!entry.state.value) {
+                        return;
+                    }
+
+                    unsubInner();
+
+                    try {
+                        expect(canStore).to.be.true;
+                        expect(entry.state.value).to.equal('1234');
+                        expect(Array.from(statusCodes).join(', ')).to.equal(
+                            'STORE_LIMBO, STORE_READY, STORE_QUEUED, STORE_BUSY, STORE_ERROR, STORE_BUSY, STORE_COMPLETE'
+                        );
+                        done();
+                    } catch (err) {
+                        done(err);
+                    }
+                });
+
+                // we have to wait for a bit as the current store task has to finish before we can retry
+                setTimeout(() => {
+                    // now try to store again
+                    entryTree.updateEntry(entry.id, {
+                        state: {
+                            store: true,
+                        },
+                    });
+                }, 16);
+            });
+
+            entryTree.entries = [
+                {
+                    src: new File(['foo bar baz'], 'file.txt', { type: 'text/plain' }),
+                    state: {
+                        store: true,
+                    },
+                },
+            ];
+        }));
+
     it('should store a file when "shouldStore" is set to a function', () =>
         new Promise((done) => {
             let shouldStoreCalled = false;
 
-            const StoreExtension = createStoreExtension('StoreExtension', {}, () => {
+            const TestStore = createStoreExtension('TestStore', {}, () => {
                 async function storeEntry(entry, { abortController, onprogress, onabort }) {
                     // returns the storage id
                     return '1234';
@@ -137,7 +222,7 @@ describe('createStoreExtension', () => {
 
             extensionManager.extensions = [
                 [
-                    StoreExtension,
+                    TestStore,
                     {
                         shouldStore: async function () {
                             shouldStoreCalled = true;
@@ -149,7 +234,7 @@ describe('createStoreExtension', () => {
 
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
-                    StoreExtension: { canStore },
+                    TestStore: { canStore },
                 } = entry.extension;
 
                 // wait for store id to be set
@@ -173,7 +258,7 @@ describe('createStoreExtension', () => {
 
     it('should abort store action when "store" set to "true" and "abort" set to "true"', () =>
         new Promise((done) => {
-            const StoreExtension = createStoreExtension('StoreExtension', {}, () => {
+            const TestStore = createStoreExtension('TestStore', {}, () => {
                 function storeEntry(_, { abortController, onabort }) {
                     return new Promise((resolve) => {
                         let timer;
@@ -197,11 +282,11 @@ describe('createStoreExtension', () => {
                 };
             });
 
-            extensionManager.extensions = [StoreExtension];
+            extensionManager.extensions = [TestStore];
 
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
-                    StoreExtension: { status },
+                    TestStore: { status },
                 } = entry.extension;
 
                 if (status.code !== 'STORE_BUSY') {
@@ -222,7 +307,7 @@ describe('createStoreExtension', () => {
                 {
                     const unsub = entryTree.on('updateEntry', (entry) => {
                         const {
-                            StoreExtension: { status },
+                            TestStore: { status },
                         } = entry.extension;
 
                         if (status.code !== 'STORE_ABORT') {
@@ -250,7 +335,7 @@ describe('createStoreExtension', () => {
     it(`should set "canStore" to "false" if not storable`, () =>
         new Promise((done) => {
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status, canStore } = entry?.extension?.StoreExtension || {};
+                const { status, canStore } = entry?.extension?.TestStore || {};
 
                 if (status?.code !== 'STORE_IDLE') {
                     return;
@@ -273,7 +358,7 @@ describe('createStoreExtension', () => {
     it(`shouldn't "store" an object when no value set`, () =>
         new Promise((done) => {
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status, canStore } = entry?.extension?.StoreExtension || {};
+                const { status, canStore } = entry?.extension?.TestStore || {};
 
                 if (status?.code !== 'STORE_IDLE') {
                     return;
@@ -299,7 +384,7 @@ describe('createStoreExtension', () => {
     it(`should mark an object as stored if "value" is set`, () =>
         new Promise((done) => {
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status, canStore } = entry?.extension?.StoreExtension || {};
+                const { status, canStore } = entry?.extension?.TestStore || {};
 
                 if (status?.code !== 'STORE_COMPLETE') {
                     return;
@@ -326,7 +411,7 @@ describe('createStoreExtension', () => {
         new Promise((done) => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
-                    StoreExtension: { status, canStore },
+                    TestStore: { status, canStore },
                 } = entry.extension;
 
                 if (status.code !== 'STORE_COMPLETE') {
@@ -355,7 +440,7 @@ describe('createStoreExtension', () => {
     it(`should mark an object as stored if "value" is set, and retain "store" state`, () =>
         new Promise((done) => {
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status, canStore } = entry?.extension?.StoreExtension || {};
+                const { status, canStore } = entry?.extension?.TestStore || {};
 
                 if (status?.code !== 'STORE_COMPLETE') {
                     return;
@@ -384,7 +469,7 @@ describe('createStoreExtension', () => {
         new Promise((done) => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
-                    StoreExtension: { status, canStore },
+                    TestStore: { status, canStore },
                 } = entry.extension;
 
                 if (status.code !== 'STORE_COMPLETE') {
@@ -415,7 +500,7 @@ describe('createStoreExtension', () => {
     it('should restore the file object if "value" is set and "load" set to "true"', () =>
         new Promise((done) => {
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status, canStore } = entry?.extension?.StoreExtension || {};
+                const { status, canStore } = entry?.extension?.TestStore || {};
 
                 if (status?.code !== 'RESTORE_COMPLETE') {
                     return;
@@ -451,7 +536,7 @@ describe('createStoreExtension', () => {
         new Promise((done) => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
-                    StoreExtension: { status },
+                    TestStore: { status },
                 } = entry.extension;
 
                 if (status.code !== 'RELEASE_COMPLETE') return;
@@ -484,7 +569,7 @@ describe('createStoreExtension', () => {
             // we need to trigger restore when `store=false` as when the store action is reverted, if we don't have the file, we can't re-upload again
 
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status, canStore } = entry?.extension?.StoreExtension || {};
+                const { status, canStore } = entry?.extension?.TestStore || {};
 
                 if (status?.code !== 'RELEASE_COMPLETE') {
                     return;
@@ -515,7 +600,7 @@ describe('createStoreExtension', () => {
         new Promise((done) => {
             let releasedFile = null;
 
-            const CustomStoreExtension = createStoreExtension('StoreExtension', {}, () => {
+            const CustomStoreExtension = createStoreExtension('TestStore', {}, () => {
                 async function storeEntry(entry, { abortController, onprogress, onabort }) {
                     releasedFile = '1234';
                     return '1234';
@@ -544,7 +629,7 @@ describe('createStoreExtension', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 // wait for complete before we update the file
 
-                const { status } = entry?.extension?.StoreExtension || {};
+                const { status } = entry?.extension?.TestStore || {};
 
                 // wait till stored
                 if (status?.code !== 'STORE_COMPLETE') {
@@ -556,7 +641,7 @@ describe('createStoreExtension', () => {
                 // now we listen for new changes and update the file data
                 {
                     const unsub = entryTree.on('updateEntry', (entry) => {
-                        const { status } = entry?.extension?.StoreExtension || {};
+                        const { status } = entry?.extension?.TestStore || {};
 
                         // not stored yet
                         if (status?.code !== 'RELEASE_COMPLETE') {
@@ -603,7 +688,7 @@ describe('createStoreExtension', () => {
 
             let releasedFile = null;
 
-            const CustomStoreExtension = createStoreExtension('StoreExtension', {}, () => {
+            const CustomStoreExtension = createStoreExtension('TestStore', {}, () => {
                 let i = 0;
                 async function storeEntry(entry, { abortController, onprogress, onabort }) {
                     i++;
@@ -635,7 +720,7 @@ describe('createStoreExtension', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 // wait for complete before we update the file
                 const {
-                    StoreExtension: { status },
+                    TestStore: { status },
                 } = entry.extension;
 
                 // wait till stored
@@ -649,7 +734,7 @@ describe('createStoreExtension', () => {
                 {
                     const unsub = entryTree.on('updateEntry', (entry) => {
                         const {
-                            StoreExtension: { status },
+                            TestStore: { status },
                         } = entry.extension;
 
                         // not stored yet
@@ -688,7 +773,7 @@ describe('createStoreExtension', () => {
         new Promise((done) => {
             let releasedFile = null;
 
-            const CustomStoreExtension = createStoreExtension('StoreExtension', {}, () => {
+            const CustomStoreExtension = createStoreExtension('TestStore', {}, () => {
                 async function storeEntry(entry, { abortController, onprogress, onabort }) {
                     releasedFile = '1234';
                     return '1234';
@@ -711,7 +796,7 @@ describe('createStoreExtension', () => {
 
             // we first store a new file
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status } = entry?.extension?.StoreExtension || {};
+                const { status } = entry?.extension?.TestStore || {};
 
                 // wait till stored
                 if (status?.code !== 'STORE_COMPLETE') {
@@ -724,7 +809,7 @@ describe('createStoreExtension', () => {
                 {
                     const unsub = entryTree.on('updateEntry', (entry) => {
                         const {
-                            StoreExtension: { status },
+                            TestStore: { status },
                         } = entry.extension;
 
                         // not stored yet
