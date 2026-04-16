@@ -10,6 +10,7 @@ import type {
 } from '../extensions/common/createExtension.js';
 import type { FilePondEntry, FilePondEntrySource } from '../types/index.js';
 import type { createEntryTree, Needle } from './entryTree.js';
+import { log } from '../common/console.js';
 
 export type ExtensionFactory = Extension | [Extension, { [key: string]: unknown }];
 
@@ -100,7 +101,7 @@ export interface ExtensionMangerInstance {
 
 // for debugging task manager
 function logTasks(tasks: Task[]) {
-    console.log(`Tasks: ${tasks.length}`);
+    log(`Tasks: ${tasks.length}`);
     for (const task of tasks) {
         const { group, fn, order, parallel, state, ..._ } = task;
         let icon = {
@@ -113,9 +114,9 @@ function logTasks(tasks: Task[]) {
             // halted
             4: '🖐️',
         }[state];
-        console.log(icon, group, fn.name, { parallel, order });
+        log(icon, group, fn.name, { parallel, order });
     }
-    console.log('');
+    log('');
 }
 
 export function createExtensionManager(

@@ -317,8 +317,6 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
             // task failed, we need to halt other tasks for this group
             setTaskStateByGroupId(group, TaskState.HALTED);
 
-            console.log('set current task state to failed');
-
             // mark this task as failed, it's not removed
             task.state = TaskState.FAILED;
         }
