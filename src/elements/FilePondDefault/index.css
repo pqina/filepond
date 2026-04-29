@@ -227,13 +227,6 @@ file-pond-entry-list {
     }
 }
 
-/* Remove outline on Mobile Safari Only */
-/* @supports (-webkit-touch-callout: none) {
-    file-pond-entry-list::part(entry-list-item):focus-visible {
-        outline: none;
-    }
-} */
-
 :host([disabled]) {
     & file-pond-entry-list {
         --entry-overlay-color: rgb(from var(--entry-background-color) r g b / 0.5);
@@ -313,6 +306,11 @@ file-pond-entry-list {
     line-height: 2;
     transform: translate(calc(var(--width, 0) * 1px), calc(var(--height, 0) * 1px))
         translateX(calc(-100% - var(--inset)));
+
+    &:dir(rtl) {
+        left: 0;
+        transform: translate(var(--inset), calc(var(--height, 0) * 1px));
+    }
 }
 
 /* Browse button */
@@ -343,4 +341,11 @@ file-pond-entry-list {
 
 :host([nodrop]) button[part='browse-button'] {
     align-self: flex-start;
+}
+
+:host([nodrop]) button[part='browse-button'],
+:host(:not([nodrop])) button[part='browse-button'] {
+    &:dir(rtl) {
+        align-self: flex-end;
+    }
 }

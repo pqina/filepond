@@ -87,7 +87,7 @@
         pointer-events: none;
         & > [layout='split'] > *:nth-child(2) {
             /* alignment of content in second child (storage state) */
-            text-align: right;
+            text-align: end;
 
             /* we need to scale the box to fit the content so when the parent entry width changes the spring that wraps this element is moved correctly */
             min-width: fit-content;

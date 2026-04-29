@@ -4,7 +4,7 @@
     isolation: isolate;
 
     /* Default styles */
-    text-align: left;
+    text-align: start;
     font-weight: 500;
 
     /* Disabled state */

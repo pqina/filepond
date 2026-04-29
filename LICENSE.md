@@ -1,4 +1,4 @@
-Copyright (c) 2019-2025 [Pqina](https://pqina.nl)
+Copyright (c) 2019-2026 [Pqina](https://pqina.nl)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

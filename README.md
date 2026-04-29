@@ -12,8 +12,6 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 TODO:
 
 -   [Finish docs](https://v5.filepond.com/)
--   Better naming of various types
--   Add basic image manipulation extensions
 
 If you're trying out v5, please share your feedback on [Discord](https://discord.gg/KTyymsrTrX)
 
