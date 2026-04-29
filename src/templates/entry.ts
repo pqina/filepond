@@ -1,7 +1,13 @@
 import type { EntryListFunctions, TemplateNode } from '../types/index.js';
 import { nodeTree, type NodeContext } from '../elements/common/nodeTree.js';
 
-import { isDataTransferEntry, isFileEntry, isNumber, isString } from '../utils/test.js';
+import {
+    isDataTransferEntry,
+    isFileEntry,
+    isNumber,
+    isString,
+    isUndefined,
+} from '../utils/test.js';
 import { bytesToNaturalFileSize } from '../utils/file.js';
 import { fade } from '../elements/common/transition.js';
 import { quadInOut } from 'svelte/easing';
@@ -271,12 +277,16 @@ export function createFileLoadInfo() {
                     isFrozen,
                 }),
                 context: ({ entry, byteUnits }: NodeContext) => {
-                    const naturalFileSize = isNumber(entry.size)
-                        ? cache(bytesToNaturalFileSize, [entry.size, { byteUnits }])
-                        : null;
+                    if (!isNumber(entry.size)) {
+                        return;
+                    }
 
-                    const [fileSize, fileSizeUnit] =
-                        naturalFileSize === null ? [] : naturalFileSize.split(' ');
+                    const naturalFileSize = cache(bytesToNaturalFileSize, [
+                        entry.size,
+                        { byteUnits },
+                    ]);
+
+                    const [fileSize, fileSizeUnit] = naturalFileSize.split(' ');
 
                     return {
                         size: fileSize,
