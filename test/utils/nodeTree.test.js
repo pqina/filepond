@@ -1,10 +1,10 @@
 import { it, describe, expect } from 'vitest';
-import { nodeTree } from '../../src/elements/common/nodeTree';
+import { withNodeTree } from '../../src/elements/common/nodeTree';
 
 describe('nodeTree', () => {
     it('should unwrap nodes', () => {
         const nodes = [{}];
-        expect(nodeTree(nodes).unwrap()).to.equal(nodes);
+        expect(withNodeTree(nodes).unwrap()).to.equal(nodes);
     });
 
     it('should append node', () => {
@@ -18,7 +18,7 @@ describe('nodeTree', () => {
             key: 'bar',
         };
 
-        const unwrapped = nodeTree(nodes).append(node).unwrap();
+        const unwrapped = withNodeTree(nodes).append(node).unwrap();
 
         expect(unwrapped[1]).to.equal(node);
     });
@@ -34,7 +34,7 @@ describe('nodeTree', () => {
             key: 'bar',
         };
 
-        const unwrapped = nodeTree(nodes).prepend(node).unwrap();
+        const unwrapped = withNodeTree(nodes).prepend(node).unwrap();
 
         expect(unwrapped[0]).to.equal(node);
     });
@@ -42,7 +42,7 @@ describe('nodeTree', () => {
     it('should unwrap nodes after append', () => {
         const nodes = [];
 
-        const unwrapped = nodeTree(nodes)
+        const unwrapped = withNodeTree(nodes)
             .append({
                 key: 'foo',
             })
@@ -62,7 +62,7 @@ describe('nodeTree', () => {
             key: 'bar',
         };
 
-        const unwrapped = nodeTree(nodes).append(nodeTree(node)).unwrap();
+        const unwrapped = withNodeTree(nodes).append(withNodeTree(node)).unwrap();
 
         expect(unwrapped[1]).to.equal(node);
     });
@@ -82,7 +82,7 @@ describe('nodeTree', () => {
             key: 'baz',
         };
 
-        const unwrapped = nodeTree(nodes).append(bar, baz).unwrap();
+        const unwrapped = withNodeTree(nodes).append(bar, baz).unwrap();
 
         expect(unwrapped[1]).to.equal(bar);
         expect(unwrapped[2]).to.equal(baz);
@@ -106,7 +106,7 @@ describe('nodeTree', () => {
             },
         ];
 
-        expect(nodeTree(nodes).find('boz').unwrap()?.key).to.equal('boz');
+        expect(withNodeTree(nodes).find('boz').unwrap()?.key).to.equal('boz');
     });
 
     it('should update node props', () => {
@@ -124,7 +124,7 @@ describe('nodeTree', () => {
             },
         ];
 
-        nodeTree(nodes).update('bar', (node) => {
+        withNodeTree(nodes).update('bar', (node) => {
             node.hello = 'world';
         });
 
@@ -146,7 +146,7 @@ describe('nodeTree', () => {
             },
         ];
 
-        nodeTree(nodes)
+        withNodeTree(nodes)
             .update('bar', (node) => {
                 node.hello = 'world';
             })
@@ -167,7 +167,7 @@ describe('nodeTree', () => {
             },
         ];
 
-        nodeTree(nodes).insert(1, {
+        withNodeTree(nodes).insert(1, {
             key: 'baz',
         });
 
@@ -177,7 +177,7 @@ describe('nodeTree', () => {
     it('should append nodes to original level', () => {
         const nodes = [];
 
-        nodeTree(nodes)
+        withNodeTree(nodes)
             .append({
                 key: 'foo',
             })
@@ -196,12 +196,12 @@ describe('nodeTree', () => {
     it('should append nodes to sub level', () => {
         const nodes = [];
 
-        nodeTree(nodes)
+        withNodeTree(nodes)
             .append({
                 key: 'foo',
             })
             .append(
-                nodeTree({
+                withNodeTree({
                     key: 'bar',
                 }).append({
                     key: 'baz',
@@ -223,7 +223,7 @@ describe('nodeTree', () => {
             },
         ];
 
-        nodeTree(nodes).remove('bar');
+        withNodeTree(nodes).remove('bar');
 
         expect(nodes.length).to.equal(1);
         expect(nodes[0].key).to.equal('foo');
@@ -258,7 +258,7 @@ describe('nodeTree', () => {
             },
         ];
 
-        nodeTree(nodes).remove('fii');
+        withNodeTree(nodes).remove('fii');
         expect(nodes.length).to.equal(3);
         expect(nodes[1].item.children.length).to.equal(2);
     });
