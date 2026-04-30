@@ -1,6 +1,6 @@
 // TODO: fix @ts-ignore
 
-import { type SpringOptions, type Template } from '../../types/index.js';
+import { type SpringOptions } from '../../types/index.js';
 import { arrayInsertAtIndex, arrayRemoveFalsy, arrayWrap } from '../../utils/array.js';
 import { isArray, isFunction } from '../../utils/test.js';
 import { hasOwnProp } from '../../utils/object.js';
@@ -94,14 +94,14 @@ export interface NodeTree {
     insert: (index: number, ...nodes: (NodeTree | TemplateNode)[]) => NodeTree;
 }
 
-export function nodeTree(tree: void | TemplateNode | TemplateNode[]): NodeTree {
+export function withNodeTree(tree: void | TemplateNode | TemplateNode[]): NodeTree {
     function find(key: string) {
         if (tree) {
             const node = withNodeByKey(tree, key, (node: TemplateNode) => node);
-            return nodeTree(node);
+            return withNodeTree(node);
         }
         // no results
-        return nodeTree(undefined);
+        return withNodeTree(undefined);
     }
 
     return {
@@ -112,7 +112,7 @@ export function nodeTree(tree: void | TemplateNode | TemplateNode[]): NodeTree {
         remove(key: string) {
             // can't remove
             if (!tree) {
-                return nodeTree(undefined);
+                return withNodeTree(undefined);
             }
 
             withNodeByKey(tree, key, (node: TemplateNode, parent: TemplateNode[]) => {
@@ -122,12 +122,12 @@ export function nodeTree(tree: void | TemplateNode | TemplateNode[]): NodeTree {
             });
 
             // return tree, not node that was removed as we can no longer do anything with it
-            return nodeTree(tree);
+            return withNodeTree(tree);
         },
         replace(key: string, ...nodes: (NodeTree | TemplateNode)[]) {
             // can't remove
             if (!tree) {
-                return nodeTree(undefined);
+                return withNodeTree(undefined);
             }
 
             const unwrappedNodes = nodes.map(unwrap);
@@ -139,15 +139,15 @@ export function nodeTree(tree: void | TemplateNode | TemplateNode[]): NodeTree {
             });
 
             // return tree, not node that was removed as we can no longer do anything with it
-            return nodeTree(tree);
+            return withNodeTree(tree);
         },
         update(key: string, updater: (currentProps: TemplateNode) => void) {
             if (!tree) {
-                return nodeTree(undefined);
+                return withNodeTree(undefined);
             }
             const hit = find(key);
             if (!hit || !unwrap(hit)) {
-                return nodeTree(undefined);
+                return withNodeTree(undefined);
             }
             updater(unwrap(hit));
             return hit;
@@ -157,13 +157,13 @@ export function nodeTree(tree: void | TemplateNode | TemplateNode[]): NodeTree {
                 let index = getAppendIndex(tree);
                 insertNode(tree, index, arrayRemoveFalsy(nodes) as (NodeTree | TemplateNode)[]);
             }
-            return nodeTree(tree);
+            return withNodeTree(tree);
         },
         prepend(...nodes: (NodeTree | TemplateNode)[]) {
-            return nodeTree(tree ? insertNode(tree, 0, nodes) : undefined);
+            return withNodeTree(tree ? insertNode(tree, 0, nodes) : undefined);
         },
         insert(index: number, ...nodes: (NodeTree | TemplateNode)[]) {
-            return nodeTree(tree ? insertNode(tree, index, nodes) : undefined);
+            return withNodeTree(tree ? insertNode(tree, index, nodes) : undefined);
         },
     };
 }

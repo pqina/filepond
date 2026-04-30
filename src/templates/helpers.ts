@@ -1,5 +1,5 @@
 import {
-    nodeTree,
+    withNodeTree,
     type NodeTree,
     type NodeContext,
     type TemplateNode,
@@ -24,8 +24,6 @@ import { Button } from '../elements/components/Button/index.js';
 import { ElementPane } from '../elements/components/ElementPane/index.js';
 import { Entry } from '../elements/FilePondEntryList/components/Entry/index.js';
 import { hasOwnProp } from '../utils/object.js';
-
-export { nodeTree }; // from '../elements/common/nodeTree.js';
 
 export function getEntryExtensionsAsArray(entry: FilePondEntry): ExtensionState[] {
     if (!entry || !entry.extension) {
@@ -80,7 +78,7 @@ export function getExtensionStatusWithCode(
 
 export function createElementStack(options: { layout?: 'row' | 'stack' | 'pile'; class?: string }) {
     const { layout = 'row', class: klass } = options || {};
-    return nodeTree({
+    return withNodeTree({
         tag: 'element-stack',
         attrs: {
             class: klass,
@@ -143,7 +141,7 @@ export function getAsButtonProps(props: { icon: string; label: string; title: st
 }
 
 function createNodeTreeWithTest(test: (context: NodeContext) => boolean): NodeTree {
-    return nodeTree({
+    return withNodeTree({
         if: {
             test,
             then: {

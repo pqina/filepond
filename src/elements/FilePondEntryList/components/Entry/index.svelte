@@ -13,6 +13,7 @@
         class: klass = undefined,
         nameId = undefined,
         dataset,
+        ...attrs
     } = $props();
 
     let root: HTMLFieldSetElement;
@@ -44,7 +45,7 @@
     const maskStyle = $derived(`0px ${maskRight}px ${maskBottom}px 0px`);
 </script>
 
-<fieldset class={entryClass} bind:this={root} style:--mask={maskStyle} {part}>
+<fieldset class={entryClass} bind:this={root} style:--mask={maskStyle} {part} {...attrs}>
     <legend class="implicit" id={nameId}>{name}</legend>
     {@render children()}
 </fieldset>

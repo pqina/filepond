@@ -1,5 +1,5 @@
 import type { EntryListFunctions, TemplateNode } from '../types/index.js';
-import { nodeTree, type NodeContext } from '../elements/common/nodeTree.js';
+import { withNodeTree, type NodeContext } from '../elements/common/nodeTree.js';
 
 import { isDataTransferEntry, isFileEntry, isNumber, isString } from '../utils/test.js';
 import { bytesToNaturalFileSize } from '../utils/file.js';
@@ -256,6 +256,7 @@ export function createFileLoadInfo() {
                 props: ({ isWaiting, isFrozen }: NodeContext) => {
                     return {
                         class: 'entry-info-main',
+                        part: 'entry-info-main',
                         isWaiting,
                         isFrozen,
                     };
@@ -267,6 +268,7 @@ export function createFileLoadInfo() {
                 component: ElementSkeleton,
                 props: ({ isWaiting, isFrozen }: NodeContext) => ({
                     class: 'entry-info-sub',
+                    part: 'entry-info-sub',
                     isWaiting,
                     isFrozen,
                 }),
@@ -573,7 +575,7 @@ export function createFileRenameInput(options?: FileRenameInputOptions): Templat
 }
 
 export function appendEntryCheckbox(template: TemplateNode[]) {
-    nodeTree(template)
+    withNodeTree(template)
         .remove('entry-store-state')
         .replace('entry-load-state', createEntryCheckbox())
         .update('entry-list-item', (node: any) => {
@@ -594,7 +596,7 @@ export function appendEntryCheckbox(template: TemplateNode[]) {
 }
 
 export function appendEntryRenameInput(template: TemplateNode[]) {
-    nodeTree(template).update('file-info-main', (node: any) => {
+    withNodeTree(template).update('file-info-main', (node: any) => {
         node.children = createFileRenameInput();
     });
 

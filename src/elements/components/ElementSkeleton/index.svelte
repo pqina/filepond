@@ -8,6 +8,9 @@
         /** Class to set on the element */
         class?: string;
 
+        /** Part to set on the element */
+        part?: string;
+
         /**
          * Let's the skeleton know that loading is done, if no content yet, we reveal empty
          * container
@@ -23,6 +26,7 @@
 
     let {
         class: klass = undefined,
+        part = undefined,
         isWaiting = true,
         isFrozen = false,
         children,
@@ -122,7 +126,7 @@
     });
 </script>
 
-<element-skeleton bind:this={root} style:--skeleton-offset={offset} class={klass}
+<element-skeleton bind:this={root} style:--skeleton-offset={offset} class={klass} {part}
     >{@render children()}{#if shouldRender && !didCompleteOutro}<skeleton-pane
             {@attach transitions({
                 opacity: {

@@ -16,7 +16,7 @@ import {
 import { RangeInput } from '../elements/components/RangeInput/index.js';
 import { supportsRequestFullscreen } from '../utils/support.js';
 import { toTime } from '../utils/date.js';
-import { type NodeContext, type TemplateNode, nodeTree } from '../elements/common/nodeTree.js';
+import { type NodeContext, type TemplateNode, withNodeTree } from '../elements/common/nodeTree.js';
 import { boolToAttributeValue } from '../utils/dom.js';
 import { MediaVideo } from '../elements/FilePondEntryList/components/MediaVideo/index.js';
 import { MediaTimeIndicator } from '../elements/FilePondEntryList/components/MediaTimeIndicator/index.js';
@@ -206,7 +206,7 @@ export function createMediaControlGroup(options?: {
     const klass =
         'media-control-group' + (justifyContent ? ` justify-content-${justifyContent}` : '');
 
-    return nodeTree({
+    return withNodeTree({
         key,
         component: SpringElement,
         props: {
@@ -224,7 +224,7 @@ export function createMediaControlGroup(options?: {
 
 export function createMediaControl(options?: { key?: string }) {
     const { key } = options || {};
-    return nodeTree({
+    return withNodeTree({
         key,
         component: SpringElement,
         props: {
@@ -247,7 +247,7 @@ export function createMediaControls(options?: {
     const { key = 'media-controls', justifyContent } = options || {};
     const klass =
         'entry-media-controls' + (justifyContent ? ` justify-content-${justifyContent}` : '');
-    return nodeTree({
+    return withNodeTree({
         if: {
             // don't render media controls if in error state
             test: ({ entry }: NodeContext) => {
@@ -391,7 +391,7 @@ export function appendEntryImageView(
     const { enableEdit = true, enableReset = true, ...imageOptions } = options ?? {};
     const canTransform = enableEdit || enableReset;
 
-    nodeTree(template)
+    withNodeTree(template)
         .find('entry')
         .append(
             whenEntryIs((entry: any) => {
@@ -421,7 +421,7 @@ export function appendEntryVideoView(
     const { enableEdit = true, enableReset = true, ...videoOptions } = options ?? {};
 
     const canTransform = enableEdit || enableReset;
-    nodeTree(template)
+    withNodeTree(template)
         .update('entry', (node: any) => {
             node.routes = {
                 'toggle-playback:click': 'entry-video.togglePlayback',
