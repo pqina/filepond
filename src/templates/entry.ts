@@ -278,7 +278,7 @@ export function createFileLoadInfo() {
                 }),
                 context: ({ entry, byteUnits }: NodeContext) => {
                     if (!isNumber(entry.size)) {
-                        return;
+                        return {};
                     }
 
                     const naturalFileSize = cache(bytesToNaturalFileSize, [
