@@ -754,7 +754,7 @@ export function createStoreExtension(
 
             const unsubUpdateEntryData = on('updateEntryData', handleUpdateEntryData);
             const unsubUpdate = on('updateEntry', handleUpdateEntry);
-            const unsubRemove = on('removeEntries', handleRemoveEntry);
+            const unsubRemove = on('removeEntry', handleRemoveEntry);
             const unsubUpdateEntries = on('updateEntries', debounce(handleUpdateEntries));
 
             return {
