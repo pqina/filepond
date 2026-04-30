@@ -25,6 +25,8 @@ import { ElementPane } from '../elements/components/ElementPane/index.js';
 import { Entry } from '../elements/FilePondEntryList/components/Entry/index.js';
 import { hasOwnProp } from '../utils/object.js';
 
+export { nodeTree }; // from '../elements/common/nodeTree.js';
+
 export function getEntryExtensionsAsArray(entry: FilePondEntry): ExtensionState[] {
     if (!entry || !entry.extension) {
         return [];

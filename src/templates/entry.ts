@@ -1,13 +1,7 @@
 import type { EntryListFunctions, TemplateNode } from '../types/index.js';
 import { nodeTree, type NodeContext } from '../elements/common/nodeTree.js';
 
-import {
-    isDataTransferEntry,
-    isFileEntry,
-    isNumber,
-    isString,
-    isUndefined,
-} from '../utils/test.js';
+import { isDataTransferEntry, isFileEntry, isNumber, isString } from '../utils/test.js';
 import { bytesToNaturalFileSize } from '../utils/file.js';
 import { fade } from '../elements/common/transition.js';
 import { quadInOut } from 'svelte/easing';
