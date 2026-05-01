@@ -26,7 +26,8 @@ export const ObjectURLView = createExtension(
             });
         }
 
-        function handleRemoveEntry(entry: FilePondFileEntry) {
+        function handleRemoveEntry(detail: { entry: FilePondFileEntry; index: number }) {
+            const { entry } = detail;
             const { file } = entry;
 
             // Need a file

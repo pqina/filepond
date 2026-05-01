@@ -25,7 +25,6 @@ describe('createStoreExtension', () => {
                     const { shouldThrow } = props;
 
                     if (shouldThrow) {
-                        console.log('in should throw');
                         throw new Error('OH NO');
                     }
 
@@ -843,5 +842,52 @@ describe('createStoreExtension', () => {
                     },
                 },
             ];
+        }));
+
+    it('should release a stored file when file item is removed', () =>
+        new Promise((done) => {
+            let releasedFile = null;
+
+            const CustomStoreExtension = createStoreExtension('TestStore', {}, () => {
+                async function storeEntry(entry, { abortController, onprogress, onabort }) {
+                    releasedFile = '1234';
+                    return '1234';
+                }
+
+                async function releaseEntry(storageId) {
+                    // so we can remember which file was released
+                    releasedFile = storageId;
+                    return true;
+                }
+
+                async function restoreEntry() {
+                    return new File(['restored'], 'foo.jpeg', { type: 'image/jpeg' });
+                }
+
+                return { restoreEntry, storeEntry, releaseEntry };
+            });
+
+            extensionManager.extensions = [CustomStoreExtension];
+
+            // wait for empty entries list
+            const unsub = entryTree.on('updateEntries', (entries) => {
+                if (entries.length > 0) {
+                    return;
+                }
+
+                done();
+            });
+
+            entryTree.entries = [
+                {
+                    name: 'foo.jpeg',
+                    size: 1234,
+                    state: {
+                        value: '1234',
+                    },
+                },
+            ];
+
+            entryTree.removeEntries();
         }));
 });
