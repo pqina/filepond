@@ -28,14 +28,14 @@ export interface FileNameTransformOptions extends TransformExtensionOptions {
     ) => Promise<string>;
 }
 
-export const FileNameTransform = createTransformExtension(
-    'FileNameTransform',
-    {
+export const FileNameTransform = createTransformExtension({
+    name: 'FileNameTransform',
+    props: {
         actionTransform: 'renameFile',
         sanitizeName: sanitizeFilename,
         renameEntry: (entry, options) => {},
     } as FileNameTransformOptions,
-    ({ props, extensionName }) => {
+    factory: ({ props, extensionName }) => {
         async function transformEntry(entry: FilePondFileEntry & { file: File }) {
             const { renameEntry, sanitizeName, actionTransform } = props;
 
@@ -89,8 +89,8 @@ export const FileNameTransform = createTransformExtension(
         return {
             transformEntry,
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

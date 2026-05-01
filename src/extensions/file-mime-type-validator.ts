@@ -15,9 +15,9 @@ export interface FileMimeTypeValidatorOptions extends ValidatorExtensionOptions 
     format?: (mimeTypes: string[]) => string;
 }
 
-export const FileMimeTypeValidator = createValidatorExtension(
-    'FileMimeTypeValidator',
-    {
+export const FileMimeTypeValidator = createValidatorExtension({
+    name: 'FileMimeTypeValidator',
+    props: {
         accept: [],
         format: (mimeTypes: string[]) =>
             mimeTypes
@@ -29,7 +29,7 @@ export const FileMimeTypeValidator = createValidatorExtension(
                 })
                 .join(', '),
     } as FileMimeTypeValidatorOptions,
-    ({ props, didSetProps }) => {
+    factory: ({ props, didSetProps }) => {
         /** Filter out non mimetype values */
         let filteredMimeTypes: string[] = [];
 
@@ -106,8 +106,8 @@ export const FileMimeTypeValidator = createValidatorExtension(
             validateEntry,
             canValidateEntry,
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

@@ -10,12 +10,12 @@ export interface DataURLStoreOptions extends StoreExtensionOptions {
     workersURL?: URL;
 }
 
-export const DataURLStore = createStoreExtension(
-    'DataURLStore',
-    {
+export const DataURLStore = createStoreExtension({
+    name: 'DataURLStore',
+    props: {
         workersURL: undefined,
     } as DataURLStoreOptions,
-    ({ props }) => {
+    factory: ({ props }) => {
         async function storeEntry(
             entry: FilePondEntry,
             { abortController, onprogress, onabort }: StoreTaskFnOptions
@@ -42,8 +42,8 @@ export const DataURLStore = createStoreExtension(
         return {
             storeEntry,
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

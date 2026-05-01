@@ -15,12 +15,12 @@ describe('createStoreExtension', () => {
     beforeEach(() => {
         entryTree = createDefaultEntryTree();
 
-        const TestStore = createStoreExtension(
-            'TestStore',
-            {
+        const TestStore = createStoreExtension({
+            name: 'TestStore',
+            props: {
                 shouldThrow: false,
             },
-            ({ props, didSetProps }) => {
+            factory: ({ props, didSetProps }) => {
                 async function storeEntry(entry, { abortController, onprogress, onabort }) {
                     const { shouldThrow } = props;
 
@@ -47,8 +47,8 @@ describe('createStoreExtension', () => {
                     releaseEntry,
                     restoreEntry,
                 };
-            }
-        );
+            },
+        });
 
         extensionManager = createExtensionManager(entryTree);
         extensionManager.extensions = [TestStore];
@@ -196,27 +196,31 @@ describe('createStoreExtension', () => {
         new Promise((done) => {
             let shouldStoreCalled = false;
 
-            const TestStore = createStoreExtension('TestStore', {}, () => {
-                async function storeEntry(entry, { abortController, onprogress, onabort }) {
-                    // returns the storage id
-                    return '1234';
-                }
+            const TestStore = createStoreExtension({
+                name: 'TestStore',
+                props: {},
+                factory: () => {
+                    async function storeEntry(entry, { abortController, onprogress, onabort }) {
+                        // returns the storage id
+                        return '1234';
+                    }
 
-                async function releaseEntry(storageId) {
-                    // returns true if release was a success
-                    return true;
-                }
+                    async function releaseEntry(storageId) {
+                        // returns true if release was a success
+                        return true;
+                    }
 
-                async function restoreEntry(storageId) {
-                    // returns the stored file object
-                    return new File(['Hello World'], 'file.txt', { type: 'plain/text' });
-                }
+                    async function restoreEntry(storageId) {
+                        // returns the stored file object
+                        return new File(['Hello World'], 'file.txt', { type: 'plain/text' });
+                    }
 
-                return {
-                    storeEntry,
-                    releaseEntry,
-                    restoreEntry,
-                };
+                    return {
+                        storeEntry,
+                        releaseEntry,
+                        restoreEntry,
+                    };
+                },
             });
 
             extensionManager.extensions = [
@@ -257,28 +261,32 @@ describe('createStoreExtension', () => {
 
     it('should abort store action when "store" set to "true" and "abort" set to "true"', () =>
         new Promise((done) => {
-            const TestStore = createStoreExtension('TestStore', {}, () => {
-                function storeEntry(_, { abortController, onabort }) {
-                    return new Promise((resolve) => {
-                        let timer;
+            const TestStore = createStoreExtension({
+                name: 'TestStore',
+                props: {},
+                factory: () => {
+                    function storeEntry(_, { abortController, onabort }) {
+                        return new Promise((resolve) => {
+                            let timer;
 
-                        abortController.signal.onabort = () => {
-                            clearTimeout(timer);
+                            abortController.signal.onabort = () => {
+                                clearTimeout(timer);
 
-                            // we need to call onabort when aborted
-                            onabort();
-                        };
+                                // we need to call onabort when aborted
+                                onabort();
+                            };
 
-                        // we just wait
-                        timer = setTimeout(() => {
-                            resolve('1234');
-                        }, 100000);
-                    });
-                }
+                            // we just wait
+                            timer = setTimeout(() => {
+                                resolve('1234');
+                            }, 100000);
+                        });
+                    }
 
-                return {
-                    storeEntry,
-                };
+                    return {
+                        storeEntry,
+                    };
+                },
             });
 
             extensionManager.extensions = [TestStore];
@@ -599,27 +607,31 @@ describe('createStoreExtension', () => {
         new Promise((done) => {
             let releasedFile = null;
 
-            const CustomStoreExtension = createStoreExtension('TestStore', {}, () => {
-                async function storeEntry(entry, { abortController, onprogress, onabort }) {
-                    releasedFile = '1234';
-                    return '1234';
-                }
+            const CustomStoreExtension = createStoreExtension({
+                name: 'TestStore',
+                props: {},
+                factory: () => {
+                    async function storeEntry(entry, { abortController, onprogress, onabort }) {
+                        releasedFile = '1234';
+                        return '1234';
+                    }
 
-                async function releaseEntry(storageId) {
-                    // so we can remember which file was released
-                    releasedFile = storageId;
-                    return true;
-                }
+                    async function releaseEntry(storageId) {
+                        // so we can remember which file was released
+                        releasedFile = storageId;
+                        return true;
+                    }
 
-                async function restoreEntry() {
-                    return new File(['restored'], 'foo.jpeg', { type: 'image/jpeg' });
-                }
+                    async function restoreEntry() {
+                        return new File(['restored'], 'foo.jpeg', { type: 'image/jpeg' });
+                    }
 
-                return {
-                    storeEntry,
-                    releaseEntry,
-                    restoreEntry,
-                };
+                    return {
+                        storeEntry,
+                        releaseEntry,
+                        restoreEntry,
+                    };
+                },
             });
 
             extensionManager.extensions = [CustomStoreExtension];
@@ -687,30 +699,34 @@ describe('createStoreExtension', () => {
 
             let releasedFile = null;
 
-            const CustomStoreExtension = createStoreExtension('TestStore', {}, () => {
-                let i = 0;
-                async function storeEntry(entry, { abortController, onprogress, onabort }) {
-                    i++;
+            const CustomStoreExtension = createStoreExtension({
+                name: 'TestStore',
+                props: {},
+                factory: () => {
+                    let i = 0;
+                    async function storeEntry(entry, { abortController, onprogress, onabort }) {
+                        i++;
 
-                    // id for first file
-                    if (i == 1) {
-                        return '1234';
+                        // id for first file
+                        if (i == 1) {
+                            return '1234';
+                        }
+
+                        // id for second file
+                        return '5678';
                     }
 
-                    // id for second file
-                    return '5678';
-                }
+                    async function releaseEntry(storageId) {
+                        // so we can remember which file was released
+                        releasedFile = storageId;
+                        return true;
+                    }
 
-                async function releaseEntry(storageId) {
-                    // so we can remember which file was released
-                    releasedFile = storageId;
-                    return true;
-                }
-
-                return {
-                    storeEntry,
-                    releaseEntry,
-                };
+                    return {
+                        storeEntry,
+                        releaseEntry,
+                    };
+                },
             });
 
             extensionManager.extensions = [CustomStoreExtension];
@@ -772,23 +788,27 @@ describe('createStoreExtension', () => {
         new Promise((done) => {
             let releasedFile = null;
 
-            const CustomStoreExtension = createStoreExtension('TestStore', {}, () => {
-                async function storeEntry(entry, { abortController, onprogress, onabort }) {
-                    releasedFile = '1234';
-                    return '1234';
-                }
+            const CustomStoreExtension = createStoreExtension({
+                name: 'TestStore',
+                props: {},
+                factory: () => {
+                    async function storeEntry(entry, { abortController, onprogress, onabort }) {
+                        releasedFile = '1234';
+                        return '1234';
+                    }
 
-                async function releaseEntry(storageId) {
-                    // so we can remember which file was released
-                    releasedFile = storageId;
-                    return true;
-                }
+                    async function releaseEntry(storageId) {
+                        // so we can remember which file was released
+                        releasedFile = storageId;
+                        return true;
+                    }
 
-                async function restoreEntry() {
-                    return new File(['restored'], 'foo.jpeg', { type: 'image/jpeg' });
-                }
+                    async function restoreEntry() {
+                        return new File(['restored'], 'foo.jpeg', { type: 'image/jpeg' });
+                    }
 
-                return { restoreEntry, storeEntry, releaseEntry };
+                    return { restoreEntry, storeEntry, releaseEntry };
+                },
             });
 
             extensionManager.extensions = [CustomStoreExtension];
@@ -848,23 +868,27 @@ describe('createStoreExtension', () => {
         new Promise((done) => {
             let releasedFile = null;
 
-            const CustomStoreExtension = createStoreExtension('TestStore', {}, () => {
-                async function storeEntry(entry, { abortController, onprogress, onabort }) {
-                    releasedFile = '1234';
-                    return '1234';
-                }
+            const CustomStoreExtension = createStoreExtension({
+                name: 'TestStore',
+                props: {},
+                factory: () => {
+                    async function storeEntry(entry, { abortController, onprogress, onabort }) {
+                        releasedFile = '1234';
+                        return '1234';
+                    }
 
-                async function releaseEntry(storageId) {
-                    // so we can remember which file was released
-                    releasedFile = storageId;
-                    return true;
-                }
+                    async function releaseEntry(storageId) {
+                        // so we can remember which file was released
+                        releasedFile = storageId;
+                        return true;
+                    }
 
-                async function restoreEntry() {
-                    return new File(['restored'], 'foo.jpeg', { type: 'image/jpeg' });
-                }
+                    async function restoreEntry() {
+                        return new File(['restored'], 'foo.jpeg', { type: 'image/jpeg' });
+                    }
 
-                return { restoreEntry, storeEntry, releaseEntry };
+                    return { restoreEntry, storeEntry, releaseEntry };
+                },
             });
 
             extensionManager.extensions = [CustomStoreExtension];

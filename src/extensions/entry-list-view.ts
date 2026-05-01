@@ -10,16 +10,17 @@ const props = COMPONENT_PROPS.reduce((res: { [key: string]: any }, key) => {
     return res;
 }, {});
 
-export const EntryListView = createExtension(
-    'EntryListView',
-    {
+export const EntryListView = createExtension({
+    name: 'EntryListView',
+    type: 'view',
+    props: {
         // props available on this element
         ...props,
 
         // element reference
         element: undefined,
     },
-    (state, pond) => {
+    factory: (state, pond) => {
         const { didSetProps } = state;
 
         const {
@@ -116,8 +117,8 @@ export const EntryListView = createExtension(
                 }
             },
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

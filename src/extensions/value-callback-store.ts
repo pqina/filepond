@@ -23,9 +23,10 @@ export interface ValueCallbackStoreOptions {
     onChange: (currentValues: unknown[]) => void;
 }
 
-export const ValueCallbackStore = createExtension(
-    'ValueCallbackStore',
-    {
+export const ValueCallbackStore = createExtension({
+    name: 'ValueCallbackStore',
+    type: 'store',
+    props: {
         // if the value is required or not
         required: false,
 
@@ -38,7 +39,7 @@ export const ValueCallbackStore = createExtension(
         // called when formdata object changed
         onChange: noop,
     } as ValueCallbackStoreOptions,
-    ({ props, didSetProps }, { on, getEntries, setExtensionStatus }) => {
+    factory: ({ props, didSetProps }, { on, getEntries, setExtensionStatus }) => {
         // holds last values so we can determine if values changed
         let previousValues: any[] = [];
 
@@ -106,8 +107,8 @@ export const ValueCallbackStore = createExtension(
                 unsubUpdateEntry();
             },
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

@@ -22,14 +22,14 @@ export interface FileSizeValidatorOptions extends ValidatorExtensionOptions {
     byteUnits?: 'mega' | 'mebi';
 }
 
-export const FileSizeValidator = createValidatorExtension(
-    'FileSizeValidator',
-    {
+export const FileSizeValidator = createValidatorExtension({
+    name: 'FileSizeValidator',
+    props: {
         minSize: 0,
         maxSize: Infinity,
         byteUnits: undefined,
     } as FileSizeValidatorOptions,
-    ({ didSetProps }) => {
+    factory: ({ didSetProps }) => {
         const range = {
             min: 0,
             max: Infinity,
@@ -103,8 +103,8 @@ export const FileSizeValidator = createValidatorExtension(
             validateEntry,
             canValidateEntry,
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

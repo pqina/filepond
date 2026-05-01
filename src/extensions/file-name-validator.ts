@@ -13,10 +13,10 @@ export interface FileNameValidatorOptions extends ValidatorExtensionOptions {
     test: (name: string) => boolean;
 }
 
-export const FileNameValidator = createValidatorExtension(
-    'FileNameValidator',
-    {} as FileNameValidatorOptions,
-    ({ props }) => {
+export const FileNameValidator = createValidatorExtension({
+    name: 'FileNameValidator',
+    props: {} as FileNameValidatorOptions,
+    factory: ({ props }) => {
         const { test } = props;
         if (!test) {
             warn(`FileNameValidator: 'test' is a required property`);
@@ -70,8 +70,8 @@ export const FileNameValidator = createValidatorExtension(
             validateEntry,
             canValidateEntry,
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

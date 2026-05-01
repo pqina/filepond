@@ -1,5 +1,6 @@
 import type {
     Extension,
+    ExtensionType,
     ExtensionState,
     ExtensionStatus,
     ExtensionInstance,
@@ -36,6 +37,7 @@ export type {
     FilePondElement,
     FilePondInputElement,
     Extension,
+    ExtensionType,
     ExtensionInstance,
     ExtensionState,
     ExtensionStatus,

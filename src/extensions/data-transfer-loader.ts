@@ -38,14 +38,15 @@ export interface DataTransferLoaderOptions {
     mode: 'flatten';
 }
 
-export const DataTransferLoader = createExtension(
-    'DataTransferLoader',
-    {
+export const DataTransferLoader = createExtension({
+    name: 'DataTransferLoader',
+    type: 'loader',
+    props: {
         actionLoad: 'load',
         actionAbort: 'abort',
         mode: 'flatten',
     } as DataTransferLoaderOptions,
-    (state, pond) => {
+    factory: (state, pond) => {
         const { props, didSetProps } = state;
 
         const {
@@ -203,8 +204,8 @@ export const DataTransferLoader = createExtension(
                 unsubUpdateEntry();
             },
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

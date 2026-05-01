@@ -33,6 +33,7 @@ export interface ExtensionOptions {
     props: any;
     didSetProps: (cb: (props: any) => void) => void;
     extensionName: string;
+    extensionType: ExtensionType;
 }
 
 export interface ExtensionAPI extends ExtensionManagerAPI {
@@ -65,28 +66,45 @@ export interface ExtensionInstance {
     destroy: () => void;
 }
 
-export type Extension = (pond: ExtensionManagerAPI) => ExtensionInstance;
+export type ExtensionType =
+    | 'source'
+    | 'loader'
+    | 'validator'
+    | 'transform'
+    | 'resource'
+    | 'view'
+    | 'store';
 
-export function createExtension(
-    extensionName: string,
-    props: any,
-    factory: ExtensionFactoryFunction
-): Extension {
+export type Extension = ((pond: ExtensionManagerAPI) => ExtensionInstance) & {
+    readonly name: string;
+    readonly type: ExtensionType;
+};
+
+export interface CreateExtensionOptions {
+    name: string;
+    type: ExtensionType;
+    props: any;
+    factory: ExtensionFactoryFunction;
+}
+
+export function createExtension(options: CreateExtensionOptions): Extension {
+    const { name, type, props, factory } = options || ({} as CreateExtensionOptions);
+
     const fn = (pond: ExtensionManagerAPI): ExtensionInstance => {
-        if (!isString(extensionName) || !extensionName) {
+        if (!isString(name) || !name) {
             warn('Extension name missing or invalid');
         }
 
         /** Returns entry state for this extension */
         function getEntryExtensionState(entry: FilePondEntry) {
-            return entry.extension?.[extensionName] ?? {};
+            return entry.extension?.[name] ?? {};
         }
 
         /** Updates item state */
         function setEntryExtensionState(entry: FilePondEntry, state: ExtensionState) {
             pond.updateEntry(entry, {
                 extension: {
-                    [extensionName]: state,
+                    [name]: state,
                 },
             });
         }
@@ -139,7 +157,10 @@ export function createExtension(
                 didSetProps,
 
                 // return name of this extension
-                extensionName,
+                extensionName: name,
+
+                // return type of this extension
+                extensionType: type,
             },
             {
                 // merge extension manager with extension api
@@ -178,7 +199,7 @@ export function createExtension(
             setProps,
             getProps,
             get name() {
-                return extensionName;
+                return name;
             },
             destroy() {
                 instance.destroy();
@@ -186,7 +207,10 @@ export function createExtension(
         });
     };
 
-    Object.defineProperty(fn, 'name', { value: extensionName, writable: false });
+    Object.defineProperties(fn, {
+        name: { value: name, writable: false },
+        type: { value: type, writable: false },
+    });
 
-    return fn;
+    return fn as Extension;
 }

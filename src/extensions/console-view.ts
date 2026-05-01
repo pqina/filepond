@@ -19,13 +19,14 @@ export interface ConsoleViewOptions {
 // this counts public pond instances
 let pondCounter = 0;
 
-export const ConsoleView = createExtension(
-    'ConsoleView',
-    {
+export const ConsoleView = createExtension({
+    name: 'ConsoleView',
+    type: 'view',
+    props: {
         clearBeforeLog: false,
         debounce: true,
     } as ConsoleViewOptions,
-    ({ props, extensionName }, pond) => {
+    factory: ({ props, extensionName }, pond) => {
         // shortcuts to filepond internal methods
         const { on, insertEntries, updateEntry, removeEntries } = pond;
 
@@ -272,8 +273,8 @@ export const ConsoleView = createExtension(
                 unsubUpdate();
             },
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

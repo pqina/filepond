@@ -43,9 +43,9 @@ export interface ImageBitmapTransformOptions extends TransformExtensionOptions {
     actionTransform?: string;
 }
 
-export const ImageBitmapTransform = createTransformExtension(
-    'ImageBitmapTransform',
-    {
+export const ImageBitmapTransform = createTransformExtension({
+    name: 'ImageBitmapTransform',
+    props: {
         actionTransform: 'transformImage',
         width: undefined,
         height: undefined,
@@ -58,7 +58,7 @@ export const ImageBitmapTransform = createTransformExtension(
         workersURL: undefined,
         shouldTransform: () => true,
     } as ImageBitmapTransformOptions,
-    ({ props, extensionName }) => {
+    factory: ({ props, extensionName }) => {
         /** Tests if we can transform this entry */
         function canTransformEntry(entry: FilePondEntry): boolean | Promise<boolean> {
             return isFileEntry(entry) && isImageFile(entry.file) && !/svg/.test(entry.file.type);
@@ -201,8 +201,8 @@ export const ImageBitmapTransform = createTransformExtension(
             canTransformEntry,
             transformEntry,
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

@@ -4,6 +4,23 @@ import { createExtension } from '../../src/extensions/common/createExtension.js'
 
 describe('extensionManager', function () {
     let extensionManager;
+
+    const createTestExtension = (
+        name,
+        props = {},
+        factory = function () {
+            return {
+                destroy() {},
+            };
+        }
+    ) =>
+        createExtension({
+            name,
+            type: 'resource',
+            props,
+            factory,
+        });
+
     beforeEach(() => {
         extensionManager = createExtensionManager({
             on: () => {
@@ -14,23 +31,9 @@ describe('extensionManager', function () {
     });
 
     it('should set extensions', function () {
-        const Foo = createExtension('Foo', {}, function () {
-            return {
-                destroy() {},
-            };
-        });
-
-        const Bar = createExtension('Bar', {}, function () {
-            return {
-                destroy() {},
-            };
-        });
-
-        const Baz = createExtension('Baz', {}, function () {
-            return {
-                destroy() {},
-            };
-        });
+        const Foo = createTestExtension('Foo');
+        const Bar = createTestExtension('Bar');
+        const Baz = createTestExtension('Baz');
 
         extensionManager.extensions = [Foo, Bar, Baz];
         expect(extensionManager.extensions.length).to.equal(3);
@@ -38,13 +41,9 @@ describe('extensionManager', function () {
 
     it('should remove extensions', () =>
         new Promise((done) => {
-            const Foo = createExtension('Foo', {}, function () {
-                return {
-                    destroy() {},
-                };
-            });
+            const Foo = createTestExtension('Foo');
 
-            const Bar = createExtension('Bar', {}, function () {
+            const Bar = createTestExtension('Bar', {}, function () {
                 return {
                     destroy() {
                         done();
@@ -52,11 +51,7 @@ describe('extensionManager', function () {
                 };
             });
 
-            const Baz = createExtension('Baz', {}, function () {
-                return {
-                    destroy() {},
-                };
-            });
+            const Baz = createTestExtension('Baz');
 
             extensionManager.extensions = [Foo, Bar, Baz];
 
@@ -65,30 +60,26 @@ describe('extensionManager', function () {
 
     it('should correctly update extension props', () =>
         new Promise((done) => {
-            const Foo = createExtension('Foo', {}, function () {
-                return {
-                    destroy() {},
-                };
-            });
+            const Foo = createTestExtension('Foo');
 
-            const Bar = createExtension('Bar', { bar: false }, function ({ props, didSetProps }) {
-                didSetProps(() => {
-                    if (props.bar === true) {
-                        expect(props.bar).to.be.true;
-                        done();
-                    }
-                });
+            const Bar = createTestExtension(
+                'Bar',
+                { bar: false },
+                function ({ props, didSetProps }) {
+                    didSetProps(() => {
+                        if (props.bar === true) {
+                            expect(props.bar).to.be.true;
+                            done();
+                        }
+                    });
 
-                return {
-                    destroy() {},
-                };
-            });
+                    return {
+                        destroy() {},
+                    };
+                }
+            );
 
-            const Baz = createExtension('Baz', {}, function () {
-                return {
-                    destroy() {},
-                };
-            });
+            const Baz = createTestExtension('Baz');
 
             extensionManager.extensions = [Foo, Bar, Baz];
 
@@ -99,30 +90,26 @@ describe('extensionManager', function () {
 
     it('should cache extension props', () =>
         new Promise((done) => {
-            const Foo = createExtension('Foo', {}, function () {
-                return {
-                    destroy() {},
-                };
-            });
+            const Foo = createTestExtension('Foo');
 
-            const Bar = createExtension('Bar', { bar: false }, function ({ props, didSetProps }) {
-                didSetProps(() => {
-                    if (props.bar === true) {
-                        expect(props.bar).to.be.true;
-                        done();
-                    }
-                });
+            const Bar = createTestExtension(
+                'Bar',
+                { bar: false },
+                function ({ props, didSetProps }) {
+                    didSetProps(() => {
+                        if (props.bar === true) {
+                            expect(props.bar).to.be.true;
+                            done();
+                        }
+                    });
 
-                return {
-                    destroy() {},
-                };
-            });
+                    return {
+                        destroy() {},
+                    };
+                }
+            );
 
-            const Baz = createExtension('Baz', {}, function () {
-                return {
-                    destroy() {},
-                };
-            });
+            const Baz = createTestExtension('Baz');
 
             extensionManager.setExtensionProperties('Bar', {
                 bar: true,
@@ -133,40 +120,31 @@ describe('extensionManager', function () {
 
     it('should set props with array', () =>
         new Promise((done) => {
-            const Foo = createExtension('Foo', {}, function () {
-                return {
-                    destroy() {},
-                };
-            });
+            const Foo = createTestExtension('Foo');
 
-            const Bar = createExtension('Bar', { bar: false }, function ({ props, didSetProps }) {
-                didSetProps(() => {
-                    if (props.bar === true) {
-                        expect(props.bar).to.be.true;
-                        done();
-                    }
-                });
+            const Bar = createTestExtension(
+                'Bar',
+                { bar: false },
+                function ({ props, didSetProps }) {
+                    didSetProps(() => {
+                        if (props.bar === true) {
+                            expect(props.bar).to.be.true;
+                            done();
+                        }
+                    });
 
-                return {
-                    destroy() {},
-                };
-            });
+                    return {
+                        destroy() {},
+                    };
+                }
+            );
 
             extensionManager.extensions = [Foo, [Bar, { bar: true }]];
         }));
 
     it('should handle undefined props when props set with array', function () {
-        const Foo = createExtension('Foo', {}, function () {
-            return {
-                destroy() {},
-            };
-        });
-
-        const Bar = createExtension('Bar', {}, function () {
-            return {
-                destroy() {},
-            };
-        });
+        const Foo = createTestExtension('Foo');
+        const Bar = createTestExtension('Bar');
 
         let error = null;
         try {

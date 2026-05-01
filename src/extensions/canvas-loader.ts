@@ -36,9 +36,10 @@ export interface CanvasLoaderOptions {
     mimeTypeMap?: { [key: string]: string };
 }
 
-export const CanvasLoader = createExtension(
-    'CanvasLoader',
-    {
+export const CanvasLoader = createExtension({
+    name: 'CanvasLoader',
+    type: 'loader',
+    props: {
         parallel: 1,
         type: undefined,
         quality: undefined,
@@ -47,7 +48,7 @@ export const CanvasLoader = createExtension(
         getExtension,
         getFilename,
     } as CanvasLoaderOptions,
-    ({ props }, pond) => {
+    factory: ({ props }, pond) => {
         // shortcuts to filepond internal methods
         const { on, updateEntry, pushTask, setEntryExtensionStatus, getEntryExtensionStatus } =
             pond;
@@ -117,8 +118,8 @@ export const CanvasLoader = createExtension(
                 unsubUpdateEntry();
             },
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

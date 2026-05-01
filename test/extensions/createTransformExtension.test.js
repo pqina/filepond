@@ -9,17 +9,21 @@ describe('createTransformExtension', () => {
     let extensionManager;
 
     beforeEach(() => {
-        const FileDataTransform = createTransformExtension('FileDataTransform', {}, () => {
-            return {
-                async transformEntry() {
-                    // just returns a new file
-                    return {
-                        file: new File(['FOO BAR BAZ'], 'file-transformed.txt', {
-                            type: 'text/plain',
-                        }),
-                    };
-                },
-            };
+        const FileDataTransform = createTransformExtension({
+            name: 'FileDataTransform',
+            props: {},
+            factory: () => {
+                return {
+                    async transformEntry() {
+                        // just returns a new file
+                        return {
+                            file: new File(['FOO BAR BAZ'], 'file-transformed.txt', {
+                                type: 'text/plain',
+                            }),
+                        };
+                    },
+                };
+            },
         });
 
         entryTree = createDefaultEntryTree();
@@ -31,14 +35,18 @@ describe('createTransformExtension', () => {
         new Promise((done) => {
             let didCallTransformEntry = false;
 
-            const Foo = createTransformExtension('Foo', {}, function () {
-                return {
-                    async transformEntry(entry) {
-                        didCallTransformEntry = true;
+            const Foo = createTransformExtension({
+                name: 'Foo',
+                props: {},
+                factory: function () {
+                    return {
+                        async transformEntry(entry) {
+                            didCallTransformEntry = true;
 
-                        return new File(['hello world'], 'foo.txt', { type: 'text/plain' });
-                    },
-                };
+                            return new File(['hello world'], 'foo.txt', { type: 'text/plain' });
+                        },
+                    };
+                },
             });
 
             extensionManager.extensions = [Foo];
@@ -72,14 +80,18 @@ describe('createTransformExtension', () => {
         new Promise((done) => {
             let didCallTransformEntry = false;
 
-            const Foo = createTransformExtension('Foo', {}, function () {
-                return {
-                    async transformEntry(entry) {
-                        didCallTransformEntry = true;
+            const Foo = createTransformExtension({
+                name: 'Foo',
+                props: {},
+                factory: function () {
+                    return {
+                        async transformEntry(entry) {
+                            didCallTransformEntry = true;
 
-                        // did not return a transformed file
-                    },
-                };
+                            // did not return a transformed file
+                        },
+                    };
+                },
             });
 
             extensionManager.extensions = [Foo];
@@ -186,12 +198,12 @@ describe('createTransformExtension', () => {
         new Promise((done) => {
             let transformOrder = [];
 
-            const Foo = createTransformExtension(
-                'Foo',
-                {
+            const Foo = createTransformExtension({
+                name: 'Foo',
+                props: {
                     actionTransform: 'foo',
                 },
-                function () {
+                factory: function () {
                     return {
                         transformEntry(entry) {
                             transformOrder.push('foo');
@@ -199,15 +211,15 @@ describe('createTransformExtension', () => {
                             return new File(['f'], 'file-foo.txt', { type: 'text/plain' });
                         },
                     };
-                }
-            );
+                },
+            });
 
-            const Bar = createTransformExtension(
-                'Bar',
-                {
+            const Bar = createTransformExtension({
+                name: 'Bar',
+                props: {
                     actionTransform: 'bar',
                 },
-                function () {
+                factory: function () {
                     return {
                         transformEntry(entry) {
                             transformOrder.push('bar');
@@ -217,8 +229,8 @@ describe('createTransformExtension', () => {
                             });
                         },
                     };
-                }
-            );
+                },
+            });
 
             extensionManager.extensions = [Foo, Bar];
 
@@ -251,45 +263,58 @@ describe('createTransformExtension', () => {
                 baz: 0,
             };
 
-            const FooTransform = createTransformExtension('FooTransform', {}, () => {
-                return {
-                    async transformEntry(entry) {
-                        transformState.foo++;
-                        const file = new File(['foo'], 'foo-' + entry.file.name, {
-                            type: 'text/plain',
-                        });
-                        return {
-                            file,
-                        };
-                    },
-                };
-            });
-            const BarTransform = createTransformExtension('BarTransform', {}, () => {
-                return {
-                    async transformEntry(entry) {
-                        transformState.bar++;
-                        const file = new File(['bar'], 'bar-' + entry.file.name, {
-                            type: 'text/plain',
-                        });
-                        return {
-                            file,
-                        };
-                    },
-                };
+            const FooTransform = createTransformExtension({
+                name: 'FooTransform',
+                props: {},
+                factory: () => {
+                    return {
+                        async transformEntry(entry) {
+                            transformState.foo++;
+                            const file = new File(['foo'], 'foo-' + entry.file.name, {
+                                type: 'text/plain',
+                            });
+                            return {
+                                file,
+                            };
+                        },
+                    };
+                },
             });
 
-            const BazTransform = createTransformExtension('BazTransform', {}, () => {
-                return {
-                    async transformEntry(entry) {
-                        transformState.baz++;
-                        const file = new File(['baz'], 'baz-' + entry.file.name, {
-                            type: 'text/plain',
-                        });
-                        return {
-                            file,
-                        };
-                    },
-                };
+            const BarTransform = createTransformExtension({
+                name: 'BarTransform',
+                props: {},
+                factory: () => {
+                    return {
+                        async transformEntry(entry) {
+                            transformState.bar++;
+                            const file = new File(['bar'], 'bar-' + entry.file.name, {
+                                type: 'text/plain',
+                            });
+                            return {
+                                file,
+                            };
+                        },
+                    };
+                },
+            });
+
+            const BazTransform = createTransformExtension({
+                name: 'BazTransform',
+                props: {},
+                factory: () => {
+                    return {
+                        async transformEntry(entry) {
+                            transformState.baz++;
+                            const file = new File(['baz'], 'baz-' + entry.file.name, {
+                                type: 'text/plain',
+                            });
+                            return {
+                                file,
+                            };
+                        },
+                    };
+                },
             });
 
             extensionManager.extensions = [
@@ -358,56 +383,68 @@ describe('createTransformExtension', () => {
                 baz: 0,
             };
 
-            const FooTransform = createTransformExtension('Foo', {}, () => {
-                return {
-                    async transformEntry(entry) {
-                        transformState.foo++;
+            const FooTransform = createTransformExtension({
+                name: 'Foo',
+                props: {},
+                factory: () => {
+                    return {
+                        async transformEntry(entry) {
+                            transformState.foo++;
 
-                        const [name, extension] = entry.file.name.split('.');
+                            const [name, extension] = entry.file.name.split('.');
 
-                        const file = new File(['foo'], name + '_foo.' + extension, {
-                            type: 'text/plain',
-                        });
+                            const file = new File(['foo'], name + '_foo.' + extension, {
+                                type: 'text/plain',
+                            });
 
-                        return {
-                            file,
-                        };
-                    },
-                };
+                            return {
+                                file,
+                            };
+                        },
+                    };
+                },
             });
 
-            const BarTransform = createTransformExtension('Bar', {}, () => {
-                return {
-                    async transformEntry(entry) {
-                        transformState.bar++;
+            const BarTransform = createTransformExtension({
+                name: 'Bar',
+                props: {},
+                factory: () => {
+                    return {
+                        async transformEntry(entry) {
+                            transformState.bar++;
 
-                        const [name, extension] = entry.file.name.split('.');
+                            const [name, extension] = entry.file.name.split('.');
 
-                        const file = new File(['bar'], name + '_bar.' + extension, {
-                            type: 'text/plain',
-                        });
-                        return {
-                            file,
-                        };
-                    },
-                };
+                            const file = new File(['bar'], name + '_bar.' + extension, {
+                                type: 'text/plain',
+                            });
+                            return {
+                                file,
+                            };
+                        },
+                    };
+                },
             });
 
-            const BazTransform = createTransformExtension('Baz', {}, () => {
-                return {
-                    async transformEntry(entry) {
-                        transformState.baz++;
+            const BazTransform = createTransformExtension({
+                name: 'Baz',
+                props: {},
+                factory: () => {
+                    return {
+                        async transformEntry(entry) {
+                            transformState.baz++;
 
-                        const [name, extension] = entry.file.name.split('.');
+                            const [name, extension] = entry.file.name.split('.');
 
-                        const file = new File(['baz'], name + '_baz.' + extension, {
-                            type: 'text/plain',
-                        });
-                        return {
-                            file,
-                        };
-                    },
-                };
+                            const file = new File(['baz'], name + '_baz.' + extension, {
+                                type: 'text/plain',
+                            });
+                            return {
+                                file,
+                            };
+                        },
+                    };
+                },
             });
 
             extensionManager.extensions = [

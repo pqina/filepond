@@ -45,16 +45,16 @@ export interface SimulatedStoreOptions extends StoreExtensionOptions {
     log?: boolean;
 }
 
-export const SimulatedStore = createStoreExtension(
-    'SimulatedStore',
-    {
+export const SimulatedStore = createStoreExtension({
+    name: 'SimulatedStore',
+    props: {
         bitrate: 1024000,
         tickrate: 250,
         connectionDelay: 250,
         fetchStoredFile: undefined,
         log: true,
     } as SimulatedStoreOptions,
-    ({ extensionName, props, didSetProps }) => {
+    factory: ({ extensionName, props, didSetProps }) => {
         let bytesPerTick: number;
 
         didSetProps(({ bitrate = 1024000, tickrate = 250 }: SimulatedStoreOptions) => {
@@ -198,8 +198,8 @@ export const SimulatedStore = createStoreExtension(
             restoreEntry,
             releaseEntry,
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

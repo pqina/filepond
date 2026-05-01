@@ -10,12 +10,13 @@ export interface TextInputStoreOptions {
     element?: HTMLInputElement | string;
 }
 
-export const TextInputStore = createExtension(
-    'TextInputStore',
-    {
+export const TextInputStore = createExtension({
+    name: 'TextInputStore',
+    type: 'store',
+    props: {
         element: undefined,
     } as TextInputStoreOptions,
-    ({ props, didSetProps }, { on }) => {
+    factory: ({ props, didSetProps }, { on }) => {
         // the element to store data in
         let targetElement;
 
@@ -65,8 +66,8 @@ export const TextInputStore = createExtension(
                 unsubUpdateEntries();
             },
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

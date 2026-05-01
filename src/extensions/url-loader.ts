@@ -47,9 +47,10 @@ function willRequestWithOptions(src: string, options: any, entry: FilePondFileEn
     return options;
 }
 
-export const URLLoader = createExtension(
-    'URLLoader',
-    {
+export const URLLoader = createExtension({
+    name: 'URLLoader',
+    type: 'loader',
+    props: {
         getBaseName: () => 'Untitled',
         mimeTypeMap: undefined,
         parallel: 2,
@@ -60,7 +61,7 @@ export const URLLoader = createExtension(
         actionAbort: 'abort',
         willRequestWithOptions,
     } as URLLoaderOptions,
-    ({ extensionName, props }, pond) => {
+    factory: ({ extensionName, props }, pond) => {
         const {
             on,
             removeEntries,
@@ -298,8 +299,8 @@ export const URLLoader = createExtension(
                 unsubUpdateEntry();
             },
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

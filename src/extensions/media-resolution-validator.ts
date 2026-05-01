@@ -32,14 +32,14 @@ export interface MediaResolutionValidatorOptions extends ValidatorExtensionOptio
     toNaturalResolution?: (pixels: number) => string;
 }
 
-export const MediaResolutionValidator = createValidatorExtension(
-    'MediaResolutionValidator',
-    {
+export const MediaResolutionValidator = createValidatorExtension({
+    name: 'MediaResolutionValidator',
+    props: {
         toNaturalResolution: (pixels) => {
             return `${Math.round(pixels / 1000000)}`;
         },
     } as MediaResolutionValidatorOptions,
-    ({ props, didSetProps }, { updateEntry }) => {
+    factory: ({ props, didSetProps }, { updateEntry }) => {
         let hasWidthLimitation = false;
         let hasHeightLimitation = false;
         let hasResolutionLimitation = false;
@@ -213,8 +213,8 @@ export const MediaResolutionValidator = createValidatorExtension(
             validateEntry,
             canValidateEntry,
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

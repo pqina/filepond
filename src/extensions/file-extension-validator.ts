@@ -15,9 +15,9 @@ export interface FileExtensionValidatorOptions extends ValidatorExtensionOptions
     format?: (mimeTypes: string[]) => string;
 }
 
-export const FileExtensionValidator = createValidatorExtension(
-    'FileExtensionValidator',
-    {
+export const FileExtensionValidator = createValidatorExtension({
+    name: 'FileExtensionValidator',
+    props: {
         accept: [],
         format: (extensions: string[]) =>
             extensions
@@ -25,7 +25,7 @@ export const FileExtensionValidator = createValidatorExtension(
                 .join(', ')
                 .toUpperCase(),
     } as FileExtensionValidatorOptions,
-    ({ props, didSetProps }) => {
+    factory: ({ props, didSetProps }) => {
         let computedExtensions: string[] = [];
 
         didSetProps(({ accept }) => {
@@ -85,8 +85,8 @@ export const FileExtensionValidator = createValidatorExtension(
             validateEntry,
             canValidateEntry,
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

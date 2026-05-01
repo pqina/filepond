@@ -17,8 +17,11 @@ export type ExtensionFactory = Extension | [Extension, { [key: string]: unknown 
 export type ExtensionFactoryInsertInstructions =
     | Extension
     | [Extension, { [key: string]: unknown }]
-    | [Extension, { [key: string]: unknown }, { before: string; after?: undefined }]
-    | [Extension, { [key: string]: unknown }, { before?: undefined; after: string }];
+    | ExtensionInsertInstructions;
+
+export type ExtensionInsertInstructions =
+    | { insert: Extension; options: { [key: string]: unknown }; before: string; after?: undefined }
+    | { insert: Extension; options: { [key: string]: unknown }; before?: undefined; after: string };
 
 export interface LoadedExtension {
     current?: any;

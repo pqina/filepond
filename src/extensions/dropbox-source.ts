@@ -10,16 +10,17 @@ export interface DropboxSourceOptions {
     dropboxOptions?: { [key: string]: any };
 }
 
-export const DropboxSource = createExtension(
-    'DropboxSource',
-    {
+export const DropboxSource = createExtension({
+    name: 'DropboxSource',
+    type: 'source',
+    props: {
         script: 'https://www.dropbox.com/static/api/2/dropins.js',
         appKey: undefined,
         target: undefined,
         buttonLabel: 'Browse Dropbox',
         dropboxOptions: undefined,
     } as DropboxSourceOptions,
-    ({ didSetProps }, { insertEntries }) => {
+    factory: ({ didSetProps }, { insertEntries }) => {
         let s: HTMLScriptElement;
 
         let unlisten: () => void;
@@ -129,8 +130,8 @@ export const DropboxSource = createExtension(
                 browseButtonRef && browseButtonRef.remove();
             },
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

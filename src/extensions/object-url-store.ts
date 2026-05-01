@@ -10,10 +10,10 @@ import { createObjectURL, revokeObjectURL } from '../utils/objectURL.js';
 
 export interface ObjectURLStoreOptions extends StoreExtensionOptions {}
 
-export const ObjectURLStore = createStoreExtension(
-    'ObjectURLStore',
-    {} as ObjectURLStoreOptions,
-    () => {
+export const ObjectURLStore = createStoreExtension({
+    name: 'ObjectURLStore',
+    props: {} as ObjectURLStoreOptions,
+    factory: () => {
         async function storeEntry(entry: FilePondEntry, { onprogress }: StoreTaskFnOptions) {
             // is not a file, exit!
             if (!isFileEntry(entry) || !isFile(entry.file)) {
@@ -35,8 +35,8 @@ export const ObjectURLStore = createStoreExtension(
             storeEntry,
             releaseEntry,
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

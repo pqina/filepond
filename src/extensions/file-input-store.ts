@@ -12,15 +12,16 @@ export interface FileInputStoreOptions {
     elementUpdateEvent?: string;
 }
 
-export const FileInputStore = createExtension(
-    'FileInputStore',
-    {
+export const FileInputStore = createExtension({
+    name: 'FileInputStore',
+    type: 'store',
+    props: {
         element: undefined,
 
         // the event fired on the element when it's updated, defaults to 'update'
         elementUpdateEvent: undefined,
     } as FileInputStoreOptions,
-    ({ props, didSetProps }, { on }) => {
+    factory: ({ props, didSetProps }, { on }) => {
         /** The element to store data in */
         let targetElement: HTMLInputElement | null;
 
@@ -82,8 +83,8 @@ export const FileInputStore = createExtension(
                 unsubUpdateEntry();
             },
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

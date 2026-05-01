@@ -20,14 +20,15 @@ export interface ListSizeValidatorOptions {
     byteUnits?: 'mega' | 'mebi';
 }
 
-export const ListSizeValidator = createExtension(
-    'ListSizeValidator',
-    {
+export const ListSizeValidator = createExtension({
+    name: 'ListSizeValidator',
+    type: 'validator',
+    props: {
         minListSize: 0,
         maxListSize: Infinity,
         byteUnits: undefined,
     } as ListSizeValidatorOptions,
-    ({ didSetProps }, { on, setExtensionStatus, getEntries }) => {
+    factory: ({ didSetProps }, { on, setExtensionStatus, getEntries }) => {
         // default byte range
         const range = {
             min: 0,
@@ -129,8 +130,8 @@ export const ListSizeValidator = createExtension(
                 unsubUpdateEntry();
             },
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

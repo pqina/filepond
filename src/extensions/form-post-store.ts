@@ -21,15 +21,15 @@ export interface FormPostStoreOptions extends StoreExtensionOptions {
     willRequestWithOptions?: RequestHook;
 }
 
-export const FormPostStore = createStoreExtension(
-    'FormPostStore',
-    {
+export const FormPostStore = createStoreExtension({
+    name: 'FormPostStore',
+    props: {
         url: '',
         name: 'entry',
         fetchHead: true,
         willRequestWithOptions: (src, options, entry) => options,
     } as FormPostStoreOptions,
-    ({ props }, pond) => {
+    factory: ({ props }, pond) => {
         const { updateEntry } = pond;
 
         function getFilename(request: XHRResponse) {
@@ -159,8 +159,8 @@ export const FormPostStore = createStoreExtension(
             restoreEntry,
             releaseEntry,
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

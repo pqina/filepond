@@ -10,13 +10,14 @@ export interface ListCountValidatorOptions {
     maxFiles?: number | string;
 }
 
-export const ListCountValidator = createExtension(
-    'ListCountValidator',
-    {
+export const ListCountValidator = createExtension({
+    name: 'ListCountValidator',
+    type: 'validator',
+    props: {
         minFiles: 0,
         maxFiles: Infinity,
     } as ListCountValidatorOptions,
-    ({ props, didSetProps }, { on, setExtensionStatus }) => {
+    factory: ({ props, didSetProps }, { on, setExtensionStatus }) => {
         // so we can more easily determine if range is limited
         let hasLimitedRange = false;
 
@@ -70,8 +71,8 @@ export const ListCountValidator = createExtension(
                 unsubUpdateEntry();
             },
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

@@ -2,10 +2,11 @@ import type { FilePondFileEntry } from '../types/index.js';
 import { isFile } from '../utils/test.js';
 import { createExtension } from './common/createExtension.js';
 
-export const ObjectURLView = createExtension(
-    'ObjectURLView',
-    {},
-    (state, { on, getEntryExtensionState, setEntryExtensionState }) => {
+export const ObjectURLResource = createExtension({
+    name: 'ObjectURLResource',
+    type: 'resource',
+    props: {},
+    factory: (state, { on, getEntryExtensionState, setEntryExtensionState }) => {
         function handleUpdateEntryData(entry: FilePondFileEntry) {
             const { file } = entry;
 
@@ -15,14 +16,14 @@ export const ObjectURLView = createExtension(
             }
 
             // If we already have an ObjectURL we need to revoke it
-            const { url } = getEntryExtensionState(entry);
-            if (url) {
-                URL.revokeObjectURL(url);
+            const { value } = getEntryExtensionState(entry);
+            if (value) {
+                URL.revokeObjectURL(value);
             }
 
             // Update the ObjectURL
             setEntryExtensionState(entry, {
-                url: URL.createObjectURL(file),
+                value: URL.createObjectURL(file),
             });
         }
 
@@ -36,9 +37,9 @@ export const ObjectURLView = createExtension(
             }
 
             // If we've set an ObjectURL we need to revoke it
-            const { url } = getEntryExtensionState(entry);
-            if (url) {
-                URL.revokeObjectURL(url);
+            const { value } = getEntryExtensionState(entry);
+            if (value) {
+                URL.revokeObjectURL(value);
             }
         }
 
@@ -51,5 +52,5 @@ export const ObjectURLView = createExtension(
                 unsubRemove();
             },
         };
-    }
-);
+    },
+});

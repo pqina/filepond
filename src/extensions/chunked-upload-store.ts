@@ -29,9 +29,9 @@ export interface ChunkedUploadStoreOptions extends StoreExtensionOptions {
     willRequestWithOptions?: RequestHook;
 }
 
-export const ChunkedUploadStore = createStoreExtension(
-    'ChunkedUploadStore',
-    {
+export const ChunkedUploadStore = createStoreExtension({
+    name: 'ChunkedUploadStore',
+    props: {
         url: '',
         chunkSize: Infinity,
         retryDelays: [500, 1000, 3000],
@@ -39,7 +39,7 @@ export const ChunkedUploadStore = createStoreExtension(
         parallelChunks: 2,
         willRequestWithOptions: (src, options, entry) => options,
     } as ChunkedUploadStoreOptions,
-    ({ props, didSetProps }, { updateEntry }) => {
+    factory: ({ props, didSetProps }, { updateEntry }) => {
         let computedChunkSize: number = Infinity;
 
         didSetProps(({ chunkSize }: ChunkedUploadStoreOptions) => {
@@ -386,8 +386,8 @@ export const ChunkedUploadStore = createStoreExtension(
             storeEntry,
             releaseEntry,
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

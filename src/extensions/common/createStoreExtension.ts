@@ -1,4 +1,4 @@
-import type { ExtensionAPI, ExtensionOptions } from './createExtension.js';
+import type { Extension, ExtensionAPI, ExtensionOptions } from './createExtension.js';
 import type { FilePondEntry, FilePondFileEntry } from '../../types/index.js';
 import type { TaskFnOptions } from '../../core/taskScheduler.js';
 
@@ -95,14 +95,19 @@ export interface PerceivedPerformanceOptions {
     maxStep: number;
 }
 
-export function createStoreExtension(
-    extensionName: string,
-    storeOptions: StoreExtensionOptions,
-    storeFactory: StoreFactory
-) {
-    return createExtension(
-        extensionName,
-        {
+export interface CreateStoreExtensionOptions {
+    name: string;
+    props: StoreExtensionOptions;
+    factory: StoreFactory;
+}
+
+export function createStoreExtension(options: CreateStoreExtensionOptions): Extension {
+    const { name: extensionName, props: storeOptions, factory: storeFactory } = options;
+
+    return createExtension({
+        name: extensionName,
+        type: 'store',
+        props: {
             perceivedPerformance: null,
             parallel: 4,
             actionStore: 'store',
@@ -111,7 +116,7 @@ export function createStoreExtension(
             valueKey: 'value',
             ...storeOptions,
         },
-        (state, pond) => {
+        factory: (state, pond) => {
             const { props, didSetProps } = state;
             const {
                 on,
@@ -766,6 +771,6 @@ export function createStoreExtension(
                     unsubRemove();
                 },
             };
-        }
-    );
+        },
+    });
 }

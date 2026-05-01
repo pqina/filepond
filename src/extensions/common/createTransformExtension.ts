@@ -1,5 +1,4 @@
-import type { ExtensionManagerAPI } from '../../core/extensionManager.js';
-import type { ExtensionAPI, ExtensionInstance, ExtensionOptions } from './createExtension.js';
+import type { Extension, ExtensionAPI, ExtensionOptions } from './createExtension.js';
 import type { FilePondEntry, FilePondFileEntry, Progress } from '../../types/index.js';
 
 import { createExtension } from './createExtension.js';
@@ -58,14 +57,19 @@ export interface TransformExtensionOptions {
     parallel?: number;
 }
 
-export function createTransformExtension(
-    extensionName: string,
-    transformProps: TransformExtensionOptions,
-    transformFactory: TransformFactory
-): (pond: ExtensionManagerAPI) => ExtensionInstance {
-    return createExtension(
-        extensionName,
-        {
+export interface CreateTransformExtensionOptions {
+    name: string;
+    props: TransformExtensionOptions;
+    factory: TransformFactory;
+}
+
+export function createTransformExtension(options: CreateTransformExtensionOptions): Extension {
+    const { name: extensionName, props: transformProps, factory: transformFactory } = options;
+
+    return createExtension({
+        name: extensionName,
+        type: 'transform',
+        props: {
             // default action props
             actionTransform: 'transform',
             actionLoad: 'load',
@@ -74,7 +78,7 @@ export function createTransformExtension(
             filterEntry: (_: FilePondEntry) => true,
             ...transformProps,
         },
-        (state, pond) => {
+        factory: (state, pond) => {
             const { props } = state;
 
             const {
@@ -456,6 +460,6 @@ export function createTransformExtension(
                     unsubUpdateEntryData();
                 },
             };
-        }
-    );
+        },
+    });
 }

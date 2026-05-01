@@ -44,9 +44,10 @@ export interface SimulatedLoaderOptions {
     ) => Promise<File>;
 }
 
-export const SimulatedLoader = createExtension(
-    'SimulatedLoader',
-    {
+export const SimulatedLoader = createExtension({
+    name: 'SimulatedLoader',
+    type: 'loader',
+    props: {
         actionLoad: 'load',
         actionAbort: 'abort',
         bitrate: 1024000,
@@ -57,7 +58,7 @@ export const SimulatedLoader = createExtension(
         log: true,
         fetchFile: undefined,
     } as SimulatedLoaderOptions,
-    ({ extensionName, props, didSetProps }, pond) => {
+    factory: ({ extensionName, props, didSetProps }, pond) => {
         const {
             setEntryExtensionStatus,
             getEntryExtensionStatus,
@@ -317,8 +318,8 @@ export const SimulatedLoader = createExtension(
                 unsubUpdateEntry();
             },
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

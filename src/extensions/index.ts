@@ -40,7 +40,9 @@ export { SimulatedStore } from './simulated-store.js';
 export { FileNameTransform } from './file-name-transform.js';
 export { ImageBitmapTransform } from './image-bitmap-transform.js';
 
+// resources
+export { ObjectURLResource } from './object-url-resource.js';
+
 // views
 export { EntryListView } from './entry-list-view.js';
 export { ConsoleView } from './console-view.js';
-export { ObjectURLView } from './object-url-view.js';

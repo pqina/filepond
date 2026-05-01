@@ -22,15 +22,16 @@ export interface BlobLoaderOptions {
     mimeTypeMap?: { [key: string]: string };
 }
 
-export const BlobLoader = createExtension(
-    'BlobLoader',
-    {
+export const BlobLoader = createExtension({
+    name: 'BlobLoader',
+    type: 'loader',
+    props: {
         mimeTypeMap: undefined,
         getBasename,
         getExtension,
         getFilename,
     } as BlobLoaderOptions,
-    (
+    factory: (
         { props },
         { on, updateEntry, pushTask, setEntryExtensionStatus, getEntryExtensionStatus }
     ) => {
@@ -96,8 +97,8 @@ export const BlobLoader = createExtension(
                 unsubUpdateEntry();
             },
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

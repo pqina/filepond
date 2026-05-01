@@ -16,10 +16,15 @@ export interface FileInputSourceOptions {
     insertIndex?: number;
 }
 
-export const FileInputSource = createExtension(
-    'FileInputSource',
-    { element: undefined, resetFilesOnAdd: false, insertIndex: 0 } as FileInputSourceOptions,
-    ({ didSetProps }, pond) => {
+export const FileInputSource = createExtension({
+    name: 'FileInputSource',
+    type: 'source',
+    props: {
+        element: undefined,
+        resetFilesOnAdd: false,
+        insertIndex: 0,
+    } as FileInputSourceOptions,
+    factory: ({ didSetProps }, pond) => {
         const { insertEntries, removeEntries } = pond;
 
         /* Unsubscribe from input events */
@@ -92,8 +97,8 @@ export const FileInputSource = createExtension(
                 }
             },
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

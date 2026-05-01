@@ -7,12 +7,13 @@ export interface DragDropSourceOptions {
     shouldHandleDrop?: (e: DragEvent) => boolean;
 }
 
-export const DragDropSource = createExtension(
-    'DragDropSource',
-    {
+export const DragDropSource = createExtension({
+    name: 'DragDropSource',
+    type: 'source',
+    props: {
         shouldHandleDrop: () => true,
     } as DragDropSourceOptions,
-    ({ didSetProps }, { insertEntries }) => {
+    factory: ({ didSetProps }, { insertEntries }) => {
         let removeDropListener: () => void;
 
         let removeDragOverListener: () => void;
@@ -74,8 +75,8 @@ export const DragDropSource = createExtension(
                 removeDragOverListener && removeDragOverListener();
             },
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {

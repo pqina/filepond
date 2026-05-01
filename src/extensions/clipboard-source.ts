@@ -6,12 +6,13 @@ export interface ClipboardSourceOptions {
     shouldHandlePaste: (e: ClipboardEvent) => boolean;
 }
 
-export const ClipboardSource = createExtension(
-    'ClipboardSource',
-    {
+export const ClipboardSource = createExtension({
+    name: 'ClipboardSource',
+    type: 'source',
+    props: {
         shouldHandlePaste: () => true,
     } as ClipboardSourceOptions,
-    ({ didSetProps }, pond) => {
+    factory: ({ didSetProps }, pond) => {
         // shortcuts to filepond internal methods
         const { insertEntries } = pond;
 
@@ -58,8 +59,8 @@ export const ClipboardSource = createExtension(
                 }
             },
         };
-    }
-);
+    },
+});
 
 declare module '../index.js' {
     interface FilePondElement {
