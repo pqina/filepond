@@ -427,8 +427,9 @@ export function createStoreExtension(
             }
 
             /** Releases an entry on file removal */
-            async function handleRemoveEntry(entry: FilePondFileEntry) {
+            async function handleRemoveEntry(detail: { entry: FilePondFileEntry; index: number }) {
                 const { valueKey } = props;
+                const { entry } = detail;
 
                 // TODO: should make this release call configurable (add shouldRelease prop?)
                 if (!releaseEntry) {
