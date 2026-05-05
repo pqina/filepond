@@ -1,11 +1,14 @@
-import type { StoreExtensionOptions, StoreTaskFnOptions } from './common/createStoreExtension.js';
+import type {
+    StoreExtensionFunctionOptions,
+    StoreExtensionOptions,
+} from './common/createStoreExtension.js';
 import type { XHRResponse } from '../utils/xhr.js';
 import { createStoreExtension } from './common/createStoreExtension.js';
 import { blobToFile } from '../utils/file.js';
 import { isFile, isFileEntry } from '../utils/test.js';
 import { xhr, getResponseHeaders, getFilenameFromResponseHeaders } from '../utils/xhr.js';
 
-import type { RequestHook, FilePondEntry } from '../types/index.js';
+import type { RequestHook, PublicRequestOptions, FilePondEntry } from '../types/index.js';
 
 export interface FormPostStoreOptions extends StoreExtensionOptions {
     /** Server URL, defaults to empty string */
@@ -45,7 +48,7 @@ export const FormPostStore = createStoreExtension({
 
         async function storeEntry(
             entry: FilePondEntry,
-            { abortController, onprogress, onabort }: StoreTaskFnOptions
+            { abortController, onprogress, onabort }: StoreExtensionFunctionOptions
         ) {
             const { url, valueKey, willRequestWithOptions } = props;
 
@@ -61,7 +64,7 @@ export const FormPostStore = createStoreExtension({
 
             // Let's upload the file data
             const { name } = props;
-            const requestOptions = {
+            const requestOptions: PublicRequestOptions = {
                 method: 'POST',
                 formData: [[name, entry.file, entry.file.name]],
             };
@@ -79,13 +82,13 @@ export const FormPostStore = createStoreExtension({
         async function restoreEntry(
             storageId: string,
             entry: FilePondEntry,
-            { onprogress, onabort, abortController }: StoreTaskFnOptions
+            { onprogress, onabort, abortController }: StoreExtensionFunctionOptions
         ) {
             const { url, fetchHead, willRequestWithOptions } = props;
 
             // Head request to get name and size?
             if (fetchHead) {
-                const requestOptions = {
+                const requestOptions: PublicRequestOptions = {
                     method: 'HEAD',
                     queryString: {
                         id: storageId,
@@ -109,7 +112,7 @@ export const FormPostStore = createStoreExtension({
             }
 
             // get file
-            const requestOptions = {
+            const requestOptions: PublicRequestOptions = {
                 method: 'GET',
                 queryString: {
                     id: storageId,
@@ -141,7 +144,7 @@ export const FormPostStore = createStoreExtension({
         async function releaseEntry(storageId: string, entry: FilePondEntry) {
             const { url, willRequestWithOptions } = props;
 
-            const requestOptions = {
+            const requestOptions: PublicRequestOptions = {
                 method: 'DELETE',
                 queryString: {
                     id: storageId,

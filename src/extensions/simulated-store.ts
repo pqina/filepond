@@ -1,5 +1,11 @@
 import type { FilePondEntry } from '../types/index.js';
-import type { StoreExtensionOptions, StoreTaskFnOptions } from './common/createStoreExtension.ts';
+import type {
+    StoreExtensionFunctionOptions,
+    StoreExtensionOptions,
+    StoreExtensionReleaseFunction,
+    StoreExtensionRestoreFunction,
+    StoreExtensionStoreFunction,
+} from './common/createStoreExtension.ts';
 import { createStoreExtension } from './common/createStoreExtension.js';
 import { isFile, isFileEntry } from '../utils/test.js';
 import { getUniqueId } from '../utils/string.js';
@@ -25,10 +31,10 @@ export interface SimulatedStoreOptions extends StoreExtensionOptions {
     onstore?: (progress: number) => void;
 
     /** Restore hook so we can throw errors */
-    onrestore?: (progress: number) => void;
+    onrestore?: () => void;
 
     /** Release hook so we can throw errors */
-    onrelease?: (progress: number) => void;
+    onrelease?: () => void;
 
     /** Fetches an actual stored file to use for demo purposes. */
     fetchStoredFile?: (
@@ -64,10 +70,10 @@ export const SimulatedStore = createStoreExtension({
         // We "store" our files in this map
         const SimulatedStore = new Map();
 
-        async function storeEntry(
-            entry: FilePondEntry,
-            { abortController, onprogress, onabort }: StoreTaskFnOptions
-        ): Promise<string | undefined> {
+        const storeEntry: StoreExtensionStoreFunction = async (
+            entry,
+            { abortController, onprogress, onabort }
+        ) => {
             // Needs to be of type File
             if (!isFileEntry(entry) || !isFile(entry.file)) {
                 return;
@@ -130,13 +136,9 @@ export const SimulatedStore = createStoreExtension({
                     }
                 }, tickrate);
             });
-        }
+        };
 
-        async function restoreEntry(
-            storageId: string,
-            entry: FilePondEntry,
-            options: StoreTaskFnOptions
-        ) {
+        const restoreEntry: StoreExtensionRestoreFunction = async (storageId, entry, options) => {
             const {
                 log,
                 connectionDelay,
@@ -164,9 +166,9 @@ export const SimulatedStore = createStoreExtension({
 
             // load remote file
             return await fetchStoredFile(storageId, entry, options);
-        }
+        };
 
-        async function releaseEntry(storageId: string): Promise<boolean> {
+        const releaseEntry: StoreExtensionReleaseFunction = async (storageId) => {
             const { log, connectionDelay, onrelease = noop } = props;
             await sleep(connectionDelay);
 
@@ -184,7 +186,7 @@ export const SimulatedStore = createStoreExtension({
             log && logState(['did release', storageId]);
 
             return true;
-        }
+        };
 
         function logState(action: string[]) {
             log('⛃', extensionName, '(', ...action, ')');

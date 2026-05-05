@@ -1,4 +1,7 @@
-import type { StoreExtensionOptions, StoreTaskFnOptions } from './common/createStoreExtension.js';
+import type {
+    StoreExtensionFunctionOptions,
+    StoreExtensionOptions,
+} from './common/createStoreExtension.js';
 import type { FilePondEntry } from '../types/index.js';
 import { createStoreExtension } from './common/createStoreExtension.js';
 import { createThreadWorker, thread } from '../utils/thread.js';
@@ -18,7 +21,7 @@ export const DataURLStore = createStoreExtension({
     factory: ({ props }) => {
         async function storeEntry(
             entry: FilePondEntry,
-            { abortController, onprogress, onabort }: StoreTaskFnOptions
+            { abortController, onprogress, onabort }: StoreExtensionFunctionOptions
         ) {
             // should we use a blob worker
             const { workersURL } = props;

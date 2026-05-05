@@ -6,8 +6,16 @@ import { noop } from '../utils/placeholder.js';
 import { sleep } from '../utils/sleep.js';
 import { xhr, createProgressEvent, getResponseHeaders } from '../utils/xhr.js';
 import { warn } from '../common/console.js';
-import type { StoreTaskFnOptions, StoreExtensionOptions } from './common/createStoreExtension.js';
-import type { RequestHook, FilePondEntry, FilePondFileEntry } from '../types/index.js';
+import type {
+    StoreExtensionFunctionOptions,
+    StoreExtensionOptions,
+} from './common/createStoreExtension.js';
+import type {
+    RequestHook,
+    PublicRequestOptions,
+    FilePondEntry,
+    FilePondFileEntry,
+} from '../types/index.js';
 
 export interface ChunkedUploadStoreOptions extends StoreExtensionOptions {
     /** Server URL */
@@ -108,7 +116,7 @@ export const ChunkedUploadStore = createStoreExtension({
             const { url, willRequestWithOptions } = props;
             const { abortController, onabort } = options ?? {};
 
-            const requestOptions = {
+            const requestOptions: PublicRequestOptions = {
                 method: 'POST',
                 headers: {
                     uploadLength: file.size,
@@ -136,7 +144,7 @@ export const ChunkedUploadStore = createStoreExtension({
             const { url, willRequestWithOptions } = props;
             const { abortController, onabort } = options ?? {};
 
-            const requestOptions = {
+            const requestOptions: PublicRequestOptions = {
                 method: 'HEAD',
                 queryString: {
                     id: serverId,
@@ -172,7 +180,7 @@ export const ChunkedUploadStore = createStoreExtension({
             for (const delay of [...retryDelays, undefined]) {
                 try {
                     // upload chunk patch
-                    const requestOptions = {
+                    const requestOptions: PublicRequestOptions = {
                         method: 'PATCH',
                         headers,
                         data,
@@ -285,7 +293,7 @@ export const ChunkedUploadStore = createStoreExtension({
 
         async function storeEntry(
             entry: FilePondFileEntry,
-            { abortController, onprogress, onabort }: StoreTaskFnOptions
+            { abortController, onprogress, onabort }: StoreExtensionFunctionOptions
         ) {
             // Needs to be of type File
             if (!isFileEntry(entry) || !isFile(entry.file)) {
@@ -369,7 +377,7 @@ export const ChunkedUploadStore = createStoreExtension({
         async function releaseEntry(storageId: string, entry: FilePondFileEntry) {
             const { url, willRequestWithOptions } = props;
 
-            const requestOptions = {
+            const requestOptions: PublicRequestOptions = {
                 method: 'DELETE',
                 queryString: {
                     id: storageId,

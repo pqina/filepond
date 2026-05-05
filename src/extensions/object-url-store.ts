@@ -1,6 +1,6 @@
 import {
     type StoreExtensionOptions,
-    type StoreTaskFnOptions,
+    type StoreExtensionFunctionOptions,
     createStoreExtension,
 } from './common/createStoreExtension.js';
 import type { FilePondEntry } from '../types/index.js';
@@ -14,7 +14,10 @@ export const ObjectURLStore = createStoreExtension({
     name: 'ObjectURLStore',
     props: {} as ObjectURLStoreOptions,
     factory: () => {
-        async function storeEntry(entry: FilePondEntry, { onprogress }: StoreTaskFnOptions) {
+        async function storeEntry(
+            entry: FilePondEntry,
+            { onprogress }: StoreExtensionFunctionOptions
+        ) {
             // is not a file, exit!
             if (!isFileEntry(entry) || !isFile(entry.file)) {
                 return;

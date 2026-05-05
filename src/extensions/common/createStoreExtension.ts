@@ -8,20 +8,49 @@ import { Status } from '../../common/status.js';
 import { debounce } from '../../utils/debounce.js';
 import { createPerceivedPerformanceProxy } from '../../common/perceivedPerformanceProxy.js';
 
-export type StoreFactory = (
-    instance: ExtensionOptions,
+export type StoreExtensionResolvedOptions = StoreExtensionOptions & {
+    /** If an upload is really fast, will show simulated progress to instill confidence in upload */
+    perceivedPerformance: boolean | PerceivedPerformanceOptions | null;
+
+    /** How many of these store operations can run in parallel */
+    parallel: number;
+
+    /** The key to use when setting the storage id */
+    valueKey: string;
+
+    /** Action to run to trigger the store operation */
+    actionStore: string;
+
+    /** Action to run to trigger the load operation */
+    actionLoad: string;
+
+    /** Action to run to trigger the abort operation */
+    actionAbort: string;
+};
+
+export type StoreExtensionResolvedProps<Props extends object = StoreExtensionOptions> =
+    StoreExtensionResolvedOptions & Required<Props>;
+
+export interface StoreExtensionState<Props extends object = StoreExtensionOptions>
+    extends Omit<ExtensionOptions, 'props' | 'didSetProps'> {
+    props: StoreExtensionResolvedProps<Props>;
+    didSetProps: (cb: (props: StoreExtensionResolvedProps<Props>) => void) => void;
+}
+
+export type StoreFactory<Props extends object = StoreExtensionOptions> = (
+    instance: StoreExtensionState<Props>,
     api: ExtensionAPI
 ) => StoreExtensionFunctions;
 
-export interface StoreTaskFnOptions extends TaskFnOptions {
+export interface StoreExtensionFunctionOptions extends TaskFnOptions {
     onprogress: (e: ProgressEvent) => void;
     onabort: () => void;
 }
 
 export interface StoreExtensionFunctions {
-    storeEntry: FunctionStore;
-    restoreEntry?: FunctionRestore;
-    releaseEntry?: FunctionRelease;
+    storeEntry: StoreExtensionStoreFunction;
+    restoreEntry?: StoreExtensionRestoreFunction;
+    releaseEntry?: StoreExtensionReleaseFunction;
 }
 
 export interface StoreExtensionOptions {
@@ -36,7 +65,7 @@ export interface StoreExtensionOptions {
     }
     ```
     */
-    perceivedPerformance?: boolean | PerceivedPerformanceOptions;
+    perceivedPerformance?: boolean | PerceivedPerformanceOptions | null;
 
     /** How many of these store operations can run in parallel */
     parallel?: number;
@@ -58,21 +87,21 @@ export interface StoreExtensionOptions {
      * automatically. When this prop is set the `actionStore` prop cannot be set to `false` to
      * reset the store operation
      */
-    shouldStore: (entry: FilePondEntry) => Promise<boolean>;
+    shouldStore?: (entry: FilePondEntry) => Promise<boolean> | boolean;
 }
 
-export type FunctionStore = (
+export type StoreExtensionStoreFunction = (
     entry: FilePondFileEntry,
-    options: StoreTaskFnOptions
+    options: StoreExtensionFunctionOptions
 ) => Promise<string | boolean | void>;
 
-export type FunctionRestore = (
+export type StoreExtensionRestoreFunction = (
     storageId: string,
     entry: FilePondFileEntry,
-    options: StoreTaskFnOptions
+    options: StoreExtensionFunctionOptions
 ) => Promise<File | void>;
 
-export type FunctionRelease = (
+export type StoreExtensionReleaseFunction = (
     storageId: string,
     entry: FilePondFileEntry,
     options?: TaskFnOptions & {
@@ -95,13 +124,15 @@ export interface PerceivedPerformanceOptions {
     maxStep: number;
 }
 
-export interface CreateStoreExtensionOptions {
+export interface CreateStoreExtensionOptions<Props extends object = StoreExtensionOptions> {
     name: string;
-    props: StoreExtensionOptions;
-    factory: StoreFactory;
+    props: Props & Partial<StoreExtensionOptions>;
+    factory: StoreFactory<Props>;
 }
 
-export function createStoreExtension(options: CreateStoreExtensionOptions): Extension {
+export function createStoreExtension<Props extends object = StoreExtensionOptions>(
+    options: CreateStoreExtensionOptions<Props>
+): Extension {
     const { name: extensionName, props: storeOptions, factory: storeFactory } = options;
 
     return createExtension({
@@ -117,7 +148,8 @@ export function createStoreExtension(options: CreateStoreExtensionOptions): Exte
             ...storeOptions,
         },
         factory: (state, pond) => {
-            const { props, didSetProps } = state;
+            const storeState = state as StoreExtensionState<Props>;
+            const { props, didSetProps } = storeState;
             const {
                 on,
                 setExtensionStatus,
@@ -155,7 +187,7 @@ export function createStoreExtension(options: CreateStoreExtensionOptions): Exte
             });
 
             // gets the store methods
-            const { restoreEntry, storeEntry, releaseEntry } = storeFactory(state, pond) ?? {};
+            const { restoreEntry, storeEntry, releaseEntry } = storeFactory(storeState, pond) ?? {};
 
             /**
              * Calls custom store function and handles default responses to abort task and update

@@ -13,6 +13,17 @@ export {
 export {
     createStoreExtension,
     type CreateStoreExtensionOptions,
+    type PerceivedPerformanceOptions,
+    type StoreExtensionFunctions,
+    type StoreExtensionFunctionOptions,
+    type StoreExtensionOptions,
+    type StoreExtensionReleaseFunction,
+    type StoreExtensionResolvedOptions,
+    type StoreExtensionResolvedProps,
+    type StoreExtensionRestoreFunction,
+    type StoreExtensionState,
+    type StoreExtensionStoreFunction,
+    type StoreFactory,
 } from './extensions/common/createStoreExtension.js';
 export {
     createTransformExtension,

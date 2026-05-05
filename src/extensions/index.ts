@@ -1,7 +1,21 @@
 // shared
 export { createExtension } from './common/createExtension.js';
 export { createValidatorExtension } from './common/createValidatorExtension.js';
-export { createStoreExtension } from './common/createStoreExtension.js';
+export {
+    createStoreExtension,
+    type CreateStoreExtensionOptions,
+    type PerceivedPerformanceOptions,
+    type StoreExtensionFunctions,
+    type StoreExtensionFunctionOptions,
+    type StoreExtensionOptions,
+    type StoreExtensionReleaseFunction,
+    type StoreExtensionResolvedOptions,
+    type StoreExtensionResolvedProps,
+    type StoreExtensionRestoreFunction,
+    type StoreExtensionState,
+    type StoreExtensionStoreFunction,
+    type StoreFactory,
+} from './common/createStoreExtension.js';
 export { createTransformExtension } from './common/createTransformExtension.js';
 
 // sources
