@@ -1,8 +1,7 @@
 import type {
-    StoreExtensionFunctionOptions,
     StoreExtensionOptions,
+    StoreExtensionStoreFunction,
 } from './common/createStoreExtension.js';
-import type { FilePondEntry } from '../types/index.js';
 import { createStoreExtension } from './common/createStoreExtension.js';
 import { createThreadWorker, thread } from '../utils/thread.js';
 import { isFileEntry } from '../utils/test.js';
@@ -19,10 +18,10 @@ export const DataURLStore = createStoreExtension({
         workersURL: undefined,
     } as DataURLStoreOptions,
     factory: ({ props }) => {
-        async function storeEntry(
-            entry: FilePondEntry,
-            { abortController, onprogress, onabort }: StoreExtensionFunctionOptions
-        ) {
+        const storeEntry: StoreExtensionStoreFunction = async (
+            entry,
+            { abortController, onprogress, onabort }
+        ) => {
             // should we use a blob worker
             const { workersURL } = props;
 
@@ -40,7 +39,7 @@ export const DataURLStore = createStoreExtension({
 
             // return as value
             return res.dataURL;
-        }
+        };
 
         return {
             storeEntry,

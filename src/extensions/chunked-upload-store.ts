@@ -7,8 +7,9 @@ import { sleep } from '../utils/sleep.js';
 import { xhr, createProgressEvent, getResponseHeaders } from '../utils/xhr.js';
 import { warn } from '../common/console.js';
 import type {
-    StoreExtensionFunctionOptions,
     StoreExtensionOptions,
+    StoreExtensionReleaseFunction,
+    StoreExtensionStoreFunction,
 } from './common/createStoreExtension.js';
 import type {
     RequestHook,
@@ -291,10 +292,10 @@ export const ChunkedUploadStore = createStoreExtension({
             unobserveUploadProgress();
         }
 
-        async function storeEntry(
-            entry: FilePondFileEntry,
-            { abortController, onprogress, onabort }: StoreExtensionFunctionOptions
-        ) {
+        const storeEntry: StoreExtensionStoreFunction = async (
+            entry,
+            { abortController, onprogress, onabort }
+        ) => {
             // Needs to be of type File
             if (!isFileEntry(entry) || !isFile(entry.file)) {
                 return;
@@ -372,9 +373,9 @@ export const ChunkedUploadStore = createStoreExtension({
             );
 
             return serverId;
-        }
+        };
 
-        async function releaseEntry(storageId: string, entry: FilePondFileEntry) {
+        const releaseEntry: StoreExtensionReleaseFunction = async (storageId, entry) => {
             const { url, willRequestWithOptions } = props;
 
             const requestOptions: PublicRequestOptions = {
@@ -388,7 +389,7 @@ export const ChunkedUploadStore = createStoreExtension({
 
             // TODO: return success / fail state, for now always succeeds
             return true;
-        }
+        };
 
         return {
             storeEntry,

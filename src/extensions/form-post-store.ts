@@ -1,6 +1,8 @@
 import type {
-    StoreExtensionFunctionOptions,
     StoreExtensionOptions,
+    StoreExtensionReleaseFunction,
+    StoreExtensionRestoreFunction,
+    StoreExtensionStoreFunction,
 } from './common/createStoreExtension.js';
 import type { XHRResponse } from '../utils/xhr.js';
 import { createStoreExtension } from './common/createStoreExtension.js';
@@ -8,7 +10,7 @@ import { blobToFile } from '../utils/file.js';
 import { isFile, isFileEntry } from '../utils/test.js';
 import { xhr, getResponseHeaders, getFilenameFromResponseHeaders } from '../utils/xhr.js';
 
-import type { RequestHook, PublicRequestOptions, FilePondEntry } from '../types/index.js';
+import type { RequestHook, PublicRequestOptions } from '../types/index.js';
 
 export interface FormPostStoreOptions extends StoreExtensionOptions {
     /** Server URL, defaults to empty string */
@@ -46,10 +48,10 @@ export const FormPostStore = createStoreExtension({
             }
         }
 
-        async function storeEntry(
-            entry: FilePondEntry,
-            { abortController, onprogress, onabort }: StoreExtensionFunctionOptions
-        ) {
+        const storeEntry: StoreExtensionStoreFunction = async (
+            entry,
+            { abortController, onprogress, onabort }
+        ) => {
             const { url, valueKey, willRequestWithOptions } = props;
 
             // Needs to be of type File
@@ -77,13 +79,13 @@ export const FormPostStore = createStoreExtension({
 
             // return a unique id
             return request.response;
-        }
+        };
 
-        async function restoreEntry(
-            storageId: string,
-            entry: FilePondEntry,
-            { onprogress, onabort, abortController }: StoreExtensionFunctionOptions
-        ) {
+        const restoreEntry: StoreExtensionRestoreFunction = async (
+            storageId,
+            entry,
+            { onprogress, onabort, abortController }
+        ) => {
             const { url, fetchHead, willRequestWithOptions } = props;
 
             // Head request to get name and size?
@@ -139,9 +141,9 @@ export const FormPostStore = createStoreExtension({
                     // else fall back
                     'untitled'
             );
-        }
+        };
 
-        async function releaseEntry(storageId: string, entry: FilePondEntry) {
+        const releaseEntry: StoreExtensionReleaseFunction = async (storageId, entry) => {
             const { url, willRequestWithOptions } = props;
 
             const requestOptions: PublicRequestOptions = {
@@ -155,7 +157,7 @@ export const FormPostStore = createStoreExtension({
 
             // TODO: return success / fail state, for now always succeeds
             return true;
-        }
+        };
 
         return {
             storeEntry,

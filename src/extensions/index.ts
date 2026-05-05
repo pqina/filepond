@@ -41,7 +41,6 @@ export { ListCountValidator } from './list-count-validator.js';
 export { MediaResolutionValidator } from './media-resolution-validator.js';
 
 // stores
-export { ObjectURLStore } from './object-url-store.js';
 export { TextInputStore } from './text-input-store.js';
 export { FileInputStore } from './file-input-store.js';
 export { FormPostStore } from './form-post-store.js';

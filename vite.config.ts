@@ -42,6 +42,12 @@ export default defineConfig(({ command }) => ({
                 replacement: resolve(__dirname, srcDir + '/extensions/index.js'),
             },
 
+            // utils
+            {
+                find: 'filepond/utils',
+                replacement: resolve(__dirname, srcDir + '/utils/index.js'),
+            },
+
             // templates
             {
                 find: 'filepond/templates',
@@ -85,6 +91,7 @@ export default defineConfig(({ command }) => ({
                 index: srcDir + '/index.ts',
                 'locales/index': srcDir + '/locales/index.js',
                 'extensions/index': srcDir + '/extensions/index.ts',
+                'utils/index': srcDir + '/utils/index.ts',
                 'templates/index': srcDir + '/templates/index.ts',
 
                 // dev helpers

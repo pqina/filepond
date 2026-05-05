@@ -41,6 +41,10 @@
             "types": "./types/extensions/*.d.ts",
             "import": "./esm/extensions/*.js"
         },
+        "./utils": {
+            "types": "./types/utils/index.d.ts",
+            "import": "./esm/utils/index.js"
+        },
         "./elements": {
             "types": "./types/elements/index.d.ts",
             "import": "./esm/elements/index.js"
