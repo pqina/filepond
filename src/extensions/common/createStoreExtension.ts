@@ -148,8 +148,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
             ...storeOptions,
         },
         factory: (state, pond) => {
-            const storeState = state as StoreExtensionState<Props>;
-            const { props, didSetProps } = storeState;
+            const { props, didSetProps } = state as StoreExtensionState<Props>;
             const {
                 on,
                 setExtensionStatus,
@@ -187,7 +186,8 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
             });
 
             // gets the store methods
-            const { restoreEntry, storeEntry, releaseEntry } = storeFactory(storeState, pond) ?? {};
+            const { restoreEntry, storeEntry, releaseEntry } =
+                storeFactory(state as StoreExtensionState<Props>, pond) ?? {};
 
             /**
              * Calls custom store function and handles default responses to abort task and update

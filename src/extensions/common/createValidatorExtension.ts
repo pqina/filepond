@@ -7,8 +7,17 @@ import { upperCaseFirstLetter } from '../../utils/string.js';
 import type { Extension, ExtensionAPI, ExtensionOptions } from './createExtension.js';
 import type { FilePondEntry } from '../../types/index.js';
 
-export type ValidatorFactory = (
-    instance: ExtensionOptions,
+export type ValidatorExtensionResolvedProps<Props extends object = ValidatorExtensionOptions> =
+    ValidatorExtensionOptions & Required<Props>;
+
+export interface ValidatorExtensionState<Props extends object = ValidatorExtensionOptions>
+    extends Omit<ExtensionOptions, 'props' | 'didSetProps'> {
+    props: ValidatorExtensionResolvedProps<Props>;
+    didSetProps: (cb: (props: ValidatorExtensionResolvedProps<Props>) => void) => void;
+}
+
+export type ValidatorFactory<Props extends object = ValidatorExtensionOptions> = (
+    instance: ValidatorExtensionState<Props>,
     api: ExtensionAPI
 ) => ValidatorExtensionFunctions;
 
@@ -26,21 +35,29 @@ export interface ValidatorExtensionOptions {
 
 export interface ValidatorExtensionFunctions {
     /** Returns `true` when can run validation logic on this entry */
-    canValidateEntry?: (entry: FilePondEntry) => Promise<boolean> | boolean;
+    canValidateEntry?: ValidatorExtensionCanValidateFunction;
 
     /** Returns `string` when error state, returns `null` when all is fine */
-    validateEntry: (
-        entry: FilePondEntry
-    ) => Promise<null | ValidationResultInvalid> | (null | ValidationResultInvalid);
+    validateEntry: ValidatorExtensionValidateFunction;
 }
 
-export interface CreateValidatorExtensionOptions {
+export type ValidatorExtensionCanValidateFunction = (
+    entry: FilePondEntry
+) => Promise<boolean> | boolean;
+
+export type ValidatorExtensionValidateFunction = (
+    entry: FilePondEntry
+) => Promise<null | ValidationResultInvalid> | (null | ValidationResultInvalid);
+
+export interface CreateValidatorExtensionOptions<Props extends object = ValidatorExtensionOptions> {
     name: string;
-    props: ValidatorExtensionOptions;
-    factory: ValidatorFactory;
+    props: Props & Partial<ValidatorExtensionOptions>;
+    factory: ValidatorFactory<Props>;
 }
 
-export function createValidatorExtension(options: CreateValidatorExtensionOptions): Extension {
+export function createValidatorExtension<Props extends object = ValidatorExtensionOptions>(
+    options: CreateValidatorExtensionOptions<Props>
+): Extension {
     const { name: extensionName, props: validatorProps, factory: validatorFactory } = options;
 
     return createExtension({
@@ -48,7 +65,7 @@ export function createValidatorExtension(options: CreateValidatorExtensionOption
         type: 'validator',
         props: validatorProps,
         factory: (state, pond) => {
-            const { didSetProps, props } = state;
+            const { didSetProps, props } = state as ValidatorExtensionState<Props>;
 
             const {
                 setExtensionStatus,
@@ -68,7 +85,7 @@ export function createValidatorExtension(options: CreateValidatorExtensionOption
 
                 // by default all validate entry returns "all is well" state
                 validateEntry = () => null,
-            } = validatorFactory(state, pond);
+            } = validatorFactory(state as ValidatorExtensionState<Props>, pond);
 
             // should reset validation state when props are updated
             didSetProps(() => {

@@ -1,7 +1,7 @@
-import type { FilePondEntry } from '../types/index.js';
 import {
-    type ValidationResultInvalid,
+    type ValidatorExtensionCanValidateFunction,
     type ValidatorExtensionOptions,
+    type ValidatorExtensionValidateFunction,
     createValidatorExtension,
 } from './common/createValidatorExtension.js';
 import { isBlobOrFile, isFile, isFileEntry, isString } from '../utils/test.js';
@@ -37,7 +37,7 @@ export const FileExtensionValidator = createValidatorExtension({
                 : accept;
         });
 
-        function validateEntry(entry: FilePondEntry): null | ValidationResultInvalid {
+        const validateEntry: ValidatorExtensionValidateFunction = (entry) => {
             const { format } = props;
             if (!isFileEntry(entry) || !isFile(entry.file)) {
                 return null;
@@ -69,9 +69,9 @@ export const FileExtensionValidator = createValidatorExtension({
                 code: 'VALIDATION_FILE_EXTENSION_MISMATCH',
                 values: { accept: format(computedExtensions), count: computedExtensions.length },
             };
-        }
+        };
 
-        function canValidateEntry(entry: FilePondEntry) {
+        const canValidateEntry: ValidatorExtensionCanValidateFunction = (entry) => {
             if (!isFileEntry(entry) || !isFile(entry.file)) {
                 return false;
             }
@@ -79,7 +79,7 @@ export const FileExtensionValidator = createValidatorExtension({
             return (
                 !!(isBlobOrFile(entry.file) && entry.file?.name) && computedExtensions.length > 0
             );
-        }
+        };
 
         return {
             validateEntry,

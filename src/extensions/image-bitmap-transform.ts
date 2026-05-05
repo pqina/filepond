@@ -1,4 +1,3 @@
-import type { FilePondEntry, FilePondFileEntry } from '../types/index.js';
 import { blobToFile } from '../utils/file.js';
 import { getImageSize } from '../utils/media.js';
 import { rectApply, rectFromSize } from '../utils/rect.js';
@@ -7,7 +6,9 @@ import { isFileEntry, isImageFile } from '../utils/test.js';
 import { createThreadWorker, thread } from '../utils/thread.js';
 import {
     createTransformExtension,
+    type TransformExtensionCanTransformFunction,
     type TransformExtensionOptions,
+    type TransformExtensionTransformFunction,
 } from './common/createTransformExtension.js';
 import { transformImage } from '../workers/transformImage.js';
 
@@ -60,14 +61,14 @@ export const ImageBitmapTransform = createTransformExtension({
     } as ImageBitmapTransformOptions,
     factory: ({ props, extensionName }) => {
         /** Tests if we can transform this entry */
-        function canTransformEntry(entry: FilePondEntry): boolean | Promise<boolean> {
+        const canTransformEntry: TransformExtensionCanTransformFunction = (entry) => {
             return isFileEntry(entry) && isImageFile(entry.file) && !/svg/.test(entry.file.type);
-        }
+        };
 
-        async function transformEntry(
-            entry: FilePondFileEntry & { file: File },
-            { abortController }: { abortController: AbortController }
-        ) {
+        const transformEntry: TransformExtensionTransformFunction = async (
+            entry,
+            { abortController }
+        ) => {
             const {
                 aspectRatio,
                 width,
@@ -195,7 +196,7 @@ export const ImageBitmapTransform = createTransformExtension({
                 file: resizedFile,
                 history: [...currentHistory, resizedFile],
             };
-        }
+        };
 
         return {
             canTransformEntry,

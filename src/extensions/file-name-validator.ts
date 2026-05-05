@@ -1,8 +1,8 @@
-import type { FilePondEntry } from '../types/index.js';
 import {
     createValidatorExtension,
-    type ValidationResultInvalid,
+    type ValidatorExtensionCanValidateFunction,
     type ValidatorExtensionOptions,
+    type ValidatorExtensionValidateFunction,
 } from './common/createValidatorExtension.js';
 import { isBlobOrFile, isFile, isFileEntry, isFunction } from '../utils/test.js';
 import { getFilenameWithoutExtension } from '../utils/file.js';
@@ -22,7 +22,7 @@ export const FileNameValidator = createValidatorExtension({
             warn(`FileNameValidator: 'test' is a required property`);
         }
 
-        function validateEntry(entry: FilePondEntry): null | ValidationResultInvalid {
+        const validateEntry: ValidatorExtensionValidateFunction = (entry) => {
             const { test } = props;
 
             if (!isFileEntry(entry)) {
@@ -40,7 +40,7 @@ export const FileNameValidator = createValidatorExtension({
             }
 
             // get entry extension
-            const nameWithoutExtension = getFilenameWithoutExtension(name);
+            const nameWithoutExtension = getFilenameWithoutExtension(name) as string;
 
             // match types
             const didMatch = test(nameWithoutExtension);
@@ -54,9 +54,9 @@ export const FileNameValidator = createValidatorExtension({
             return {
                 code: 'VALIDATION_FILE_NAME_MISMATCH',
             };
-        }
+        };
 
-        function canValidateEntry(entry: FilePondEntry) {
+        const canValidateEntry: ValidatorExtensionCanValidateFunction = (entry) => {
             const { test } = props;
 
             if (!isFunction(test) || !isFileEntry(entry)) {
@@ -64,7 +64,7 @@ export const FileNameValidator = createValidatorExtension({
             }
 
             return !!(isBlobOrFile(entry.file) && entry.file?.name);
-        }
+        };
 
         return {
             validateEntry,

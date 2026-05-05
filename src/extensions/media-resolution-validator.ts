@@ -1,8 +1,8 @@
-import type { FilePondEntry } from '../types/index.js';
 import {
     createValidatorExtension,
-    type ValidationResultInvalid,
+    type ValidatorExtensionCanValidateFunction,
     type ValidatorExtensionOptions,
+    type ValidatorExtensionValidateFunction,
 } from './common/createValidatorExtension.js';
 import { isFile, isFileEntry, isImageFile, isVideoFile } from '../utils/test.js';
 import { getMediaSize } from '../utils/media.js';
@@ -59,9 +59,7 @@ export const MediaResolutionValidator = createValidatorExtension({
             }
         );
 
-        async function validateEntry(
-            entry: FilePondEntry
-        ): Promise<null | ValidationResultInvalid> {
+        const validateEntry: ValidatorExtensionValidateFunction = async (entry) => {
             // all good!
             if (!isFileEntry(entry) || !isFile(entry.file)) {
                 return null;
@@ -203,11 +201,11 @@ export const MediaResolutionValidator = createValidatorExtension({
 
             // all good!
             return null;
-        }
+        };
 
-        function canValidateEntry(entry: FilePondEntry): boolean {
+        const canValidateEntry: ValidatorExtensionCanValidateFunction = (entry) => {
             return isFileEntry(entry) && (isImageFile(entry.file) || isVideoFile(entry.file));
-        }
+        };
 
         return {
             validateEntry,

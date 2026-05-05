@@ -1,8 +1,8 @@
 import type { FilePondFileEntry } from '../types/index.js';
-import type { Extension } from './common/createExtension.js';
 import {
     createTransformExtension,
     type TransformExtensionOptions,
+    type TransformExtensionTransformFunction,
 } from './common/createTransformExtension.js';
 
 import { isString } from '../utils/test.js';
@@ -36,13 +36,13 @@ export const FileNameTransform = createTransformExtension({
         renameEntry: (entry, options) => {},
     } as FileNameTransformOptions,
     factory: ({ props, extensionName }) => {
-        async function transformEntry(entry: FilePondFileEntry & { file: File }) {
+        const transformEntry: TransformExtensionTransformFunction = async (entry) => {
             const { renameEntry, sanitizeName, actionTransform } = props;
 
             const { name = '' } = entry;
 
-            const basename = getFilenameWithoutExtension(name);
-            const fileExtension = getExtensionFromFilename(name);
+            const basename = getFilenameWithoutExtension(name) ?? '';
+            const fileExtension = getExtensionFromFilename(name) ?? '';
             const entryExtension = entry.extension[extensionName];
 
             // @ts-ignore
@@ -84,7 +84,7 @@ export const FileNameTransform = createTransformExtension({
                 file,
                 history,
             };
-        }
+        };
 
         return {
             transformEntry,

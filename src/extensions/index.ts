@@ -1,6 +1,17 @@
 // shared
 export { createExtension } from './common/createExtension.js';
-export { createValidatorExtension } from './common/createValidatorExtension.js';
+export {
+    createValidatorExtension,
+    type CreateValidatorExtensionOptions,
+    type ValidationResultInvalid,
+    type ValidatorExtensionCanValidateFunction,
+    type ValidatorExtensionFunctions,
+    type ValidatorExtensionOptions,
+    type ValidatorExtensionResolvedProps,
+    type ValidatorExtensionState,
+    type ValidatorExtensionValidateFunction,
+    type ValidatorFactory,
+} from './common/createValidatorExtension.js';
 export {
     createStoreExtension,
     type CreateStoreExtensionOptions,
@@ -16,7 +27,21 @@ export {
     type StoreExtensionStoreFunction,
     type StoreFactory,
 } from './common/createStoreExtension.js';
-export { createTransformExtension } from './common/createTransformExtension.js';
+export {
+    createTransformExtension,
+    type CreateTransformExtensionOptions,
+    type TransformExtensionCanTransformFunction,
+    type TransformExtensionFunctionOptions,
+    type TransformExtensionFunctions,
+    type TransformExtensionOptions,
+    type TransformExtensionPrepareFunction,
+    type TransformExtensionResolvedOptions,
+    type TransformExtensionResolvedProps,
+    type TransformExtensionResult,
+    type TransformExtensionState,
+    type TransformExtensionTransformFunction,
+    type TransformFactory,
+} from './common/createTransformExtension.js';
 
 // sources
 export { ClipboardSource } from './clipboard-source.js';

@@ -1,8 +1,8 @@
-import type { FilePondEntry } from '../types/index.js';
 import {
     createValidatorExtension,
-    type ValidationResultInvalid,
+    type ValidatorExtensionCanValidateFunction,
     type ValidatorExtensionOptions,
+    type ValidatorExtensionValidateFunction,
 } from './common/createValidatorExtension.js';
 import { isBlobOrFile, isFileEntry, isString } from '../utils/test.js';
 import {
@@ -66,7 +66,7 @@ export const FileSizeValidator = createValidatorExtension({
             rangeNatural.maxUnit = maxUnit;
         });
 
-        function validateEntry(entry: FilePondEntry): null | ValidationResultInvalid {
+        const validateEntry: ValidatorExtensionValidateFunction = (entry) => {
             // @ts-ignore
             const { size } = entry.file;
 
@@ -93,11 +93,11 @@ export const FileSizeValidator = createValidatorExtension({
 
             // all good!
             return null;
-        }
+        };
 
-        function canValidateEntry(entry: FilePondEntry) {
+        const canValidateEntry: ValidatorExtensionCanValidateFunction = (entry) => {
             return isFileEntry(entry) && isBlobOrFile(entry.file);
-        }
+        };
 
         return {
             validateEntry,

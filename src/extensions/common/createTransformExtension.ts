@@ -12,31 +12,71 @@ import {
 import { cloneFile, cloneFileWithOptions } from '../../utils/file.js';
 import { Status } from '../../common/status.js';
 
-export type TransformFactory = (
-    instance: ExtensionOptions,
+export type TransformExtensionResolvedOptions = TransformExtensionOptions & {
+    /** Action to run to trigger this extension */
+    actionTransform: string;
+
+    /** Action to run to trigger file load */
+    actionLoad: string;
+
+    /** Determines if we should transform the entry */
+    shouldTransform: ((entry: FilePondEntry) => Promise<boolean> | boolean) | undefined;
+
+    /** How many transform operations can run in parallel */
+    parallel: number;
+
+    /** Determines if this entry is allowed to transform */
+    filterEntry: (entry: FilePondEntry) => Promise<boolean> | boolean;
+};
+
+export type TransformExtensionResolvedProps<Props extends object = TransformExtensionOptions> =
+    TransformExtensionResolvedOptions & Required<Props>;
+
+export interface TransformExtensionState<Props extends object = TransformExtensionOptions>
+    extends Omit<ExtensionOptions, 'props' | 'didSetProps'> {
+    props: TransformExtensionResolvedProps<Props>;
+    didSetProps: (cb: (props: TransformExtensionResolvedProps<Props>) => void) => void;
+}
+
+export type TransformFactory<Props extends object = TransformExtensionOptions> = (
+    instance: TransformExtensionState<Props>,
     api: ExtensionAPI
 ) => TransformExtensionFunctions;
 
+export interface TransformExtensionFunctionOptions {
+    abortController: AbortController;
+    onprogress: (e: Progress) => void;
+}
+
+export type TransformExtensionResult =
+    | { file: File; history?: any[] }
+    | File
+    | undefined
+    | null;
+
+export type TransformExtensionCanTransformFunction = (
+    entry: FilePondEntry
+) => Promise<boolean> | boolean;
+
+export type TransformExtensionPrepareFunction = (
+    entry: FilePondFileEntry & { file: File },
+    options: TransformExtensionFunctionOptions
+) => Promise<void>;
+
+export type TransformExtensionTransformFunction = (
+    entry: FilePondFileEntry & { file: File },
+    options: TransformExtensionFunctionOptions
+) => Promise<TransformExtensionResult> | TransformExtensionResult;
+
 export interface TransformExtensionFunctions {
     /** Determines if we even can transform this entry */
-    canTransformEntry?: (entry: FilePondEntry) => Promise<boolean> | boolean;
+    canTransformEntry?: TransformExtensionCanTransformFunction;
 
     /** Runs before the transformEntry function, useful for loading dependencies */
-    prepareTransformEntry?: (
-        entry: FilePondFileEntry & { file: File },
-        options: { abortController: AbortController; onprogress: (e: Progress) => void }
-    ) => Promise<void>;
+    prepareTransformEntry?: TransformExtensionPrepareFunction;
 
     /** Transforms the passed FilePond entry */
-    transformEntry: (
-        entry: FilePondFileEntry & { file: File },
-        options: { abortController: AbortController; onprogress: (e: Progress) => void }
-    ) =>
-        | Promise<{ file: File; history?: any[] } | File | undefined | null>
-        | { file: File; history?: any[] }
-        | File
-        | undefined
-        | null;
+    transformEntry: TransformExtensionTransformFunction;
 }
 
 export interface TransformExtensionOptions {
@@ -55,15 +95,20 @@ export interface TransformExtensionOptions {
 
     /** How many transform operations can run in parallel, defaults to `1` */
     parallel?: number;
+
+    /** Determines if this entry is allowed to transform */
+    filterEntry?: (entry: FilePondEntry) => Promise<boolean> | boolean;
 }
 
-export interface CreateTransformExtensionOptions {
+export interface CreateTransformExtensionOptions<Props extends object = TransformExtensionOptions> {
     name: string;
-    props: TransformExtensionOptions;
-    factory: TransformFactory;
+    props: Props & Partial<TransformExtensionOptions>;
+    factory: TransformFactory<Props>;
 }
 
-export function createTransformExtension(options: CreateTransformExtensionOptions): Extension {
+export function createTransformExtension<Props extends object = TransformExtensionOptions>(
+    options: CreateTransformExtensionOptions<Props>
+): Extension {
     const { name: extensionName, props: transformProps, factory: transformFactory } = options;
 
     return createExtension({
@@ -79,7 +124,7 @@ export function createTransformExtension(options: CreateTransformExtensionOption
             ...transformProps,
         },
         factory: (state, pond) => {
-            const { props } = state;
+            const { props } = state as TransformExtensionState<Props>;
 
             const {
                 on,
@@ -98,7 +143,7 @@ export function createTransformExtension(options: CreateTransformExtensionOption
                 transformEntry = () => null,
                 canTransformEntry = (entry) => isFileEntry(entry) && isBlobOrFile(entry.file),
                 prepareTransformEntry = undefined,
-            } = transformFactory(state, pond);
+            } = transformFactory(state as TransformExtensionState<Props>, pond);
 
             /** Transforms the passed entry */
             async function taskTransform(

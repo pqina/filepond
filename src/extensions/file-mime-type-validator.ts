@@ -1,8 +1,9 @@
-import type { FilePondEntry } from '../types/index.js';
+import type { FilePondFileEntry } from '../types/index.js';
 import {
     createValidatorExtension,
-    type ValidationResultInvalid,
+    type ValidatorExtensionCanValidateFunction,
     type ValidatorExtensionOptions,
+    type ValidatorExtensionValidateFunction,
 } from './common/createValidatorExtension.js';
 import { isBlobOrFile, isFileEntry, isString } from '../utils/test.js';
 import { upperCaseFirstLetter } from '../utils/string.js';
@@ -31,7 +32,10 @@ export const FileMimeTypeValidator = createValidatorExtension({
     } as FileMimeTypeValidatorOptions,
     factory: ({ props, didSetProps }) => {
         /** Filter out non mimetype values */
-        let filteredMimeTypes: string[] = [];
+        let filteredMimeTypes: (string | RegExp)[] = [];
+
+        /** Mime types we can display in validation labels */
+        let filteredMimeTypeLabels: string[] = [];
 
         /** Parses mimetypes and replaces wildcard mimetypes with regular expresssions */
         let computedMimeTypes: RegExp[] = [];
@@ -52,6 +56,7 @@ export const FileMimeTypeValidator = createValidatorExtension({
                     }
                     return true;
                 });
+            filteredMimeTypeLabels = filteredMimeTypes.filter(isString);
 
             // create regex to test with
             computedMimeTypes = filteredMimeTypes.map((mimeType) => {
@@ -64,11 +69,11 @@ export const FileMimeTypeValidator = createValidatorExtension({
             });
         });
 
-        function validateEntry(entry: FilePondEntry): null | ValidationResultInvalid {
+        const validateEntry: ValidatorExtensionValidateFunction = (entry) => {
             const { format } = props;
 
             // at this point we know we geta filepondentry with a file
-            const { type } = (entry as FilePondEntry & { file: File }).file;
+            const { type } = (entry as FilePondFileEntry & { file: File }).file;
 
             // match types
             const didMatchSome = computedMimeTypes.some((mimeType) => mimeType.test(type));
@@ -79,13 +84,13 @@ export const FileMimeTypeValidator = createValidatorExtension({
                 : {
                       code: 'VALIDATION_FILE_MIME_TYPE_MISMATCH',
                       values: {
-                          accept: format(filteredMimeTypes),
+                          accept: format(filteredMimeTypeLabels),
                           count: filteredMimeTypes.length,
                       },
                   };
-        }
+        };
 
-        function canValidateEntry(entry: FilePondEntry) {
+        const canValidateEntry: ValidatorExtensionCanValidateFunction = (entry) => {
             if (!isFileEntry(entry)) {
                 return false;
             }
@@ -100,7 +105,7 @@ export const FileMimeTypeValidator = createValidatorExtension({
 
             // has a type and it's not empty
             return !!entry.file.type;
-        }
+        };
 
         return {
             validateEntry,
