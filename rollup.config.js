@@ -32,6 +32,7 @@ function virtualIndex() {
             return `
             export * from '${srcDir}/extensions/index.js';
             export * from '${srcDir}/templates/index.js';
+            export * from '${srcDir}/utils/index.js';
             export * from '${srcDir}/dev/index.js';
             export * from '${srcDir}/index.js';
             `;
@@ -56,6 +57,9 @@ createMicroFiles(srcDir + '/extensions/*.js', destDir + '/extensions');
 
 // templates
 createMicroFiles(srcDir + '/templates/*.js', destDir + '/templates');
+
+// utils
+createMicroFiles(srcDir + '/utils/*.js', destDir + '/utils');
 
 // dev
 createMicroFiles(srcDir + '/dev/*.js', destDir + '/dev');
