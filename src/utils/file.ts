@@ -43,8 +43,9 @@ export function sanitizeFilename(filename: string) {
 }
 
 /** Returns extension + preceding dot, `test.txt` returns `.txt` */
-export function getExtensionFromFilename(filename: unknown): string | undefined {
-    return isString(filename) ? /(?:\.([^.]+))?$/.exec(filename)?.[0] : undefined;
+export function getExtensionFromFilename(filename: unknown, caseInsensitive = false): string | undefined {
+    const extension = isString(filename) ? /(?:\.([^.]+))?$/.exec(filename)?.[0] : undefined;
+    return caseInsensitive ? extension?.toLowerCase() : extension;
 }
 
 export function getFilenameWithoutExtension(filename: string): string | undefined {

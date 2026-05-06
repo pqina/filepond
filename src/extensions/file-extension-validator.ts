@@ -53,8 +53,8 @@ export const FileExtensionValidator = createValidatorExtension({
                 };
             }
 
-            // get entry extension
-            const extension = getExtensionFromFilename(name);
+            // get entry extension (case insensitive)
+            const extension = getExtensionFromFilename(name, true);
 
             // match types
             const didMatchSome = computedExtensions.some((ext) => ext === extension);

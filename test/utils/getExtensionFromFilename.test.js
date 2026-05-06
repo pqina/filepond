@@ -18,6 +18,14 @@ describe('getExtensionFromFilename', function () {
         expect(getExtensionFromFilename('name.txt.txt')).to.equal('.txt');
     });
 
+    it('should parse "name.TXT" (case sensitive)', function () {
+        expect(getExtensionFromFilename('name.TXT')).to.equal('.TXT');
+    });
+
+    it('should parse "name.TXT" (case insensitive)', function () {
+        expect(getExtensionFromFilename('name.TXT', true)).to.equal('.txt');
+    });
+
     it('should parse "name"', function () {
         expect(getExtensionFromFilename('name')).to.equal('');
     });
