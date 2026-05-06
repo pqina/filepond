@@ -7,7 +7,7 @@ export interface TaskSchedulerOptions {
 }
 
 export interface TaskFnOptions {
-    abortController: AbortController;
+    signal: AbortSignal;
 }
 
 export type TaskFn = (...args: any[]) => Promise<void | boolean> | void | boolean;
@@ -301,7 +301,7 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
             const taskParameters = isFunction(params) ? params() : params;
 
             // task can return `false` to prevent running additional tasks (only tasks that can ignore soft failures will run), task can throw error to halt all task processing
-            const taskSuccess = await fn(...taskParameters, { abortController });
+            const taskSuccess = await fn(...taskParameters, { signal: abortController.signal });
 
             // done!
             removeTask(task);

@@ -108,11 +108,11 @@ export const ChunkedUploadStore = createStoreExtension({
 
         async function requestFileTransferId(
             file: File,
-            options: { abortController?: AbortController; onabort: () => void },
+            options: { signal?: AbortSignal; onabort: () => void },
             entry: FilePondFileEntry
         ): Promise<string> {
             const { url, resolveRequest } = props;
-            const { abortController, onabort } = options ?? {};
+            const { signal, onabort } = options ?? {};
 
             const requestOptions: PublicRequestOptions = {
                 method: 'POST',
@@ -129,7 +129,7 @@ export const ChunkedUploadStore = createStoreExtension({
             );
             const request = await xhr(resolvedRequest.url, {
                 ...resolvedRequest.options,
-                signal: abortController?.signal,
+                signal,
                 onabort,
             });
 
@@ -142,11 +142,11 @@ export const ChunkedUploadStore = createStoreExtension({
 
         async function requestFileChunkOffset(
             serverId: string,
-            options: { abortController?: AbortController; onabort: () => void },
+            options: { signal?: AbortSignal; onabort: () => void },
             entry: FilePondFileEntry
         ): Promise<number> {
             const { url, resolveRequest } = props;
-            const { abortController, onabort } = options ?? {};
+            const { signal, onabort } = options ?? {};
 
             const requestOptions: PublicRequestOptions = {
                 method: 'HEAD',
@@ -163,7 +163,7 @@ export const ChunkedUploadStore = createStoreExtension({
             );
             const request = await xhr(resolvedRequest.url, {
                 ...resolvedRequest.options,
-                signal: abortController?.signal,
+                signal,
                 onabort,
             });
 
@@ -182,11 +182,11 @@ export const ChunkedUploadStore = createStoreExtension({
             data: Blob,
             serverId: string,
             headers: { [key: string]: string | number },
-            options: { abortController?: AbortController; onabort: () => void },
+            options: { signal?: AbortSignal; onabort: () => void },
             entry: FilePondFileEntry
         ): Promise<boolean | void> {
             const { url, retryDelays, resolveRequest } = props;
-            const { abortController, onabort } = options ?? {};
+            const { signal, onabort } = options ?? {};
             for (const delay of [...retryDelays, undefined]) {
                 try {
                     // upload chunk patch
@@ -209,7 +209,7 @@ export const ChunkedUploadStore = createStoreExtension({
                     await xhr(resolvedRequest.url, {
                         ...resolvedRequest.options,
                         onabort,
-                        signal: abortController?.signal,
+                        signal,
                     });
 
                     // success
@@ -236,13 +236,13 @@ export const ChunkedUploadStore = createStoreExtension({
             { uploadName, uploadLength }: { uploadName: string; uploadLength: string },
             options: {
                 onprogress?: (e: ProgressEvent) => void;
-                abortController?: AbortController;
+                signal?: AbortSignal;
                 onabort?: () => void;
             },
             entry: FilePondFileEntry
         ): Promise<void> {
             const { parallelChunks } = props;
-            const { onprogress = noop, onabort = noop, abortController } = options ?? {};
+            const { onprogress = noop, onabort = noop, signal } = options ?? {};
 
             // prevents handling next chunk when abort is called
             let didAbort = false;
@@ -274,7 +274,7 @@ export const ChunkedUploadStore = createStoreExtension({
                         uploadLength,
                     },
                     {
-                        abortController,
+                        signal,
                         onabort: () => {
                             didAbort = true;
                             unobserveUploadProgress();
@@ -309,7 +309,7 @@ export const ChunkedUploadStore = createStoreExtension({
 
         const storeEntry: StoreExtensionStoreFunction = async (
             entry,
-            { abortController, onprogress, onabort }
+            { signal, onprogress, onabort }
         ) => {
             // Needs to be of type File
             if (!isFileEntry(entry) || !isFile(entry.file)) {
@@ -329,11 +329,7 @@ export const ChunkedUploadStore = createStoreExtension({
 
             if (!serverId) {
                 // get and remember server id for when we want to resume, if aborted during this action we revert entire save process
-                serverId = await requestFileTransferId(
-                    entry.file,
-                    { abortController, onabort },
-                    entry
-                );
+                serverId = await requestFileTransferId(entry.file, { signal, onabort }, entry);
 
                 // need to remember this for when we want to resume
                 storeServerId(entry, serverId);
@@ -342,7 +338,7 @@ export const ChunkedUploadStore = createStoreExtension({
                 uploadOffset = await requestFileChunkOffset(
                     serverId,
                     {
-                        abortController,
+                        signal,
                         onabort: () => {
                             // this call will reset state and remove server id
                             onabort();
@@ -372,7 +368,7 @@ export const ChunkedUploadStore = createStoreExtension({
                 // upload progress
                 {
                     onprogress,
-                    abortController,
+                    signal,
                     onabort: () => {
                         // this will reset the save state to false
                         onabort();

@@ -11,6 +11,7 @@ import {
 } from '../../utils/test.js';
 import { cloneFile, cloneFileWithOptions } from '../../utils/file.js';
 import { Status } from '../../common/status.js';
+import type { TaskFnOptions } from '../../core/taskScheduler.js';
 
 export type TransformExtensionResolvedOptions = TransformExtensionOptions & {
     /** Action to run to trigger this extension */
@@ -44,15 +45,11 @@ export type TransformFactory<Props extends object = TransformExtensionOptions> =
 ) => TransformExtensionFunctions;
 
 export interface TransformExtensionFunctionOptions {
-    abortController: AbortController;
+    signal: AbortSignal;
     onprogress: (e: Progress) => void;
 }
 
-export type TransformExtensionResult =
-    | { file: File; history?: any[] }
-    | File
-    | undefined
-    | null;
+export type TransformExtensionResult = { file: File; history?: any[] } | File | undefined | null;
 
 export type TransformExtensionCanTransformFunction = (
     entry: FilePondEntry
@@ -148,7 +145,7 @@ export function createTransformExtension<Props extends object = TransformExtensi
             /** Transforms the passed entry */
             async function taskTransform(
                 entry: FilePondFileEntry & { file: File },
-                { abortController }: { abortController: AbortController }
+                { signal }: TaskFnOptions
             ) {
                 const { actionTransform, actionLoad, shouldTransform } = props;
 
@@ -162,7 +159,7 @@ export function createTransformExtension<Props extends object = TransformExtensi
 
                     try {
                         await prepareTransformEntry(entry, {
-                            abortController,
+                            signal,
                             onprogress: createProgressHandler(entry),
                         });
                     } catch (error) {
@@ -191,7 +188,7 @@ export function createTransformExtension<Props extends object = TransformExtensi
                 let transformResult;
                 try {
                     transformResult = await transformEntry(entry, {
-                        abortController,
+                        signal,
                         onprogress: createProgressHandler(entry),
                     });
                 } catch (error) {

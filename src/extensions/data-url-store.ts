@@ -20,7 +20,7 @@ export const DataURLStore = createStoreExtension({
     factory: ({ props }) => {
         const storeEntry: StoreExtensionStoreFunction = async (
             entry,
-            { abortController, onprogress, onabort }
+            { signal, onprogress, onabort }
         ) => {
             // should we use a blob worker
             const { workersURL } = props;
@@ -32,7 +32,7 @@ export const DataURLStore = createStoreExtension({
 
             // encode in separate thread so doesn't block UI animations
             const res = (await thread(createThreadWorker(workersURL, readFile), [entry.file], {
-                signal: abortController.signal,
+                signal,
                 onprogress,
                 onabort,
             })) as { dataURL: string };

@@ -85,7 +85,7 @@ export const DataTransferLoader = createExtension({
         /** Converts a DataTransfer to separate entries */
         async function taskConvertDataTransferToEntries(
             entry: FilePondFileEntry,
-            { abortController }: { abortController: AbortController }
+            { signal }: { signal: AbortSignal }
         ) {
             const { mode } = props;
 
@@ -111,7 +111,7 @@ export const DataTransferLoader = createExtension({
 
                     // @ts-ignore
                     const rawEntries = await readEntries(entry.src, {
-                        abortController,
+                        signal,
                         onprogress: ({ loaded, total }) => {
                             setEntryExtensionStatus(entry, {
                                 type: Status.System,

@@ -58,17 +58,14 @@ export interface ExtensionManagerAPI {
         entryId: string,
         fn: (
             entry: T,
-            options: { abortController: AbortController }
+            options: { signal: AbortSignal }
         ) => Promise<void | boolean> | void | boolean,
         options?: TaskOptions
     ) => void;
 
     abortTask: <T>(
         entryId: string,
-        fn: (
-            entry: T,
-            options: { abortController: AbortController }
-        ) => Promise<void | boolean> | void | boolean
+        fn: (entry: T, options: { signal: AbortSignal }) => Promise<void | boolean> | void | boolean
     ) => void;
 
     abortTasks: (group?: string) => void;
@@ -203,7 +200,7 @@ export function createExtensionManager(
                 key: string,
                 fn: (
                     entry: T,
-                    options: { abortController: AbortController }
+                    options: { signal: AbortSignal }
                 ) => Promise<void | boolean> | void | boolean,
                 options?: TaskOptions
             ) {
@@ -241,7 +238,7 @@ export function createExtensionManager(
                 key: string,
                 fn: (
                     entry: T,
-                    options: { abortController: AbortController }
+                    options: { signal: AbortSignal }
                 ) => Promise<void | boolean> | void | boolean
             ) {
                 taskScheduler.abortTask(key, fn);

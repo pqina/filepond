@@ -193,10 +193,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
              * Calls custom store function and handles default responses to abort task and update
              * entry state
              */
-            async function taskStoreEntry(
-                entry: FilePondFileEntry,
-                { abortController }: TaskFnOptions
-            ) {
+            async function taskStoreEntry(entry: FilePondFileEntry, { signal }: TaskFnOptions) {
                 // store file
                 setEntryExtensionStatus(entry, {
                     type: Status.System,
@@ -221,6 +218,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
 
                     const response = await storeFn(entry, {
                         onprogress: createProgressHandler(entry),
+                        signal,
                         onabort: () => {
                             updateEntry(entry, {
                                 state: {
@@ -243,7 +241,6 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                                 },
                             });
                         },
-                        abortController,
                     });
 
                     // update store state with storage key if returned
@@ -276,10 +273,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
             }
 
             /** Restores an entry to a File by value */
-            async function taskRestoreEntry(
-                entry: FilePondFileEntry,
-                { abortController }: TaskFnOptions
-            ) {
+            async function taskRestoreEntry(entry: FilePondFileEntry, { signal }: TaskFnOptions) {
                 // can't restore entry without a restore implementation
                 if (!restoreEntry) {
                     return;
@@ -299,7 +293,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                 try {
                     let response = await restoreEntry(value, entry, {
                         onprogress: createProgressHandler(entry),
-                        abortController,
+                        signal,
                         onabort: () => {
                             setEntryExtensionStatus(entry, {
                                 type: Status.System,
@@ -348,10 +342,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
             }
 
             /** Restores an entry to a File by value */
-            async function taskReleaseEntry(
-                entry: FilePondFileEntry,
-                { abortController }: TaskFnOptions
-            ) {
+            async function taskReleaseEntry(entry: FilePondFileEntry, { signal }: TaskFnOptions) {
                 const { valueKey, actionLoad, actionStore, shouldStore } = props;
 
                 try {
@@ -382,7 +373,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                     if (restoreEntry && !isFile(entry.file) && !removeOnRelease) {
                         let response = await restoreEntry(value, entry, {
                             onprogress: createProgressHandler(entry),
-                            abortController,
+                            signal,
                             onabort: () => {
                                 setEntryExtensionStatus(entry, {
                                     type: Status.System,
@@ -401,7 +392,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                     if (releaseEntry) {
                         // now release uploaded file from storage
                         const success = await releaseEntry(value, entry, {
-                            abortController,
+                            signal,
                             onabort: () => {
                                 setEntryExtensionStatus(entry, {
                                     type: Status.System,

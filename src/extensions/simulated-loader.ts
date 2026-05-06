@@ -37,7 +37,7 @@ export interface SimulatedLoaderOptions {
     fetchFile?: (
         entry: FilePondEntry,
         options: {
-            abortController: AbortController;
+            signal: AbortSignal;
             onprogress: (e: ProgressEvent) => void;
             onabort: () => void;
         }
@@ -126,7 +126,7 @@ export const SimulatedLoader = createExtension({
         /** Convert entry to a file object */
         async function taskUrlToFileSimulation(
             entry: FilePondFileEntry,
-            { abortController }: TaskFnOptions
+            { signal }: TaskFnOptions
         ): Promise<void> {
             const { src, size = 1024 * 1024 } = entry;
             const {
@@ -171,7 +171,7 @@ export const SimulatedLoader = createExtension({
 
                 const intervalId = setInterval(async () => {
                     // aborted
-                    if (abortController.signal.aborted) {
+                    if (signal.aborted) {
                         return;
                     }
 
@@ -195,7 +195,7 @@ export const SimulatedLoader = createExtension({
                     // we create a file
                     let file;
                     if (fetchFile) {
-                        file = await fetchFile(entry, { abortController, onprogress, onabort });
+                        file = await fetchFile(entry, { signal, onprogress, onabort });
                     } else {
                         await sleep(0);
                         // @ts-ignore
@@ -227,7 +227,7 @@ export const SimulatedLoader = createExtension({
                 }, tickrate);
 
                 // can abort
-                abortController.signal.onabort = () => {
+                signal.onabort = () => {
                     clearInterval(intervalId);
 
                     log && logState(['did abort load data', entry.id]);

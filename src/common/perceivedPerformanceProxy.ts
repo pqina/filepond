@@ -3,7 +3,7 @@ import { randomNumberBetween } from '../utils/math.js';
 
 function createPerceivedPerformanceProcess(
     onprogress: (e: Progress) => void,
-    abortController: AbortController,
+    signal: AbortSignal,
     config: { minDuration: number; maxDuration: number; minStep: number; maxStep: number }
 ): Promise<void> {
     return new Promise((resolve) => {
@@ -14,14 +14,14 @@ function createPerceivedPerformanceProcess(
         const total = 1;
         let loaded = 0;
 
-        abortController.signal.onabort = () => {
+        signal.onabort = () => {
             clearTimeout(timeoutId);
         };
 
         onprogress({ lengthComputable, loaded, total });
 
         const tick = () => {
-            if (abortController.signal.aborted) {
+            if (signal.aborted) {
                 return;
             }
 
@@ -69,11 +69,11 @@ export function createPerceivedPerformanceProxy(fn: any, options: any) {
         {
             onprogress,
             onabort,
-            abortController,
+            signal,
         }: {
             onprogress: (e: Progress) => void;
             onabort: () => void;
-            abortController: AbortController;
+            signal: AbortSignal;
         }
     ) {
         // used to cancel perceived performance store operations
@@ -116,7 +116,7 @@ export function createPerceivedPerformanceProxy(fn: any, options: any) {
             },
 
             // if we abort we abort simulation as well
-            perceivedPerformanceAbortController,
+            perceivedPerformanceAbortController.signal,
 
             options
         );
@@ -129,13 +129,13 @@ export function createPerceivedPerformanceProxy(fn: any, options: any) {
                 handleProgressUpdate();
             },
             onabort: () => {
-                // need to call perceivedPerformancePromise abortController to cancel perceived performance updates
+                // need to call perceivedPerformancePromise abort controller to cancel perceived performance updates
                 perceivedPerformanceAbortController.abort();
 
                 // run actual handle abort logic
                 onabort();
             },
-            abortController,
+            signal,
         });
 
         return new Promise((resolve, reject) => {

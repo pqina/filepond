@@ -124,7 +124,7 @@ export const URLLoader = createExtension({
         }
 
         /** Get remote file information */
-        async function taskUrlToInfo(entry: FilePondFileEntry, { abortController }: TaskFnOptions) {
+        async function taskUrlToInfo(entry: FilePondFileEntry, { signal }: TaskFnOptions) {
             const { src } = entry;
 
             setEntryExtensionStatus(entry, {
@@ -151,7 +151,7 @@ export const URLLoader = createExtension({
                 );
                 const headRequest = await xhr(resolvedRequest.url, {
                     ...resolvedRequest.options,
-                    signal: abortController.signal,
+                    signal,
                     useWebWorkers,
                     workersURL,
                 });
@@ -173,7 +173,7 @@ export const URLLoader = createExtension({
         }
 
         /** Convert entry to a file object */
-        async function taskUrlToFile(entry: FilePondFileEntry, { abortController }: TaskFnOptions) {
+        async function taskUrlToFile(entry: FilePondFileEntry, { signal }: TaskFnOptions) {
             const { src } = entry;
 
             setEntryExtensionStatus(entry, {
@@ -200,7 +200,7 @@ export const URLLoader = createExtension({
                 const dataRequest = await xhr(resolvedRequest.url, {
                     ...resolvedRequest.options,
                     responseType: 'arraybuffer',
-                    signal: abortController.signal,
+                    signal,
                     useWebWorkers,
                     workersURL,
                     onprogress: createProgressHandler(entry),

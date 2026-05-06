@@ -21,7 +21,7 @@ describe('createStoreExtension', () => {
                 shouldThrow: false,
             },
             factory: ({ props, didSetProps }) => {
-                async function storeEntry(entry, { abortController, onprogress, onabort }) {
+                async function storeEntry(entry, { onprogress, onabort }) {
                     const { shouldThrow } = props;
 
                     if (shouldThrow) {
@@ -200,7 +200,7 @@ describe('createStoreExtension', () => {
                 name: 'TestStore',
                 props: {},
                 factory: () => {
-                    async function storeEntry(entry, { abortController, onprogress, onabort }) {
+                    async function storeEntry(entry, { onprogress, onabort }) {
                         // returns the storage id
                         return '1234';
                     }
@@ -265,11 +265,11 @@ describe('createStoreExtension', () => {
                 name: 'TestStore',
                 props: {},
                 factory: () => {
-                    function storeEntry(_, { abortController, onabort }) {
+                    function storeEntry(_, { signal, onabort }) {
                         return new Promise((resolve) => {
                             let timer;
 
-                            abortController.signal.onabort = () => {
+                            signal.onabort = () => {
                                 clearTimeout(timer);
 
                                 // we need to call onabort when aborted
@@ -611,7 +611,7 @@ describe('createStoreExtension', () => {
                 name: 'TestStore',
                 props: {},
                 factory: () => {
-                    async function storeEntry(entry, { abortController, onprogress, onabort }) {
+                    async function storeEntry(entry, { onprogress, onabort }) {
                         releasedFile = '1234';
                         return '1234';
                     }
@@ -704,7 +704,7 @@ describe('createStoreExtension', () => {
                 props: {},
                 factory: () => {
                     let i = 0;
-                    async function storeEntry(entry, { abortController, onprogress, onabort }) {
+                    async function storeEntry(entry, { onprogress, onabort }) {
                         i++;
 
                         // id for first file
@@ -792,7 +792,7 @@ describe('createStoreExtension', () => {
                 name: 'TestStore',
                 props: {},
                 factory: () => {
-                    async function storeEntry(entry, { abortController, onprogress, onabort }) {
+                    async function storeEntry(entry, { onprogress, onabort }) {
                         releasedFile = '1234';
                         return '1234';
                     }
@@ -872,7 +872,7 @@ describe('createStoreExtension', () => {
                 name: 'TestStore',
                 props: {},
                 factory: () => {
-                    async function storeEntry(entry, { abortController, onprogress, onabort }) {
+                    async function storeEntry(entry, { onprogress, onabort }) {
                         releasedFile = '1234';
                         return '1234';
                     }

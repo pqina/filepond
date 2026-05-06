@@ -41,7 +41,7 @@ export interface SimulatedStoreOptions extends StoreExtensionOptions {
         storageId: string,
         entry: FilePondEntry,
         options: {
-            abortController: AbortController;
+            signal: AbortSignal;
             onprogress: (e: ProgressEvent) => void;
             onabort: () => void;
         }
@@ -72,7 +72,7 @@ export const SimulatedStore = createStoreExtension({
 
         const storeEntry: StoreExtensionStoreFunction = async (
             entry,
-            { abortController, onprogress, onabort }
+            { signal, onprogress, onabort }
         ) => {
             // Needs to be of type File
             if (!isFileEntry(entry) || !isFile(entry.file)) {
@@ -82,7 +82,7 @@ export const SimulatedStore = createStoreExtension({
             let intervalId: ReturnType<typeof setTimeout>;
 
             // can abort
-            abortController.signal.onabort = () => {
+            signal.onabort = () => {
                 clearInterval(intervalId);
                 onabort();
             };
@@ -91,7 +91,7 @@ export const SimulatedStore = createStoreExtension({
             await sleep(connectionDelay);
 
             // aborted while sleeping
-            if (abortController.signal.aborted) {
+            if (signal.aborted) {
                 return;
             }
 
@@ -102,7 +102,7 @@ export const SimulatedStore = createStoreExtension({
 
                 intervalId = setInterval(() => {
                     // aborted
-                    if (abortController.signal.aborted) {
+                    if (signal.aborted) {
                         return;
                     }
 

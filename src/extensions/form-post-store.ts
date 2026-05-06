@@ -53,7 +53,7 @@ export const FormPostStore = createStoreExtension({
 
         const storeEntry: StoreExtensionStoreFunction = async (
             entry,
-            { abortController, onprogress, onabort }
+            { signal, onprogress, onabort }
         ) => {
             const { url, valueKey, resolveRequest } = props;
 
@@ -81,7 +81,7 @@ export const FormPostStore = createStoreExtension({
             );
             const request = await xhr(resolvedRequest.url, {
                 ...resolvedRequest.options,
-                signal: abortController.signal,
+                signal,
                 onprogress,
                 onabort,
             });
@@ -93,7 +93,7 @@ export const FormPostStore = createStoreExtension({
         const restoreEntry: StoreExtensionRestoreFunction = async (
             storageId,
             entry,
-            { onprogress, onabort, abortController }
+            { onprogress, onabort, signal }
         ) => {
             const { url, fetchHead, resolveRequest } = props;
 
@@ -142,7 +142,7 @@ export const FormPostStore = createStoreExtension({
             const request = await xhr(resolvedRequest.url, {
                 ...resolvedRequest.options,
                 responseType: 'blob',
-                signal: abortController.signal,
+                signal,
                 onprogress,
                 onabort,
             });

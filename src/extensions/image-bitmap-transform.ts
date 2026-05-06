@@ -65,10 +65,7 @@ export const ImageBitmapTransform = createTransformExtension({
             return isFileEntry(entry) && isImageFile(entry.file) && !/svg/.test(entry.file.type);
         };
 
-        const transformEntry: TransformExtensionTransformFunction = async (
-            entry,
-            { abortController }
-        ) => {
+        const transformEntry: TransformExtensionTransformFunction = async (entry, { signal }) => {
             const {
                 aspectRatio,
                 width,
@@ -164,7 +161,7 @@ export const ImageBitmapTransform = createTransformExtension({
                         },
                     ],
                     {
-                        signal: abortController.signal,
+                        signal,
                     }
                 )) as ImageBitmap;
             } catch (error) {

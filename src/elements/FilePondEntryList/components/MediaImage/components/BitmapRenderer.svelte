@@ -36,6 +36,7 @@
     import { createThreadWorker, thread } from '../../../../../utils/thread.js';
     import { type Size } from '../../../../../utils/size.js';
     import { transformImage } from '../../../../../workers/transformImage.js';
+    import type { TaskFnOptions } from '../../../../../core/taskScheduler.js';
 
     let {
         file,
@@ -97,10 +98,7 @@
     );
 
     /** Load image bitmap with webworker */
-    async function drawImageInWorker(
-        _: any,
-        { abortController }: { abortController: AbortController }
-    ) {
+    async function drawImageInWorker(_: any, { signal }: TaskFnOptions) {
         // we did load this image
         didRequestDisplayImage = true;
 
@@ -122,7 +120,7 @@
                     },
                 ],
                 {
-                    signal: abortController.signal,
+                    signal,
                 }
             )) as ImageBitmap;
 
