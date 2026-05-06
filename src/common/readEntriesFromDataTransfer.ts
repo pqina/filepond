@@ -23,10 +23,9 @@ export async function readEntriesFromDataTransfer(
     options: {
         onprogress: (progress: { loaded: number; total: number }) => void;
         signal?: AbortSignal;
-        onabort?: () => void;
     }
 ): Promise<any> {
-    const { onprogress = noop, onabort = noop, signal } = options ?? {};
+    const { onprogress = noop, signal } = options ?? {};
 
     // test if has items
     const { items } = dataTransfer ?? {};
@@ -35,7 +34,6 @@ export async function readEntriesFromDataTransfer(
     }
 
     // state
-    let didCallOnAbort = false;
     let totalFileEntries = 0;
     let processedFileEntries = 0;
 
@@ -45,8 +43,7 @@ export async function readEntriesFromDataTransfer(
 
     // aborted
     if (signal?.aborted) {
-        onabort();
-        return;
+        throw signal.reason;
     }
 
     // count total files
@@ -68,11 +65,7 @@ export async function readEntriesFromDataTransfer(
             if (isFunction(entry)) {
                 // aborted
                 if (signal?.aborted) {
-                    if (!didCallOnAbort) {
-                        onabort();
-                    }
-                    didCallOnAbort = true;
-                    return;
+                    throw signal.reason;
                 }
 
                 // turn into file
@@ -95,10 +88,9 @@ async function entriesToArray(
         entryToFile?: (entry: FilePondFileEntry) => any;
         onprocessentry?: (entry: FileSystemEntry) => void;
         signal?: AbortSignal;
-        onabort?: () => void;
     }
 ): Promise<((() => Promise<File & { path?: string }>) | FilePondEntry)[]> {
-    const { signal, onabort = noop } = options ?? {};
+    const { signal } = options ?? {};
 
     let entriesArray: ((() => Promise<File & { path?: string }>) | FilePondEntry)[] = [];
 
@@ -110,8 +102,7 @@ async function entriesToArray(
 
         // aborted
         if (signal?.aborted) {
-            onabort();
-            return [];
+            throw signal.reason;
         }
 
         let item;

@@ -51,10 +51,7 @@ export const FormPostStore = createStoreExtension({
             }
         }
 
-        const storeEntry: StoreExtensionStoreFunction = async (
-            entry,
-            { signal, onprogress, onabort }
-        ) => {
+        const storeEntry: StoreExtensionStoreFunction = async (entry, { onprogress, signal }) => {
             const { url, valueKey, resolveRequest } = props;
 
             // Needs to be of type File
@@ -83,7 +80,6 @@ export const FormPostStore = createStoreExtension({
                 ...resolvedRequest.options,
                 signal,
                 onprogress,
-                onabort,
             });
 
             // return a unique id
@@ -93,7 +89,7 @@ export const FormPostStore = createStoreExtension({
         const restoreEntry: StoreExtensionRestoreFunction = async (
             storageId,
             entry,
-            { onprogress, onabort, signal }
+            { onprogress, signal }
         ) => {
             const { url, fetchHead, resolveRequest } = props;
 
@@ -111,7 +107,10 @@ export const FormPostStore = createStoreExtension({
                     requestOptions,
                     entry
                 );
-                const headRequest = await xhr(resolvedRequest.url, resolvedRequest.options);
+                const headRequest = await xhr(resolvedRequest.url, {
+                    ...resolvedRequest.options,
+                    signal,
+                });
 
                 // use this to prefill content type and length
                 const { contentType, contentLength, lastModified } =
@@ -144,7 +143,6 @@ export const FormPostStore = createStoreExtension({
                 responseType: 'blob',
                 signal,
                 onprogress,
-                onabort,
             });
 
             // get the blob object
@@ -162,8 +160,9 @@ export const FormPostStore = createStoreExtension({
             );
         };
 
-        const releaseEntry: StoreExtensionReleaseFunction = async (storageId, entry) => {
+        const releaseEntry: StoreExtensionReleaseFunction = async (storageId, entry, options) => {
             const { url, resolveRequest } = props;
+            const { signal } = options ?? {};
 
             const requestOptions: PublicRequestOptions = {
                 method: 'DELETE',
@@ -179,7 +178,10 @@ export const FormPostStore = createStoreExtension({
                 entry
             );
 
-            await xhr(resolvedRequest.url, resolvedRequest.options);
+            await xhr(resolvedRequest.url, {
+                ...resolvedRequest.options,
+                signal,
+            });
 
             // TODO: return success / fail state, for now always succeeds
             return true;

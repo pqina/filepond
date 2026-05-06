@@ -1,5 +1,6 @@
 import { createStoreExtension } from './common/createStoreExtension.js';
 import { isFile, isFileEntry, isNumber, isString } from '../utils/test.js';
+import { didAbort } from '../utils/abort.js';
 import { toURL } from '../utils/url.js';
 import { naturalFileSizeToBytes } from '../utils/file.js';
 import { noop, passthrough } from '../utils/placeholder.js';
@@ -108,11 +109,11 @@ export const ChunkedUploadStore = createStoreExtension({
 
         async function requestFileTransferId(
             file: File,
-            options: { signal?: AbortSignal; onabort: () => void },
+            options: { signal?: AbortSignal },
             entry: FilePondFileEntry
         ): Promise<string> {
             const { url, resolveRequest } = props;
-            const { signal, onabort } = options ?? {};
+            const { signal } = options ?? {};
 
             const requestOptions: PublicRequestOptions = {
                 method: 'POST',
@@ -130,7 +131,6 @@ export const ChunkedUploadStore = createStoreExtension({
             const request = await xhr(resolvedRequest.url, {
                 ...resolvedRequest.options,
                 signal,
-                onabort,
             });
 
             if (!isString(request.response) || !request.response.length) {
@@ -142,11 +142,11 @@ export const ChunkedUploadStore = createStoreExtension({
 
         async function requestFileChunkOffset(
             serverId: string,
-            options: { signal?: AbortSignal; onabort: () => void },
+            options: { signal?: AbortSignal },
             entry: FilePondFileEntry
         ): Promise<number> {
             const { url, resolveRequest } = props;
-            const { signal, onabort } = options ?? {};
+            const { signal } = options ?? {};
 
             const requestOptions: PublicRequestOptions = {
                 method: 'HEAD',
@@ -164,7 +164,6 @@ export const ChunkedUploadStore = createStoreExtension({
             const request = await xhr(resolvedRequest.url, {
                 ...resolvedRequest.options,
                 signal,
-                onabort,
             });
 
             // get the upload offset
@@ -182,11 +181,11 @@ export const ChunkedUploadStore = createStoreExtension({
             data: Blob,
             serverId: string,
             headers: { [key: string]: string | number },
-            options: { signal?: AbortSignal; onabort: () => void },
+            options: { signal?: AbortSignal },
             entry: FilePondFileEntry
         ): Promise<boolean | void> {
             const { url, retryDelays, resolveRequest } = props;
-            const { signal, onabort } = options ?? {};
+            const { signal } = options ?? {};
             for (const delay of [...retryDelays, undefined]) {
                 try {
                     // upload chunk patch
@@ -208,13 +207,16 @@ export const ChunkedUploadStore = createStoreExtension({
                     );
                     await xhr(resolvedRequest.url, {
                         ...resolvedRequest.options,
-                        onabort,
                         signal,
                     });
 
                     // success
                     return true;
                 } catch (error) {
+                    if (didAbort(signal, error)) {
+                        throw error;
+                    }
+
                     // try again after retry delay if is bigger than 0
                     if (isNumber(delay)) {
                         await sleep(delay);
@@ -237,15 +239,11 @@ export const ChunkedUploadStore = createStoreExtension({
             options: {
                 onprogress?: (e: ProgressEvent) => void;
                 signal?: AbortSignal;
-                onabort?: () => void;
             },
             entry: FilePondFileEntry
         ): Promise<void> {
             const { parallelChunks } = props;
-            const { onprogress = noop, onabort = noop, signal } = options ?? {};
-
-            // prevents handling next chunk when abort is called
-            let didAbort = false;
+            const { onprogress = noop, signal } = options ?? {};
 
             // observe progress
             const unobserveUploadProgress = observeUploadProgress(
@@ -254,63 +252,71 @@ export const ChunkedUploadStore = createStoreExtension({
                 onprogress
             );
 
+            const abortUploadProgress = () => {
+                unobserveUploadProgress();
+            };
+
+            if (signal?.aborted) {
+                abortUploadProgress();
+                throw signal.reason;
+            }
+
+            signal?.addEventListener('abort', abortUploadProgress, { once: true });
+
             // currently active uploads
             let activeUploads: Promise<boolean | void>[] = [];
 
-            // start uploading
-            for (const [chunkOffset, chunkData] of chunks) {
-                // don't process next chunk when aborted
-                if (didAbort) {
-                    return;
-                }
+            try {
+                // start uploading
+                for (const [chunkOffset, chunkData] of chunks) {
+                    // don't process next chunk when aborted
+                    if (signal?.aborted) {
+                        throw signal.reason;
+                    }
 
-                // errors handled by parent
-                const chunkUploadPromise = uploadChunk(
-                    chunkData,
-                    serverId,
-                    {
-                        uploadOffset: chunkOffset,
-                        uploadName,
-                        uploadLength,
-                    },
-                    {
-                        signal,
-                        onabort: () => {
-                            didAbort = true;
-                            unobserveUploadProgress();
-                            onabort();
+                    // errors handled by parent
+                    const chunkUploadPromise = uploadChunk(
+                        chunkData,
+                        serverId,
+                        {
+                            uploadOffset: chunkOffset,
+                            uploadName,
+                            uploadLength,
                         },
-                    },
-                    entry
-                );
+                        {
+                            signal,
+                        },
+                        entry
+                    );
 
-                // we remember this upload
-                activeUploads.push(chunkUploadPromise);
+                    // we remember this upload
+                    activeUploads.push(chunkUploadPromise);
 
-                // still room for more chunks to upload in parallel
-                if (activeUploads.length < parallelChunks) continue;
+                    // still room for more chunks to upload in parallel
+                    if (activeUploads.length < parallelChunks) continue;
 
-                // we've reached the maximum chunks we can upload in parallel we have to wait for one of the chunks to finish uploading
-                await Promise.race(activeUploads);
+                    // we've reached the maximum chunks to upload in parallel, wait for one to finish
+                    await Promise.race(activeUploads);
 
-                // filter out resolved promises
-                const remainingUploads: Promise<boolean | void>[] = [];
-                for (const upload of activeUploads) {
-                    const res = await upload;
-                    if (res === true) continue;
-                    activeUploads.push(upload);
+                    // filter out resolved promises
+                    const remainingUploads: Promise<boolean | void>[] = [];
+                    for (const upload of activeUploads) {
+                        const res = await upload;
+                        if (res === true) {
+                            continue;
+                        }
+                        remainingUploads.push(upload);
+                    }
+                    activeUploads = [...remainingUploads];
                 }
-                activeUploads = [...remainingUploads];
+            } finally {
+                // done uploading, let's stop progress observer
+                signal?.removeEventListener('abort', abortUploadProgress);
+                unobserveUploadProgress();
             }
-
-            // done uploading, let's stop progress observer
-            unobserveUploadProgress();
         }
 
-        const storeEntry: StoreExtensionStoreFunction = async (
-            entry,
-            { signal, onprogress, onabort }
-        ) => {
+        const storeEntry: StoreExtensionStoreFunction = async (entry, { onprogress, signal }) => {
             // Needs to be of type File
             if (!isFileEntry(entry) || !isFile(entry.file)) {
                 return;
@@ -320,7 +326,7 @@ export const ChunkedUploadStore = createStoreExtension({
             const chunks = getChunksForFile(entry.file);
 
             // get server id
-            const { valueKey } = props;
+            const { resume, valueKey } = props;
             let serverId = entry.state[valueKey];
             let uploadOffset = 0;
 
@@ -328,66 +334,60 @@ export const ChunkedUploadStore = createStoreExtension({
             onprogress(createProgressEvent());
 
             if (!serverId) {
-                // get and remember server id for when we want to resume, if aborted during this action we revert entire save process
-                serverId = await requestFileTransferId(entry.file, { signal, onabort }, entry);
+                // get and remember server id for when we want to continue upload, if aborted during this action we revert entire save process
+                serverId = await requestFileTransferId(entry.file, { signal }, entry);
 
-                // need to remember this for when we want to resume
+                // need to remember this for when we want to continue upload at a later time
                 storeServerId(entry, serverId);
             } else {
                 // we already have server id, request upload offset of next chunk instead, if aborted during this action we revert entire save process
-                uploadOffset = await requestFileChunkOffset(
-                    serverId,
-                    {
-                        signal,
-                        onabort: () => {
-                            // this call will reset state and remove server id
-                            onabort();
-
-                            // now restore server id
-                            storeServerId(entry, serverId);
-                        },
-                    },
-                    entry
-                );
+                try {
+                    uploadOffset = await requestFileChunkOffset(serverId, { signal }, entry);
+                } catch (error) {
+                    if (didAbort(signal, error)) {
+                        storeServerId(entry, serverId);
+                    }
+                    throw error;
+                }
             }
 
             // start uploading chunks
-            await uploadChunks(
-                // get chunks that still need to be uploaded
-                chunks.filter(([chunkOffset]) => chunkOffset >= uploadOffset),
+            try {
+                await uploadChunks(
+                    // get chunks that still need to be uploaded
+                    chunks.filter(([chunkOffset]) => chunkOffset >= uploadOffset),
 
-                // need to add them to this transfer
-                serverId,
+                    // need to add them to this transfer
+                    serverId,
 
-                // file headers
-                {
-                    uploadName: `${entry.file.name}`,
-                    uploadLength: `${entry.file.size}`,
-                },
-
-                // upload progress
-                {
-                    onprogress,
-                    signal,
-                    onabort: () => {
-                        // this will reset the save state to false
-                        onabort();
-
-                        // if is soft abort we store the sid so we can resume later on
-                        const { resume } = props;
-                        if (resume) storeServerId(entry, serverId);
+                    // file headers
+                    {
+                        uploadName: `${entry.file.name}`,
+                        uploadLength: `${entry.file.size}`,
                     },
-                },
 
-                // entry reference
-                entry
-            );
+                    // upload progress
+                    {
+                        onprogress,
+                        signal,
+                    },
+
+                    // entry reference
+                    entry
+                );
+            } catch (error) {
+                if (resume && didAbort(signal, error)) {
+                    storeServerId(entry, serverId);
+                }
+                throw error;
+            }
 
             return serverId;
         };
 
-        const releaseEntry: StoreExtensionReleaseFunction = async (storageId, entry) => {
+        const releaseEntry: StoreExtensionReleaseFunction = async (storageId, entry, options) => {
             const { url, resolveRequest } = props;
+            const { signal } = options ?? {};
 
             const requestOptions: PublicRequestOptions = {
                 method: 'DELETE',
@@ -403,7 +403,10 @@ export const ChunkedUploadStore = createStoreExtension({
                 entry
             );
 
-            await xhr(resolvedRequest.url, resolvedRequest.options);
+            await xhr(resolvedRequest.url, {
+                ...resolvedRequest.options,
+                signal,
+            });
 
             // TODO: return success / fail state, for now always succeeds
             return true;

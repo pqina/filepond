@@ -11,6 +11,7 @@ import {
 } from '../../utils/test.js';
 import { cloneFile, cloneFileWithOptions } from '../../utils/file.js';
 import { Status } from '../../common/status.js';
+import { didAbort } from '../../utils/abort.js';
 import type { TaskFnOptions } from '../../core/taskScheduler.js';
 
 export type TransformExtensionResolvedOptions = TransformExtensionOptions & {
@@ -163,6 +164,10 @@ export function createTransformExtension<Props extends object = TransformExtensi
                             onprogress: createProgressHandler(entry),
                         });
                     } catch (error) {
+                        if (didAbort(signal, error)) {
+                            return;
+                        }
+
                         setEntryExtensionStatus(entry, {
                             type: Status.Error,
                             code: 'TRANSFORM_PREPARE_ERROR',
@@ -192,6 +197,10 @@ export function createTransformExtension<Props extends object = TransformExtensi
                         onprogress: createProgressHandler(entry),
                     });
                 } catch (error) {
+                    if (didAbort(signal, error)) {
+                        return;
+                    }
+
                     setEntryExtensionStatus(entry, {
                         type: Status.Error,
                         code: 'TRANSFORM_ERROR',

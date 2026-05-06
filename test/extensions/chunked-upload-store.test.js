@@ -271,9 +271,13 @@ describe('ChunkedUploadStore', function () {
                 done();
             });
 
-            mockXhr.onCreate = (xhr) => {
+            mockXhr.onCreate = () => {
                 setTimeout(() => {
-                    xhr.abort();
+                    entryTree.updateEntry(entryTree.entries[0], {
+                        state: {
+                            abort: true,
+                        },
+                    });
                 }, 0);
             };
 

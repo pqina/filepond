@@ -2,6 +2,7 @@ import { blobToFile } from '../utils/file.js';
 import { getImageSize } from '../utils/media.js';
 import { rectApply, rectFromSize } from '../utils/rect.js';
 import { sizeFromRect, sizeIsEmpty } from '../utils/size.js';
+import { didAbort } from '../utils/abort.js';
 import { isFileEntry, isImageFile } from '../utils/test.js';
 import { createThreadWorker, thread } from '../utils/thread.js';
 import {
@@ -165,6 +166,10 @@ export const ImageBitmapTransform = createTransformExtension({
                     }
                 )) as ImageBitmap;
             } catch (error) {
+                if (didAbort(signal, error)) {
+                    throw error;
+                }
+
                 throw 'Failed to create image bitmap';
             }
 

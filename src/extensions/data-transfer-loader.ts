@@ -2,6 +2,7 @@ import type { FilePondFileEntry } from '../types/index.js';
 import type { PerceivedPerformanceOptions } from './common/createStoreExtension.ts';
 
 import { createExtension } from './common/createExtension.js';
+import { didAbort } from '../utils/abort.js';
 import { isDataTransfer, isDirectoryEntry } from '../utils/test.js';
 import { Status } from '../common/status.js';
 import {
@@ -123,7 +124,6 @@ export const DataTransferLoader = createExtension({
                                 },
                             });
                         },
-                        onabort: () => removeEntries(entry),
                     });
 
                     // flatten folder
@@ -148,6 +148,11 @@ export const DataTransferLoader = createExtension({
                     );
                 }
             } catch (error) {
+                if (didAbort(signal, error)) {
+                    removeEntries(entry);
+                    return;
+                }
+
                 setEntryExtensionStatus(entry, {
                     type: Status.Error,
                     code: 'LOAD_ERROR',

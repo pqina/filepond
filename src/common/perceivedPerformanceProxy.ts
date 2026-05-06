@@ -6,7 +6,7 @@ function createPerceivedPerformanceProcess(
     signal: AbortSignal,
     config: { minDuration: number; maxDuration: number; minStep: number; maxStep: number }
 ): Promise<void> {
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         let timeoutId: ReturnType<typeof setTimeout>;
         let duration = randomNumberBetween(config.minDuration, config.maxDuration);
         const start = Date.now();
@@ -14,14 +14,23 @@ function createPerceivedPerformanceProcess(
         const total = 1;
         let loaded = 0;
 
-        signal.onabort = () => {
+        const abort = () => {
             clearTimeout(timeoutId);
+            reject(signal.reason);
         };
+
+        if (signal.aborted) {
+            abort();
+            return;
+        }
+
+        signal.addEventListener('abort', abort, { once: true });
 
         onprogress({ lengthComputable, loaded, total });
 
         const tick = () => {
             if (signal.aborted) {
+                abort();
                 return;
             }
 
@@ -45,6 +54,7 @@ function createPerceivedPerformanceProcess(
 
             // done!
             if (loaded >= total) {
+                signal.removeEventListener('abort', abort);
                 return resolve();
             }
 
@@ -68,11 +78,9 @@ export function createPerceivedPerformanceProxy(fn: any, options: any) {
         entry: FilePondEntry,
         {
             onprogress,
-            onabort,
             signal,
         }: {
             onprogress: (e: Progress) => void;
-            onabort: () => void;
             signal: AbortSignal;
         }
     ) {
@@ -121,19 +129,22 @@ export function createPerceivedPerformanceProxy(fn: any, options: any) {
             options
         );
 
+        const abortPerceivedPerformance = () => {
+            perceivedPerformanceAbortController.abort(signal.reason);
+        };
+
+        if (signal.aborted) {
+            abortPerceivedPerformance();
+        } else {
+            signal.addEventListener('abort', abortPerceivedPerformance, { once: true });
+        }
+
         // start actual storage
         const actualPromise = fn(entry, {
             onprogress: (progress: Progress) => {
                 actualProgress = progress;
 
                 handleProgressUpdate();
-            },
-            onabort: () => {
-                // need to call perceivedPerformancePromise abort controller to cancel perceived performance updates
-                perceivedPerformanceAbortController.abort();
-
-                // run actual handle abort logic
-                onabort();
             },
             signal,
         });
@@ -147,10 +158,13 @@ export function createPerceivedPerformanceProxy(fn: any, options: any) {
                 })
                 .catch((err) => {
                     // when the actual upload failes, abort the perceived performance updater
-                    perceivedPerformanceAbortController.abort();
+                    perceivedPerformanceAbortController.abort(err);
 
                     // pass to scheduler
                     reject(err);
+                })
+                .finally(() => {
+                    signal.removeEventListener('abort', abortPerceivedPerformance);
                 });
         });
     };

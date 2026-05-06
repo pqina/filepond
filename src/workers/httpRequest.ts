@@ -17,7 +17,6 @@ export interface RequestResponse {
 export interface RequestOptions {
     signal?: AbortSignal;
     onprogress: (e: ProgressEvent) => void;
-    onabort: () => void;
 }
 
 export function httpRequest(
@@ -31,23 +30,23 @@ export function httpRequest(
         withCredentials = false,
         responseType = 'text',
     }: RequestParams,
-    cb: (error: string | null, response?: RequestResponse, transferList?: Transferable[]) => void,
-    { signal, onprogress, onabort }: RequestOptions
+    cb: (error: unknown | null, response?: RequestResponse, transferList?: Transferable[]) => void,
+    { onprogress, signal }: RequestOptions
 ) {
-    // handling abort
+    // handling abort (signal only passed when not running in worker)
     if (signal?.aborted) {
-        onabort();
+        cb(signal.reason);
         return;
     }
 
-    function didAbort() {
+    function abortRequest() {
         request.abort();
     }
 
-    signal?.addEventListener('abort', didAbort, { once: true });
+    signal?.addEventListener('abort', abortRequest, { once: true });
 
     function release() {
-        signal?.removeEventListener('abort', didAbort);
+        signal?.removeEventListener('abort', abortRequest);
     }
 
     /** Default error response */
@@ -97,7 +96,7 @@ export function httpRequest(
     };
     request.onabort = () => {
         release();
-        onabort();
+        cb(signal?.reason);
     };
 
     request.open(dataToSend && (method === 'GET' || method === 'HEAD') ? 'POST' : method, url);

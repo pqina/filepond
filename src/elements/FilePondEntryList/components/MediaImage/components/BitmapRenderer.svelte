@@ -29,6 +29,7 @@
 
     import { onDestroy, onMount } from 'svelte';
     import { isFirefox } from '../../../../../utils/test.js';
+    import { didAbort } from '../../../../../utils/abort.js';
     import { createObjectURL } from '../../../../../utils/objectURL.js';
     import { getImageSize } from '../../../../../utils/media.js';
     import { getAppContext } from '../../../contexts/appContext.js';
@@ -138,6 +139,10 @@
             // reveal image
             didRender = true;
         } catch (error) {
+            if (didAbort(signal, error)) {
+                throw error;
+            }
+
             onerror?.(error as Error);
         }
     }

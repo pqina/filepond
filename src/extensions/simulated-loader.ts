@@ -39,7 +39,6 @@ export interface SimulatedLoaderOptions {
         options: {
             signal: AbortSignal;
             onprogress: (e: ProgressEvent) => void;
-            onabort: () => void;
         }
     ) => Promise<File>;
 }
@@ -146,11 +145,49 @@ export const SimulatedLoader = createExtension({
             });
 
             const onprogress = createProgressHandler(entry);
+            let intervalId: ReturnType<typeof setInterval> | undefined;
+            let rejectLoad: ((reason?: unknown) => void) | undefined;
+            let didAbortLoad = false;
+
+            const abort = () => {
+                if (didAbortLoad) {
+                    return;
+                }
+                didAbortLoad = true;
+
+                clearInterval(intervalId);
+
+                log && logState(['did abort load data', entry.id]);
+
+                updateEntry(entry, {
+                    state: {
+                        [actionLoad]: false,
+                        [actionAbort]: false,
+                    },
+                });
+
+                // we do this in a microtask as removing an entry also aborts all it's tasks and the `aborted` signal state is only set after this function completes
+                queueMicrotask(() => {
+                    removeEntries(entry);
+                });
+
+                rejectLoad?.(signal.reason);
+            };
+
+            signal.addEventListener('abort', abort, { once: true });
 
             await sleep(connectionDelay);
 
+            if (signal.aborted) {
+                throw signal.reason;
+            }
+
             if (errorDelay) {
                 await sleep(errorDelay);
+
+                if (signal.aborted) {
+                    throw signal.reason;
+                }
 
                 const error = 'Simulated error';
 
@@ -162,16 +199,20 @@ export const SimulatedLoader = createExtension({
 
                 log && logState(['did throw load data error', entry.id]);
 
+                signal.removeEventListener('abort', abort);
+
                 // so scheduler aborts  rest of tasks
                 throw error;
             }
 
-            return await new Promise((resolve) => {
+            return await new Promise((resolve, reject) => {
                 let bytesLoaded = 0;
+                rejectLoad = reject;
 
-                const intervalId = setInterval(async () => {
+                intervalId = setInterval(async () => {
                     // aborted
                     if (signal.aborted) {
+                        abort();
                         return;
                     }
 
@@ -194,15 +235,31 @@ export const SimulatedLoader = createExtension({
 
                     // we create a file
                     let file;
-                    if (fetchFile) {
-                        file = await fetchFile(entry, { signal, onprogress, onabort });
-                    } else {
-                        await sleep(0);
-                        // @ts-ignore
-                        file = new File(['#'.repeat(size)], src.split('/').pop(), {
-                            type: 'plain/text',
-                        });
+                    try {
+                        if (fetchFile) {
+                            file = await fetchFile(entry, { onprogress, signal });
+                        } else {
+                            await sleep(0);
+                            if (signal.aborted) {
+                                throw signal.reason;
+                            }
+                            // @ts-ignore
+                            file = new File(['#'.repeat(size)], src.split('/').pop(), {
+                                type: 'plain/text',
+                            });
+                        }
+                    } catch (error) {
+                        signal.removeEventListener('abort', abort);
+                        reject(error);
+                        return;
                     }
+
+                    if (signal.aborted) {
+                        abort();
+                        return;
+                    }
+
+                    signal.removeEventListener('abort', abort);
 
                     // update in one go
                     updateEntry(entry, {
@@ -225,25 +282,6 @@ export const SimulatedLoader = createExtension({
                     // @ts-ignore done
                     resolve();
                 }, tickrate);
-
-                // can abort
-                signal.onabort = () => {
-                    clearInterval(intervalId);
-
-                    log && logState(['did abort load data', entry.id]);
-
-                    updateEntry(entry, {
-                        state: {
-                            [actionLoad]: false,
-                            [actionAbort]: false,
-                        },
-                    });
-
-                    // we do this in a microtask as removing an entry also aborts all it's tasks and the `aborted` signal state is only set after this function completes
-                    queueMicrotask(() => {
-                        removeEntries(entry);
-                    });
-                };
             });
         }
 

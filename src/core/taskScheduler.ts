@@ -1,4 +1,5 @@
 import { arrayRemoveInPlace } from '../utils/array.js';
+import { didAbort } from '../utils/abort.js';
 import { pubsub } from '../utils/pubsub.js';
 import { isFunction, isString } from '../utils/test.js';
 
@@ -288,10 +289,12 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
         }
     }
 
+    // note that a task can spawn new tasks while it's being run
     async function runTask(task: Task) {
         const { group, fn, params, abortController } = task;
 
-        // a task can spawn new tasks while it's being run
+        // quick ref
+        const { signal } = abortController;
 
         // now busy with this task
         task.state = TaskState.ACTIVE;
@@ -301,7 +304,7 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
             const taskParameters = isFunction(params) ? params() : params;
 
             // task can return `false` to prevent running additional tasks (only tasks that can ignore soft failures will run), task can throw error to halt all task processing
-            const taskSuccess = await fn(...taskParameters, { signal: abortController.signal });
+            const taskSuccess = await fn(...taskParameters, { signal });
 
             // done!
             removeTask(task);
@@ -311,6 +314,11 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
                 setTaskStateByGroupId(group, TaskState.HALTED, { isSoftFailure: true });
             }
         } catch (error) {
+            // task was aborted
+            if (didAbort(signal, error)) {
+                return;
+            }
+
             // so others can handle it
             pub('error', error);
 

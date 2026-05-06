@@ -3,7 +3,6 @@ import { arrayRemoveInPlace } from './array.js';
 import { requestIdleCallback } from './poly.js';
 import { createObjectURL } from './objectURL.js';
 import { isString } from './test.js';
-import { noop } from './placeholder.js';
 
 /*
 function () {
@@ -26,7 +25,7 @@ function () {
 }
 */
 
-const wrapFunction = (fn: Function | string) =>
+const functionToWorker = (fn: Function | string) =>
     `function () {self.onmessage = function (message) {(${fn.toString()}).apply(null, message.data.concat([function (err, response, transferList = []) {const message = { content: response, error: err };return self.postMessage(message, transferList);},{onprogress: function({ lengthComputable, loaded, total }) {self.postMessage({ type: 'progress', content: { lengthComputable, loaded, total }, error: null })}}]))}}`;
 
 interface PooledWorker {
@@ -44,13 +43,12 @@ interface Task {
     args: any[];
     options: ThreadOptions;
     promise: { resolve: (value: unknown) => void; reject: (reason?: unknown) => void };
-    onaborted: () => void;
+    abortQueuedTask?: () => void;
 }
 
 interface ThreadOptions {
     signal?: AbortSignal;
     transferList?: Transferable[];
-    onabort?: () => void;
     onprogress?: (e: ProgressEvent) => void;
 }
 
@@ -78,12 +76,12 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
         const MAX_WORKERS = navigator.hardwareConcurrency;
 
         // this helps with queueing
-        const runTask = ({ fn, args, options, onaborted, promise }: Task) => {
-            const { signal, transferList = [], onabort, onprogress } = options;
+        const runTask = ({ fn, args, options, abortQueuedTask, promise }: Task) => {
+            const { signal, transferList = [], onprogress } = options;
 
             // exit
             if (signal?.aborted) {
-                onabort?.();
+                promise.reject(signal.reason);
                 return;
             }
 
@@ -99,22 +97,23 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                 // if no pooled worker found found and all worker spots are taken up by busy workers
                 // we wait for a spot to free up
                 if (workerPool.filter((worker) => worker.busy).length >= MAX_WORKERS) {
+                    let task: Task;
+                    const abortQueuedTask = () => {
+                        arrayRemoveInPlace(
+                            workerTaskQueue,
+                            (queuedTask: Task) => queuedTask === task
+                        );
+
+                        promise.reject(signal?.reason);
+                    };
+
                     // need to queue tasks for when workers become available
-                    const task: Task = {
+                    task = {
                         fn,
                         fnStr,
                         args,
                         options,
-                        onaborted: () => {
-                            arrayRemoveInPlace(
-                                workerTaskQueue,
-                                (queuedTask: Task) => queuedTask === task
-                            );
-
-                            if (onabort) {
-                                onabort();
-                            }
-                        },
+                        abortQueuedTask,
                         promise: { resolve, reject },
                     };
 
@@ -122,14 +121,14 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                     workerTaskQueue.push(task);
 
                     // if aborted earlier, remove task from queue
-                    signal?.addEventListener('abort', task.onaborted, { once: true });
+                    signal?.addEventListener('abort', abortQueuedTask, { once: true });
 
                     // now we wait
                     return;
                 }
 
                 // create a new Web Worker
-                const url = useBlob ? createObjectURL(functionToBlob(wrapFunction(fn))) : fnStr;
+                const url = useBlob ? createObjectURL(functionToBlob(functionToWorker(fn))) : fnStr;
                 const worker = new window.Worker(url);
                 worker.addEventListener('error', reject);
 
@@ -180,14 +179,14 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
             pooledWorker.busy = true;
 
             // remove queued task aborted listener
-            signal?.removeEventListener('abort', onaborted);
+            if (abortQueuedTask) {
+                signal?.removeEventListener('abort', abortQueuedTask);
+            }
 
-            // set new abort handler so we call correct onabort when it's aborted
+            // set new abort handler so we can stop worker and reject when aborted
             const onAbortWorker = () => {
                 pooledWorker.terminate();
-                if (onabort) {
-                    onabort();
-                }
+                promise.reject(signal?.reason);
             };
 
             clearTimeout(pooledWorker.terminationTimeout);
@@ -209,7 +208,7 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                 }, WORKER_TERMINATION_TIMEOUT);
 
                 // resolve or reject message based on response from worker
-                error ? promise.reject(error) : promise.resolve(content);
+                error !== null ? promise.reject(error) : promise.resolve(content);
 
                 // remove abort listener for this task
                 signal?.removeEventListener('abort', onAbortWorker);
@@ -238,14 +237,14 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                 });
             };
 
-            // post message and wait for response
-            pooledWorker.worker.postMessage(args, transferList);
-
             // set up worker aborted handler
             signal?.addEventListener('abort', onAbortWorker, { once: true });
+
+            // post message and wait for response
+            pooledWorker.worker.postMessage(args, transferList);
         };
 
         // try for first time
-        runTask({ fn, args, options, onaborted: noop, promise: { resolve, reject } });
+        runTask({ fn, args, options, promise: { resolve, reject } });
     });
 }

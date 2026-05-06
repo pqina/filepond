@@ -43,7 +43,6 @@ export interface SimulatedStoreOptions extends StoreExtensionOptions {
         options: {
             signal: AbortSignal;
             onprogress: (e: ProgressEvent) => void;
-            onabort: () => void;
         }
     ) => Promise<File>;
 
@@ -70,39 +69,38 @@ export const SimulatedStore = createStoreExtension({
         // We "store" our files in this map
         const SimulatedStore = new Map();
 
-        const storeEntry: StoreExtensionStoreFunction = async (
-            entry,
-            { signal, onprogress, onabort }
-        ) => {
+        const storeEntry: StoreExtensionStoreFunction = async (entry, { onprogress, signal }) => {
             // Needs to be of type File
             if (!isFileEntry(entry) || !isFile(entry.file)) {
                 return;
             }
-
-            let intervalId: ReturnType<typeof setTimeout>;
-
-            // can abort
-            signal.onabort = () => {
-                clearInterval(intervalId);
-                onabort();
-            };
 
             const { log, connectionDelay, tickrate, onstore = noop } = props;
             await sleep(connectionDelay);
 
             // aborted while sleeping
             if (signal.aborted) {
-                return;
+                throw signal.reason;
             }
 
             const size = entry.size as number;
 
             return await new Promise((resolve, reject) => {
+                let intervalId: ReturnType<typeof setTimeout>;
                 let bytesUploaded = 0;
+
+                const abort = () => {
+                    signal.removeEventListener('abort', abort);
+                    clearInterval(intervalId);
+                    reject(signal.reason);
+                };
+
+                signal.addEventListener('abort', abort, { once: true });
 
                 intervalId = setInterval(() => {
                     // aborted
                     if (signal.aborted) {
+                        abort();
                         return;
                     }
 
@@ -115,6 +113,7 @@ export const SimulatedStore = createStoreExtension({
                     } catch (error) {
                         log && logState(['error during store operation']);
                         clearInterval(intervalId);
+                        signal.removeEventListener('abort', abort);
                         reject(error);
                         return;
                     }
@@ -132,6 +131,7 @@ export const SimulatedStore = createStoreExtension({
                         log && logState(['did store', id]);
 
                         clearInterval(intervalId);
+                        signal.removeEventListener('abort', abort);
                         resolve(id);
                     }
                 }, tickrate);
@@ -148,6 +148,10 @@ export const SimulatedStore = createStoreExtension({
             } = props;
 
             await sleep(connectionDelay);
+
+            if (options.signal.aborted) {
+                throw options.signal.reason;
+            }
 
             // this allows us to throw an error after x amount of bytes
             try {
@@ -168,9 +172,14 @@ export const SimulatedStore = createStoreExtension({
             return await fetchStoredFile(storageId, entry, options);
         };
 
-        const releaseEntry: StoreExtensionReleaseFunction = async (storageId) => {
+        const releaseEntry: StoreExtensionReleaseFunction = async (storageId, _entry, options) => {
             const { log, connectionDelay, onrelease = noop } = props;
             await sleep(connectionDelay);
+            const { signal } = options ?? {};
+
+            if (signal?.aborted) {
+                throw signal.reason;
+            }
 
             // this allows us to throw an error after x amount of bytes
             try {

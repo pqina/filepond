@@ -14,7 +14,6 @@ interface XHROptions {
     method?: 'GET' | 'POST' | 'HEAD' | 'PUT' | 'DELETE' | 'PATCH';
     responseType?: XMLHttpRequestResponseType;
     onprogress?: (e: ProgressEvent) => void;
-    onabort?: () => void;
     withCredentials?: boolean;
     timeout?: number;
     useWebWorkers?: boolean;
@@ -40,7 +39,6 @@ export function xhr(url: string, options?: XHROptions): Promise<XHRResponse> {
         workersURL,
         signal,
         onprogress = noop,
-        onabort = noop,
     } = options ?? {};
 
     const requestParameters = {
@@ -57,7 +55,7 @@ export function xhr(url: string, options?: XHROptions): Promise<XHRResponse> {
         withCredentials,
     };
 
-    const requestOptions = { signal, onprogress, onabort };
+    const requestOptions = { onprogress, signal };
 
     function xhrResponse(request: Promise<RequestResponse>): Promise<XHRResponse> {
         return new Promise((resolve, reject) => {
@@ -88,8 +86,8 @@ export function xhr(url: string, options?: XHROptions): Promise<XHRResponse> {
             httpRequest(
                 requestParameters,
                 (err, response) => {
-                    if (err) {
-                        reject(new Error(err));
+                    if (err !== null) {
+                        reject(err === signal?.reason ? err : new Error(`${err}`));
                         return;
                     }
                     resolve(response as RequestResponse);

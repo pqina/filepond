@@ -7,6 +7,7 @@ import { isBlob, isFile, isFileEntry, isNullOrUndefined } from '../../utils/test
 import { Status } from '../../common/status.js';
 import { debounce } from '../../utils/debounce.js';
 import { createPerceivedPerformanceProxy } from '../../common/perceivedPerformanceProxy.js';
+import { didAbort } from '../../utils/abort.js';
 
 export type StoreExtensionResolvedOptions = StoreExtensionOptions & {
     /** If an upload is really fast, will show simulated progress to instill confidence in upload */
@@ -44,7 +45,6 @@ export type StoreFactory<Props extends object = StoreExtensionOptions> = (
 
 export interface StoreExtensionFunctionOptions extends TaskFnOptions {
     onprogress: (e: ProgressEvent) => void;
-    onabort: () => void;
 }
 
 export interface StoreExtensionFunctions {
@@ -104,9 +104,7 @@ export type StoreExtensionRestoreFunction = (
 export type StoreExtensionReleaseFunction = (
     storageId: string,
     entry: FilePondFileEntry,
-    options?: TaskFnOptions & {
-        onabort?: () => void;
-    }
+    options?: TaskFnOptions
 ) => Promise<boolean | void>;
 
 /** Used to simulate load or store progress, the progress duration will be random between `minDuration` and `maxDuration` the progress step length will be random between `minStep` and `maxStep` */
@@ -214,33 +212,11 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                         : storeEntry;
 
                     // start storage process
-                    const { actionStore, actionAbort, valueKey } = props;
+                    const { valueKey } = props;
 
                     const response = await storeFn(entry, {
                         onprogress: createProgressHandler(entry),
                         signal,
-                        onabort: () => {
-                            updateEntry(entry, {
-                                state: {
-                                    // don't abort again
-                                    [actionAbort]: false,
-
-                                    // need to halt store action or will keep storing
-                                    [actionStore]: null,
-
-                                    // reset storage key
-                                    [valueKey]: null,
-                                },
-                                extension: {
-                                    [extensionName]: {
-                                        status: {
-                                            type: Status.System,
-                                            code: 'STORE_ABORT',
-                                        },
-                                    },
-                                },
-                            });
-                        },
                     });
 
                     // update store state with storage key if returned
@@ -260,6 +236,32 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                         });
                     }
                 } catch (error) {
+                    if (didAbort(signal, error)) {
+                        const { actionStore, actionAbort, valueKey } = props;
+
+                        updateEntry(entry, {
+                            state: {
+                                // don't abort again
+                                [actionAbort]: false,
+
+                                // need to halt store action or will keep storing
+                                [actionStore]: null,
+
+                                // reset storage key
+                                [valueKey]: null,
+                            },
+                            extension: {
+                                [extensionName]: {
+                                    status: {
+                                        type: Status.System,
+                                        code: 'STORE_ABORT',
+                                    },
+                                },
+                            },
+                        });
+                        return;
+                    }
+
                     // set error status
                     setEntryExtensionStatus(entry, {
                         type: Status.Error,
@@ -294,12 +296,6 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                     let response = await restoreEntry(value, entry, {
                         onprogress: createProgressHandler(entry),
                         signal,
-                        onabort: () => {
-                            setEntryExtensionStatus(entry, {
-                                type: Status.System,
-                                code: 'RESTORE_ABORT',
-                            });
-                        },
                     });
 
                     // now update state
@@ -329,6 +325,14 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                         },
                     });
                 } catch (error) {
+                    if (didAbort(signal, error)) {
+                        setEntryExtensionStatus(entry, {
+                            type: Status.System,
+                            code: 'RESTORE_ABORT',
+                        });
+                        return;
+                    }
+
                     // set error state
                     setEntryExtensionStatus(entry, {
                         type: Status.Error,
@@ -374,12 +378,6 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                         let response = await restoreEntry(value, entry, {
                             onprogress: createProgressHandler(entry),
                             signal,
-                            onabort: () => {
-                                setEntryExtensionStatus(entry, {
-                                    type: Status.System,
-                                    code: 'RELEASE_ABORT',
-                                });
-                            },
                         });
 
                         // we now have the file
@@ -393,12 +391,6 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                         // now release uploaded file from storage
                         const success = await releaseEntry(value, entry, {
                             signal,
-                            onabort: () => {
-                                setEntryExtensionStatus(entry, {
-                                    type: Status.System,
-                                    code: 'RELEASE_ABORT',
-                                });
-                            },
                         });
 
                         // didn't fail
@@ -442,6 +434,14 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                         removeEntries(entry);
                     }
                 } catch (error) {
+                    if (didAbort(signal, error)) {
+                        setEntryExtensionStatus(entry, {
+                            type: Status.System,
+                            code: 'RELEASE_ABORT',
+                        });
+                        return;
+                    }
+
                     // set error state
                     setEntryExtensionStatus(entry, {
                         type: Status.Error,
@@ -474,7 +474,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                     return;
                 }
 
-                // value is set so entry is stored, let's release
+                // value is set so entry is stored, let's release, no signal to abort as there's no way back now
                 try {
                     await releaseEntry(value, entry);
                 } catch (error) {

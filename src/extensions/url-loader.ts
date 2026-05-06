@@ -11,6 +11,7 @@ import {
 import { urlToFilename } from '../utils/url.js';
 import { isString, isBlobOrFile, isDataURL, isNumber } from '../utils/test.js';
 import { blobToFile, getExtensionFromMimeType } from '../utils/file.js';
+import { didAbort } from '../utils/abort.js';
 import { passthrough } from '../utils/placeholder.js';
 import { createExtension } from './common/createExtension.js';
 import { Status } from '../common/status.js';
@@ -168,6 +169,10 @@ export const URLLoader = createExtension({
                     lastModified: new Date(lastModified).getTime(),
                 });
             } catch (error) {
+                if (didAbort(signal, error)) {
+                    return;
+                }
+
                 handleLoadError(entry, error);
             }
         }
@@ -204,10 +209,6 @@ export const URLLoader = createExtension({
                     useWebWorkers,
                     workersURL,
                     onprogress: createProgressHandler(entry),
-                    onabort: () => {
-                        // remove from list, as we can't load it after aborting load
-                        removeEntries(entry);
-                    },
                 });
 
                 // get the blob object
@@ -236,6 +237,12 @@ export const URLLoader = createExtension({
                     },
                 });
             } catch (error) {
+                if (didAbort(signal, error)) {
+                    // remove from list, as we can't load it after aborting load
+                    removeEntries(entry);
+                    return;
+                }
+
                 handleLoadError(entry, error);
             }
         }
