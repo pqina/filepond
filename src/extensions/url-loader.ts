@@ -1,4 +1,4 @@
-import type { RequestHook, FilePondEntry, FilePondFileEntry } from '../types/index.js';
+import type { FilePondEntry, FilePondFileEntry, PublicRequestOptions } from '../types/index.js';
 import type { TaskFnOptions } from '../core/taskScheduler.ts';
 import type { XHRResponse } from '../utils/xhr.js';
 
@@ -11,8 +11,11 @@ import {
 import { urlToFilename } from '../utils/url.js';
 import { isString, isBlobOrFile, isDataURL, isNumber } from '../utils/test.js';
 import { blobToFile, getExtensionFromMimeType } from '../utils/file.js';
+import { passthrough } from '../utils/placeholder.js';
 import { createExtension } from './common/createExtension.js';
 import { Status } from '../common/status.js';
+import { getResolvedRequest } from './common/requestResolver.js';
+import type { RequestResolver } from './common/requestResolver.js';
 
 export interface URLLoaderOptions {
     /** Action to run to trigger the load operation, defaults to `'load'`. */
@@ -39,12 +42,8 @@ export interface URLLoaderOptions {
     /** Where the extension can find the WebWorker to use */
     workersURL?: URL;
 
-    /** Intercept options sent to XMLHttpRequest with `RequestHook`. */
-    willRequestWithOptions?: RequestHook;
-}
-
-function willRequestWithOptions(src: string, options: any, entry: FilePondFileEntry) {
-    return options;
+    /** Resolve the URL and options sent to `XMLHttpRequest`. */
+    resolveRequest?: RequestResolver<FilePondFileEntry>;
 }
 
 export const URLLoader = createExtension({
@@ -59,7 +58,7 @@ export const URLLoader = createExtension({
         workersURL: undefined,
         actionLoad: 'load',
         actionAbort: 'abort',
-        willRequestWithOptions,
+        resolveRequest: passthrough,
     } as URLLoaderOptions,
     factory: ({ extensionName, props }, pond) => {
         const {
@@ -140,14 +139,19 @@ export const URLLoader = createExtension({
                 }
 
                 // get settings
-                const { useWebWorkers, workersURL, willRequestWithOptions } = props;
+                const { resolveRequest, useWebWorkers, workersURL } = props;
 
                 // quickly try to get file metadata and update so user knows how much data is loaded
-                const headRequestOptions = { method: 'HEAD' };
-                const headRequest = await xhr(src as string, {
-                    ...(willRequestWithOptions(src, headRequestOptions, entry) ||
-                        headRequestOptions),
-                    abortController,
+                const headRequestOptions: PublicRequestOptions = { method: 'HEAD' };
+                const resolvedRequest = await getResolvedRequest(
+                    resolveRequest,
+                    src as string,
+                    headRequestOptions,
+                    entry
+                );
+                const headRequest = await xhr(resolvedRequest.url, {
+                    ...resolvedRequest.options,
+                    signal: abortController.signal,
                     useWebWorkers,
                     workersURL,
                 });
@@ -184,14 +188,19 @@ export const URLLoader = createExtension({
                 }
 
                 // get settings
-                const { useWebWorkers, workersURL, willRequestWithOptions } = props;
+                const { resolveRequest, useWebWorkers, workersURL } = props;
 
-                const dataRequestOptions = { method: 'GET' };
-                const dataRequest = await xhr(src as string, {
-                    ...(willRequestWithOptions(src, dataRequestOptions, entry) ||
-                        dataRequestOptions),
+                const dataRequestOptions: PublicRequestOptions = { method: 'GET' };
+                const resolvedRequest = await getResolvedRequest(
+                    resolveRequest,
+                    src as string,
+                    dataRequestOptions,
+                    entry
+                );
+                const dataRequest = await xhr(resolvedRequest.url, {
+                    ...resolvedRequest.options,
                     responseType: 'arraybuffer',
-                    abortController,
+                    signal: abortController.signal,
                     useWebWorkers,
                     workersURL,
                     onprogress: createProgressHandler(entry),

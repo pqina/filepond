@@ -2,21 +2,18 @@ import { createStoreExtension } from './common/createStoreExtension.js';
 import { isFile, isFileEntry, isNumber, isString } from '../utils/test.js';
 import { toURL } from '../utils/url.js';
 import { naturalFileSizeToBytes } from '../utils/file.js';
-import { noop } from '../utils/placeholder.js';
+import { noop, passthrough } from '../utils/placeholder.js';
 import { sleep } from '../utils/sleep.js';
 import { xhr, createProgressEvent, getResponseHeaders } from '../utils/xhr.js';
 import { warn } from '../common/console.js';
+import { getResolvedRequest } from './common/requestResolver.js';
 import type {
     StoreExtensionOptions,
     StoreExtensionReleaseFunction,
     StoreExtensionStoreFunction,
 } from './common/createStoreExtension.js';
-import type {
-    RequestHook,
-    PublicRequestOptions,
-    FilePondEntry,
-    FilePondFileEntry,
-} from '../types/index.js';
+import type { PublicRequestOptions, FilePondFileEntry } from '../types/index.js';
+import type { RequestResolver } from './common/requestResolver.js';
 
 export interface ChunkedUploadStoreOptions extends StoreExtensionOptions {
     /** Server URL */
@@ -34,8 +31,8 @@ export interface ChunkedUploadStoreOptions extends StoreExtensionOptions {
     /** Allow pause/resume */
     resume?: boolean;
 
-    /** Intercept options sent to XMLHttpRequest */
-    willRequestWithOptions?: RequestHook;
+    /** Resolve the URL and options sent to `XMLHttpRequest` */
+    resolveRequest?: RequestResolver<FilePondFileEntry>;
 }
 
 export const ChunkedUploadStore = createStoreExtension({
@@ -46,7 +43,7 @@ export const ChunkedUploadStore = createStoreExtension({
         retryDelays: [500, 1000, 3000],
         resume: false,
         parallelChunks: 2,
-        willRequestWithOptions: (src, options, entry) => options,
+        resolveRequest: passthrough,
     } as ChunkedUploadStoreOptions,
     factory: ({ props, didSetProps }, { updateEntry }) => {
         let computedChunkSize: number = Infinity;
@@ -112,9 +109,9 @@ export const ChunkedUploadStore = createStoreExtension({
         async function requestFileTransferId(
             file: File,
             options: { abortController?: AbortController; onabort: () => void },
-            entry: FilePondEntry
+            entry: FilePondFileEntry
         ): Promise<string> {
-            const { url, willRequestWithOptions } = props;
+            const { url, resolveRequest } = props;
             const { abortController, onabort } = options ?? {};
 
             const requestOptions: PublicRequestOptions = {
@@ -124,9 +121,15 @@ export const ChunkedUploadStore = createStoreExtension({
                 },
             };
 
-            const request = await xhr(url, {
-                ...(willRequestWithOptions(url, requestOptions, entry) ?? requestOptions),
-                abortController,
+            const resolvedRequest = await getResolvedRequest(
+                resolveRequest,
+                url,
+                requestOptions,
+                entry
+            );
+            const request = await xhr(resolvedRequest.url, {
+                ...resolvedRequest.options,
+                signal: abortController?.signal,
                 onabort,
             });
 
@@ -140,9 +143,9 @@ export const ChunkedUploadStore = createStoreExtension({
         async function requestFileChunkOffset(
             serverId: string,
             options: { abortController?: AbortController; onabort: () => void },
-            entry: FilePondEntry
+            entry: FilePondFileEntry
         ): Promise<number> {
-            const { url, willRequestWithOptions } = props;
+            const { url, resolveRequest } = props;
             const { abortController, onabort } = options ?? {};
 
             const requestOptions: PublicRequestOptions = {
@@ -152,9 +155,15 @@ export const ChunkedUploadStore = createStoreExtension({
                 },
             };
 
-            const request = await xhr(url, {
-                ...(willRequestWithOptions(url, requestOptions, entry) ?? requestOptions),
-                abortController,
+            const resolvedRequest = await getResolvedRequest(
+                resolveRequest,
+                url,
+                requestOptions,
+                entry
+            );
+            const request = await xhr(resolvedRequest.url, {
+                ...resolvedRequest.options,
+                signal: abortController?.signal,
                 onabort,
             });
 
@@ -174,9 +183,9 @@ export const ChunkedUploadStore = createStoreExtension({
             serverId: string,
             headers: { [key: string]: string | number },
             options: { abortController?: AbortController; onabort: () => void },
-            entry: FilePondEntry
+            entry: FilePondFileEntry
         ): Promise<boolean | void> {
-            const { url, retryDelays, willRequestWithOptions } = props;
+            const { url, retryDelays, resolveRequest } = props;
             const { abortController, onabort } = options ?? {};
             for (const delay of [...retryDelays, undefined]) {
                 try {
@@ -191,10 +200,16 @@ export const ChunkedUploadStore = createStoreExtension({
                         },
                     };
 
-                    await xhr(url, {
-                        ...(willRequestWithOptions(url, requestOptions, entry) ?? requestOptions),
+                    const resolvedRequest = await getResolvedRequest(
+                        resolveRequest,
+                        url,
+                        requestOptions,
+                        entry
+                    );
+                    await xhr(resolvedRequest.url, {
+                        ...resolvedRequest.options,
                         onabort,
-                        abortController,
+                        signal: abortController?.signal,
                     });
 
                     // success
@@ -224,7 +239,7 @@ export const ChunkedUploadStore = createStoreExtension({
                 abortController?: AbortController;
                 onabort?: () => void;
             },
-            entry: FilePondEntry
+            entry: FilePondFileEntry
         ): Promise<void> {
             const { parallelChunks } = props;
             const { onprogress = noop, onabort = noop, abortController } = options ?? {};
@@ -376,7 +391,7 @@ export const ChunkedUploadStore = createStoreExtension({
         };
 
         const releaseEntry: StoreExtensionReleaseFunction = async (storageId, entry) => {
-            const { url, willRequestWithOptions } = props;
+            const { url, resolveRequest } = props;
 
             const requestOptions: PublicRequestOptions = {
                 method: 'DELETE',
@@ -385,7 +400,14 @@ export const ChunkedUploadStore = createStoreExtension({
                 },
             };
 
-            await xhr(url, willRequestWithOptions(url, requestOptions, entry) ?? requestOptions);
+            const resolvedRequest = await getResolvedRequest(
+                resolveRequest,
+                url,
+                requestOptions,
+                entry
+            );
+
+            await xhr(resolvedRequest.url, resolvedRequest.options);
 
             // TODO: return success / fail state, for now always succeeds
             return true;

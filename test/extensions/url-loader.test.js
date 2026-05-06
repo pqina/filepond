@@ -66,6 +66,66 @@ describe('URLLoader', function () {
             ];
         }));
 
+    it('should resolve request URL and options', () =>
+        new Promise((done) => {
+            extensionManager.extensions = [
+                [
+                    URLLoader,
+                    {
+                        useWebWorkers: false,
+                        fetchHead: false,
+                        resolveRequest: ({ url, options, entry }) => {
+                            expect(url).to.equal('file.txt');
+                            expect(options.method).to.equal('GET');
+                            expect(entry.src).to.equal('file.txt');
+
+                            return {
+                                url: 'signed-file.txt',
+                                options: {
+                                    ...options,
+                                    queryString: {
+                                        token: '1234',
+                                    },
+                                },
+                            };
+                        },
+                    },
+                ],
+            ];
+
+            mockXhr.onSend = (xhr) => {
+                setTimeout(() => {
+                    const requestURL = new URL(xhr.requestData.url);
+                    expect(requestURL.pathname).to.equal('/signed-file.txt');
+                    expect(requestURL.searchParams.get('token')).to.equal('1234');
+
+                    xhr.respond(
+                        200,
+                        {
+                            'Content-Type': 'text/plain',
+                        },
+                        'hello world'
+                    );
+                }, 0);
+            };
+
+            const unsub = entryTree.on('updateEntry', (entry) => {
+                const { status } = entry?.extension?.URLLoader || {};
+
+                if (status?.code !== 'LOAD_COMPLETE') return;
+
+                unsub();
+                expect(isFile(entry.file)).to.equal(true);
+                done();
+            });
+
+            entryTree.entries = [
+                {
+                    src: 'file.txt',
+                },
+            ];
+        }));
+
     it('should correctly rename File based on server response', () =>
         new Promise((done) => {
             mockXhr.onSend = (xhr) => {

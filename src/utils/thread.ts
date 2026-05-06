@@ -3,6 +3,7 @@ import { arrayRemoveInPlace } from './array.js';
 import { requestIdleCallback } from './poly.js';
 import { createObjectURL } from './objectURL.js';
 import { isString } from './test.js';
+import { noop } from './placeholder.js';
 
 /*
 function () {
@@ -43,10 +44,11 @@ interface Task {
     args: any[];
     options: ThreadOptions;
     promise: { resolve: (value: unknown) => void; reject: (reason?: unknown) => void };
+    onaborted: () => void;
 }
 
 interface ThreadOptions {
-    abortController?: AbortController;
+    signal?: AbortSignal;
     transferList?: Transferable[];
     onabort?: () => void;
     onprogress?: (e: ProgressEvent) => void;
@@ -56,7 +58,7 @@ interface ThreadOptions {
 const workerPool: PooledWorker[] = [];
 
 // this holds queueud tasks for when all threads are occupied
-const taskQueue: Task[] = [];
+const workerTaskQueue: Task[] = [];
 
 // time till a idle worker is automatically terminated instead of re-used
 const WORKER_TERMINATION_TIMEOUT = 5000;
@@ -76,13 +78,14 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
         const MAX_WORKERS = navigator.hardwareConcurrency;
 
         // this helps with queueing
-        const runTask = ({ fn, args, options, promise }: Task) => {
-            const {
-                abortController = new AbortController(),
-                transferList = [],
-                onabort,
-                onprogress,
-            } = options;
+        const runTask = ({ fn, args, options, onaborted, promise }: Task) => {
+            const { signal, transferList = [], onabort, onprogress } = options;
+
+            // exit
+            if (signal?.aborted) {
+                onabort?.();
+                return;
+            }
 
             // test if we should use blob worker
             const useBlob = !isString(fn);
@@ -102,19 +105,24 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                         fnStr,
                         args,
                         options,
+                        onaborted: () => {
+                            arrayRemoveInPlace(
+                                workerTaskQueue,
+                                (queuedTask: Task) => queuedTask === task
+                            );
+
+                            if (onabort) {
+                                onabort();
+                            }
+                        },
                         promise: { resolve, reject },
                     };
 
                     // add to queue
-                    taskQueue.push(task);
+                    workerTaskQueue.push(task);
 
-                    // if aborter earlier, remove task from queue
-                    abortController.signal.onabort = () => {
-                        arrayRemoveInPlace(taskQueue, (queuedTask: Task) => queuedTask === task);
-                        if (onabort) {
-                            onabort();
-                        }
-                    };
+                    // if aborted earlier, remove task from queue
+                    signal?.addEventListener('abort', task.onaborted, { once: true });
 
                     // now we wait
                     return;
@@ -138,7 +146,7 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                         (pooledWorker as PooledWorker).worker.terminate();
 
                         // clean up event listeners
-                        worker.addEventListener('error', reject);
+                        worker.removeEventListener('error', reject);
 
                         // free memory when is blob URL
                         if (url.startsWith('blob:')) {
@@ -152,11 +160,11 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                         );
 
                         // run next queued task
-                        if (!taskQueue.length) {
+                        if (!workerTaskQueue.length) {
                             return;
                         }
 
-                        runTask(taskQueue.shift() as Task);
+                        runTask(workerTaskQueue.shift() as Task);
                     },
                 };
 
@@ -170,6 +178,18 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
 
             // now in use
             pooledWorker.busy = true;
+
+            // remove queued task aborted listener
+            signal?.removeEventListener('abort', onaborted);
+
+            // set new abort handler so we call correct onabort when it's aborted
+            const onAbortWorker = () => {
+                pooledWorker.terminate();
+                if (onabort) {
+                    onabort();
+                }
+            };
+
             clearTimeout(pooledWorker.terminationTimeout);
 
             // handle received messages
@@ -178,7 +198,8 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
 
                 // route progress event
                 if (type === 'progress') {
-                    return onprogress && onprogress(content);
+                    onprogress && onprogress(content);
+                    return;
                 }
 
                 // automatically clean up idle workers after a certain time
@@ -190,8 +211,13 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                 // resolve or reject message based on response from worker
                 error ? promise.reject(error) : promise.resolve(content);
 
+                // remove abort listener for this task
+                signal?.removeEventListener('abort', onAbortWorker);
+
                 // no similar tasks in queue
-                const similarTasks = taskQueue.filter((task) => task.fnStr === pooledWorker.fnStr);
+                const similarTasks = workerTaskQueue.filter(
+                    (task) => task.fnStr === pooledWorker.fnStr
+                );
                 if (!similarTasks.length) {
                     // we're no longer busy
                     pooledWorker.busy = false;
@@ -202,7 +228,7 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                 const nextTask = similarTasks.shift() as Task;
 
                 // remove from queue
-                arrayRemoveInPlace(taskQueue, (task: Task) => task === nextTask);
+                arrayRemoveInPlace(workerTaskQueue, (task: Task) => task === nextTask);
 
                 // run the similar task
                 requestIdleCallback(() => {
@@ -215,18 +241,11 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
             // post message and wait for response
             pooledWorker.worker.postMessage(args, transferList);
 
-            // set up abort handler
-            if (abortController) {
-                abortController.signal.onabort = () => {
-                    pooledWorker.terminate();
-                    if (onabort) {
-                        onabort();
-                    }
-                };
-            }
+            // set up worker aborted handler
+            signal?.addEventListener('abort', onAbortWorker, { once: true });
         };
 
         // try for first time
-        runTask({ fn, args, options, promise: { resolve, reject } });
+        runTask({ fn, args, options, onaborted: noop, promise: { resolve, reject } });
     });
 }

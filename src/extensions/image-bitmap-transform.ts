@@ -164,7 +164,7 @@ export const ImageBitmapTransform = createTransformExtension({
                         },
                     ],
                     {
-                        abortController,
+                        signal: abortController.signal,
                     }
                 )) as ImageBitmap;
             } catch (error) {

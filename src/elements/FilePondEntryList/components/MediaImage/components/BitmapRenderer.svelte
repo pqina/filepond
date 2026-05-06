@@ -122,7 +122,7 @@
                     },
                 ],
                 {
-                    abortController,
+                    signal: abortController.signal,
                 }
             )) as ImageBitmap;
 

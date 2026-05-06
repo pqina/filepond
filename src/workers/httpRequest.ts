@@ -15,7 +15,7 @@ export interface RequestResponse {
 }
 
 export interface RequestOptions {
-    abortController?: AbortController;
+    signal?: AbortSignal;
     onprogress: (e: ProgressEvent) => void;
     onabort: () => void;
 }
@@ -32,8 +32,24 @@ export function httpRequest(
         responseType = 'text',
     }: RequestParams,
     cb: (error: string | null, response?: RequestResponse, transferList?: Transferable[]) => void,
-    { abortController = new AbortController(), onprogress, onabort }: RequestOptions
+    { signal, onprogress, onabort }: RequestOptions
 ) {
+    // handling abort
+    if (signal?.aborted) {
+        onabort();
+        return;
+    }
+
+    function didAbort() {
+        request.abort();
+    }
+
+    signal?.addEventListener('abort', didAbort, { once: true });
+
+    function release() {
+        signal?.removeEventListener('abort', didAbort);
+    }
+
     /** Default error response */
     function respondWithError() {
         cb(request.status + ' (' + request.statusText + ')');
@@ -60,9 +76,6 @@ export function httpRequest(
     // build request
     const request = new XMLHttpRequest();
     request.responseType = responseType;
-    abortController.signal.onabort = () => {
-        request.abort();
-    };
 
     const dataToSend = data ? data : formData ? toFormData(formData) : null;
 
@@ -70,12 +83,22 @@ export function httpRequest(
     (dataToSend ? request.upload : request).onprogress = onprogress;
 
     request.onload = () => {
+        release();
         request.status >= 200 && request.status < 300 ? respondWithData() : respondWithError();
     };
 
-    request.onerror = respondWithError;
-    request.ontimeout = respondWithError;
-    request.onabort = onabort;
+    request.onerror = () => {
+        release();
+        respondWithError();
+    };
+    request.ontimeout = () => {
+        release();
+        respondWithError();
+    };
+    request.onabort = () => {
+        release();
+        onabort();
+    };
 
     request.open(dataToSend && (method === 'GET' || method === 'HEAD') ? 'POST' : method, url);
 

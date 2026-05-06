@@ -1,3 +1,3 @@
-export const passthrough = (value: any) => value;
+export const passthrough = <T>(value: T): T => value;
 
 export const noop = () => {};

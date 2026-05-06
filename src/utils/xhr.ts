@@ -6,7 +6,7 @@ import { arrayRemoveFalsy } from './array.js';
 import { httpRequest, type RequestResponse } from '../workers/httpRequest.js';
 
 interface XHROptions {
-    abortController?: AbortController;
+    signal?: AbortSignal;
     data?: any;
     formData?: ([string, string] | [string, File] | [string, File, string])[];
     queryString?: { [key: string]: string | number };
@@ -38,7 +38,7 @@ export function xhr(url: string, options?: XHROptions): Promise<XHRResponse> {
         timeout,
         useWebWorkers = false,
         workersURL,
-        abortController,
+        signal,
         onprogress = noop,
         onabort = noop,
     } = options ?? {};
@@ -57,7 +57,7 @@ export function xhr(url: string, options?: XHROptions): Promise<XHRResponse> {
         withCredentials,
     };
 
-    const RequestOptions = { abortController, onprogress, onabort };
+    const requestOptions = { signal, onprogress, onabort };
 
     function xhrResponse(request: Promise<RequestResponse>): Promise<XHRResponse> {
         return new Promise((resolve, reject) => {
@@ -78,7 +78,7 @@ export function xhr(url: string, options?: XHROptions): Promise<XHRResponse> {
         // @ts-ignore fix types
         return xhrResponse(
             // @ts-ignore fix types
-            thread(createThreadWorker(workersURL, httpRequest), [requestParameters], RequestOptions)
+            thread(createThreadWorker(workersURL, httpRequest), [requestParameters], requestOptions)
         );
     }
 
@@ -94,7 +94,7 @@ export function xhr(url: string, options?: XHROptions): Promise<XHRResponse> {
                     }
                     resolve(response as RequestResponse);
                 },
-                RequestOptions
+                requestOptions
             )
         )
     );

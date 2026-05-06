@@ -32,7 +32,7 @@ export const DataURLStore = createStoreExtension({
 
             // encode in separate thread so doesn't block UI animations
             const res = (await thread(createThreadWorker(workersURL, readFile), [entry.file], {
-                abortController,
+                signal: abortController.signal,
                 onprogress,
                 onabort,
             })) as { dataURL: string };

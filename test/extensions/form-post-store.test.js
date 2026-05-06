@@ -114,9 +114,17 @@ describe('FormPostStore', function () {
                     FormPostStore,
                     {
                         url: 'store',
-                        willRequestWithOptions: (src, requestOptions, entry) => {
-                            requestOptions.formData.push(['entry', 'Hello World']);
-                            return requestOptions;
+                        resolveRequest: ({ url, options, entry }) => {
+                            expect(options.method).to.equal('POST');
+                            expect(url).to.equal('store');
+                            expect(entry.file.name).to.equal('file.txt');
+
+                            options.formData.push(['entry', 'Hello World']);
+
+                            return {
+                                url: 'signed-store',
+                                options,
+                            };
                         },
                     },
                 ],
@@ -144,6 +152,7 @@ describe('FormPostStore', function () {
             let requestBody;
             mockXhr.onSend = (xhr) => {
                 setTimeout(() => {
+                    expect(new URL(xhr.requestData.url).pathname).to.equal('/signed-store');
                     requestBody = Array.from(xhr.requestData.body.entries());
                     xhr.respond(200, { contentType: 'text/plain' }, '1234');
                 }, 0);

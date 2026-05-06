@@ -122,6 +122,72 @@ describe('ChunkedUploadStore', function () {
             entryTree.entries = [entry];
         }));
 
+    it('should resolve request URL and options', () =>
+        new Promise((done) => {
+            const entryTree = createDefaultEntryTree();
+            const extensionManager = createExtensionManager(entryTree);
+            extensionManager.extensions = [
+                [
+                    ChunkedUploadStore,
+                    {
+                        url: 'store',
+                        resolveRequest: ({ url, options, entry }) => {
+                            expect(url).to.equal('store');
+                            expect(entry.file.name).to.equal('file.txt');
+
+                            return {
+                                url: `signed-${options.method.toLowerCase()}`,
+                                options: {
+                                    ...options,
+                                    queryString: {
+                                        ...options.queryString,
+                                        token: options.method.toLowerCase(),
+                                    },
+                                },
+                            };
+                        },
+                    },
+                ],
+            ];
+
+            const unsub = entryTree.on('updateEntry', (entry) => {
+                const {
+                    ChunkedUploadStore: { status },
+                } = entry.extension;
+
+                if (!status.code.endsWith('COMPLETE')) return;
+
+                unsub();
+                expect(status.code).to.equal('STORE_COMPLETE');
+                done();
+            });
+
+            mockXhr.onSend = (xhr) => {
+                setTimeout(() => {
+                    const requestURL = new URL(xhr.requestData.url);
+
+                    if (xhr.method === 'POST') {
+                        expect(requestURL.pathname).to.equal('/signed-post');
+                        expect(requestURL.searchParams.get('token')).to.equal('post');
+                        xhr.respond(201, { contentType: 'text/plain' }, '1234');
+                    } else if (xhr.method === 'PATCH') {
+                        expect(requestURL.pathname).to.equal('/signed-patch');
+                        expect(requestURL.searchParams.get('id')).to.equal('1234');
+                        expect(requestURL.searchParams.get('token')).to.equal('patch');
+                        xhr.respond(204, { contentType: 'text/plain' }, '');
+                    }
+                }, 0);
+            };
+
+            const entry = {
+                src: new File(['hello world'], 'file.txt', { type: 'text/plain' }),
+                state: {
+                    store: true,
+                },
+            };
+            entryTree.entries = [entry];
+        }));
+
     it('should resume storage of a File', () =>
         new Promise((done) => {
             const entryTree = createDefaultEntryTree();

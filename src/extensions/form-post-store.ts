@@ -8,9 +8,12 @@ import type { XHRResponse } from '../utils/xhr.js';
 import { createStoreExtension } from './common/createStoreExtension.js';
 import { blobToFile } from '../utils/file.js';
 import { isFile, isFileEntry } from '../utils/test.js';
+import { passthrough } from '../utils/placeholder.js';
 import { xhr, getResponseHeaders, getFilenameFromResponseHeaders } from '../utils/xhr.js';
+import { getResolvedRequest } from './common/requestResolver.js';
 
-import type { RequestHook, PublicRequestOptions } from '../types/index.js';
+import type { FilePondFileEntry, PublicRequestOptions } from '../types/index.js';
+import type { RequestResolver } from './common/requestResolver.js';
 
 export interface FormPostStoreOptions extends StoreExtensionOptions {
     /** Server URL, defaults to empty string */
@@ -22,8 +25,8 @@ export interface FormPostStoreOptions extends StoreExtensionOptions {
     /** when restoring a file will first do request head so we have file info, defaults to `true` */
     fetchHead?: boolean;
 
-    /** Intercept options sent to `XMLHttpRequest` */
-    willRequestWithOptions?: RequestHook;
+    /** Resolve the URL and options sent to `XMLHttpRequest` */
+    resolveRequest?: RequestResolver<FilePondFileEntry>;
 }
 
 export const FormPostStore = createStoreExtension({
@@ -32,7 +35,7 @@ export const FormPostStore = createStoreExtension({
         url: '',
         name: 'entry',
         fetchHead: true,
-        willRequestWithOptions: (src, options, entry) => options,
+        resolveRequest: passthrough,
     } as FormPostStoreOptions,
     factory: ({ props }, pond) => {
         const { updateEntry } = pond;
@@ -52,7 +55,7 @@ export const FormPostStore = createStoreExtension({
             entry,
             { abortController, onprogress, onabort }
         ) => {
-            const { url, valueKey, willRequestWithOptions } = props;
+            const { url, valueKey, resolveRequest } = props;
 
             // Needs to be of type File
             if (!isFileEntry(entry) || !isFile(entry.file)) {
@@ -70,9 +73,15 @@ export const FormPostStore = createStoreExtension({
                 method: 'POST',
                 formData: [[name, entry.file, entry.file.name]],
             };
-            const request = await xhr(url, {
-                ...(willRequestWithOptions(url, requestOptions, entry) ?? requestOptions),
-                abortController,
+            const resolvedRequest = await getResolvedRequest(
+                resolveRequest,
+                url,
+                requestOptions,
+                entry
+            );
+            const request = await xhr(resolvedRequest.url, {
+                ...resolvedRequest.options,
+                signal: abortController.signal,
                 onprogress,
                 onabort,
             });
@@ -86,7 +95,7 @@ export const FormPostStore = createStoreExtension({
             entry,
             { onprogress, onabort, abortController }
         ) => {
-            const { url, fetchHead, willRequestWithOptions } = props;
+            const { url, fetchHead, resolveRequest } = props;
 
             // Head request to get name and size?
             if (fetchHead) {
@@ -96,9 +105,13 @@ export const FormPostStore = createStoreExtension({
                         id: storageId,
                     },
                 };
-                const headRequest = await xhr(url, {
-                    ...(willRequestWithOptions(url, requestOptions, entry) ?? requestOptions),
-                });
+                const resolvedRequest = await getResolvedRequest(
+                    resolveRequest,
+                    url,
+                    requestOptions,
+                    entry
+                );
+                const headRequest = await xhr(resolvedRequest.url, resolvedRequest.options);
 
                 // use this to prefill content type and length
                 const { contentType, contentLength, lastModified } =
@@ -120,10 +133,16 @@ export const FormPostStore = createStoreExtension({
                     id: storageId,
                 },
             };
-            const request = await xhr(url, {
-                ...(willRequestWithOptions(url, requestOptions, entry) ?? requestOptions),
+            const resolvedRequest = await getResolvedRequest(
+                resolveRequest,
+                url,
+                requestOptions,
+                entry
+            );
+            const request = await xhr(resolvedRequest.url, {
+                ...resolvedRequest.options,
                 responseType: 'blob',
-                abortController,
+                signal: abortController.signal,
                 onprogress,
                 onabort,
             });
@@ -144,7 +163,7 @@ export const FormPostStore = createStoreExtension({
         };
 
         const releaseEntry: StoreExtensionReleaseFunction = async (storageId, entry) => {
-            const { url, willRequestWithOptions } = props;
+            const { url, resolveRequest } = props;
 
             const requestOptions: PublicRequestOptions = {
                 method: 'DELETE',
@@ -153,7 +172,14 @@ export const FormPostStore = createStoreExtension({
                 },
             };
 
-            await xhr(url, willRequestWithOptions(url, requestOptions, entry) ?? requestOptions);
+            const resolvedRequest = await getResolvedRequest(
+                resolveRequest,
+                url,
+                requestOptions,
+                entry
+            );
+
+            await xhr(resolvedRequest.url, resolvedRequest.options);
 
             // TODO: return success / fail state, for now always succeeds
             return true;

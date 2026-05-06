@@ -66,13 +66,6 @@ export type Progress = {
     total: number;
 };
 
-/** A function used to intercept options sent to `XMLHttpRequest` */
-export type RequestHook = (
-    url: string,
-    options: PublicRequestOptions,
-    entry: FilePondEntry
-) => PublicRequestOptions;
-
 export interface PublicRequestOptions {
     method: 'GET' | 'POST' | 'HEAD' | 'PUT' | 'DELETE' | 'PATCH';
     data?: any;
