@@ -115,17 +115,17 @@ export function isDataTransfer(value: unknown): value is DataTransfer {
 
 /** Tests if mimetype includes /video/ */
 export function isVideoFile(value: unknown): value is File {
-    return !!(isBlobOrFile(value) && /video/.test(value.type));
+    return !!(isBlobOrFile(value) && /video/i.test(value.type));
 }
 
 /** Tests if mimetype includes /image/ */
 export function isImageFile(value: unknown): value is File {
-    return !!(isBlobOrFile(value) && /image/.test(value.type));
+    return !!(isBlobOrFile(value) && /image/i.test(value.type));
 }
 
 /** Tests if mimetype includes /audio/ */
 export function isAudioFile(value: unknown): value is File {
-    return !!(isBlobOrFile(value) && /audio/.test(value.type));
+    return !!(isBlobOrFile(value) && /audio/i.test(value.type));
 }
 
 export function isDataTransferEntry(value: any): value is FilePondFileEntry {

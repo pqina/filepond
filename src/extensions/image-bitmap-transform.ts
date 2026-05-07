@@ -63,7 +63,7 @@ export const ImageBitmapTransform = createTransformExtension({
     factory: ({ props, extensionName }) => {
         /** Tests if we can transform this entry */
         const canTransformEntry: TransformExtensionCanTransformFunction = (entry) => {
-            return isFileEntry(entry) && isImageFile(entry.file) && !/svg/.test(entry.file.type);
+            return isFileEntry(entry) && isImageFile(entry.file) && !/svg/i.test(entry.file.type);
         };
 
         const transformEntry: TransformExtensionTransformFunction = async (entry, { signal }) => {

@@ -44,7 +44,7 @@ export const FileMimeTypeValidator = createValidatorExtension({
             // sanitize input
             filteredMimeTypes = (isString(accept) ? accept.split(',') : accept)
                 .map((mimeType: string | RegExp) =>
-                    isString(mimeType) ? mimeType.trim() : mimeType
+                    isString(mimeType) ? mimeType.trim().toLowerCase() : mimeType
                 )
                 .filter((mimeType: string | RegExp) => {
                     // test if this mimetype is an extension, else remove it
@@ -75,8 +75,10 @@ export const FileMimeTypeValidator = createValidatorExtension({
             // at this point we know we geta filepondentry with a file
             const { type } = (entry as FilePondFileEntry & { file: File }).file;
 
-            // match types
-            const didMatchSome = computedMimeTypes.some((mimeType) => mimeType.test(type));
+            // match types (normalize type because it's allowed to have uppercase characters)
+            const didMatchSome = computedMimeTypes.some((mimeType) =>
+                mimeType.test(type.toLowerCase())
+            );
 
             // returns error key so can be used with locale
             return didMatchSome

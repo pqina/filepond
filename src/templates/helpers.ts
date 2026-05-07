@@ -188,7 +188,7 @@ export function createEntryMatcher(matches: string | string[] | RegExp): (entry:
             return (entry: Entry) =>
                 isFileEntry(entry) &&
                 isBlobOrFile(entry.file) &&
-                entry.file.type.startsWith(mainType);
+                entry.file.type.toLowerCase().startsWith(mainType);
         }
 
         // mimetype
