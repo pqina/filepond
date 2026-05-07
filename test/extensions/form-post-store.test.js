@@ -114,17 +114,19 @@ describe('FormPostStore', function () {
                     FormPostStore,
                     {
                         url: 'store',
-                        resolveRequest: ({ url, options, entry }) => {
-                            expect(options.method).to.equal('POST');
-                            expect(url).to.equal('store');
-                            expect(entry.file.name).to.equal('file.txt');
+                        resolveRequest: {
+                            store: ({ url, options, entry }) => {
+                                expect(options.method).to.equal('POST');
+                                expect(url).to.equal('store');
+                                expect(entry.file.name).to.equal('file.txt');
 
-                            options.formData.push(['entry', 'Hello World']);
+                                options.formData.push(['entry', 'Hello World']);
 
-                            return {
-                                url: 'signed-store',
-                                options,
-                            };
+                                return {
+                                    url: 'signed-store',
+                                    options,
+                                };
+                            },
                         },
                     },
                 ],
@@ -354,6 +356,93 @@ describe('FormPostStore', function () {
                     name: 'file.txt',
                     type: 'text/plain',
                     size: '10',
+                    state: {
+                        load: true,
+                        value: '1234',
+                    },
+                },
+            ];
+        }));
+
+    it('should resolve metadata request and response when restoring a stored file', () =>
+        new Promise((done) => {
+            const entryTree = createDefaultEntryTree();
+            const extensionManager = createExtensionManager(entryTree);
+            extensionManager.extensions = [
+                [
+                    FormPostStore,
+                    {
+                        url: 'store',
+                        resolveRequest: {
+                            metadata: ({ url, options, entry }) => {
+                                expect(options.method).to.equal('HEAD');
+                                expect(options.queryString.id).to.equal('1234');
+                                expect(url).to.equal('store');
+                                expect(entry.state.value).to.equal('1234');
+
+                                return {
+                                    url: 'signed-metadata',
+                                    options,
+                                };
+                            },
+                        },
+                        resolveResponse: {
+                            metadata: ({ value, response, entry }) => {
+                                expect(value.name).to.equal('file.txt');
+                                expect(response.response).to.equal('');
+                                expect(entry.state.value).to.equal('1234');
+
+                                return {
+                                    ...value,
+                                    name: 'metadata-file.txt',
+                                };
+                            },
+                        },
+                    },
+                ],
+            ];
+
+            const unsub = entryTree.on('updateEntry', (entry) => {
+                if (entry.name !== 'metadata-file.txt') {
+                    return;
+                }
+
+                unsub();
+                expect(entry.type).to.equal('text/plain');
+                expect(entry.size).to.equal(10);
+                done();
+            });
+
+            mockXhr.onSend = (xhr) => {
+                setTimeout(() => {
+                    const requestURL = new URL(xhr.requestData.url);
+
+                    if (xhr.method === 'HEAD') {
+                        expect(requestURL.pathname).to.equal('/signed-metadata');
+                        xhr.respond(
+                            200,
+                            {
+                                'Content-Length': '10',
+                                'Content-Type': 'text/plain',
+                                'Content-Disposition': 'attachment; filename=file.txt',
+                            },
+                            ''
+                        );
+                    } else {
+                        xhr.respond(
+                            200,
+                            {
+                                'Content-Type': 'text/plain',
+                                'Content-Disposition': 'attachment; filename=file.txt',
+                            },
+                            'dummy-text'
+                        );
+                    }
+                }, 0);
+            };
+
+            entryTree.entries = [
+                {
                     state: {
                         load: true,
                         value: '1234',

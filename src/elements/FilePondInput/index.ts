@@ -669,7 +669,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         const localeData = {
             multiple: `${this.multiple}`,
             //
-            name: totalEntries === 1 ? this.#entryTree.entries[0].name || 'untitled' : null,
+            name: totalEntries === 1 ? this.#entryTree.entries[0].name || 'Untitled' : null,
             count: totalEntries,
 
             //

@@ -10,10 +10,32 @@ import { blobToFile } from '../utils/file.js';
 import { isFile, isFileEntry } from '../utils/test.js';
 import { passthrough } from '../utils/placeholder.js';
 import { xhr, getResponseHeaders, getFilenameFromResponseHeaders } from '../utils/xhr.js';
-import { getResolvedRequest } from './common/requestResolver.js';
 
-import type { FilePondFileEntry, PublicRequestOptions } from '../types/index.js';
-import type { RequestResolver } from './common/requestResolver.js';
+import type { FilePondFileEntry } from '../types/index.js';
+import type { RequestResolverContext, ResolvedRequest } from './common/requestResolver.js';
+
+interface FormPostStoreMetadata {
+    name?: string;
+    type?: string;
+    size?: number;
+    lastModified?: number;
+}
+
+type ResolvedResponseValue = string | File | FormPostStoreMetadata;
+
+interface ResponseResolverContext<Resolved extends ResolvedResponseValue = ResolvedResponseValue> {
+    value: Resolved;
+    response: XHRResponse;
+    entry: FilePondFileEntry;
+}
+
+type ResponseResolver<Resolved extends ResolvedResponseValue> = (
+    response: ResponseResolverContext<Resolved>
+) => Resolved;
+
+type RequestResolver = (
+    request: RequestResolverContext<FilePondFileEntry>
+) => ResolvedRequest | Promise<ResolvedRequest>;
 
 export interface FormPostStoreOptions extends StoreExtensionOptions {
     /** Server URL, defaults to empty string */
@@ -22,11 +44,26 @@ export interface FormPostStoreOptions extends StoreExtensionOptions {
     /** The name of the form field being submitted with the form POST, defaults to `'entry'` */
     name?: string;
 
-    /** when restoring a file will first do request head so we have file info, defaults to `true` */
-    fetchHead?: boolean;
+    /** When restoring a file, first fetch metadata so file details are updated sooner, defaults to `true`. */
+    fetchMetadata?: boolean;
+
+    /** Hook that runs when determining the name for a file. Defaults to `() => 'Untitled'`. */
+    getBasename?: (entry: FilePondFileEntry, blob: Blob) => string;
 
     /** Resolve the URL and options sent to `XMLHttpRequest` */
-    resolveRequest?: RequestResolver<FilePondFileEntry>;
+    resolveRequest?: {
+        metadata?: RequestResolver;
+        store?: RequestResolver;
+        restore?: RequestResolver;
+        release?: RequestResolver;
+    };
+
+    /** Resolve the requested value from the response, when storing a file this is the server entry id, when restoring a file this is a File object */
+    resolveResponse?: {
+        metadata?: ResponseResolver<FormPostStoreMetadata>;
+        store?: ResponseResolver<string>;
+        restore?: ResponseResolver<File>;
+    };
 }
 
 export const FormPostStore = createStoreExtension({
@@ -34,8 +71,10 @@ export const FormPostStore = createStoreExtension({
     props: {
         url: '',
         name: 'entry',
-        fetchHead: true,
-        resolveRequest: passthrough,
+        fetchMetadata: true,
+        resolveRequest: {},
+        resolveResponse: {},
+        getBasename: () => 'Untitled',
     } as FormPostStoreOptions,
     factory: ({ props }, pond) => {
         const { updateEntry } = pond;
@@ -52,7 +91,13 @@ export const FormPostStore = createStoreExtension({
         }
 
         const storeEntry: StoreExtensionStoreFunction = async (entry, { onprogress, signal }) => {
-            const { url, valueKey, resolveRequest } = props;
+            const {
+                name,
+                url,
+                valueKey,
+                resolveRequest: { store: resolveStoreRequest = passthrough },
+                resolveResponse: { store: resolveStoreResponse = ({ value }) => value },
+            } = props;
 
             // Needs to be of type File
             if (!isFileEntry(entry) || !isFile(entry.file)) {
@@ -65,25 +110,26 @@ export const FormPostStore = createStoreExtension({
             }
 
             // Let's upload the file data
-            const { name } = props;
-            const requestOptions: PublicRequestOptions = {
-                method: 'POST',
-                formData: [[name, entry.file, entry.file.name]],
-            };
-            const resolvedRequest = await getResolvedRequest(
-                resolveRequest,
+            const resolvedRequest = await resolveStoreRequest({
                 url,
-                requestOptions,
-                entry
-            );
-            const request = await xhr(resolvedRequest.url, {
+                options: {
+                    method: 'POST',
+                    formData: [[name, entry.file, entry.file.name]],
+                },
+                entry,
+            });
+            const requestResponse = await xhr(resolvedRequest.url, {
                 ...resolvedRequest.options,
                 signal,
                 onprogress,
             });
 
             // return a unique id
-            return request.response;
+            return resolveStoreResponse({
+                response: requestResponse,
+                value: requestResponse.response as string,
+                entry,
+            });
         };
 
         const restoreEntry: StoreExtensionRestoreFunction = async (
@@ -91,54 +137,67 @@ export const FormPostStore = createStoreExtension({
             entry,
             { onprogress, signal }
         ) => {
-            const { url, fetchHead, resolveRequest } = props;
+            const {
+                url,
+                fetchMetadata,
+                getBasename,
+                resolveRequest: {
+                    metadata: resolveMetadataRequest = passthrough,
+                    restore: resolveRestoreRequest = passthrough,
+                },
+                resolveResponse: {
+                    metadata: resolveMetadataResponse = ({ value }) => value,
+                    restore: resolveRestoreResponse = ({ value }) => value,
+                },
+            } = props;
 
-            // Head request to get name and size?
-            if (fetchHead) {
-                const requestOptions: PublicRequestOptions = {
-                    method: 'HEAD',
-                    queryString: {
-                        id: storageId,
-                    },
-                };
-                const resolvedRequest = await getResolvedRequest(
-                    resolveRequest,
+            // Metadata request to get name and size?
+            if (fetchMetadata) {
+                const resolvedRequest = await resolveMetadataRequest({
                     url,
-                    requestOptions,
-                    entry
-                );
-                const headRequest = await xhr(resolvedRequest.url, {
+                    options: {
+                        method: 'HEAD',
+                        queryString: {
+                            id: storageId,
+                        },
+                    },
+                    entry,
+                });
+                const metadataRequest = await xhr(resolvedRequest.url, {
                     ...resolvedRequest.options,
                     signal,
                 });
 
                 // use this to prefill content type and length
                 const { contentType, contentLength, lastModified } =
-                    getResponseHeaders(headRequest);
+                    getResponseHeaders(metadataRequest);
+
+                const metadata = resolveMetadataResponse({
+                    response: metadataRequest,
+                    value: {
+                        name: getFilename(metadataRequest),
+                        type: contentType,
+                        size: parseInt(contentLength, 10),
+                        lastModified: new Date(lastModified).getTime(),
+                    },
+                    entry,
+                });
 
                 // update entry so we know size, name, and type before the blob is loaded
-                updateEntry(entry, {
-                    name: getFilename(headRequest),
-                    type: contentType,
-                    size: parseInt(contentLength, 10),
-                    lastModified: new Date(lastModified).getTime(),
-                });
+                updateEntry(entry, metadata);
             }
 
-            // get file
-            const requestOptions: PublicRequestOptions = {
-                method: 'GET',
-                queryString: {
-                    id: storageId,
-                },
-            };
-            const resolvedRequest = await getResolvedRequest(
-                resolveRequest,
+            const resolvedRequest = await resolveRestoreRequest({
                 url,
-                requestOptions,
-                entry
-            );
-            const request = await xhr(resolvedRequest.url, {
+                options: {
+                    method: 'GET',
+                    queryString: {
+                        id: storageId,
+                    },
+                },
+                entry,
+            });
+            const requestResponse = await xhr(resolvedRequest.url, {
                 ...resolvedRequest.options,
                 responseType: 'blob',
                 signal,
@@ -146,37 +205,44 @@ export const FormPostStore = createStoreExtension({
             });
 
             // get the blob object
-            const { response: blob } = request;
+            const { response: blob } = requestResponse;
 
             // replace entry with our new shiny file object
-            return blobToFile(
+            const file = blobToFile(
                 blob as Blob,
                 // use entry name if defined
                 entry.name ||
                     // else read from response headers
-                    getFilenameFromResponseHeaders(getResponseHeaders(request)) ||
+                    getFilenameFromResponseHeaders(getResponseHeaders(requestResponse)) ||
                     // else fall back
-                    'untitled'
+                    getBasename(entry, blob as Blob)
             );
+
+            // return a file object
+            return resolveRestoreResponse({
+                response: requestResponse,
+                value: file,
+                entry,
+            });
         };
 
         const releaseEntry: StoreExtensionReleaseFunction = async (storageId, entry, options) => {
-            const { url, resolveRequest } = props;
+            const {
+                url,
+                resolveRequest: { release: resolveReleaseRequest = passthrough },
+            } = props;
             const { signal } = options ?? {};
 
-            const requestOptions: PublicRequestOptions = {
-                method: 'DELETE',
-                queryString: {
-                    id: storageId,
-                },
-            };
-
-            const resolvedRequest = await getResolvedRequest(
-                resolveRequest,
+            const resolvedRequest = await resolveReleaseRequest({
                 url,
-                requestOptions,
-                entry
-            );
+                options: {
+                    method: 'DELETE',
+                    queryString: {
+                        id: storageId,
+                    },
+                },
+                entry,
+            });
 
             await xhr(resolvedRequest.url, {
                 ...resolvedRequest.options,

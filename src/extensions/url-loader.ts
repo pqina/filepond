@@ -1,4 +1,4 @@
-import type { FilePondEntry, FilePondFileEntry, PublicRequestOptions } from '../types/index.js';
+import type { FilePondEntry, FilePondFileEntry } from '../types/index.js';
 import type { TaskFnOptions } from '../core/taskScheduler.ts';
 import type { XHRResponse } from '../utils/xhr.js';
 
@@ -15,8 +15,23 @@ import { didAbort } from '../utils/abort.js';
 import { passthrough } from '../utils/placeholder.js';
 import { createExtension } from './common/createExtension.js';
 import { Status } from '../common/status.js';
-import { getResolvedRequest } from './common/requestResolver.js';
-import type { RequestResolver } from './common/requestResolver.js';
+import type { RequestResolverContext, ResolvedRequest } from './common/requestResolver.js';
+
+interface URLLoaderResponseResolverContext<Value> {
+    value: Value;
+    response: XHRResponse;
+    entry: FilePondFileEntry;
+}
+
+type URLLoaderRequestResolver = (
+    request: RequestResolverContext<FilePondFileEntry>
+) => ResolvedRequest | Promise<ResolvedRequest>;
+
+type URLLoaderResponseResolver<Value> = (
+    response: URLLoaderResponseResolverContext<Value>
+) => Value;
+
+const defaultResolveLoadResponse: URLLoaderResponseResolver<File> = ({ value }) => value;
 
 export interface URLLoaderOptions {
     /** Action to run to trigger the load operation, defaults to `'load'`. */
@@ -26,13 +41,13 @@ export interface URLLoaderOptions {
     actionAbort?: string;
 
     /** Hook that runs when determining the name for a file. Defaults to `() => 'Untitled'`. */
-    getBaseName?: (entry: FilePondEntry, blob: Blob) => string;
+    getBasename?: (entry: FilePondEntry, blob: Blob) => string;
 
     /** An object with key value pairs describing mime type relation to extension. */
     mimeTypeMap?: { [key: string]: string };
 
-    /** Fetch remote HEAD to get file content length and type so meta data is updated sooner, defaults to `true`. */
-    fetchHead?: boolean;
+    /** Fetch remote metadata using HEAD request so file content length and type are updated sooner, defaults to `true`. */
+    fetchMetadata?: boolean;
 
     /** Maximum number of URLs to load in parallel, defaults to `2`. */
     parallel?: number;
@@ -44,22 +59,31 @@ export interface URLLoaderOptions {
     workersURL?: URL;
 
     /** Resolve the URL and options sent to `XMLHttpRequest`. */
-    resolveRequest?: RequestResolver<FilePondFileEntry>;
+    resolveRequest?: {
+        metadata?: URLLoaderRequestResolver;
+        load?: URLLoaderRequestResolver;
+    };
+
+    /** Resolve the value created from the `XMLHttpRequest` response. */
+    resolveResponse?: {
+        load?: URLLoaderResponseResolver<File>;
+    };
 }
 
 export const URLLoader = createExtension({
     name: 'URLLoader',
     type: 'loader',
     props: {
-        getBaseName: () => 'Untitled',
+        getBasename: () => 'Untitled',
         mimeTypeMap: undefined,
         parallel: 2,
-        fetchHead: true,
+        fetchMetadata: true,
         useWebWorkers: true,
         workersURL: undefined,
         actionLoad: 'load',
         actionAbort: 'abort',
-        resolveRequest: passthrough,
+        resolveRequest: {},
+        resolveResponse: {},
     } as URLLoaderOptions,
     factory: ({ extensionName, props }, pond) => {
         const {
@@ -90,8 +114,8 @@ export const URLLoader = createExtension({
 
             // get from data url / blob
             if (isDataURL(url)) {
-                const { getBaseName, mimeTypeMap } = props;
-                return `${getBaseName(entry, blob as Blob)}${getExtensionFromMimeType((blob as Blob).type, mimeTypeMap)}`;
+                const { getBasename, mimeTypeMap } = props;
+                return `${getBasename(entry, blob as Blob)}${getExtensionFromMimeType((blob as Blob).type, mimeTypeMap)}`;
             }
 
             return urlToFilename(url);
@@ -125,7 +149,7 @@ export const URLLoader = createExtension({
         }
 
         /** Get remote file information */
-        async function taskUrlToInfo(entry: FilePondFileEntry, { signal }: TaskFnOptions) {
+        async function taskUrlToMetadata(entry: FilePondFileEntry, { signal }: TaskFnOptions) {
             const { src } = entry;
 
             setEntryExtensionStatus(entry, {
@@ -140,16 +164,20 @@ export const URLLoader = createExtension({
                 }
 
                 // get settings
-                const { resolveRequest, useWebWorkers, workersURL } = props;
+                const {
+                    resolveRequest: { metadata: resolveMetadataRequest = passthrough },
+                    useWebWorkers,
+                    workersURL,
+                } = props;
 
                 // quickly try to get file metadata and update so user knows how much data is loaded
-                const headRequestOptions: PublicRequestOptions = { method: 'HEAD' };
-                const resolvedRequest = await getResolvedRequest(
-                    resolveRequest,
-                    src as string,
-                    headRequestOptions,
-                    entry
-                );
+                const resolvedRequest = await resolveMetadataRequest({
+                    url: src as string,
+                    options: {
+                        method: 'HEAD',
+                    },
+                    entry,
+                });
                 const headRequest = await xhr(resolvedRequest.url, {
                     ...resolvedRequest.options,
                     signal,
@@ -193,15 +221,20 @@ export const URLLoader = createExtension({
                 }
 
                 // get settings
-                const { resolveRequest, useWebWorkers, workersURL } = props;
+                const {
+                    resolveRequest: { load: resolveLoadRequest = passthrough },
+                    resolveResponse: { load: resolveLoadResponse = defaultResolveLoadResponse },
+                    useWebWorkers,
+                    workersURL,
+                } = props;
 
-                const dataRequestOptions: PublicRequestOptions = { method: 'GET' };
-                const resolvedRequest = await getResolvedRequest(
-                    resolveRequest,
-                    src as string,
-                    dataRequestOptions,
-                    entry
-                );
+                const resolvedRequest = await resolveLoadRequest({
+                    url: src as string,
+                    options: {
+                        method: 'GET',
+                    },
+                    entry,
+                });
                 const dataRequest = await xhr(resolvedRequest.url, {
                     ...resolvedRequest.options,
                     responseType: 'arraybuffer',
@@ -223,10 +256,15 @@ export const URLLoader = createExtension({
 
                 // turn into file object
                 const filename = getFilename(entry, dataRequest);
+                const file = resolveLoadResponse({
+                    response: dataRequest,
+                    value: blobToFile(blob, filename),
+                    entry,
+                });
 
                 // update in one go
                 updateEntry(entry, {
-                    file: blobToFile(blob, filename),
+                    file,
                     extension: {
                         [extensionName]: {
                             status: {
@@ -260,7 +298,7 @@ export const URLLoader = createExtension({
             }
 
             // get settings
-            const { actionLoad, actionAbort, fetchHead, parallel } = props;
+            const { actionLoad, actionAbort, fetchMetadata, parallel } = props;
 
             // get refs to source
             const { src, name, size } = entry;
@@ -289,9 +327,9 @@ export const URLLoader = createExtension({
 
             // start loading file info
             const hasFileInfo = isString(name) && isNumber(size);
-            const canFetchHead = fetchHead && !isDataURL(src);
-            if (!hasFileInfo && canFetchHead) {
-                pushTask(entry.id, taskUrlToInfo);
+            const canFetchMetadata = fetchMetadata && !isDataURL(src);
+            if (!hasFileInfo && canFetchMetadata) {
+                pushTask(entry.id, taskUrlToMetadata);
                 return;
             }
 

@@ -73,21 +73,37 @@ describe('URLLoader', function () {
                     URLLoader,
                     {
                         useWebWorkers: false,
-                        fetchHead: false,
-                        resolveRequest: ({ url, options, entry }) => {
-                            expect(url).to.equal('file.txt');
-                            expect(options.method).to.equal('GET');
-                            expect(entry.src).to.equal('file.txt');
+                        resolveRequest: {
+                            metadata: ({ url, options, entry }) => {
+                                expect(url).to.equal('file.txt');
+                                expect(options.method).to.equal('HEAD');
+                                expect(entry.src).to.equal('file.txt');
 
-                            return {
-                                url: 'signed-file.txt',
-                                options: {
-                                    ...options,
-                                    queryString: {
-                                        token: '1234',
+                                return {
+                                    url: 'signed-metadata.txt',
+                                    options: {
+                                        ...options,
+                                        queryString: {
+                                            token: 'metadata',
+                                        },
                                     },
-                                },
-                            };
+                                };
+                            },
+                            load: ({ url, options, entry }) => {
+                                expect(url).to.equal('file.txt');
+                                expect(options.method).to.equal('GET');
+                                expect(entry.src).to.equal('file.txt');
+
+                                return {
+                                    url: 'signed-file.txt',
+                                    options: {
+                                        ...options,
+                                        queryString: {
+                                            token: '1234',
+                                        },
+                                    },
+                                };
+                            },
                         },
                     },
                 ],
@@ -96,8 +112,13 @@ describe('URLLoader', function () {
             mockXhr.onSend = (xhr) => {
                 setTimeout(() => {
                     const requestURL = new URL(xhr.requestData.url);
-                    expect(requestURL.pathname).to.equal('/signed-file.txt');
-                    expect(requestURL.searchParams.get('token')).to.equal('1234');
+                    if (xhr.method === 'HEAD') {
+                        expect(requestURL.pathname).to.equal('/signed-metadata.txt');
+                        expect(requestURL.searchParams.get('token')).to.equal('metadata');
+                    } else {
+                        expect(requestURL.pathname).to.equal('/signed-file.txt');
+                        expect(requestURL.searchParams.get('token')).to.equal('1234');
+                    }
 
                     xhr.respond(
                         200,
@@ -116,6 +137,56 @@ describe('URLLoader', function () {
 
                 unsub();
                 expect(isFile(entry.file)).to.equal(true);
+                done();
+            });
+
+            entryTree.entries = [
+                {
+                    src: 'file.txt',
+                },
+            ];
+        }));
+
+    it('should resolve loaded File from response', () =>
+        new Promise((done) => {
+            extensionManager.extensions = [
+                [
+                    URLLoader,
+                    {
+                        useWebWorkers: false,
+                        fetchMetadata: false,
+                        resolveResponse: {
+                            load: ({ value, response, entry }) => {
+                                expect(value.name).to.equal('file.txt');
+                                expect(response.response).to.exist;
+                                expect(entry.src).to.equal('file.txt');
+
+                                return new File([value], 'resolved-file.txt', {
+                                    type: value.type,
+                                });
+                            },
+                        },
+                    },
+                ],
+            ];
+
+            mockXhr.onSend = (xhr) => {
+                setTimeout(() => {
+                    xhr.respond(
+                        200,
+                        {
+                            'Content-Type': 'text/plain',
+                        },
+                        'hello world'
+                    );
+                }, 0);
+            };
+
+            const unsub = entryTree.on('updateEntry', (entry) => {
+                if (!isFile(entry.file)) return;
+
+                unsub();
+                expect(entry.file.name).to.equal('resolved-file.txt');
                 done();
             });
 

@@ -5,16 +5,33 @@ import { toURL } from '../utils/url.js';
 import { naturalFileSizeToBytes } from '../utils/file.js';
 import { noop, passthrough } from '../utils/placeholder.js';
 import { sleep } from '../utils/sleep.js';
-import { xhr, createProgressEvent, getResponseHeaders } from '../utils/xhr.js';
+import { xhr, createProgressEvent, getResponseHeaders, type XHRResponse } from '../utils/xhr.js';
 import { warn } from '../common/console.js';
-import { getResolvedRequest } from './common/requestResolver.js';
 import type {
     StoreExtensionOptions,
     StoreExtensionReleaseFunction,
     StoreExtensionStoreFunction,
 } from './common/createStoreExtension.js';
-import type { PublicRequestOptions, FilePondFileEntry } from '../types/index.js';
-import type { RequestResolver } from './common/requestResolver.js';
+import type { FilePondFileEntry } from '../types/index.js';
+import type { RequestResolverContext, ResolvedRequest } from './common/requestResolver.js';
+
+type ChunkedUploadStoreResponseValue = string | number;
+
+interface ChunkedUploadStoreResponseResolverContext<
+    Value extends ChunkedUploadStoreResponseValue = ChunkedUploadStoreResponseValue,
+> {
+    value: Value;
+    response: XHRResponse;
+    entry: FilePondFileEntry;
+}
+
+type ChunkedUploadStoreRequestResolver = (
+    request: RequestResolverContext<FilePondFileEntry>
+) => ResolvedRequest | Promise<ResolvedRequest>;
+
+type ChunkedUploadStoreResponseResolver<Value extends ChunkedUploadStoreResponseValue> = (
+    response: ChunkedUploadStoreResponseResolverContext<Value>
+) => Value;
 
 export interface ChunkedUploadStoreOptions extends StoreExtensionOptions {
     /** Server URL */
@@ -33,7 +50,18 @@ export interface ChunkedUploadStoreOptions extends StoreExtensionOptions {
     resume?: boolean;
 
     /** Resolve the URL and options sent to `XMLHttpRequest` */
-    resolveRequest?: RequestResolver<FilePondFileEntry>;
+    resolveRequest?: {
+        create?: ChunkedUploadStoreRequestResolver;
+        offset?: ChunkedUploadStoreRequestResolver;
+        chunk?: ChunkedUploadStoreRequestResolver;
+        release?: ChunkedUploadStoreRequestResolver;
+    };
+
+    /** Resolve the value created from the `XMLHttpRequest` response */
+    resolveResponse?: {
+        create?: ChunkedUploadStoreResponseResolver<string>;
+        offset?: ChunkedUploadStoreResponseResolver<number>;
+    };
 }
 
 export const ChunkedUploadStore = createStoreExtension({
@@ -44,7 +72,8 @@ export const ChunkedUploadStore = createStoreExtension({
         retryDelays: [500, 1000, 3000],
         resume: false,
         parallelChunks: 2,
-        resolveRequest: passthrough,
+        resolveRequest: {},
+        resolveResponse: {},
     } as ChunkedUploadStoreOptions,
     factory: ({ props, didSetProps }, { updateEntry }) => {
         let computedChunkSize: number = Infinity;
@@ -112,32 +141,39 @@ export const ChunkedUploadStore = createStoreExtension({
             options: { signal?: AbortSignal },
             entry: FilePondFileEntry
         ): Promise<string> {
-            const { url, resolveRequest } = props;
+            const {
+                url,
+                resolveRequest: { create: resolveCreateRequest = passthrough },
+                resolveResponse: { create: resolveCreateResponse = ({ value }) => value },
+            } = props;
             const { signal } = options ?? {};
 
-            const requestOptions: PublicRequestOptions = {
-                method: 'POST',
-                headers: {
-                    uploadLength: file.size,
-                },
-            };
-
-            const resolvedRequest = await getResolvedRequest(
-                resolveRequest,
+            const resolvedRequest = await resolveCreateRequest({
                 url,
-                requestOptions,
-                entry
-            );
+                options: {
+                    method: 'POST',
+                    headers: {
+                        uploadLength: file.size,
+                    },
+                },
+                entry,
+            });
             const request = await xhr(resolvedRequest.url, {
                 ...resolvedRequest.options,
                 signal,
             });
 
-            if (!isString(request.response) || !request.response.length) {
+            const serverId = resolveCreateResponse({
+                response: request,
+                value: request.response as string,
+                entry,
+            });
+
+            if (!isString(serverId) || !serverId.length) {
                 throw new Error('No server id returned');
             }
 
-            return request.response;
+            return serverId;
         }
 
         async function requestFileChunkOffset(
@@ -145,22 +181,23 @@ export const ChunkedUploadStore = createStoreExtension({
             options: { signal?: AbortSignal },
             entry: FilePondFileEntry
         ): Promise<number> {
-            const { url, resolveRequest } = props;
+            const {
+                url,
+                resolveRequest: { offset: resolveOffsetRequest = passthrough },
+                resolveResponse: { offset: resolveOffsetResponse = ({ value }) => value },
+            } = props;
             const { signal } = options ?? {};
 
-            const requestOptions: PublicRequestOptions = {
-                method: 'HEAD',
-                queryString: {
-                    id: serverId,
-                },
-            };
-
-            const resolvedRequest = await getResolvedRequest(
-                resolveRequest,
+            const resolvedRequest = await resolveOffsetRequest({
                 url,
-                requestOptions,
-                entry
-            );
+                options: {
+                    method: 'HEAD',
+                    queryString: {
+                        id: serverId,
+                    },
+                },
+                entry,
+            });
             const request = await xhr(resolvedRequest.url, {
                 ...resolvedRequest.options,
                 signal,
@@ -168,12 +205,20 @@ export const ChunkedUploadStore = createStoreExtension({
 
             // get the upload offset
             const { uploadOffset } = getResponseHeaders(request);
+            const offset = resolveOffsetResponse({
+                response: request,
+                value:
+                    isString(uploadOffset) && uploadOffset.length
+                        ? parseInt(uploadOffset, 10)
+                        : Number.NaN,
+                entry,
+            });
 
-            if (!isString(uploadOffset) || !uploadOffset.length) {
+            if (!isNumber(offset) || Number.isNaN(offset)) {
                 throw new Error('No upload offset returned');
             }
 
-            return parseInt(uploadOffset, 10);
+            return offset;
         }
 
         /** Uploads a chunk of data to the server */
@@ -184,27 +229,28 @@ export const ChunkedUploadStore = createStoreExtension({
             options: { signal?: AbortSignal },
             entry: FilePondFileEntry
         ): Promise<boolean | void> {
-            const { url, retryDelays, resolveRequest } = props;
+            const {
+                url,
+                retryDelays,
+                resolveRequest: { chunk: resolveChunkRequest = passthrough },
+            } = props;
             const { signal } = options ?? {};
             for (const delay of [...retryDelays, undefined]) {
                 try {
                     // upload chunk patch
-                    const requestOptions: PublicRequestOptions = {
-                        method: 'PATCH',
-                        headers,
-                        data,
-                        queryString: {
-                            contentType: 'application/offset+octet-stream',
-                            id: serverId,
-                        },
-                    };
-
-                    const resolvedRequest = await getResolvedRequest(
-                        resolveRequest,
+                    const resolvedRequest = await resolveChunkRequest({
                         url,
-                        requestOptions,
-                        entry
-                    );
+                        options: {
+                            method: 'PATCH',
+                            headers,
+                            data,
+                            queryString: {
+                                contentType: 'application/offset+octet-stream',
+                                id: serverId,
+                            },
+                        },
+                        entry,
+                    });
                     await xhr(resolvedRequest.url, {
                         ...resolvedRequest.options,
                         signal,
@@ -386,22 +432,22 @@ export const ChunkedUploadStore = createStoreExtension({
         };
 
         const releaseEntry: StoreExtensionReleaseFunction = async (storageId, entry, options) => {
-            const { url, resolveRequest } = props;
+            const {
+                url,
+                resolveRequest: { release: resolveReleaseRequest = passthrough },
+            } = props;
             const { signal } = options ?? {};
 
-            const requestOptions: PublicRequestOptions = {
-                method: 'DELETE',
-                queryString: {
-                    id: storageId,
-                },
-            };
-
-            const resolvedRequest = await getResolvedRequest(
-                resolveRequest,
+            const resolvedRequest = await resolveReleaseRequest({
                 url,
-                requestOptions,
-                entry
-            );
+                options: {
+                    method: 'DELETE',
+                    queryString: {
+                        id: storageId,
+                    },
+                },
+                entry,
+            });
 
             await xhr(resolvedRequest.url, {
                 ...resolvedRequest.options,
