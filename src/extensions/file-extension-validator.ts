@@ -28,13 +28,15 @@ export const FileExtensionValidator = createValidatorExtension({
     factory: ({ props, didSetProps }) => {
         let computedExtensions: string[] = [];
 
+        function sanitizeExtensions(extensions: string[]) {
+            return extensions
+                .map((extension) => extension.trim())
+                .filter((extension) => extension.startsWith('.'))
+                .map((extension) => extension.toLowerCase());
+        }
+
         didSetProps(({ accept }) => {
-            computedExtensions = isString(accept)
-                ? accept
-                      .split(',')
-                      .map((str) => str.trim())
-                      .filter((extension) => extension.startsWith('.'))
-                : accept;
+            computedExtensions = sanitizeExtensions(isString(accept) ? accept.split(',') : accept);
         });
 
         const validateEntry: ValidatorExtensionValidateFunction = (entry) => {
@@ -53,13 +55,13 @@ export const FileExtensionValidator = createValidatorExtension({
                 };
             }
 
-            // get entry extension
-            const extension = getExtensionFromFilename(name);
+            // get entry extension, if returns undefined
+            const extension = getExtensionFromFilename(name)?.toLowerCase();
 
             // match types
             const didMatchSome = computedExtensions.some((ext) => ext === extension);
 
-            // returns error key so can be used with locale
+            // all good
             if (didMatchSome) {
                 return null;
             }
