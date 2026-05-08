@@ -5,30 +5,17 @@ import { createDefaultEntryTree } from '../stub/createDefaultEntryTree.js';
 import { MockXhr } from 'mock-xmlhttprequest';
 
 describe('ChunkedUploadStore', function () {
-    let eventSourceBackup;
-
     let mockXhr;
 
     beforeEach(function () {
         mockXhr = MockXhr;
         globalThis.XMLHttpRequest = mockXhr;
-
-        eventSourceBackup = EventSource;
-
-        EventSource = class EventSource {
-            constructor(url) {}
-            addEventListener() {}
-            get readyState() {
-                return eventSourceBackup.OPEN;
-            }
-        };
     });
 
     afterEach(function () {
         delete globalThis.XMLHttpRequest;
         mockXhr.onSend = null;
         mockXhr.onCreate = null;
-        EventSource = eventSourceBackup;
     });
 
     it('should fail on invalid URL', () =>
@@ -122,6 +109,56 @@ describe('ChunkedUploadStore', function () {
             entryTree.entries = [entry];
         }));
 
+    it('should update progress from upload request progress', () =>
+        new Promise((done) => {
+            const progressValues = [];
+            const entryTree = createDefaultEntryTree();
+            const extensionManager = createExtensionManager(entryTree);
+            extensionManager.extensions = [
+                [
+                    ChunkedUploadStore,
+                    {
+                        url: 'store',
+                    },
+                ],
+            ];
+
+            const unsub = entryTree.on('updateEntry', (entry) => {
+                const {
+                    ChunkedUploadStore: { status },
+                } = entry.extension;
+
+                if (status.code === 'STORE_BUSY' && Number.isFinite(status.progress)) {
+                    progressValues.push(status.progress);
+                }
+
+                if (!status.code.endsWith('COMPLETE')) return;
+
+                unsub();
+                expect(progressValues.some((value) => value > 0 && value < 1)).to.equal(true);
+                done();
+            });
+
+            mockXhr.onSend = (xhr) => {
+                setTimeout(() => {
+                    if (xhr.method === 'POST') {
+                        xhr.respond(201, { contentType: 'text/plain' }, '1234');
+                    } else if (xhr.method === 'PATCH') {
+                        xhr.uploadProgress(5);
+                        xhr.respond(204, { contentType: 'text/plain' }, '');
+                    }
+                }, 0);
+            };
+
+            const entry = {
+                src: new File(['hello world'], 'file.txt', { type: 'text/plain' }),
+                state: {
+                    store: true,
+                },
+            };
+            entryTree.entries = [entry];
+        }));
+
     it('should resolve transfer id from response', () =>
         new Promise((done) => {
             const entryTree = createDefaultEntryTree();
@@ -185,6 +222,9 @@ describe('ChunkedUploadStore', function () {
 
     it('should resolve request URL and options', () =>
         new Promise((done) => {
+            let chunkResponseResolved = false;
+            let completeRequestResolved = false;
+            let completeResponseResolved = false;
             const entryTree = createDefaultEntryTree();
             const extensionManager = createExtensionManager(entryTree);
             extensionManager.extensions = [
@@ -208,10 +248,12 @@ describe('ChunkedUploadStore', function () {
                                     },
                                 };
                             },
-                            chunk: ({ url, options, entry }) => {
+                            chunk: ({ url, options, entry, chunk }) => {
                                 expect(url).to.equal('store');
                                 expect(options.method).to.equal('PATCH');
                                 expect(entry.file.name).to.equal('file.txt');
+                                expect(options.queryString.id).to.equal('1234');
+                                expect(chunk.offset).to.equal(0);
 
                                 return {
                                     url: 'signed-chunk',
@@ -223,6 +265,54 @@ describe('ChunkedUploadStore', function () {
                                         },
                                     },
                                 };
+                            },
+                            complete: ({ url, options, entry, id, chunks }) => {
+                                expect(url).to.equal('store');
+                                expect(options.method).to.equal('POST');
+                                expect(entry.file.name).to.equal('file.txt');
+                                expect(id).to.equal('1234');
+                                expect(chunks[0].id).to.equal('chunk-id');
+
+                                completeRequestResolved = true;
+
+                                return {
+                                    url: 'signed-complete',
+                                    options: {
+                                        ...options,
+                                        queryString: {
+                                            ...options.queryString,
+                                            token: 'complete',
+                                        },
+                                    },
+                                };
+                            },
+                        },
+                        resolveResponse: {
+                            chunk: ({ value, response, entry, id, chunk }) => {
+                                expect(value.index).to.equal(0);
+                                expect(value.offset).to.equal(0);
+                                expect(response.response).to.equal('');
+                                expect(entry.file.name).to.equal('file.txt');
+                                expect(id).to.equal('1234');
+                                expect(chunk.offset).to.equal(0);
+
+                                chunkResponseResolved = true;
+
+                                return {
+                                    ...value,
+                                    id: 'chunk-id',
+                                };
+                            },
+                            complete: ({ value, response, entry, id, chunks }) => {
+                                expect(value).to.equal('stored-id');
+                                expect(response.response).to.equal('stored-id');
+                                expect(entry.file.name).to.equal('file.txt');
+                                expect(id).to.equal('1234');
+                                expect(chunks[0].id).to.equal('chunk-id');
+
+                                completeResponseResolved = true;
+
+                                return value;
                             },
                         },
                     },
@@ -238,6 +328,10 @@ describe('ChunkedUploadStore', function () {
 
                 unsub();
                 expect(status.code).to.equal('STORE_COMPLETE');
+                expect(chunkResponseResolved).to.equal(true);
+                expect(completeRequestResolved).to.equal(true);
+                expect(completeResponseResolved).to.equal(true);
+                expect(entry.state.value).to.equal('stored-id');
                 done();
             });
 
@@ -246,9 +340,15 @@ describe('ChunkedUploadStore', function () {
                     const requestURL = new URL(xhr.requestData.url);
 
                     if (xhr.method === 'POST') {
-                        expect(requestURL.pathname).to.equal('/signed-create');
-                        expect(requestURL.searchParams.get('token')).to.equal('create');
-                        xhr.respond(201, { contentType: 'text/plain' }, '1234');
+                        if (requestURL.pathname === '/signed-create') {
+                            expect(requestURL.searchParams.get('token')).to.equal('create');
+                            xhr.respond(201, { contentType: 'text/plain' }, '1234');
+                        } else {
+                            expect(requestURL.pathname).to.equal('/signed-complete');
+                            expect(requestURL.searchParams.get('id')).to.equal('1234');
+                            expect(requestURL.searchParams.get('token')).to.equal('complete');
+                            xhr.respond(200, { contentType: 'text/plain' }, 'stored-id');
+                        }
                     } else if (xhr.method === 'PATCH') {
                         expect(requestURL.pathname).to.equal('/signed-chunk');
                         expect(requestURL.searchParams.get('id')).to.equal('1234');
@@ -276,6 +376,26 @@ describe('ChunkedUploadStore', function () {
                     ChunkedUploadStore,
                     {
                         url: 'store',
+                        resolveRequest: {
+                            status: ({ url, options, entry }) => {
+                                expect(url).to.equal('store');
+                                expect(options.method).to.equal('HEAD');
+                                expect(entry.file.name).to.equal('file.txt');
+                                expect(options.queryString.id).to.equal('1234');
+
+                                return { url, options };
+                            },
+                        },
+                        resolveResponse: {
+                            status: ({ value, response, entry }) => {
+                                expect(value.id).to.equal('1234');
+                                expect(value.offset).to.equal(0);
+                                expect(response.response).to.equal('');
+                                expect(entry.file.name).to.equal('file.txt');
+
+                                return value;
+                            },
+                        },
                     },
                 ],
             ];

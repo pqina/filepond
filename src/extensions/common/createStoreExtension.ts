@@ -654,7 +654,8 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                 const value = entry.state[valueKey];
                 const status = getEntryExtensionStatus(entry);
                 const { canStore = null } = getEntryExtensionState(entry); // canStore is true if is file, if hasn't defined extension object yet, it defaults to null which triggers a test
-                const hasStored = !isNullOrUndefined(value);
+                const isStoring = status?.code === 'STORE_BUSY';
+                const hasStored = !isNullOrUndefined(value) && !isStoring; // we could have a server id and still be patching
 
                 // not sure if we can store this file, let's test it
                 if (canStore === null) {
@@ -704,7 +705,6 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
 
                 // we don't have a storage id but shouldRelease
                 const couldAbort = !hasStored && canStore;
-                const isStoring = status?.code === 'STORE_BUSY';
                 const shouldAbort = store === true && abort === true;
                 if (couldAbort && shouldAbort) {
                     abortTask(entry.id, taskStoreEntry);

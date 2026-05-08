@@ -448,10 +448,11 @@ export function createEntryStoreState() {
                     button: createButton('button-store-busy', {
                         icon: 'abort',
                         disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
-                        onclick: () =>
+                        onclick: () => {
                             updateEntryState(id, {
                                 abort: true,
-                            }),
+                            });
+                        },
                         ariaDescribedby: toSpaceSeparatedString(
                             `${ariaId}-name`,
                             `${ariaId}-store-info`
