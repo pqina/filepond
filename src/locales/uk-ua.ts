@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'Не вдалося завантажити файл.',
 
-    loadDataTranserProgress: 'Завантаження файлів',
-    loadDataTranserInfo: 'Оброблено {{processedFiles}} із {{totalFiles}} файлів',
+    loadDataTransferProgress: 'Завантаження файлів',
+    loadDataTransferInfo: 'Оброблено {{processedFiles}} із {{totalFiles}} файлів',
 
     validationInvalid: 'Недійсний файл.',
     validationFileNameMissing: 'Відсутня назва файлу',
@@ -158,27 +158,37 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Цей файл замалий. Мінімальний розмір: {{minSize}} {{minSizeUnit}}.',
-    validationFileSizeOverflow: 'Цей файл завеликий. Максимальний розмір: {{maxSize}} {{maxSizeUnit}}.',
+    validationFileSizeUnderflow:
+        'Цей файл замалий. Мінімальний розмір: {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow:
+        'Цей файл завеликий. Максимальний розмір: {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Загальний розмір файлів замалий. Мінімальний загальний розмір: {{minSize}} {{minSizeUnit}}.',
-    validationListSizeOverflow: 'Загальний розмір файлів завеликий. Максимальний загальний розмір: {{maxSize}} {{maxSizeUnit}}.',
+    validationListSizeUnderflow:
+        'Загальний розмір файлів замалий. Мінімальний загальний розмір: {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow:
+        'Загальний розмір файлів завеликий. Максимальний загальний розмір: {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Не вдалося прочитати розмір медіа.',
 
-    validationMediaWidthRangeMismatch: 'Ширина {{fileMainType}} недійсна. Ширина має бути від {{minWidth}} до {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthRangeMismatch:
+        'Ширина {{fileMainType}} недійсна. Ширина має бути від {{minWidth}} до {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow: '{{fileMainType}} замалий. Мінімальна ширина: {{minWidth}} {{minWidthUnit}}.',
-    validationMediaWidthOverflow: '{{fileMainType}} завеликий. Максимальна ширина: {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthUnderflow:
+        '{{fileMainType}} замалий. Мінімальна ширина: {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow:
+        '{{fileMainType}} завеликий. Максимальна ширина: {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch: 'Висота {{fileMainType}} недійсна. Висота має бути від {{minHeight}} до {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightRangeMismatch:
+        'Висота {{fileMainType}} недійсна. Висота має бути від {{minHeight}} до {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow: '{{fileMainType}} замалий. Мінімальна висота: {{minHeight}} {{minHeightUnit}}.',
-    validationMediaHeightOverflow: '{{fileMainType}} завеликий. Максимальна висота: {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightUnderflow:
+        '{{fileMainType}} замалий. Мінімальна висота: {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow:
+        '{{fileMainType}} завеликий. Максимальна висота: {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'Недійсна роздільна здатність. Має бути від {{minResolution}}MP до {{maxResolution}}MP.',

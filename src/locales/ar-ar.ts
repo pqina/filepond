@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'تعذر تحميل الملف.',
 
-    loadDataTranserProgress: 'جارٍ تحميل الملفات',
-    loadDataTranserInfo: 'تمت معالجة {{processedFiles}} من {{totalFiles}} ملفات',
+    loadDataTransferProgress: 'جارٍ تحميل الملفات',
+    loadDataTransferInfo: 'تمت معالجة {{processedFiles}} من {{totalFiles}} ملفات',
 
     validationInvalid: 'ملف غير صالح.',
     validationFileNameMissing: 'اسم الملف مفقود',
@@ -158,26 +158,39 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'الملف صغير جدًا. الحد الأدنى للحجم هو {{minSize}} {{minSizeUnit}}.',
-    validationFileSizeOverflow: 'الملف كبير جدًا. الحد الأقصى للحجم هو {{maxSize}} {{maxSizeUnit}}.',
+    validationFileSizeUnderflow:
+        'الملف صغير جدًا. الحد الأدنى للحجم هو {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow:
+        'الملف كبير جدًا. الحد الأقصى للحجم هو {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'إجمالي حجم الملفات صغير جدًا. الحد الأدنى للإجمالي هو {{minSize}} {{minSizeUnit}}.',
-    validationListSizeOverflow: 'إجمالي حجم الملفات كبير جدًا. الحد الأقصى للإجمالي هو {{maxSize}} {{maxSizeUnit}}.',
+    validationListSizeUnderflow:
+        'إجمالي حجم الملفات صغير جدًا. الحد الأدنى للإجمالي هو {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow:
+        'إجمالي حجم الملفات كبير جدًا. الحد الأقصى للإجمالي هو {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'تعذر قراءة حجم الوسائط.',
-    validationMediaWidthRangeMismatch: 'عرض {{fileMainType}} غير صالح. يجب أن يكون العرض بين {{minWidth}} و{{maxWidth}} {{maxWidthUnit}}.',
-    validationMediaWidthUnderflow: '{{fileMainType}} صغير جدًا. الحد الأدنى للعرض هو {{minWidth}} {{minWidthUnit}}.',
-    validationMediaWidthOverflow: '{{fileMainType}} كبير جدًا. الحد الأقصى للعرض هو {{maxWidth}} {{maxWidthUnit}}.',
-    validationMediaHeightRangeMismatch: 'ارتفاع {{fileMainType}} غير صالح. يجب أن يكون الارتفاع بين {{minHeight}} و{{maxHeight}} {{maxHeightUnit}}.',
-    validationMediaHeightUnderflow: '{{fileMainType}} صغير جدًا. الحد الأدنى للارتفاع هو {{minHeight}} {{minHeightUnit}}.',
-    validationMediaHeightOverflow: '{{fileMainType}} كبير جدًا. الحد الأقصى للارتفاع هو {{maxHeight}} {{maxHeightUnit}}.',
-    validationMediaResolutionRangeMismatch: 'دقة {{fileMainType}} غير صالحة. يجب أن تكون بين {{minResolution}}MP و {{maxResolution}}MP.',
-    validationMediaResolutionUnderflow: 'دقة {{fileMainType}} غير صالحة. الحد الأدنى للدقة هو {{minResolution}}MP.',
-    validationMediaResolutionOverflow: 'دقة {{fileMainType}} غير صالحة. الحد الأقصى للدقة هو {{maxResolution}}MP.',
+    validationMediaWidthRangeMismatch:
+        'عرض {{fileMainType}} غير صالح. يجب أن يكون العرض بين {{minWidth}} و{{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthUnderflow:
+        '{{fileMainType}} صغير جدًا. الحد الأدنى للعرض هو {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow:
+        '{{fileMainType}} كبير جدًا. الحد الأقصى للعرض هو {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaHeightRangeMismatch:
+        'ارتفاع {{fileMainType}} غير صالح. يجب أن يكون الارتفاع بين {{minHeight}} و{{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightUnderflow:
+        '{{fileMainType}} صغير جدًا. الحد الأدنى للارتفاع هو {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow:
+        '{{fileMainType}} كبير جدًا. الحد الأقصى للارتفاع هو {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaResolutionRangeMismatch:
+        'دقة {{fileMainType}} غير صالحة. يجب أن تكون بين {{minResolution}}MP و {{maxResolution}}MP.',
+    validationMediaResolutionUnderflow:
+        'دقة {{fileMainType}} غير صالحة. الحد الأدنى للدقة هو {{minResolution}}MP.',
+    validationMediaResolutionOverflow:
+        'دقة {{fileMainType}} غير صالحة. الحد الأقصى للدقة هو {{maxResolution}}MP.',
 };
 
 export const validationListCount = {

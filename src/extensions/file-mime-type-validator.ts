@@ -37,7 +37,7 @@ export const FileMimeTypeValidator = createValidatorExtension({
         /** Mime types we can display in validation labels */
         let filteredMimeTypeLabels: string[] = [];
 
-        /** Parses mimetypes and replaces wildcard mimetypes with regular expresssions */
+        /** Parses mimetypes and replaces wildcard mimetypes with regular expressions */
         let computedMimeTypes: RegExp[] = [];
 
         didSetProps(({ accept }) => {

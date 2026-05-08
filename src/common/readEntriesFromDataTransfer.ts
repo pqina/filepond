@@ -183,7 +183,7 @@ async function getFileFromEntry(entry: FileSystemFileEntry): Promise<File & { pa
 }
 
 export function shouldLoadWithIdleCallback(dataTransfer: DataTransfer) {
-    // we need to know how many entries are in the DataTranfer, if it's just a couple files we don't show the loading indicator
+    // we need to know how many entries are in the DataTransfer, if it's just a couple files we don't show the loading indicator
     const entries = dataTransferItemsToEntries(dataTransfer.items);
 
     // need to show entry loader when includes directories or more than 10 items
@@ -191,10 +191,10 @@ export function shouldLoadWithIdleCallback(dataTransfer: DataTransfer) {
 }
 
 export async function dataTransferToFiles(dataTransfer: DataTransfer): Promise<(File | null)[]> {
-    // we need to know how many entries are in the DataTranfer, if it's just a couple files we don't show the loading indicator
+    // we need to know how many entries are in the DataTransfer, if it's just a couple files we don't show the loading indicator
     let entries = dataTransferItemsToEntries(dataTransfer.items);
 
-    // no entries receives, let's check files
+    // no entries received, let's check files
     if (arrayRemoveFalsy(entries).length === 0) {
         return dataTransferItemsToFiles(dataTransfer.items);
     }

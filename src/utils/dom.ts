@@ -146,7 +146,7 @@ export function setFileInputFilesFromEntries(
 
 /** Sets a list of files/directories to a file input element */
 export function getFileListFromEntries(entries: FilePondFileEntry[]): FileList {
-    // create data tranfer instance which we'll use as a proxy to get a FileList
+    // create data transfer instance which we'll use as a proxy to get a FileList
     const dataTransfer = new DataTransfer();
 
     // add all files

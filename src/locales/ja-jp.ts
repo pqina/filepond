@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'ファイルを読み込めませんでした。',
 
-    loadDataTranserProgress: 'ファイルを読み込み中',
-    loadDataTranserInfo: '{{processedFiles}} / {{totalFiles}} 個のファイルを処理しました',
+    loadDataTransferProgress: 'ファイルを読み込み中',
+    loadDataTransferInfo: '{{processedFiles}} / {{totalFiles}} 個のファイルを処理しました',
 
     validationInvalid: '無効なファイルです。',
     validationFileNameMissing: 'ファイル名がありません',
@@ -157,27 +157,37 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'このファイルは小さすぎます。最小サイズは {{minSize}} {{minSizeUnit}} です。',
-    validationFileSizeOverflow: 'このファイルは大きすぎます。最大サイズは {{maxSize}} {{maxSizeUnit}} です。',
+    validationFileSizeUnderflow:
+        'このファイルは小さすぎます。最小サイズは {{minSize}} {{minSizeUnit}} です。',
+    validationFileSizeOverflow:
+        'このファイルは大きすぎます。最大サイズは {{maxSize}} {{maxSizeUnit}} です。',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'ファイルの合計サイズが小さすぎます。最小合計サイズは {{minSize}} {{minSizeUnit}} です。',
-    validationListSizeOverflow: 'ファイルの合計サイズが大きすぎます。最大合計サイズは {{maxSize}} {{maxSizeUnit}} です。',
+    validationListSizeUnderflow:
+        'ファイルの合計サイズが小さすぎます。最小合計サイズは {{minSize}} {{minSizeUnit}} です。',
+    validationListSizeOverflow:
+        'ファイルの合計サイズが大きすぎます。最大合計サイズは {{maxSize}} {{maxSizeUnit}} です。',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'メディアサイズを読み取れませんでした。',
 
-    validationMediaWidthRangeMismatch: '{{fileMainType}} の幅が無効です。幅は {{minWidth}} 〜 {{maxWidth}} {{maxWidthUnit}} である必要があります。',
+    validationMediaWidthRangeMismatch:
+        '{{fileMainType}} の幅が無効です。幅は {{minWidth}} 〜 {{maxWidth}} {{maxWidthUnit}} である必要があります。',
 
-    validationMediaWidthUnderflow: '{{fileMainType}} が小さすぎます。最小幅は {{minWidth}} {{minWidthUnit}} です。',
-    validationMediaWidthOverflow: '{{fileMainType}} が大きすぎます。最大幅は {{maxWidth}} {{maxWidthUnit}} です。',
+    validationMediaWidthUnderflow:
+        '{{fileMainType}} が小さすぎます。最小幅は {{minWidth}} {{minWidthUnit}} です。',
+    validationMediaWidthOverflow:
+        '{{fileMainType}} が大きすぎます。最大幅は {{maxWidth}} {{maxWidthUnit}} です。',
 
-    validationMediaHeightRangeMismatch: '{{fileMainType}} の高さが無効です。高さは {{minHeight}} 〜 {{maxHeight}} {{maxHeightUnit}} である必要があります。',
+    validationMediaHeightRangeMismatch:
+        '{{fileMainType}} の高さが無効です。高さは {{minHeight}} 〜 {{maxHeight}} {{maxHeightUnit}} である必要があります。',
 
-    validationMediaHeightUnderflow: '{{fileMainType}} が小さすぎます。最小高さは {{minHeight}} {{minHeightUnit}} です。',
-    validationMediaHeightOverflow: '{{fileMainType}} が大きすぎます。最大高さは {{maxHeight}} {{maxHeightUnit}} です。',
+    validationMediaHeightUnderflow:
+        '{{fileMainType}} が小さすぎます。最小高さは {{minHeight}} {{minHeightUnit}} です。',
+    validationMediaHeightOverflow:
+        '{{fileMainType}} が大きすぎます。最大高さは {{maxHeight}} {{maxHeightUnit}} です。',
 
     validationMediaResolutionRangeMismatch:
         '{{fileMainType}} の解像度が無効です。解像度は {{minResolution}}MP 〜 {{maxResolution}}MP の範囲である必要があります。',

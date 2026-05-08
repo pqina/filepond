@@ -77,7 +77,7 @@ export interface ExtensionManagerAPI {
     getExtensionStatus: () => ExtensionStatus;
 }
 
-export interface ExtensionMangerInstance {
+export interface ExtensionManagerInstance {
     on: (event: string, callback: (detail?: any) => void) => () => void;
     get extensions(): Extension[];
     set extensions(newExtensionFactories: ExtensionFactory[]);
@@ -121,7 +121,7 @@ function logTasks(tasks: Task[]) {
 
 export function createExtensionManager(
     tree: ReturnType<typeof createEntryTree>
-): ExtensionMangerInstance {
+): ExtensionManagerInstance {
     // pubsub
     const { on, pub } = pubsub();
 

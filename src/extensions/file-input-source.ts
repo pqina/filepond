@@ -9,7 +9,7 @@ export interface FileInputSourceOptions {
     /** An HTMLInputElement or a QueryString selector */
     element?: HTMLInputElement | string;
 
-    /** Should we reset the input everytime a `FileList` is added */
+    /** Should we reset the input every time a `FileList` is added */
     resetFilesOnAdd?: boolean;
 
     /** Where to add new files, defaults to index `0` */

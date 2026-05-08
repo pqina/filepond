@@ -25,7 +25,7 @@ function getValueByVariable(variable: string, value: any) {
     return getObjectValueByString(variable.substring(2, variable.length - 2), value);
 }
 
-/** Drills down into an objecto find a prop value, if is null or undefined, returns empty string */
+/** Drills down into an object to find a prop value, if is null or undefined, returns empty string */
 export function getObjectValueByString(selector: string, value: any) {
     const levels = selector.split('.');
     for (const level of levels) {

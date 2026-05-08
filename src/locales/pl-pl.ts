@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'Nie udało się załadować pliku.',
 
-    loadDataTranserProgress: 'Ładowanie plików',
-    loadDataTranserInfo: 'Przetworzono {{processedFiles}} z {{totalFiles}} plików',
+    loadDataTransferProgress: 'Ładowanie plików',
+    loadDataTransferInfo: 'Przetworzono {{processedFiles}} z {{totalFiles}} plików',
 
     validationInvalid: 'Nieprawidłowy plik.',
     validationFileNameMissing: 'Brak nazwy pliku',
@@ -158,27 +158,37 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Ten plik jest za mały. Minimalny rozmiar to {{minSize}} {{minSizeUnit}}.',
-    validationFileSizeOverflow: 'Ten plik jest za duży. Maksymalny rozmiar to {{maxSize}} {{maxSizeUnit}}.',
+    validationFileSizeUnderflow:
+        'Ten plik jest za mały. Minimalny rozmiar to {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow:
+        'Ten plik jest za duży. Maksymalny rozmiar to {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Łączny rozmiar plików jest za mały. Minimalny łączny rozmiar to {{minSize}} {{minSizeUnit}}.',
-    validationListSizeOverflow: 'Łączny rozmiar plików jest za duży. Maksymalny łączny rozmiar to {{maxSize}} {{maxSizeUnit}}.',
+    validationListSizeUnderflow:
+        'Łączny rozmiar plików jest za mały. Minimalny łączny rozmiar to {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow:
+        'Łączny rozmiar plików jest za duży. Maksymalny łączny rozmiar to {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Nie udało się odczytać rozmiaru multimediów.',
 
-    validationMediaWidthRangeMismatch: 'Szerokość {{fileMainType}} jest nieprawidłowa. Szerokość musi mieścić się między {{minWidth}} a {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthRangeMismatch:
+        'Szerokość {{fileMainType}} jest nieprawidłowa. Szerokość musi mieścić się między {{minWidth}} a {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow: '{{fileMainType}} jest za mały. Minimalna szerokość to {{minWidth}} {{minWidthUnit}}.',
-    validationMediaWidthOverflow: '{{fileMainType}} jest za duży. Maksymalna szerokość to {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthUnderflow:
+        '{{fileMainType}} jest za mały. Minimalna szerokość to {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow:
+        '{{fileMainType}} jest za duży. Maksymalna szerokość to {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch: 'Wysokość {{fileMainType}} jest nieprawidłowa. Wysokość musi mieścić się między {{minHeight}} a {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightRangeMismatch:
+        'Wysokość {{fileMainType}} jest nieprawidłowa. Wysokość musi mieścić się między {{minHeight}} a {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow: '{{fileMainType}} jest za mały. Minimalna wysokość to {{minHeight}} {{minHeightUnit}}.',
-    validationMediaHeightOverflow: '{{fileMainType}} jest za duży. Maksymalna wysokość to {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightUnderflow:
+        '{{fileMainType}} jest za mały. Minimalna wysokość to {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow:
+        '{{fileMainType}} jest za duży. Maksymalna wysokość to {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'Rozdzielczość jest nieprawidłowa. Musi być między {{minResolution}}MP a {{maxResolution}}MP.',

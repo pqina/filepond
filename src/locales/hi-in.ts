@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'फ़ाइल लोड नहीं हो सकी।',
 
-    loadDataTranserProgress: 'फ़ाइलें लोड हो रही हैं',
-    loadDataTranserInfo: '{{processedFiles}} / {{totalFiles}} फ़ाइलें प्रोसेस हुईं',
+    loadDataTransferProgress: 'फ़ाइलें लोड हो रही हैं',
+    loadDataTransferInfo: '{{processedFiles}} / {{totalFiles}} फ़ाइलें प्रोसेस हुईं',
 
     validationInvalid: 'अमान्य फ़ाइल।',
     validationFileNameMissing: 'फ़ाइल नाम गायब है',
@@ -157,27 +157,37 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'यह फ़ाइल बहुत छोटी है। न्यूनतम आकार {{minSize}} {{minSizeUnit}} है।',
-    validationFileSizeOverflow: 'यह फ़ाइल बहुत बड़ी है। अधिकतम आकार {{maxSize}} {{maxSizeUnit}} है।',
+    validationFileSizeUnderflow:
+        'यह फ़ाइल बहुत छोटी है। न्यूनतम आकार {{minSize}} {{minSizeUnit}} है।',
+    validationFileSizeOverflow:
+        'यह फ़ाइल बहुत बड़ी है। अधिकतम आकार {{maxSize}} {{maxSizeUnit}} है।',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'फ़ाइलों का कुल आकार बहुत छोटा है। न्यूनतम कुल आकार {{minSize}} {{minSizeUnit}} है।',
-    validationListSizeOverflow: 'फ़ाइलों का कुल आकार बहुत बड़ा है। अधिकतम कुल आकार {{maxSize}} {{maxSizeUnit}} है।',
+    validationListSizeUnderflow:
+        'फ़ाइलों का कुल आकार बहुत छोटा है। न्यूनतम कुल आकार {{minSize}} {{minSizeUnit}} है।',
+    validationListSizeOverflow:
+        'फ़ाइलों का कुल आकार बहुत बड़ा है। अधिकतम कुल आकार {{maxSize}} {{maxSizeUnit}} है।',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'मीडिया का आकार पढ़ा नहीं जा सका।',
 
-    validationMediaWidthRangeMismatch: '{{fileMainType}} की चौड़ाई अमान्य है। चौड़ाई {{minWidth}} और {{maxWidth}} {{maxWidthUnit}} के बीच होनी चाहिए।',
+    validationMediaWidthRangeMismatch:
+        '{{fileMainType}} की चौड़ाई अमान्य है। चौड़ाई {{minWidth}} और {{maxWidth}} {{maxWidthUnit}} के बीच होनी चाहिए।',
 
-    validationMediaWidthUnderflow: '{{fileMainType}} बहुत छोटा है। न्यूनतम चौड़ाई {{minWidth}} {{minWidthUnit}} है।',
-    validationMediaWidthOverflow: '{{fileMainType}} बहुत बड़ा है। अधिकतम चौड़ाई {{maxWidth}} {{maxWidthUnit}} है।',
+    validationMediaWidthUnderflow:
+        '{{fileMainType}} बहुत छोटा है। न्यूनतम चौड़ाई {{minWidth}} {{minWidthUnit}} है।',
+    validationMediaWidthOverflow:
+        '{{fileMainType}} बहुत बड़ा है। अधिकतम चौड़ाई {{maxWidth}} {{maxWidthUnit}} है।',
 
-    validationMediaHeightRangeMismatch: '{{fileMainType}} की ऊंचाई अमान्य है। ऊंचाई {{minHeight}} और {{maxHeight}} {{maxHeightUnit}} के बीच होनी चाहिए।',
+    validationMediaHeightRangeMismatch:
+        '{{fileMainType}} की ऊंचाई अमान्य है। ऊंचाई {{minHeight}} और {{maxHeight}} {{maxHeightUnit}} के बीच होनी चाहिए।',
 
-    validationMediaHeightUnderflow: '{{fileMainType}} बहुत छोटा है। न्यूनतम ऊंचाई {{minHeight}} {{minHeightUnit}} है।',
-    validationMediaHeightOverflow: '{{fileMainType}} बहुत बड़ा है। अधिकतम ऊंचाई {{maxHeight}} {{maxHeightUnit}} है।',
+    validationMediaHeightUnderflow:
+        '{{fileMainType}} बहुत छोटा है। न्यूनतम ऊंचाई {{minHeight}} {{minHeightUnit}} है।',
+    validationMediaHeightOverflow:
+        '{{fileMainType}} बहुत बड़ा है। अधिकतम ऊंचाई {{maxHeight}} {{maxHeightUnit}} है।',
 
     validationMediaResolutionRangeMismatch:
         '{{fileMainType}} का रिज़ॉल्यूशन मान्य नहीं है। रिज़ॉल्यूशन {{minResolution}}MP और {{maxResolution}}MP के बीच होना चाहिए।',

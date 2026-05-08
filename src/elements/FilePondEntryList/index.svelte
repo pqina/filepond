@@ -749,7 +749,7 @@
 
         const entry = currentEntries[dragStateIndex];
         if (dropState?.remove) {
-            animateEntry(entry, 'disolve', { retain: true });
+            animateEntry(entry, 'dissolve', { retain: true });
             return;
         }
 

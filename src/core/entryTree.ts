@@ -140,7 +140,7 @@ export function createEntryTree(options: EntryTreeOptions) {
         pub('updateEntries', tree.entries);
     }
 
-    /** Computes indexes for the curren tree of entries so we can quickly look up entries */
+    /** Computes indexes for the current tree of entries so we can quickly look up entries */
     function computeIndexes(entries?: FilePondEntry[], path: number[] = []) {
         if (!entries) {
             treeIndexes.clear();

@@ -202,7 +202,7 @@ export function createEntryDataTransferInfo() {
                 attrs: {
                     class: 'entry-info-main',
                 },
-                children: 'loadDataTranserProgress',
+                children: 'loadDataTransferProgress',
             },
             {
                 key: 'data-transfer-info-sub',
@@ -210,7 +210,7 @@ export function createEntryDataTransferInfo() {
                 attrs: {
                     class: 'entry-info-sub',
                 },
-                children: 'loadDataTranserInfo',
+                children: 'loadDataTransferInfo',
             },
         ],
     };

@@ -483,7 +483,7 @@ export const ChunkedUploadStore = createStoreExtension({
             let uploadOffset = 0;
             let uploadedChunks: UploadedChunk[] = [];
 
-            // start inifinity spinner while where gathering info from server
+            // start infinity spinner while we're gathering info from server
             onprogress(createProgressEvent());
 
             if (!serverId) {

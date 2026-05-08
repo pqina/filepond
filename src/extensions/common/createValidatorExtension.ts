@@ -191,7 +191,7 @@ export function createValidatorExtension<Props extends object = ValidatorExtensi
                 //determine if we _should_ activate validation
                 const result = await shouldValidate(entry);
 
-                // udpate activation status
+                // update activation status
                 setEntryExtensionState(entry, {
                     shouldValidate: result,
 
@@ -220,7 +220,7 @@ export function createValidatorExtension<Props extends object = ValidatorExtensi
                     throw error;
                 }
 
-                // udpate activation status
+                // update activation status
                 setEntryExtensionState(entry, {
                     canValidate,
 

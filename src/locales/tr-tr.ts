@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'Dosya yüklenemedi.',
 
-    loadDataTranserProgress: 'Dosyalar yükleniyor',
-    loadDataTranserInfo: '{{processedFiles}} / {{totalFiles}} dosya işlendi',
+    loadDataTransferProgress: 'Dosyalar yükleniyor',
+    loadDataTransferInfo: '{{processedFiles}} / {{totalFiles}} dosya işlendi',
 
     validationInvalid: 'Geçersiz dosya.',
     validationFileNameMissing: 'Dosya adı eksik',
@@ -163,22 +163,30 @@ export const validationFileSize = {
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Toplam dosya boyutu çok küçük. Minimum toplam boyut {{minSize}} {{minSizeUnit}}.',
-    validationListSizeOverflow: 'Toplam dosya boyutu çok büyük. Maksimum toplam boyut {{maxSize}} {{maxSizeUnit}}.',
+    validationListSizeUnderflow:
+        'Toplam dosya boyutu çok küçük. Minimum toplam boyut {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow:
+        'Toplam dosya boyutu çok büyük. Maksimum toplam boyut {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Ortam boyutu okunamadı.',
 
-    validationMediaWidthRangeMismatch: '{{fileMainType}} genişliği geçersiz. Genişlik {{minWidth}} ile {{maxWidth}} {{maxWidthUnit}} arasında olmalıdır.',
+    validationMediaWidthRangeMismatch:
+        '{{fileMainType}} genişliği geçersiz. Genişlik {{minWidth}} ile {{maxWidth}} {{maxWidthUnit}} arasında olmalıdır.',
 
-    validationMediaWidthUnderflow: '{{fileMainType}} çok küçük. Minimum genişlik {{minWidth}} {{minWidthUnit}}.',
-    validationMediaWidthOverflow: '{{fileMainType}} çok büyük. Maksimum genişlik {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthUnderflow:
+        '{{fileMainType}} çok küçük. Minimum genişlik {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow:
+        '{{fileMainType}} çok büyük. Maksimum genişlik {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch: '{{fileMainType}} yüksekliği geçersiz. Yükseklik {{minHeight}} ile {{maxHeight}} {{maxHeightUnit}} arasında olmalıdır.',
+    validationMediaHeightRangeMismatch:
+        '{{fileMainType}} yüksekliği geçersiz. Yükseklik {{minHeight}} ile {{maxHeight}} {{maxHeightUnit}} arasında olmalıdır.',
 
-    validationMediaHeightUnderflow: '{{fileMainType}} çok küçük. Minimum yükseklik {{minHeight}} {{minHeightUnit}}.',
-    validationMediaHeightOverflow: '{{fileMainType}} çok büyük. Maksimum yükseklik {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightUnderflow:
+        '{{fileMainType}} çok küçük. Minimum yükseklik {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow:
+        '{{fileMainType}} çok büyük. Maksimum yükseklik {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         '{{fileMainType}} çözünürlüğü geçersiz. {{minResolution}}MP - {{maxResolution}}MP aralığında olmalıdır.',

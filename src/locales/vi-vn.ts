@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'Không thể tải tệp.',
 
-    loadDataTranserProgress: 'Đang tải tệp',
-    loadDataTranserInfo: 'Đã xử lý {{processedFiles}} / {{totalFiles}} tệp',
+    loadDataTransferProgress: 'Đang tải tệp',
+    loadDataTransferInfo: 'Đã xử lý {{processedFiles}} / {{totalFiles}} tệp',
 
     validationInvalid: 'Tệp không hợp lệ.',
     validationFileNameMissing: 'Thiếu tên tệp',
@@ -158,27 +158,37 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Tệp này quá nhỏ. Kích thước tối thiểu là {{minSize}} {{minSizeUnit}}.',
-    validationFileSizeOverflow: 'Tệp này quá lớn. Kích thước tối đa là {{maxSize}} {{maxSizeUnit}}.',
+    validationFileSizeUnderflow:
+        'Tệp này quá nhỏ. Kích thước tối thiểu là {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow:
+        'Tệp này quá lớn. Kích thước tối đa là {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Tổng kích thước tệp quá nhỏ. Tổng kích thước tối thiểu là {{minSize}} {{minSizeUnit}}.',
-    validationListSizeOverflow: 'Tổng kích thước tệp quá lớn. Tổng kích thước tối đa là {{maxSize}} {{maxSizeUnit}}.',
+    validationListSizeUnderflow:
+        'Tổng kích thước tệp quá nhỏ. Tổng kích thước tối thiểu là {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow:
+        'Tổng kích thước tệp quá lớn. Tổng kích thước tối đa là {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Không đọc được kích thước phương tiện.',
 
-    validationMediaWidthRangeMismatch: 'Chiều rộng của {{fileMainType}} không hợp lệ. Chiều rộng phải nằm trong khoảng từ {{minWidth}} đến {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthRangeMismatch:
+        'Chiều rộng của {{fileMainType}} không hợp lệ. Chiều rộng phải nằm trong khoảng từ {{minWidth}} đến {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow: '{{fileMainType}} quá nhỏ. Chiều rộng tối thiểu là {{minWidth}} {{minWidthUnit}}.',
-    validationMediaWidthOverflow: '{{fileMainType}} quá lớn. Chiều rộng tối đa là {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthUnderflow:
+        '{{fileMainType}} quá nhỏ. Chiều rộng tối thiểu là {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow:
+        '{{fileMainType}} quá lớn. Chiều rộng tối đa là {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch: 'Chiều cao của {{fileMainType}} không hợp lệ. Chiều cao phải nằm trong khoảng từ {{minHeight}} đến {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightRangeMismatch:
+        'Chiều cao của {{fileMainType}} không hợp lệ. Chiều cao phải nằm trong khoảng từ {{minHeight}} đến {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow: '{{fileMainType}} quá nhỏ. Chiều cao tối thiểu là {{minHeight}} {{minHeightUnit}}.',
-    validationMediaHeightOverflow: '{{fileMainType}} quá lớn. Chiều cao tối đa là {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightUnderflow:
+        '{{fileMainType}} quá nhỏ. Chiều cao tối thiểu là {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow:
+        '{{fileMainType}} quá lớn. Chiều cao tối đa là {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'Độ phân giải không hợp lệ. Cần trong khoảng {{minResolution}}MP đến {{maxResolution}}MP.',

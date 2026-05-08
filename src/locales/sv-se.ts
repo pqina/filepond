@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'Det gick inte att ladda filen.',
 
-    loadDataTranserProgress: 'Laddar filer',
-    loadDataTranserInfo: '{{processedFiles}} av {{totalFiles}} filer behandlade',
+    loadDataTransferProgress: 'Laddar filer',
+    loadDataTransferInfo: '{{processedFiles}} av {{totalFiles}} filer behandlade',
 
     validationInvalid: 'Ogiltig fil.',
     validationFileNameMissing: 'Filnamn saknas',
@@ -157,27 +157,37 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Den här filen är för liten. Minsta storlek är {{minSize}} {{minSizeUnit}}.',
-    validationFileSizeOverflow: 'Den här filen är för stor. Största storlek är {{maxSize}} {{maxSizeUnit}}.',
+    validationFileSizeUnderflow:
+        'Den här filen är för liten. Minsta storlek är {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow:
+        'Den här filen är för stor. Största storlek är {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Den totala filstorleken är för liten. Minsta totala storlek är {{minSize}} {{minSizeUnit}}.',
-    validationListSizeOverflow: 'Den totala filstorleken är för stor. Största totala storlek är {{maxSize}} {{maxSizeUnit}}.',
+    validationListSizeUnderflow:
+        'Den totala filstorleken är för liten. Minsta totala storlek är {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow:
+        'Den totala filstorleken är för stor. Största totala storlek är {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Det gick inte att läsa mediestorleken.',
 
-    validationMediaWidthRangeMismatch: '{{fileMainType}}-bredden är ogiltig. Bredden måste vara mellan {{minWidth}} och {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthRangeMismatch:
+        '{{fileMainType}}-bredden är ogiltig. Bredden måste vara mellan {{minWidth}} och {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow: '{{fileMainType}} är för liten. Minsta bredd är {{minWidth}} {{minWidthUnit}}.',
-    validationMediaWidthOverflow: '{{fileMainType}} är för stor. Största bredd är {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthUnderflow:
+        '{{fileMainType}} är för liten. Minsta bredd är {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow:
+        '{{fileMainType}} är för stor. Största bredd är {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch: '{{fileMainType}}-höjden är ogiltig. Höjden måste vara mellan {{minHeight}} och {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightRangeMismatch:
+        '{{fileMainType}}-höjden är ogiltig. Höjden måste vara mellan {{minHeight}} och {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow: '{{fileMainType}} är för liten. Minsta höjd är {{minHeight}} {{minHeightUnit}}.',
-    validationMediaHeightOverflow: '{{fileMainType}} är för stor. Största höjd är {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightUnderflow:
+        '{{fileMainType}} är för liten. Minsta höjd är {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow:
+        '{{fileMainType}} är för stor. Största höjd är {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         '{{fileMainType}} har ogiltig upplösning. Den måste vara mellan {{minResolution}}MP och {{maxResolution}}MP.',

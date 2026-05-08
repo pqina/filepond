@@ -18,7 +18,7 @@ export function debounce(
         // should run always
         beforeDebounce(...args);
 
-        // clear queueud last call
+        // clear queued last call
         clearTimeout(timeoutId);
 
         // what time is it now?

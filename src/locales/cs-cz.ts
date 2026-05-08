@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'Soubor se nepodařilo načíst.',
 
-    loadDataTranserProgress: 'Načítání souborů',
-    loadDataTranserInfo: 'Zpracováno {{processedFiles}} z {{totalFiles}} souborů',
+    loadDataTransferProgress: 'Načítání souborů',
+    loadDataTransferInfo: 'Zpracováno {{processedFiles}} z {{totalFiles}} souborů',
 
     validationInvalid: 'Neplatný soubor.',
     validationFileNameMissing: 'Chybí název souboru',
@@ -158,27 +158,37 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Tento soubor je příliš malý. Minimální velikost je {{minSize}} {{minSizeUnit}}.',
-    validationFileSizeOverflow: 'Tento soubor je příliš velký. Maximální velikost je {{maxSize}} {{maxSizeUnit}}.',
+    validationFileSizeUnderflow:
+        'Tento soubor je příliš malý. Minimální velikost je {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow:
+        'Tento soubor je příliš velký. Maximální velikost je {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Celková velikost souborů je příliš malá. Minimální celková velikost je {{minSize}} {{minSizeUnit}}.',
-    validationListSizeOverflow: 'Celková velikost souborů je příliš velká. Maximální celková velikost je {{maxSize}} {{maxSizeUnit}}.',
+    validationListSizeUnderflow:
+        'Celková velikost souborů je příliš malá. Minimální celková velikost je {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow:
+        'Celková velikost souborů je příliš velká. Maximální celková velikost je {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Nelze přečíst velikost média.',
 
-    validationMediaWidthRangeMismatch: 'Šířka {{fileMainType}} není platná. Šířka musí být mezi {{minWidth}} a {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthRangeMismatch:
+        'Šířka {{fileMainType}} není platná. Šířka musí být mezi {{minWidth}} a {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow: '{{fileMainType}} je příliš malý. Minimální šířka je {{minWidth}} {{minWidthUnit}}.',
-    validationMediaWidthOverflow: '{{fileMainType}} je příliš velký. Maximální šířka je {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthUnderflow:
+        '{{fileMainType}} je příliš malý. Minimální šířka je {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow:
+        '{{fileMainType}} je příliš velký. Maximální šířka je {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch: 'Výška {{fileMainType}} není platná. Výška musí být mezi {{minHeight}} a {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightRangeMismatch:
+        'Výška {{fileMainType}} není platná. Výška musí být mezi {{minHeight}} a {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow: '{{fileMainType}} je příliš malý. Minimální výška je {{minHeight}} {{minHeightUnit}}.',
-    validationMediaHeightOverflow: '{{fileMainType}} je příliš velký. Maximální výška je {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightUnderflow:
+        '{{fileMainType}} je příliš malý. Minimální výška je {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow:
+        '{{fileMainType}} je příliš velký. Maximální výška je {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'Rozlišení je neplatné. Musí být mezi {{minResolution}}MP a {{maxResolution}}MP.',

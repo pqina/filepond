@@ -5,7 +5,7 @@ import { type Snippet } from 'svelte';
 export interface MediaVideoOptions {
     class?: string;
 
-    /** The amount we should overflowAmount the image when we move it around */
+    /** The amount the video should overflow when we move it around */
     overflowAmount?: number;
 
     /** How to present image in viewer, defaults to 'cover', alternative is 'contain' */

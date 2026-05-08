@@ -135,7 +135,7 @@ export function rectPad(rect: Rect, padding: number): Rect {
     };
 }
 
-/** Creates a rectangle inside a given size optionally based on an aspect raito */
+/** Creates a rectangle inside a given size optionally based on an aspect ratio */
 export function rectFromSize(size: Size, aspectRatio: number = size.width / size.height): Rect {
     let { width } = size;
     let height = width / aspectRatio;

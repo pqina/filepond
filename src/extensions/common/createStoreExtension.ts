@@ -597,7 +597,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                 // determine if we _can_ _in theory_ activate the store logic
                 const canStore = isFileEntry(entry) && isFile(entry.file);
 
-                // udpate store activation status
+                // update store activation status
                 updateEntry(entry, {
                     state: {
                         [valueKey]: value ?? null,

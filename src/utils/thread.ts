@@ -55,7 +55,7 @@ interface ThreadOptions {
 // this holds all active workers
 const workerPool: PooledWorker[] = [];
 
-// this holds queueud tasks for when all threads are occupied
+// this holds queued tasks for when all threads are occupied
 const workerTaskQueue: Task[] = [];
 
 // time till a idle worker is automatically terminated instead of re-used

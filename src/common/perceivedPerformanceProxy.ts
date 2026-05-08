@@ -157,7 +157,7 @@ export function createPerceivedPerformanceProxy(fn: any, options: any) {
                     resolve(res[0]);
                 })
                 .catch((err) => {
-                    // when the actual upload failes, abort the perceived performance updater
+                    // when the actual upload fails, abort the perceived performance updater
                     perceivedPerformanceAbortController.abort(err);
 
                     // pass to scheduler

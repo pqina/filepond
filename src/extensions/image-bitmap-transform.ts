@@ -29,7 +29,7 @@ export interface ImageBitmapTransformOptions extends TransformExtensionOptions {
     /** Output aspect ratio, defaults to input image aspect ratio */
     aspectRatio?: number;
 
-    /** Output format type, defaults to input image type, some example types are `'image/jpeg'`, `'image/wepb'`, and `'image/png'`, limited to what the canvas `toBlob` method can output for the current browser */
+    /** Output format type, defaults to input image type, some example types are `'image/jpeg'`, `'image/webp'`, and `'image/png'`, limited to what the canvas `toBlob` method can output for the current browser */
     type?: string;
 
     /** Resize quality. Defaults to `'medium'` */
@@ -121,7 +121,7 @@ export const ImageBitmapTransform = createTransformExtension({
                         targetSize.height = computedWidth / computedAspectRatio;
                     }
                 }
-                // width & height descibe inner bounds
+                // width & height describe inner bounds
                 else if (fit === 'cover') {
                     if (computedWidth > computedHeight) {
                         targetSize.height = computedWidth / computedAspectRatio;

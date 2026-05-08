@@ -15,10 +15,10 @@ export interface MediaImageOptions {
     /** How to present image in viewer, defaults to 'cover', alternative is 'contain' */
     objectFit?: 'cover' | 'contain';
 
-    /** The amount we should overflowAmount the image when we move it around */
+    /** The amount the image should overflow when we move it around */
     overflowAmount?: number;
 
-    /** Enable parralax effects while dragging images */
+    /** Enable parallax effects while dragging images */
     enableParallax?: boolean;
 }
 

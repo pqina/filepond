@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'Tókst ekki að hlaða skránni.',
 
-    loadDataTranserProgress: 'Hleð inn skrám',
-    loadDataTranserInfo: 'Unnið {{processedFiles}} af {{totalFiles}} skrám',
+    loadDataTransferProgress: 'Hleð inn skrám',
+    loadDataTransferInfo: 'Unnið {{processedFiles}} af {{totalFiles}} skrám',
 
     validationInvalid: 'Ógild skrá.',
     validationFileNameMissing: 'Skráarheiti vantar',
@@ -158,27 +158,37 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Þessi skrá er of lítil. Lágmarksstærð er {{minSize}} {{minSizeUnit}}.',
-    validationFileSizeOverflow: 'Þessi skrá er of stór. Hámarksstærð er {{maxSize}} {{maxSizeUnit}}.',
+    validationFileSizeUnderflow:
+        'Þessi skrá er of lítil. Lágmarksstærð er {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow:
+        'Þessi skrá er of stór. Hámarksstærð er {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Heildarstærð skráa er of lítil. Lágmarksheildarstærð er {{minSize}} {{minSizeUnit}}.',
-    validationListSizeOverflow: 'Heildarstærð skráa er of stór. Hámarksheildarstærð er {{maxSize}} {{maxSizeUnit}}.',
+    validationListSizeUnderflow:
+        'Heildarstærð skráa er of lítil. Lágmarksheildarstærð er {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow:
+        'Heildarstærð skráa er of stór. Hámarksheildarstærð er {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Tókst ekki að lesa fjölmiðlastærð.',
 
-    validationMediaWidthRangeMismatch: 'Breidd {{fileMainType}} er ógild. Breidd þarf að vera á milli {{minWidth}} og {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthRangeMismatch:
+        'Breidd {{fileMainType}} er ógild. Breidd þarf að vera á milli {{minWidth}} og {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow: '{{fileMainType}} er of lítil. Lágmarksbreidd er {{minWidth}} {{minWidthUnit}}.',
-    validationMediaWidthOverflow: '{{fileMainType}} er of stór. Hámarksbreidd er {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthUnderflow:
+        '{{fileMainType}} er of lítil. Lágmarksbreidd er {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow:
+        '{{fileMainType}} er of stór. Hámarksbreidd er {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch: 'Hæð {{fileMainType}} er ógild. Hæð þarf að vera á milli {{minHeight}} og {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightRangeMismatch:
+        'Hæð {{fileMainType}} er ógild. Hæð þarf að vera á milli {{minHeight}} og {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow: '{{fileMainType}} er of lítil. Lágmarkshæð er {{minHeight}} {{minHeightUnit}}.',
-    validationMediaHeightOverflow: '{{fileMainType}} er of stór. Hámarkshæð er {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightUnderflow:
+        '{{fileMainType}} er of lítil. Lágmarkshæð er {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow:
+        '{{fileMainType}} er of stór. Hámarkshæð er {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'Upplausn er ógild. Hún þarf að vera á milli {{minResolution}}MP og {{maxResolution}}MP.',

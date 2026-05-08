@@ -63,8 +63,8 @@ export const core = {
     loadError: 'Bestand kon niet worden geladen.',
 
     // data transfer status
-    loadDataTranserProgress: 'Bestanden laden',
-    loadDataTranserInfo: '{{processedFiles}} van {{totalFiles}} bestanden verwerkt',
+    loadDataTransferProgress: 'Bestanden laden',
+    loadDataTransferInfo: '{{processedFiles}} van {{totalFiles}} bestanden verwerkt',
 
     // validation fallback
     validationInvalid: 'Ongeldig bestand.',
@@ -167,27 +167,37 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Dit bestand is te klein. Minimale grootte is {{minSize}} {{minSizeUnit}}.',
-    validationFileSizeOverflow: 'Dit bestand is te groot. Maximale grootte is {{maxSize}} {{maxSizeUnit}}.',
+    validationFileSizeUnderflow:
+        'Dit bestand is te klein. Minimale grootte is {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow:
+        'Dit bestand is te groot. Maximale grootte is {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Totale bestandsgrootte is te klein. Minimale totale grootte is {{minSize}} {{minSizeUnit}}.',
-    validationListSizeOverflow: 'Totale bestandsgrootte is te groot. Maximale totale grootte is {{maxSize}} {{maxSizeUnit}}.',
+    validationListSizeUnderflow:
+        'Totale bestandsgrootte is te klein. Minimale totale grootte is {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow:
+        'Totale bestandsgrootte is te groot. Maximale totale grootte is {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Kon mediagrootte niet lezen.',
 
-    validationMediaWidthRangeMismatch: 'De breedte van de {{fileMainType}} is ongeldig. De breedte moet tussen {{minWidth}} en {{maxWidth}} {{maxWidthUnit}} liggen.',
+    validationMediaWidthRangeMismatch:
+        'De breedte van de {{fileMainType}} is ongeldig. De breedte moet tussen {{minWidth}} en {{maxWidth}} {{maxWidthUnit}} liggen.',
 
-    validationMediaWidthUnderflow: 'De {{fileMainType}} is te klein. Minimale breedte is {{minWidth}} {{minWidthUnit}}.',
-    validationMediaWidthOverflow: 'De {{fileMainType}} is te groot. Maximale breedte is {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthUnderflow:
+        'De {{fileMainType}} is te klein. Minimale breedte is {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow:
+        'De {{fileMainType}} is te groot. Maximale breedte is {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch: 'De hoogte van de {{fileMainType}} is ongeldig. De hoogte moet tussen {{minHeight}} en {{maxHeight}} {{maxHeightUnit}} liggen.',
+    validationMediaHeightRangeMismatch:
+        'De hoogte van de {{fileMainType}} is ongeldig. De hoogte moet tussen {{minHeight}} en {{maxHeight}} {{maxHeightUnit}} liggen.',
 
-    validationMediaHeightUnderflow: 'De {{fileMainType}} is te klein. Minimale hoogte is {{minHeight}} {{minHeightUnit}}.',
-    validationMediaHeightOverflow: 'De {{fileMainType}} is te groot. Maximale hoogte is {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightUnderflow:
+        'De {{fileMainType}} is te klein. Minimale hoogte is {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow:
+        'De {{fileMainType}} is te groot. Maximale hoogte is {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'De resolutie van de {{fileMainType}} is ongeldig. De resolutie moet tussen {{minResolution}}MP en {{maxResolution}}MP liggen.',

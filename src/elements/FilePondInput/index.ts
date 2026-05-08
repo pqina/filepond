@@ -5,7 +5,7 @@ import type { ExtensionFactory } from '../../core/extensionManager.js';
 // import modules
 import {
     createExtensionManager,
-    type ExtensionMangerInstance,
+    type ExtensionManagerInstance,
 } from '../../core/extensionManager.js';
 import { createEntryTree, type Needle } from '../../core/entryTree.js';
 import {
@@ -73,7 +73,7 @@ function hasInvalidEntries(entries: FilePondEntry[]) {
     });
 }
 
-/** Converst a passed value to a FormData object */
+/** Converts a passed value to a FormData object */
 function toFormData(fieldName: string, value: string | File | (string | File)[]) {
     const values = Array.isArray(value) ? value : [value];
     const formData = new FormData();
@@ -90,7 +90,7 @@ function toFormData(fieldName: string, value: string | File | (string | File)[])
 // Along with the InteractionAttributes these attributes are synced from an optional slotted file input to the custom element
 const GenericAttributes = ['required', 'name', 'id'];
 
-// These attributes are assigend to the hidden file input so it correctly responds when calling `browse()` the 'multiple' attribute isn't in this list as it can't be set on the file-pond element
+// These attributes are assigned to the hidden file input so it correctly responds when calling `browse()` the 'multiple' attribute isn't in this list as it can't be set on the file-pond element
 const InteractionAttributes = ['disabled', 'accept', 'capture', 'webkitdirectory'];
 
 // these attributes when set on the custom element have their boolean values (which read as '') auto-converted to `true`
@@ -131,7 +131,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     #browseButton: HTMLButtonElement;
 
     /** FilePond extension manager reference */
-    #extensionManager: ExtensionMangerInstance;
+    #extensionManager: ExtensionManagerInstance;
 
     /** FilePond core instance reference */
     #entryTree: ReturnType<typeof createEntryTree>;
@@ -398,7 +398,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         return getFileSizeAttributeValue(this, 'max-size');
     }
 
-    /** Min total file size setter, accepta a number of bytes or a natural filesize string like 1MB */
+    /** Min total file size setter, accepts a number of bytes or a natural filesize string like 1MB */
     set minListSize(value: number | string) {
         setStringAttribute(this, 'min-list-size', value);
     }
@@ -498,7 +498,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
             return;
         }
 
-        // this follows default browser file input interactions, when we click a label linked to a file inupt the file input is focussed and then the browse interaction starts.
+        // this follows default browser file input interactions, when we click a label linked to a file input the file input is focussed and then the browse interaction starts.
         this.#browseButton.focus({ preventScroll: true });
         this.#fileInput.click();
     }
@@ -738,7 +738,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
     /** Called each time the element is added to the document */
     connectedCallback() {
-        // sync slotted chidlren for first time
+        // sync slotted children for first time
         this.#syncSlottedElements();
 
         /**
@@ -776,7 +776,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         });
 
         // handle state updates so we can set custom validity if state is invalid, we also validate now so we know the current state
-        this.#attachValidaton();
+        this.#attachValidation();
 
         // this listens for events on child elements
         this.#connectedSubs.push(
@@ -818,7 +818,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     }
 
     //#region Form integration and validation
-    /** This makes the element associateable with its parent form */
+    /** This makes the element associable with its parent form */
     static formAssociated = true;
 
     /** Sets the current field name */
@@ -866,7 +866,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     }
 
     /** Sets up the field for validation */
-    #attachValidaton() {
+    #attachValidation() {
         this.#connectedSubs.push(
             this.#entryTree.on(
                 'updateEntries',

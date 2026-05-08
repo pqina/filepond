@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'Le fichier n’a pas pu être chargé.',
 
-    loadDataTranserProgress: 'Chargement des fichiers',
-    loadDataTranserInfo: '{{processedFiles}} fichiers sur {{totalFiles}} traités',
+    loadDataTransferProgress: 'Chargement des fichiers',
+    loadDataTransferInfo: '{{processedFiles}} fichiers sur {{totalFiles}} traités',
 
     validationInvalid: 'Fichier invalide.',
     validationFileNameMissing: 'Nom de fichier manquant',

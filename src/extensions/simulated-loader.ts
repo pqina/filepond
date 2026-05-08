@@ -327,7 +327,7 @@ export const SimulatedLoader = createExtension({
                 return;
             }
 
-            // this trigger sekeleton animation to get name of file
+            // this triggers skeleton animation to get name of file
             const hasFileInfo = isString(name) && isNumber(size);
             if (!hasFileInfo) {
                 pushTask(entry.id, taskUrlToInfoSimulation);

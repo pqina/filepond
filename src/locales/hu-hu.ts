@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'A fájl betöltése nem sikerült.',
 
-    loadDataTranserProgress: 'Fájlok betöltése',
-    loadDataTranserInfo: '{{processedFiles}} / {{totalFiles}} fájl feldolgozva',
+    loadDataTransferProgress: 'Fájlok betöltése',
+    loadDataTransferInfo: '{{processedFiles}} / {{totalFiles}} fájl feldolgozva',
 
     validationInvalid: 'Érvénytelen fájl.',
     validationFileNameMissing: 'Hiányzó fájlnév',
@@ -159,27 +159,37 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Ez a fájl túl kicsi. A minimális méret {{minSize}} {{minSizeUnit}}.',
-    validationFileSizeOverflow: 'Ez a fájl túl nagy. A maximális méret {{maxSize}} {{maxSizeUnit}}.',
+    validationFileSizeUnderflow:
+        'Ez a fájl túl kicsi. A minimális méret {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow:
+        'Ez a fájl túl nagy. A maximális méret {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'A fájlok teljes mérete túl kicsi. A minimális összméret {{minSize}} {{minSizeUnit}}.',
-    validationListSizeOverflow: 'A fájlok teljes mérete túl nagy. A maximális összméret {{maxSize}} {{maxSizeUnit}}.',
+    validationListSizeUnderflow:
+        'A fájlok teljes mérete túl kicsi. A minimális összméret {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow:
+        'A fájlok teljes mérete túl nagy. A maximális összméret {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'A média mérete nem olvasható.',
 
-    validationMediaWidthRangeMismatch: 'A(z) {{fileMainType}} szélessége érvénytelen. A szélességnek {{minWidth}} és {{maxWidth}} {{maxWidthUnit}} között kell lennie.',
+    validationMediaWidthRangeMismatch:
+        'A(z) {{fileMainType}} szélessége érvénytelen. A szélességnek {{minWidth}} és {{maxWidth}} {{maxWidthUnit}} között kell lennie.',
 
-    validationMediaWidthUnderflow: 'A(z) {{fileMainType}} túl kicsi. A minimális szélesség {{minWidth}} {{minWidthUnit}}.',
-    validationMediaWidthOverflow: 'A(z) {{fileMainType}} túl nagy. A maximális szélesség {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthUnderflow:
+        'A(z) {{fileMainType}} túl kicsi. A minimális szélesség {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow:
+        'A(z) {{fileMainType}} túl nagy. A maximális szélesség {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch: 'A(z) {{fileMainType}} magassága érvénytelen. A magasságnak {{minHeight}} és {{maxHeight}} {{maxHeightUnit}} között kell lennie.',
+    validationMediaHeightRangeMismatch:
+        'A(z) {{fileMainType}} magassága érvénytelen. A magasságnak {{minHeight}} és {{maxHeight}} {{maxHeightUnit}} között kell lennie.',
 
-    validationMediaHeightUnderflow: 'A(z) {{fileMainType}} túl kicsi. A minimális magasság {{minHeight}} {{minHeightUnit}}.',
-    validationMediaHeightOverflow: 'A(z) {{fileMainType}} túl nagy. A maximális magasság {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightUnderflow:
+        'A(z) {{fileMainType}} túl kicsi. A minimális magasság {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow:
+        'A(z) {{fileMainType}} túl nagy. A maximális magasság {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'A felbontás érvénytelen. {{minResolution}}–{{maxResolution}} MP között kell lennie.',

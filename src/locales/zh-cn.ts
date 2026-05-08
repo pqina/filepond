@@ -58,8 +58,8 @@ export const core = {
 
     loadError: '无法加载文件。',
 
-    loadDataTranserProgress: '正在加载文件',
-    loadDataTranserInfo: '已处理 {{processedFiles}} / {{totalFiles}} 个文件',
+    loadDataTransferProgress: '正在加载文件',
+    loadDataTransferInfo: '已处理 {{processedFiles}} / {{totalFiles}} 个文件',
 
     validationInvalid: '文件无效。',
     validationFileNameMissing: '缺少文件名',
@@ -168,15 +168,21 @@ export const validationListSize = {
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: '无法读取媒体尺寸。',
 
-    validationMediaWidthRangeMismatch: '{{fileMainType}}宽度无效。宽度必须在 {{minWidth}} 到 {{maxWidth}} {{maxWidthUnit}} 之间。',
+    validationMediaWidthRangeMismatch:
+        '{{fileMainType}}宽度无效。宽度必须在 {{minWidth}} 到 {{maxWidth}} {{maxWidthUnit}} 之间。',
 
-    validationMediaWidthUnderflow: '{{fileMainType}}过小。最小宽度为 {{minWidth}} {{minWidthUnit}}。',
-    validationMediaWidthOverflow: '{{fileMainType}}过大。最大宽度为 {{maxWidth}} {{maxWidthUnit}}。',
+    validationMediaWidthUnderflow:
+        '{{fileMainType}}过小。最小宽度为 {{minWidth}} {{minWidthUnit}}。',
+    validationMediaWidthOverflow:
+        '{{fileMainType}}过大。最大宽度为 {{maxWidth}} {{maxWidthUnit}}。',
 
-    validationMediaHeightRangeMismatch: '{{fileMainType}}高度无效。高度必须在 {{minHeight}} 到 {{maxHeight}} {{maxHeightUnit}} 之间。',
+    validationMediaHeightRangeMismatch:
+        '{{fileMainType}}高度无效。高度必须在 {{minHeight}} 到 {{maxHeight}} {{maxHeightUnit}} 之间。',
 
-    validationMediaHeightUnderflow: '{{fileMainType}}过小。最小高度为 {{minHeight}} {{minHeightUnit}}。',
-    validationMediaHeightOverflow: '{{fileMainType}}过大。最大高度为 {{maxHeight}} {{maxHeightUnit}}。',
+    validationMediaHeightUnderflow:
+        '{{fileMainType}}过小。最小高度为 {{minHeight}} {{minHeightUnit}}。',
+    validationMediaHeightOverflow:
+        '{{fileMainType}}过大。最大高度为 {{maxHeight}} {{maxHeightUnit}}。',
 
     validationMediaResolutionRangeMismatch:
         '{{fileMainType}} 的分辨率无效。必须介于 {{minResolution}}MP 和 {{maxResolution}}MP 之间。',
@@ -189,10 +195,8 @@ export const validationMediaResolution = {
 };
 
 export const validationListCount = {
-    validationListEntryCountUnderflow:
-        '列表中的文件过少。最少为 {{minFiles}} {{minFilesUnit}}。',
-    validationListEntryCountOverflow:
-        '列表中的文件过多。最多为 {{maxFiles}} {{maxFilesUnit}}。',
+    validationListEntryCountUnderflow: '列表中的文件过少。最少为 {{minFiles}} {{minFilesUnit}}。',
+    validationListEntryCountOverflow: '列表中的文件过多。最多为 {{maxFiles}} {{maxFilesUnit}}。',
 };
 
 export const validation = {

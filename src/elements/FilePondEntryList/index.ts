@@ -150,7 +150,7 @@ export function getDefaultSpringOptions() {
 export function getDefaultEntryAnimationProps() {
     return {
         // spring state when dragging outside list
-        disolve: {
+        dissolve: {
             scale: 1,
             opacity: 0.5,
         },

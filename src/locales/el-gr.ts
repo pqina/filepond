@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'Αποτυχία φόρτωσης αρχείου.',
 
-    loadDataTranserProgress: 'Φόρτωση αρχείων',
-    loadDataTranserInfo: 'Επεξεργάστηκαν {{processedFiles}} από {{totalFiles}} αρχεία',
+    loadDataTransferProgress: 'Φόρτωση αρχείων',
+    loadDataTransferInfo: 'Επεξεργάστηκαν {{processedFiles}} από {{totalFiles}} αρχεία',
 
     validationInvalid: 'Μη έγκυρο αρχείο.',
     validationFileNameMissing: 'Λείπει το όνομα αρχείου',
@@ -158,27 +158,37 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Αυτό το αρχείο είναι πολύ μικρό. Το ελάχιστο μέγεθος είναι {{minSize}} {{minSizeUnit}}.',
-    validationFileSizeOverflow: 'Αυτό το αρχείο είναι πολύ μεγάλο. Το μέγιστο μέγεθος είναι {{maxSize}} {{maxSizeUnit}}.',
+    validationFileSizeUnderflow:
+        'Αυτό το αρχείο είναι πολύ μικρό. Το ελάχιστο μέγεθος είναι {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow:
+        'Αυτό το αρχείο είναι πολύ μεγάλο. Το μέγιστο μέγεθος είναι {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Το συνολικό μέγεθος αρχείων είναι πολύ μικρό. Το ελάχιστο συνολικό μέγεθος είναι {{minSize}} {{minSizeUnit}}.',
-    validationListSizeOverflow: 'Το συνολικό μέγεθος αρχείων είναι πολύ μεγάλο. Το μέγιστο συνολικό μέγεθος είναι {{maxSize}} {{maxSizeUnit}}.',
+    validationListSizeUnderflow:
+        'Το συνολικό μέγεθος αρχείων είναι πολύ μικρό. Το ελάχιστο συνολικό μέγεθος είναι {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow:
+        'Το συνολικό μέγεθος αρχείων είναι πολύ μεγάλο. Το μέγιστο συνολικό μέγεθος είναι {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Αδύνατη η ανάγνωση μεγέθους πολυμέσων.',
 
-    validationMediaWidthRangeMismatch: 'Το πλάτος του {{fileMainType}} δεν είναι έγκυρο. Το πλάτος πρέπει να είναι μεταξύ {{minWidth}} και {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthRangeMismatch:
+        'Το πλάτος του {{fileMainType}} δεν είναι έγκυρο. Το πλάτος πρέπει να είναι μεταξύ {{minWidth}} και {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow: 'Το {{fileMainType}} είναι πολύ μικρό. Το ελάχιστο πλάτος είναι {{minWidth}} {{minWidthUnit}}.',
-    validationMediaWidthOverflow: 'Το {{fileMainType}} είναι πολύ μεγάλο. Το μέγιστο πλάτος είναι {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthUnderflow:
+        'Το {{fileMainType}} είναι πολύ μικρό. Το ελάχιστο πλάτος είναι {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow:
+        'Το {{fileMainType}} είναι πολύ μεγάλο. Το μέγιστο πλάτος είναι {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch: 'Το ύψος του {{fileMainType}} δεν είναι έγκυρο. Το ύψος πρέπει να είναι μεταξύ {{minHeight}} και {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightRangeMismatch:
+        'Το ύψος του {{fileMainType}} δεν είναι έγκυρο. Το ύψος πρέπει να είναι μεταξύ {{minHeight}} και {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow: 'Το {{fileMainType}} είναι πολύ μικρό. Το ελάχιστο ύψος είναι {{minHeight}} {{minHeightUnit}}.',
-    validationMediaHeightOverflow: 'Το {{fileMainType}} είναι πολύ μεγάλο. Το μέγιστο ύψος είναι {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightUnderflow:
+        'Το {{fileMainType}} είναι πολύ μικρό. Το ελάχιστο ύψος είναι {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow:
+        'Το {{fileMainType}} είναι πολύ μεγάλο. Το μέγιστο ύψος είναι {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'Η ανάλυση δεν είναι έγκυρη. Πρέπει να είναι μεταξύ {{minResolution}}MP και {{maxResolution}}MP.',

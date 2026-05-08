@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'Kunne ikke indlæse filen.',
 
-    loadDataTranserProgress: 'Indlæser filer',
-    loadDataTranserInfo: 'Behandlet {{processedFiles}} af {{totalFiles}} filer',
+    loadDataTransferProgress: 'Indlæser filer',
+    loadDataTransferInfo: 'Behandlet {{processedFiles}} af {{totalFiles}} filer',
 
     validationInvalid: 'Ugyldig fil.',
     validationFileNameMissing: 'Filnavn mangler',
@@ -158,27 +158,37 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Denne fil er for lille. Minimumsstørrelsen er {{minSize}} {{minSizeUnit}}.',
-    validationFileSizeOverflow: 'Denne fil er for stor. Maksimumsstørrelsen er {{maxSize}} {{maxSizeUnit}}.',
+    validationFileSizeUnderflow:
+        'Denne fil er for lille. Minimumsstørrelsen er {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow:
+        'Denne fil er for stor. Maksimumsstørrelsen er {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Den samlede filstørrelse er for lille. Minimumsstørrelsen er {{minSize}} {{minSizeUnit}}.',
-    validationListSizeOverflow: 'Den samlede filstørrelse er for stor. Maksimumsstørrelsen er {{maxSize}} {{maxSizeUnit}}.',
+    validationListSizeUnderflow:
+        'Den samlede filstørrelse er for lille. Minimumsstørrelsen er {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow:
+        'Den samlede filstørrelse er for stor. Maksimumsstørrelsen er {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Kunne ikke læse mediestørrelsen.',
 
-    validationMediaWidthRangeMismatch: '{{fileMainType}}-bredden er ugyldig. Bredden skal være mellem {{minWidth}} og {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthRangeMismatch:
+        '{{fileMainType}}-bredden er ugyldig. Bredden skal være mellem {{minWidth}} og {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow: '{{fileMainType}} er for lille. Minimumsbredde er {{minWidth}} {{minWidthUnit}}.',
-    validationMediaWidthOverflow: '{{fileMainType}} er for stor. Maksimal bredde er {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthUnderflow:
+        '{{fileMainType}} er for lille. Minimumsbredde er {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow:
+        '{{fileMainType}} er for stor. Maksimal bredde er {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch: '{{fileMainType}}-højden er ugyldig. Højden skal være mellem {{minHeight}} og {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightRangeMismatch:
+        '{{fileMainType}}-højden er ugyldig. Højden skal være mellem {{minHeight}} og {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow: '{{fileMainType}} er for lille. Minimumshøjde er {{minHeight}} {{minHeightUnit}}.',
-    validationMediaHeightOverflow: '{{fileMainType}} er for stor. Maksimal højde er {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightUnderflow:
+        '{{fileMainType}} er for lille. Minimumshøjde er {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow:
+        '{{fileMainType}} er for stor. Maksimal højde er {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         '{{fileMainType}} har en ugyldig opløsning. Opløsningen skal være mellem {{minResolution}}MP og {{maxResolution}}MP.',

@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'Impossibile caricare il file.',
 
-    loadDataTranserProgress: 'Caricamento dei file',
-    loadDataTranserInfo: '{{processedFiles}} di {{totalFiles}} file elaborati',
+    loadDataTransferProgress: 'Caricamento dei file',
+    loadDataTransferInfo: '{{processedFiles}} di {{totalFiles}} file elaborati',
 
     validationInvalid: 'File non valido.',
     validationFileNameMissing: 'Nome file mancante',
@@ -157,27 +157,37 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Questo file è troppo piccolo. La dimensione minima è {{minSize}} {{minSizeUnit}}.',
-    validationFileSizeOverflow: 'Questo file è troppo grande. La dimensione massima è {{maxSize}} {{maxSizeUnit}}.',
+    validationFileSizeUnderflow:
+        'Questo file è troppo piccolo. La dimensione minima è {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow:
+        'Questo file è troppo grande. La dimensione massima è {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'La dimensione totale dei file è troppo piccola. La dimensione totale minima è {{minSize}} {{minSizeUnit}}.',
-    validationListSizeOverflow: 'La dimensione totale dei file è troppo grande. La dimensione totale massima è {{maxSize}} {{maxSizeUnit}}.',
+    validationListSizeUnderflow:
+        'La dimensione totale dei file è troppo piccola. La dimensione totale minima è {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow:
+        'La dimensione totale dei file è troppo grande. La dimensione totale massima è {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Impossibile leggere la dimensione del file.',
 
-    validationMediaWidthRangeMismatch: 'La larghezza di {{fileMainType}} non è valida. La larghezza deve essere compresa tra {{minWidth}} e {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthRangeMismatch:
+        'La larghezza di {{fileMainType}} non è valida. La larghezza deve essere compresa tra {{minWidth}} e {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow: '{{fileMainType}} è troppo piccolo. La larghezza minima è {{minWidth}} {{minWidthUnit}}.',
-    validationMediaWidthOverflow: '{{fileMainType}} è troppo grande. La larghezza massima è {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthUnderflow:
+        '{{fileMainType}} è troppo piccolo. La larghezza minima è {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow:
+        '{{fileMainType}} è troppo grande. La larghezza massima è {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch: 'L\'altezza di {{fileMainType}} non è valida. L\'altezza deve essere compresa tra {{minHeight}} e {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightRangeMismatch:
+        "L'altezza di {{fileMainType}} non è valida. L'altezza deve essere compresa tra {{minHeight}} e {{maxHeight}} {{maxHeightUnit}}.",
 
-    validationMediaHeightUnderflow: '{{fileMainType}} è troppo piccolo. L\'altezza minima è {{minHeight}} {{minHeightUnit}}.',
-    validationMediaHeightOverflow: '{{fileMainType}} è troppo grande. L\'altezza massima è {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightUnderflow:
+        "{{fileMainType}} è troppo piccolo. L'altezza minima è {{minHeight}} {{minHeightUnit}}.",
+    validationMediaHeightOverflow:
+        "{{fileMainType}} è troppo grande. L'altezza massima è {{maxHeight}} {{maxHeightUnit}}.",
 
     validationMediaResolutionRangeMismatch:
         'La risoluzione del {{fileMainType}} non è valida. Deve essere tra {{minResolution}}MP e {{maxResolution}}MP.',
@@ -191,9 +201,9 @@ export const validationMediaResolution = {
 
 export const validationListCount = {
     validationListEntryCountUnderflow:
-        'Troppi pochi file nell\'elenco. Il minimo è {{minFiles}} {{minFilesUnit}}.',
+        "Troppi pochi file nell'elenco. Il minimo è {{minFiles}} {{minFilesUnit}}.",
     validationListEntryCountOverflow:
-        'Troppi file nell\'elenco. Il massimo è {{maxFiles}} {{maxFilesUnit}}.',
+        "Troppi file nell'elenco. Il massimo è {{maxFiles}} {{maxFilesUnit}}.",
 };
 
 export const validation = {

@@ -49,7 +49,7 @@ export class FilePondElement extends FilePondInputElement {
     /** Holds references to event subscriptions so we can more easily unsub */
     #connectedSubs: (() => void)[] = [];
 
-    /** Pass spring and animaton config to children */
+    /** Pass spring and animation config to children */
     set springDefaults(value: SpringOptions) {
         Object.values(this.#components).forEach((element) => {
             element.springDefaults = value;
@@ -157,7 +157,7 @@ export class FilePondElement extends FilePondInputElement {
             part: 'drop-indicator',
         }) as FilePondDropIndicatorElement;
 
-        // so we can set shared props on these lements
+        // so we can set shared props on these elements
         this.#components = {
             entryList,
             dropArea,
@@ -214,7 +214,7 @@ export class FilePondElement extends FilePondInputElement {
             } as EntryListViewOptions,
         });
 
-        // set default springconfig to this element and it's children
+        // set default spring config to this element and its children
         this.springDefaults = getDefaultSpringOptions();
 
         // set initial values to children
@@ -228,7 +228,7 @@ export class FilePondElement extends FilePondInputElement {
             caption: 'Powered by FilePond',
         });
 
-        // apply intial options
+        // apply initial options
         Object.assign(this, globalInitialOptions);
     }
 

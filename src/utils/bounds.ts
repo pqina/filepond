@@ -55,7 +55,7 @@ export function boundsUpdate(
     return target;
 }
 
-/** Updates target biounds with property values of source bounds */
+/** Updates target bounds with property values of source bounds */
 export function boundsUpdateWithBounds(target: Bounds, source: Bounds): Bounds {
     target.top = source.top;
     target.right = source.right;

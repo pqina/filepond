@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'ফাইল লোড করা যায়নি।',
 
-    loadDataTranserProgress: 'ফাইল লোড হচ্ছে',
-    loadDataTranserInfo: '{{processedFiles}} / {{totalFiles}} ফাইল প্রক্রিয়াকৃত',
+    loadDataTransferProgress: 'ফাইল লোড হচ্ছে',
+    loadDataTransferInfo: '{{processedFiles}} / {{totalFiles}} ফাইল প্রক্রিয়াকৃত',
 
     validationInvalid: 'অকার্যকর ফাইল।',
     validationFileNameMissing: 'ফাইলের নাম অনুপস্থিত',
@@ -163,22 +163,30 @@ export const validationFileSize = {
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'মোট ফাইলের আকার খুব ছোট। ন্যূনতম মোট আকার {{minSize}} {{minSizeUnit}}।',
-    validationListSizeOverflow: 'মোট ফাইলের আকার খুব বড়। সর্বোচ্চ মোট আকার {{maxSize}} {{maxSizeUnit}}।',
+    validationListSizeUnderflow:
+        'মোট ফাইলের আকার খুব ছোট। ন্যূনতম মোট আকার {{minSize}} {{minSizeUnit}}।',
+    validationListSizeOverflow:
+        'মোট ফাইলের আকার খুব বড়। সর্বোচ্চ মোট আকার {{maxSize}} {{maxSizeUnit}}।',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'মিডিয়ার আকার পড়া যায়নি।',
 
-    validationMediaWidthRangeMismatch: '{{fileMainType}}-এর প্রস্থ সঠিক নয়। প্রস্থ {{minWidth}} থেকে {{maxWidth}} {{maxWidthUnit}}-এর মধ্যে হতে হবে।',
+    validationMediaWidthRangeMismatch:
+        '{{fileMainType}}-এর প্রস্থ সঠিক নয়। প্রস্থ {{minWidth}} থেকে {{maxWidth}} {{maxWidthUnit}}-এর মধ্যে হতে হবে।',
 
-    validationMediaWidthUnderflow: '{{fileMainType}} খুব ছোট। ন্যূনতম প্রস্থ {{minWidth}} {{minWidthUnit}}।',
-    validationMediaWidthOverflow: '{{fileMainType}} খুব বড়। সর্বোচ্চ প্রস্থ {{maxWidth}} {{maxWidthUnit}}।',
+    validationMediaWidthUnderflow:
+        '{{fileMainType}} খুব ছোট। ন্যূনতম প্রস্থ {{minWidth}} {{minWidthUnit}}।',
+    validationMediaWidthOverflow:
+        '{{fileMainType}} খুব বড়। সর্বোচ্চ প্রস্থ {{maxWidth}} {{maxWidthUnit}}।',
 
-    validationMediaHeightRangeMismatch: '{{fileMainType}}-এর উচ্চতা সঠিক নয়। উচ্চতা {{minHeight}} থেকে {{maxHeight}} {{maxHeightUnit}}-এর মধ্যে হতে হবে।',
+    validationMediaHeightRangeMismatch:
+        '{{fileMainType}}-এর উচ্চতা সঠিক নয়। উচ্চতা {{minHeight}} থেকে {{maxHeight}} {{maxHeightUnit}}-এর মধ্যে হতে হবে।',
 
-    validationMediaHeightUnderflow: '{{fileMainType}} খুব ছোট। ন্যূনতম উচ্চতা {{minHeight}} {{minHeightUnit}}।',
-    validationMediaHeightOverflow: '{{fileMainType}} খুব বড়। সর্বোচ্চ উচ্চতা {{maxHeight}} {{maxHeightUnit}}।',
+    validationMediaHeightUnderflow:
+        '{{fileMainType}} খুব ছোট। ন্যূনতম উচ্চতা {{minHeight}} {{minHeightUnit}}।',
+    validationMediaHeightOverflow:
+        '{{fileMainType}} খুব বড়। সর্বোচ্চ উচ্চতা {{maxHeight}} {{maxHeightUnit}}।',
 
     validationMediaResolutionRangeMismatch:
         'রেজোলিউশন অকার্যকর। {{minResolution}}MP থেকে {{maxResolution}}MP এর মধ্যে হতে হবে।',

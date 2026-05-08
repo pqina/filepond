@@ -55,10 +55,10 @@ export const core = {
     loadError: 'Failed to load file.',
 
     // data transfer status
-    loadDataTranserProgress: 'Loading files',
-    loadDataTranserInfo: 'Processed {{processedFiles}} of {{totalFiles}} files',
+    loadDataTransferProgress: 'Loading files',
+    loadDataTransferInfo: 'Processed {{processedFiles}} of {{totalFiles}} files',
 
-    // validaton fallback if no subscode set
+    // validation fallback if no subcode set
     validationInvalid: 'Invalid file.',
     validationFileNameMissing: 'File name missing.',
 

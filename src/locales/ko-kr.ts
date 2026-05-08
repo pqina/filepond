@@ -58,8 +58,8 @@ export const core = {
 
     loadError: '파일을 불러올 수 없습니다.',
 
-    loadDataTranserProgress: '파일을 불러오는 중',
-    loadDataTranserInfo: '{{processedFiles}} / {{totalFiles}} 파일 처리됨',
+    loadDataTransferProgress: '파일을 불러오는 중',
+    loadDataTransferInfo: '{{processedFiles}} / {{totalFiles}} 파일 처리됨',
 
     validationInvalid: '유효하지 않은 파일입니다.',
     validationFileNameMissing: '파일 이름이 없습니다',
@@ -157,27 +157,37 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: '이 파일은 너무 작습니다. 최소 크기는 {{minSize}} {{minSizeUnit}}입니다.',
-    validationFileSizeOverflow: '이 파일은 너무 큽니다. 최대 크기는 {{maxSize}} {{maxSizeUnit}}입니다.',
+    validationFileSizeUnderflow:
+        '이 파일은 너무 작습니다. 최소 크기는 {{minSize}} {{minSizeUnit}}입니다.',
+    validationFileSizeOverflow:
+        '이 파일은 너무 큽니다. 최대 크기는 {{maxSize}} {{maxSizeUnit}}입니다.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: '전체 파일 크기가 너무 작습니다. 최소 총 크기는 {{minSize}} {{minSizeUnit}}입니다.',
-    validationListSizeOverflow: '전체 파일 크기가 너무 큽니다. 최대 총 크기는 {{maxSize}} {{maxSizeUnit}}입니다.',
+    validationListSizeUnderflow:
+        '전체 파일 크기가 너무 작습니다. 최소 총 크기는 {{minSize}} {{minSizeUnit}}입니다.',
+    validationListSizeOverflow:
+        '전체 파일 크기가 너무 큽니다. 최대 총 크기는 {{maxSize}} {{maxSizeUnit}}입니다.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: '미디어 크기를 읽을 수 없습니다.',
 
-    validationMediaWidthRangeMismatch: '{{fileMainType}} 너비가 올바르지 않습니다. 너비는 {{minWidth}}에서 {{maxWidth}} {{maxWidthUnit}} 사이여야 합니다.',
+    validationMediaWidthRangeMismatch:
+        '{{fileMainType}} 너비가 올바르지 않습니다. 너비는 {{minWidth}}에서 {{maxWidth}} {{maxWidthUnit}} 사이여야 합니다.',
 
-    validationMediaWidthUnderflow: '{{fileMainType}}이(가) 너무 작습니다. 최소 너비는 {{minWidth}} {{minWidthUnit}}입니다.',
-    validationMediaWidthOverflow: '{{fileMainType}}이(가) 너무 큽니다. 최대 너비는 {{maxWidth}} {{maxWidthUnit}}입니다.',
+    validationMediaWidthUnderflow:
+        '{{fileMainType}}이(가) 너무 작습니다. 최소 너비는 {{minWidth}} {{minWidthUnit}}입니다.',
+    validationMediaWidthOverflow:
+        '{{fileMainType}}이(가) 너무 큽니다. 최대 너비는 {{maxWidth}} {{maxWidthUnit}}입니다.',
 
-    validationMediaHeightRangeMismatch: '{{fileMainType}} 높이가 올바르지 않습니다. 높이는 {{minHeight}}에서 {{maxHeight}} {{maxHeightUnit}} 사이여야 합니다.',
+    validationMediaHeightRangeMismatch:
+        '{{fileMainType}} 높이가 올바르지 않습니다. 높이는 {{minHeight}}에서 {{maxHeight}} {{maxHeightUnit}} 사이여야 합니다.',
 
-    validationMediaHeightUnderflow: '{{fileMainType}}이(가) 너무 작습니다. 최소 높이는 {{minHeight}} {{minHeightUnit}}입니다.',
-    validationMediaHeightOverflow: '{{fileMainType}}이(가) 너무 큽니다. 최대 높이는 {{maxHeight}} {{maxHeightUnit}}입니다.',
+    validationMediaHeightUnderflow:
+        '{{fileMainType}}이(가) 너무 작습니다. 최소 높이는 {{minHeight}} {{minHeightUnit}}입니다.',
+    validationMediaHeightOverflow:
+        '{{fileMainType}}이(가) 너무 큽니다. 최대 높이는 {{maxHeight}} {{maxHeightUnit}}입니다.',
 
     validationMediaResolutionRangeMismatch:
         '{{fileMainType}}의 해상도가 잘못되었습니다. 해상도는 {{minResolution}}MP에서 {{maxResolution}}MP 사이여야 합니다.',

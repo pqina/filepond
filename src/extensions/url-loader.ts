@@ -291,7 +291,7 @@ export const URLLoader = createExtension({
                 return;
             }
 
-            // is in erro state
+            // is in error state
             const status = getEntryExtensionStatus(entry);
             if (status?.type === 'error') {
                 return;

@@ -367,7 +367,7 @@ export function createTransformExtension<Props extends object = TransformExtensi
                     canTransform = await filterEntry(entry);
                 }
 
-                // udpate activation status
+                // update activation status
                 setEntryExtensionState(entry, {
                     canTransform,
                     actions: canTransform ? [actionTransform] : [],

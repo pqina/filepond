@@ -140,7 +140,7 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
     }
 
     /**
-     * This gets the tasks as assigned in the groupTasks Map, it's fast, but it's not guaranteerd
+     * This gets the tasks as assigned in the groupTasks Map, it's fast, but it's not guaranteed
      * the tasks are sorted by order
      */
     function getTasksByGroup(group: string) {

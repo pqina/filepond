@@ -79,7 +79,7 @@ export function getDropTargetIndex(
         const closestItemBounds = boundsFromRect(closestItemRect);
         const closestItemCenter = rectCenter(closestItemRect);
 
-        // is vertical list layout, determine if placeholder pposition is before or afer closest item
+        // is vertical list layout, determine if placeholder position is before or after closest item
         if (listItems.every((item) => item.getBoundingClientRect().x === closestItemRect.x)) {
             if (viewPosition.y > closestItemCenter.y) {
                 return closestItemIndex + 1;

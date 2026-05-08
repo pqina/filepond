@@ -58,8 +58,8 @@ export const core = {
 
     loadError: 'Tiedostoa ei voitu ladata.',
 
-    loadDataTranserProgress: 'Ladataan tiedostoja',
-    loadDataTranserInfo: 'Käsitelty {{processedFiles}} / {{totalFiles}} tiedostoa',
+    loadDataTransferProgress: 'Ladataan tiedostoja',
+    loadDataTransferInfo: 'Käsitelty {{processedFiles}} / {{totalFiles}} tiedostoa',
 
     validationInvalid: 'Virheellinen tiedosto.',
     validationFileNameMissing: 'Tiedoston nimi puuttuu',
@@ -158,27 +158,37 @@ export const validationFileName = {
 };
 
 export const validationFileSize = {
-    validationFileSizeUnderflow: 'Tämä tiedosto on liian pieni. Vähimmäiskoko on {{minSize}} {{minSizeUnit}}.',
-    validationFileSizeOverflow: 'Tämä tiedosto on liian suuri. Enimmäiskoko on {{maxSize}} {{maxSizeUnit}}.',
+    validationFileSizeUnderflow:
+        'Tämä tiedosto on liian pieni. Vähimmäiskoko on {{minSize}} {{minSizeUnit}}.',
+    validationFileSizeOverflow:
+        'Tämä tiedosto on liian suuri. Enimmäiskoko on {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationListSize = {
-    validationListSizeUnderflow: 'Tiedostojen kokonaiskoko on liian pieni. Vähimmäiskokonaiskoko on {{minSize}} {{minSizeUnit}}.',
-    validationListSizeOverflow: 'Tiedostojen kokonaiskoko on liian suuri. Enimmäiskokonaiskoko on {{maxSize}} {{maxSizeUnit}}.',
+    validationListSizeUnderflow:
+        'Tiedostojen kokonaiskoko on liian pieni. Vähimmäiskokonaiskoko on {{minSize}} {{minSizeUnit}}.',
+    validationListSizeOverflow:
+        'Tiedostojen kokonaiskoko on liian suuri. Enimmäiskokonaiskoko on {{maxSize}} {{maxSizeUnit}}.',
 };
 
 export const validationMediaResolution = {
     validationMediaSizeUnavailable: 'Mediakokoa ei voitu lukea.',
 
-    validationMediaWidthRangeMismatch: '{{fileMainType}}n leveys ei kelpaa. Leveyden on oltava välillä {{minWidth}} ja {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthRangeMismatch:
+        '{{fileMainType}}n leveys ei kelpaa. Leveyden on oltava välillä {{minWidth}} ja {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaWidthUnderflow: '{{fileMainType}} on liian pieni. Vähimmäisleveys on {{minWidth}} {{minWidthUnit}}.',
-    validationMediaWidthOverflow: '{{fileMainType}} on liian suuri. Enimmäisleveys on {{maxWidth}} {{maxWidthUnit}}.',
+    validationMediaWidthUnderflow:
+        '{{fileMainType}} on liian pieni. Vähimmäisleveys on {{minWidth}} {{minWidthUnit}}.',
+    validationMediaWidthOverflow:
+        '{{fileMainType}} on liian suuri. Enimmäisleveys on {{maxWidth}} {{maxWidthUnit}}.',
 
-    validationMediaHeightRangeMismatch: '{{fileMainType}}n korkeus ei kelpaa. Korkeuden on oltava välillä {{minHeight}} ja {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightRangeMismatch:
+        '{{fileMainType}}n korkeus ei kelpaa. Korkeuden on oltava välillä {{minHeight}} ja {{maxHeight}} {{maxHeightUnit}}.',
 
-    validationMediaHeightUnderflow: '{{fileMainType}} on liian pieni. Vähimmäiskorkeus on {{minHeight}} {{minHeightUnit}}.',
-    validationMediaHeightOverflow: '{{fileMainType}} on liian suuri. Enimmäiskorkeus on {{maxHeight}} {{maxHeightUnit}}.',
+    validationMediaHeightUnderflow:
+        '{{fileMainType}} on liian pieni. Vähimmäiskorkeus on {{minHeight}} {{minHeightUnit}}.',
+    validationMediaHeightOverflow:
+        '{{fileMainType}} on liian suuri. Enimmäiskorkeus on {{maxHeight}} {{maxHeightUnit}}.',
 
     validationMediaResolutionRangeMismatch:
         'Tarkkuus on virheellinen. Sen tulee olla {{minResolution}}–{{maxResolution}} MP.',

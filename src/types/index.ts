@@ -104,7 +104,7 @@ export interface FilePondEntryBase {
     /** How and when was this file entry added */
     origin: EntryOrigin;
 
-    /** Id of the container entry (DataTranfer, Archive) this file was "extracted" from */
+    /** Id of the container entry (DataTransfer, Archive) this file was "extracted" from */
     containerId: string | null;
 
     /** Optional entry metadata */
