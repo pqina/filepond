@@ -37,6 +37,10 @@
             "types": "./types/extensions/index.d.ts",
             "import": "./esm/extensions/index.js"
         },
+        "./extensions/*.js": {
+            "types": "./types/extensions/*.d.ts",
+            "import": "./esm/extensions/*.js"
+        },
         "./extensions/*": {
             "types": "./types/extensions/*.d.ts",
             "import": "./esm/extensions/*.js"
@@ -57,6 +61,10 @@
             "types": "./types/locales/index.d.ts",
             "import": "./esm/locales/index.js"
         },
+        "./locales/*.js": {
+            "types": "./types/locales/*.d.ts",
+            "import": "./esm/locales/*.js"
+        },
         "./locales/*": {
             "types": "./types/locales/*.d.ts",
             "import": "./esm/locales/*"
@@ -76,7 +84,7 @@
     },
     "devDependencies": {
         "@rollup/plugin-terser": "^0.4.4",
-        "@sveltejs/vite-plugin-svelte": "^6.0.0",
+        "@sveltejs/vite-plugin-svelte": "^6.2.4",
         "@typescript-eslint/types": "^8.48.1",
         "@vitest/browser-playwright": "^4.0.18",
         "eslint-plugin-svelte": "^2.46.1",
@@ -88,10 +96,10 @@
         "rollup": "^4.53.3",
         "rollup-plugin-cleanup": "^3.2.1",
         "rollup-plugin-license": "^3.6.0",
-        "svelte": "^5.53.12",
-        "svelte-check": "^4.3.1",
+        "svelte": "^5.55.5",
+        "svelte-check": "^4.4.8",
         "typescript": "^5.9.2",
-        "vite": "^7.2.6",
+        "vite": "^7.3.3",
         "vite-plugin-dts": "^4.5.4",
         "vite-plugin-static-copy": "^3.1.2",
         "vitest": "^4.0.18"
