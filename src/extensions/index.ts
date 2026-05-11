@@ -12,6 +12,7 @@ export {
     type ValidatorExtensionValidateFunction,
     type ValidatorFactory,
 } from './common/createValidatorExtension.js';
+
 export {
     createStoreExtension,
     type CreateStoreExtensionOptions,
@@ -27,6 +28,7 @@ export {
     type StoreExtensionStoreFunction,
     type StoreFactory,
 } from './common/createStoreExtension.js';
+
 export {
     createTransformExtension,
     type CreateTransformExtensionOptions,
@@ -45,7 +47,6 @@ export {
 
 // sources
 export { ClipboardSource } from './clipboard-source.js';
-export { DropboxSource } from './dropbox-source.js';
 export { DragDropSource } from './drag-drop-source.js';
 export { FileInputSource } from './file-input-source.js';
 
