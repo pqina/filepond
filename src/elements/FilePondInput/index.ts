@@ -700,11 +700,14 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         }
 
         // normal button is different based
-        this.#browseButton.innerHTML = stringReplaceVariables(
-            this.#locale ? this.#locale[this.#browseButtonLabelKey] : this.#browseButtonLabelKey,
-            localeData,
-            this.#locale
-        );
+        this.#browseButton.innerHTML =
+            stringReplaceVariables(
+                this.#locale
+                    ? this.#locale[this.#browseButtonLabelKey]
+                    : this.#browseButtonLabelKey,
+                localeData,
+                this.#locale
+            ) || '';
     }
 
     #syncSlottedElements() {
@@ -950,7 +953,9 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
                 : statusCodeToLocaleKey(status.code);
 
             // render validation message or fallback to invalid state label
-            messages[flag] = validationMessage ?? stringReplaceVariables(validationInvalidState);
+            messages[flag] = validationMessage
+                ? validationMessage
+                : stringReplaceVariables(validationInvalidState) || '';
         }
 
         // all flags are false if is valid

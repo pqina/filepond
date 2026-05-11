@@ -67,6 +67,6 @@ declare module '../index.js' {
         ClipboardSource: ClipboardSourceOptions;
     }
     interface defineFilePondOptions {
-        ClipboardSource: ClipboardSourceOptions;
+        ClipboardSource?: ClipboardSourceOptions;
     }
 }

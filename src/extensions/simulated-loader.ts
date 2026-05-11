@@ -364,6 +364,6 @@ declare module '../index.js' {
         SimulatedLoader: SimulatedLoaderOptions;
     }
     interface defineFilePondOptions {
-        SimulatedLoader: SimulatedLoaderOptions;
+        SimulatedLoader?: SimulatedLoaderOptions;
     }
 }

@@ -121,6 +121,6 @@ declare module '../index.js' {
         FileMimeTypeValidator: FileMimeTypeValidatorOptions;
     }
     interface defineFilePondOptions {
-        FileMimeTypeValidator: FileMimeTypeValidatorOptions;
+        FileMimeTypeValidator?: FileMimeTypeValidatorOptions;
     }
 }

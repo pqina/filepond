@@ -91,6 +91,6 @@ declare module '../index.js' {
         FileInputStore: FileInputStoreOptions;
     }
     interface defineFilePondOptions {
-        FileInputStore: FileInputStoreOptions;
+        FileInputStore?: FileInputStoreOptions;
     }
 }

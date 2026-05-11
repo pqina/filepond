@@ -219,6 +219,6 @@ declare module '../index.js' {
         MediaResolutionValidator: MediaResolutionValidatorOptions;
     }
     interface defineFilePondOptions {
-        MediaResolutionValidator: MediaResolutionValidatorOptions;
+        MediaResolutionValidator?: MediaResolutionValidatorOptions;
     }
 }

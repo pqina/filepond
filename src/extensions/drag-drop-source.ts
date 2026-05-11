@@ -83,6 +83,6 @@ declare module '../index.js' {
         DragDropSource: DragDropSourceOptions;
     }
     interface defineFilePondOptions {
-        DragDropSource: DragDropSourceOptions;
+        DragDropSource?: DragDropSourceOptions;
     }
 }

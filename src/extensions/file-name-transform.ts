@@ -97,6 +97,6 @@ declare module '../index.js' {
         FileNameTransform: FileNameTransformOptions;
     }
     interface defineFilePondOptions {
-        FileNameTransform: FileNameTransformOptions;
+        FileNameTransform?: FileNameTransformOptions;
     }
 }

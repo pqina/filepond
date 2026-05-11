@@ -151,20 +151,22 @@ export type PartialFilePondEntry = (
     | Partial<FilePondDataTransferEntry>
 ) & { src?: EntrySource };
 
+export type LocalePrimitive = string | boolean | number | null;
+
 export interface DynamicLocaleMap {
     /**
      * The string to use for this amount.
      *
      * 1: "1 file"
      */
-    [key: number]: string | boolean | number | null;
+    [key: number]: LocalePrimitive | undefined;
 
     /**
      * The default placeholder to use for this key.
      *
      * "{{minFiles}} files"
      */
-    else: string | boolean | number | null;
+    else?: LocalePrimitive;
 }
 
 export interface DynamicLocale {
@@ -192,9 +194,11 @@ export interface DynamicLocale {
     };
 }
 
-/** A FilePond Locale object */
+export type LocaleValue = string | DynamicLocale;
+
 export interface Locale {
-    [key: string]: string | DynamicLocale;
+    [key: string]: LocaleValue | DynamicLocaleMap;
+    [key: `unit${string}`]: DynamicLocaleMap;
 }
 
 export interface EntryListFunctions {

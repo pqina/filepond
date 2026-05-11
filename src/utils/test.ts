@@ -1,4 +1,5 @@
-import type { FilePondFileEntry, FilePondDirectoryEntry } from '../types/index.js';
+import type { FilePondFileEntry, FilePondDirectoryEntry, DynamicLocale } from '../types/index.js';
+import { hasOwnProp } from './object.js';
 
 /** Stores test results locally */
 export function createTest(test: () => boolean, requireBrowser = true) {
@@ -130,6 +131,14 @@ export function isAudioFile(value: unknown): value is File {
 
 export function isDataTransferEntry(value: any): value is FilePondFileEntry {
     return isDataTransfer(value.src);
+}
+
+export function isLocaleUnitKey(value: any): value is string {
+    return isString(value) && value.startsWith('unit');
+}
+
+export function isLocaleTemplate(value: any): value is DynamicLocale {
+    return hasOwnProp(value, 'template');
 }
 
 export function isFileEntry(value: unknown): value is FilePondFileEntry {

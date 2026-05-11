@@ -361,6 +361,6 @@ declare module '../index.js' {
         URLLoader: URLLoaderOptions;
     }
     interface defineFilePondOptions {
-        URLLoader: URLLoaderOptions;
+        URLLoader?: URLLoaderOptions;
     }
 }

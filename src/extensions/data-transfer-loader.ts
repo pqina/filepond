@@ -217,6 +217,6 @@ declare module '../index.js' {
         DataTransferLoader: DataTransferLoaderOptions;
     }
     interface defineFilePondOptions {
-        DataTransferLoader: DataTransferLoaderOptions;
+        DataTransferLoader?: DataTransferLoaderOptions;
     }
 }

@@ -266,6 +266,6 @@ declare module '../index.js' {
         FormPostStore: FormPostStoreOptions;
     }
     interface defineFilePondOptions {
-        FormPostStore: FormPostStoreOptions;
+        FormPostStore?: FormPostStoreOptions;
     }
 }

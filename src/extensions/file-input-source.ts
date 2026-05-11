@@ -105,6 +105,6 @@ declare module '../index.js' {
         FileInputSource: FileInputSourceOptions;
     }
     interface defineFilePondOptions {
-        FileInputSource: FileInputSourceOptions;
+        FileInputSource?: FileInputSourceOptions;
     }
 }

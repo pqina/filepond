@@ -281,6 +281,6 @@ declare module '../index.js' {
         ConsoleView: ConsoleViewOptions;
     }
     interface defineFilePondOptions {
-        ConsoleView: ConsoleViewOptions;
+        ConsoleView?: ConsoleViewOptions;
     }
 }

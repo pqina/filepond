@@ -1,7 +1,13 @@
 import type { Locale, DynamicLocale, DynamicLocaleMap } from '../../types/index.js';
 import { lowerCaseFirstLetter, upperCaseFirstLetter } from '../../utils/string.js';
 import { arrayRemoveFalsy } from '../../utils/array.js';
-import { isNullOrUndefined, isObject, isString } from '../../utils/test.js';
+import {
+    isLocaleUnitKey,
+    isNullOrUndefined,
+    isObject,
+    isString,
+    isLocaleTemplate,
+} from '../../utils/test.js';
 import { createDefaultIcon } from './html.js';
 import { hasOwnProp } from '../../utils/object.js';
 import { cache } from '../../utils/cache.js';
@@ -38,7 +44,7 @@ export function getObjectValueByString(selector: string, value: any) {
 }
 
 export function stringReplaceVariables(
-    label: string | DynamicLocale,
+    label: string | DynamicLocale | DynamicLocaleMap,
     data?: { [key: string]: string | number | boolean | null },
     locale: Locale = {}
 ) {
@@ -59,8 +65,8 @@ export function stringReplaceVariables(
             // A variable value can also be a key in the locale, so we'll try to find a localized representation for this value.
             let localValue = locale[value] ?? value;
 
-            // This is a unit (TODO improve)
-            if (isObject(localValue) && value.startsWith('unit')) {
+            // This is a unit
+            if (isLocaleUnitKey(value) && isObject(localValue)) {
                 const context = variable.substring(2, variable.length - 6);
                 localValue = stringReplaceVariables(
                     {
@@ -75,7 +81,7 @@ export function stringReplaceVariables(
                     },
                     data,
                     locale
-                );
+                ) as string;
             }
 
             // @ts-ignore replace each variable with values in entries object
@@ -85,26 +91,31 @@ export function stringReplaceVariables(
         return stringReplaceVariables(label, data, locale);
     }
 
-    const { variables, template } = label;
-    const res = Object.entries(variables).reduce((template, [variable, variableMapOrConfig]) => {
-        let context: string;
-        let map: DynamicLocaleMap;
-        if ('context' in variableMapOrConfig && isString(variableMapOrConfig.context)) {
-            context = variableMapOrConfig.context;
-            map = variableMapOrConfig.map;
-        } else {
-            context = variable;
-            map = variableMapOrConfig as DynamicLocaleMap;
-        }
+    if (isLocaleTemplate(label)) {
+        const { variables, template } = label;
+        const res = Object.entries(variables).reduce(
+            (template, [variable, variableMapOrConfig]) => {
+                let context: string;
+                let map: DynamicLocaleMap;
+                if ('context' in variableMapOrConfig && isString(variableMapOrConfig.context)) {
+                    context = variableMapOrConfig.context;
+                    map = variableMapOrConfig.map;
+                } else {
+                    context = variable;
+                    map = variableMapOrConfig as DynamicLocaleMap;
+                }
 
-        const dataValue = getObjectValueByString(context, data);
+                const dataValue = getObjectValueByString(context, data);
 
-        const labelValue = isNullOrUndefined(map[dataValue]) ? map.else : map[dataValue];
+                const labelValue = isNullOrUndefined(map[dataValue]) ? map.else : map[dataValue];
 
-        return template.replace(`{{${variable}}}`, `${labelValue}`);
-    }, template);
+                return template.replace(`{{${variable}}}`, `${labelValue}`);
+            },
+            template
+        );
 
-    return stringReplaceVariables(res, data, locale);
+        return stringReplaceVariables(res, data, locale);
+    }
 }
 
 export function getValueByKeyFromData(
@@ -121,7 +132,8 @@ export function statusToLabel({ code, subcode, values }: any, locale: Locale) {
 
     // get and format the label
     const labelKey = cache(statusCodeToLocaleKey, [localeCode]);
-    const hasLabel = !isNullOrUndefined(locale[labelKey]);
+    const label = locale[labelKey];
+    const hasLabel = !isNullOrUndefined(label) && (isString(label) || isLocaleTemplate(label));
 
     // if no label we don't display this status
     if (!hasLabel) {
@@ -129,7 +141,7 @@ export function statusToLabel({ code, subcode, values }: any, locale: Locale) {
     }
 
     // get label
-    return hasLabel ? stringReplaceVariables(locale[labelKey], values, locale) : undefined;
+    return hasLabel ? stringReplaceVariables(label, values, locale) : undefined;
 }
 
 export function statusToIcon(

@@ -138,6 +138,6 @@ declare module '../index.js' {
         ListSizeValidator: ListSizeValidatorOptions;
     }
     interface defineFilePondOptions {
-        ListSizeValidator: ListSizeValidatorOptions;
+        ListSizeValidator?: ListSizeValidatorOptions;
     }
 }

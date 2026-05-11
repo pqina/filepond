@@ -111,6 +111,6 @@ declare module '../index.js' {
         FileSizeValidator: FileSizeValidatorOptions;
     }
     interface defineFilePondOptions {
-        FileSizeValidator: FileSizeValidatorOptions;
+        FileSizeValidator?: FileSizeValidatorOptions;
     }
 }

@@ -126,6 +126,6 @@ declare module '../index.js' {
         CanvasLoader: CanvasLoaderOptions;
     }
     interface defineFilePondOptions {
-        CanvasLoader: CanvasLoaderOptions;
+        CanvasLoader?: CanvasLoaderOptions;
     }
 }

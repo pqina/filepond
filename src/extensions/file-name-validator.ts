@@ -78,6 +78,6 @@ declare module '../index.js' {
         FileNameValidator: FileNameValidatorOptions;
     }
     interface defineFilePondOptions {
-        FileNameValidator: FileNameValidatorOptions;
+        FileNameValidator?: FileNameValidatorOptions;
     }
 }

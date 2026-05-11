@@ -48,6 +48,6 @@ declare module '../index.js' {
         DataURLStore: DataURLStoreOptions;
     }
     interface defineFilePondOptions {
-        DataURLStore: DataURLStoreOptions;
+        DataURLStore?: DataURLStoreOptions;
     }
 }

@@ -217,6 +217,6 @@ declare module '../index.js' {
         SimulatedStore: SimulatedStoreOptions;
     }
     interface defineFilePondOptions {
-        SimulatedStore: SimulatedStoreOptions;
+        SimulatedStore?: SimulatedStoreOptions;
     }
 }

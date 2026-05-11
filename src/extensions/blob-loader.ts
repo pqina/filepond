@@ -105,6 +105,6 @@ declare module '../index.js' {
         BlobLoader: BlobLoaderOptions;
     }
     interface defineFilePondOptions {
-        BlobLoader: BlobLoaderOptions;
+        BlobLoader?: BlobLoaderOptions;
     }
 }

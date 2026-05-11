@@ -95,6 +95,6 @@ declare module '../index.js' {
         FileExtensionValidator: FileExtensionValidatorOptions;
     }
     interface defineFilePondOptions {
-        FileExtensionValidator: FileExtensionValidatorOptions;
+        FileExtensionValidator?: FileExtensionValidatorOptions;
     }
 }

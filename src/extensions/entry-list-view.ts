@@ -125,6 +125,6 @@ declare module '../index.js' {
         EntryListView: EntryListViewOptions;
     }
     interface defineFilePondOptions {
-        EntryListView: EntryListViewOptions;
+        EntryListView?: EntryListViewOptions;
     }
 }
