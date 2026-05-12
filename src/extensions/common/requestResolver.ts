@@ -13,18 +13,3 @@ export interface RequestResolverContext<Entry extends FilePondEntry = FilePondEn
 export type RequestResolver<Entry extends FilePondEntry = FilePondEntry> = (
     request: RequestResolverContext<Entry>
 ) => ResolvedRequest | void | Promise<ResolvedRequest | void>;
-
-export async function getResolvedRequest<Entry extends FilePondEntry>(
-    resolveRequest: RequestResolver<Entry>,
-    url: string,
-    options: PublicRequestOptions,
-    entry: Entry
-): Promise<ResolvedRequest> {
-    return (
-        (await resolveRequest({
-            url,
-            options,
-            entry,
-        })) ?? { url, options }
-    );
-}
