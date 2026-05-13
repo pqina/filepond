@@ -9,7 +9,8 @@ export class FilePondDropIndicatorElement extends FilePondSvelteComponentElement
         super(FilePondDropIndicatorApp, { styles: [styles, elementPaneStyles] });
     }
 
-    set indicatorRect(rect: Rect) {
+    /** Updates the current location of the drop indicator */
+    set indicatorRect(rect: Rect | null) {
         if (!this._app) {
             return;
         }

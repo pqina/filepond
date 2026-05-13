@@ -39,7 +39,21 @@ const SharedProps = ['springDefaults', 'animations'];
 // This holds the initial options object passed to `defineFilePond`, we store this value so we can assign the initialOptions to FilePond components created _after_ the first `defineFilePond` call.
 let globalInitialOptions: defineFilePondOptions | undefined;
 
-export class FilePondElement extends FilePondInputElement {
+export interface FilePondElementEvents {
+    addEventListener<K extends keyof HTMLElementEventMap>(
+        type: K | 'computerect' | 'updaterect',
+        listener: (this: FilePondElement, ev: HTMLElementEventMap[K]) => any,
+        options?: boolean | AddEventListenerOptions
+    ): void;
+}
+
+/**
+ * FilePondElement
+ *
+ * @event {CustomEvent} 'computerect' - Fired when the element rect has been computed
+ * @event {CustomEvent} 'updaterect' - Fired when the element visual rect has been updated
+ */
+export class FilePondElement extends FilePondInputElement implements FilePondElementEvents {
     // Child components
     #components: { [key: string]: any } = {};
 
@@ -49,13 +63,14 @@ export class FilePondElement extends FilePondInputElement {
     /** Holds references to event subscriptions so we can more easily unsub */
     #connectedSubs: (() => void)[] = [];
 
-    /** Pass spring and animation config to children */
+    /** Automatically passes value to child elements, for usage see `FilePondSvelteComponentElement` */
     set springDefaults(value: SpringOptions) {
         Object.values(this.#components).forEach((element) => {
             element.springDefaults = value;
         });
     }
 
+    /** Automatically passes value to child elements, for usage see `FilePondSvelteComponentElement` */
     set animations(value: AnimationMode) {
         Object.values(this.#components).forEach((element) => {
             element.animations = value;
@@ -65,27 +80,6 @@ export class FilePondElement extends FilePondInputElement {
     /** Wraps `createFilePondExtensionSet` so we always set the default extension set */
     set extensions(value: ExtensionFactory[]) {
         super.extensions = createFilePondExtensionSet(value);
-    }
-
-    /** Set to false to hide credits */
-    static get observedAttributes() {
-        return [...super.observedAttributes, 'noattribution', 'nodrop'];
-    }
-
-    attributeChangedCallback(name: string, _: string, value: string | boolean) {
-        // toggle attribution
-        if (name === 'noattribution') {
-            this.noAttribution = isString(value);
-            return;
-        }
-
-        // toggle drop
-        if (name === 'nodrop') {
-            this.noDrop = isString(value);
-            return;
-        }
-
-        super.attributeChangedCallback(name, _, value);
     }
 
     /** Set to `true` to remove drop area */
@@ -120,7 +114,16 @@ export class FilePondElement extends FilePondInputElement {
         return this.hasAttribute('nodrop');
     }
 
-    /** Set to `true` to remove the attribution link */
+    /** 
+    A programmatic way to toggle the attribution link on/off.
+
+    When set to `true` this property automatically adds the `noattribution` attribute to the `<file-pond>` element.
+
+    ```js
+    const element = document.querySelector('file-pond');
+    element.noAttribution = true;
+    ```
+    */
     set noAttribution(value: boolean) {
         if (value) {
             setBooleanAttribute(this, 'noattribution', true);
@@ -134,6 +137,26 @@ export class FilePondElement extends FilePondInputElement {
     /** Returns current noattribution state */
     get noAttribution() {
         return !this.#attributionLink?.parentNode;
+    }
+
+    static get observedAttributes() {
+        return [...super.observedAttributes, 'noattribution', 'nodrop'];
+    }
+
+    attributeChangedCallback(name: string, _: string, value: string | boolean) {
+        // toggle attribution
+        if (name === 'noattribution') {
+            this.noAttribution = isString(value);
+            return;
+        }
+
+        // toggle drop
+        if (name === 'nodrop') {
+            this.noDrop = isString(value);
+            return;
+        }
+
+        super.attributeChangedCallback(name, _, value);
     }
 
     constructor() {

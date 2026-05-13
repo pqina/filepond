@@ -5,7 +5,23 @@ import { roundPrecision } from '../../utils/math.js';
 import styles from './index.css?inline';
 import elementPaneStyles from '../components/ElementPane/index.css?inline';
 
-export class FilePondDropAreaElement extends FilePondSvelteComponentElement {
+export interface FilePondDropAreaElementEvents {
+    addEventListener<K extends keyof HTMLElementEventMap>(
+        type: K | 'updaterect',
+        listener: (this: FilePondDropAreaElement, ev: HTMLElementEventMap[K]) => any,
+        options?: boolean | AddEventListenerOptions
+    ): void;
+}
+
+/**
+ * FilePondDropAreaElement
+ *
+ * @event {CustomEvent} 'updaterect' - Fired when the drop area element rect is updated.
+ */
+export class FilePondDropAreaElement
+    extends FilePondSvelteComponentElement
+    implements FilePondDropAreaElementEvents
+{
     constructor() {
         super(FilePondDropArea, {
             styles: [styles, elementPaneStyles],
@@ -14,11 +30,6 @@ export class FilePondDropAreaElement extends FilePondSvelteComponentElement {
 
     connectedCallback() {
         super.connectedCallback();
-
-        // const didRunConnect = super.connectedCallback();
-        // if (didRunConnect === false) {
-        //     return false;
-        // }
 
         let lastHeight: number | null;
         let lastWidth: number | null;

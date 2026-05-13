@@ -22,7 +22,7 @@
 
     let { animations = 'auto', springDefaults }: FilePondSvelteComponentOptions = $props();
 
-    export function setIndicatorRect(rect: Rect) {
+    export function setIndicatorRect(rect: Rect | null) {
         // no rect so let's stop showing the placeholder indicator
         if (!rect) {
             placeholderRect = undefined;

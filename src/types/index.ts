@@ -14,6 +14,11 @@ import type { FilePondElement } from '../elements/FilePondDefault/index.js';
 
 import type { FilePondInputElement } from '../elements/FilePondInput/index.js';
 
+import type { FilePondDropAreaElement } from '../elements/FilePondDropArea/index.js';
+import type { FilePondDropIndicatorElement } from '../elements/FilePondDropIndicator/index.js';
+import type { FilePondEntryListElement } from '../elements/FilePondEntryList/index.js';
+import type { FilePondSvelteComponentElement } from '../elements/FilePondSvelteComponent/index.svelte.js';
+
 import type { Needle } from '../core/entryTree.js';
 
 import type {
@@ -36,6 +41,10 @@ export type {
     NodeContext,
     FilePondElement,
     FilePondInputElement,
+    FilePondDropAreaElement,
+    FilePondDropIndicatorElement,
+    FilePondEntryListElement,
+    FilePondSvelteComponentElement,
     Extension,
     ExtensionType,
     ExtensionInstance,

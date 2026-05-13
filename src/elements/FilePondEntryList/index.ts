@@ -108,8 +108,26 @@ const COMPONENT_METHODS = [
 
 const COMPONENT_EVENTS = ['dragentry', 'dragentrystart', 'dragentryend', 'updateplaceholder'];
 
-/** FilePond EntryList Element */
-export class FilePondEntryListElement extends FilePondSvelteComponentElement {
+export interface FilePondElementEvents {
+    addEventListener<K extends keyof HTMLElementEventMap>(
+        type: K | 'dragentrystart' | 'dragentry' | 'dragentryend' | 'updateplaceholder',
+        listener: (this: FilePondEntryListElement, ev: HTMLElementEventMap[K]) => any,
+        options?: boolean | AddEventListenerOptions
+    ): void;
+}
+
+/**
+ * FilePondEntryListElement
+ *
+ * @event {CustomEvent} 'dragentrystart' - Fired when an entry drag operation starts
+ * @event {CustomEvent} 'dragentry' - Fired when an entry is dragged
+ * @event {CustomEvent} 'dragentryend' - Fired when an entry drag operation ends
+ * @event {CustomEvent} 'updateplaceholder' - Fired when a placeholder rect is updated
+ */
+export class FilePondEntryListElement
+    extends FilePondSvelteComponentElement
+    implements FilePondElementEvents
+{
     constructor() {
         super(FilePondEntryListApp, {
             properties: COMPONENT_PROPS,

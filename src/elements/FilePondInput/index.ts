@@ -107,9 +107,9 @@ export interface FilePondInputElementEvents {
 /**
  * FilePond Custom Element Base
  *
- * @event {CustomEvent} 'change' - emitted when form value changed
- * @event {CustomEvent} 'update' - emitted when entries list updated
- * @event {CustomEvent} 'connected' - emitted when connected to the DOM
+ * @event {CustomEvent} 'change' - Fired when form value changed
+ * @event {CustomEvent} 'update' - Fired when entries list updated
+ * @event {CustomEvent} 'connected' - Fired when connected to the DOM
  */
 export class FilePondInputElement extends HTMLElementSafe implements FilePondInputElementEvents {
     /** FilePond element shadowRoot */
@@ -491,7 +491,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
     //#region Element methods
 
-    /** Browse files */
+    /** Opens the system file browser */
     browse() {
         // can only browse if browsing enabled
         if (this.noBrowse) {
@@ -503,12 +503,12 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         this.#fileInput.click();
     }
 
-    /** Listen for events */
+    /** Subscribe to internal entryTree events */
     on(type: string, handler: (...args: any[]) => void) {
         return this.#entryTree.on(type, handler);
     }
 
-    /** Add/Insert entries in the entry tree */
+    /** Add one or more entries to the end of the list or insert them at a specific index */
     insertEntries(entry: FilePondEntry | FilePondEntry[], index?: number | number[]) {
         return this.#entryTree.insertEntries(entry, index);
     }
@@ -540,10 +540,12 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         });
     }
 
+    /** Move entry from current location to new index */
     moveEntry(needle: Needle, index: number | number[]) {
         return this.#entryTree.moveEntry(needle, index);
     }
 
+    /** Replace entry with one or more entries */
     replaceEntry(needle: Needle, ...entries: FilePondEntry[]) {
         return this.#entryTree.replaceEntry(needle, ...entries);
     }
