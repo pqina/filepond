@@ -48,6 +48,7 @@ export function createEditMediaButton(options?: { action?: string }) {
                         'TRANSFORM_CANCEL',
                         'TRANSFORM_COMPLETE',
                         'TRANSFORM_BUSY',
+                        'TRANSFORM_ERROR',
                     ],
                     button: createButton('button-transform-activate', {
                         icon: 'mediaEdit',
@@ -68,6 +69,7 @@ export function createEditMediaButton(options?: { action?: string }) {
                             'STORE_QUEUED',
                             'STORE_BUSY',
                             'TRANSFORM_BUSY',
+                            'TRANSFORM_ERROR',
                         ]),
                         onclick: () =>
                             updateEntryState(id, {
@@ -249,10 +251,9 @@ export function createMediaControls(options?: {
         'entry-media-controls' + (justifyContent ? ` justify-content-${justifyContent}` : '');
     return withNodeTree({
         if: {
-            // don't render media controls if in error state
             test: ({ entry }: NodeContext) => {
                 const { media } = getMediaContextReference({ entry });
-                return media && media.isReady && !hasExtensionWithStatusType(entry, ['error']);
+                return media && media.isReady;
             },
             then: {
                 key,
