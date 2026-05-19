@@ -9,7 +9,7 @@ describe('FileSizeValidator', () => {
 
     beforeEach(function () {
         entryTree = createDefaultEntryTree();
-        extensionManager = createExtensionManager(entryTree);
+        extensionManager = createExtensionManager({ entryTree });
         extensionManager.extensions = [
             [
                 FileSizeValidator,

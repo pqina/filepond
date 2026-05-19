@@ -25,11 +25,10 @@ dist-ssr
 *.sw?
 _*.md
 
-# Various temp private folders
+# Dev files and folders
 /_*/
 /dev/
 /types/
 /esm/
 /cdn/
-/_TODO.md
 __screenshots__

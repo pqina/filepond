@@ -8,7 +8,7 @@
         AppCallbacks,
         DragState,
         DropState,
-    } from './index.js';
+    } from './types.js';
     import type { Needle, FilePondEntryListOptions } from '../../types/index.js';
     import { type Bounds } from '../../utils/bounds.js';
 
@@ -907,7 +907,7 @@
         setBooleanAttribute(root, 'data-disabled', disabled);
     });
 
-    const entryListAPI = $derived({
+    const entryListContext = $derived({
         insertEntries: callback.insertEntries,
         removeEntries: callback.removeEntries,
         updateEntry: callback.updateEntry,
@@ -1090,7 +1090,7 @@
     <NodeList
         nodes={template}
         context={{ entries: computedEntries }}
-        sharedContext={entryListAPI}
+        sharedContext={entryListContext}
         beforeRenderNode={(node, context, sharedContext) =>
             beforeRenderNode(node, context, sharedContext)}
         beforeSetProps={(props) => ({

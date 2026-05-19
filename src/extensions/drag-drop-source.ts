@@ -68,7 +68,6 @@ export const DragDropSource = createExtension({
             );
         });
 
-        // expose api
         return {
             destroy: () => {
                 removeDropListener && removeDropListener();
@@ -82,7 +81,7 @@ declare module '../index.js' {
     interface FilePondElement {
         DragDropSource: DragDropSourceOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         DragDropSource?: DragDropSourceOptions;
     }
 }

@@ -1,7 +1,7 @@
 import { getContext, setContext } from 'svelte';
 import type { EntryAnimation, FilePondEntry, Locale, SpringOptions } from '../../../types/index.js';
 import type { Rect } from '../../../utils/rect.js';
-import type { AnimatedEntry, AppCallbacks } from '../index.js';
+import type { AnimatedEntry, AppCallbacks } from '../types.js';
 
 export interface AppContext extends AppCallbacks {
     readonly enableAnimations: boolean;

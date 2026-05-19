@@ -114,7 +114,7 @@ declare module '../index.js' {
     interface FilePondElement {
         ValueCallbackStore: ValueCallbackStoreOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         ValueCallbackStore?: ValueCallbackStoreOptions;
     }
 }

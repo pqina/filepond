@@ -21,7 +21,7 @@ describe('ChunkedUploadStore', function () {
     it('should fail on invalid URL', () =>
         new Promise((done) => {
             const entryTree = createDefaultEntryTree();
-            const extensionManager = createExtensionManager(entryTree);
+            const extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     ChunkedUploadStore,
@@ -63,7 +63,7 @@ describe('ChunkedUploadStore', function () {
     it('should store a File and save server id', () =>
         new Promise((done) => {
             const entryTree = createDefaultEntryTree();
-            const extensionManager = createExtensionManager(entryTree);
+            const extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     ChunkedUploadStore,
@@ -113,7 +113,7 @@ describe('ChunkedUploadStore', function () {
         new Promise((done) => {
             const progressValues = [];
             const entryTree = createDefaultEntryTree();
-            const extensionManager = createExtensionManager(entryTree);
+            const extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     ChunkedUploadStore,
@@ -162,7 +162,7 @@ describe('ChunkedUploadStore', function () {
     it('should resolve transfer id from response', () =>
         new Promise((done) => {
             const entryTree = createDefaultEntryTree();
-            const extensionManager = createExtensionManager(entryTree);
+            const extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     ChunkedUploadStore,
@@ -226,7 +226,7 @@ describe('ChunkedUploadStore', function () {
             let completeRequestResolved = false;
             let completeResponseResolved = false;
             const entryTree = createDefaultEntryTree();
-            const extensionManager = createExtensionManager(entryTree);
+            const extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     ChunkedUploadStore,
@@ -370,7 +370,7 @@ describe('ChunkedUploadStore', function () {
     it('should resume storage of a File', () =>
         new Promise((done) => {
             const entryTree = createDefaultEntryTree();
-            const extensionManager = createExtensionManager(entryTree);
+            const extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     ChunkedUploadStore,
@@ -446,7 +446,7 @@ describe('ChunkedUploadStore', function () {
     it('should handle abort during transfer id request', () =>
         new Promise((done) => {
             const entryTree = createDefaultEntryTree();
-            const extensionManager = createExtensionManager(entryTree);
+            const extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     ChunkedUploadStore,

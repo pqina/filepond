@@ -8,7 +8,7 @@ import { isBlobOrFile, isFile, isFileEntry, isString } from '../utils/test.js';
 import { getExtensionFromFilename } from '../utils/file.js';
 
 export interface FileExtensionValidatorOptions extends ValidatorExtensionOptions {
-    /** An array of case-insensitive filename extensions, starting with a period ('.') character */
+    /** An array or string of case-insensitive filename extensions, starting with a period character, for example `.png, .jpg`, or `['.png', '.jpg']` */
     accept?: string | string[];
 
     /** Formats the extensions for presentation in a validation message */
@@ -94,7 +94,7 @@ declare module '../index.js' {
     interface FilePondElement {
         FileExtensionValidator: FileExtensionValidatorOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         FileExtensionValidator?: FileExtensionValidatorOptions;
     }
 }

@@ -1,17 +1,15 @@
-import type { FilePondFileEntry } from '../types/index.js';
-import { isFile } from '../utils/test.js';
+import type { FilePondEntry, FilePondFileEntry } from '../types/index.js';
+import { isFile, isFileEntry } from '../utils/test.js';
 import { createExtension } from './common/createExtension.js';
 
 export const ObjectURLResource = createExtension({
     name: 'ObjectURLResource',
     type: 'resource',
     props: {},
-    factory: (state, { on, getEntryExtensionState, setEntryExtensionState }) => {
-        function handleUpdateEntryData(entry: FilePondFileEntry) {
-            const { file } = entry;
-
-            // We wait for a file
-            if (!isFile(file)) {
+    factory: (_, { on, getEntryExtensionState, setEntryExtensionState }) => {
+        function handleUpdateEntryData(entry: FilePondEntry) {
+            // no can do
+            if (!isFileEntry(entry) || !isFile(entry.file)) {
                 return;
             }
 
@@ -23,16 +21,15 @@ export const ObjectURLResource = createExtension({
 
             // Update the ObjectURL
             setEntryExtensionState(entry, {
-                value: URL.createObjectURL(file),
+                value: URL.createObjectURL(entry.file),
             });
         }
 
-        function handleRemoveEntry(detail: { entry: FilePondFileEntry; index: number }) {
+        function handleRemoveEntry(detail: { entry: FilePondEntry; index: number[] }) {
             const { entry } = detail;
-            const { file } = entry;
 
-            // Need a file
-            if (!isFile(file)) {
+            // no can do
+            if (!isFileEntry(entry) || !isFile(entry.file)) {
                 return;
             }
 

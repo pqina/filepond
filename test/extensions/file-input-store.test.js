@@ -14,7 +14,7 @@ describe('FileInputStore', () => {
         input.setAttribute('type', 'file');
 
         entryTree = createDefaultEntryTree();
-        extensionManager = createExtensionManager(entryTree);
+        extensionManager = createExtensionManager({ entryTree });
         extensionManager.extensions = [
             [
                 FileInputStore,

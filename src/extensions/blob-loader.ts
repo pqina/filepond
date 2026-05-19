@@ -1,6 +1,6 @@
 import type { FilePondEntry, FilePondFileEntry } from '../types/index.js';
 import { createExtension } from './common/createExtension.js';
-import { isBlob, isFile } from '../utils/test.js';
+import { isBlob, isFile, isFileEntry } from '../utils/test.js';
 import { blobToFile } from '../utils/file.js';
 import { Status } from '../common/status.js';
 import { getBasename, getExtension, getFilename } from '../common/entry.js';
@@ -73,7 +73,7 @@ export const BlobLoader = createExtension({
         }
 
         /** Determines if we should convert blob to file */
-        function handleUpdateEntry(entry: FilePondFileEntry) {
+        function handleUpdateEntry(entry: FilePondEntry) {
             // get extension entry props to help determine what next step to take
             const status = getEntryExtensionStatus(entry);
 
@@ -81,7 +81,7 @@ export const BlobLoader = createExtension({
             const hasFailed = status?.type === 'error';
 
             // already running tasks or can't convert to file
-            if (hasFailed || !isBlob(entry.src) || isFile(entry.file)) {
+            if (hasFailed || !isFileEntry(entry) || !isBlob(entry.src) || isFile(entry.file)) {
                 return;
             }
 
@@ -104,7 +104,7 @@ declare module '../index.js' {
     interface FilePondElement {
         BlobLoader: BlobLoaderOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         BlobLoader?: BlobLoaderOptions;
     }
 }

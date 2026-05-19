@@ -211,7 +211,7 @@ declare module '../index.js' {
     interface FilePondElement {
         ImageBitmapTransform: ImageBitmapTransformOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         ImageBitmapTransform?: ImageBitmapTransformOptions;
     }
 }

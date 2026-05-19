@@ -1,6 +1,6 @@
 // TODO: fix @ts-ignore
 
-import { type SpringOptions } from '../../types/index.js';
+import type { SpringOptions } from '../../types/index.js';
 import { arrayInsertAtIndex, arrayRemoveFalsy, arrayWrap } from '../../utils/array.js';
 import { isArray, isFunction } from '../../utils/test.js';
 import { hasOwnProp } from '../../utils/object.js';
@@ -29,8 +29,7 @@ export interface BaseNode {
     };
 
     /**
-     * Automatically create springs for props, returned properties are added to context for this
-     * node
+     * Automatically create springs for props, returned properties are added to context for this node
      */
     spring?: (context: NodeContext) => {
         /** Property name to expose on context */
@@ -46,7 +45,7 @@ export interface BaseNode {
         };
     };
 
-    /** Children of this node, can be falsy children in array */
+    /** Children of this node. Falsy children are automatically filtered out */
     children?: string | TemplateNode | (TemplateNode | undefined)[];
 }
 

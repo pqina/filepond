@@ -5,7 +5,7 @@ import { roundPrecision } from '../../utils/math.js';
 import styles from './index.css?inline';
 import elementPaneStyles from '../components/ElementPane/index.css?inline';
 
-export interface FilePondDropAreaElementEvents {
+interface FilePondDropAreaElementEvents {
     addEventListener<K extends keyof HTMLElementEventMap>(
         type: K | 'updaterect',
         listener: (this: FilePondDropAreaElement, ev: HTMLElementEventMap[K]) => any,

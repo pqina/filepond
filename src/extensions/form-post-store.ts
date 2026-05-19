@@ -11,7 +11,7 @@ import { isFile, isFileEntry } from '../utils/test.js';
 import { passthrough } from '../utils/placeholder.js';
 import { xhr, getResponseHeaders, getFilenameFromResponseHeaders } from '../utils/xhr.js';
 
-import type { FilePondFileEntry } from '../types/index.js';
+import type { FilePondEntry, FilePondFileEntry } from '../types/index.js';
 import type { RequestResolverContext, ResolvedRequest } from './common/requestResolver.js';
 
 interface FormPostStoreMetadata {
@@ -26,7 +26,7 @@ type ResolvedResponseValue = string | File | FormPostStoreMetadata;
 interface ResponseResolverContext<Resolved extends ResolvedResponseValue = ResolvedResponseValue> {
     value: Resolved;
     response: XHRResponse;
-    entry: FilePondFileEntry;
+    entry: FilePondEntry;
 }
 
 type ResponseResolver<Resolved extends ResolvedResponseValue> = (
@@ -34,7 +34,7 @@ type ResponseResolver<Resolved extends ResolvedResponseValue> = (
 ) => Resolved;
 
 type RequestResolver = (
-    request: RequestResolverContext<FilePondFileEntry>
+    request: RequestResolverContext<FilePondEntry>
 ) => ResolvedRequest | Promise<ResolvedRequest>;
 
 export interface FormPostStoreOptions extends StoreExtensionOptions {
@@ -215,7 +215,7 @@ export const FormPostStore = createStoreExtension({
                     // else read from response headers
                     getFilenameFromResponseHeaders(getResponseHeaders(requestResponse)) ||
                     // else fall back
-                    getBasename(entry, blob as Blob)
+                    getBasename(entry as FilePondFileEntry, blob as Blob)
             );
 
             // return a file object
@@ -265,7 +265,7 @@ declare module '../index.js' {
     interface FilePondElement {
         FormPostStore: FormPostStoreOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         FormPostStore?: FormPostStoreOptions;
     }
 }

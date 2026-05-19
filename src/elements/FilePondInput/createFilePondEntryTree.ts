@@ -1,17 +1,14 @@
 import type {
+    EntrySource,
     FilePondDataTransferEntry,
     FilePondDirectoryEntry,
     FilePondFileEntry,
 } from '../../types/index.js';
-import type {
-    FilePondEntrySource,
-    PartialFilePondEntry,
-    FilePondEntry,
-} from '../../types/index.js';
+import type { FilePondEntrySource, FilePondEntry } from '../../types/index.js';
 import type { ExtensionStatus } from '../../extensions/common/createExtension.js';
 
 // import modules
-import { createEntryTree, type EntryTreeOptions } from '../../core/entryTree.js';
+import { createEntryTree, type CreateEntryTreeOptions } from '../../core/entryTree.js';
 import {
     isFile,
     isFileEntry,
@@ -26,12 +23,18 @@ import {
 import { copyFilePropsToObject } from '../../utils/file.js';
 import { getFilenameFromURL } from '../../utils/url.js';
 
-export type createFilePondEntryTreeOptions = Omit<
-    EntryTreeOptions,
+type PartialFilePondEntry = (
+    | Partial<FilePondDirectoryEntry>
+    | Partial<FilePondFileEntry>
+    | Partial<FilePondDataTransferEntry>
+) & { src?: EntrySource };
+
+export type CreateFilePondEntryTreeOptions = Omit<
+    CreateEntryTreeOptions,
     'beforeOnboardEntry' | 'beforeUpdateEntryWithProps'
 >;
 
-export function createFilePondEntryTree(options?: createFilePondEntryTreeOptions) {
+export function createFilePondEntryTree(options?: CreateFilePondEntryTreeOptions) {
     const { beforeInsertEntries } = options || {};
     return createEntryTree({
         // allows limiting the total entries added

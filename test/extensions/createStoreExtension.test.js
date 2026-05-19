@@ -50,7 +50,7 @@ describe('createStoreExtension', () => {
             },
         });
 
-        extensionManager = createExtensionManager(entryTree);
+        extensionManager = createExtensionManager({ entryTree });
         extensionManager.extensions = [TestStore];
     });
 

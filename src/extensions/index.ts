@@ -3,46 +3,17 @@ export { createExtension } from './common/createExtension.js';
 export {
     createValidatorExtension,
     type CreateValidatorExtensionOptions,
-    type ValidationResultInvalid,
-    type ValidatorExtensionCanValidateFunction,
-    type ValidatorExtensionFunctions,
-    type ValidatorExtensionOptions,
-    type ValidatorExtensionResolvedProps,
-    type ValidatorExtensionState,
-    type ValidatorExtensionValidateFunction,
-    type ValidatorFactory,
 } from './common/createValidatorExtension.js';
 
 export {
     createStoreExtension,
-    type CreateStoreExtensionOptions,
     type PerceivedPerformanceOptions,
-    type StoreExtensionFunctions,
-    type StoreExtensionFunctionOptions,
-    type StoreExtensionOptions,
-    type StoreExtensionReleaseFunction,
-    type StoreExtensionResolvedOptions,
-    type StoreExtensionResolvedProps,
-    type StoreExtensionRestoreFunction,
-    type StoreExtensionState,
-    type StoreExtensionStoreFunction,
-    type StoreFactory,
+    type CreateStoreExtensionOptions,
 } from './common/createStoreExtension.js';
 
 export {
     createTransformExtension,
     type CreateTransformExtensionOptions,
-    type TransformExtensionCanTransformFunction,
-    type TransformExtensionFunctionOptions,
-    type TransformExtensionFunctions,
-    type TransformExtensionOptions,
-    type TransformExtensionPrepareFunction,
-    type TransformExtensionResolvedOptions,
-    type TransformExtensionResolvedProps,
-    type TransformExtensionResult,
-    type TransformExtensionState,
-    type TransformExtensionTransformFunction,
-    type TransformFactory,
 } from './common/createTransformExtension.js';
 
 // sources

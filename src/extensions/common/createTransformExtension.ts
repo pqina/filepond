@@ -1,4 +1,4 @@
-import type { Extension, ExtensionAPI, ExtensionOptions } from './createExtension.js';
+import type { Extension, ExtensionContext, ExtensionOptions } from './createExtension.js';
 import type { FilePondEntry, FilePondFileEntry, Progress } from '../../types/index.js';
 
 import { createExtension } from './createExtension.js';
@@ -14,7 +14,7 @@ import { Status } from '../../common/status.js';
 import { didAbort } from '../../utils/abort.js';
 import type { TaskFnOptions } from '../../core/taskScheduler.js';
 
-export type TransformExtensionResolvedOptions = TransformExtensionOptions & {
+type TransformExtensionResolvedOptions = TransformExtensionOptions & {
     /** Action to run to trigger this extension */
     actionTransform: string;
 
@@ -31,26 +31,26 @@ export type TransformExtensionResolvedOptions = TransformExtensionOptions & {
     filterEntry: (entry: FilePondEntry) => Promise<boolean> | boolean;
 };
 
-export type TransformExtensionResolvedProps<Props extends object = TransformExtensionOptions> =
+type TransformExtensionResolvedProps<Props extends object = TransformExtensionOptions> =
     TransformExtensionResolvedOptions & Required<Props>;
 
-export interface TransformExtensionState<Props extends object = TransformExtensionOptions>
+interface TransformExtensionState<Props extends object = TransformExtensionOptions>
     extends Omit<ExtensionOptions, 'props' | 'didSetProps'> {
     props: TransformExtensionResolvedProps<Props>;
     didSetProps: (cb: (props: TransformExtensionResolvedProps<Props>) => void) => void;
 }
 
-export type TransformFactory<Props extends object = TransformExtensionOptions> = (
+type TransformFactory<Props extends object = TransformExtensionOptions> = (
     instance: TransformExtensionState<Props>,
-    api: ExtensionAPI
+    api: ExtensionContext
 ) => TransformExtensionFunctions;
 
-export interface TransformExtensionFunctionOptions {
+interface TransformExtensionFunctionOptions {
     signal: AbortSignal;
     onprogress: (e: Progress) => void;
 }
 
-export type TransformExtensionResult = { file: File; history?: any[] } | File | undefined | null;
+type TransformExtensionResult = { file: File; history?: any[] } | File | undefined | null;
 
 export type TransformExtensionCanTransformFunction = (
     entry: FilePondEntry
@@ -66,7 +66,7 @@ export type TransformExtensionTransformFunction = (
     options: TransformExtensionFunctionOptions
 ) => Promise<TransformExtensionResult> | TransformExtensionResult;
 
-export interface TransformExtensionFunctions {
+interface TransformExtensionFunctions {
     /** Determines if we even can transform this entry */
     canTransformEntry?: TransformExtensionCanTransformFunction;
 
@@ -99,8 +99,13 @@ export interface TransformExtensionOptions {
 }
 
 export interface CreateTransformExtensionOptions<Props extends object = TransformExtensionOptions> {
+    /** The name of the extension */
     name: string;
+
+    /** The default properties available to this extension */
     props: Props & Partial<TransformExtensionOptions>;
+
+    /** The factory function that runs when the extension is created */
     factory: TransformFactory<Props>;
 }
 
@@ -390,16 +395,16 @@ export function createTransformExtension<Props extends object = TransformExtensi
                 });
             }
 
-            async function handleUpdateEntryData(entry: FilePondFileEntry) {
+            async function handleUpdateEntryData(entry: FilePondEntry) {
+                // no file data
+                if (!isFileEntry(entry) || !isFile(entry.file)) {
+                    return;
+                }
+
                 const { actionTransform, shouldTransform } = props;
 
                 // get quick refs to relevant props
                 const { file } = entry;
-
-                // no file no data
-                if (!isFile(file)) {
-                    return;
-                }
 
                 // transform action
                 const transform = isNullOrUndefined(entry.state[actionTransform])
@@ -451,8 +456,13 @@ export function createTransformExtension<Props extends object = TransformExtensi
                 });
             }
 
-            async function handleUpdateEntry(entry: FilePondFileEntry) {
+            async function handleUpdateEntry(entry: FilePondEntry) {
                 const { actionTransform, actionLoad, parallel, shouldTransform } = props;
+
+                // can only transform files
+                if (!isFileEntry(entry)) {
+                    return;
+                }
 
                 // get props to help determine what next step to take
                 const { canTransform = null, input } = getEntryExtensionState(entry);

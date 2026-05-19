@@ -1,13 +1,13 @@
 import {
     createValidatorExtension,
     type ValidatorExtensionCanValidateFunction,
-    type ValidatorExtensionOptions,
+    type CreateValidatorExtensionOptions,
     type ValidatorExtensionValidateFunction,
 } from './common/createValidatorExtension.js';
 import { isFile, isFileEntry, isImageFile, isVideoFile } from '../utils/test.js';
 import { getMediaSize } from '../utils/media.js';
 
-export interface MediaResolutionValidatorOptions extends ValidatorExtensionOptions {
+export interface MediaResolutionValidatorOptions extends CreateValidatorExtensionOptions {
     /** Min media width. Defaults to `1` */
     minWidth?: number;
 
@@ -218,7 +218,7 @@ declare module '../index.js' {
     interface FilePondElement {
         MediaResolutionValidator: MediaResolutionValidatorOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         MediaResolutionValidator?: MediaResolutionValidatorOptions;
     }
 }

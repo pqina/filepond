@@ -1,5 +1,5 @@
 import { getContext, setContext } from 'svelte';
-import type { DragState } from '../index.js';
+import type { DragState } from '../types.js';
 
 const key = {};
 

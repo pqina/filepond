@@ -7,7 +7,7 @@ import {
     createExtensionManager,
     type ExtensionManagerInstance,
 } from '../../core/extensionManager.js';
-import { createEntryTree, type Needle } from '../../core/entryTree.js';
+import { createEntryTree, type EntryTreeOn, type Needle } from '../../core/entryTree.js';
 import {
     h,
     getAttribute,
@@ -96,7 +96,7 @@ const InteractionAttributes = ['disabled', 'accept', 'capture', 'webkitdirectory
 // these attributes when set on the custom element have their boolean values (which read as '') auto-converted to `true`
 const BooleanAttributes = ['disabled', 'required', 'webkitdirectory'];
 
-export interface FilePondInputElementEvents {
+interface FilePondInputElementEvents {
     addEventListener<K extends keyof HTMLElementEventMap>(
         type: K | 'change' | 'update' | 'connected',
         listener: (this: FilePondInputElement, ev: HTMLElementEventMap[K]) => any,
@@ -504,9 +504,9 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     }
 
     /** Subscribe to internal entryTree events */
-    on(type: string, handler: (...args: any[]) => void) {
+    on: EntryTreeOn = (type, handler) => {
         return this.#entryTree.on(type, handler);
-    }
+    };
 
     /** Add one or more entries to the end of the list or insert them at a specific index */
     insertEntries(entry: FilePondEntry | FilePondEntry[], index?: number | number[]) {
@@ -612,7 +612,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         });
 
         // create the core file manager and make sure we can store results in the custom element
-        this.#extensionManager = createExtensionManager(this.#entryTree);
+        this.#extensionManager = createExtensionManager({ entryTree: this.#entryTree });
 
         // we need to know when extension names change so we can add getters and setters on the custom element dynamically
         this.#extensionManager.on('setExtensions', ({ extensionNames }) => {

@@ -15,7 +15,7 @@ describe('URLLoader', function () {
         globalThis.XMLHttpRequest = mockXhr;
 
         entryTree = createDefaultEntryTree();
-        extensionManager = createExtensionManager(entryTree);
+        extensionManager = createExtensionManager({ entryTree });
 
         extensionManager.extensions = [
             [

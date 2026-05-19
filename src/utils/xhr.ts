@@ -3,19 +3,13 @@ import { toURL } from './url.js';
 import { noop } from './placeholder.js';
 import { createThreadWorker, thread } from './thread.js';
 import { arrayRemoveFalsy } from './array.js';
-import { httpRequest, type RequestResponse } from '../workers/httpRequest.js';
+import { httpRequest, type HttpRequestResponse } from '../workers/httpRequest.js';
+import type { RequestOptions } from '../types/index.js';
 
-interface XHROptions {
+interface XHROptions extends RequestOptions {
     signal?: AbortSignal;
-    data?: any;
-    formData?: ([string, string] | [string, File] | [string, File, string])[];
-    queryString?: { [key: string]: string | number };
-    headers?: { [key: string]: string | number };
-    method?: 'GET' | 'POST' | 'HEAD' | 'PUT' | 'DELETE' | 'PATCH';
     responseType?: XMLHttpRequestResponseType;
     onprogress?: (e: ProgressEvent) => void;
-    withCredentials?: boolean;
-    timeout?: number;
     useWebWorkers?: boolean;
     workersURL?: URL;
 }
@@ -57,10 +51,10 @@ export function xhr(url: string, options?: XHROptions): Promise<XHRResponse> {
 
     const requestOptions = { onprogress, signal };
 
-    function xhrResponse(request: Promise<RequestResponse>): Promise<XHRResponse> {
+    function xhrResponse(request: Promise<HttpRequestResponse>): Promise<XHRResponse> {
         return new Promise((resolve, reject) => {
             request
-                .then((res: RequestResponse) => {
+                .then((res: HttpRequestResponse) => {
                     resolve({
                         getAllResponseHeaders: () => {
                             return res.responseHeaders;
@@ -90,7 +84,7 @@ export function xhr(url: string, options?: XHROptions): Promise<XHRResponse> {
                         reject(err === signal?.reason ? err : new Error(`${err}`));
                         return;
                     }
-                    resolve(response as RequestResponse);
+                    resolve(response as HttpRequestResponse);
                 },
                 requestOptions
             )

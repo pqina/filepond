@@ -67,7 +67,7 @@
     const durationStr = $derived(isNumber(duration) ? toTime(duration) : undefined);
     const durationStrISO = $derived(isNumber(duration) ? `${duration}S` : undefined);
 
-    /* Public API */
+    /* Public methods */
     export function togglePlayback() {
         if (!videoElement) {
             return;

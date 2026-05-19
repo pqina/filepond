@@ -1,5 +1,5 @@
 import { getContext, setContext } from 'svelte';
-import type { DropState } from '../index.js';
+import type { DropState } from '../types.js';
 
 const key = {};
 

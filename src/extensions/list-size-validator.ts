@@ -137,7 +137,7 @@ declare module '../index.js' {
     interface FilePondElement {
         ListSizeValidator: ListSizeValidatorOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         ListSizeValidator?: ListSizeValidatorOptions;
     }
 }

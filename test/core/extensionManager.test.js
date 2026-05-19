@@ -1,6 +1,7 @@
 import { it, describe, expect, beforeEach } from 'vitest';
 import { createExtensionManager } from '../../src/core/extensionManager.js';
 import { createExtension } from '../../src/extensions/common/createExtension.js';
+import { createEntryTree } from '../../src/core/entryTree.js';
 
 describe('extensionManager', function () {
     let extensionManager;
@@ -23,10 +24,7 @@ describe('extensionManager', function () {
 
     beforeEach(() => {
         extensionManager = createExtensionManager({
-            on: () => {
-                return () => {};
-            },
-            entries: [],
+            entryTree: createEntryTree(),
         });
     });
 

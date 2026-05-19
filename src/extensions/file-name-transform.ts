@@ -1,7 +1,7 @@
-import type { FilePondFileEntry } from '../types/index.js';
+import type { FilePondEntry } from '../types/index.js';
 import {
     createTransformExtension,
-    type TransformExtensionOptions,
+    type CreateTransformExtensionOptions,
     type TransformExtensionTransformFunction,
 } from './common/createTransformExtension.js';
 
@@ -14,7 +14,7 @@ import {
     updateFilename,
 } from '../utils/file.js';
 
-export interface FileNameTransformOptions extends TransformExtensionOptions {
+export interface FileNameTransformOptions extends CreateTransformExtensionOptions {
     /** Action name to use for rename. Defaults to `'renameFile'` */
     actionTransform?: string;
 
@@ -23,7 +23,7 @@ export interface FileNameTransformOptions extends TransformExtensionOptions {
 
     /** Allows requesting a new filename. */
     renameEntry?: (
-        entry: FilePondFileEntry,
+        entry: FilePondEntry,
         options: { basename: string; extension: string; history: string[] }
     ) => Promise<string>;
 }
@@ -96,7 +96,7 @@ declare module '../index.js' {
     interface FilePondElement {
         FileNameTransform: FileNameTransformOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         FileNameTransform?: FileNameTransformOptions;
     }
 }

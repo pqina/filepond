@@ -11,7 +11,7 @@ import {
     getDefaultSpringOptions,
 } from '../FilePondEntryList/index.js';
 
-import { type EntryListViewOptions } from '../../extensions/entry-list-view.js';
+import type { EntryListViewOptions } from '../../extensions/entry-list-view.js';
 
 import {
     h,
@@ -37,9 +37,9 @@ import { createFilePondExtensionSet } from './createFilePondExtensionSet.js';
 const SharedProps = ['springDefaults', 'animations'];
 
 // This holds the initial options object passed to `defineFilePond`, we store this value so we can assign the initialOptions to FilePond components created _after_ the first `defineFilePond` call.
-let globalInitialOptions: defineFilePondOptions | undefined;
+let globalInitialOptions: DefineFilePondOptions | undefined;
 
-export interface FilePondElementEvents {
+interface FilePondElementEvents {
     addEventListener<K extends keyof HTMLElementEventMap>(
         type: K | 'computerect' | 'updaterect',
         listener: (this: FilePondElement, ev: HTMLElementEventMap[K]) => any,
@@ -354,7 +354,7 @@ function createAttributionLink(options?: { caption: string }) {
     }) as HTMLAnchorElement;
 }
 
-export interface defineFilePondOptions {
+export interface DefineFilePondOptions {
     /** Initial locale to use */
     locale?: Locale;
 
@@ -373,7 +373,7 @@ export interface defineFilePondOptions {
  * returns an array of `<file-pond>` components on the page at time of registration
  * @param initialOptions - The initial options to pass to the FilePond components
  */
-export function defineFilePond(initialOptions?: defineFilePondOptions): FilePondElement[] {
+export function defineFilePond(initialOptions?: DefineFilePondOptions): FilePondElement[] {
     const tag = 'file-pond';
 
     // remember these options

@@ -2,7 +2,7 @@ import { warn } from '../../common/console.js';
 import { copyDescriptors, isObjectValuesEqual } from '../../utils/object.js';
 import { isObject, isString } from '../../utils/test.js';
 
-import type { ExtensionManagerAPI } from '../../core/extensionManager.js';
+import type { ExtensionManagerContext } from '../../core/extensionManager.js';
 import type { FilePondEntry, Progress } from '../../types/index.js';
 
 type EmptyObject = Record<PropertyKey, never>;
@@ -21,11 +21,21 @@ export interface ExtensionState {
 export type ExtensionStatusType = 'error' | 'warning' | 'success' | 'info' | 'system';
 
 export interface ExtensionStatus {
+    /** Type of status */
     type: ExtensionStatusType;
+    /** The current status code */
     code: string;
+
+    /** An optional subscode (used in validation extensions) */
     subcode?: string;
-    values?: { [key: string]: any } | null;
+
+    /** Optional progress between `0` and `1` */
     progress?: number | null;
+
+    /** Optional values to pass to use in locale label */
+    values?: { [key: string]: any } | null;
+
+    /** Metadata not for use in locale labels */
     meta?: { [key: string]: any } | null;
 }
 
@@ -36,7 +46,7 @@ export interface ExtensionOptions {
     extensionType: ExtensionType;
 }
 
-export interface ExtensionAPI extends ExtensionManagerAPI {
+export interface ExtensionContext extends ExtensionManagerContext {
     // update entry extension state
     getEntryExtensionState: (entry: FilePondEntry) => { [key: string]: any };
     setEntryExtensionState: (entry: FilePondEntry, state: { [key: string]: any }) => void;
@@ -49,20 +59,20 @@ export interface ExtensionAPI extends ExtensionManagerAPI {
 
 export type ExtensionFactoryFunction = (
     instance: ExtensionOptions,
-    api: ExtensionAPI
+    context: ExtensionContext
 ) => { destroy: () => void };
 
 export interface ExtensionInstance {
     /** Extension name */
     get name(): string;
 
-    /** Current props */
+    /** Returns the current props */
     getProps: () => { [key: string]: any };
 
-    /** New props */
+    /** Sets new props */
     setProps: (newProps: { [key: string]: any }) => void;
 
-    /** Clean up extension */
+    /** Cleans up the extension */
     destroy: () => void;
 }
 
@@ -75,22 +85,29 @@ export type ExtensionType =
     | 'view'
     | 'store';
 
-export type Extension = ((pond: ExtensionManagerAPI) => ExtensionInstance) & {
+export type Extension = ((pond: ExtensionManagerContext) => ExtensionInstance) & {
     readonly name: string;
     readonly type: ExtensionType;
 };
 
 export interface CreateExtensionOptions {
+    /** The name of the extension */
     name: string;
+
+    /** The type of the extension */
     type: ExtensionType;
+
+    /** The default properties available to this extension */
     props: any;
+
+    /** The factory function that runs when the extension is created */
     factory: ExtensionFactoryFunction;
 }
 
 export function createExtension(options: CreateExtensionOptions): Extension {
     const { name, type, props, factory } = options || ({} as CreateExtensionOptions);
 
-    const fn = (pond: ExtensionManagerAPI): ExtensionInstance => {
+    const fn = (pond: ExtensionManagerContext): ExtensionInstance => {
         if (!isString(name) || !name) {
             warn('Extension name missing or invalid');
         }
@@ -163,7 +180,7 @@ export function createExtension(options: CreateExtensionOptions): Extension {
                 extensionType: type,
             },
             {
-                // merge extension manager with extension api
+                // merge extension manager with extension context
                 ...pond,
                 getEntryExtensionState,
                 setEntryExtensionState,

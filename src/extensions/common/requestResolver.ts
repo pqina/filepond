@@ -1,8 +1,8 @@
-import type { FilePondEntry, PublicRequestOptions } from '../../types/index.js';
+import type { FilePondEntry, RequestOptions } from '../../types/index.js';
 
 export interface ResolvedRequest {
     url: string;
-    options: PublicRequestOptions;
+    options: RequestOptions;
 }
 
 export interface RequestResolverContext<Entry extends FilePondEntry = FilePondEntry>

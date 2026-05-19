@@ -97,7 +97,6 @@ export const EntryListView = createExtension({
         const unsubRemoveEntry = on('removeEntry', handleRemoveEntry);
         const unsubUpdateEntries = on('updateEntries', handleUpdateEntries);
 
-        // api
         return {
             destroy() {
                 if (unsubConnectListener) {
@@ -124,7 +123,7 @@ declare module '../index.js' {
     interface FilePondElement {
         EntryListView: EntryListViewOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         EntryListView?: EntryListViewOptions;
     }
 }

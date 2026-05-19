@@ -1,4 +1,4 @@
-import type { Extension, ExtensionAPI, ExtensionOptions } from './createExtension.js';
+import type { Extension, ExtensionContext, ExtensionOptions } from './createExtension.js';
 import type { FilePondEntry, FilePondFileEntry } from '../../types/index.js';
 import type { TaskFnOptions } from '../../core/taskScheduler.js';
 
@@ -9,7 +9,7 @@ import { debounce } from '../../utils/debounce.js';
 import { createPerceivedPerformanceProxy } from '../../common/perceivedPerformanceProxy.js';
 import { didAbort } from '../../utils/abort.js';
 
-export type StoreExtensionResolvedOptions = StoreExtensionOptions & {
+type StoreExtensionResolvedOptions = StoreExtensionOptions & {
     /** If an upload is really fast, will show simulated progress to instill confidence in upload */
     perceivedPerformance: boolean | PerceivedPerformanceOptions | null;
 
@@ -29,25 +29,25 @@ export type StoreExtensionResolvedOptions = StoreExtensionOptions & {
     actionAbort: string;
 };
 
-export type StoreExtensionResolvedProps<Props extends object = StoreExtensionOptions> =
+type StoreExtensionResolvedProps<Props extends object = StoreExtensionOptions> =
     StoreExtensionResolvedOptions & Required<Props>;
 
-export interface StoreExtensionState<Props extends object = StoreExtensionOptions>
+interface StoreExtensionState<Props extends object = StoreExtensionOptions>
     extends Omit<ExtensionOptions, 'props' | 'didSetProps'> {
     props: StoreExtensionResolvedProps<Props>;
     didSetProps: (cb: (props: StoreExtensionResolvedProps<Props>) => void) => void;
 }
 
-export type StoreFactory<Props extends object = StoreExtensionOptions> = (
+type StoreFactory<Props extends object = StoreExtensionOptions> = (
     instance: StoreExtensionState<Props>,
-    api: ExtensionAPI
+    api: ExtensionContext
 ) => StoreExtensionFunctions;
 
 export interface StoreExtensionFunctionOptions extends TaskFnOptions {
     onprogress: (e: ProgressEvent) => void;
 }
 
-export interface StoreExtensionFunctions {
+interface StoreExtensionFunctions {
     storeEntry: StoreExtensionStoreFunction;
     restoreEntry?: StoreExtensionRestoreFunction;
     releaseEntry?: StoreExtensionReleaseFunction;
@@ -91,19 +91,19 @@ export interface StoreExtensionOptions {
 }
 
 export type StoreExtensionStoreFunction = (
-    entry: FilePondFileEntry,
+    entry: FilePondEntry,
     options: StoreExtensionFunctionOptions
 ) => Promise<string | boolean | void>;
 
 export type StoreExtensionRestoreFunction = (
     storageId: string,
-    entry: FilePondFileEntry,
+    entry: FilePondEntry,
     options: StoreExtensionFunctionOptions
 ) => Promise<File | void>;
 
 export type StoreExtensionReleaseFunction = (
     storageId: string,
-    entry: FilePondFileEntry,
+    entry: FilePondEntry,
     options?: TaskFnOptions
 ) => Promise<boolean | void>;
 
@@ -123,8 +123,13 @@ export interface PerceivedPerformanceOptions {
 }
 
 export interface CreateStoreExtensionOptions<Props extends object = StoreExtensionOptions> {
+    /** The name of the extension */
     name: string;
+
+    /** The default properties available to this extension */
     props: Props & Partial<StoreExtensionOptions>;
+
+    /** The factory function that runs when the extension is created */
     factory: StoreFactory<Props>;
 }
 
@@ -455,7 +460,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
             }
 
             /** Releases an entry on file removal */
-            async function handleRemoveEntry(detail: { entry: FilePondFileEntry; index: number }) {
+            async function handleRemoveEntry(detail: { entry: FilePondEntry; index: number[] }) {
                 const { valueKey } = props;
                 const { entry } = detail;
 

@@ -10,7 +10,7 @@ describe('BlobLoader', () => {
 
     beforeEach(() => {
         entryTree = createDefaultEntryTree();
-        extensionManager = createExtensionManager(entryTree);
+        extensionManager = createExtensionManager({ entryTree });
         extensionManager.extensions = [BlobLoader];
     });
 

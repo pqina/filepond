@@ -5,7 +5,7 @@ import { Status } from './status.js';
 
 type MimeTypeMap = { [extension: string]: string };
 
-interface getFilenameOptions {
+interface GetFilenameOptions {
     getBasename: (entry: FilePondEntry, blob: Blob) => string;
     getExtension: (
         entry: FilePondEntry,
@@ -27,7 +27,7 @@ export function getExtension(
     return getExtensionFromMimeType(blob.type, options.mimeTypeMap);
 }
 
-export function getFilename(entry: FilePondEntry, blob: Blob, options: getFilenameOptions) {
+export function getFilename(entry: FilePondEntry, blob: Blob, options: GetFilenameOptions) {
     const basename = (options.getBasename ?? getBasename)(entry, blob);
     const extension = (options.getExtension ?? getExtension)(entry, blob, {
         mimeTypeMap: options.mimeTypeMap,

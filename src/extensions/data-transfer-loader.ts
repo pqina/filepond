@@ -1,9 +1,9 @@
-import type { FilePondFileEntry } from '../types/index.js';
+import type { FilePondEntry, FilePondFileEntry } from '../types/index.js';
 import type { PerceivedPerformanceOptions } from './common/createStoreExtension.ts';
 
 import { createExtension } from './common/createExtension.js';
 import { didAbort } from '../utils/abort.js';
-import { isDataTransfer, isDirectoryEntry } from '../utils/test.js';
+import { isDataTransfer, isDirectoryEntry, isFileEntry } from '../utils/test.js';
 import { Status } from '../common/status.js';
 import {
     dataTransferToFiles,
@@ -173,7 +173,7 @@ export const DataTransferLoader = createExtension({
             replaceEntry(entry, entries);
         }
 
-        function handleUpdateEntry(entry: FilePondFileEntry) {
+        function handleUpdateEntry(entry: FilePondEntry) {
             // get extension entry props to help determine what next step to take
             const status = getEntryExtensionStatus(entry);
 
@@ -181,7 +181,7 @@ export const DataTransferLoader = createExtension({
             const hasFailed = status?.type === 'error';
 
             // already running tasks or can't convert to file
-            if (hasFailed || !isDataTransfer(entry.src)) {
+            if (hasFailed || !isFileEntry(entry) || !isDataTransfer(entry.src)) {
                 return;
             }
 
@@ -216,7 +216,7 @@ declare module '../index.js' {
     interface FilePondElement {
         DataTransferLoader: DataTransferLoaderOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         DataTransferLoader?: DataTransferLoaderOptions;
     }
 }

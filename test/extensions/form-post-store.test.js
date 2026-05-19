@@ -22,7 +22,7 @@ describe('FormPostStore', function () {
     it('should fail on invalid URL', () =>
         new Promise((done) => {
             const entryTree = createDefaultEntryTree();
-            const extensionManager = createExtensionManager(entryTree);
+            const extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     FormPostStore,
@@ -63,7 +63,7 @@ describe('FormPostStore', function () {
     it('should store a file and save server id', () =>
         new Promise((done) => {
             const entryTree = createDefaultEntryTree();
-            const extensionManager = createExtensionManager(entryTree);
+            const extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     FormPostStore,
@@ -107,7 +107,7 @@ describe('FormPostStore', function () {
     it('should store a file and metadata', () =>
         new Promise((done) => {
             const entryTree = createDefaultEntryTree();
-            const extensionManager = createExtensionManager(entryTree);
+            const extensionManager = createExtensionManager({ entryTree });
 
             extensionManager.extensions = [
                 [
@@ -173,7 +173,7 @@ describe('FormPostStore', function () {
     it('should attempt to store a file and abort', () =>
         new Promise((done) => {
             const entryTree = createDefaultEntryTree();
-            const extensionManager = createExtensionManager(entryTree);
+            const extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     FormPostStore,
@@ -220,7 +220,7 @@ describe('FormPostStore', function () {
     it('should correctly show state of already stored file', () =>
         new Promise((done) => {
             const entryTree = createDefaultEntryTree();
-            const extensionManager = createExtensionManager(entryTree);
+            const extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     FormPostStore,
@@ -259,7 +259,7 @@ describe('FormPostStore', function () {
     it('should revert store of a stored file', () =>
         new Promise((done) => {
             const entryTree = createDefaultEntryTree();
-            const extensionManager = createExtensionManager(entryTree);
+            const extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     FormPostStore,
@@ -310,7 +310,7 @@ describe('FormPostStore', function () {
     it('should restore a stored file when load set to true', () =>
         new Promise((done) => {
             const entryTree = createDefaultEntryTree();
-            const extensionManager = createExtensionManager(entryTree);
+            const extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     FormPostStore,
@@ -367,7 +367,7 @@ describe('FormPostStore', function () {
     it('should resolve metadata request and response when restoring a stored file', () =>
         new Promise((done) => {
             const entryTree = createDefaultEntryTree();
-            const extensionManager = createExtensionManager(entryTree);
+            const extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     FormPostStore,

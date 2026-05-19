@@ -1,14 +1,14 @@
 import {
     createValidatorExtension,
     type ValidatorExtensionCanValidateFunction,
-    type ValidatorExtensionOptions,
+    type CreateValidatorExtensionOptions,
     type ValidatorExtensionValidateFunction,
 } from './common/createValidatorExtension.js';
 import { isBlobOrFile, isFile, isFileEntry, isFunction } from '../utils/test.js';
 import { getFilenameWithoutExtension } from '../utils/file.js';
 import { warn } from '../common/console.js';
 
-export interface FileNameValidatorOptions extends ValidatorExtensionOptions {
+export interface FileNameValidatorOptions extends CreateValidatorExtensionOptions {
     /** A function that tests if the name is valid */
     test: (name: string) => boolean;
 }
@@ -77,7 +77,7 @@ declare module '../index.js' {
     interface FilePondElement {
         FileNameValidator: FileNameValidatorOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         FileNameValidator?: FileNameValidatorOptions;
     }
 }

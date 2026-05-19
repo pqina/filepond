@@ -1,4 +1,4 @@
-export interface RequestParams {
+export interface HttpRequestParams {
     url: string;
     method: string | undefined;
     responseType: XMLHttpRequestResponseType | undefined;
@@ -9,12 +9,12 @@ export interface RequestParams {
     withCredentials: boolean | undefined;
 }
 
-export interface RequestResponse {
+export interface HttpRequestResponse {
     response: string;
     responseHeaders: string;
 }
 
-export interface RequestOptions {
+export interface HttpRequestOptions {
     signal?: AbortSignal;
     onprogress: (e: ProgressEvent) => void;
 }
@@ -29,9 +29,13 @@ export function httpRequest(
         timeout = 0,
         withCredentials = false,
         responseType = 'text',
-    }: RequestParams,
-    cb: (error: unknown | null, response?: RequestResponse, transferList?: Transferable[]) => void,
-    { onprogress, signal }: RequestOptions
+    }: HttpRequestParams,
+    cb: (
+        error: unknown | null,
+        response?: HttpRequestResponse,
+        transferList?: Transferable[]
+    ) => void,
+    { onprogress, signal }: HttpRequestOptions
 ) {
     // handling abort (signal only passed when not running in worker)
     if (signal?.aborted) {

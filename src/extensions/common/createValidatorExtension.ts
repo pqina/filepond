@@ -1,27 +1,26 @@
 import { createExtension } from './createExtension.js';
 import { isBlobOrFile, isFile, isFileEntry } from '../../utils/test.js';
 import { Status } from '../../common/status.js';
-import { debounce } from '../../utils/debounce.js';
 import { upperCaseFirstLetter } from '../../utils/string.js';
 
-import type { Extension, ExtensionAPI, ExtensionOptions } from './createExtension.js';
+import type { Extension, ExtensionContext, ExtensionOptions } from './createExtension.js';
 import type { FilePondEntry } from '../../types/index.js';
 
-export type ValidatorExtensionResolvedProps<Props extends object = ValidatorExtensionOptions> =
+type ValidatorExtensionResolvedProps<Props extends object = ValidatorExtensionOptions> =
     ValidatorExtensionOptions & Required<Props>;
 
-export interface ValidatorExtensionState<Props extends object = ValidatorExtensionOptions>
+interface ValidatorExtensionState<Props extends object = ValidatorExtensionOptions>
     extends Omit<ExtensionOptions, 'props' | 'didSetProps'> {
     props: ValidatorExtensionResolvedProps<Props>;
     didSetProps: (cb: (props: ValidatorExtensionResolvedProps<Props>) => void) => void;
 }
 
-export type ValidatorFactory<Props extends object = ValidatorExtensionOptions> = (
+type ValidatorFactory<Props extends object = ValidatorExtensionOptions> = (
     instance: ValidatorExtensionState<Props>,
-    api: ExtensionAPI
+    api: ExtensionContext
 ) => ValidatorExtensionFunctions;
 
-export interface ValidationResultInvalid {
+interface ValidationResultInvalid {
     code: string;
     values?: { [key: string]: any } | null;
 }
@@ -33,7 +32,7 @@ export interface ValidatorExtensionOptions {
     shouldValidate?: (entry: FilePondEntry) => Promise<boolean>;
 }
 
-export interface ValidatorExtensionFunctions {
+interface ValidatorExtensionFunctions {
     /** Returns `true` when can run validation logic on this entry */
     canValidateEntry?: ValidatorExtensionCanValidateFunction;
 
@@ -50,8 +49,13 @@ export type ValidatorExtensionValidateFunction = (
 ) => Promise<null | ValidationResultInvalid> | (null | ValidationResultInvalid);
 
 export interface CreateValidatorExtensionOptions<Props extends object = ValidatorExtensionOptions> {
+    /** The name of the extension */
     name: string;
+
+    /** The default properties available to this extension */
     props: Props & Partial<ValidatorExtensionOptions>;
+
+    /** The factory function that runs when the extension is created */
     factory: ValidatorFactory<Props>;
 }
 
@@ -68,13 +72,11 @@ export function createValidatorExtension<Props extends object = ValidatorExtensi
             const { didSetProps, props } = state as ValidatorExtensionState<Props>;
 
             const {
-                setExtensionStatus,
                 getEntries,
                 on,
                 pushTask,
                 abortTask,
                 setEntryExtensionStatus,
-                getEntryExtensionStatus,
                 setEntryExtensionState,
                 getEntryExtensionState,
             } = pond;
@@ -290,7 +292,6 @@ export function createValidatorExtension<Props extends object = ValidatorExtensi
 
             return {
                 destroy() {
-                    // unsubUpdate();
                     unsubUpdateEntry();
                     unsubUpdateEntryData();
                 },

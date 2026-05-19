@@ -1,4 +1,4 @@
-import type { FilePondEntry, FilePondFileEntry } from '../types/index.js';
+import type { FilePondEntry } from '../types/index.js';
 import { addListener, getAsElement } from '../utils/dom.js';
 import { createExtension } from './common/createExtension.js';
 import { noop } from '../utils/placeholder.js';
@@ -64,7 +64,7 @@ export const FileInputSource = createExtension({
                 const entries = mapTree(Array.from(element.files ?? []), (file: File) => ({
                     src: file,
                     origin: 'input',
-                })) as FilePondFileEntry[];
+                })) as FilePondEntry[];
 
                 // store entries so we can remove later
                 currentEntries = entries;
@@ -104,7 +104,7 @@ declare module '../index.js' {
     interface FilePondElement {
         FileInputSource: FileInputSourceOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         FileInputSource?: FileInputSourceOptions;
     }
 }

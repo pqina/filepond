@@ -3,8 +3,8 @@ import { didAbort } from '../utils/abort.js';
 import { pubsub } from '../utils/pubsub.js';
 import { isFunction, isString } from '../utils/test.js';
 
-export interface TaskSchedulerOptions {
-    log?: (tasks: Task[]) => void;
+export interface CreateTaskSchedulerOptions {
+    log?: (tasks: TaskSchedulerTask[]) => void;
 }
 
 export interface TaskFnOptions {
@@ -15,7 +15,7 @@ export type TaskFn = (...args: any[]) => Promise<void | boolean> | void | boolea
 
 export type TaskArgs = unknown[] | (() => unknown[]);
 
-export interface Task {
+export interface TaskSchedulerTask {
     /** A function reference */
     fn: TaskFn;
 
@@ -62,25 +62,25 @@ const TaskState = {
     HALTED: 4,
 };
 
-export function createTaskScheduler(options: TaskSchedulerOptions) {
+export function createTaskScheduler(options: CreateTaskSchedulerOptions) {
     const { log = undefined } = options ?? {};
 
     const { on, pub } = pubsub();
 
-    const tasks: Task[] = [];
+    const tasks: TaskSchedulerTask[] = [];
 
     /** This allows us to access tasks faster */
-    const groupTasks: Map<string, Task[]> = new Map();
+    const groupTasks: Map<string, TaskSchedulerTask[]> = new Map();
 
-    function isRemainingTask(task: Task) {
+    function isRemainingTask(task: TaskSchedulerTask) {
         return task.state === TaskState.QUEUED || task.state === TaskState.ACTIVE;
     }
 
-    function isQueuedTask(task: Task) {
+    function isQueuedTask(task: TaskSchedulerTask) {
         return task.state === TaskState.QUEUED;
     }
 
-    function isActiveTask(task: Task) {
+    function isActiveTask(task: TaskSchedulerTask) {
         return task.state === TaskState.ACTIVE;
     }
 
@@ -88,7 +88,7 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
         return isString(group) && isFunction(fn);
     }
 
-    function insertTaskIntoTasks(task: Task, tasks: Task[]) {
+    function insertTaskIntoTasks(task: TaskSchedulerTask, tasks: TaskSchedulerTask[]) {
         // insert into tasks based in task order
         let index = 0;
         for (let i = 0; i < tasks.length; i++) {
@@ -99,7 +99,7 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
         tasks.splice(index, 0, task);
     }
 
-    function addTask(task: Task) {
+    function addTask(task: TaskSchedulerTask) {
         // insert into main tasks
         insertTaskIntoTasks(task, tasks);
 
@@ -117,10 +117,10 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
         return tasksInGroup ? !!tasksInGroup.find((task) => task.fn === fn) : false;
     }
 
-    function removeTask(needle: Task) {
+    function removeTask(needle: TaskSchedulerTask) {
         arrayRemoveInPlace(
             tasks,
-            (task: Task) => task.group === needle.group && task.fn === needle.fn
+            (task: TaskSchedulerTask) => task.group === needle.group && task.fn === needle.fn
         );
 
         // clean up look up
@@ -129,11 +129,11 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
             return;
         }
 
-        arrayRemoveInPlace(tasksInGroup, (task: Task) => task.fn === needle.fn);
+        arrayRemoveInPlace(tasksInGroup, (task: TaskSchedulerTask) => task.fn === needle.fn);
     }
 
     function removeTasksByGroup(group: string) {
-        arrayRemoveInPlace(tasks, (task: Task) => task.group === group);
+        arrayRemoveInPlace(tasks, (task: TaskSchedulerTask) => task.group === group);
 
         // clean up lookup
         groupTasks.delete(group);
@@ -209,11 +209,11 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
         return tasks.filter(isActiveTask);
     }
 
-    function getActiveSimilarTasks(needle: Task) {
+    function getActiveSimilarTasks(needle: TaskSchedulerTask) {
         return getActiveTasks().filter((activeTask) => activeTask.fn === needle.fn);
     }
 
-    function canRunTask(task: Task) {
+    function canRunTask(task: TaskSchedulerTask) {
         // this isn't a task
         if (!task) {
             return false;
@@ -290,7 +290,7 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
     }
 
     // note that a task can spawn new tasks while it's being run
-    async function runTask(task: Task) {
+    async function runTask(task: TaskSchedulerTask) {
         const { group, fn, params, abortController } = task;
 
         // quick ref
@@ -339,7 +339,7 @@ export function createTaskScheduler(options: TaskSchedulerOptions) {
     }
 
     /** Runs the abort function on the task abort controller */
-    function abort(task: Task) {
+    function abort(task: TaskSchedulerTask) {
         // already aborted this controller
         if (task.abortController.signal.aborted) {
             return;

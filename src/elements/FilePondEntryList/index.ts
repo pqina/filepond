@@ -1,70 +1,9 @@
-import type { Needle, FilePondEntry, FilePondEntrySource } from '../../types/index.js';
-import type { Vector } from '../../utils/vector.js';
 import { FilePondSvelteComponentElement } from '../FilePondSvelteComponent/index.svelte.js';
 import { setBooleanAttribute } from '../../utils/dom.js';
 import { registerShadowRoot } from '../common/extendStyles.js';
 import FilePondEntryListApp from './index.svelte';
 import styles from './index.css?inline';
-
-export interface AnimatedEntry {
-    delayed: boolean;
-    entry: FilePondEntry;
-    animation: string;
-    oncancel: () => void;
-    oncomplete: () => void;
-}
-
-export interface DragInteraction {
-    id: string;
-    element: HTMLElement | undefined;
-
-    // for pointer interaction
-    offset?: Vector;
-    translation?: Vector;
-    vector?: Vector;
-    viewPosition?: Vector;
-
-    // for keyboard interaction
-    direction?: 'none' | 'up' | 'down' | 'left' | 'right';
-}
-
-export interface DropState {
-    id?: string;
-    remove: boolean;
-}
-
-export interface DragState {
-    id: string;
-    index: number;
-    element: HTMLElement | undefined;
-    offset?: Vector;
-    translation?: Vector;
-    parentTranslation?: Vector;
-    outside?: boolean;
-}
-
-export interface AppCallbacks {
-    setEntries: (entries: FilePondEntry[]) => void;
-    insertEntries: (
-        entry: FilePondEntrySource | FilePondEntrySource[],
-        index?: number | number[]
-    ) => void;
-    removeEntries: (
-        ...needles: Needle[]
-    ) =>
-        | ({ entry: FilePondEntry; index: number[] } | void)[]
-        | { entry: FilePondEntry; index: number[] }
-        | void;
-    updateEntry: (needle: Needle, ...props: any[]) => void;
-    setEntryExtensionState: (entry: FilePondEntry, props: { [key: string]: any }) => void;
-    getEntryExtensionState: (entry: FilePondEntry) => { [key: string]: any };
-    pushTask: (
-        id: string,
-        fn: Function,
-        options?: { parallel?: number; ignoreSoftFailure?: boolean }
-    ) => void;
-    abortTask: (id: string, fn: Function) => void;
-}
+import type { SpringOptions } from '../../types/index.js';
 
 // Props to create getters and setters for, the defaults for these props are set in the FilePondEntryList component
 export const COMPONENT_PROPS = [
@@ -108,7 +47,7 @@ const COMPONENT_METHODS = [
 
 const COMPONENT_EVENTS = ['dragentry', 'dragentrystart', 'dragentryend', 'updateplaceholder'];
 
-export interface FilePondElementEvents {
+interface FilePondEntryListElementEvents {
     addEventListener<K extends keyof HTMLElementEventMap>(
         type: K | 'dragentrystart' | 'dragentry' | 'dragentryend' | 'updateplaceholder',
         listener: (this: FilePondEntryListElement, ev: HTMLElementEventMap[K]) => any,
@@ -126,7 +65,7 @@ export interface FilePondElementEvents {
  */
 export class FilePondEntryListElement
     extends FilePondSvelteComponentElement
-    implements FilePondElementEvents
+    implements FilePondEntryListElementEvents
 {
     constructor() {
         super(FilePondEntryListApp, {
@@ -162,7 +101,7 @@ export function getDefaultSpringOptions() {
         stiffness: 0.1,
         damping: 0.495,
         precision: 0.001,
-    };
+    } as SpringOptions;
 }
 
 export function getDefaultEntryAnimationProps() {

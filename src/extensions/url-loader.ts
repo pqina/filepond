@@ -9,7 +9,7 @@ import {
     getResponseHeaderValue,
 } from '../utils/xhr.js';
 import { urlToFilename } from '../utils/url.js';
-import { isString, isBlobOrFile, isDataURL, isNumber } from '../utils/test.js';
+import { isString, isBlobOrFile, isDataURL, isNumber, isFileEntry } from '../utils/test.js';
 import { blobToFile, getExtensionFromMimeType } from '../utils/file.js';
 import { didAbort } from '../utils/abort.js';
 import { passthrough } from '../utils/placeholder.js';
@@ -285,9 +285,9 @@ export const URLLoader = createExtension({
             }
         }
 
-        function handleUpdateEntry(entry: FilePondFileEntry) {
+        function handleUpdateEntry(entry: FilePondEntry) {
             // already is blob or file, no need to load
-            if (isBlobOrFile(entry.file)) {
+            if (!isFileEntry(entry) || isBlobOrFile(entry.file)) {
                 return;
             }
 
@@ -360,7 +360,7 @@ declare module '../index.js' {
     interface FilePondElement {
         URLLoader: URLLoaderOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         URLLoader?: URLLoaderOptions;
     }
 }

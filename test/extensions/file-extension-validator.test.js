@@ -10,7 +10,7 @@ describe('FileExtensionValidator', () => {
     it('should reject files with incorrect extension', () =>
         new Promise((done) => {
             entryTree = createDefaultEntryTree();
-            extensionManager = createExtensionManager(entryTree);
+            extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     FileExtensionValidator,
@@ -40,7 +40,7 @@ describe('FileExtensionValidator', () => {
     it('should reject files without extension', () =>
         new Promise((done) => {
             entryTree = createDefaultEntryTree();
-            extensionManager = createExtensionManager(entryTree);
+            extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     FileExtensionValidator,
@@ -71,7 +71,7 @@ describe('FileExtensionValidator', () => {
     it('should accept files with uppercase extensions', () =>
         new Promise((done) => {
             entryTree = createDefaultEntryTree();
-            extensionManager = createExtensionManager(entryTree);
+            extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     FileExtensionValidator,

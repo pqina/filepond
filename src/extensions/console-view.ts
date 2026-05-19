@@ -5,7 +5,7 @@ import { Status } from '../common/status.js';
 import { clamp } from '../utils/math.js';
 import { arrayRemoveFalsy } from '../utils/array.js';
 import { clear, log } from '../common/console.js';
-import type { FilePondEntry, FilePondFileEntry, FilePondDirectoryEntry } from '../types/index.js';
+import type { FilePondEntry, FilePondDirectoryEntry } from '../types/index.js';
 import type { ExtensionState, ExtensionStatus } from './common/createExtension.js';
 import { toSpaceSeparatedString } from '../elements/common/string.js';
 
@@ -176,7 +176,7 @@ export const ConsoleView = createExtension({
             );
         }
 
-        function logFile(entry: FilePondFileEntry, prefix: string) {
+        function logFile(entry: FilePondEntry, prefix: string) {
             logEntry(
                 entry,
                 prefix,
@@ -280,7 +280,7 @@ declare module '../index.js' {
     interface FilePondElement {
         ConsoleView: ConsoleViewOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         ConsoleView?: ConsoleViewOptions;
     }
 }

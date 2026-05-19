@@ -1,4 +1,4 @@
-import { createTaskScheduler, type Task, type TaskOptions } from './taskScheduler.js';
+import { createTaskScheduler, type TaskSchedulerTask, type TaskOptions } from './taskScheduler.js';
 import { pubsub } from '../utils/pubsub.js';
 import { isArray } from '../utils/test.js';
 import { arrayItemsEqual, arrayRemoveInPlace, arraySortByItemProp } from '../utils/array.js';
@@ -9,7 +9,7 @@ import type {
     Extension,
 } from '../extensions/common/createExtension.js';
 import type { FilePondEntry, FilePondEntrySource } from '../types/index.js';
-import type { createEntryTree, Needle } from './entryTree.js';
+import type { EntryTreeInstance, EntryTreeOn, Needle } from './entryTree.js';
 import { log } from '../common/console.js';
 
 export type ExtensionFactory = Extension | [Extension, { [key: string]: unknown }];
@@ -23,7 +23,7 @@ export type ExtensionInsertInstructions =
     | { insert: Extension; options: { [key: string]: unknown }; before: string; after?: undefined }
     | { insert: Extension; options: { [key: string]: unknown }; before?: undefined; after: string };
 
-export interface LoadedExtension {
+interface LoadedExtension {
     current?: any;
     index: number;
     instance: ExtensionInstance;
@@ -36,24 +36,34 @@ export interface ExtensionManagerState {
     };
 }
 
-export interface ExtensionManagerAPI {
-    on: (event: string, callback: (detail?: any) => void) => () => void;
+export interface ExtensionManagerContext {
+    /** Subscribe to events */
+    on: EntryTreeOn;
 
+    /** Sets the current entries */
     setEntries: (entries: FilePondEntry[]) => void;
+
+    /** Returns the current entries */
     getEntries: () => FilePondEntry[];
 
-    // helper functions
+    /** Insert new entries */
     insertEntries: (entry: FilePondEntry | FilePondEntry[], index?: number | number[]) => void;
+
+    /** Remove existing entries */
     removeEntries: (
         ...needles: Needle[]
     ) =>
         | ({ entry: FilePondEntry; index: number[] } | void)[]
         | { entry: FilePondEntry; index: number[] }
         | void;
+
+    /** Update a specific entry */
     updateEntry: (needle: Needle, ...props: any[]) => void;
+
+    /** Replace an entry with one ore more entries */
     replaceEntry: (needle: Needle, ...entries: FilePondEntry[]) => void;
 
-    // running tasks
+    /** Push a new task */
     pushTask: <T>(
         entryId: string,
         fn: (
@@ -63,44 +73,72 @@ export interface ExtensionManagerAPI {
         options?: TaskOptions
     ) => void;
 
+    /** Abort an existing task */
     abortTask: <T>(
         entryId: string,
         fn: (entry: T, options: { signal: AbortSignal }) => Promise<void | boolean> | void | boolean
     ) => void;
 
+    /** Abort tasks */
     abortTasks: (group?: string) => void;
 
-    // update pond extension state
     setExtensionState: (state: any) => void;
     getExtensionState: () => any;
     setExtensionStatus: (status: ExtensionStatus) => void;
     getExtensionStatus: () => ExtensionStatus;
 }
 
+interface ExtensionManagerEvents {
+    updateExtensionState: ExtensionManagerState['extension'];
+    setExtensions: {
+        extensionNames: string[];
+    };
+}
+
+type ExtensionManagerOn = <EventName extends keyof ExtensionManagerEvents>(
+    event: EventName,
+    callback: (detail: ExtensionManagerEvents[EventName]) => void
+) => () => void;
+
 export interface ExtensionManagerInstance {
-    on: (event: string, callback: (detail?: any) => void) => () => void;
+    /** Subscribe to extension manager event */
+    on: ExtensionManagerOn;
+
+    /** Gets current extensions */
     get extensions(): Extension[];
+
+    /** Update current extensions */
     set extensions(newExtensionFactories: ExtensionFactory[]);
+
+    /** Propagate an extension proprty name with a value to managed extensions  */
     propagateExtensionProperty: (propertyName: string, value: any) => void;
+
+    /** Set properties on a specific extension */
     setExtensionProperties: (
         extensionName: string,
         props: {
             [key: string]: any;
         }
     ) => void;
+
+    /** Get properties from a specific extension */
     getExtensionProperties: (extensionName: string) =>
         | {
               [key: string]: any;
           }
         | undefined;
+
+    /** Get current extension states */
     getState(): {
         [name: string]: ExtensionState;
     };
+
+    /** Clean up */
     destroy(): void;
 }
 
 // for debugging task manager
-function logTasks(tasks: Task[]) {
+function logTasks(tasks: TaskSchedulerTask[]) {
     log(`Tasks: ${tasks.length}`);
     for (const task of tasks) {
         const { group, fn, order, parallel, state, ..._ } = task;
@@ -119,16 +157,21 @@ function logTasks(tasks: Task[]) {
     log('');
 }
 
+export interface CreateExtensionManagerOptions {
+    entryTree: EntryTreeInstance;
+}
+
 export function createExtensionManager(
-    tree: ReturnType<typeof createEntryTree>
+    options: CreateExtensionManagerOptions
 ): ExtensionManagerInstance {
+    const { entryTree: tree } = options;
     // pubsub
     const { on, pub } = pubsub();
 
     /** Holds Currently loaded extensions */
     const extensions: LoadedExtension[] = [];
 
-    // so we can easily expose these methods in the extension api
+    // so we can easily expose these methods in the extension context
     const { insertEntries, replaceEntry, updateEntry, removeEntries } = tree;
 
     // schedule tasks
@@ -169,7 +212,7 @@ export function createExtensionManager(
     //
     function createExtensionInstance(factory: Extension): ExtensionInstance {
         /** Listen for events */
-        const on = function (event: string, cb: (entry: FilePondEntry) => void) {
+        const on: EntryTreeOn = (event, cb) => {
             return tree.on(event, cb);
         };
 
@@ -301,7 +344,7 @@ export function createExtensionManager(
         extensions.length = 0;
     }
 
-    const api = {
+    const instance = {
         // subscribe to events
         on,
 
@@ -321,7 +364,7 @@ export function createExtensionManager(
             );
 
             // no changes detected
-            if (arrayItemsEqual(newFlatExtensionFactories, api.extensions)) {
+            if (arrayItemsEqual(newFlatExtensionFactories, instance.extensions)) {
                 // only apply props
                 for (const newExtensionFactory of newExtensionFactories) {
                     // skip if no props defined
@@ -513,5 +556,5 @@ export function createExtensionManager(
         });
     }
 
-    return api;
+    return instance;
 }

@@ -7,11 +7,11 @@ import { sleep } from '../utils/sleep.js';
 import { xhr, createProgressEvent, getResponseHeaders, type XHRResponse } from '../utils/xhr.js';
 import { warn } from '../common/console.js';
 import type {
-    StoreExtensionOptions,
+    CreateStoreExtensionOptions,
     StoreExtensionReleaseFunction,
     StoreExtensionStoreFunction,
 } from './common/createStoreExtension.js';
-import type { FilePondFileEntry } from '../types/index.js';
+import type { FilePondEntry } from '../types/index.js';
 import type { RequestResolverContext, ResolvedRequest } from './common/requestResolver.js';
 
 interface UploadChunk {
@@ -36,8 +36,7 @@ export interface UploadStatus {
 
 type ChunkedUploadStoreResponseValue = string | UploadStatus | UploadedChunk;
 
-interface ChunkedUploadStoreRequestResolverContext
-    extends RequestResolverContext<FilePondFileEntry> {
+interface ChunkedUploadStoreRequestResolverContext extends RequestResolverContext<FilePondEntry> {
     id?: string;
     chunk?: UploadChunk;
     chunks?: UploadedChunk[];
@@ -48,7 +47,7 @@ interface ChunkedUploadStoreResponseResolverContext<
 > {
     value: Value;
     response: XHRResponse;
-    entry: FilePondFileEntry;
+    entry: FilePondEntry;
     id?: string;
     chunk?: UploadChunk;
     chunks?: UploadedChunk[];
@@ -62,7 +61,7 @@ type ChunkedUploadStoreResponseResolver<Value extends ChunkedUploadStoreResponse
     response: ChunkedUploadStoreResponseResolverContext<Value>
 ) => Value;
 
-export interface ChunkedUploadStoreOptions extends StoreExtensionOptions {
+export interface ChunkedUploadStoreOptions extends CreateStoreExtensionOptions {
     /** Server URL */
     url?: string;
 
@@ -124,7 +123,7 @@ export const ChunkedUploadStore = createStoreExtension({
         });
 
         /** Helper function to make it easier to update the server id */
-        function storeServerId(entry: FilePondFileEntry, serverId: string): void {
+        function storeServerId(entry: FilePondEntry, serverId: string): void {
             const { valueKey } = props;
             updateEntry(entry, {
                 state: {
@@ -156,7 +155,7 @@ export const ChunkedUploadStore = createStoreExtension({
         async function requestFileTransferId(
             file: File,
             options: { signal?: AbortSignal },
-            entry: FilePondFileEntry
+            entry: FilePondEntry
         ): Promise<string> {
             const {
                 url,
@@ -196,7 +195,7 @@ export const ChunkedUploadStore = createStoreExtension({
         async function requestFileUploadStatus(
             serverId: string,
             options: { signal?: AbortSignal },
-            entry: FilePondFileEntry
+            entry: FilePondEntry
         ): Promise<UploadStatus> {
             const {
                 url,
@@ -249,7 +248,7 @@ export const ChunkedUploadStore = createStoreExtension({
             serverId: string,
             { uploadName, uploadLength }: { uploadName: string; uploadLength: string },
             options: { onprogress?: (e: ProgressEvent) => void; signal?: AbortSignal },
-            entry: FilePondFileEntry
+            entry: FilePondEntry
         ): Promise<UploadedChunk> {
             const {
                 url,
@@ -324,7 +323,7 @@ export const ChunkedUploadStore = createStoreExtension({
                 onprogress?: (e: ProgressEvent) => void;
                 signal?: AbortSignal;
             },
-            entry: FilePondFileEntry
+            entry: FilePondEntry
         ): Promise<UploadedChunk[]> {
             const { parallelChunks } = props;
             const { onprogress = noop, signal } = options ?? {};
@@ -419,7 +418,7 @@ export const ChunkedUploadStore = createStoreExtension({
             serverId: string,
             chunks: UploadedChunk[],
             options: { signal?: AbortSignal },
-            entry: FilePondFileEntry
+            entry: FilePondEntry
         ): Promise<string> {
             const {
                 url,
@@ -588,7 +587,7 @@ declare module '../index.js' {
     interface FilePondElement {
         ChunkedUploadStore: ChunkedUploadStoreOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         ChunkedUploadStore?: ChunkedUploadStoreOptions;
     }
 }

@@ -2,7 +2,7 @@ import type { FilePondEntry, FilePondFileEntry } from '../types/index.js';
 import type { TaskFnOptions } from '../core/taskScheduler.js';
 
 import { createProgressEvent } from '../utils/xhr.js';
-import { isString, isBlobOrFile, isNumber } from '../utils/test.js';
+import { isString, isBlobOrFile, isNumber, isFileEntry } from '../utils/test.js';
 import { createExtension } from './common/createExtension.js';
 import { Status } from '../common/status.js';
 import { sleep } from '../utils/sleep.js';
@@ -285,7 +285,7 @@ export const SimulatedLoader = createExtension({
             });
         }
 
-        function handleUpdateEntry(entry: FilePondFileEntry) {
+        function handleUpdateEntry(entry: FilePondEntry) {
             const status = getEntryExtensionStatus(entry);
 
             // has current status
@@ -295,7 +295,7 @@ export const SimulatedLoader = createExtension({
             const hasFailed = status?.type === 'error';
 
             // already running tasks or already is blob or file
-            if (hasFailed || isBlobOrFile(entry.file)) {
+            if (hasFailed || !isFileEntry(entry) || isBlobOrFile(entry.file)) {
                 return;
             }
 
@@ -363,7 +363,7 @@ declare module '../index.js' {
     interface FilePondElement {
         SimulatedLoader: SimulatedLoaderOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         SimulatedLoader?: SimulatedLoaderOptions;
     }
 }

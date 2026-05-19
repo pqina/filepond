@@ -19,7 +19,7 @@ import {
 import { getUniqueId } from '../utils/string.js';
 import { passthrough } from '../utils/placeholder.js';
 
-export interface EntryTreeOptions {
+export interface CreateEntryTreeOptions {
     /**
      * Called before inserting entries into the tree, allows limiting the amount of entries inserted
      */
@@ -53,8 +53,54 @@ interface FilePondEntryTree {
     entries: FilePondEntry[];
 }
 
+interface EntryTreeEvents {
+    insertEntry: FilePondEntry;
+    removeEntry: {
+        entry: FilePondEntry;
+        index: number[];
+    };
+    updateEntry: FilePondEntry;
+    updateEntryData: FilePondEntry;
+    updateEntries: FilePondEntry[];
+}
+
+export type EntryTreeOn = <EventName extends keyof EntryTreeEvents>(
+    event: EventName,
+    callback: (detail: EntryTreeEvents[EventName]) => void
+) => () => void;
+
+export interface EntryTreeInstance {
+    on: EntryTreeOn;
+
+    insertEntries: (
+        entries: FilePondEntrySource | FilePondEntrySource[],
+        index?: number | number[]
+    ) => void;
+
+    findEntries: (
+        ...needles: (void | Needle)[]
+    ) => FilePondEntry | (FilePondEntry | undefined)[] | undefined;
+
+    removeEntries: (
+        ...needles: Needle[]
+    ) =>
+        | ({ entry: FilePondEntry; index: number[] } | void)[]
+        | { entry: FilePondEntry; index: number[] }
+        | void;
+
+    sortEntries: (fn: (a: FilePondEntry, b: FilePondEntry) => 1 | -1 | 0) => void;
+    updateEntry: (needle: Needle, ...props: any[]) => void;
+    replaceEntry: (needle: Needle, ...entries: FilePondEntrySource[]) => void;
+    moveEntry: (needle: Needle, index: number | number[]) => void;
+
+    get entries(): FilePondEntry[];
+    set entries(entries: FilePondEntrySource[]);
+
+    destroy(): void;
+}
+
 /** Lean headless file processor */
-export function createEntryTree(options: EntryTreeOptions) {
+export function createEntryTree(options: CreateEntryTreeOptions): EntryTreeInstance {
     const {
         beforeInsertEntries = passthrough,
         beforeOnboardEntry,

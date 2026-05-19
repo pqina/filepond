@@ -1,5 +1,5 @@
 import { it, describe, expect } from 'vitest';
-import { withNodeTree } from '../../src/elements/common/nodeTree';
+import { withNodeTree } from '../../src/elements/common/nodeTree.js';
 
 describe('nodeTree', () => {
     it('should unwrap nodes', () => {

@@ -37,7 +37,7 @@ interface PooledWorker {
     terminate: () => void;
 }
 
-interface Task {
+interface QueuedWorkerTask {
     fn: Function | string;
     fnStr?: string;
     args: any[];
@@ -56,7 +56,7 @@ interface ThreadOptions {
 const workerPool: PooledWorker[] = [];
 
 // this holds queued tasks for when all threads are occupied
-const workerTaskQueue: Task[] = [];
+const workerTaskQueue: QueuedWorkerTask[] = [];
 
 // time till a idle worker is automatically terminated instead of re-used
 const WORKER_TERMINATION_TIMEOUT = 5000;
@@ -76,7 +76,7 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
         const MAX_WORKERS = navigator.hardwareConcurrency;
 
         // this helps with queueing
-        const runTask = ({ fn, args, options, abortQueuedTask, promise }: Task) => {
+        const runTask = ({ fn, args, options, abortQueuedTask, promise }: QueuedWorkerTask) => {
             const { signal, transferList = [], onprogress } = options;
 
             // exit
@@ -97,11 +97,11 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                 // if no pooled worker found found and all worker spots are taken up by busy workers
                 // we wait for a spot to free up
                 if (workerPool.filter((worker) => worker.busy).length >= MAX_WORKERS) {
-                    let task: Task;
+                    let task: QueuedWorkerTask;
                     const abortQueuedTask = () => {
                         arrayRemoveInPlace(
                             workerTaskQueue,
-                            (queuedTask: Task) => queuedTask === task
+                            (queuedTask: QueuedWorkerTask) => queuedTask === task
                         );
 
                         promise.reject(signal?.reason);
@@ -163,7 +163,7 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                             return;
                         }
 
-                        runTask(workerTaskQueue.shift() as Task);
+                        runTask(workerTaskQueue.shift() as QueuedWorkerTask);
                     },
                 };
 
@@ -224,10 +224,10 @@ export function thread(fn: Function | string, args: any[], options: ThreadOption
                 }
 
                 // get next similar task
-                const nextTask = similarTasks.shift() as Task;
+                const nextTask = similarTasks.shift() as QueuedWorkerTask;
 
                 // remove from queue
-                arrayRemoveInPlace(workerTaskQueue, (task: Task) => task === nextTask);
+                arrayRemoveInPlace(workerTaskQueue, (task: QueuedWorkerTask) => task === nextTask);
 
                 // run the similar task
                 requestIdleCallback(() => {

@@ -10,7 +10,7 @@ describe('FileMimeTypeValidator', () => {
     it('should reject files with incorrect mime type', () =>
         new Promise((done) => {
             entryTree = createDefaultEntryTree();
-            extensionManager = createExtensionManager(entryTree);
+            extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     FileMimeTypeValidator,
@@ -38,7 +38,7 @@ describe('FileMimeTypeValidator', () => {
     it('should reject files with incorrect mime type by wildcard', () =>
         new Promise((done) => {
             entryTree = createDefaultEntryTree();
-            extensionManager = createExtensionManager(entryTree);
+            extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     FileMimeTypeValidator,
@@ -66,7 +66,7 @@ describe('FileMimeTypeValidator', () => {
     it('should accept files by mime type wildcard', () =>
         new Promise((done) => {
             entryTree = createDefaultEntryTree();
-            extensionManager = createExtensionManager(entryTree);
+            extensionManager = createExtensionManager({ entryTree });
             extensionManager.extensions = [
                 [
                     FileMimeTypeValidator,

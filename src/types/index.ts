@@ -4,22 +4,26 @@ import type {
     ExtensionState,
     ExtensionStatus,
     ExtensionInstance,
+    ExtensionFactoryFunction,
+    ExtensionOptions,
+    ExtensionContext,
 } from '../extensions/common/createExtension.js';
 
-import type { ExtensionManagerAPI } from '../core/extensionManager.js';
-
-import type { TaskArgs, TaskOptions } from '../core/taskScheduler.js';
-
+import type { ExtensionManagerContext } from '../core/extensionManager.js';
 import type { FilePondElement } from '../elements/FilePondDefault/index.js';
-
 import type { FilePondInputElement } from '../elements/FilePondInput/index.js';
-
 import type { FilePondDropAreaElement } from '../elements/FilePondDropArea/index.js';
 import type { FilePondDropIndicatorElement } from '../elements/FilePondDropIndicator/index.js';
 import type { FilePondEntryListElement } from '../elements/FilePondEntryList/index.js';
 import type { FilePondSvelteComponentElement } from '../elements/FilePondSvelteComponent/index.svelte.js';
-
 import type { Needle } from '../core/entryTree.js';
+
+export type {
+    CreateExtensionManagerOptions,
+    ExtensionManagerInstance,
+} from '../core/extensionManager.js';
+export type { CreateEntryTreeOptions, EntryTreeInstance } from '../core/entryTree.js';
+export type { CreateTaskSchedulerOptions } from '../core/taskScheduler.js';
 
 import type {
     TemplateNode,
@@ -31,9 +35,18 @@ import type {
 
 import type { Vector } from '../utils/vector.js';
 
+export type { DefineFilePondOptions } from '../elements/FilePondDefault/index.js';
+
+export type { CreateExtensionOptions } from '../extensions/common/createExtension.js';
+export type {
+    PerceivedPerformanceOptions,
+    CreateStoreExtensionOptions,
+} from '../extensions/common/createStoreExtension.js';
+export type { CreateTransformExtensionOptions } from '../extensions/common/createTransformExtension.js';
+export type { CreateValidatorExtensionOptions } from '../extensions/common/createValidatorExtension.js';
+
 export type {
     Needle,
-    Vector,
     TemplateNode,
     ElementNode,
     BaseNode,
@@ -50,16 +63,17 @@ export type {
     ExtensionInstance,
     ExtensionState,
     ExtensionStatus,
-    ExtensionManagerAPI,
-    TaskArgs,
-    TaskOptions,
+    ExtensionManagerContext,
+    ExtensionFactoryFunction,
+    ExtensionOptions,
+    ExtensionContext,
 };
 
-export type Partial<T> = {
+type Partial<T> = {
     [P in keyof T]?: T[P];
 };
 
-export type SpringOptions = { stiffness: number; damping: number; precision: number };
+export type SpringOptions = { stiffness: number; damping: number; precision?: number };
 
 /**
  * A progress object which is passed to `onprogress` callbacks
@@ -75,13 +89,26 @@ export type Progress = {
     total: number;
 };
 
-export interface PublicRequestOptions {
-    method: 'GET' | 'POST' | 'HEAD' | 'PUT' | 'DELETE' | 'PATCH';
+export interface RequestOptions {
+    /** Request method */
+    method?: 'GET' | 'POST' | 'HEAD' | 'PUT' | 'DELETE' | 'PATCH';
+
+    /** Data to post with the request */
     data?: any;
+
+    /** FormData to add to the request (in Array format) */
     formData?: ([string, string] | [string, File] | [string, File, string])[];
+
+    /** QueryString to append to the URL */
     queryString?: { [key: string]: string | number };
+
+    /** Request headers to add to the request */
     headers?: { [key: string]: string | number };
+
+    /** Toggle `withCredentials`, defaults to `false` */
     withCredentials?: boolean;
+
+    /** Set timeout, defaults to `0` */
     timeout?: number;
 }
 
@@ -92,7 +119,7 @@ export type EntryOrigin = 'api' | 'input' | 'drop' | 'clipboard' | 'remote';
 /**
  * Hello World
  */
-export interface FilePondEntryBase {
+interface FilePondEntryBase {
     /** Unique id for this entry */
     id: string;
 
@@ -154,56 +181,32 @@ export type FilePondEntry = FilePondFileEntry | FilePondDirectoryEntry | FilePon
 
 export type FilePondEntrySource = Partial<FilePondEntry> | EntrySource;
 
-export type PartialFilePondEntry = (
-    | Partial<FilePondDirectoryEntry>
-    | Partial<FilePondFileEntry>
-    | Partial<FilePondDataTransferEntry>
-) & { src?: EntrySource };
-
-export type LocalePrimitive = string | boolean | number | null;
+type LocalePrimitive = string | boolean | number | null;
 
 export interface DynamicLocaleMap {
-    /**
-     * The string to use for this amount.
-     *
-     * 1: "1 file"
-     */
+    /** The string to use for this amount. `1: "1 file"` */
     [key: number]: LocalePrimitive | undefined;
 
-    /**
-     * The default placeholder to use for this key.
-     *
-     * "{{minFiles}} files"
-     */
+    /** The default placeholder to use for this key */
     else?: LocalePrimitive;
 }
 
 export interface DynamicLocale {
-    /**
-     * The template string to use.
-     *
-     * "Too few files in the list. Minimum required is {{minFiles}}."
-     */
+    /** The template string to use. Can contain variables. Variables are defined with double curly braces. */
     template: string;
 
-    /** The keys that can be replaced */
+    /** The variable keys that can be replaced */
     variables: {
-        /**
-         * The variable key
-         *
-         * "minFiles"
-         */
         [key: string]:
             | DynamicLocaleMap
             | {
-                  /** Optionally select data property to count with */
                   context?: string;
                   map: DynamicLocaleMap;
               };
     };
 }
 
-export type LocaleValue = string | DynamicLocale;
+type LocaleValue = string | DynamicLocale;
 
 export interface Locale {
     [key: string]: LocaleValue | DynamicLocaleMap;
@@ -228,13 +231,13 @@ export interface EntryListFunctions {
 export type Template = (api: EntryListFunctions) => TemplateNode[];
 
 export interface EntryAnimation {
-    opacitySpringOptions?: any;
+    opacitySpringOptions?: SpringOptions;
     opacityFrom?: number;
     opacity?: number;
-    scaleSpringOptions?: any;
+    scaleSpringOptions?: SpringOptions;
     scaleFrom?: number;
     scale?: number;
-    translationSpringOptions?: any;
+    translationSpringOptions?: SpringOptions;
     translationFrom?: Vector;
     translation?: Vector;
 }
@@ -245,6 +248,7 @@ export interface EntryAnimation {
 export type AnimationMode = 'auto' | 'always' | 'never';
 
 export interface FilePondSvelteComponentOptions {
+    /** The component root element */
     root: HTMLElement;
 
     /** Control animations */

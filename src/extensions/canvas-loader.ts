@@ -1,5 +1,5 @@
 import { createExtension } from './common/createExtension.js';
-import { isCanvas, isFile } from '../utils/test.js';
+import { isCanvas, isFile, isFileEntry } from '../utils/test.js';
 import { canvasToBlob } from '../utils/canvasToBlob.js';
 import { Status } from '../common/status.js';
 import { blobToFile } from '../utils/file.js';
@@ -93,7 +93,7 @@ export const CanvasLoader = createExtension({
             });
         }
 
-        function handleUpdateEntry(entry: FilePondFileEntry) {
+        function handleUpdateEntry(entry: FilePondEntry) {
             const { parallel } = props;
 
             // get extension entry props to help determine what next step to take
@@ -103,7 +103,7 @@ export const CanvasLoader = createExtension({
             const hasFailed = status?.type === 'error';
 
             // is already a blob or is not a canvas source
-            if (hasFailed || isFile(entry.file) || !isCanvas(entry.src)) {
+            if (hasFailed || !isFileEntry(entry) || isFile(entry.file) || !isCanvas(entry.src)) {
                 return;
             }
 
@@ -125,7 +125,7 @@ declare module '../index.js' {
     interface FilePondElement {
         CanvasLoader: CanvasLoaderOptions;
     }
-    interface defineFilePondOptions {
+    interface DefineFilePondOptions {
         CanvasLoader?: CanvasLoaderOptions;
     }
 }
