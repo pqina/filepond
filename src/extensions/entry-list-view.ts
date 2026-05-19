@@ -1,4 +1,5 @@
-import type { FilePondEntry, FilePondEntryListOptions } from '../types/index.js';
+import type { FilePondEntry } from '../types/index.js';
+import type { FilePondEntryListOptions } from '../elements/FilePondEntryList/types.js';
 import { createExtension } from './common/createExtension.js';
 import { COMPONENT_PROPS } from '../elements/FilePondEntryList/index.js';
 import { addListener } from '../utils/dom.js';

@@ -8,7 +8,7 @@
     } from '../common/animationPreference.svelte.js';
     import { rectFromBounds, type Rect } from '../../utils/rect.js';
     import { ElementPane } from '../components/ElementPane/index.js';
-    import type { FilePondSvelteComponentOptions } from '../../types/index.js';
+    import type { FilePondSvelteComponentOptions } from '../FilePondSvelteComponent/index.svelte.js';
     import type { Bounds } from '../../utils/bounds.js';
 
     let { animations = 'auto', springDefaults }: FilePondSvelteComponentOptions = $props();

@@ -12,9 +12,9 @@ import type {
 import type { ExtensionManagerContext } from '../core/extensionManager.js';
 import type { FilePondElement } from '../elements/FilePondDefault/index.js';
 import type { FilePondInputElement } from '../elements/FilePondInput/index.js';
+import type { FilePondEntryListElement } from '../elements/FilePondEntryList/index.js';
 import type { FilePondDropAreaElement } from '../elements/FilePondDropArea/index.js';
 import type { FilePondDropIndicatorElement } from '../elements/FilePondDropIndicator/index.js';
-import type { FilePondEntryListElement } from '../elements/FilePondEntryList/index.js';
 import type { FilePondSvelteComponentElement } from '../elements/FilePondSvelteComponent/index.svelte.js';
 import type { Needle } from '../core/entryTree.js';
 
@@ -246,76 +246,3 @@ export interface EntryAnimation {
  * The animation mode of the interface. Defaults to `'auto'`, set to `'always'` to force animation, even if users prefers no animation, set to `'never'` to never animate the user interface.
  */
 export type AnimationMode = 'auto' | 'always' | 'never';
-
-export interface FilePondSvelteComponentOptions {
-    /** The component root element */
-    root: HTMLElement;
-
-    /** Control animations */
-    animations?: AnimationMode;
-
-    /** Generic Spring configuration to use */
-    springDefaults?: SpringOptions;
-}
-
-export interface FilePondEntryListOptions extends Omit<FilePondSvelteComponentOptions, 'root'> {
-    /** Set entries in list */
-    entries?: FilePondEntry[];
-
-    /** Template to use for rendering different types */
-    template?: TemplateNode[];
-
-    /** Hook to manipulate nodes before rendering */
-    beforeRenderNode?: (
-        node: TemplateNode,
-        context: NodeContext,
-        sharedContext: NodeContext
-    ) => TemplateNode | void | false;
-
-    /** Toggle drop functionality on/off */
-    drop?: boolean;
-
-    /** Which element to use as drop container, defaults to `null` */
-    dropRoot?: HTMLElement;
-
-    /** Padding around drop area that will also catch drops, defaults to `20` */
-    dropPadding?: number;
-
-    /** Toggle drag functionality on/off */
-    drag?: boolean;
-
-    /** User needs to hold down on item for this amount of milliseconds to start dragging operation. Defaults to `100` */
-    dragGrabTimeout?: number;
-
-    /** The distance from the root element after which the element will be detached from the list, defaults to `40` */
-    dragDetachMargin?: number;
-
-    /** The distance from the root element after which the element will be removed when dropped, defaults to `80`, set to `Infinity` to prevent removal by dragging */
-    dragSafetyMargin?: number;
-
-    /** Toggle the UI on/off */
-    disabled?: boolean;
-
-    /** Maps Entry origin to animation for intro effect */
-    entryAnimationOriginMap?: { [origin: string]: string };
-
-    /** Animation configuration for each entry animation */
-    entryAnimationProps?: { [animation: string]: EntryAnimation };
-
-    /** Delay to use between entry animations that are staggered (insert / remove) */
-    entryAnimationStaggerInterval?: number;
-
-    /** The assets resource to use for icons, defaults to `{}` */
-    assets?: { [key: string]: string };
-
-    /** The locale resource props to use for text, defaults to `{}` */
-    locale?: { [key: string]: string };
-
-    /** The data format to use in the templates */
-    byteUnits?: 'mega' | 'mebi';
-
-    /**
-     * Automatically maps a property name to a resource value in locale and/or assets, defaults to `{ title: 'locale', label: 'locale', icon: 'assets' }` meaning that the value of a `label` property is automatically looked up in the `locale` property
-     */
-    propResourceMap?: { [componentProperty: string]: string };
-}

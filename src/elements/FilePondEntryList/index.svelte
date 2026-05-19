@@ -1,5 +1,6 @@
 <script lang="ts">
-    import type { FilePondEntry, FilePondEntrySource, Vector } from '../../types/index.js';
+    import type { FilePondEntry, FilePondEntrySource, Needle } from '../../types/index.js';
+    import type { Vector } from '../../utils/vector.js';
     import type { DragEventDetail } from '../attachments/dragarea.js';
     import type { DropEventDetail } from '../attachments/droparea.js';
     import type {
@@ -9,8 +10,8 @@
         DragState,
         DropState,
     } from './types.js';
-    import type { Needle, FilePondEntryListOptions } from '../../types/index.js';
-    import { type Bounds } from '../../utils/bounds.js';
+    import type { FilePondEntryListOptions } from '../FilePondEntryList/types.js';
+    import type { Bounds } from '../../utils/bounds.js';
 
     import { untrack } from 'svelte';
     import { dragarea } from '../attachments/dragarea.js';
@@ -38,7 +39,7 @@
         getGlobalPreventAnimations,
         getShouldReduceMotion,
     } from '../common/animationPreference.svelte.js';
-    import { getAppContext, setAppContext } from './contexts/appContext.js';
+    import { setAppContext } from './contexts/appContext.js';
     import { setDragContext } from './contexts/dragContext.js';
     import { setDropContext } from './contexts/dropContext.js';
     import { getUniqueId } from '../../utils/string.js';

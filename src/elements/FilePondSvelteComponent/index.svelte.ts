@@ -2,9 +2,21 @@ import { mount, unmount, type Component } from 'svelte';
 import { HTMLElementSafe } from '../../common/ssr.js';
 import { addListener, createStyleSheet, dispatchCustomEvent } from '../../utils/dom.js';
 import { arrayRemoveFalsy } from '../../utils/array.js';
+import type { AnimationMode, SpringOptions } from '../../types/index.js';
 
 const ObservedAttributes = ['animations'];
 const SharedProperties = ['animations', 'springDefaults'];
+
+export interface FilePondSvelteComponentOptions {
+    /** The component root element */
+    root: HTMLElement;
+
+    /** Control animations */
+    animations?: AnimationMode;
+
+    /** Generic Spring configuration to use */
+    springDefaults?: SpringOptions;
+}
 
 export class FilePondSvelteComponentElement extends HTMLElementSafe {
     #root: ShadowRoot;
