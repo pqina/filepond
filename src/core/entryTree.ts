@@ -72,26 +72,26 @@ export type EntryTreeOn = <EventName extends keyof EntryTreeEvents>(
 export interface EntryTreeInstance {
     on: EntryTreeOn;
 
-    insertEntries: (
+    insertEntries(
         entries: FilePondEntrySource | FilePondEntrySource[],
         index?: number | number[]
-    ) => void;
+    ): void;
 
-    findEntries: (
+    findEntries(
         ...needles: (void | Needle)[]
-    ) => FilePondEntry | (FilePondEntry | undefined)[] | undefined;
+    ): FilePondEntry | (FilePondEntry | undefined)[] | undefined;
 
-    removeEntries: (
+    removeEntries(
         ...needles: Needle[]
-    ) =>
+    ):
         | ({ entry: FilePondEntry; index: number[] } | void)[]
         | { entry: FilePondEntry; index: number[] }
         | void;
 
-    sortEntries: (fn: (a: FilePondEntry, b: FilePondEntry) => 1 | -1 | 0) => void;
-    updateEntry: (needle: Needle, ...props: any[]) => void;
-    replaceEntry: (needle: Needle, ...entries: FilePondEntrySource[]) => void;
-    moveEntry: (needle: Needle, index: number | number[]) => void;
+    sortEntries(fn: (a: FilePondEntry, b: FilePondEntry) => 1 | -1 | 0): void;
+    updateEntry(needle: Needle, ...props: any[]): void;
+    replaceEntry(needle: Needle, ...entries: FilePondEntrySource[]): void;
+    moveEntry(needle: Needle, index: number | number[]): void;
 
     get entries(): FilePondEntry[];
     set entries(entries: FilePondEntrySource[]);
