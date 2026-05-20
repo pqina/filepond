@@ -266,12 +266,14 @@ export function createFileLoadInfo() {
             {
                 key: 'file-info-sub',
                 component: ElementSkeleton,
-                props: ({ isWaiting, isFrozen }: NodeContext) => ({
-                    class: 'entry-info-sub',
-                    part: 'entry-info-sub',
-                    isWaiting,
-                    isFrozen,
-                }),
+                props: ({ isWaiting, isFrozen }: NodeContext) => {
+                    return {
+                        class: 'entry-info-sub',
+                        part: 'entry-info-sub',
+                        isWaiting,
+                        isFrozen,
+                    };
+                },
                 context: ({ entry, byteUnits }: NodeContext) => {
                     if (!isNumber(entry.size)) {
                         return {};

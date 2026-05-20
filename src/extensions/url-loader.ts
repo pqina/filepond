@@ -93,6 +93,7 @@ export const URLLoader = createExtension({
             pushTask,
             abortTask,
             getEntryExtensionStatus,
+            getEntryExtensionState,
             setEntryExtensionStatus,
             createProgressHandler,
         } = pond;
@@ -189,12 +190,35 @@ export const URLLoader = createExtension({
                 const { contentType, contentLength, lastModified } =
                     getResponseHeaders(headRequest);
 
+                const fileInfo: {
+                    name: string;
+                    type?: string;
+                    size?: number;
+                    lastModified?: number;
+                } = {
+                    name: getFilename(entry, headRequest),
+                };
+
+                if (contentType) {
+                    fileInfo.type = contentType;
+                }
+
+                if (contentLength) {
+                    fileInfo.size = parseInt(contentLength, 10);
+                }
+
+                if (lastModified) {
+                    fileInfo.lastModified = new Date(lastModified).getTime();
+                }
+
                 // update entry so we know size, name, and type before the blob is loaded
                 updateEntry(entry, {
-                    name: getFilename(entry, headRequest),
-                    type: contentType,
-                    size: parseInt(contentLength, 10),
-                    lastModified: new Date(lastModified).getTime(),
+                    ...fileInfo,
+                    extension: {
+                        [extensionName]: {
+                            fetchedMetadata: true,
+                        },
+                    },
                 });
             } catch (error) {
                 if (didAbort(signal, error)) {
@@ -297,6 +321,9 @@ export const URLLoader = createExtension({
                 return;
             }
 
+            // if we can fetch metadata we need to know if we fetched metadata
+            const { fetchedMetadata = false } = getEntryExtensionState(entry);
+
             // get settings
             const { actionLoad, actionAbort, fetchMetadata, parallel } = props;
 
@@ -325,10 +352,10 @@ export const URLLoader = createExtension({
                 return;
             }
 
-            // start loading file info
+            // start loading file info if not set manually and hasn't fetched yet
             const hasFileInfo = isString(name) && isNumber(size);
             const canFetchMetadata = fetchMetadata && !isDataURL(src);
-            if (!hasFileInfo && canFetchMetadata) {
+            if (!fetchedMetadata && !hasFileInfo && canFetchMetadata) {
                 pushTask(entry.id, taskUrlToMetadata);
                 return;
             }

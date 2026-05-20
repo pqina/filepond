@@ -213,7 +213,9 @@ describe('URLLoader', function () {
             };
 
             const unsub = entryTree.on('updateEntry', (entry) => {
-                if (!isFile(entry.file)) return;
+                if (!isFile(entry.file)) {
+                    return;
+                }
 
                 unsub();
                 expect(entry.name).to.equal('my-file.txt');

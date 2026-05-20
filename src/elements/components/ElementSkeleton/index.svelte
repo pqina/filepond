@@ -98,7 +98,7 @@
             // keep text nodes
             if (node.nodeType === 3) {
                 // @ts-ignore
-                return node.textContent.length > 0;
+                return node.textContent?.trim().length > 0;
             }
 
             // keep nodes that aren't the skeleton pane

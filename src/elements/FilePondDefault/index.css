@@ -127,6 +127,14 @@ file-pond-entry-list {
         padding: var(--entry-padding);
     }
 
+    &::part(entry-info-main) {
+        --skeleton-color: var(--entry-color);
+    }
+
+    &::part(entry-info-sub) {
+        --skeleton-color: var(--entry-color);
+    }
+
     &::part(entry-checkbox) {
         grid-row: 1;
         grid-column: 1;
