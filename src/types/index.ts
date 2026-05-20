@@ -41,9 +41,16 @@ export type { CreateExtensionOptions } from '../extensions/common/createExtensio
 export type {
     PerceivedPerformanceOptions,
     CreateStoreExtensionOptions,
+    StoreExtensionOptions,
 } from '../extensions/common/createStoreExtension.js';
-export type { CreateTransformExtensionOptions } from '../extensions/common/createTransformExtension.js';
-export type { CreateValidatorExtensionOptions } from '../extensions/common/createValidatorExtension.js';
+export type {
+    CreateTransformExtensionOptions,
+    TransformExtensionOptions,
+} from '../extensions/common/createTransformExtension.js';
+export type {
+    CreateValidatorExtensionOptions,
+    ValidatorExtensionOptions,
+} from '../extensions/common/createValidatorExtension.js';
 
 export type {
     Needle,

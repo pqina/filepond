@@ -1,10 +1,9 @@
 import type { FilePondEntry } from '../types/index.js';
 import type {
-    StoreExtensionFunctionOptions,
-    CreateStoreExtensionOptions,
     StoreExtensionReleaseFunction,
     StoreExtensionRestoreFunction,
     StoreExtensionStoreFunction,
+    StoreExtensionOptions,
 } from './common/createStoreExtension.ts';
 import { createStoreExtension } from './common/createStoreExtension.js';
 import { isFile, isFileEntry } from '../utils/test.js';
@@ -14,7 +13,7 @@ import { log } from '../common/console.js';
 import { sleep } from '../utils/sleep.js';
 import { noop } from '../utils/placeholder.js';
 
-export interface SimulatedStoreOptions extends CreateStoreExtensionOptions {
+export interface SimulatedStoreOptions extends StoreExtensionOptions {
     /** Maximum simulated load speed. Defaults to `1024000` */
     bitrate?: number;
 

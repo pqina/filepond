@@ -7,7 +7,7 @@ import { sleep } from '../utils/sleep.js';
 import { xhr, createProgressEvent, getResponseHeaders, type XHRResponse } from '../utils/xhr.js';
 import { warn } from '../common/console.js';
 import type {
-    CreateStoreExtensionOptions,
+    StoreExtensionOptions,
     StoreExtensionReleaseFunction,
     StoreExtensionStoreFunction,
 } from './common/createStoreExtension.js';
@@ -61,7 +61,7 @@ type ChunkedUploadStoreResponseResolver<Value extends ChunkedUploadStoreResponse
     response: ChunkedUploadStoreResponseResolverContext<Value>
 ) => Value;
 
-export interface ChunkedUploadStoreOptions extends CreateStoreExtensionOptions {
+export interface ChunkedUploadStoreOptions extends StoreExtensionOptions {
     /** Server URL */
     url?: string;
 

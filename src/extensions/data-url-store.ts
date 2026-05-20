@@ -1,5 +1,5 @@
 import type {
-    CreateStoreExtensionOptions,
+    StoreExtensionOptions,
     StoreExtensionStoreFunction,
 } from './common/createStoreExtension.js';
 import { createStoreExtension } from './common/createStoreExtension.js';
@@ -7,7 +7,7 @@ import { createThreadWorker, thread } from '../utils/thread.js';
 import { isFileEntry } from '../utils/test.js';
 import { readFile } from '../workers/readFile.js';
 
-export interface DataURLStoreOptions extends CreateStoreExtensionOptions {
+export interface DataURLStoreOptions extends StoreExtensionOptions {
     /** Where the extension can find the WebWorker to use. Optional and usually automatically set by FilePond. */
     workersURL?: URL;
 }
