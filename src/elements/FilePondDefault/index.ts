@@ -22,7 +22,7 @@ import {
     dispatchCustomEvent,
     setBooleanAttribute,
 } from '../../utils/dom.js';
-import { isString } from '../../utils/test.js';
+import { isBrowser, isString } from '../../utils/test.js';
 import { assets } from '../../assets/index.js';
 
 // default FilePond styles
@@ -374,6 +374,12 @@ export interface DefineFilePondOptions {
  * @param initialOptions - The initial options to pass to the FilePond components
  */
 export function defineFilePond(initialOptions?: DefineFilePondOptions): FilePondElement[] {
+    // Bail when not in browser
+    if (!isBrowser()) {
+        return [];
+    }
+
+    // for re-use purposes
     const tag = 'file-pond';
 
     // remember these options

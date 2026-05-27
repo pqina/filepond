@@ -15,7 +15,7 @@ export function fixSvelteDollarCollisions(): Plugin {
                 }
 
                 const chunk = file as OutputChunk;
-                chunk.code = chunk.code.replace(/\$\$/g, '_$$').replace(/\$window/g, '_$window');
+                chunk.code = chunk.code.replace(/(?<![\w$])\$(?!\{)/g, '_$');
             }
         },
     };

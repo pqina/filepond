@@ -81,7 +81,7 @@ export default defineConfig(({ command }) => ({
 
     // build
     build: {
-        minify: true,
+        minify: 'esbuild',
         outDir: destDir,
         cssMinify: true,
         lib: {
