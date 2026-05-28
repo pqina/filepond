@@ -36,7 +36,7 @@ export function prepareWorkers(options?: { destDir: string }): Plugin {
                 }
 
                 // get fn name
-                const [_, fnName] = file.code.match(/function ([a-z]+)\(/) || [];
+                const [_, fnName] = file.code.match(/function ([a-zA-Z$]+)\(/) || [];
                 if (!fnName) {
                     throw new Error(`Couldn't extract function name from: ${fileName}`);
                 }

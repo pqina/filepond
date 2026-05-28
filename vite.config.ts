@@ -4,7 +4,6 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { banner } from './banner.js';
 import { preventConsoleUsage } from './build/preventConsoleUsage.js';
 import { prepareWorkers } from './build/prepareWorkers.js';
-import { fixSvelteDollarCollisions } from './build/fixSvelteDollarCollisions.js';
 import { fullReloadAlways } from './build/fullReloadAlways.js';
 import { addBanner } from './build/addBanner.js';
 
@@ -69,7 +68,6 @@ export default defineConfig(({ command }) => ({
             },
         }),
         preventConsoleUsage(),
-        fixSvelteDollarCollisions(),
         prepareWorkers({
             destDir,
         }),
@@ -104,8 +102,13 @@ export default defineConfig(({ command }) => ({
                 preserveModulesRoot: 'src',
                 chunkFileNames: '[name].js',
                 entryFileNames: (chunkInfo) => {
+                    // Things from node modules are svelte deps
                     if (chunkInfo.name.includes('node_modules')) {
                         return chunkInfo.name.replace('node_modules', 'svelte') + '.js';
+                    }
+                    // To fix 'The $ prefix is reserved and cannot be used for variables or imports' when used in a Svelte project
+                    else if (chunkInfo.name.includes('.svelte')) {
+                        return chunkInfo.name.replace('.svelte', '-svelte.js');
                     }
                     return '[name].js';
                 },
