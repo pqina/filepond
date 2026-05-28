@@ -294,6 +294,7 @@ export function createExtensionManager(
             setEntries: function (entries: FilePondEntrySource[]) {
                 tree.entries = entries;
             },
+
             getEntries: () => tree.entries,
 
             // manipulating entry list

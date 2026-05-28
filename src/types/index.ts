@@ -18,6 +18,12 @@ import type { FilePondDropIndicatorElement } from '../elements/FilePondDropIndic
 import type { FilePondSvelteComponentElement } from '../elements/FilePondSvelteComponent/index.svelte.js';
 import type { Needle } from '../core/entryTree.js';
 
+export type { FilePondElementEventMap } from '../elements/FilePondDefault/index.js';
+export type { FilePondInputElementEventMap } from '../elements/FilePondInput/index.js';
+export type { FilePondEntryListElementEventMap } from '../elements/FilePondEntryList/index.js';
+export type { FilePondDropAreaElementEventMap } from '../elements/FilePondDropArea/index.js';
+export type { FilePondSvelteComponentElementEventMap } from '../elements/FilePondSvelteComponent/index.svelte.js';
+
 export type {
     CreateExtensionManagerOptions,
     ExtensionManagerInstance,

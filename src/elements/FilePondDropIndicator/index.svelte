@@ -187,7 +187,7 @@
         onmeasure: handleMeasure,
     })}
     {@attach droparea({
-        ondragitem: handleDragItem,
+        onitemdrag: handleDragItem,
     })}
 >
     {#if shouldRenderIndicator}

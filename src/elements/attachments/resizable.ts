@@ -38,7 +38,6 @@ const updateNodeSize = (node: Element, width: number, height: number) => {
 
     // Run callback
     nodeCallbacks.get(node)(size);
-    // node.dispatchEvent(new CustomEvent('resize', { detail: size }));
 };
 
 // Total observed elements so we know when we can unload resizeObserver

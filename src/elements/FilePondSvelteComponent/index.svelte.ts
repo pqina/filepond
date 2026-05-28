@@ -7,6 +7,22 @@ import type { AnimationMode, SpringOptions } from '../../types/index.js';
 const ObservedAttributes = ['animations'];
 const SharedProperties = ['animations', 'springDefaults'];
 
+export interface FilePondSvelteComponentElementEventMap {
+    connected: CustomEvent<null>;
+    disconnected: CustomEvent<null>;
+}
+
+interface FilePondSvelteElementEventHandler {
+    addEventListener<K extends keyof FilePondSvelteComponentElementEventMap>(
+        type: K,
+        listener: (
+            this: FilePondSvelteComponentElement,
+            event: FilePondSvelteComponentElementEventMap[K]
+        ) => void,
+        options?: boolean | AddEventListenerOptions
+    ): void;
+}
+
 export interface FilePondSvelteComponentOptions {
     /** The component root element */
     root: HTMLElement;
@@ -18,7 +34,16 @@ export interface FilePondSvelteComponentOptions {
     springDefaults?: SpringOptions;
 }
 
-export class FilePondSvelteComponentElement extends HTMLElementSafe {
+/**
+ * FilePond Svelte Component Element
+ *
+ * @event {CustomEvent<null>} 'connected' - Fired when connected to the DOM
+ * @event {CustomEvent<null>} 'disconnected' - Fired when disconnected from the DOM
+ */
+export class FilePondSvelteComponentElement
+    extends HTMLElementSafe
+    implements FilePondSvelteElementEventHandler
+{
     #root: ShadowRoot;
     #app: any;
     #props: any;
@@ -142,5 +167,7 @@ export class FilePondSvelteComponentElement extends HTMLElementSafe {
         this.#listeners.forEach((unsub) => unsub());
         unmount(this.#app);
         this.#app = null;
+
+        this.dispatchEvent(new CustomEvent('disconnected'));
     }
 }

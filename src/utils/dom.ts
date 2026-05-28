@@ -116,32 +116,29 @@ export function h(
     return el;
 }
 
-/** Sets a list of files/directories to a file input element */
+/** Sets a list of files/directories to a file input element, return `true` if value was updated */
 export function setFileInputFilesFromEntries(
     element: HTMLInputElement,
-    entries?: FilePondFileEntry[] | undefined,
-    options?: { customEventType: string }
-) {
-    const { customEventType = 'update' } = options ?? {};
-
+    entries?: FilePondFileEntry[] | undefined
+): boolean {
     // clear
     if (!entries || !entries.length) {
         element.value = '';
-        return;
+        return false;
     }
 
     const fileList = getFileListFromEntries(entries);
 
     // no change since last update
     if (arrayItemsEqual([...fileList], [...(element.files ?? [])])) {
-        return;
+        return false;
     }
 
     // set new files
     element.files = fileList;
 
-    // let others know the input value was changed
-    element.dispatchEvent(new CustomEvent(customEventType));
+    // did update
+    return true;
 }
 
 /** Sets a list of files/directories to a file input element */

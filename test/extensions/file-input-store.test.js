@@ -27,7 +27,7 @@ describe('FileInputStore', () => {
 
     it('should add file to file input', () =>
         new Promise((done) => {
-            input.addEventListener('update', (e) => {
+            input.addEventListener('fileschange', (e) => {
                 expect(isFile(input.files[0])).to.be.true;
 
                 done();
@@ -43,7 +43,7 @@ describe('FileInputStore', () => {
 
     it('should add files to file input', () =>
         new Promise((done) => {
-            input.addEventListener('update', () => {
+            input.addEventListener('fileschange', () => {
                 expect(input.files.length).to.equal(2);
                 done();
             });
@@ -67,7 +67,7 @@ describe('FileInputStore', () => {
 
     it('should not add files in failed state to file input', () =>
         new Promise((done) => {
-            input.addEventListener('update', () => {
+            input.addEventListener('fileschange', () => {
                 expect(entryTree.entries.length).to.equal(2);
                 expect(input.files.length).to.equal(1);
                 done();
@@ -107,7 +107,7 @@ describe('FileInputStore', () => {
 
             entryTree.insertEntries(file);
 
-            input.addEventListener('update', () => {
+            input.addEventListener('fileschange', () => {
                 expect(input.files[0].name).to.equal('my-file-2.txt');
 
                 done();

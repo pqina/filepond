@@ -13,6 +13,25 @@ import type {
     SpringOptions,
     TemplateNode,
 } from '../../types/index.js';
+import type { Rect } from '../../utils/rect.js';
+
+export interface FilePondEntryListElementEventMap {
+    entrydragstart: CustomEvent<null>;
+    entrydrag: CustomEvent<null>;
+    entrydragend: CustomEvent<null>;
+    placeholderchange: CustomEvent<Rect | null>;
+}
+
+interface FilePondEntryListElementEvents {
+    addEventListener<K extends keyof FilePondEntryListElementEventMap>(
+        type: K,
+        listener: (
+            this: FilePondEntryListElement,
+            event: FilePondEntryListElementEventMap[K]
+        ) => void,
+        options?: boolean | AddEventListenerOptions
+    ): void;
+}
 
 // Props to create getters and setters for, the defaults for these props are set in the FilePondEntryList component
 export const COMPONENT_PROPS = [
@@ -54,7 +73,7 @@ const COMPONENT_METHODS = [
     'setAbortTaskCallback',
 ];
 
-const COMPONENT_EVENTS = ['dragentry', 'dragentrystart', 'dragentryend', 'updateplaceholder'];
+const COMPONENT_EVENTS = ['entrydrag', 'entrydragstart', 'entrydragend', 'placeholderchange'];
 
 export interface FilePondEntryListElement {
     /** Template to use for rendering different types */
@@ -157,71 +176,18 @@ export interface FilePondEntryListElement {
     setAbortTaskCallback(cb: (id: string, fn: Function) => void): void;
 }
 
-interface FilePondEntryListElementEvents {
-    addEventListener<K extends keyof HTMLElementEventMap>(
-        type: K | 'dragentrystart' | 'dragentry' | 'dragentryend' | 'updateplaceholder',
-        listener: (this: FilePondEntryListElement, ev: HTMLElementEventMap[K]) => any,
-        options?: boolean | AddEventListenerOptions
-    ): void;
-}
-
 /**
  * FilePondEntryListElement
  *
- * @event {CustomEvent} 'dragentrystart' - Fired when an entry drag operation starts
- * @event {CustomEvent} 'dragentry' - Fired when an entry is dragged
- * @event {CustomEvent} 'dragentryend' - Fired when an entry drag operation ends
- * @event {CustomEvent} 'updateplaceholder' - Fired when a placeholder rect is updated
+ * @event {CustomEvent<null>} 'entrydragstart' - Fired when an entry drag operation starts
+ * @event {CustomEvent<null>} 'entrydrag' - Fired when an entry is dragged
+ * @event {CustomEvent<null>} 'entrydragend' - Fired when an entry drag operation ends
+ * @event {CustomEvent<Rect | null>} 'placeholderchange' - Fired when a placeholder rect is updated
  */
 export class FilePondEntryListElement
     extends FilePondSvelteComponentElement
     implements FilePondEntryListElementEvents
 {
-    //
-    // /** Called when entries are set */
-    // onSetEntries: (entries: FilePondEntry[]) => void;
-
-    // /** Called when entry is inserted */
-    // onInsertEntry: (entry: FilePondEntry) => void;
-
-    // /** Called when entry is removed */
-    // onRemoveEntry: (detail: { entry: FilePondEntry; index: number[] }) => void;
-
-    // /** Set the callback to use when the view updates entries */
-    // setSetEntriesCallback: (cb: (entries: FilePondEntry[]) => void) => void;
-
-    // /** Set the callback to use when user wants to remove entry */
-    // setInsertEntriesCallback: (
-    //     cb: (entry: FilePondEntrySource | FilePondEntrySource[], index?: number | number[]) => void
-    // ) => void;
-
-    // /** Set the callback to use when user wants to remove entry */
-    // setRemoveEntriesCallback: (
-    //     cb: (
-    //         ...needles: Needle[]
-    //     ) =>
-    //         | ({ entry: FilePondEntry; index: number[] } | void)[]
-    //         | { entry: FilePondEntry; index: number[] }
-    //         | void
-    // ) => void;
-
-    // /** Set the callback to use for updating entry state */
-    // setUpdateEntryCallback: (cb: (needle: Needle, ...props: any[]) => void) => void;
-
-    // /** Set the callback to use to get the current entry state */
-    // setGetEntryExtensionStateCallback: (
-    //     cb: (entry: FilePondEntry) => { [key: string]: any }
-    // ) => void;
-
-    // /** Set the callback to use to update the entry status */
-    // setSetEntryExtensionStateCallback: (
-    //     cb: (entry: FilePondEntry, props: { [key: string]: any }) => void
-    // ) => void;
-
-    // setPushTaskCallback: (cb: (id: string, fn: Function) => void) => void;
-
-    // setAbortTaskCallback: (cb: (id: string, fn: Function) => void) => void;
-
     constructor() {
         super(FilePondEntryListApp, {
             properties: COMPONENT_PROPS,
@@ -236,7 +202,7 @@ export class FilePondEntryListElement
     connectedCallback() {
         super.connectedCallback();
 
-        this.addListener('updateentries', (e) => {
+        this.addListener('entrieschange', (e) => {
             setBooleanAttribute(this, 'empty', e.detail === 0);
         });
     }

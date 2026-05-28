@@ -9,7 +9,8 @@ export interface FileInputStoreOptions {
     /** An HTML Element or a QueryString selector */
     element?: HTMLInputElement | string;
 
-    elementUpdateEvent?: string;
+    /** Event to fire when value of file input is changed, defaults to "fileschange" */
+    valueChangeEvent?: string;
 }
 
 export const FileInputStore = createExtension({
@@ -19,7 +20,7 @@ export const FileInputStore = createExtension({
         element: undefined,
 
         // the event fired on the element when it's updated, defaults to 'update'
-        elementUpdateEvent: undefined,
+        valueChangeEvent: 'fileschange',
     } as FileInputStoreOptions,
     factory: ({ props, didSetProps }, { on }) => {
         /** The element to store data in */
@@ -53,10 +54,10 @@ export const FileInputStore = createExtension({
             }
 
             // event to fire on input update
-            const { elementUpdateEvent } = props;
+            const { valueChangeEvent } = props;
 
             // set files list to target element, filter out entries in error state
-            setFileInputFilesFromEntries(
+            const didUpdate = setFileInputFilesFromEntries(
                 targetElement,
 
                 // @ts-ignore we know these are file entries
@@ -68,11 +69,16 @@ export const FileInputStore = createExtension({
                     return !Object.values(entry.extension).some((extension) => {
                         return extension.status?.type === 'error';
                     });
-                }),
-                {
-                    customEventType: elementUpdateEvent,
-                }
+                })
             );
+
+            // exit if didn't update
+            if (!didUpdate) {
+                return;
+            }
+
+            // let others know the input value was changed
+            targetElement.dispatchEvent(new CustomEvent(valueChangeEvent));
         }
 
         // when an entry is updated we check if it's a Blob, if so we queue our Blob to File task, else we ignore

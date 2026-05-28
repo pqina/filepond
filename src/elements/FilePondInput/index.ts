@@ -96,20 +96,28 @@ const InteractionAttributes = ['disabled', 'accept', 'capture', 'webkitdirectory
 // these attributes when set on the custom element have their boolean values (which read as '') auto-converted to `true`
 const BooleanAttributes = ['disabled', 'required', 'webkitdirectory'];
 
+export interface FilePondInputElementEventMap {
+    change: CustomEvent<null>;
+    entrieschange: CustomEvent<FilePondEntry[]>;
+    connected: CustomEvent<null>;
+    disconnected: CustomEvent<null>;
+}
+
 interface FilePondInputElementEvents {
-    addEventListener<K extends keyof HTMLElementEventMap>(
-        type: K | 'change' | 'update' | 'connected',
-        listener: (this: FilePondInputElement, ev: HTMLElementEventMap[K]) => any,
+    addEventListener<K extends keyof FilePondInputElementEventMap>(
+        type: K,
+        listener: (this: FilePondInputElement, event: FilePondInputElementEventMap[K]) => void,
         options?: boolean | AddEventListenerOptions
     ): void;
 }
 
 /**
- * FilePond Custom Element Base
+ * FilePond Custom Input Element
  *
- * @event {CustomEvent} 'change' - Fired when form value changed
- * @event {CustomEvent} 'update' - Fired when entries list updated
- * @event {CustomEvent} 'connected' - Fired when connected to the DOM
+ * @event {CustomEvent<null>} 'change' - Fired when form value changed
+ * @event {CustomEvent<FilePondEntry[]>} 'entrieschange' - Fired when entries list updated
+ * @event {CustomEvent<null>} 'connected' - Fired when connected to the DOM
+ * @event {CustomEvent<null>} 'disconnected' - Fired when disconnected from the DOM
  */
 export class FilePondInputElement extends HTMLElementSafe implements FilePondInputElementEvents {
     /** FilePond element shadowRoot */
@@ -204,12 +212,6 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
             this.value = `${value}`;
             return;
         }
-
-        // // nobrowse
-        // if (name === 'nobrowse') {
-        //     this.noBrowse = isString(value);
-        //     return;
-        // }
 
         // make sure internal state is updated based on attribute changes
         this.#syncAttributeToInternals(name, value);
@@ -453,7 +455,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     }
 
     /** Returns a `structuredClone` of the current entries array */
-    get entries(): FilePondEntry[] {
+    get currentEntries(): FilePondEntry[] {
         return this.#entryTree.entries;
     }
 
@@ -807,7 +809,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
             // fire update events
             this.#entryTree.on('updateEntries', () => {
-                dispatchCustomEvent(this, 'update');
+                dispatchCustomEvent(this, 'entrieschange', { detail: this.currentEntries });
             })
         );
 
@@ -820,6 +822,9 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         // unsub subscriptions created when connecting to the DOM
         this.#connectedSubs.forEach((unsub) => unsub());
         this.#connectedSubs = [];
+
+        // the custom element is now disconnected
+        dispatchCustomEvent(this, 'disconnected');
     }
 
     //#region Form integration and validation
@@ -867,7 +872,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
     /** Proxy for `entries` getter */
     get value(): FilePondEntry[] {
-        return this.entries;
+        return this.currentEntries;
     }
 
     /** Sets up the field for validation */
@@ -892,7 +897,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         const { validationInvalidBusy = '', validationInvalidState = '' } = this.#locale || {};
 
         // need to know if extensions are currently working on files, if so, we show busy validity state
-        if (hasBusyEntries(this.entries)) {
+        if (hasBusyEntries(this.currentEntries)) {
             // already in custom busy state
             if (this.#internals.validity.customError === true) {
                 return;
@@ -908,7 +913,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         // get current generic extension states, these are prioritized over generic invalid entry states
         const extensionStates = {
             // add generic item state, for when an extension doesn't set a generic state on the extension manager (this allows for more extension specific error messages like "not all items have been stored")
-            ...(hasInvalidEntries(this.entries)
+            ...(hasInvalidEntries(this.currentEntries)
                 ? {
                       FilePondItemValidator: {
                           status: {

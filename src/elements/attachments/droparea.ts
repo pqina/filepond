@@ -15,10 +15,10 @@ export interface DropEventDetail extends DragEventDetail {
 
 interface DropAreaOptions {
     disabled?: boolean;
-    ondragitem?: (obj: DropEventDetail) => void;
-    ondragitemin?: (obj: DropEventDetail) => void;
-    ondragitemout?: (obj: DropEventDetail) => void;
-    ondropitem?: (obj: DropEventDetail) => void;
+    onitemdrag?: (obj: DropEventDetail) => void;
+    onitemdragin?: (obj: DropEventDetail) => void;
+    onitemdragout?: (obj: DropEventDetail) => void;
+    onitemdrop?: (obj: DropEventDetail) => void;
 }
 
 /** Target element can handle dropping of items */
@@ -119,7 +119,7 @@ export function droparea(options: DropAreaOptions = {}): (element: HTMLElement) 
             update(e);
 
             // let others know
-            dispatchEvent('dragitemin');
+            dispatchEvent('itemdragin');
         };
 
         const handleDragLeave = (e: DragEvent) => {
@@ -134,7 +134,7 @@ export function droparea(options: DropAreaOptions = {}): (element: HTMLElement) 
             update(e);
 
             // let others know
-            dispatchEvent('dragitemout');
+            dispatchEvent('itemdragout');
         };
 
         const handleDrag = debounce(
@@ -148,7 +148,7 @@ export function droparea(options: DropAreaOptions = {}): (element: HTMLElement) 
                 update(e);
 
                 // let others know
-                dispatchEvent('dragitem');
+                dispatchEvent('itemdrag');
             },
             {
                 beforeDebounce: (e: DragEvent) => {
@@ -168,7 +168,7 @@ export function droparea(options: DropAreaOptions = {}): (element: HTMLElement) 
             update(e);
 
             // let others know
-            dispatchEvent('dropitem', e.dataTransfer);
+            dispatchEvent('itemdrop', e.dataTransfer);
 
             // make sure everything is ready for next drag operation
             reset();

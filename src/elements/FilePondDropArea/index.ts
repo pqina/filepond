@@ -4,11 +4,19 @@ import FilePondDropArea from './index.svelte';
 import { roundPrecision } from '../../utils/math.js';
 import styles from './index.css?inline';
 import elementPaneStyles from '../components/ElementPane/index.css?inline';
+import type { Bounds } from '../../utils/bounds.js';
+
+export interface FilePondDropAreaElementEventMap {
+    rectchange: CustomEvent<Bounds>;
+}
 
 interface FilePondDropAreaElementEvents {
-    addEventListener<K extends keyof HTMLElementEventMap>(
-        type: K | 'updaterect',
-        listener: (this: FilePondDropAreaElement, ev: HTMLElementEventMap[K]) => any,
+    addEventListener<K extends keyof FilePondDropAreaElementEventMap>(
+        type: K,
+        listener: (
+            this: FilePondDropAreaElement,
+            event: FilePondDropAreaElementEventMap[K]
+        ) => void,
         options?: boolean | AddEventListenerOptions
     ): void;
 }
@@ -16,7 +24,7 @@ interface FilePondDropAreaElementEvents {
 /**
  * FilePondDropAreaElement
  *
- * @event {CustomEvent} 'updaterect' - Fired when the drop area element rect is updated.
+ * @event {CustomEvent<Bounds>} 'rectchange' - Fired when the drop area element rect is updated.
  */
 export class FilePondDropAreaElement
     extends FilePondSvelteComponentElement
@@ -38,13 +46,15 @@ export class FilePondDropAreaElement
             if (!rect) {
                 return;
             }
-            this.dispatchEvent(new CustomEvent('computerect', { detail: rect }));
+            this.dispatchEvent(new CustomEvent('rectcompute', { detail: rect }));
         });
 
         this._app.setUpdateRectCallback((rect: Rect | undefined) => {
             if (!rect) {
                 return;
             }
+
+            // so we not too many events are fired only on .1 change
             const width = rect ? roundPrecision(rect.width, 1) : null;
             const height = rect ? roundPrecision(rect.height, 1) : null;
             if (width === lastWidth && height === lastHeight) {
@@ -52,7 +62,8 @@ export class FilePondDropAreaElement
             }
             lastWidth = width;
             lastHeight = height;
-            this.dispatchEvent(new CustomEvent('updaterect', { detail: rect }));
+
+            this.dispatchEvent(new CustomEvent('rectchange', { detail: rect }));
         });
     }
 }

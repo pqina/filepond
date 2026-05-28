@@ -257,8 +257,8 @@
             return;
         }
 
-        dispatchCustomEvent(root, 'updateplaceholder', {
-            detail: rect,
+        dispatchCustomEvent(root, 'placeholderchange', {
+            detail: rect || null,
         });
     }
 
@@ -281,7 +281,7 @@
     // this is used to set the "empty" state on the parent element, when empty it doesn't render, this makes the main drop panel animate more nicely when last element is removed
     const activeEntries = $derived(Math.max(retainedEntries.length, currentEntries.length));
     $effect(() => {
-        dispatchCustomEvent(root, 'updateentries', {
+        dispatchCustomEvent(root, 'entrieschange', {
             detail: activeEntries,
         });
     });
@@ -759,7 +759,7 @@
 
     /** Handles item being grabbed */
     function handleGrabItem(detail: DragEventDetail) {
-        dispatchCustomEvent(root, 'dragentrystart');
+        dispatchCustomEvent(root, 'entrydragstart');
         dragInteraction = detail;
     }
 
@@ -768,7 +768,7 @@
 
     /** Handles item being dragged */
     function handleDragItem(detail: DragEventDetail) {
-        dispatchCustomEvent(root, 'dragentry');
+        dispatchCustomEvent(root, 'entrydrag');
         dragInteraction = detail;
     }
 
@@ -784,7 +784,7 @@
 
     /** Handles item being dropped */
     function handleDropItem(e: DropEventDetail | DragEventDetail) {
-        dispatchCustomEvent(root, 'dragentryend');
+        dispatchCustomEvent(root, 'entrydragend');
 
         // no valid drag interaction
         if (!dragState) {
@@ -1073,17 +1073,17 @@
         disabled: !drag || disabled,
         itemSelector: '[data-draggable]',
         grabTimeout: dragGrabTimeout,
-        ongrabitem: handleGrabItem,
-        ongrabitemcancel: handleGrabItemCancel,
-        ondragitem: handleDragItem,
-        ondropitem: handleDropItem,
+        onitemgrab: handleGrabItem,
+        onitemgrabcancel: handleGrabItemCancel,
+        onitemdrag: handleDragItem,
+        onitemdrop: handleDropItem,
     })}
     {@attach droparea({
         disabled: !drop || disabled,
-        ondragitem: handleDragItem,
-        ondragitemin: handleDragItemIn,
-        ondragitemout: handleDragItemOut,
-        ondropitem: handleDropItem,
+        onitemdrag: handleDragItem,
+        onitemdragin: handleDragItemIn,
+        onitemdragout: handleDragItemOut,
+        onitemdrop: handleDropItem,
     })}
     onkeydown={handleKeyDown}
     onkeyup={handleKeyUp}

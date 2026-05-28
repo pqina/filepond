@@ -23,12 +23,12 @@ interface DragAreaOptions {
     grabTimeout?: number;
     grabIgnoreMoveDistance?: number;
     itemSelector?: string;
-    ongrabitemattempt?: (obj: DragEventDetail) => void;
-    ongrabitemcancel?: (obj: DragEventDetail) => void;
-    ongrabitem?: (obj: DragEventDetail) => void;
-    ondragitemcancel?: (obj: DragEventDetail) => void;
-    ondragitem?: (obj: DragEventDetail) => void;
-    ondropitem?: (obj: DragEventDetail) => void;
+    onitemgrabattempt?: (obj: DragEventDetail) => void;
+    onitemgrabcancel?: (obj: DragEventDetail) => void;
+    onitemgrab?: (obj: DragEventDetail) => void;
+    onitemdragcancel?: (obj: DragEventDetail) => void;
+    onitemdrag?: (obj: DragEventDetail) => void;
+    onitemdrop?: (obj: DragEventDetail) => void;
 }
 
 export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) => void {
@@ -69,6 +69,7 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
         let pointerMoveUnsub: (() => void) | void;
         let pointerUpUnsub: (() => void) | void;
         let pointerCancelUnsub: (() => void) | void;
+        let pointerUpWindowUnsub: (() => void) | void;
 
         // holds timeout for when we consider something a grab action
         let grabAttemptTimeout: ReturnType<typeof setTimeout>;
@@ -91,6 +92,7 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
             element.releasePointerCapture(e.pointerId);
 
             // reset state
+            id = undefined;
             target = undefined;
             vector = undefined;
             startPosition = undefined;
@@ -108,6 +110,11 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
 
             // unsub from cancel
             pointerCancelUnsub = pointerCancelUnsub && pointerCancelUnsub();
+
+            // Chromium fix: unsub from window, after timeout so window up event can be handled first
+            setTimeout(() => {
+                pointerUpWindowUnsub = pointerUpWindowUnsub && pointerUpWindowUnsub();
+            }, 0);
         };
 
         /** Update the drag state based on passed pointer event */
@@ -219,7 +226,7 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
             update(e);
 
             // testing grab
-            dispatchEvent('grabitemattempt');
+            dispatchEvent('itemgrabattempt');
 
             // if pointer up in this phase we cancel the grab
             pointerUpUnsub && pointerUpUnsub();
@@ -254,7 +261,7 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
             pointerMoveUnsub && pointerMoveUnsub();
 
             // cancel
-            dispatchEvent('grabitemcancel');
+            dispatchEvent('itemgrabcancel');
 
             // clean up!
             reset(e);
@@ -280,11 +287,17 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
             pointerCancelUnsub && pointerCancelUnsub();
             pointerCancelUnsub = addListener(element, 'pointercancel', handleDragCancel);
 
+            // start Chromium fix
+            // where the pointerup sometimes doesn't fire but does fire on the window, easiest to reproduce by dragging an item offscreen quickly and then drag it back and try to release, comment out this code below to test
+            pointerUpWindowUnsub && pointerUpWindowUnsub();
+            pointerUpWindowUnsub = addListener(window, 'pointerup', handleDropWindowFixForChromium);
+            // end Chromium fix
+
             // get unique id for this drag operation
             id = getUniqueId();
 
             // now dragging
-            dispatchEvent('grabitem');
+            dispatchEvent('itemgrab');
         };
 
         /** Handle cancelling of drag */
@@ -295,7 +308,7 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
             update(e);
 
             // dropped
-            dispatchEvent('dragitemcancel');
+            dispatchEvent('itemdragcancel');
 
             // clean up!
             reset(e);
@@ -308,7 +321,7 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
                 update(e);
 
                 // now dragging
-                dispatchEvent('dragitem');
+                dispatchEvent('itemdrag');
             },
             {
                 beforeDebounce: (e: PointerEvent) => {
@@ -329,10 +342,21 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
             update(e);
 
             // dropped
-            dispatchEvent('dropitem');
+            dispatchEvent('itemdrop');
 
             // clean up!
             reset(e);
+        };
+
+        /** To fix weird Chromium bug where sometimes the pointerup event doesn't fire, everything works fine on Firefox and Safari */
+        const handleDropWindowFixForChromium = (e: PointerEvent) => {
+            // drop was handled correctly if id was reset (by reset function)
+            if (!id) {
+                return;
+            }
+
+            // we need to handle a drop
+            handleDrop(e);
         };
 
         // listen to events

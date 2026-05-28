@@ -1,5 +1,10 @@
 import type { ExtensionFactory } from '../../core/extensionManager.ts';
-import type { AnimationMode, Locale, SpringOptions } from '../../types/index.js';
+import type {
+    AnimationMode,
+    FilePondInputElementEventMap,
+    Locale,
+    SpringOptions,
+} from '../../types/index.js';
 import { FilePondInputElement } from '../FilePondInput/index.js';
 import { FilePondEntryListElement } from '../FilePondEntryList/index.js';
 import { FilePondDropAreaElement } from '../FilePondDropArea/index.js';
@@ -33,16 +38,23 @@ import { createFilePondEntryList } from '../../templates/entry.js';
 
 // extensions
 import { createFilePondExtensionSet } from './createFilePondExtensionSet.js';
+import type { Bounds } from '../../utils/bounds.js';
+import type { Rect } from '../../utils/rect.js';
 
 const SharedProps = ['springDefaults', 'animations'];
 
 // This holds the initial options object passed to `defineFilePond`, we store this value so we can assign the initialOptions to FilePond components created _after_ the first `defineFilePond` call.
 let globalInitialOptions: DefineFilePondOptions | undefined;
 
+export interface FilePondElementEventMap {
+    rectcompute: CustomEvent<Bounds>;
+    rectchange: CustomEvent<Bounds>;
+}
+
 interface FilePondElementEvents {
-    addEventListener<K extends keyof HTMLElementEventMap>(
-        type: K | 'computerect' | 'updaterect',
-        listener: (this: FilePondElement, ev: HTMLElementEventMap[K]) => any,
+    addEventListener<K extends keyof FilePondElementEventMap>(
+        type: K,
+        listener: (this: FilePondInputElement, event: FilePondElementEventMap[K]) => void,
         options?: boolean | AddEventListenerOptions
     ): void;
 }
@@ -50,8 +62,8 @@ interface FilePondElementEvents {
 /**
  * FilePondElement
  *
- * @event {CustomEvent} 'computerect' - Fired when the element rect has been computed
- * @event {CustomEvent} 'updaterect' - Fired when the element visual rect has been updated
+ * @event {CustomEvent<Bounds>} 'rectcompute' - Fired when the element rect has been computed
+ * @event {CustomEvent<Bounds>} 'rectchange' - Fired when the element visual rect has been updated
  */
 export class FilePondElement extends FilePondInputElement implements FilePondElementEvents {
     // Child components
@@ -278,18 +290,18 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
             }),
 
             // did compute target rect
-            addListener(dropArea, 'computerect', (e: CustomEvent) => {
+            addListener(dropArea, 'rectcompute', (e: CustomEvent) => {
                 if (!e.detail) {
                     return;
                 }
 
                 const computedRect = e.detail;
 
-                dispatchCustomEvent(this, 'computerect', { detail: computedRect });
+                dispatchCustomEvent(this, 'rectcompute', { detail: computedRect });
             }),
 
             // did update visual rect
-            addListener(dropArea, 'updaterect', (e: CustomEvent) => {
+            addListener(dropArea, 'rectchange', (e: CustomEvent) => {
                 if (!e.detail) {
                     return;
                 }
@@ -301,22 +313,22 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
                 this._root.style.setProperty('--height', animatedRect.height);
 
                 // did compute rect
-                dispatchCustomEvent(this, 'updaterect', { detail: animatedRect });
+                dispatchCustomEvent(this, 'rectchange', { detail: animatedRect });
             }),
 
             // link up placeholder position with drop indicator
-            addListener(entryList, 'updateplaceholder', (e) => {
+            addListener(entryList, 'placeholderchange', (e: CustomEvent<Rect | null>) => {
                 dropIndicator.indicatorRect = e.detail;
             }),
 
             // these two listeners toggle the dragging attribute to the file-pond element, we do this so we can move the file-pond element that is being interacted with to the front, so the dragged item also renders on top. Additionally they prevent interaction with slot content and attribution link while dragging
-            addListener(entryList, 'dragentrystart', () => {
+            addListener(entryList, 'entrydragstart', () => {
                 setBooleanAttribute(this, 'dragging', true);
                 this._slot.inert = true;
                 this.#attributionLink.inert = true;
             }),
 
-            addListener(entryList, 'dragentryend', () => {
+            addListener(entryList, 'entrydragend', () => {
                 setBooleanAttribute(this, 'dragging', false);
                 this._slot.inert = false;
                 this.#attributionLink.inert = false;
