@@ -1,26 +1,24 @@
 import { OutputChunk } from 'rollup';
 import { Plugin } from 'vite';
 
-export function addBanner(options?: { banner: string }): Plugin {
-    const { banner } = options || {};
+export function replaceString(options?: { patterns: { [key: string]: string } }): Plugin {
+    const { patterns } = options || {};
 
     return {
-        name: 'vite-plugin-banner',
+        name: 'vite-plugin-replace-string',
         generateBundle(_, bundle) {
-            if (!banner) {
+            if (!patterns) {
                 return;
             }
             for (const [fileName, file] of Object.entries(bundle)) {
-                if (fileName.startsWith('vendor')) {
-                    continue;
-                }
-
                 if (file.type !== 'chunk') {
                     continue;
                 }
 
                 const chunk = file as OutputChunk;
-                chunk.code = banner + '\n' + chunk.code;
+                Object.entries(patterns).forEach(([needle, replacement]) => {
+                    chunk.code = chunk.code.replaceAll(needle, replacement);
+                });
             }
         },
     };

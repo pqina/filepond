@@ -15,7 +15,7 @@
         "test": "vitest run --config vitest.config.ts",
         "build": "npm run test && npm run esm && npm run cdn && npm run types",
         "esm": "rm -rf ./esm && vite build",
-        "types": "rm -rf ./types && tsc -p ./tsconfig.build.json && cp src/types/*.d.ts types && echo 'import \"./custom-element.js\";\nimport \"./default-extensions.js\";' >> types/index.d.ts",
+        "types": "rm -rf ./types && tsc -p ./tsconfig.build.json && cp src/types/*.d.ts types && echo 'import \"./custom-element.js\";\nimport \"./default-extensions.js\";' >> types/index.d.ts && cp -rf ./integrations/* ./types && echo \"export {};\" > ./esm/noop.js",
         "cdn": "rm -rf ./cdn && rollup -c rollup.config.js",
         "dev-cdn": "npx ws --stack lws-redirect lws-static --redirect 'http://localhost:8000/cdn-redirect/ -> http://localhost:8000/cdn/'",
         "prepublishOnly": "npm run build && node prepublish.js"
@@ -23,8 +23,7 @@
     "files": [
         "./esm",
         "./cdn",
-        "./types",
-        "./integrations"
+        "./types"
     ],
     "browser": "./cdn/index.js",
     "module": "./esm/index.js",
@@ -82,9 +81,9 @@
             "types": "./types/dev/index.d.ts",
             "import": "./esm/dev/index.js"
         },
-        "./react": {
-            "types": "./integrations/react/types.d.ts",
-            "import": "./integrations/noop.js"
+        "./types/react": {
+            "types": "./types/react.d.ts",
+            "import": "./esm/noop.js"
         }
     },
     "devDependencies": {

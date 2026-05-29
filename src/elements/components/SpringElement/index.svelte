@@ -393,6 +393,10 @@
 
     // this animates the element to new positions
     function dispatchSpringEnd() {
+        // don't call when destroyed
+        if (isDestroyed) {
+            return;
+        }
         onspringcomplete({ opacity: springedOpacity.current, scale: springedScale.current });
     }
 
@@ -738,7 +742,9 @@
     });
 
     //#endregion
+    let isDestroyed = false;
     onDestroy(() => {
+        isDestroyed = true;
         removeSpringElement(springElementContext);
     });
 </script>

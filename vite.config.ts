@@ -6,6 +6,7 @@ import { preventConsoleUsage } from './build/preventConsoleUsage.js';
 import { prepareWorkers } from './build/prepareWorkers.js';
 import { fullReloadAlways } from './build/fullReloadAlways.js';
 import { addBanner } from './build/addBanner.js';
+import { replaceString } from './build/replaceString.js';
 
 const srcDir = './src';
 const destDir = './esm';
@@ -72,6 +73,11 @@ export default defineConfig(({ command }) => ({
             destDir,
         }),
         fullReloadAlways(),
+        replaceString({
+            patterns: {
+                'https://svelte.dev/e/': '',
+            },
+        }),
         addBanner({
             banner,
         }),
@@ -102,9 +108,9 @@ export default defineConfig(({ command }) => ({
                 preserveModulesRoot: 'src',
                 chunkFileNames: '[name].js',
                 entryFileNames: (chunkInfo) => {
-                    // Things from node modules are svelte deps
+                    // Things from node modules are vendor deps
                     if (chunkInfo.name.includes('node_modules')) {
-                        return chunkInfo.name.replace('node_modules', 'svelte') + '.js';
+                        return chunkInfo.name.replace('node_modules', 'vendor') + '.js';
                     }
                     // To fix 'The $ prefix is reserved and cannot be used for variables or imports' when used in a Svelte project
                     else if (chunkInfo.name.includes('.svelte')) {
