@@ -82,7 +82,7 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
         });
     }
 
-    /** Automatically passes value to child elements, for usage see `FilePondSvelteComponentElement` */
+    /** Automatically passes `animations` setting to child elements, for usage see `FilePondSvelteComponentElement` */
     set animations(value: AnimationMode) {
         Object.values(this.#components).forEach((element) => {
             element.animations = value;
