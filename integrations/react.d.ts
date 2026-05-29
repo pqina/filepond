@@ -1,19 +1,8 @@
-import type {
-    FilePondElement,
-    FilePondElementEventMap,
-    FilePondInputElementEventMap,
-} from 'filepond';
-
+import type { FilePondElement } from 'filepond';
+import type { FilePondElementEventMap, FilePondElementProps } from './helpers';
 import type { DetailedHTMLProps, HTMLAttributes } from 'react';
 
-/** Used to Filter out non function keys from the FilePondElement interface */
-type NonFunctionKeys<T> = {
-    [K in keyof T]: T[K] extends (...args: never[]) => unknown ? never : K;
-}[keyof T];
-
-type NonFunctionProps<T> = Pick<T, NonFunctionKeys<T>>;
-
-/** Creates Rect event handlers from a passed event map (the Capture variant is for React 19 event capture mode) */
+/** Creates React event handlers from a passed event map (the Capture variant is for React 19 event capture mode) */
 type CustomElementEventProps<EventMap> = {
     [K in keyof EventMap as K extends string ? `on${K}` : never]?: (event: EventMap[K]) => void;
 } & {
@@ -22,13 +11,11 @@ type CustomElementEventProps<EventMap> = {
     ) => void;
 };
 
-/** Select the relevant props from the FilePondElement interface & add events from relevant event maps */
-type FilePondElementPropsAndEvents = Partial<
-    NonFunctionProps<Omit<FilePondElement, keyof HTMLElement>>
-> &
-    CustomElementEventProps<FilePondElementEventMap & FilePondInputElementEventMap>;
+// Merge Props and Events
+type FilePondElementPropsAndEvents = FilePondElementProps &
+    CustomElementEventProps<FilePondElementEventMap>;
 
-/** Merge default React element HTML attributes with the FilePondElementProps, the first part adds react html attributes and types the element ref (for example in an event) as FilePondElement */
+/** Merge default React element HTML attributes with the FilePondElementPropsAndEvents, the first part adds React html attributes and types the element ref (for example in an event) as FilePondElement */
 type FilePondReactElement = DetailedHTMLProps<HTMLAttributes<FilePondElement>, FilePondElement> &
     FilePondElementPropsAndEvents;
 

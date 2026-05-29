@@ -15,7 +15,7 @@
         "test": "vitest run --config vitest.config.ts",
         "build": "npm run test && npm run esm && npm run cdn && npm run types",
         "esm": "rm -rf ./esm && vite build",
-        "types": "rm -rf ./types && tsc -p ./tsconfig.build.json && cp src/types/*.d.ts types && echo 'import \"./custom-element.js\";\nimport \"./default-extensions.js\";' >> types/index.d.ts && cp -rf ./integrations/* ./types && echo \"export {};\" > ./esm/noop.js",
+        "types": "rm -rf ./types && tsc -p ./tsconfig.build.json && cp src/types/*.d.ts types && echo 'import \"./custom-element.js\";\nimport \"./default-extensions.js\";' >> types/index.d.ts && cp -rf ./integrations ./types/integrations && echo \"export {};\" > ./esm/noop.js",
         "cdn": "rm -rf ./cdn && rollup -c rollup.config.js",
         "dev-cdn": "npx ws --stack lws-redirect lws-static --redirect 'http://localhost:8000/cdn-redirect/ -> http://localhost:8000/cdn/'",
         "prepublishOnly": "npm run build && node prepublish.js"
@@ -82,7 +82,15 @@
             "import": "./esm/dev/index.js"
         },
         "./types/react": {
-            "types": "./types/react.d.ts",
+            "types": "./types/integrations/react.d.ts",
+            "import": "./esm/noop.js"
+        },
+        "./types/svelte": {
+            "types": "./types/integrations/svelte.d.ts",
+            "import": "./esm/noop.js"
+        },
+        "./types/vue": {
+            "types": "./types/integrations/vue.d.ts",
             "import": "./esm/noop.js"
         }
     },
