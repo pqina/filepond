@@ -92,6 +92,10 @@
         "./types/vue": {
             "types": "./types/integrations/vue.d.ts",
             "import": "./esm/noop.js"
+        },
+        "./types/solid": {
+            "types": "./types/integrations/solid.d.ts",
+            "import": "./esm/noop.js"
         }
     },
     "devDependencies": {
