@@ -1,6 +1,11 @@
 export { default as NodeList } from './index.svelte';
 
-import { type TemplateNode, type NodeContext } from '../../common/nodeTree.js';
+import {
+    type TemplateNode,
+    type NodeContext,
+    type ComponentNode,
+    type ElementNode,
+} from '../../common/nodeTree.js';
 
 export interface NodeListOptions {
     /** The nodes to render */
@@ -20,7 +25,7 @@ export interface NodeListOptions {
 
     /** Allows node manipulation before rendering */
     beforeRenderNode: (
-        node: TemplateNode,
+        node: ComponentNode | ElementNode,
         context: NodeContext,
         sharedContext: NodeContext
     ) => TemplateNode | false | void;

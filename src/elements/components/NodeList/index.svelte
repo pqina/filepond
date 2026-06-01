@@ -1,12 +1,14 @@
 <script lang="ts">
     import {
         type TemplateNode,
+        type ComponentNode,
         type NodeContext,
         type SwitchNode,
         isSwitchNode,
         isTemplateNode,
         isComponentNode,
         isElementNode,
+        type ElementNode,
     } from '../../common/nodeTree.js';
     import { type Component, untrack } from 'svelte';
     import { type Locale } from '../../../types/index.js';
@@ -176,18 +178,22 @@
             preparedNodes.push(node);
         }
 
+        function getNodeKey(key: string | undefined, index: number): string {
+            return `${key ?? index}`;
+        }
+
         return preparedNodes
             .map((node, index) => {
                 // convert strings to nodes so they can be used in #each, if item is a string we use index as key
                 if (isString(node)) {
                     return {
                         key: index,
-                        content: node,
+                        children: node,
                     };
                 }
 
                 // handle springed context data
-                if (isTemplateNode(node) && isFunction(node.spring)) {
+                if (!isSwitchNode(node) && isFunction(node.spring)) {
                     const springEntries = Object.entries(node.spring(treeContext));
                     untrack(() => {
                         springEntries.forEach(
@@ -217,7 +223,7 @@
                     children,
                     transition,
                     context: nodeContext,
-                } = node;
+                } = node as ComponentNode | ElementNode;
 
                 // merge routes
                 if (nodeRoutes) {
@@ -277,11 +283,11 @@
                     const { component, item, props } = node;
                     return beforeRenderNode(
                         {
-                            key: key ?? index,
-                            Component: component,
+                            key: getNodeKey(key, index),
+                            component,
                             props: computeObjectWithResources(props, mergedNodeContext, resources),
                             item,
-                            content,
+                            children: content,
                             context: mergedNodeContext,
                             transition,
                             routes: computedRoutes,
@@ -295,10 +301,10 @@
                     const { attrs, tag } = node;
                     return beforeRenderNode(
                         {
-                            key: key ?? index,
+                            key: getNodeKey(key, index),
                             tag,
                             attrs: computeObjectWithResources(attrs, mergedNodeContext, resources),
-                            content,
+                            children: content,
                             context: mergedNodeContext,
                             transition,
                             routes: computedRoutes,
@@ -312,15 +318,15 @@
     });
 </script>
 
-{#each computedNodes as { key, tag, attrs, Component, props, content, context, routes, item, transition } (key)}
+{#each computedNodes as { key, tag, attrs, component, props, children, context, routes, item, transition } (key)}
     {#if transition}
         {#if transition.when(context)}
             <svelte:element this={'div'} transition:transition.fn={transition}>
-                {@render node(key, tag, attrs, Component, props, content, context, routes, item)}
+                {@render node(key, tag, attrs, component, props, children, context, routes, item)}
             </svelte:element>
         {/if}
     {:else}
-        {@render node(key, tag, attrs, Component, props, content, context, routes, item)}
+        {@render node(key, tag, attrs, component, props, children, context, routes, item)}
     {/if}
 {/each}
 

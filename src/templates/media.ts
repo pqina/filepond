@@ -1,4 +1,3 @@
-import { type FilePondEntry } from '../types/index.js';
 import { type EntryListFunctions } from '../types/index.js';
 import { type MediaVideoOptions } from '../elements/FilePondEntryList/components/MediaVideo/index.js';
 import {
@@ -8,7 +7,6 @@ import {
     getExtensionByAction,
     hasExtensionWithProp,
     hasExtensionWithStatusCode,
-    hasExtensionWithStatusType,
     whenEntryHasAction,
     whenEntryIs,
     whenEntryNotHasStatus,
