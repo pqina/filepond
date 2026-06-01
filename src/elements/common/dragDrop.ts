@@ -1,7 +1,7 @@
 import { boundsFromRect, type Bounds } from '../../utils/bounds.js';
 import { rectCenter } from '../../utils/rect.js';
 import { isVectorPointingTowardsPoint, type Vector } from '../../utils/vector.js';
-import { getClosestElement } from './getClosestElement.js';
+import { getClosestElement } from './dom.js';
 
 /** Gets the target index for a Drag interaction */
 export function getDragTargetIndex(

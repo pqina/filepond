@@ -24,6 +24,7 @@
     import { Spring } from 'svelte/motion';
     import { arrayWrap } from '../../../utils/array.js';
     import NodeList from './index.svelte';
+    import { getSuspensionObserver } from '../../common/dom.js';
 
     let {
         nodes,
@@ -316,12 +317,21 @@
             })
             .filter(Boolean);
     });
+
+    // we need this so when a transition outro starts we can mark the transition node as suspended and children of the node can stop measuring
+    const SuspensionObserver = getSuspensionObserver();
 </script>
 
 {#each computedNodes as { key, tag, attrs, component, props, children, context, routes, item, transition } (key)}
     {#if transition}
-        {#if transition.when(context)}
-            <svelte:element this={'div'} transition:transition.fn={transition}>
+        {#if transition?.when(context)}
+            <svelte:element
+                this={'div'}
+                transition:transition.fn={transition}
+                onoutrostart={(e) => {
+                    SuspensionObserver.suspend(e.currentTarget);
+                }}
+            >
                 {@render node(key, tag, attrs, component, props, children, context, routes, item)}
             </svelte:element>
         {/if}

@@ -6,6 +6,25 @@ import {
     sizeUpdate,
     sizeUpdateWithSize,
 } from '../../utils/size.js';
+import { type SuspensionObserver, getSuspensionObserver } from '../common/dom.js';
+
+/**
+ * Observe nodes being suspended so we can stop measuring them
+ */
+let SuspensionObserver: SuspensionObserver;
+function createSuspensionObserver() {
+    SuspensionObserver = getSuspensionObserver();
+
+    // when a node is suspended we check if it contains a measured element, if so, we stop measuring
+    SuspensionObserver.on('suspend', (suspendedNode) => {
+        for (const element of nodeCallbacks.values()) {
+            if (!suspendedNode.contains(element)) {
+                continue;
+            }
+            nodeSuspended.set(element, true);
+        }
+    });
+}
 
 // to compare rectangles
 const sizeTest = sizeCreate();
@@ -16,8 +35,15 @@ const nodeSizes = new Map();
 // Stores onresize callbacks
 const nodeCallbacks = new Map();
 
+// Used to mark nodes as suspended
+const nodeSuspended = new Map();
+
 /** Updates the node.rect property */
 const updateNodeSize = (node: Element, width: number, height: number) => {
+    if (nodeSuspended.has(node)) {
+        return;
+    }
+
     if (!nodeSizes.has(node)) {
         nodeSizes.set(node, sizeCreate());
     }
@@ -68,6 +94,11 @@ export function resizable(options: { onresize?: (size: Size) => void } = {}): {
             createResizeObserver();
         }
 
+        // We only need one reference to the suspension observer
+        if (!SuspensionObserver) {
+            createSuspensionObserver();
+        }
+
         // register node
         nodeCallbacks.set(node, onresize);
 
@@ -83,6 +114,9 @@ export function resizable(options: { onresize?: (size: Size) => void } = {}): {
 
             // Remove node callback
             nodeCallbacks.delete(node);
+
+            // Remove suspended node
+            nodeSuspended.delete(node);
 
             // Test if all nodes have been removed, if so, remove resizeObserver
             resizeObserverObservedNodes--;

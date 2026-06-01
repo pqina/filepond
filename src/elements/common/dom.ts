@@ -1,8 +1,8 @@
 import type { Vector } from '../../utils/vector.js';
 import type { Bounds } from '../../utils/bounds.js';
 import type { Rect } from '../../utils/rect.js';
-
 import { boundsOutsideBounds } from '../../utils/bounds.js';
+import { pubsub } from '../../utils/pubsub.js';
 
 /** Search a list of elements around a position within bounds */
 export function getClosestElement(
@@ -55,4 +55,31 @@ function getDistanceToNodeRect(nodeRect: Rect, position: Vector) {
     const dx = Math.max(nodeRect.x - position.x, 0, position.x - (nodeRect.x + nodeRect.width));
     const dy = Math.max(nodeRect.y - position.y, 0, position.y - (nodeRect.y + nodeRect.height));
     return Math.hypot(dx, dy);
+}
+
+//
+function createSuspensionObserver(): SuspensionObserver {
+    const { on, pub } = pubsub();
+
+    return {
+        on,
+        suspend(node: HTMLElement) {
+            node.setAttribute('suspend', '');
+            pub('suspend', node);
+        },
+    };
+}
+
+let suspensionObserver: SuspensionObserver;
+
+export interface SuspensionObserver {
+    on: (event: string, callback: (detail?: any) => void) => () => void;
+    suspend: (node: HTMLElement) => void;
+}
+
+export function getSuspensionObserver() {
+    if (!suspensionObserver) {
+        suspensionObserver = createSuspensionObserver();
+    }
+    return suspensionObserver;
 }

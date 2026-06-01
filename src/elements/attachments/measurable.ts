@@ -6,6 +6,7 @@ import {
     boundsUpdateWithBounds,
 } from '../../utils/bounds.js';
 import { noop } from '../../utils/placeholder.js';
+import { type SuspensionObserver, getSuspensionObserver } from '../common/dom.js';
 
 // Margin around viewport we use when determining if an item is in view
 export const VIEWPORT_MARGIN = 100;
@@ -37,6 +38,24 @@ function createWindowVisibilityObserver() {
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     handleVisibilityChange();
+}
+
+/**
+ * Observe nodes being suspended so we can stop measuring them
+ */
+let SuspensionObserver: SuspensionObserver;
+function createSuspensionObserver() {
+    SuspensionObserver = getSuspensionObserver();
+
+    // when a node is suspended we check if it contains a measured element, if so, we stop measuring
+    SuspensionObserver.on('suspend', (suspendedNode) => {
+        for (const element of elements) {
+            if (!suspendedNode.contains(element)) {
+                continue;
+            }
+            nodeSuspended.set(element, true);
+        }
+    });
 }
 
 /**
@@ -125,6 +144,7 @@ const boundsTest = boundsCreate();
 // Stores all nodes and their current rectangles
 const nodeBounds = new Map();
 const nodeVisibility = new Map();
+const nodeSuspended = new Map();
 
 /** Updates the bounds property */
 const updateNodeBounds = (
@@ -134,8 +154,8 @@ const updateNodeBounds = (
     bottom: number,
     left: number
 ) => {
-    // could've been deregistered before this call
-    if (!nodeCallbacks.has(node)) {
+    // could've been deregistered before this call, or was suspended before this call
+    if (!nodeCallbacks.has(node) || nodeSuspended.has(node)) {
         return;
     }
 
@@ -158,6 +178,10 @@ const updateNodeBounds = (
     // Update existing bounds with new bounds
     boundsUpdateWithBounds(bounds, boundsTest);
 
+    // if (node.closest('[suspended]')) {
+    //     return bounds;
+    // }
+
     // new bounds
     nodeCallbacks.get(node)(bounds);
 
@@ -176,12 +200,8 @@ const elements: Element[] = [];
 /** Measure loop */
 let frame: number | null = null;
 function tick() {
-    // measure visible rectangles
-    elements
-        // remove invisible items
-        // .filter((element) => nodeVisibility.get(element))
-        // measure rectangles
-        .forEach(measureClientRect);
+    // measure rectangles
+    elements.forEach(measureClientRect);
 
     // wait for next frame
     frame = requestAnimationFrame(tick);
@@ -234,13 +254,18 @@ export function measurable(
             createWindowVisibilityObserver();
         }
 
+        // Start listening for nodes being suspended
+        if (!SuspensionObserver) {
+            createSuspensionObserver();
+        }
+
         // register node
         nodeCallbacks.set(node, onmeasure);
 
         // Start observing this node, will get also get its initial position
         intersectionObserver?.observe(node);
 
-        return () => {
+        function destroy() {
             // remove element
             const index = elements.indexOf(node);
 
@@ -251,6 +276,7 @@ export function measurable(
 
             // stop observing
             intersectionObserver?.unobserve(node);
+            nodeSuspended.delete(node);
             nodeVisibility.delete(node);
             nodeBounds.delete(node);
             nodeCallbacks.delete(node);
@@ -259,6 +285,7 @@ export function measurable(
             if (!elements.length) {
                 stop();
             }
-        };
+        }
+        return destroy;
     };
 }
