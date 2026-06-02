@@ -288,7 +288,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
 
                 setEntryExtensionStatus(entry, {
                     type: Status.System,
-                    code: 'RESTORE_BUSY',
+                    code: 'STORE_RESTORE_BUSY',
                     progress: Infinity,
                 });
 
@@ -324,7 +324,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                                 // done!
                                 status: {
                                     type: Status.System,
-                                    code: 'RESTORE_COMPLETE',
+                                    code: 'STORE_RESTORE_COMPLETE',
                                 },
                             },
                         },
@@ -333,7 +333,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                     if (didAbort(signal, error)) {
                         setEntryExtensionStatus(entry, {
                             type: Status.System,
-                            code: 'RESTORE_ABORT',
+                            code: 'STORE_RESTORE_ABORT',
                         });
                         return;
                     }
@@ -341,7 +341,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                     // set error state
                     setEntryExtensionStatus(entry, {
                         type: Status.Error,
-                        code: 'RESTORE_ERROR',
+                        code: 'STORE_RESTORE_ERROR',
                         values: { error },
                     });
 
@@ -365,7 +365,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                     // set base state
                     setEntryExtensionStatus(entry, {
                         type: Status.System,
-                        code: 'RELEASE_BUSY',
+                        code: 'STORE_RELEASE_BUSY',
                         progress: Infinity,
                     });
 
@@ -410,7 +410,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                                         canStore: true,
                                         status: {
                                             type: Status.System,
-                                            code: 'RELEASE_COMPLETE',
+                                            code: 'STORE_RELEASE_COMPLETE',
                                         },
                                     },
                                 },
@@ -427,7 +427,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                                 [extensionName]: {
                                     status: {
                                         type: Status.System,
-                                        code: 'RELEASE_COMPLETE',
+                                        code: 'STORE_RELEASE_COMPLETE',
                                     },
                                 },
                             },
@@ -442,7 +442,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                     if (didAbort(signal, error)) {
                         setEntryExtensionStatus(entry, {
                             type: Status.System,
-                            code: 'RELEASE_ABORT',
+                            code: 'STORE_RELEASE_ABORT',
                         });
                         return;
                     }
@@ -450,7 +450,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                     // set error state
                     setEntryExtensionStatus(entry, {
                         type: Status.Error,
-                        code: 'RELEASE_ERROR',
+                        code: 'STORE_RELEASE_ERROR',
                         values: { error },
                     });
 
@@ -472,7 +472,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                 const value = entry.state[valueKey];
                 const couldRelease = !isNullOrUndefined(value);
                 const status = getEntryExtensionStatus(entry);
-                const canRelease = status?.code !== 'RESTORE_ERROR';
+                const canRelease = status?.code !== 'STORE_RESTORE_ERROR';
 
                 // can't release as was not restored
                 if (!couldRelease || !canRelease) {
@@ -528,10 +528,10 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
 
                 // we have a value, so now we need to determine if the current file (that trigger this updated) is the stored file
 
-                // we just restored this file as the RESTORE_COMPLETE state is set and the file object was updated
+                // we just restored this file as the STORE_RESTORE_COMPLETE state is set and the file object was updated
                 // 1. this means we have a value, or we could not have restored the file
                 // 2. the value is still set because it's still relevant
-                if (status.code === 'RESTORE_COMPLETE') {
+                if (status.code === 'STORE_RESTORE_COMPLETE') {
                     return;
                 }
 
