@@ -106,6 +106,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: 'Tókst ekki að hlaða skránni.',
     storeRestoreProgress: 'Hleð {{progress}}%',
 
     storeStorageQueued: 'Bíð eftir upphali',

@@ -106,6 +106,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: '파일을 불러올 수 없습니다.',
     storeRestoreProgress: '{{progress}}% 불러오는 중',
 
     storeStorageQueued: '업로드 대기 중',

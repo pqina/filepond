@@ -106,6 +106,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: 'Nie udało się załadować pliku.',
     storeRestoreProgress: 'Ładowanie {{progress}}%',
 
     storeStorageQueued: 'Oczekiwanie na przesłanie',

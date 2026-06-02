@@ -106,6 +106,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: 'Le fichier n’a pas pu être chargé.',
     storeRestoreProgress: 'Chargement {{progress}}%',
 
     storeStorageQueued: 'En attente de téléversement',

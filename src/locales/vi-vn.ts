@@ -106,6 +106,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: 'Không thể tải tệp.',
     storeRestoreProgress: 'Đang tải {{progress}}%',
 
     storeStorageQueued: 'Chờ tải lên',

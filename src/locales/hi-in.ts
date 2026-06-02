@@ -106,6 +106,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: 'फ़ाइल लोड नहीं हो सकी।',
     storeRestoreProgress: '{{progress}}% लोड हो रहा है',
 
     storeStorageQueued: 'अपलोड की प्रतीक्षा में',

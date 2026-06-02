@@ -106,6 +106,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: 'Dosya yüklenemedi.',
     storeRestoreProgress: '{{progress}}% yükleniyor',
 
     storeStorageQueued: 'Yükleme bekleniyor',

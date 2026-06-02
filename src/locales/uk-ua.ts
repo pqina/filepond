@@ -106,6 +106,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: 'Не вдалося завантажити файл.',
     storeRestoreProgress: 'Завантаження {{progress}}%',
 
     storeStorageQueued: 'Очікування завантаження',

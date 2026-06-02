@@ -106,6 +106,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: 'Tiedostoa ei voitu ladata.',
     storeRestoreProgress: 'Ladataan {{progress}}%',
 
     storeStorageQueued: 'Odottaa latausta',

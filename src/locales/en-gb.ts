@@ -109,16 +109,12 @@ export const media = {
 };
 
 export const store = {
+    storeError: 'Failed to store file.',
+    storeRestoreError: 'Failed to load file.',
     storeRestoreProgress: 'Loading {{progress}}%',
-
     storeStorageQueued: 'Awaiting upload',
     storeStorageProgress: 'Uploading {{progress}}%',
     storeStorageComplete: 'Upload complete',
-
-    // item status block
-    storeError: 'Failed to store file.',
-
-    // list validation status
     storeAwaitingCompletion: 'Not all files have been stored.',
 };
 

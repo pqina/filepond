@@ -106,6 +106,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: 'ファイルを読み込めませんでした。',
     storeRestoreProgress: '{{progress}}% を読み込み中',
 
     storeStorageQueued: 'アップロード待機中',

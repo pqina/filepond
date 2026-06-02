@@ -106,6 +106,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: 'Det gick inte att ladda filen.',
     storeRestoreProgress: 'Laddar {{progress}}%',
 
     storeStorageQueued: 'Väntar på uppladdning',

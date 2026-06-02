@@ -106,6 +106,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: 'Αποτυχία φόρτωσης αρχείου.',
     storeRestoreProgress: 'Φόρτωση {{progress}}%',
 
     storeStorageQueued: 'Αναμονή για μεταφόρτωση',

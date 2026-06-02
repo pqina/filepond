@@ -106,6 +106,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: 'تعذر تحميل الملف.',
     storeRestoreProgress: 'جارٍ التحميل {{progress}}%',
 
     storeStorageQueued: 'في انتظار الرفع',

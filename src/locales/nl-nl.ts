@@ -113,6 +113,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: 'Bestand kon niet worden geladen.',
     storeRestoreProgress: '{{progress}}% laden',
 
     storeStorageQueued: 'Wachten op upload',

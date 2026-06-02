@@ -107,6 +107,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: 'A fájl betöltése nem sikerült.',
     storeRestoreProgress: '{{progress}}% betöltése',
 
     storeStorageQueued: 'Feltöltésre vár',

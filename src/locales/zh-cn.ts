@@ -105,6 +105,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: '无法加载文件。',
     storeRestoreProgress: '正在加载 {{progress}}%',
 
     storeStorageQueued: '等待上传',

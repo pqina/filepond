@@ -106,6 +106,7 @@ export const media = {
 };
 
 export const store = {
+    storeRestoreError: 'Soubor se nepodařilo načíst.',
     storeRestoreProgress: 'Načítání {{progress}}%',
 
     storeStorageQueued: 'Čeká na nahrání',
