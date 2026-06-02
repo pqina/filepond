@@ -239,10 +239,13 @@ export function createFileLoadInfo() {
             const isWaiting = hasExtensionWithStatusCode(entry, [
                 'LOAD_QUEUED',
                 'LOAD_BUSY',
-                'RESTORE_BUSY',
+                'STORE_RESTORE_BUSY',
             ]);
 
-            const isFrozen = hasExtensionWithStatusCode(entry, ['LOAD_ERROR', 'RESTORE_ERROR']);
+            const isFrozen = hasExtensionWithStatusCode(entry, [
+                'LOAD_ERROR',
+                'STORE_RESTORE_ERROR',
+            ]);
 
             return {
                 isWaiting,
@@ -378,7 +381,7 @@ export function createEntryLoadState() {
             buttonPart: 'entry-button',
             states: [
                 {
-                    codes: ['LOAD_QUEUED', 'LOAD_BUSY', 'RESTORE_BUSY'],
+                    codes: ['LOAD_QUEUED', 'LOAD_BUSY', 'STORE_RESTORE_BUSY'],
                     progress: true,
                     button: createButton('button-load-abort', {
                         title: 'abort',
@@ -394,8 +397,8 @@ export function createEntryLoadState() {
                         null,
                         'LOAD_ERROR',
                         'LOAD_COMPLETE',
-                        'RESTORE_COMPLETE',
-                        'RESTORE_ERROR',
+                        'STORE_RESTORE_COMPLETE',
+                        'STORE_RESTORE_ERROR',
                     ],
                     button: createButton('button-entry-remove', {
                         icon: 'remove',
@@ -426,8 +429,8 @@ export function createEntryStoreState() {
                         'STORE_READY',
                         'STORE_ABORT',
                         'STORE_ERROR',
-                        'RELEASE_COMPLETE',
-                        'RELEASE_ABORT',
+                        'STORE_RELEASE_COMPLETE',
+                        'STORE_RELEASE_ABORT',
                     ],
                     button: createButton('button-store-idle', {
                         icon: 'store',
@@ -462,7 +465,7 @@ export function createEntryStoreState() {
                     }),
                 },
                 {
-                    codes: ['RELEASE_BUSY'],
+                    codes: ['STORE_RELEASE_BUSY'],
                     progress: {
                         direction: 'reverse',
                     },
@@ -477,7 +480,7 @@ export function createEntryStoreState() {
                     }),
                 },
                 {
-                    codes: ['STORE_COMPLETE', 'RESTORE_COMPLETE', 'RELEASE_ABORT'],
+                    codes: ['STORE_COMPLETE', 'STORE_RESTORE_COMPLETE', 'STORE_RELEASE_ABORT'],
                     button: createButton('button-store-complete', {
                         icon: 'revert',
                         styles: createIndicatorButtonTransforms({
