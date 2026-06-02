@@ -46,6 +46,7 @@ interface ChunkedUploadStoreResponseResolverContext<
     Value extends ChunkedUploadStoreResponseValue = ChunkedUploadStoreResponseValue,
 > {
     value: Value;
+    request: ResolvedRequest;
     response: XHRResponse;
     entry: FilePondEntry;
     id?: string;
@@ -180,6 +181,7 @@ export const ChunkedUploadStore = createStoreExtension({
             });
 
             const serverId = resolveCreateResponse({
+                request: resolvedRequest,
                 response: request,
                 value: request.response as string,
                 entry,
@@ -222,6 +224,7 @@ export const ChunkedUploadStore = createStoreExtension({
             // get the upload offset
             const { uploadOffset } = getResponseHeaders(request);
             const status = resolveStatusResponse({
+                request: resolvedRequest,
                 response: request,
                 value: {
                     id: serverId,
@@ -285,6 +288,7 @@ export const ChunkedUploadStore = createStoreExtension({
                     });
 
                     return resolveChunkResponse({
+                        request: resolvedRequest,
                         response: requestResponse,
                         value: {
                             index: chunk.index,
@@ -450,6 +454,7 @@ export const ChunkedUploadStore = createStoreExtension({
             });
 
             const value = resolveCompleteResponse({
+                request: resolvedRequest,
                 response: requestResponse,
                 value:
                     isString(requestResponse.response) && requestResponse.response.length

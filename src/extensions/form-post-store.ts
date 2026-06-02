@@ -25,6 +25,7 @@ type ResolvedResponseValue = string | File | FormPostStoreMetadata;
 
 interface ResponseResolverContext<Resolved extends ResolvedResponseValue = ResolvedResponseValue> {
     value: Resolved;
+    request: ResolvedRequest;
     response: XHRResponse;
     entry: FilePondEntry;
 }
@@ -126,6 +127,7 @@ export const FormPostStore = createStoreExtension({
 
             // return a unique id
             return resolveStoreResponse({
+                request: resolvedRequest,
                 response: requestResponse,
                 value: requestResponse.response as string,
                 entry,
@@ -173,6 +175,7 @@ export const FormPostStore = createStoreExtension({
                     getResponseHeaders(metadataRequest);
 
                 const metadata = resolveMetadataResponse({
+                    request: resolvedRequest,
                     response: metadataRequest,
                     value: {
                         name: getFilename(metadataRequest),
@@ -220,6 +223,7 @@ export const FormPostStore = createStoreExtension({
 
             // return a file object
             return resolveRestoreResponse({
+                request: resolvedRequest,
                 response: requestResponse,
                 value: file,
                 entry,
