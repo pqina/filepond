@@ -280,7 +280,7 @@ describe('FormPostStore', function () {
 
                 const { value } = entry.state;
 
-                if (!status.code.endsWith('RELEASE_COMPLETE')) {
+                if (!status.code.endsWith('STORE_RELEASE_COMPLETE')) {
                     return;
                 }
 
@@ -330,7 +330,7 @@ describe('FormPostStore', function () {
                 }
 
                 unsub();
-                expect(status.code).to.equal('RESTORE_COMPLETE');
+                expect(status.code).to.equal('STORE_RESTORE_COMPLETE');
                 expect(value).to.equal('1234');
                 expect();
 

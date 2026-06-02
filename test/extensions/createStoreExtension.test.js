@@ -510,7 +510,7 @@ describe('createStoreExtension', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const { status, canStore } = entry?.extension?.TestStore || {};
 
-                if (status?.code !== 'RESTORE_COMPLETE') {
+                if (status?.code !== 'STORE_RESTORE_COMPLETE') {
                     return;
                 }
 
@@ -547,7 +547,7 @@ describe('createStoreExtension', () => {
                     TestStore: { status },
                 } = entry.extension;
 
-                if (status.code !== 'RELEASE_COMPLETE') return;
+                if (status.code !== 'STORE_RELEASE_COMPLETE') return;
 
                 unsub();
                 // we still have a file object locally
@@ -579,7 +579,7 @@ describe('createStoreExtension', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const { status, canStore } = entry?.extension?.TestStore || {};
 
-                if (status?.code !== 'RELEASE_COMPLETE') {
+                if (status?.code !== 'STORE_RELEASE_COMPLETE') {
                     return;
                 }
 
@@ -656,7 +656,7 @@ describe('createStoreExtension', () => {
                         const { status } = entry?.extension?.TestStore || {};
 
                         // not stored yet
-                        if (status?.code !== 'RELEASE_COMPLETE') {
+                        if (status?.code !== 'STORE_RELEASE_COMPLETE') {
                             return;
                         }
 
@@ -833,7 +833,7 @@ describe('createStoreExtension', () => {
                         } = entry.extension;
 
                         // not stored yet
-                        if (status.code !== 'RELEASE_COMPLETE') {
+                        if (status.code !== 'STORE_RELEASE_COMPLETE') {
                             return;
                         }
 
