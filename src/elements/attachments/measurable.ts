@@ -53,7 +53,7 @@ function createSuspensionObserver() {
             if (!suspendedNode.contains(element)) {
                 continue;
             }
-            nodeSuspended.set(element, true);
+            nodeSuspended.add(element);
         }
     });
 }
@@ -144,7 +144,7 @@ const boundsTest = boundsCreate();
 // Stores all nodes and their current rectangles
 const nodeBounds = new Map();
 const nodeVisibility = new Map();
-const nodeSuspended = new Map();
+const nodeSuspended = new Set();
 
 /** Updates the bounds property */
 const updateNodeBounds = (
@@ -177,10 +177,6 @@ const updateNodeBounds = (
 
     // Update existing bounds with new bounds
     boundsUpdateWithBounds(bounds, boundsTest);
-
-    // if (node.closest('[suspended]')) {
-    //     return bounds;
-    // }
 
     // new bounds
     nodeCallbacks.get(node)(bounds);
