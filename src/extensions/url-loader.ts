@@ -17,6 +17,8 @@ import { createExtension } from './common/createExtension.js';
 import { Status } from '../common/status.js';
 import type { RequestResolverContext, ResolvedRequest } from './common/requestResolver.js';
 
+export type { ResolvedRequest, RequestResolverContext };
+
 export interface URLLoaderResponseResolverContext<Value> {
     value: Value;
     response: XHRResponse;

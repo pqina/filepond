@@ -26,14 +26,27 @@ import {
 import { SpringElement } from '../elements/components/SpringElement/index.js';
 import { ElementPane } from '../elements/components/ElementPane/index.js';
 
+type RetainOmit<T, K extends keyof T> = {
+    [P in keyof T as P extends K ? never : P]: T[P];
+};
+
 export type { MediaVideoOptions, MediaImageOptions };
 
-export type VideoViewOptions = Omit<MediaVideoOptions, 'class' | 'children'>;
+/**
+ * Options to configure the video view
+ */
+export type VideoViewOptions = RetainOmit<MediaVideoOptions, 'class' | 'children'>;
 
-export type ImageViewOptions = Omit<MediaImageOptions, 'class'>;
+/**
+ * Options to configure the video view
+ */
+export type ImageViewOptions = RetainOmit<MediaImageOptions, 'class'>;
 
 export type AppendMediaViewOptions = {
+    /** Enable edit button */
     enableEdit?: boolean;
+
+    /** Enable reset button */
     enableReset?: boolean;
 };
 

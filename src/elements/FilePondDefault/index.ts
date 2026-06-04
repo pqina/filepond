@@ -1,10 +1,5 @@
 import type { ExtensionFactory } from '../../core/extensionManager.ts';
-import type {
-    AnimationMode,
-    FilePondInputElementEventMap,
-    Locale,
-    SpringOptions,
-} from '../../types/index.js';
+import type { AnimationMode, Locale, SpringOptions } from '../../types/index.js';
 import { FilePondInputElement } from '../FilePondInput/index.js';
 import { FilePondEntryListElement } from '../FilePondEntryList/index.js';
 import { FilePondDropAreaElement } from '../FilePondDropArea/index.js';

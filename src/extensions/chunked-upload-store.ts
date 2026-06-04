@@ -14,6 +14,8 @@ import type {
 import type { FilePondEntry } from '../types/index.js';
 import type { RequestResolverContext, ResolvedRequest } from './common/requestResolver.js';
 
+export type { ResolvedRequest, RequestResolverContext };
+
 export interface UploadChunk {
     index: number;
     offset: number;

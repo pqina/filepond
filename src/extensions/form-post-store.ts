@@ -14,6 +14,8 @@ import { xhr, getResponseHeaders, getFilenameFromResponseHeaders } from '../util
 import type { FilePondEntry, FilePondFileEntry } from '../types/index.js';
 import type { RequestResolverContext, ResolvedRequest } from './common/requestResolver.js';
 
+export type { ResolvedRequest, RequestResolverContext };
+
 export interface FormPostStoreMetadata {
     name?: string;
     type?: string;
