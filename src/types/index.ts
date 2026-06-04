@@ -147,8 +147,10 @@ export interface RequestOptions {
     timeout?: number;
 }
 
+/** Valid entry sources */
 export type EntrySource = FilePondEntry | string | File | Blob | HTMLCanvasElement | DataTransfer;
 
+/** The origin of the entry, this can be used to determine the animation to run */
 export type EntryOrigin = 'api' | 'input' | 'drop' | 'clipboard' | 'remote';
 
 /**
@@ -220,7 +222,7 @@ type LocalePrimitive = string | boolean | number | null;
 
 export interface DynamicLocaleMap {
     /** The string to use for this amount. `1: "1 file"` */
-    [key: number]: LocalePrimitive | undefined;
+    [amountKey: number]: LocalePrimitive | undefined;
 
     /** The default placeholder to use for this key */
     else?: LocalePrimitive;
@@ -232,7 +234,7 @@ export interface DynamicLocale {
 
     /** The variable keys that can be replaced */
     variables: {
-        [key: string]:
+        [variableKey: string]:
             | DynamicLocaleMap
             | {
                   context?: string;
@@ -243,9 +245,12 @@ export interface DynamicLocale {
 
 type LocaleValue = string | DynamicLocale;
 
+/**
+ * An object with key value pairs where each value is a `string`, a `DynamicLocale`, or a `DynamicLocaleMap`
+ */
 export interface Locale {
-    [key: string]: LocaleValue | DynamicLocaleMap;
-    [key: `unit${string}`]: DynamicLocaleMap;
+    [localeKey: string]: LocaleValue | DynamicLocaleMap;
+    [unitLocaleKey: `unit${string}`]: DynamicLocaleMap;
 }
 
 export interface EntryListFunctions {

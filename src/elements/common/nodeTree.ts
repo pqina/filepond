@@ -5,6 +5,9 @@ import { arrayInsertAtIndex, arrayRemoveFalsy, arrayWrap } from '../../utils/arr
 import { isArray, isFunction } from '../../utils/test.js';
 import { hasOwnProp } from '../../utils/object.js';
 
+/**
+ * A collection of context information passed to this node
+ */
 export type NodeContext = { [key: string]: any };
 
 export interface BaseNode {
