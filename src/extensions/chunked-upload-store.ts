@@ -14,7 +14,7 @@ import type {
 import type { FilePondEntry } from '../types/index.js';
 import type { RequestResolverContext, ResolvedRequest } from './common/requestResolver.js';
 
-interface UploadChunk {
+export interface UploadChunk {
     index: number;
     offset: number;
     size: number;
@@ -34,15 +34,16 @@ export interface UploadStatus {
     chunks?: UploadedChunk[];
 }
 
-type ChunkedUploadStoreResponseValue = string | UploadStatus | UploadedChunk;
+export type ChunkedUploadStoreResponseValue = string | UploadStatus | UploadedChunk;
 
-interface ChunkedUploadStoreRequestResolverContext extends RequestResolverContext<FilePondEntry> {
+export interface ChunkedUploadStoreRequestResolverContext
+    extends RequestResolverContext<FilePondEntry> {
     id?: string;
     chunk?: UploadChunk;
     chunks?: UploadedChunk[];
 }
 
-interface ChunkedUploadStoreResponseResolverContext<
+export interface ChunkedUploadStoreResponseResolverContext<
     Value extends ChunkedUploadStoreResponseValue = ChunkedUploadStoreResponseValue,
 > {
     value: Value;
@@ -54,11 +55,11 @@ interface ChunkedUploadStoreResponseResolverContext<
     chunks?: UploadedChunk[];
 }
 
-type ChunkedUploadStoreRequestResolver = (
+export type ChunkedUploadStoreRequestResolver = (
     request: ChunkedUploadStoreRequestResolverContext
 ) => ResolvedRequest | Promise<ResolvedRequest>;
 
-type ChunkedUploadStoreResponseResolver<Value extends ChunkedUploadStoreResponseValue> = (
+export type ChunkedUploadStoreResponseResolver<Value extends ChunkedUploadStoreResponseValue> = (
     response: ChunkedUploadStoreResponseResolverContext<Value>
 ) => Value;
 

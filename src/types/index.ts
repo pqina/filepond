@@ -25,11 +25,22 @@ export type { FilePondDropAreaElementEventMap } from '../elements/FilePondDropAr
 export type { FilePondSvelteComponentElementEventMap } from '../elements/FilePondSvelteComponent/index.svelte.js';
 
 export type {
+    MediaVideoOptions,
+    MediaImageOptions,
+    VideoViewOptions,
+    ImageViewOptions,
+    AppendEntryVideoViewOptions,
+    AppendEntryImageViewOptions,
+} from '../templates/media.js';
+
+export type {
     CreateExtensionManagerOptions,
     ExtensionManagerInstance,
 } from '../core/extensionManager.js';
 export type { CreateEntryTreeOptions, EntryTreeInstance } from '../core/entryTree.js';
 export type { CreateTaskSchedulerOptions } from '../core/taskScheduler.js';
+export type { Rect } from '../utils/rect.js';
+export type { Bounds } from '../utils/bounds.js';
 
 import type {
     TemplateNode,
@@ -37,6 +48,7 @@ import type {
     BaseNode,
     ElementNode,
     ComponentNode,
+    SwitchNode,
 } from '../elements/common/nodeTree.js';
 
 import type { Vector } from '../utils/vector.js';
@@ -49,10 +61,12 @@ export type {
     CreateStoreExtensionOptions,
     StoreExtensionOptions,
 } from '../extensions/common/createStoreExtension.js';
+
 export type {
     CreateTransformExtensionOptions,
     TransformExtensionOptions,
 } from '../extensions/common/createTransformExtension.js';
+
 export type {
     CreateValidatorExtensionOptions,
     ValidatorExtensionOptions,
@@ -62,6 +76,7 @@ export type {
     Needle,
     TemplateNode,
     ElementNode,
+    SwitchNode,
     BaseNode,
     ComponentNode,
     NodeContext,
@@ -86,7 +101,14 @@ type Partial<T> = {
     [P in keyof T]?: T[P];
 };
 
-export type SpringOptions = { stiffness: number; damping: number; precision?: number };
+export type SpringOptions = {
+    /** Controls how strongly the spring moves toward its target. Value between `0` and `1`, higher values result in more tight springs. */
+    stiffness: number;
+    /** Controls how quickly the spring loses energy. Value between `0` and `1`, higher values result in spring animations that settle more quickly. */
+    damping: number;
+    /** Controls when the spring is considered settled. Lower means more precise. Defaults to `0.01`. */
+    precision?: number;
+};
 
 /**
  * A progress object which is passed to `onprogress` callbacks

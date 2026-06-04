@@ -14,27 +14,29 @@ import { xhr, getResponseHeaders, getFilenameFromResponseHeaders } from '../util
 import type { FilePondEntry, FilePondFileEntry } from '../types/index.js';
 import type { RequestResolverContext, ResolvedRequest } from './common/requestResolver.js';
 
-interface FormPostStoreMetadata {
+export interface FormPostStoreMetadata {
     name?: string;
     type?: string;
     size?: number;
     lastModified?: number;
 }
 
-type ResolvedResponseValue = string | File | FormPostStoreMetadata;
+export type ResolvedResponseValue = string | File | FormPostStoreMetadata;
 
-interface ResponseResolverContext<Resolved extends ResolvedResponseValue = ResolvedResponseValue> {
+export interface ResponseResolverContext<
+    Resolved extends ResolvedResponseValue = ResolvedResponseValue,
+> {
     value: Resolved;
     request: ResolvedRequest;
     response: XHRResponse;
     entry: FilePondEntry;
 }
 
-type ResponseResolver<Resolved extends ResolvedResponseValue> = (
+export type ResponseResolver<Resolved extends ResolvedResponseValue> = (
     response: ResponseResolverContext<Resolved>
 ) => Resolved;
 
-type RequestResolver = (
+export type RequestResolver = (
     request: RequestResolverContext<FilePondEntry>
 ) => ResolvedRequest | Promise<ResolvedRequest>;
 

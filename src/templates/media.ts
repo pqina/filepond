@@ -26,9 +26,20 @@ import {
 import { SpringElement } from '../elements/components/SpringElement/index.js';
 import { ElementPane } from '../elements/components/ElementPane/index.js';
 
+export type { MediaVideoOptions, MediaImageOptions };
+
 export type VideoViewOptions = Omit<MediaVideoOptions, 'class' | 'children'>;
 
 export type ImageViewOptions = Omit<MediaImageOptions, 'class'>;
+
+export type AppendMediaViewOptions = {
+    enableEdit?: boolean;
+    enableReset?: boolean;
+};
+
+export type AppendEntryImageViewOptions = ImageViewOptions & AppendMediaViewOptions;
+
+export type AppendEntryVideoViewOptions = VideoViewOptions & AppendMediaViewOptions;
 
 export function createEditMediaButton(options?: { action?: string }) {
     const { action = 'editMedia' } = options ?? {};
@@ -382,10 +393,7 @@ const entryIsImage = createEntryMatcher('image');
 
 export function appendEntryImageView(
     template: TemplateNode[],
-    options?: ImageViewOptions & {
-        enableEdit: boolean;
-        enableReset: boolean;
-    }
+    options?: AppendEntryImageViewOptions
 ) {
     const { enableEdit = true, enableReset = true, ...imageOptions } = options ?? {};
     const canTransform = enableEdit || enableReset;
@@ -412,10 +420,7 @@ export function appendEntryImageView(
 
 export function appendEntryVideoView(
     template: TemplateNode[],
-    options?: VideoViewOptions & {
-        enableEdit: boolean;
-        enableReset: boolean;
-    }
+    options?: AppendEntryVideoViewOptions
 ) {
     const { enableEdit = true, enableReset = true, ...videoOptions } = options ?? {};
 

@@ -17,17 +17,17 @@ import { createExtension } from './common/createExtension.js';
 import { Status } from '../common/status.js';
 import type { RequestResolverContext, ResolvedRequest } from './common/requestResolver.js';
 
-interface URLLoaderResponseResolverContext<Value> {
+export interface URLLoaderResponseResolverContext<Value> {
     value: Value;
     response: XHRResponse;
     entry: FilePondFileEntry;
 }
 
-type URLLoaderRequestResolver = (
+export type URLLoaderRequestResolver = (
     request: RequestResolverContext<FilePondFileEntry>
 ) => ResolvedRequest | Promise<ResolvedRequest>;
 
-type URLLoaderResponseResolver<Value> = (
+export type URLLoaderResponseResolver<Value> = (
     response: URLLoaderResponseResolverContext<Value>
 ) => Value;
 
