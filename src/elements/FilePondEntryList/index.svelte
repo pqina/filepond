@@ -501,7 +501,7 @@
 
     // determine if can drop, and if so, what the drop padding and safety margin is
     const acceptsDrop = $derived(drop);
-    const dropRootElement = $derived(dropRoot ?? root);
+    const dropRootElement = $derived(acceptsDrop ? (dropRoot ?? root) : undefined);
 
     // for dragging items outside of the drop root to remove them
     let dropState: DropState | undefined = $state.raw();
@@ -519,7 +519,7 @@
         }
 
         const interactionRect = rectPad(
-            untrack(() => dropRootRect),
+            untrack(() => dropRootRect ?? currentRect),
             dragSafetyMargin
         );
 
@@ -604,7 +604,7 @@
         // test if is drop operation is close enough to FilePond
         if (!element && acceptsDrop && dropPadding < Infinity) {
             const interactionRect = rectPad(
-                untrack(() => dropRootRect),
+                untrack(() => dropRootRect ?? currentRect),
                 dropPadding
             );
             if (!rectContainsPoint(interactionRect, viewPosition)) {
@@ -667,7 +667,7 @@
         // is outside of filepond drop area
         const outside = !rectContainsPoint(
             rectPad(
-                untrack(() => dropRootRect),
+                untrack(() => dropRootRect ?? currentRect),
                 dragDetachMargin
             ),
             viewPosition
