@@ -286,7 +286,9 @@
                         {
                             key: getNodeKey(key, index),
                             component,
-                            props: computeObjectWithResources(props, mergedNodeContext, resources),
+                            props: beforeSetProps(
+                                computeObjectWithResources(props, mergedNodeContext, resources)
+                            ),
                             item,
                             children: content,
                             context: mergedNodeContext,
@@ -353,7 +355,7 @@
 )}
     {#if Component}
         <Component
-            {...beforeSetProps(props)}
+            {...props}
             {...routes}
             nodeContext={{
                 context,

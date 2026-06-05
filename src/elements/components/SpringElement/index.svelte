@@ -582,9 +582,11 @@
             springElementContext.childSpringCount === springElementContext.childSpringReadyCount;
     });
 
-    const parentScale = $derived(
-        springElementContext.parent ? springElementContext.parent.currentScale : 1
-    );
+    // use an $effect because when using $derived we run into trouble when the Spring is torn down before it has fully initialised (can happen inside a transition)
+    let parentScale = 1;
+    $effect(() => {
+        parentScale = springElementContext.parent ? springElementContext.parent.currentScale : 1;
+    });
 
     /** Sync rectangle */
     function handleMeasure(bounds: Bounds) {
