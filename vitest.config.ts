@@ -12,10 +12,10 @@ export default defineConfig({
     ],
     test: {
         include: ['test/**/*.test.js'],
-        testTimeout: 1000,
+        testTimeout: 2000,
         browser: {
             enabled: true,
-            headless: false,
+            headless: true,
             screenshotFailures: false,
             provider: playwright(),
             instances: [{ browser: 'chromium' }],

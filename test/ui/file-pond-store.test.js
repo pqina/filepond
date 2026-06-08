@@ -6,10 +6,15 @@ import { generateFile } from '../../src/dev';
 import { entryExtensionStatus, event } from '../helpers';
 
 let pond;
+let form;
 let elements;
+
 beforeEach(async () => {
+    form = document.createElement('form');
+    document.body.append(form);
+
     pond = document.createElement('file-pond');
-    document.body.append(pond);
+    form.append(pond);
 
     elements = defineFilePond({
         extensions: [[SimulatedStore, { log: false }]],
