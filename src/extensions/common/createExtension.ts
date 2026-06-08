@@ -114,13 +114,13 @@ export function createExtension(options: CreateExtensionOptions): Extension {
 
         /** Returns entry state for this extension */
         function getEntryExtensionState(entry: FilePondEntry) {
-            return entry.extension?.[name] ?? {};
+            return entry.extensionState?.[name] ?? {};
         }
 
         /** Updates item state */
         function setEntryExtensionState(entry: FilePondEntry, state: ExtensionState) {
             pond.updateEntry(entry, {
-                extension: {
+                extensionState: {
                     [name]: state,
                 },
             });

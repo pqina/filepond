@@ -54,7 +54,7 @@ describe('createTransformExtension', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     Foo: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (!didCallTransformEntry) return;
 
@@ -99,7 +99,7 @@ describe('createTransformExtension', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     Foo: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (!didCallTransformEntry) return;
 
@@ -125,7 +125,7 @@ describe('createTransformExtension', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FileDataTransform: { status, hash },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (!status.code.endsWith('COMPLETE')) return;
 
@@ -152,7 +152,7 @@ describe('createTransformExtension', () => {
                 const unsub = entryTree.on('updateEntry', (entry) => {
                     const {
                         FileDataTransform: { status },
-                    } = entry.extension;
+                    } = entry.extensionState;
 
                     if (!status.code.endsWith('COMPLETE')) return;
 
@@ -163,7 +163,7 @@ describe('createTransformExtension', () => {
                         const unsub = entryTree.on('updateEntry', (entry) => {
                             const {
                                 FileDataTransform: { status, hash },
-                            } = entry.extension;
+                            } = entry.extensionState;
 
                             if (!status.code.endsWith('TRANSFORM_IDLE')) return;
 
@@ -349,7 +349,7 @@ describe('createTransformExtension', () => {
 
             let loop = 0;
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { BazTransform } = entry.extension;
+                const { BazTransform } = entry.extensionState;
 
                 // failsafe
                 if (loop++ > 100) {
@@ -476,7 +476,7 @@ describe('createTransformExtension', () => {
 
             let loop = 0;
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { BazTransform } = entry.extension;
+                const { BazTransform } = entry.extensionState;
 
                 // failsafe
                 if (loop++ > 100) {
@@ -507,7 +507,7 @@ describe('createTransformExtension', () => {
                     });
 
                     const unsub = entryTree.on('updateEntry', (entry) => {
-                        // const { BazTransform } = entry.extension;
+                        // const { BazTransform } = entry.extensionState;
 
                         // console.log('🧪 updateEntry', { entry: structuredClone(entry) });
 

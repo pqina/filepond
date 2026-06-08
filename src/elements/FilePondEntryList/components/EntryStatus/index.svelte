@@ -27,8 +27,8 @@
 
     const entryContext = getEntryContext();
 
-    // list of extension objects
-    const extensions: ExtensionState[] = $derived(Object.values(entryContext.current.extension));
+    // list of extension state objects
+    const extensions: ExtensionState[] = $derived(Object.values(entryContext.current.extensionState));
 
     const StatusWeights: { [key: string]: number } = {
         error: 5,

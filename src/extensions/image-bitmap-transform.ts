@@ -80,7 +80,7 @@ export const ImageBitmapTransform = createTransformExtension({
             } = props;
             const { file } = entry;
 
-            const entryExtension = entry.extension[extensionName];
+            const entryExtension = entry.extensionState[extensionName];
 
             // @ts-ignore
             const currentHistory = [...(entryExtension.history ?? [])];

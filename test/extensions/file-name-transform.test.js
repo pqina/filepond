@@ -28,7 +28,7 @@ describe('FileNameTransform', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FileNameTransform: { status, history },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (!status.code.endsWith('COMPLETE')) return;
 
@@ -56,7 +56,7 @@ describe('FileNameTransform', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FileNameTransform: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (!status.code.endsWith('COMPLETE')) return;
 
@@ -66,7 +66,7 @@ describe('FileNameTransform', () => {
                     const unsub = entryTree.on('updateEntry', (entry) => {
                         const {
                             FileNameTransform: { status, history },
-                        } = entry.extension;
+                        } = entry.extensionState;
 
                         if (!status.code.endsWith('IDLE')) return;
 

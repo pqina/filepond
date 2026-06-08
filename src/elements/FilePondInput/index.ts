@@ -47,7 +47,7 @@ const VALIDATION_FLAGS_ORDER = [
 
 function hasBusyEntries(entries: FilePondEntry[]) {
     return entries.some((entry) => {
-        return Object.values(entry.extension ?? {}).some(({ status }) => {
+        return Object.values(entry.extensionState ?? {}).some(({ status }) => {
             // no status, not busy
             if (!status) {
                 return false;
@@ -61,7 +61,7 @@ function hasBusyEntries(entries: FilePondEntry[]) {
 
 function hasInvalidEntries(entries: FilePondEntry[]) {
     return entries.some((entry) => {
-        return Object.values(entry.extension ?? {}).some(({ status }) => {
+        return Object.values(entry.extensionState ?? {}).some(({ status }) => {
             // no status, no error
             if (!status) {
                 return false;

@@ -105,7 +105,7 @@ export const ConsoleView = createExtension({
         function logEntry(entry: FilePondEntry, prefix: string, label: string, info = '') {
             let textColor = 'inherit';
 
-            const extensions = arrayRemoveFalsy(Object.values(entry.extension ?? {}));
+            const extensions = arrayRemoveFalsy(Object.values(entry.extensionState ?? {}));
 
             const labels = extensions
                 .filter(hasStatus)

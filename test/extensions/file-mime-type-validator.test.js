@@ -23,7 +23,7 @@ describe('FileMimeTypeValidator', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FileMimeTypeValidator: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (status?.type !== 'error') return;
 
@@ -51,7 +51,7 @@ describe('FileMimeTypeValidator', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FileMimeTypeValidator: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (status?.type !== 'error') return;
 
@@ -79,7 +79,7 @@ describe('FileMimeTypeValidator', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FileMimeTypeValidator: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (status?.code !== 'VALIDATION_COMPLETE') return;
 

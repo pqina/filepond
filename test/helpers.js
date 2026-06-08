@@ -15,8 +15,8 @@ export function entryExtensionStatus(pond, awaitedStatus, options) {
 
             // test if should filter on extensionName, else loop over all extensions
             const extensions = extensionName
-                ? [entry.extension[extensionName]]
-                : Object.values(entry.extension);
+                ? [entry.extensionState[extensionName]]
+                : Object.values(entry.extensionState);
             const extension = extensions.find(
                 (extension) => extension.status.code === awaitedStatus
             );

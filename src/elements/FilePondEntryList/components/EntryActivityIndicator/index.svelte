@@ -47,8 +47,8 @@
     // get store
     const entryContext = getEntryContext();
 
-    // list of extension objects
-    const extensions = $derived(Object.values(entryContext.current.extension)) as ExtensionState[];
+    // list of extension state objects
+    const extensions = $derived(Object.values(entryContext.current.extensionState)) as ExtensionState[];
 
     function getState(states: any[], extensions: ExtensionState[]) {
         // no states to check
@@ -57,7 +57,7 @@
         }
 
         for (const state of states) {
-            // get matching extension state from list of extension, we'll match the extension status with the list of codes
+            // get matching extension state from list of states, we'll match the extension status with the list of codes
             const extensionStatus = getExtensionStateByStatusCode(extensions, state.codes);
 
             // none found, skip to continue to next possible state

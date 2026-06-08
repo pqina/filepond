@@ -43,7 +43,7 @@ export const FileNameTransform = createTransformExtension({
 
             const basename = getFilenameWithoutExtension(name) ?? '';
             const fileExtension = getExtensionFromFilename(name) ?? '';
-            const entryExtension = entry.extension[extensionName];
+            const entryExtension = entry.extensionState[extensionName];
 
             // @ts-ignore
             const currentHistory = [...(entryExtension.history ?? [])];

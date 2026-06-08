@@ -23,7 +23,7 @@ describe('BlobLoader', () => {
     it('should turn a Blob into a File', () =>
         new Promise((done) => {
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status } = entry?.extension?.BlobLoader || {};
+                const { status } = entry?.extensionState?.BlobLoader || {};
 
                 if (status?.code !== 'LOAD_COMPLETE') {
                     return;

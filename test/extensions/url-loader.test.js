@@ -47,7 +47,7 @@ describe('URLLoader', function () {
             };
 
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status } = entry?.extension?.URLLoader || {};
+                const { status } = entry?.extensionState?.URLLoader || {};
 
                 if (!isFile(entry.file)) {
                     return;
@@ -131,7 +131,7 @@ describe('URLLoader', function () {
             };
 
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status } = entry?.extension?.URLLoader || {};
+                const { status } = entry?.extensionState?.URLLoader || {};
 
                 if (status?.code !== 'LOAD_COMPLETE') return;
 
@@ -244,7 +244,7 @@ describe('URLLoader', function () {
             };
 
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status } = entry?.extension?.URLLoader || {};
+                const { status } = entry?.extensionState?.URLLoader || {};
 
                 if (status?.code !== 'LOAD_COMPLETE') return;
 
@@ -263,7 +263,7 @@ describe('URLLoader', function () {
     it('should fail on empty URL', () =>
         new Promise((done) => {
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status } = entry?.extension?.URLLoader || {};
+                const { status } = entry?.extensionState?.URLLoader || {};
 
                 if (status?.type !== 'error') return;
 
@@ -291,7 +291,7 @@ describe('URLLoader', function () {
             };
 
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status } = entry?.extension?.URLLoader || {};
+                const { status } = entry?.extensionState?.URLLoader || {};
 
                 if (status?.type !== 'error') return;
 

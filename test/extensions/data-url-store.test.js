@@ -18,7 +18,7 @@ describe('DataURLStore', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     DataURLStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 const { value } = entry.state;
 
@@ -45,7 +45,7 @@ describe('DataURLStore', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     DataURLStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 const { value } = entry.state;
 
@@ -62,7 +62,7 @@ describe('DataURLStore', () => {
                     const unsub = entryTree.on('updateEntry', (entry) => {
                         const {
                             DataURLStore: { status },
-                        } = entry.extension;
+                        } = entry.extensionState;
 
                         const { value } = entry.state;
 

@@ -59,11 +59,11 @@ export function createFilePondEntryTree(options?: CreateFilePondEntryTreeOptions
                 copyFilePropsToObject(props.file, props);
             }
 
-            // not updating extension, exit
-            if (props.extension) {
+            // not updating extension state, exit
+            if (props.extensionState) {
                 // we're updating an extension status, let's remove progress if it's not part of the status update so it doesn't stick around when moving from one status to another
                 const extensionUpdates: { status: ExtensionStatus }[] = Object.values(
-                    props.extension
+                    props.extensionState
                 );
 
                 for (const { status } of extensionUpdates) {
@@ -112,7 +112,9 @@ function formatEntry(entry: FilePondEntrySource): FilePondEntry {
 
     // format base props
     partialEntry.state = isObject(partialEntry.state) ? partialEntry.state : {};
-    partialEntry.extension = isObject(partialEntry.extension) ? partialEntry.extension : {};
+    partialEntry.extensionState = isObject(partialEntry.extensionState)
+        ? partialEntry.extensionState
+        : {};
     partialEntry.origin = partialEntry.origin ?? 'api';
     partialEntry.containerId = partialEntry.containerId ?? null;
 

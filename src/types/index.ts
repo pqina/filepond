@@ -167,7 +167,7 @@ interface FilePondEntryBase {
     path?: string;
 
     /** Private extension state (don't manipulate) */
-    extension: {
+    extensionState: {
         [extensionName: string]: ExtensionState;
     };
 

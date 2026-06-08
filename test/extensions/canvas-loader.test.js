@@ -17,7 +17,7 @@ describe('CanvasLoader', () => {
     it('should turn a Canvas into a Blob', () =>
         new Promise((done) => {
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status } = entry?.extension?.CanvasLoader || {};
+                const { status } = entry?.extensionState?.CanvasLoader || {};
 
                 if (status?.code !== 'LOAD_COMPLETE') {
                     return;

@@ -95,7 +95,7 @@ export function createFilePondEntry(): TemplateNode {
         component: Entry,
         props: ({ entry, ariaId }) => {
             return {
-                nameId: `${ariaId}-name`,
+                legendId: `${ariaId}-name`,
                 part: isDataTransferEntry(entry) ? 'entry entry-data-transfer' : 'entry',
             };
         },

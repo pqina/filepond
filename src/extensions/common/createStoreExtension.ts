@@ -230,7 +230,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                             state: {
                                 [valueKey]: response,
                             },
-                            extension: {
+                            extensionState: {
                                 [extensionName]: {
                                     status: {
                                         type: Status.Success,
@@ -255,7 +255,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                                 // reset storage key
                                 [valueKey]: null,
                             },
-                            extension: {
+                            extensionState: {
                                 [extensionName]: {
                                     status: {
                                         type: Status.System,
@@ -316,7 +316,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                             // remember storage key
                             [valueKey]: value,
                         },
-                        extension: {
+                        extensionState: {
                             [extensionName]: {
                                 // need to re-evaluate if we can store this file
                                 canStore: true,
@@ -405,7 +405,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                                     [valueKey]: null,
                                     [actionLoad]: null,
                                 },
-                                extension: {
+                                extensionState: {
                                     [extensionName]: {
                                         canStore: true,
                                         status: {
@@ -423,7 +423,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                                 [valueKey]: null,
                                 [actionLoad]: null,
                             },
-                            extension: {
+                            extensionState: {
                                 [extensionName]: {
                                     status: {
                                         type: Status.System,
@@ -506,7 +506,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                             [valueKey]: value,
                             [actionStore]: store,
                         },
-                        extension: {
+                        extensionState: {
                             [extensionName]: {
                                 // so we can match on extension actions
                                 actions: [actionStore, actionLoad, actionAbort],
@@ -554,7 +554,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                         [valueKey]: value,
                         [actionStore]: store,
                     },
-                    extension: {
+                    extensionState: {
                         [extensionName]: {
                             canStore: true,
                             status: {
@@ -607,7 +607,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                     state: {
                         [valueKey]: value ?? null,
                     },
-                    extension: {
+                    extensionState: {
                         [extensionName]: {
                             canStore,
                             status: {
@@ -658,7 +658,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                 // get extension entry props to help determine what next step to take
                 const value = entry.state[valueKey];
                 const status = getEntryExtensionStatus(entry);
-                const { canStore = null } = getEntryExtensionState(entry); // canStore is true if is file, if hasn't defined extension object yet, it defaults to null which triggers a test
+                const { canStore = null } = getEntryExtensionState(entry); // canStore is true if is file, if hasn't defined extension state yet, it defaults to null which triggers a test
                 const isStoring = status?.code === 'STORE_BUSY';
                 const hasStored = !isNullOrUndefined(value) && !isStoring; // we could have a server id and still be patching
 
@@ -719,7 +719,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                                 [actionAbort]: false,
                                 [actionStore]: null,
                             },
-                            extension: {
+                            extensionState: {
                                 [extensionName]: {
                                     status: {
                                         type: Status.System,

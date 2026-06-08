@@ -78,7 +78,7 @@ describe('FileInputStore', () => {
                 state: {
                     store: true,
                 },
-                extension: {
+                extensionState: {
                     LoremIpsumExtension: {
                         status: {
                             type: 'error',

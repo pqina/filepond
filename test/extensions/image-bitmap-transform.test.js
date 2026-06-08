@@ -20,7 +20,7 @@ function createCanvas(width = 256, height = width) {
 
 function waitForTransformComplete(entryTree, cb) {
     const unsub = entryTree.on('updateEntry', (entry) => {
-        const { status } = entry?.extension?.ImageBitmapTransform || {};
+        const { status } = entry?.extensionState?.ImageBitmapTransform || {};
         if (status?.code !== 'TRANSFORM_COMPLETE') {
             return;
         }

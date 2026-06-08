@@ -26,7 +26,7 @@ describe('FileSizeValidator', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FileSizeValidator: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (status?.type !== 'error') return;
 
@@ -45,7 +45,7 @@ describe('FileSizeValidator', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FileSizeValidator: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (status?.type !== 'error') return;
 
@@ -64,7 +64,7 @@ describe('FileSizeValidator', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FileSizeValidator: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (status?.code !== 'VALIDATION_COMPLETE') return;
 
@@ -83,8 +83,8 @@ describe('FileSizeValidator', () => {
                 // if has validated one, test if other is valid
                 const [invalid, valid] = entries;
 
-                const invalidStatus = invalid.extension?.FileSizeValidator?.status;
-                const validStatus = valid.extension?.FileSizeValidator?.status;
+                const invalidStatus = invalid.extensionState?.FileSizeValidator?.status;
+                const validStatus = valid.extensionState?.FileSizeValidator?.status;
 
                 if (!validStatus || validStatus.code !== 'VALIDATION_COMPLETE') return;
 

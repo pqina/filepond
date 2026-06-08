@@ -70,7 +70,7 @@ export function getExtensionStateByStatusCode(
 
 /** Tests if one of the extensions is in an error state */
 export function isEntryInErrorState(entry: FilePondEntry): boolean {
-    return Object.values(entry.extension ?? {}).some(({ status }) => {
+    return Object.values(entry.extensionState ?? {}).some(({ status }) => {
         return status?.type === Status.Error;
     });
 }

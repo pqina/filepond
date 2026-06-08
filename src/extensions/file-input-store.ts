@@ -62,11 +62,11 @@ export const FileInputStore = createExtension({
 
                 // @ts-ignore we know these are file entries
                 entries.filter((entry) => {
-                    if (!entry.extension) {
+                    if (!entry.extensionState) {
                         return true;
                     }
 
-                    return !Object.values(entry.extension).some((extension) => {
+                    return !Object.values(entry.extensionState).some((extension) => {
                         return extension.status?.type === 'error';
                     });
                 })

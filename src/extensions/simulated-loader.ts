@@ -267,7 +267,7 @@ export const SimulatedLoader = createExtension({
                         state: {
                             load: false,
                         },
-                        extension: {
+                        extensionState: {
                             [extensionName]: {
                                 status: {
                                     type: Status.Success,

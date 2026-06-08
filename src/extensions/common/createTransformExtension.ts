@@ -231,7 +231,7 @@ export function createTransformExtension<Props extends object = TransformExtensi
                 if (!transformResult) {
                     updateEntry(entry, {
                         state: entryState,
-                        extension: {
+                        extensionState: {
                             [extensionName]: {
                                 status: {
                                     type: Status.System,
@@ -277,7 +277,7 @@ export function createTransformExtension<Props extends object = TransformExtensi
                         },
 
                         // did edit Entry
-                        extension: {
+                        extensionState: {
                             [extensionName]: {
                                 // the input file used
                                 input: input ?? (entry as FilePondFileEntry).file,
@@ -319,7 +319,7 @@ export function createTransformExtension<Props extends object = TransformExtensi
                         state: {
                             [actionTransform]: null,
                         },
-                        extension: {
+                        extensionState: {
                             [extensionName]: {
                                 input: null,
                                 history: [],
@@ -435,7 +435,7 @@ export function createTransformExtension<Props extends object = TransformExtensi
                         [actionTransform]:
                             shouldTransform && transform === false ? null : transform,
                     },
-                    extension: {
+                    extensionState: {
                         [extensionName]: {
                             // the action string that triggers this transform extension
                             actions: canTransform ? [actionTransform] : [],

@@ -23,7 +23,7 @@ describe('FileExtensionValidator', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FileExtensionValidator: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (status?.type !== 'error') {
                     return;
@@ -53,7 +53,7 @@ describe('FileExtensionValidator', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FileExtensionValidator: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (status?.type !== 'error') {
                     return;
@@ -84,7 +84,7 @@ describe('FileExtensionValidator', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FileExtensionValidator: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (status?.code !== 'VALIDATION_COMPLETE') {
                     return;

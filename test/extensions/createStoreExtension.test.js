@@ -60,7 +60,7 @@ describe('createStoreExtension', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     TestStore: { status, canStore },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (status.code !== 'STORE_READY' && canStore) {
                     return;
@@ -86,7 +86,7 @@ describe('createStoreExtension', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     TestStore: { status, canStore },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 // record statuscodes in order
                 statusCodes.add(status.code);
@@ -129,7 +129,7 @@ describe('createStoreExtension', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     TestStore: { status, canStore },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 // record statuscodes in order
                 statusCodes.add(status.code);
@@ -147,7 +147,7 @@ describe('createStoreExtension', () => {
                 const unsubInner = entryTree.on('updateEntry', (entry) => {
                     const {
                         TestStore: { status, canStore },
-                    } = entry.extension;
+                    } = entry.extensionState;
 
                     // record statuscodes in order
                     statusCodes.add(status.code);
@@ -238,7 +238,7 @@ describe('createStoreExtension', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     TestStore: { canStore },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 // wait for store id to be set
                 if (!entry.state.value) {
@@ -295,7 +295,7 @@ describe('createStoreExtension', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     TestStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (status.code !== 'STORE_BUSY') {
                     return;
@@ -316,7 +316,7 @@ describe('createStoreExtension', () => {
                     const unsub = entryTree.on('updateEntry', (entry) => {
                         const {
                             TestStore: { status },
-                        } = entry.extension;
+                        } = entry.extensionState;
 
                         if (status.code !== 'STORE_ABORT') {
                             return;
@@ -343,7 +343,7 @@ describe('createStoreExtension', () => {
     it(`should set "canStore" to "false" if not storable`, () =>
         new Promise((done) => {
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status, canStore } = entry?.extension?.TestStore || {};
+                const { status, canStore } = entry?.extensionState?.TestStore || {};
 
                 if (status?.code !== 'STORE_IDLE') {
                     return;
@@ -366,7 +366,7 @@ describe('createStoreExtension', () => {
     it(`shouldn't "store" an object when no value set`, () =>
         new Promise((done) => {
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status, canStore } = entry?.extension?.TestStore || {};
+                const { status, canStore } = entry?.extensionState?.TestStore || {};
 
                 if (status?.code !== 'STORE_IDLE') {
                     return;
@@ -392,7 +392,7 @@ describe('createStoreExtension', () => {
     it(`should mark an object as stored if "value" is set`, () =>
         new Promise((done) => {
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status, canStore } = entry?.extension?.TestStore || {};
+                const { status, canStore } = entry?.extensionState?.TestStore || {};
 
                 if (status?.code !== 'STORE_COMPLETE') {
                     return;
@@ -420,7 +420,7 @@ describe('createStoreExtension', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     TestStore: { status, canStore },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (status.code !== 'STORE_COMPLETE') {
                     return;
@@ -448,7 +448,7 @@ describe('createStoreExtension', () => {
     it(`should mark an object as stored if "value" is set, and retain "store" state`, () =>
         new Promise((done) => {
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status, canStore } = entry?.extension?.TestStore || {};
+                const { status, canStore } = entry?.extensionState?.TestStore || {};
 
                 if (status?.code !== 'STORE_COMPLETE') {
                     return;
@@ -478,7 +478,7 @@ describe('createStoreExtension', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     TestStore: { status, canStore },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (status.code !== 'STORE_COMPLETE') {
                     return;
@@ -508,7 +508,7 @@ describe('createStoreExtension', () => {
     it('should restore the file object if "value" is set and "load" set to "true"', () =>
         new Promise((done) => {
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status, canStore } = entry?.extension?.TestStore || {};
+                const { status, canStore } = entry?.extensionState?.TestStore || {};
 
                 if (status?.code !== 'STORE_RESTORE_COMPLETE') {
                     return;
@@ -545,7 +545,7 @@ describe('createStoreExtension', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     TestStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (status.code !== 'STORE_RELEASE_COMPLETE') return;
 
@@ -577,7 +577,7 @@ describe('createStoreExtension', () => {
             // we need to trigger restore when `store=false` as when the store action is reverted, if we don't have the file, we can't re-upload again
 
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status, canStore } = entry?.extension?.TestStore || {};
+                const { status, canStore } = entry?.extensionState?.TestStore || {};
 
                 if (status?.code !== 'STORE_RELEASE_COMPLETE') {
                     return;
@@ -641,7 +641,7 @@ describe('createStoreExtension', () => {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 // wait for complete before we update the file
 
-                const { status } = entry?.extension?.TestStore || {};
+                const { status } = entry?.extensionState?.TestStore || {};
 
                 // wait till stored
                 if (status?.code !== 'STORE_COMPLETE') {
@@ -653,7 +653,7 @@ describe('createStoreExtension', () => {
                 // now we listen for new changes and update the file data
                 {
                     const unsub = entryTree.on('updateEntry', (entry) => {
-                        const { status } = entry?.extension?.TestStore || {};
+                        const { status } = entry?.extensionState?.TestStore || {};
 
                         // not stored yet
                         if (status?.code !== 'STORE_RELEASE_COMPLETE') {
@@ -737,7 +737,7 @@ describe('createStoreExtension', () => {
                 // wait for complete before we update the file
                 const {
                     TestStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 // wait till stored
                 if (status.code !== 'STORE_COMPLETE') {
@@ -751,7 +751,7 @@ describe('createStoreExtension', () => {
                     const unsub = entryTree.on('updateEntry', (entry) => {
                         const {
                             TestStore: { status },
-                        } = entry.extension;
+                        } = entry.extensionState;
 
                         // not stored yet
                         if (status.code !== 'STORE_COMPLETE') {
@@ -816,7 +816,7 @@ describe('createStoreExtension', () => {
 
             // we first store a new file
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status } = entry?.extension?.TestStore || {};
+                const { status } = entry?.extensionState?.TestStore || {};
 
                 // wait till stored
                 if (status?.code !== 'STORE_COMPLETE') {
@@ -830,7 +830,7 @@ describe('createStoreExtension', () => {
                     const unsub = entryTree.on('updateEntry', (entry) => {
                         const {
                             TestStore: { status },
-                        } = entry.extension;
+                        } = entry.extensionState;
 
                         // not stored yet
                         if (status.code !== 'STORE_RELEASE_COMPLETE') {

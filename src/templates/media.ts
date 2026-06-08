@@ -184,7 +184,7 @@ export function createImageView(options?: ImageViewOptions) {
 }
 
 function getMediaContextReference({ entry }: NodeContext): NodeContext {
-    const { media, video } = entry.extension.EntryListView || {};
+    const { media, video } = entry.extensionState.EntryListView || {};
     return {
         media,
         video,

@@ -4,6 +4,7 @@ import { defineFilePond } from '../../src/index';
 import { SimulatedStore } from '../../src/extensions/simulated-store';
 import { generateFile } from '../../src/dev';
 import { entryExtensionStatus, event } from '../helpers';
+import { sleep } from '../../src/utils/sleep';
 
 let pond;
 let form;
@@ -82,4 +83,25 @@ test('removes entry when clicking revert button if shouldStore is true', async (
     await entryExtensionStatus(pond, 'STORE_RELEASE_COMPLETE');
 
     expect(pond.currentEntries.length).toBe(0);
+});
+
+test('form validity is invalid when entry not stored', async () => {
+    expect(form.checkValidity()).toBe(true);
+
+    pond.entries = [
+        {
+            src: await generateFile(),
+        },
+    ];
+
+    expect(form.checkValidity()).toBe(false);
+
+    await page.getByRole('listitem');
+    await page.getByRole('button', { name: 'store' }).click();
+
+    await entryExtensionStatus(pond, 'STORE_COMPLETE');
+
+    await sleep(10);
+
+    expect(form.checkValidity()).toBe(true);
 });

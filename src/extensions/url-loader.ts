@@ -216,7 +216,7 @@ export const URLLoader = createExtension({
                 // update entry so we know size, name, and type before the blob is loaded
                 updateEntry(entry, {
                     ...fileInfo,
-                    extension: {
+                    extensionState: {
                         [extensionName]: {
                             fetchedMetadata: true,
                         },
@@ -291,7 +291,7 @@ export const URLLoader = createExtension({
                 // update in one go
                 updateEntry(entry, {
                     file,
-                    extension: {
+                    extensionState: {
                         [extensionName]: {
                             status: {
                                 type: Status.Success,

@@ -35,7 +35,7 @@ describe('FormPostStore', function () {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FormPostStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (status.type !== 'error') return;
 
@@ -76,7 +76,7 @@ describe('FormPostStore', function () {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FormPostStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 const { value } = entry.state;
 
@@ -135,7 +135,7 @@ describe('FormPostStore', function () {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FormPostStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 const { value } = entry.state;
 
@@ -186,7 +186,7 @@ describe('FormPostStore', function () {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FormPostStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 const { value } = entry.state;
 
@@ -233,7 +233,7 @@ describe('FormPostStore', function () {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     FormPostStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 const { value } = entry.state;
 
@@ -270,13 +270,13 @@ describe('FormPostStore', function () {
             ];
 
             const unsub = entryTree.on('updateEntry', (entry) => {
-                if (!entry.extension.FormPostStore) {
+                if (!entry.extensionState.FormPostStore) {
                     return;
                 }
 
                 const {
                     FormPostStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 const { value } = entry.state;
 
@@ -321,7 +321,7 @@ describe('FormPostStore', function () {
             ];
 
             const unsub = entryTree.on('updateEntry', (entry) => {
-                const { status } = entry?.extension?.FormPostStore || {};
+                const { status } = entry?.extensionState?.FormPostStore || {};
 
                 const { value } = entry.state;
 

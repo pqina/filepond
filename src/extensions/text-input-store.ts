@@ -50,7 +50,7 @@ export const TextInputStore = createExtension({
 
             // set files list to target element, filter out entries in error state
             const filteredEntries = entries.filter((entry) => {
-                return !Object.values(entry.extension ?? {}).some((extension) => {
+                return !Object.values(entry.extensionState ?? {}).some((extension) => {
                     return extension.status?.type === 'error';
                 });
             });

@@ -34,7 +34,7 @@ describe('ChunkedUploadStore', function () {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     ChunkedUploadStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 const { value } = entry.state;
 
@@ -76,7 +76,7 @@ describe('ChunkedUploadStore', function () {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     ChunkedUploadStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 const { value } = entry.state;
 
@@ -126,7 +126,7 @@ describe('ChunkedUploadStore', function () {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     ChunkedUploadStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (status.code === 'STORE_BUSY' && Number.isFinite(status.progress)) {
                     progressValues.push(status.progress);
@@ -184,7 +184,7 @@ describe('ChunkedUploadStore', function () {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     ChunkedUploadStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 const { value } = entry.state;
 
@@ -322,7 +322,7 @@ describe('ChunkedUploadStore', function () {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     ChunkedUploadStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 if (!status.code.endsWith('COMPLETE')) return;
 
@@ -403,7 +403,7 @@ describe('ChunkedUploadStore', function () {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     ChunkedUploadStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 const { value } = entry.state;
 
@@ -459,7 +459,7 @@ describe('ChunkedUploadStore', function () {
             const unsub = entryTree.on('updateEntry', (entry) => {
                 const {
                     ChunkedUploadStore: { status },
-                } = entry.extension;
+                } = entry.extensionState;
 
                 const { value } = entry.state;
 
