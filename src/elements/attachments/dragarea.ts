@@ -237,6 +237,12 @@ export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) 
             pointerMoveUnsub = addListener(documentElement, 'pointermove', handleGrabCancel);
 
             // will consider a drag attempt if no pointer-up within x ms
+            if (grabTimeout <= 0) {
+                handleGrab(e.pointerId);
+                return;
+            }
+
+            // use timeout
             clearTimeout(grabAttemptTimeout);
             grabAttemptTimeout = setTimeout(() => {
                 handleGrab(e.pointerId);

@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, expect, test } from 'vitest';
-import { page } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import { defineFilePond } from '../../src/index';
-
+import { SimulatedStore } from '../../src/extensions/simulated-store';
 import { generateFile } from '../../src/dev';
+import { dragSimulation } from '../helpers';
 
 let pond;
 let elements;
@@ -44,7 +45,7 @@ test('renders entry', async () => {
     await expect.element(page.getByRole('listitem')).toBeVisible();
 });
 
-test('deletes entry', async () => {
+test('deletes entry when clicking remove button', async () => {
     pond.entries = [
         {
             src: generateFile(),
@@ -58,3 +59,19 @@ test('deletes entry', async () => {
 
     expect(pond.currentEntries.length).toBe(0);
 });
+
+test('re-order entries with drag and drop', async () => {
+    pond.EntryListView = {
+        dragGrabTimeout: 0,
+    };
+
+    pond.entries = [
+        { src: await generateFile({ name: 'a.txt' }) },
+        { src: await generateFile({ name: 'b.txt' }) },
+        { src: await generateFile({ name: 'c.txt' }) },
+    ];
+});
+
+// drag and then drop existing entry outside of file-pond to remove
+
+// add new entry with drop

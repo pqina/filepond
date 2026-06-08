@@ -57,7 +57,7 @@ function isCanvasSupportedImage(name: string, type?: string): boolean {
  * functionality without needing real files.
  */
 export async function generateFile(options?: GenerateFileOptions): Promise<File | null> {
-    const { name = 'Untitled', type } = options ?? {};
+    const { name = 'Untitled', type = 'text/plain' } = options ?? {};
 
     if (isPlainDocument(name, type)) {
         return (

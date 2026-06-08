@@ -1001,7 +1001,8 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         }
         // field is invalid
         else {
-            this.#internals.setValidity(flags, message, this.#wrapper);
+            // we pass fallback 'error' string for when no locale set
+            this.#internals.setValidity(flags, message || 'error', this.#wrapper);
             valid = false;
         }
 
