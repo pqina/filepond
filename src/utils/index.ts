@@ -20,3 +20,5 @@ export {
     updateFilename,
     updateFileType,
 } from './file.js';
+
+export { h, addListener, getAsElement } from './dom.js';
