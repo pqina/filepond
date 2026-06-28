@@ -23,8 +23,15 @@ export const getFileFromBlob = (
         filename = getDateString();
     }
 
-    // if filename supplied but no extension and filename has extension
-    if (filename && extension === null && getExtensionFromFilename(filename)) {
+    // if filename already carries an extension keep it as is, otherwise fall
+    // through and append a guessed one. `getExtensionFromFilename` returns the
+    // whole name for dotless names like "avatar", so also check for a dot.
+    if (
+        filename &&
+        extension === null &&
+        filename.includes('.') &&
+        getExtensionFromFilename(filename)
+    ) {
         file.name = filename;
     }
     else {
