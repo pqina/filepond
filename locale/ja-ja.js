@@ -5,7 +5,7 @@ export default {
     labelFileSizeNotAvailable: "ファイルサイズがみつかりません",
     labelFileLoading: "読込中...",
     labelFileLoadError: "読込中にエラーが発生",
-    labelFileProcessing: "読込中...",
+    labelFileProcessing: "アップロード中...",
     labelFileProcessingComplete: "アップロード完了",                                                                                          
     labelFileProcessingAborted: "アップロードがキャンセルされました",                                                                           
     labelFileProcessingError: "アップロード中にエラーが発生",                                                                                 
