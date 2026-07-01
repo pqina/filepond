@@ -5,6 +5,7 @@ import type {
     TemplateNode,
     NodeContext,
     EntryAnimation,
+    Locale,
 } from '../../types/index.js';
 import type { Vector } from '../../utils/vector.js';
 import type { FilePondSvelteComponentOptions } from '../FilePondSvelteComponent/index.svelte.js';
@@ -130,7 +131,7 @@ export interface FilePondEntryListOptions extends Omit<FilePondSvelteComponentOp
     assets?: { [key: string]: string };
 
     /** The locale resource props to use for text, defaults to `{}` */
-    locale?: { [key: string]: string };
+    locale?: Locale;
 
     /** The data format to use in the templates */
     byteUnits?: 'mega' | 'mebi';

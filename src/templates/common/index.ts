@@ -3,13 +3,13 @@ import {
     type NodeTree,
     type NodeContext,
     type TemplateNode,
-} from '../elements/common/nodeTree.js';
-import type { FilePondEntry } from '../types/index.js';
+} from '../../elements/common/nodeTree.js';
+import type { ComponentNode, FilePondEntry } from '../../types/index.js';
 import type {
     ExtensionState,
     ExtensionStatus,
     ExtensionStatusType,
-} from '../extensions/common/createExtension.js';
+} from '../../extensions/common/createExtension.js';
 import {
     isArray,
     isBlobOrFile,
@@ -18,12 +18,16 @@ import {
     isFunction,
     isRegExp,
     isString,
-} from '../utils/test.js';
-import { arrayWrap } from '../utils/array.js';
-import { Button } from '../elements/components/Button/index.js';
-import { ElementPane } from '../elements/components/ElementPane/index.js';
-import { Entry } from '../elements/FilePondEntryList/components/Entry/index.js';
-import { hasOwnProp } from '../utils/object.js';
+} from '../../utils/test.js';
+import { arrayWrap } from '../../utils/array.js';
+import { Button } from '../../elements/components/Button/index.js';
+import { ElementPane } from '../../elements/components/ElementPane/index.js';
+import { Entry } from '../../elements/FilePondEntryList/components/Entry/index.js';
+import { hasOwnProp } from '../../utils/object.js';
+import {
+    SpringElement,
+    type SpringElementOptions,
+} from '../../elements/components/SpringElement/index.js';
 
 export function getEntryExtensionsAsArray(entry: FilePondEntry): ExtensionState[] {
     if (!entry || !entry.extensionState) {
@@ -85,6 +89,20 @@ export function createElementStack(options: { layout?: 'row' | 'stack' | 'pile';
             layout,
         },
     });
+}
+
+export function createDefaultSpringElement(options: Omit<ComponentNode, 'component'>) {
+    return {
+        ...options,
+        component: SpringElement,
+        props: ({ enableAnimations, springDefaults }: NodeContext) => {
+            return {
+                springDefaults,
+                enableAnimations,
+                ...options.props,
+            };
+        },
+    };
 }
 
 export function createSpringPane(options: { key: string; class: string; part?: string }) {

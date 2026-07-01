@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'Dotknij, aby cofnąć',
     // browse button labels
     browse: 'Wybierz {{maxFilesUnit}}',
-    browseAndDrop: 'Upuść tutaj {{maxFilesUnit}} lub <u>przeglądaj</u>',
+    browseDrop: 'Upuść tutaj {{maxFilesUnit}} lub <u>przeglądaj</u>',
 
     loadError: 'Nie udało się załadować pliku.',
 

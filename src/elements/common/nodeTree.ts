@@ -50,6 +50,9 @@ export interface BaseNode {
 
     /** Children of this node. Falsy children are automatically filtered out */
     children?: string | TemplateNode | (TemplateNode | undefined)[];
+
+    /** Single item node description to use for list based nodes */
+    item?: TemplateNode;
 }
 
 export interface ElementNode extends BaseNode {
@@ -66,9 +69,6 @@ export interface ComponentNode extends BaseNode {
 
     /** Props to pass to the component */
     props?: { [key: string]: any } | ((context: NodeContext) => { [key: string]: any });
-
-    /** Single item node description to use for list based nodes */
-    item?: TemplateNode;
 }
 
 export interface SwitchNode {

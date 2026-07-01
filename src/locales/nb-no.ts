@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'Trykk for å angre',
     // browse button labels
     browse: 'Velg {{maxFilesUnit}}',
-    browseAndDrop: 'Slipp {{maxFilesUnit}} her, eller <u>bla gjennom</u>',
+    browseDrop: 'Slipp {{maxFilesUnit}} her, eller <u>bla gjennom</u>',
 
     loadError: 'Kunne ikke laste inn filen.',
 

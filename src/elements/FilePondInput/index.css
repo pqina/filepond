@@ -13,17 +13,28 @@
     min-height: 1px;
 
     /* default slot rendering */
-    & slot:not(:empty) {
-        display: block;
+    & slot:not([data-has-children]) {
+        display: none;
     }
 
     /* to prevent blue button color on iOS */
     & button {
         color: currentColor;
     }
+
+    /* hide status */
+    & #aria-status {
+        clip: rect(0 0 0 0);
+        clip-path: inset(50%);
+        height: 1px;
+        overflow: hidden;
+        position: absolute;
+        white-space: nowrap;
+        width: 1px;
+    }
 }
 
-/* disable user selection when disabled */
+/* no text selection when disabled */
 :host([disabled]) {
     user-select: none;
 }

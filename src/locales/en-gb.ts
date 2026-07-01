@@ -5,10 +5,12 @@ export const core = {
     reset: 'Reset',
     undo: 'Undo',
     cancel: 'Cancel',
+    import: 'Import',
     store: 'Store',
     revert: 'Revert',
     busy: 'Busy',
     loading: 'Loading',
+    close: 'Close',
 
     // units
     unitB: {
@@ -40,6 +42,21 @@ export const core = {
     success: 'Success',
     info: 'Info',
     system: 'System',
+
+    // button
+    buttonBrowse: 'Choose {{maxFilesUnit}}',
+
+    // sources
+    device: 'Device',
+    camera: 'Camera',
+    link: 'Link',
+
+    // capabilities labels
+    descriptionBrowse: '[Select {{maxFilesUnit}}]',
+    descriptionBrowseDrop: 'Drop {{maxFilesUnit}} here, or [browse]',
+    descriptionBrowseDropSelect: 'Drop {{maxFilesUnit}} here, [browse], or select from:',
+    descriptionBrowseSelect: 'Select {{maxFilesUnit}} from:',
+    descriptionSelect: 'Select {{maxFilesUnit}} from:',
 
     // file types (these also match with image/*, video/*, and audio/*)
     fileMainTypeImage: 'image',
@@ -78,10 +95,6 @@ export const core = {
             },
         },
     },
-
-    // browse button labels
-    browse: 'Choose {{maxFilesUnit}}',
-    browseAndDrop: 'Drop {{maxFilesUnit}} here, or <u>browse</u>',
 
     // screenreader accessibility
     ariaRequired: 'required',

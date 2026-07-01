@@ -180,7 +180,7 @@ export async function generateVideo(options?: GenerateVideoOptions): Promise<Fil
     const frames = 10;
     const type = 'video/webp';
 
-    const canvas = h('canvas', { width, height }) as HTMLCanvasElement;
+    const canvas = h('canvas', { width, height });
     const ctx = canvas.getContext('2d')!;
 
     const chunks: Blob[] = [];

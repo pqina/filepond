@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'পূর্বাবস্থায় ফেরত যেতে ট্যাপ করুন',
     // browse button labels
     browse: '{{maxFilesUnit}} বেছে নিন',
-    browseAndDrop: '{{maxFilesUnit}} এখানে ছেড়ে দিন, অথবা <u>ব্রাউজ</u> করুন',
+    browseDrop: '{{maxFilesUnit}} এখানে ছেড়ে দিন, অথবা <u>ব্রাউজ</u> করুন',
 
     loadError: 'ফাইল লোড করা যায়নি।',
 

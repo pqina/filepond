@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'Tryk for at fortryde',
     // browse button labels
     browse: 'Vælg {{maxFilesUnit}}',
-    browseAndDrop: 'Slip {{maxFilesUnit}} her, eller <u>gennemse</u>',
+    browseDrop: 'Slip {{maxFilesUnit}} her, eller <u>gennemse</u>',
 
     loadError: 'Kunne ikke indlæse filen.',
 

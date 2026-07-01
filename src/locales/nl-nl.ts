@@ -58,7 +58,7 @@ export const core = {
     assistUndo: 'Tik om ongedaan te maken',
     // browse button labels
     browse: 'Kies {{maxFilesUnit}}',
-    browseAndDrop: 'Sleep {{maxFilesUnit}} hierheen of <u>blader</u>',
+    browseDrop: 'Sleep {{maxFilesUnit}} hierheen of <u>blader</u>',
 
     loadError: 'Bestand kon niet worden geladen.',
 

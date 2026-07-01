@@ -8,7 +8,7 @@
         type Vector,
     } from '../../utils/vector.js';
     import { type Rect } from '../../utils/rect.js';
-    import { droparea, type DropEventDetail } from '../attachments/droparea.js';
+    import { dropArea, type DropEventDetail } from '../attachments/drop-area.js';
     import { measurable } from '../attachments/measurable.js';
     import {
         computeAnimationPreference,
@@ -186,7 +186,7 @@
     {@attach measurable({
         onmeasure: handleMeasure,
     })}
-    {@attach droparea({
+    {@attach dropArea({
         onitemdrag: handleDragItem,
     })}
 >

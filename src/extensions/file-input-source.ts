@@ -23,14 +23,69 @@ export const FileInputSource = createExtension({
         element: undefined,
         resetFilesOnAdd: false,
         insertIndex: 0,
-    } as FileInputSourceOptions,
-    factory: ({ didSetProps }, pond) => {
-        const { insertEntries, removeEntries } = pond;
 
+        // source label and icon to use
+        sourceIcon: 'device',
+        sourceLabel: undefined,
+    } as FileInputSourceOptions,
+    factory: ({ didSetProps, props }, { insertEntries, removeEntries, setExtensionState }) => {
         /* Unsubscribe from input events */
         let removeChangeListener: (() => void) | undefined;
+        let currentElement: HTMLInputElement;
+        let currentEntries: FilePondEntry[];
+        let currentObserver: MutationObserver;
 
-        didSetProps(({ element: elementOrQuerySelector, resetFilesOnAdd, insertIndex }) => {
+        // handle file input changes
+        function handleChange() {
+            const { insertIndex, resetFilesOnAdd } = props;
+
+            // if current value, request removal
+            if (currentEntries) {
+                removeEntries(currentEntries);
+            }
+
+            //  Add Origin to entries in list
+            const entries = mapTree(Array.from(currentElement.files ?? []), (file: File) => ({
+                src: file,
+                origin: 'input',
+            })) as FilePondEntry[];
+
+            // store entries so we can remove later
+            currentEntries = entries;
+
+            // done loading files
+            insertEntries(entries, insertIndex > -1 ? insertIndex : undefined);
+
+            // this clears the file input when a file is 'transferred' to filepond
+            if (!resetFilesOnAdd) {
+                return;
+            }
+
+            // reset by assigning empty data transfer filelist
+            currentElement.files = new DataTransfer().files;
+        }
+
+        function syncExtensionState() {
+            const { sourceLabel: label, sourceIcon: icon } = props;
+
+            // we use data-readonly as readonly is not available on file input
+            const canBrowse = !currentElement.hasAttribute('data-readonly');
+
+            setExtensionState({
+                source: canBrowse
+                    ? {
+                          type: 'browse',
+                          label,
+                          icon,
+                          onclick: () => {
+                              currentElement.click();
+                          },
+                      }
+                    : undefined,
+            });
+        }
+
+        didSetProps(({ element: elementOrQuerySelector }) => {
             // exit
             if (!elementOrQuerySelector) {
                 return;
@@ -44,57 +99,41 @@ export const FileInputSource = createExtension({
                 warn(`FileInputSource: HTMLInputElement not found ${elementOrQuerySelector}`);
             }
 
-            // already listening, clean up
-            if (removeChangeListener) {
-                removeChangeListener();
+            if (currentElement !== element) {
+                // clean up
+                removeChangeListener?.();
                 removeChangeListener = undefined;
-            }
 
-            /** So we can request to remove when new value is assigned */
-            let currentEntries: FilePondEntry[];
-
-            // handle file input changes
-            function handleChange() {
-                // if current value, request removal
-                if (currentEntries) {
-                    removeEntries(currentEntries);
+                // we need to perhaps remove the 'browse' extension whnen the file input is set to readonly (nobrowse mode)
+                if (!currentObserver) {
+                    currentObserver = new MutationObserver(() => {
+                        syncExtensionState();
+                    });
                 }
+                currentObserver.disconnect();
+                currentObserver.observe(element, { attributeFilter: ['data-readonly'] });
 
-                //  Add Origin to entries in list
-                const entries = mapTree(Array.from(element.files ?? []), (file: File) => ({
-                    src: file,
-                    origin: 'input',
-                })) as FilePondEntry[];
-
-                // store entries so we can remove later
-                currentEntries = entries;
-
-                // done loading files
-                insertEntries(entries, insertIndex > -1 ? insertIndex : undefined);
-
-                // this clears the file input when a file is 'transferred' to filepond
-                if (!resetFilesOnAdd) {
-                    return;
-                }
-
-                // reset by assigning empty data transfer filelist
-                element.files = new DataTransfer().files;
+                // update element
+                currentElement = element;
             }
 
             // start listening for events
-            removeChangeListener = element ? addListener(element, 'change', handleChange) : noop;
+            removeChangeListener = currentElement
+                ? addListener(currentElement, 'change', handleChange)
+                : noop;
 
             // if already contains file wait one tick
-            if (element && element.files?.length) {
+            if (!currentElement.files?.length) {
                 Promise.resolve().then(handleChange);
             }
+
+            syncExtensionState();
         });
 
         return {
             destroy() {
-                if (removeChangeListener) {
-                    removeChangeListener();
-                }
+                currentObserver?.disconnect();
+                removeChangeListener?.();
             },
         };
     },

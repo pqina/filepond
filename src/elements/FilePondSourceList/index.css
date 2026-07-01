@@ -1,0 +1,232 @@
+:host {
+    isolation: isolate;
+
+    --btn-border-width: 0;
+    --btn-border-radius: calc(var(--default-border-radius, 0) * 0.25);
+    --btn-color: var(--default-color);
+    --btn-background-color: var(--default-background-color);
+
+    --input-border: 1px solid rgb(from var(--default-color) r g b / 0.5);
+    --input-border-radius: calc(var(--default-border-radius, 0) * 0.25);
+
+    --dialog-padding: var(--default-padding, 0);
+    --dialog-color: var(--default-color);
+    --dialog-background-color: Canvas;
+    --dialog-shadow: 0 3px 6px rgb(0 0 0 / 0.25);
+
+    --dialog-timing: var(--_250ms);
+    --dialog-content-timing: var(--_250ms);
+    --dialog-content-delay: var(--_100ms);
+}
+
+/* sources list */
+ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    list-style: none;
+    gap: var(--default-padding);
+
+    & .button {
+        -webkit-tap-highlight-color: transparent;
+        box-sizing: content-box;
+        gap: 0.375em;
+        padding: 0.3125em 0.75em;
+        font: inherit;
+        --btn-font-size: var(--font-size-m);
+    }
+
+    & svg {
+        stroke-width: 2;
+    }
+}
+
+/* button dialog panel */
+dialog {
+    /* these two styles fix safari repositioning on fade out */
+    position: fixed;
+    inset: 0;
+
+    /* center to viewport */
+    margin: auto;
+    padding: var(--default-padding);
+    background: transparent;
+    color: var(--dialog-color);
+
+    /* so element-pane shadow isn't clipped */
+    overflow: visible;
+
+    /* stack content */
+    &[open] {
+        display: block;
+    }
+
+    /* dialog panel */
+    & element-pane-wrapper {
+        position: absolute;
+    }
+
+    & element-pane {
+        --border-radius: var(--default-border-radius);
+        --background-color: var(--dialog-background-color);
+        --box-shadow: var(--dialog-shadow);
+    }
+
+    /* dialog form */
+    & .dialog-form {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        z-index: 1;
+
+        /* limit size here (we can't set layout on [open] as block -> none is animated */
+        width: fit-content;
+        height: fit-content;
+        max-width: min(40em, 80vw);
+        max-height: min(30em, 80vh);
+        min-width: 12em;
+    }
+
+    /* header */
+    & .dialog-header {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        margin-top: -0.25em;
+        margin-bottom: 0.5em;
+    }
+
+    & .dialog-title {
+        font-size: var(--font-size-l);
+        font-weight: 500;
+    }
+
+    & .dialog-button-close {
+        margin-left: 1em;
+        margin-right: -0.3125em;
+        --btn-size: 1.5em;
+        --btn-icon-stroke: 2;
+        --btn-icon-size: 1em;
+        --btn-background-color: transparent;
+    }
+
+    & .button {
+        &:focus-visible {
+            outline: var(--outline);
+        }
+    }
+
+    /* content */
+    & .dialog-content {
+        /* so we can have an animated dialog content mask */
+        clip-path: inset(
+            var(--dialog-content-clip-path) round calc(var(--default-border-radius, 0) * 0.25)
+        );
+
+        /* scale down content so always fits viewport */
+        display: flex;
+        flex-direction: column;
+        min-height: 1lh;
+        min-width: 14em;
+        & > * {
+            min-height: 0;
+        }
+    }
+
+    /* footer */
+    & .dialog-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1em;
+
+        & .button {
+            --btn-font-size: var(--font-size-l);
+            line-height: 2;
+            padding: 0 1em;
+        }
+    }
+
+    & .dialog-button-cancel {
+        --btn-color: var(--default-color);
+        --btn-background-color: rgb(from var(--default-color) r g b / 0.1);
+    }
+
+    & .dialog-button-import {
+        --btn-color: var(--default-accent-color-text);
+        --btn-background-color: var(--default-accent-color);
+        font-weight: 600;
+    }
+
+    /* backdrop styles */
+    &::backdrop {
+        backdrop-filter: contrast(0.8);
+    }
+
+    &,
+    &::backdrop {
+        transition:
+            display var(--dialog-timing) allow-discrete,
+            overlay var(--dialog-timing) allow-discrete,
+            opacity var(--dialog-timing) ease-out;
+        opacity: 0;
+    }
+
+    &[open],
+    &[open]::backdrop {
+        opacity: 1;
+
+        @starting-style {
+            opacity: 0;
+        }
+    }
+}
+
+/* default dialog content styles */
+.dialog-header {
+    display: flex;
+
+    & .dialog-button-close {
+        align-self: flex-end;
+    }
+}
+
+.dialog-footer {
+    & .dialog-button-cancel {
+        align-self: flex-start;
+    }
+
+    & .dialog-button-import {
+        align-self: flex-end;
+    }
+}
+
+/* default dialog content styles */
+:where(.dialog-content) {
+    & select,
+    & textarea,
+    & input {
+        max-width: 100%;
+        padding: 0.125em 0;
+        text-indent: 0.25em;
+        font-size: var(--font-size-l);
+        border: var(--input-border);
+        border-radius: var(--input-border-radius);
+
+        &:focus-visible {
+            outline: var(--outline);
+        }
+    }
+
+    & input[type='url'] {
+        width: 20em;
+    }
+
+    @media (max-width: 30em) {
+        & select,
+        & textarea,
+        & input {
+            font-size: 16px;
+        }
+    }
+}

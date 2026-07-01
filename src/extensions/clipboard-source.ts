@@ -12,44 +12,48 @@ export const ClipboardSource = createExtension({
     props: {
         shouldHandlePaste: () => true,
     } as ClipboardSourceOptions,
-    factory: ({ didSetProps }, pond) => {
-        // shortcuts to filepond internal methods
-        const { insertEntries } = pond;
-
+    factory: ({ props, didSetProps }, { insertEntries, setExtensionState }) => {
         let removePasteListener: () => void;
 
-        didSetProps(({ shouldHandlePaste }: ClipboardSourceOptions) => {
-            /** Converts pasted entries into FilePondEntries and adds them to the list */
-            const handlePaste = (e: ClipboardEvent) => {
-                // allow filtering out this paste event
-                if (!e.clipboardData || !shouldHandlePaste(e)) {
-                    return;
-                }
+        /** Converts pasted entries into FilePondEntries and adds them to the list */
+        function handlePaste(e: ClipboardEvent) {
+            const { shouldHandlePaste } = props;
 
-                // check if this paste action contains files
-                const { items, files } = e.clipboardData;
-                if ((!files || !files.length) && ![...items].some((item) => item.kind === 'file')) {
-                    return;
-                }
-
-                // if we handle paste, we block other scripts from handling it
-                e.preventDefault();
-                e.stopPropagation();
-
-                // load the files
-                insertEntries({
-                    src: e.clipboardData,
-                    origin: 'clipboard',
-                } as any);
-            };
-
-            // remove existing listener
-            if (removePasteListener) {
-                removePasteListener();
+            // allow filtering out this paste event
+            if (!e.clipboardData || !shouldHandlePaste(e)) {
+                return;
             }
+
+            // check if this paste action contains files
+            const { items, files } = e.clipboardData;
+            if ((!files || !files.length) && ![...items].some((item) => item.kind === 'file')) {
+                return;
+            }
+
+            // if we handle paste, we block other scripts from handling it
+            e.preventDefault();
+            e.stopPropagation();
+
+            // load the files
+            insertEntries({
+                src: e.clipboardData,
+                origin: 'clipboard',
+            } as any);
+        }
+
+        didSetProps(() => {
+            // remove existing listener
+            removePasteListener?.();
 
             // start listening for paste event
             removePasteListener = addListener(document.documentElement, 'paste', handlePaste);
+
+            // set source type
+            setExtensionState({
+                source: {
+                    type: 'paste',
+                },
+            });
         });
 
         return {

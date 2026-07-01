@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'Chạm để hoàn tác',
     // browse button labels
     browse: 'Chọn {{maxFilesUnit}}',
-    browseAndDrop: 'Thả {{maxFilesUnit}} vào đây hoặc <u>duyệt</u>',
+    browseDrop: 'Thả {{maxFilesUnit}} vào đây hoặc <u>duyệt</u>',
 
     loadError: 'Không thể tải tệp.',
 

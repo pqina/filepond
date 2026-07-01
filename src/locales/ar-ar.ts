@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'اضغط للتراجع',
     // browse button labels
     browse: 'اختر {{maxFilesUnit}}',
-    browseAndDrop: 'أسقط {{maxFilesUnit}} هنا، أو <u>تصفح</u>',
+    browseDrop: 'أسقط {{maxFilesUnit}} هنا، أو <u>تصفح</u>',
 
     loadError: 'تعذر تحميل الملف.',
 

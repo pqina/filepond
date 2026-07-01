@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'Toca para deshacer',
     // browse button labels
     browse: 'Elegir {{maxFilesUnit}}',
-    browseAndDrop: 'Suelta {{maxFilesUnit}} aquí o <u>explora</u>',
+    browseDrop: 'Suelta {{maxFilesUnit}} aquí o <u>explora</u>',
 
     loadError: 'No se pudo cargar el archivo.',
 

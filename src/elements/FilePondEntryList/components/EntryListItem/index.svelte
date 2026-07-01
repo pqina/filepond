@@ -1,12 +1,13 @@
 <script lang="ts">
-    import { type FilePondEntry, type Vector } from '../../../../types/index.js';
+    import { type FilePondEntry } from '../../../../types/index.js';
     import { type Snippet } from 'svelte';
+    import type { Vector } from '../../../../utils/vector.js';
+    import { type Rect, rectCreate, rectIntersectWithRect } from '../../../../utils/rect.js';
     import { setEntryContext } from '../../contexts/entryContext.js';
     import { SpringElement } from '../../../components/SpringElement/index.js';
-    import { type Rect, rectCreate, rectIntersectWithRect } from '../../../../utils/rect.js';
-    import { VIEWPORT_MARGIN } from '../../../attachments/measurable.js';
     import { toSpaceSeparatedString } from '../../../common/string.js';
     import { getAppContext } from '../../contexts/appContext.js';
+    import { VIEWPORT_MARGIN } from '../../../attachments/measurable.js';
 
     interface EntryItemOptions {
         tag?: string;
@@ -54,7 +55,7 @@
 
     // get app context map
     const appContext = getAppContext();
-    const locale = $derived(appContext.locale);
+    const { locale, enableAnimations, springDefaults } = $derived(getAppContext());
 
     /** Window width used to calculate if element is visible or not */
     let windowWidth = $state.raw() as number;
@@ -163,6 +164,8 @@
     onroot={handleRootDefined}
     onchangerendercontent={handleChangeRenderContent}
     onelementmeasure={onmeasureitem}
+    {enableAnimations}
+    {springDefaults}
 >
     {@render children({ id: entry.id, entry })}
 </SpringElement>

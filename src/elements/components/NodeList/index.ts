@@ -12,19 +12,19 @@ export interface NodeListOptions {
     nodes: TemplateNode[];
 
     /** The context available to the current items as received by the parent */
-    context: NodeContext;
+    context?: NodeContext;
 
     /** Context shared by all nodes */
-    sharedContext: NodeContext;
+    sharedContext?: NodeContext;
 
     /** Routes between nodes */
     routes?: { [key: string]: { [event: string]: () => void } };
 
     /** Allows manipulating the component props */
-    beforeSetProps: (node: { [key: string]: any }) => { [key: string]: any };
+    beforeSetProps?: (node: { [key: string]: any }) => { [key: string]: any };
 
     /** Allows node manipulation before rendering */
-    beforeRenderNode: (
+    beforeRenderNode?: (
         node: ComponentNode | ElementNode,
         context: NodeContext,
         sharedContext: NodeContext

@@ -1,7 +1,15 @@
 import { flattenTree } from './tree.js';
 import { isNumber, isFileEntry, isString, isBoolean, isBrowser, isFile } from './test.js';
 import { arrayItemsEqual, arrayRemoveFalsy } from './array.js';
-import type { FilePondFileEntry } from '../types/index.js';
+import {
+    type FilePondDropAreaElement,
+    type FilePondDropIndicatorElement,
+    type FilePondEntryListElement,
+    type FilePondFileEntry,
+} from '../types/index.js';
+import { FilePondSourceListElement } from '../elements/FilePondSourceList/index.js';
+import type { CameraInputElement } from '../elements/FilePondCameraInput/index.js';
+import type { FilePondFrameElement } from '../elements/FilePondFrame/index.js';
 
 export function dispatchCustomEvent(element: HTMLElement, type: string, options?: CustomEventInit) {
     element.dispatchEvent(new CustomEvent(type, options));
@@ -72,13 +80,26 @@ export function setStyles(element: HTMLElement, styles: string) {
     });
 }
 
+type CustomElementTagNameMap = {
+    'file-pond-entry-list': FilePondEntryListElement;
+    'file-pond-source-description': HTMLParagraphElement;
+    'file-pond-source-list': FilePondSourceListElement;
+    'file-pond-drop-indicator': FilePondDropIndicatorElement;
+    'file-pond-frame': FilePondFrameElement;
+    'camera-input': CameraInputElement;
+};
+
+type ElementTagNameMap = HTMLElementTagNameMap & CustomElementTagNameMap;
+
 /** HTML element creation helper function */
-export function h(
-    name: string,
-    attributes: { [key: string]: ((...args: any[]) => void) | string | boolean | number } = {},
+export function h<K extends keyof ElementTagNameMap>(
+    name: K,
+    attributes: {
+        [key: string]: ((...args: any[]) => void) | string | boolean | number | HTMLElement;
+    } = {},
     children: (HTMLElement | void | false | null | undefined)[] = []
-) {
-    const el = document.createElement(name);
+): ElementTagNameMap[K] {
+    const el = document.createElement(name) as ElementTagNameMap[K];
 
     // @ts-ignore ignore __proto__ does not exist on element warning
     const descriptors = Object.getOwnPropertyDescriptors(el.__proto__);

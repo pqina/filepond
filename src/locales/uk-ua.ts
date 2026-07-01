@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'Натисніть, щоб повернути',
     // browse button labels
     browse: 'Вибрати {{maxFilesUnit}}',
-    browseAndDrop: 'Перетягніть сюди {{maxFilesUnit}} або <u>перегляньте</u>',
+    browseDrop: 'Перетягніть сюди {{maxFilesUnit}} або <u>перегляньте</u>',
 
     loadError: 'Не вдалося завантажити файл.',
 

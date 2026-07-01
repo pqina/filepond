@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'タップして元に戻す',
     // browse button labels
     browse: '{{maxFilesUnit}}を選択',
-    browseAndDrop: 'ここに{{maxFilesUnit}}をドロップ、または<u>参照</u>',
+    browseDrop: 'ここに{{maxFilesUnit}}をドロップ、または<u>参照</u>',
 
     loadError: 'ファイルを読み込めませんでした。',
 

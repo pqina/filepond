@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'Toque para anular',
     // browse button labels
     browse: 'Escolher {{maxFilesUnit}}',
-    browseAndDrop: 'Largue {{maxFilesUnit}} aqui ou <u>procure</u>',
+    browseDrop: 'Largue {{maxFilesUnit}} aqui ou <u>procure</u>',
 
     loadError: 'Não foi possível carregar o ficheiro.',
 

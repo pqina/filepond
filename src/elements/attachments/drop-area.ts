@@ -1,5 +1,5 @@
 import type { Vector } from '../../utils/vector.js';
-import type { DragEventDetail } from './dragarea.js';
+import type { DragEventDetail } from './drag-area.js';
 
 import { dispatchCustomEvent } from '../../utils/dom.js';
 import { addListener } from '../../utils/dom.js';
@@ -22,7 +22,7 @@ interface DropAreaOptions {
 }
 
 /** Target element can handle dropping of items */
-export function droparea(options: DropAreaOptions = {}): (element: HTMLElement) => () => void {
+export function dropArea(options: DropAreaOptions = {}): (element: HTMLElement) => () => void {
     const { disabled } = options;
 
     return (element) => {

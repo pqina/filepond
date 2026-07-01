@@ -15,7 +15,6 @@
     import { type NodeListOptions } from './index.js';
     import { isFunction, isString } from '../../../utils/test.js';
     import { stringReplaceVariables, withResources } from '../../common/string.js';
-    import { getAppContext } from '../../FilePondEntryList/contexts/appContext.js';
     import {
         // is used
         noop,
@@ -28,8 +27,8 @@
 
     let {
         nodes,
-        context: treeContext,
-        sharedContext,
+        context: treeContext = {},
+        sharedContext = {},
         routes: contextRoutes = {},
         beforeSetProps = passthrough,
         beforeRenderNode = passthrough,
@@ -37,9 +36,6 @@
 
     // reference to node instance (element or component)
     const refs: { [node: string]: any } = $state.raw({});
-
-    // get app context map
-    const { resources, propResourceMap, enableAnimations } = $derived(getAppContext());
 
     const springState: {
         [key: string]: {
@@ -97,7 +93,7 @@
 
         const computedObject = computeObjectWithContext(obj, context);
 
-        return withResources(computedObject, propResourceMap, resources);
+        return withResources(computedObject, sharedContext.propResourceMap, resources);
     }
 
     function computeStringWithResources(
@@ -111,7 +107,7 @@
         }
     ) {
         // auto replace props (label, icon, title) in string with locale values
-        let { label } = withResources({ label: str }, propResourceMap, resources);
+        let { label } = withResources({ label: str }, sharedContext.propResourceMap, resources);
 
         // test if we have to replace variables
         if (label.includes('{{')) {
@@ -202,7 +198,7 @@
                                 // update value spring
                                 if (springState[propertyName]) {
                                     springState[propertyName].spring.set(value, {
-                                        instant: !enableAnimations,
+                                        instant: !sharedContext.enableAnimations,
                                     });
                                 }
 
@@ -277,7 +273,11 @@
                 };
 
                 const content = isString(children)
-                    ? computeStringWithResources(children, mergedNodeContext, resources)
+                    ? computeStringWithResources(
+                          children,
+                          mergedNodeContext,
+                          sharedContext.resources
+                      )
                     : children;
 
                 if (isComponentNode(node)) {
@@ -287,7 +287,11 @@
                             key: getNodeKey(key, index),
                             component,
                             props: beforeSetProps(
-                                computeObjectWithResources(props, mergedNodeContext, resources)
+                                computeObjectWithResources(
+                                    props,
+                                    mergedNodeContext,
+                                    sharedContext.resources
+                                )
                             ),
                             item,
                             children: content,
@@ -301,12 +305,17 @@
                 }
 
                 if (isElementNode(node)) {
-                    const { attrs, tag } = node;
+                    const { attrs, item, tag } = node;
                     return beforeRenderNode(
                         {
                             key: getNodeKey(key, index),
                             tag,
-                            attrs: computeObjectWithResources(attrs, mergedNodeContext, resources),
+                            attrs: computeObjectWithResources(
+                                attrs,
+                                mergedNodeContext,
+                                sharedContext.resources
+                            ),
+                            item,
                             children: content,
                             context: mergedNodeContext,
                             transition,
@@ -397,7 +406,18 @@
                 }
             }
         >
-            {#if content}
+            {#if item}
+                {#each context.items as itemContext}
+                    <NodeList
+                        nodes={item}
+                        context={itemContext}
+                        routes={contextRoutes}
+                        {sharedContext}
+                        {beforeSetProps}
+                        {beforeRenderNode}
+                    />
+                {/each}
+            {:else if content}
                 <NodeList
                     nodes={content}
                     {context}

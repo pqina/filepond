@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'Napauta kumotaksesi',
     // browse button labels
     browse: 'Valitse {{maxFilesUnit}}',
-    browseAndDrop: 'Pudota {{maxFilesUnit}} tähän tai <u>selaa</u>',
+    browseDrop: 'Pudota {{maxFilesUnit}} tähän tai <u>selaa</u>',
 
     loadError: 'Tiedostoa ei voitu ladata.',
 

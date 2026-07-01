@@ -54,7 +54,7 @@ export const core = {
     assistUndo: '点击撤销',
     // browse button labels
     browse: '选择{{maxFilesUnit}}',
-    browseAndDrop: '将{{maxFilesUnit}}拖放到此处，或<u>浏览</u>',
+    browseDrop: '将{{maxFilesUnit}}拖放到此处，或<u>浏览</u>',
 
     loadError: '无法加载文件。',
 

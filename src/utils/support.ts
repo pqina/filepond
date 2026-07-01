@@ -26,4 +26,21 @@ export const supportsYieldScheduler = createTest(
     () => !!globalThis.scheduler?.yield
 );
 
+/** Tests if this browser supports URL patterns */
 export const supportsURLPattern = createTest(() => 'URLPattern' in window);
+
+/** Tests if this browser supports invoker commands */
+export const supportsInvokerCommands = createTest(() => 'CommandEvent' in window);
+
+/** Tests if this browser supports display transitions with allow-discrete (https://bugzilla.mozilla.org/show_bug.cgi?id=1882408#c5) */
+export const supportsDisplayTransition = createTest(() => {
+    const div = document.createElement('div');
+    div.style.transition = 'display 1s allow-discrete';
+    document.body.append(div);
+    const cs = getComputedStyle(div);
+    cs.display;
+    div.style.display = 'none';
+    const res = cs.display !== 'none';
+    div.remove();
+    return res;
+});

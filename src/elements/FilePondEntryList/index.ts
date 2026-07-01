@@ -2,6 +2,7 @@ import { FilePondSvelteComponentElement } from '../FilePondSvelteComponent/index
 import { setBooleanAttribute } from '../../utils/dom.js';
 import { registerShadowRoot } from '../common/extendStyles.js';
 import FilePondEntryListApp from './index.svelte';
+import defaultStyles from '../styles/defaults.css?inline';
 import styles from './index.css?inline';
 import type {
     EntryAnimation,
@@ -196,7 +197,7 @@ export class FilePondEntryListElement
         });
 
         // so can receive component styles
-        registerShadowRoot(this._root, styles);
+        registerShadowRoot(this._root, defaultStyles + styles);
     }
 
     connectedCallback() {

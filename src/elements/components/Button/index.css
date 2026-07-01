@@ -11,7 +11,7 @@
 
     /* By default use `auto`, if `--btn-size` is set on one of the parents we use `--btn-size`. We have to create "private" style properties because using `--btn-size` as property overwrites any cascaded properties */
     --_btn-size: var(--btn-size, auto);
-    --_btn-font-size: var(--font-size-m, auto);
+    --_btn-font-size: var(--btn-font-size, auto);
     --_btn-border-radius: var(--btn-border-radius, 0);
     --_btn-color: var(--btn-color, currentColor);
     --_btn-background-color: var(--btn-background-color, transparent);
@@ -58,7 +58,7 @@
     opacity: var(--btn-opacity, 1);
     outline: none;
     box-shadow: var(--_btn-shadow);
-    color: currentColor;
+    color: var(--_btn-color);
 
     & .icon {
         flex-shrink: 0;

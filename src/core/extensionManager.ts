@@ -38,7 +38,7 @@ export interface ExtensionManagerState {
 
 export interface ExtensionManagerContext {
     /** Subscribe to events */
-    on: EntryTreeOn;
+    on: EntryTreeOn & ExtensionManagerOn;
 
     /** Sets the current entries */
     setEntries: (entries: FilePondEntry[]) => void;
@@ -47,7 +47,10 @@ export interface ExtensionManagerContext {
     getEntries: () => FilePondEntry[];
 
     /** Insert new entries */
-    insertEntries: (entry: FilePondEntry | FilePondEntry[], index?: number | number[]) => void;
+    insertEntries: (
+        entry: FilePondEntrySource | FilePondEntrySource[],
+        index?: number | number[]
+    ) => void;
 
     /** Remove existing entries */
     removeEntries: (
@@ -95,7 +98,7 @@ interface ExtensionManagerEvents {
     };
 }
 
-type ExtensionManagerOn = <EventName extends keyof ExtensionManagerEvents>(
+export type ExtensionManagerOn = <EventName extends keyof ExtensionManagerEvents>(
     event: EventName,
     callback: (detail: ExtensionManagerEvents[EventName]) => void
 ) => () => void;
@@ -166,7 +169,7 @@ export function createExtensionManager(
 ): ExtensionManagerInstance {
     const { entryTree: tree } = options;
     // pubsub
-    const { on, pub } = pubsub();
+    const { on: sub, pub } = pubsub();
 
     /** Holds Currently loaded extensions */
     const extensions: LoadedExtension[] = [];
@@ -211,8 +214,13 @@ export function createExtensionManager(
 
     //
     function createExtensionInstance(factory: Extension): ExtensionInstance {
-        /** Listen for events */
-        const on: EntryTreeOn = (event, cb) => {
+        /** @ts-ignore Listen for events */
+        const on: EntryTreeOn & ExtensionManagerOn = (event, cb) => {
+            // route to extension manager
+            if (event === 'updateExtensionState') {
+                return sub(event, cb);
+            }
+            // route to entry list
             return tree.on(event, cb);
         };
 
@@ -314,8 +322,7 @@ export function createExtensionManager(
             return (...args) => {
                 // instance already set, we can just run this function
                 if (instance.current) {
-                    cb(...args);
-                    return;
+                    return cb(...args);
                 }
 
                 // instance not yet set, we're calling this function after the instance has been created
@@ -347,7 +354,7 @@ export function createExtensionManager(
 
     const instance = {
         // subscribe to events
-        on,
+        on: sub,
 
         get extensions(): Extension[] {
             return extensions.map(({ factory }) => factory);
@@ -431,6 +438,7 @@ export function createExtensionManager(
                 // set props if were defined
                 if (Array.isArray(newExtensionFactories[i])) {
                     const newExtensionProps = newExtensionFactories[i][1];
+                    // @ts-ignore
                     attemptSetExtensionInstanceProps(extensions.at(-1), newExtensionProps);
                 }
             }

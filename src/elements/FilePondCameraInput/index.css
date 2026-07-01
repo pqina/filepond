@@ -1,0 +1,198 @@
+:host {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    --btn-border-width: 0;
+    --btn-border-radius: calc(var(--default-border-radius, 0) * 0.5);
+    --btn-background-color: var(--default-background-color);
+}
+
+progress-indicator {
+    --size: 1.5em;
+    position: absolute;
+    left: calc(50% - var(--size) * 0.5);
+    top: calc(50% - var(--size) * 0.5);
+    --border-radius: calc(var(--btn-border-radius) * 0.5);
+    --progress-color: #fff;
+    --track-size: var(--size);
+    --progress-stroke: 2;
+    --indeterminate-cycle-duration: 1s;
+
+    opacity: var(--progress-opacity);
+    transition: opacity 0.5s ease-out;
+}
+
+canvas,
+video {
+    display: block;
+
+    /* overlay */
+    grid-row-start: 1;
+    grid-column-start: 1;
+
+    /* scale */
+    transform-origin: center center;
+    transform: translate(var(--translate-x, 0), var(--translate-y, 0)) scale(var(--scalar, 1));
+}
+
+canvas {
+    pointer-events: none;
+}
+
+button {
+    --size: 3em;
+
+    padding: 0;
+    cursor: pointer;
+
+    width: var(--size);
+    height: var(--size);
+    border-radius: 9999em;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    &[disabled] {
+        display: none;
+    }
+}
+
+button.capture {
+    --ring-width: 0.125em;
+    --ring-margin: 0.125em;
+    --ring-color: #ffffff66;
+    --button-color: #fff;
+
+    position: relative;
+    color: transparent;
+    background-color: transparent;
+
+    &::before,
+    &::after {
+        border-radius: inherit;
+        content: '';
+        position: absolute;
+    }
+
+    &::after {
+        inset: 0;
+        background-color: var(--ring-color);
+        backdrop-filter: var(--default-backdrop-filter);
+        --size-half: calc(var(--size) * 0.5);
+        mask: radial-gradient(
+            transparent calc(var(--size-half) - var(--ring-width)),
+            black calc(var(--size-half) - var(--ring-width))
+        );
+
+        /*box-shadow: inset 0 0 0 var(--ring-width) var(--ring-color);*/
+        transition: background-color var(--_200ms) ease-in-out;
+    }
+
+    &::before {
+        inset: calc(var(--ring-margin) + var(--ring-width));
+        background-color: var(--button-color);
+    }
+
+    &:hover {
+        --ring-color: #fff;
+    }
+}
+
+button.reset {
+    color: #fff;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: var(--default-backdrop-filter);
+    & svg {
+        width: 1.25em;
+    }
+}
+
+.status {
+    color: #fff;
+    position: absolute;
+    inset: 1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: var(--font-size-m);
+}
+
+.camera {
+    display: grid;
+    grid-template-columns: 1fr;
+
+    max-width: 100%;
+    max-height: 100%;
+
+    background-color: black;
+    overflow: hidden;
+    position: relative;
+
+    &[data-state~='preview'],
+    &[data-state~='processing'] {
+        &::after {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            background-color: #fff;
+            content: '';
+            animation: flash 1s;
+            pointer-events: none;
+        }
+
+        & canvas {
+            animation: preview 1s;
+        }
+    }
+}
+
+@keyframes preview {
+    0% {
+        filter: contrast(2) brightness(2);
+    }
+    100% {
+        filter: none;
+    }
+}
+
+@keyframes flash {
+    0% {
+        opacity: 0;
+    }
+
+    5% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+.camera-footer {
+    position: absolute;
+    bottom: 1em;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+}
+
+/* fade in video when ready */
+button,
+.feed {
+    /* add small delay so we're kinda sure frame is painted */
+    transition: opacity 0.25s 0.5s ease-out;
+    opacity: 0;
+}
+
+.camera[data-state~='ready'] {
+    & button,
+    & .feed {
+        opacity: 1;
+    }
+}

@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'Koppintson a visszavonáshoz',
     // browse button labels
     browse: '{{maxFilesUnit}} kiválasztása',
-    browseAndDrop: 'Dobja ide: {{maxFilesUnit}}, vagy <u>böngésszen</u>',
+    browseDrop: 'Dobja ide: {{maxFilesUnit}}, vagy <u>böngésszen</u>',
 
     loadError: 'A fájl betöltése nem sikerült.',
 

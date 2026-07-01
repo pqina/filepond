@@ -85,9 +85,10 @@ export type ExtensionType =
     | 'view'
     | 'store';
 
+// extension factory has name and type getters
 export type Extension = ((pond: ExtensionManagerContext) => ExtensionInstance) & {
     readonly name: string;
-    readonly type: ExtensionType;
+    readonly type: string;
 };
 
 export interface CreateExtensionOptions {

@@ -42,13 +42,15 @@
     let root: HTMLElement;
 
     // get locale and assets
-    const { locale, enableAnimations } = $derived(getAppContext());
+    const { locale, enableAnimations, springDefaults } = $derived(getAppContext());
 
     // get store
     const entryContext = getEntryContext();
 
     // list of extension state objects
-    const extensions = $derived(Object.values(entryContext.current.extensionState)) as ExtensionState[];
+    const extensions = $derived(
+        Object.values(entryContext.current.extensionState)
+    ) as ExtensionState[];
 
     function getState(states: any[], extensions: ExtensionState[]) {
         // no states to check
@@ -295,6 +297,8 @@
     subattrs={{ layout: 'pile' }}
     onroot={(el) => (root = el)}
     {part}
+    {enableAnimations}
+    {springDefaults}
 >
     {#if buttonsTemplate.length}
         <NodeList nodes={buttonsTemplate} {...nodeContext}></NodeList>

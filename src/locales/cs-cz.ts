@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'Klepněte pro vrácení',
     // browse button labels
     browse: 'Vybrat {{maxFilesUnit}}',
-    browseAndDrop: 'Přetáhněte sem {{maxFilesUnit}} nebo <u>procházejte</u>',
+    browseDrop: 'Přetáhněte sem {{maxFilesUnit}} nebo <u>procházejte</u>',
 
     loadError: 'Soubor se nepodařilo načíst.',
 

@@ -1,11 +1,13 @@
 progress-indicator {
-    --progress-color: var(--progress-color, currentColor);
+    --_progress-color: var(--progress-color, currentColor);
 
-    --track-color: color-mix(in srgb, var(--progress-color) 25%, transparent);
-    --track-size: var(--size, 1.5em);
-    --track-border-radius: var(--border-radius, 0);
+    --_track-color: var(--track-color, color-mix(in srgb, var(--_progress-color) 25%, transparent));
+    --_track-size: var(--track-size, var(--size, 1.5em));
+    --_track-border-radius: var(--track-border-radius, var(--border-radius, 0));
 
-    --progress-cap: round;
+    --_progress-cap: var(--progress-cap, round);
+
+    --_indeterminate-cycle-duration: var(--indeterminate-cycle-duration, 0.5s);
 
     /* this variable is also used in .svelte file for calculating stroke-width on Safari */
     --_stroke-width: var(--progress-stroke, 1.75);
@@ -15,7 +17,7 @@ progress-indicator {
     background: transparent;
     pointer-events: none;
     overflow: hidden;
-    border-radius: var(--track-border-radius);
+    border-radius: var(--_track-border-radius);
 
     & div,
     & svg {
@@ -45,12 +47,12 @@ progress-indicator {
             width: 100%;
             height: calc(var(--_stroke-width) * 1px);
             rx: calc(var(--_stroke-width) * 0.5px);
-            fill: var(--progress-color);
-            transition: width 0.5s linear;
+            fill: var(--_progress-color);
+            transition: width var(--_indeterminate-cycle-duration) linear;
         }
 
         & rect:first-of-type {
-            fill: var(--track-color);
+            fill: var(--_track-color);
         }
 
         /* state where we have a value */
@@ -71,7 +73,8 @@ progress-indicator {
 
             & rect:last-of-type {
                 --_flip: 1;
-                animation: progress-indicator-busy 0.75s infinite alternate ease-in-out;
+                animation: progress-indicator-busy var(--_indeterminate-cycle-duration) infinite
+                    alternate ease-in-out;
                 width: 25%;
             }
         }
@@ -79,8 +82,8 @@ progress-indicator {
 
     &[shape='circle'],
     &[shape='rectangle'] {
-        width: var(--track-size);
-        height: var(--track-size);
+        width: var(--_track-size);
+        height: var(--_track-size);
 
         & div {
             transform-origin: center center;
@@ -89,14 +92,14 @@ progress-indicator {
         & g rect,
         & g circle {
             fill: none;
-            stroke: var(--progress-color);
+            stroke: var(--_progress-color);
             stroke-width: var(--_stroke-width);
-            stroke-linecap: var(--progress-cap);
+            stroke-linecap: var(--_progress-cap);
         }
 
         & g rect:first-of-type,
         & g circle:first-of-type {
-            stroke: var(--track-color);
+            stroke: var(--_track-color);
         }
     }
 
@@ -127,13 +130,13 @@ progress-indicator {
             --_to: rotate(360deg);
 
             /* we animate the div, animating the svg triggers occasional layout requests on Chrome */
-            animation: progress-indicator-busy 0.5s infinite linear;
+            animation: progress-indicator-busy var(--_indeterminate-cycle-duration) infinite linear;
 
             /* 50/50 */
             & g circle:last-of-type {
                 transition:
-                    stroke-dashoffset 0.5s ease-out,
-                    stroke-dasharray 0.5s ease-out;
+                    stroke-dashoffset var(--_indeterminate-cycle-duration) ease-out,
+                    stroke-dasharray var(--_indeterminate-cycle-duration) ease-out;
 
                 /* move counter clockwise */
                 stroke-dashoffset: -1;
@@ -190,9 +193,10 @@ progress-indicator {
                 top: -25%;
                 right: 50%;
                 bottom: -25%;
-                background: var(--progress-color);
+                background: var(--_progress-color);
                 transform-origin: 100% center;
-                animation: progress-indicator-busy 0.5s infinite linear;
+                animation: progress-indicator-busy var(--_indeterminate-cycle-duration) infinite
+                    linear;
             }
         }
     }

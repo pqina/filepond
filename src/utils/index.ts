@@ -8,6 +8,8 @@ export {
     isVideoFile,
 } from './test.js';
 
+export { supportsInvokerCommands } from './support.js';
+
 export {
     blobToFile,
     cloneBlob,

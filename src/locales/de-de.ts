@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'Tippen zum Rückgängig machen',
     // browse button labels
     browse: '{{maxFilesUnit}} auswählen',
-    browseAndDrop: '{{maxFilesUnit}} hier ablegen oder <u>durchsuchen</u>',
+    browseDrop: '{{maxFilesUnit}} hier ablegen oder <u>durchsuchen</u>',
 
     loadError: 'Datei konnte nicht geladen werden.',
 

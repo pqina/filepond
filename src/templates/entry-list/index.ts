@@ -1,28 +1,28 @@
-import type { EntryListFunctions, TemplateNode } from '../types/index.js';
-import { withNodeTree, type NodeContext } from '../elements/common/nodeTree.js';
+import type { EntryListFunctions, TemplateNode } from '../../types/index.js';
+import { withNodeTree, type NodeContext } from '../../elements/common/nodeTree.js';
 
-import { isDataTransferEntry, isFileEntry, isNumber, isString } from '../utils/test.js';
-import { bytesToNaturalFileSize } from '../utils/file.js';
-import { fade } from '../elements/common/transition.js';
+import { isDataTransferEntry, isFileEntry, isNumber, isString } from '../../utils/test.js';
+import { bytesToNaturalFileSize } from '../../utils/file.js';
+import { fade } from '../../elements/common/transition.js';
 import { quadInOut } from 'svelte/easing';
 import {
     createButton,
+    createDefaultSpringElement,
     getExtensionStatusWithCode,
     hasExtensionWithAction,
     hasExtensionWithStatusCode,
-} from './helpers.js';
-import { cache } from '../utils/cache.js';
-import { BooleanInput } from '../elements/components/BooleanInput/index.js';
-import { ElementSkeleton } from '../elements/components/ElementSkeleton/index.js';
-import { FilenameInput } from '../elements/components/FilenameInput/index.js';
-import { SpringElement } from '../elements/components/SpringElement/index.js';
-import { EntryActivityIndicator } from '../elements/FilePondEntryList/components/EntryActivityIndicator/index.js';
-import { EntryStatus } from '../elements/FilePondEntryList/components/EntryStatus/index.js';
-import { EntryList } from '../elements/FilePondEntryList/components/EntryList/index.js';
-import { EntryListItem } from '../elements/FilePondEntryList/components/EntryListItem/index.js';
-import { Entry } from '../elements/FilePondEntryList/components/Entry/index.js';
-import { EntryListItemPlaceholder } from '../elements/FilePondEntryList/components/EntryListItemPlaceholder/index.js';
-import { toSpaceSeparatedString } from '../elements/common/string.js';
+} from '../common/index.js';
+import { cache } from '../../utils/cache.js';
+import { BooleanInput } from '../../elements/components/BooleanInput/index.js';
+import { ElementSkeleton } from '../../elements/components/ElementSkeleton/index.js';
+import { FilenameInput } from '../../elements/components/FilenameInput/index.js';
+import { EntryActivityIndicator } from '../../elements/FilePondEntryList/components/EntryActivityIndicator/index.js';
+import { EntryStatus } from '../../elements/FilePondEntryList/components/EntryStatus/index.js';
+import { EntryList } from '../../elements/FilePondEntryList/components/EntryList/index.js';
+import { EntryListItem } from '../../elements/FilePondEntryList/components/EntryListItem/index.js';
+import { Entry } from '../../elements/FilePondEntryList/components/Entry/index.js';
+import { EntryListItemPlaceholder } from '../../elements/FilePondEntryList/components/EntryListItemPlaceholder/index.js';
+import { toSpaceSeparatedString } from '../../elements/common/string.js';
 
 export function createFilePondEntryList(): TemplateNode[] {
     return [
@@ -30,7 +30,7 @@ export function createFilePondEntryList(): TemplateNode[] {
             key: 'entry-list',
             component: EntryList,
             props: ({ entries }: NodeContext) => ({
-                part: 'list',
+                part: 'entry-list',
                 entries,
             }),
             item: {
@@ -159,9 +159,8 @@ export function createEntryInfoBlock(
 }
 
 export function createEntryInfo() {
-    return {
+    return createDefaultSpringElement({
         key: 'entry-info',
-        component: SpringElement,
         props: {
             class: 'entry-info',
             part: 'entry-info',
@@ -171,13 +170,12 @@ export function createEntryInfo() {
             },
         },
         children: [createFileLoadInfo(), createFileStoreInfo()],
-    };
+    });
 }
 
 export function createEntryDataTransferInfo() {
-    return {
+    return createDefaultSpringElement({
         key: 'data-transfer-info',
-        component: SpringElement,
         props: {
             class: 'entry-info',
             part: 'entry-info data-transfer-info',
@@ -213,7 +211,7 @@ export function createEntryDataTransferInfo() {
                 children: 'loadDataTransferInfo',
             },
         ],
-    };
+    });
 }
 
 export function createEntryStatus() {
@@ -306,9 +304,8 @@ const createFileStoreMainAttributes = ({ ariaId }: NodeContext) => ({
 });
 
 export function createFileStoreInfo() {
-    return {
+    return createDefaultSpringElement({
         key: 'file-store-spring',
-        component: SpringElement,
         props: {
             subtag: 'element-stack',
             subattrs: {
@@ -365,7 +362,7 @@ export function createFileStoreInfo() {
                 sub: 'assistUndo',
             }),
         ],
-    };
+    });
 }
 
 export function createEntryLoadState() {

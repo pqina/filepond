@@ -119,7 +119,7 @@ export class FilePondSvelteComponentElement
                             this.#queue.push([key, args]);
                             return;
                         }
-                        this.#app[key](...args);
+                        return this.#app[key](...args);
                     },
                     writable: false,
                     configurable: false,
@@ -133,6 +133,9 @@ export class FilePondSvelteComponentElement
     }
 
     addListener(type: string, cb: (e: CustomEvent) => void) {
+        if (!this._root.children[0]) {
+            return;
+        }
         const unsub = addListener(this._root.children[0], type, cb);
         this.#listeners.push(unsub);
         return unsub;

@@ -1,9 +1,12 @@
 import type { ExtensionFactory } from '../../core/extensionManager.ts';
 import type { AnimationMode, Locale, SpringOptions } from '../../types/index.js';
+import type { Bounds } from '../../utils/bounds.js';
+import type { Rect } from '../../utils/rect.js';
 import { FilePondInputElement } from '../FilePondInput/index.js';
 import { FilePondEntryListElement } from '../FilePondEntryList/index.js';
-import { FilePondDropAreaElement } from '../FilePondDropArea/index.js';
+import { FilePondFrameElement } from '../FilePondFrame/index.js';
 import { FilePondDropIndicatorElement } from '../FilePondDropIndicator/index.js';
+import { FilePondSourceListElement } from '../FilePondSourceList/index.js';
 
 import {
     getDefaultEntryAnimationOriginMap,
@@ -21,6 +24,8 @@ import {
     addListener,
     dispatchCustomEvent,
     setBooleanAttribute,
+    getAttribute,
+    setStringAttribute,
 } from '../../utils/dom.js';
 import { isBrowser, isString } from '../../utils/test.js';
 import { assets } from '../../assets/index.js';
@@ -28,15 +33,12 @@ import { assets } from '../../assets/index.js';
 // default FilePond styles
 import defaultStyles from './index.css?inline';
 
-// template
-import { createFilePondEntryList } from '../../templates/entry.js';
+// templates
+import { createFilePondEntryList } from '../../templates/entry-list/index.js';
+import { createFilePondSourceList } from '../../templates/source-list/index.js';
 
 // extensions
 import { createFilePondExtensionSet } from './createFilePondExtensionSet.js';
-import type { Bounds } from '../../utils/bounds.js';
-import type { Rect } from '../../utils/rect.js';
-
-const SharedProps = ['springDefaults', 'animations'];
 
 // This holds the initial options object passed to `defineFilePond`, we store this value so we can assign the initialOptions to FilePond components created _after_ the first `defineFilePond` call.
 let globalInitialOptions: DefineFilePondOptions | undefined;
@@ -52,6 +54,16 @@ interface FilePondElementEvents {
         listener: (this: FilePondInputElement, event: FilePondElementEventMap[K]) => void,
         options?: boolean | AddEventListenerOptions
     ): void;
+}
+
+function createExportPartsSyncer(element: HTMLElement, exportparts: Set<string> = new Set([])) {
+    return (part?: string) => {
+        if (!part || exportparts.has(part)) {
+            return;
+        }
+        const parts = Array.from(exportparts.add(part)).join(',');
+        element.setAttribute('exportparts', parts.replace(/ /g, ','));
+    };
 }
 
 /**
@@ -70,18 +82,25 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
     /** Holds references to event subscriptions so we can more easily unsub */
     #connectedSubs: (() => void)[] = [];
 
-    /** Automatically passes value to child elements, for usage see `FilePondSvelteComponentElement` */
-    set springDefaults(value: SpringOptions) {
-        Object.values(this.#components).forEach((element) => {
-            element.springDefaults = value;
-        });
+    /** Calls a function for each component */
+    #eachComponent(cb: (comp: any) => void) {
+        Object.values(this.#components).forEach(cb);
     }
 
-    /** Automatically passes `animations` setting to child elements, for usage see `FilePondSvelteComponentElement` */
+    /** Automatically passes value to child elements, for usage see `FilePondSvelteComponentElement` */
+    set springDefaults(value: SpringOptions) {
+        this.#eachComponent((element) => (element.springDefaults = value));
+    }
+
+    /** Returns the current animation mode */
+    get animations(): AnimationMode {
+        return (getAttribute(this, 'animations') ?? 'auto') as AnimationMode;
+    }
+
+    /** Setting to toggle animations, automatically passes `animations` setting to child elements, for usage see `FilePondSvelteComponentElement` */
     set animations(value: AnimationMode) {
-        Object.values(this.#components).forEach((element) => {
-            element.animations = value;
-        });
+        setStringAttribute(this, 'animations', value);
+        this.#eachComponent((element) => (element.animations = value));
     }
 
     /** Wraps `createFilePondExtensionSet` so we always set the default extension set */
@@ -96,24 +115,17 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
 
         // remove/add components
         if (value) {
-            this.#components.dropArea.remove();
             this.#components.dropIndicator.remove();
-            Object.assign(this, {
-                EntryListView: {
-                    drop: false,
-                },
-            });
         } else {
-            this._root.prepend(this.#components.dropArea, this.#components.dropIndicator);
-            Object.assign(this, {
-                EntryListView: {
-                    drop: true,
-                },
-            });
+            this._root.prepend(this.#components.dropIndicator);
         }
 
-        // update label
-        this.setBrowseButtonLabelKey(value ? 'browse' : 'browseAndDrop');
+        // update entry list state
+        Object.assign(this, {
+            EntryListView: {
+                drop: !value,
+            },
+        });
     }
 
     /** Returns current nodrop state */
@@ -121,7 +133,7 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
         return this.hasAttribute('nodrop');
     }
 
-    /** 
+    /**
     A programmatic way to toggle the attribution link on/off.
 
     When set to `true` this property automatically adds the `noattribution` attribute to the `<file-pond>` element.
@@ -146,8 +158,16 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
         return !this.#attributionLink?.parentNode;
     }
 
+    /** Sets the locale on parent */
+    set locale(value: Locale) {
+        super.locale = value;
+
+        // pass to child elements
+        this.#eachComponent((element) => (element.locale = value));
+    }
+
     static get observedAttributes() {
-        return [...super.observedAttributes, 'noattribution', 'nodrop'];
+        return [...super.observedAttributes, 'animations', 'noattribution', 'nodrop'];
     }
 
     attributeChangedCallback(name: string, _: string, value: string | boolean) {
@@ -163,6 +183,18 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
             return;
         }
 
+        // toggle nodrop if nobrowse is set because it makes no sense to allow dropping files but not browsing for files
+        if (name === 'nobrowse' && isString(value)) {
+            this.noDrop = isString(value);
+            super.attributeChangedCallback(name, _, value);
+            return;
+        }
+
+        // toggle animations
+        if (name === 'animations') {
+            this.animations = value as AnimationMode;
+        }
+
         super.attributeChangedCallback(name, _, value);
     }
 
@@ -171,86 +203,110 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
             styles: [defaultStyles],
         });
 
-        // can also drop!
-        this.setBrowseButtonLabelKey('browseAndDrop');
-
-        // create items list
+        // create parts
         const entryList = h('file-pond-entry-list', {
-            part: 'entry-list',
+            part: 'entry-list-element',
         }) as FilePondEntryListElement;
 
-        const dropArea = h('file-pond-drop-area', {
-            part: 'drop-area',
-        }) as FilePondDropAreaElement;
+        const sourceList = h('file-pond-source-list', {
+            part: 'source-list-element',
+        }) as FilePondSourceListElement;
+
+        const sourceDescription = h('file-pond-source-description', {
+            part: 'source-description-element',
+        }) as HTMLElement;
+
+        const frame = h('file-pond-frame', {
+            part: 'frame-element',
+        }) as FilePondFrameElement;
 
         const dropIndicator = h('file-pond-drop-indicator', {
-            part: 'drop-indicator',
+            part: 'drop-indicator-element',
         }) as FilePondDropIndicatorElement;
 
         // so we can set shared props on these elements
         this.#components = {
             entryList,
-            dropArea,
+            sourceList,
+            frame,
             dropIndicator,
+            sourceDescription,
         };
 
-        // this makes sure the parts defined in the entry list nodelist are automatically exported, default modifiers are always exported
-        const exportparts = new Set(['dragging', 'virtualized', 'selected', 'checked']);
-        function syncExportparts(part?: string) {
-            if (!part || exportparts.has(part)) {
-                return;
-            }
-            const parts = Array.from(exportparts.add(part)).join(',');
-            entryList.setAttribute('exportparts', parts.replace(/ /g, ','));
-        }
+        // this makes sure the parts defined in the entry and node list nodelist are automatically exported, default modifiers are always exported
+        const syncEntryListExportParts = createExportPartsSyncer(
+            entryList,
+            new Set(['dragging', 'virtualized', 'selected', 'checked'])
+        );
+
+        const syncSourceListExportParts = createExportPartsSyncer(entryList);
 
         // template to use, if it's already supplied we don't have to set it again
-        const template = globalInitialOptions?.EntryListView?.template || createFilePondEntryList();
+        const entryListTemplate =
+            globalInitialOptions?.EntryListView?.template || createFilePondEntryList();
 
         // assign default options, anything view related we assign in connectedCallback()
         Object.assign(this, {
             // add items view
             extensions: this.extensions,
 
+            // default spring values
+            springDefaults: getDefaultSpringOptions(),
+
+            // default animation state
+            animations: 'auto',
+
             // show progress indicator for data transfers
             DataTransferLoader: {
                 perceivedPerformance: true,
             },
 
-            // set up items view extension
+            // renders the description label
+            SourceDescriptionView: {
+                element: this.#components.sourceDescription,
+            },
+
+            // set up source list view extension
+            SourceListView: {
+                element: this.#components.sourceList,
+
+                // the nodes to render
+                template: createFilePondSourceList(),
+
+                // assets to use
+                assets,
+
+                // sync source entry list parts
+                beforeRenderNode(node: any) {
+                    syncSourceListExportParts(node.props?.part || node.attrs?.part);
+                    return node;
+                },
+            },
+
+            // set up entry list view extension
             EntryListView: {
                 // the element that the item list will be appended to
                 element: this.#components.entryList,
 
                 // the root element to use for dragging and dropping components, defaults to the list itself
-                dropRoot: this.#components.dropArea,
+                dropRoot: this.#components.frame,
 
                 // assets to use
                 assets,
 
                 // the nodes to render
-                template,
+                template: entryListTemplate,
 
                 // called before rendering a node, allows dynamically modifying a node or adding nodes
                 beforeRenderNode(node: any) {
-                    syncExportparts(node.props?.part || node.attrs?.part);
+                    syncEntryListExportParts(node.props?.part || node.attrs?.part);
                     return node;
                 },
 
                 // animations
                 entryAnimationProps: getDefaultEntryAnimationProps(),
                 entryAnimationOriginMap: getDefaultEntryAnimationOriginMap(),
-                springDefaults: getDefaultSpringOptions(),
             } as EntryListViewOptions,
-        });
-
-        // set default spring config to this element and its children
-        this.springDefaults = getDefaultSpringOptions();
-
-        // set initial values to children
-        SharedProps.forEach((key) => {
-            // @ts-ignore
-            this[key] = entryList[key];
         });
 
         // optionally insert link to filepond.com
@@ -258,45 +314,41 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
             caption: 'Powered by FilePond',
         });
 
-        // apply initial options
+        // overwrite default options with global options
         Object.assign(this, globalInitialOptions);
     }
 
     connectedCallback() {
         super.connectedCallback();
 
-        const { dropArea, dropIndicator, entryList } = this.#components;
+        const { entryList, sourceList, sourceDescription, frame, dropIndicator } = this.#components;
 
         // re-add sub components
         if (!this.hasAttribute('nodrop')) {
-            this._root.prepend(dropArea, dropIndicator);
+            this._root.prepend(dropIndicator);
         }
 
-        this._root.append(entryList);
+        this._root.prepend(frame, sourceDescription);
+        this._root.append(sourceList, entryList);
+
+        // attribution
         if (!this.hasAttribute('noattribution')) {
             this._root.append(this.#attributionLink);
         }
 
-        // listen to events
+        // route events
         this.#connectedSubs.push(
-            // route clicks on drop area to browse button
-            addListener(dropArea, 'click', () => {
-                this.browse();
-            }),
-
             // did compute target rect
-            addListener(dropArea, 'rectcompute', (e: CustomEvent) => {
+            addListener(frame, 'rectcompute', (e: CustomEvent) => {
                 if (!e.detail) {
                     return;
                 }
-
                 const computedRect = e.detail;
-
                 dispatchCustomEvent(this, 'rectcompute', { detail: computedRect });
             }),
 
             // did update visual rect
-            addListener(dropArea, 'rectchange', (e: CustomEvent) => {
+            addListener(frame, 'rectchange', (e: CustomEvent) => {
                 if (!e.detail) {
                     return;
                 }
@@ -337,7 +389,7 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
         super.disconnectedCallback();
 
         // remove children
-        Object.values(this.#components).forEach((element) => element.remove());
+        this.#eachComponent((element) => element.remove());
         this.#attributionLink.remove();
 
         // unsub subscriptions created when connecting to the DOM
@@ -347,7 +399,7 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
 }
 
 /**
- * Adds attribution link below droparea
+ * Adds attribution link below drop area
  */
 function createAttributionLink(options?: { caption: string }) {
     const { caption = '' } = options || {};
@@ -357,7 +409,10 @@ function createAttributionLink(options?: { caption: string }) {
         target: '_tab',
         rel: 'noopener noreferrer nofollow',
         part: 'attribution-link',
+        // don't want to interfere with keyboard navigation
         tabindex: '-1',
+        // don't want to annoy assistive tech with this attribution link
+        'aria-hidden': 'true',
     }) as HTMLAnchorElement;
 }
 
@@ -399,8 +454,9 @@ export function defineFilePond(initialOptions?: DefineFilePondOptions): FilePond
 
     // When using the default version of the FilePond we need to define these custom components as well
     defineCustomElements({
+        [`${tag}-source-list`]: FilePondSourceListElement,
         [`${tag}-entry-list`]: FilePondEntryListElement,
-        [`${tag}-drop-area`]: FilePondDropAreaElement,
+        [`${tag}-frame`]: FilePondFrameElement,
         [`${tag}-drop-indicator`]: FilePondDropIndicatorElement,
     });
 

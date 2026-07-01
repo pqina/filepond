@@ -1,7 +1,8 @@
-import { type EntryListFunctions } from '../types/index.js';
-import { type MediaVideoOptions } from '../elements/FilePondEntryList/components/MediaVideo/index.js';
+import { type EntryListFunctions } from '../../types/index.js';
+import { type MediaVideoOptions } from '../../elements/FilePondEntryList/components/MediaVideo/index.js';
 import {
     createButton,
+    createDefaultSpringElement,
     createEntryMatcher,
     createSpringPane,
     getExtensionByAction,
@@ -10,21 +11,24 @@ import {
     whenEntryHasAction,
     whenEntryIs,
     whenEntryNotHasStatus,
-} from './helpers.js';
-import { RangeInput } from '../elements/components/RangeInput/index.js';
-import { supportsRequestFullscreen } from '../utils/support.js';
-import { toTime } from '../utils/date.js';
-import { type NodeContext, type TemplateNode, withNodeTree } from '../elements/common/nodeTree.js';
-import { boolToAttributeValue } from '../utils/dom.js';
-import { MediaVideo } from '../elements/FilePondEntryList/components/MediaVideo/index.js';
-import { MediaTimeIndicator } from '../elements/FilePondEntryList/components/MediaTimeIndicator/index.js';
-import { EntryActivityIndicator } from '../elements/FilePondEntryList/components/EntryActivityIndicator/index.js';
+} from '../common/index.js';
+import { RangeInput } from '../../elements/components/RangeInput/index.js';
+import { supportsRequestFullscreen } from '../../utils/support.js';
+import { toTime } from '../../utils/date.js';
+import {
+    type NodeContext,
+    type TemplateNode,
+    withNodeTree,
+} from '../../elements/common/nodeTree.js';
+import { boolToAttributeValue } from '../../utils/dom.js';
+import { MediaVideo } from '../../elements/FilePondEntryList/components/MediaVideo/index.js';
+import { MediaTimeIndicator } from '../../elements/FilePondEntryList/components/MediaTimeIndicator/index.js';
+import { EntryActivityIndicator } from '../../elements/FilePondEntryList/components/EntryActivityIndicator/index.js';
 import {
     type MediaImageOptions,
     MediaImage,
-} from '../elements/FilePondEntryList/components/MediaImage/index.js';
-import { SpringElement } from '../elements/components/SpringElement/index.js';
-import { ElementPane } from '../elements/components/ElementPane/index.js';
+} from '../../elements/FilePondEntryList/components/MediaImage/index.js';
+import { ElementPane } from '../../elements/components/ElementPane/index.js';
 
 type RetainOmit<T, K extends keyof T> = {
     [P in keyof T as P extends K ? never : P]: T[P];
@@ -155,9 +159,8 @@ function createMediaSpringPane(key: string) {
 export function createImageView(options?: ImageViewOptions) {
     const { objectFit = undefined } = options ?? {};
 
-    return {
+    return createDefaultSpringElement({
         key: 'entry-image-spring',
-        component: SpringElement,
         props: {
             class: 'entry-media',
             part: 'entry-media',
@@ -180,7 +183,7 @@ export function createImageView(options?: ImageViewOptions) {
                 part: 'media-overlay',
             }),
         ],
-    };
+    });
 }
 
 function getMediaContextReference({ entry }: NodeContext): NodeContext {
@@ -193,9 +196,8 @@ function getMediaContextReference({ entry }: NodeContext): NodeContext {
 
 export function createVideoView(options?: VideoViewOptions) {
     const { objectFit = undefined } = options ?? {};
-    return {
+    return createDefaultSpringElement({
         key: 'entry-video-spring',
-        component: SpringElement,
         props: {
             class: 'entry-media',
             part: 'entry-media',
@@ -218,7 +220,7 @@ export function createVideoView(options?: VideoViewOptions) {
                 part: 'media-overlay',
             }),
         ],
-    };
+    });
 }
 
 export function createMediaControlGroup(options?: {
@@ -230,38 +232,40 @@ export function createMediaControlGroup(options?: {
     const klass =
         'media-control-group' + (justifyContent ? ` justify-content-${justifyContent}` : '');
 
-    return withNodeTree({
-        key,
-        component: SpringElement,
-        props: {
-            subtag: 'element-stack',
-            class: klass,
-        },
-        children: [
-            createSpringPane({
-                key: 'media-control-group-background',
-                class: 'media-control-pane',
-            }),
-        ],
-    });
+    return withNodeTree(
+        createDefaultSpringElement({
+            key,
+            props: {
+                subtag: 'element-stack',
+                class: klass,
+            },
+            children: [
+                createSpringPane({
+                    key: 'media-control-group-background',
+                    class: 'media-control-pane',
+                }),
+            ],
+        })
+    );
 }
 
 export function createMediaControl(options?: { key?: string }) {
     const { key } = options || {};
-    return withNodeTree({
-        key,
-        component: SpringElement,
-        props: {
-            subtag: 'element-stack',
-            class: 'media-control',
-        },
-        children: [
-            createSpringPane({
-                key: 'media-control-background',
-                class: 'media-control-pane',
-            }),
-        ],
-    });
+    return withNodeTree(
+        createDefaultSpringElement({
+            key,
+            props: {
+                subtag: 'element-stack',
+                class: 'media-control',
+            },
+            children: [
+                createSpringPane({
+                    key: 'media-control-background',
+                    class: 'media-control-pane',
+                }),
+            ],
+        })
+    );
 }
 
 export function createMediaControls(options?: {
@@ -295,9 +299,8 @@ export function createMediaControls(options?: {
 }
 
 export function createTogglePlaybackButton() {
-    return {
+    return createDefaultSpringElement({
         key: 'toggle-playback-spring',
-        component: SpringElement,
         props: {
             class: 'toggle-playback',
         },
@@ -305,13 +308,12 @@ export function createTogglePlaybackButton() {
             part: 'media-button',
             icon: video?.isPaused ? 'mediaPlay' : 'mediaPause',
         })),
-    };
+    });
 }
 
 export function createToggleAudioButton() {
-    return {
+    return createDefaultSpringElement({
         key: 'toggle-audio-spring',
-        component: SpringElement,
         props: {
             class: 'toggle-audio',
         },
@@ -322,7 +324,7 @@ export function createToggleAudioButton() {
                 disabled: video?.isMute,
             };
         }),
-    };
+    });
 }
 
 export function createToggleFullscreenButton() {
@@ -330,9 +332,8 @@ export function createToggleFullscreenButton() {
         // only added when fullscreen is supported
         if: {
             test: supportsRequestFullscreen,
-            then: {
+            then: createDefaultSpringElement({
                 key: 'toggle-fullscreen-spring',
-                component: SpringElement,
                 props: {
                     class: 'toggle-fullscreen',
                 },
@@ -340,15 +341,14 @@ export function createToggleFullscreenButton() {
                     part: 'media-button',
                     icon: 'mediaFullscreen',
                 }),
-            },
+            }),
         },
     };
 }
 
 export function createMediaScrubber() {
-    return {
+    return createDefaultSpringElement({
         key: 'media-scrubber-spring',
-        component: SpringElement,
         props: {
             class: 'media-scrubber',
         },
@@ -365,7 +365,7 @@ export function createMediaScrubber() {
                 }),
             },
         ],
-    };
+    });
 }
 
 export function createMediaScrubberTitle() {
@@ -383,9 +383,8 @@ export function createMediaScrubberTitle() {
 }
 
 export function createMediaTimeIndicator() {
-    return {
+    return createDefaultSpringElement({
         key: 'media-time-indicator-spring',
-        component: SpringElement,
         props: {
             class: 'media-time-indicator',
         },
@@ -399,7 +398,7 @@ export function createMediaTimeIndicator() {
                 durationLabel: video?.durationLabel,
             }),
         },
-    };
+    });
 }
 
 const entryIsImage = createEntryMatcher('image');

@@ -1,23 +1,15 @@
 import type { FilePondEntry } from '../types/index.js';
 import type { FilePondEntryListOptions } from '../elements/FilePondEntryList/types.js';
 import { createExtension } from './common/createExtension.js';
-import { COMPONENT_PROPS } from '../elements/FilePondEntryList/index.js';
 import { addListener } from '../utils/dom.js';
 
 export interface EntryListViewOptions extends FilePondEntryListOptions {}
 
-const props = COMPONENT_PROPS.reduce((res: { [key: string]: any }, key) => {
-    res[key] = undefined;
-    return res;
-}, {});
-
+// This is a proxy extension, it facilitates communication between the FilePondEntryList element and the FilePond core
 export const EntryListView = createExtension({
     name: 'EntryListView',
     type: 'view',
     props: {
-        // props available on this element
-        ...props,
-
         // element reference
         element: undefined,
     },
@@ -33,6 +25,7 @@ export const EntryListView = createExtension({
             insertEntries,
             removeEntries,
             updateEntry,
+            setExtensionState,
             getEntryExtensionState,
             setEntryExtensionState,
         } = pond;
@@ -62,6 +55,16 @@ export const EntryListView = createExtension({
                 unsubConnectListener?.();
                 unsubConnectListener = addListener(currentElement, 'connected', () => {
                     connect();
+                });
+
+                // toggle drop capability if available
+                const { drop = true } = viewProps;
+                setExtensionState({
+                    source: drop
+                        ? {
+                              type: 'drop',
+                          }
+                        : undefined,
                 });
             }
         );

@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'Tryck för att ångra',
     // browse button labels
     browse: 'Välj {{maxFilesUnit}}',
-    browseAndDrop: 'Släpp {{maxFilesUnit}} här eller <u>bläddra</u>',
+    browseDrop: 'Släpp {{maxFilesUnit}} här eller <u>bläddra</u>',
 
     loadError: 'Det gick inte att ladda filen.',
 

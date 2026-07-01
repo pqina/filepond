@@ -1,37 +1,34 @@
-import { FilePondSvelteComponentElement } from '../FilePondSvelteComponent/index.svelte.js';
 import { type Rect } from '../../utils/rect.js';
-import FilePondDropArea from './index.svelte';
+import { type Bounds } from '../../utils/bounds.js';
+import { FilePondSvelteComponentElement } from '../FilePondSvelteComponent/index.svelte.js';
 import { roundPrecision } from '../../utils/math.js';
-import styles from './index.css?inline';
+import FilePondFrame from './index.svelte';
 import elementPaneStyles from '../components/ElementPane/index.css?inline';
-import type { Bounds } from '../../utils/bounds.js';
+import styles from './index.css?inline';
 
-export interface FilePondDropAreaElementEventMap {
+export interface FilePondFrameElementEventMap {
     rectchange: CustomEvent<Bounds>;
 }
 
-interface FilePondDropAreaElementEvents {
-    addEventListener<K extends keyof FilePondDropAreaElementEventMap>(
+interface FilePondFrameElementEvents {
+    addEventListener<K extends keyof FilePondFrameElementEventMap>(
         type: K,
-        listener: (
-            this: FilePondDropAreaElement,
-            event: FilePondDropAreaElementEventMap[K]
-        ) => void,
+        listener: (this: FilePondFrameElement, event: FilePondFrameElementEventMap[K]) => void,
         options?: boolean | AddEventListenerOptions
     ): void;
 }
 
 /**
- * FilePondDropAreaElement
+ * FilePondFrameElement the element that "frames" FilePond
  *
  * @event {CustomEvent<Bounds>} 'rectchange' - Fired when the drop area element rect is updated.
  */
-export class FilePondDropAreaElement
+export class FilePondFrameElement
     extends FilePondSvelteComponentElement
-    implements FilePondDropAreaElementEvents
+    implements FilePondFrameElementEvents
 {
     constructor() {
-        super(FilePondDropArea, {
+        super(FilePondFrame, {
             styles: [styles, elementPaneStyles],
         });
     }

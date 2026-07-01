@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'Πατήστε για αναίρεση',
     // browse button labels
     browse: 'Επιλέξτε {{maxFilesUnit}}',
-    browseAndDrop: 'Αποθέστε {{maxFilesUnit}} εδώ ή <u>περιηγηθείτε</u>',
+    browseDrop: 'Αποθέστε {{maxFilesUnit}} εδώ ή <u>περιηγηθείτε</u>',
 
     loadError: 'Αποτυχία φόρτωσης αρχείου.',
 

@@ -5,7 +5,7 @@ import type {
 } from '../../core/extensionManager.ts';
 import type { ExtensionType } from '../../extensions/common/createExtension.js';
 import type { Extension } from '../../types/index.js';
-import { isArray, isObject } from '../../utils/test.js';
+import { isArray, isFunction, isObject } from '../../utils/test.js';
 import { arrayInsertAtIndex } from '../../utils/array.js';
 import { warn } from '../../common/console.js';
 
@@ -15,11 +15,11 @@ import { ValueCallbackStore } from '../../extensions/value-callback-store.js';
 import { FileExtensionValidator } from '../../extensions/file-extension-validator.js';
 import { FileMimeTypeValidator } from '../../extensions/file-mime-type-validator.js';
 import { EntryListView } from '../../extensions/entry-list-view.js';
+import { SourceListView } from '../../extensions/source-list-view.js';
+import { SourceDescriptionView } from '../../extensions/source-description-view.js';
 import { hasOwnProp } from '../../utils/object.js';
 
-// Related to managing default extensions
-type ExtensionSetItem = ExtensionFactory | { name: string; type: ExtensionType };
-
+// extension types in auto sort order
 const ExtensionTypes: ExtensionType[] = [
     'source',
     'loader',
@@ -33,6 +33,28 @@ const ExtensionTypes: ExtensionType[] = [
 function isExtensionType(value: string): value is ExtensionType {
     return ExtensionTypes.includes(value as ExtensionType);
 }
+
+const _ExtensionSlots = ExtensionTypes.map((type) => ({ type }));
+const [
+    _SourceSlot,
+    _LoaderSlot,
+    _ValidatorSlot,
+    _TransformSlot,
+    _ResourceSlot,
+    _ViewSlot,
+    _StoreSlot,
+] = _ExtensionSlots;
+
+// Related to managing default extensions
+type ExtensionSetItem =
+    | ExtensionFactory
+    | typeof _SourceSlot
+    | typeof _LoaderSlot
+    | typeof _ValidatorSlot
+    | typeof _TransformSlot
+    | typeof _ResourceSlot
+    | typeof _ViewSlot
+    | typeof _StoreSlot;
 
 function getExtensionFactory(
     extension: ExtensionSetItem | ExtensionFactoryInsertInstructions
@@ -63,24 +85,26 @@ function getExtensionInsertInstructions(extension: ExtensionFactoryInsertInstruc
     const { insert, options, ...instructions } = extension as ExtensionInsertInstructions;
     return instructions;
 }
-
-// Where to insert transform and resource extensions
-const _TransformSlot = { name: 'Transform', type: 'transform' } as const;
-const _ResourceSlot = { name: 'Resource', type: 'resource' } as const;
-
 /** Merges a set of extensions with the default FilePond custom element extensions, this makes switching from a default input to a file-pond element as frictionless as possible */
-export function createFilePondExtensionSet(extensions: ExtensionFactory[] = []) {
+export function createFilePondExtensionSet(
+    extensions: ExtensionFactory[] = []
+): ExtensionFactory[] {
     // default extension set
     let extensionSet: ExtensionSetItem[] = [
         FileInputSource,
+        _SourceSlot,
         DataTransferLoader,
+        _LoaderSlot,
         FileExtensionValidator,
         FileMimeTypeValidator,
-        // the default extension set doesn't have a Transform extension, so we create a slot so we can auto insert transform extensions there, the slot is removed when we return the extension set
+        _ValidatorSlot,
         _TransformSlot,
-        // same for Resource extensions, these should run before views so views can use their generated entry state
         _ResourceSlot,
+        _ViewSlot,
         EntryListView,
+        SourceListView,
+        SourceDescriptionView,
+        _StoreSlot,
         ValueCallbackStore,
     ];
 
@@ -135,8 +159,13 @@ export function createFilePondExtensionSet(extensions: ExtensionFactory[] = []) 
         extensionSet = arrayInsertAtIndex(extensionSet, index + indexOffset, extensionToInsert);
     }
 
-    // remove placeholders
+    // filter out slots
     return extensionSet.filter(
-        (fn) => fn !== _TransformSlot && fn !== _ResourceSlot
-    ) as Extension[];
+        (item) =>
+            !_ExtensionSlots.includes(
+                item as {
+                    type: ExtensionType;
+                }
+            )
+    ) as ExtensionFactory[];
 }

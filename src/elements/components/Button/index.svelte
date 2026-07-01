@@ -4,6 +4,7 @@
     import { toSpaceSeparatedString } from '../../common/string.js';
     import { updateDataset, updateStyles } from '../../../utils/dom.js';
     import { noop } from '../../../utils/placeholder.js';
+    import { isElement, isString } from '../../../utils/test.js';
 
     interface ButtonOptions {
         /** Onclick handler */
@@ -14,6 +15,9 @@
 
         /** Class to set on the button element */
         class?: string;
+
+        /** Type to set on the button element */
+        type?: string;
 
         /** Label to use */
         label?: string;
@@ -42,12 +46,19 @@
         /** Should move focus to this button when created */
         autofocus?: boolean;
 
+        /** command name */
+        command?: string;
+
+        /** command target */
+        commandfor?: string | HTMLElement;
+
         /** Children to render in the button */
         children?: Snippet;
     }
 
     let {
         class: klass = undefined,
+        type = 'button',
         onclick = noop,
         part = undefined,
         icon = undefined,
@@ -58,6 +69,8 @@
         dataset = undefined,
         styles = undefined,
         ariaDescribedby = undefined,
+        command = undefined,
+        commandfor = undefined,
         autofocus = false,
     }: ButtonOptions = $props();
 
@@ -78,6 +91,11 @@
         updateStyles(root, styles);
     });
 
+    // so we can set element command for
+    $effect(() => {
+        root.commandForElement = isElement(commandfor) ? commandfor : null;
+    });
+
     $effect(() => {
         if (autofocus && !inert) {
             root.focus({
@@ -96,12 +114,14 @@
 
 <button
     bind:this={root}
-    type="button"
+    {type}
     class={buttonClass}
     {part}
     {disabled}
     {inert}
     {onclick}
+    {command}
+    commandfor={isString(commandfor) ? commandfor : undefined}
     aria-describedby={ariaDescribedby}
     title={title?.length ? title : undefined}
 >

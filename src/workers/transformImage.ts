@@ -8,9 +8,14 @@ export function transformImage(
     done: (err?: string | null, content?: any, transferList?: any[]) => void
 ) {
     const params = (!!origin ? [file, ...Object.values(origin), options] : [file, options]) as any;
-    createImageBitmap.apply(null, params).then((bitmap) => {
-        done(null, bitmap, [bitmap]);
-    });
+    createImageBitmap
+        .apply(null, params)
+        .then((bitmap) => {
+            done(null, bitmap, [bitmap]);
+        })
+        .catch((error) => {
+            done(error);
+        });
 }
 
 transformImage.fileName = 'transformImage';

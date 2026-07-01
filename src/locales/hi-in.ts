@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'पूर्ववत करने के लिए टैप करें',
     // browse button labels
     browse: '{{maxFilesUnit}} चुनें',
-    browseAndDrop: '{{maxFilesUnit}} यहां छोड़ें, या <u>ब्राउज़</u> करें',
+    browseDrop: '{{maxFilesUnit}} यहां छोड़ें, या <u>ब्राउज़</u> करें',
 
     loadError: 'फ़ाइल लोड नहीं हो सकी।',
 

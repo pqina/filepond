@@ -20,15 +20,15 @@
         id = undefined,
     }: EntryStatusOptions = $props();
 
-    // get locale and assets
-    const appContext = getAppContext();
-    const assets = $derived(appContext.assets);
-    const locale = $derived(appContext.locale);
+    // get app context data
+    const { assets, locale, enableAnimations, springDefaults } = $derived(getAppContext());
 
     const entryContext = getEntryContext();
 
     // list of extension state objects
-    const extensions: ExtensionState[] = $derived(Object.values(entryContext.current.extensionState));
+    const extensions: ExtensionState[] = $derived(
+        Object.values(entryContext.current.extensionState)
+    );
 
     const StatusWeights: { [key: string]: number } = {
         error: 5,
@@ -81,6 +81,8 @@
                     class="entry-status-message"
                     subclass="entry-status-message-content"
                     dataset={{ type }}
+                    {enableAnimations}
+                    {springDefaults}
                 >
                     {#snippet children({ visualRect })}
                         {#if icon}{@html icon}{/if}

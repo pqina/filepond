@@ -1,7 +1,8 @@
 export function canvasToBlob(
     canvas: HTMLCanvasElement,
-    { type, quality }: { type?: string; quality?: number }
+    options?: { type?: string; quality?: number }
 ): Promise<Blob> {
+    const { type, quality } = options || {};
     return new Promise((resolve, reject) => {
         canvas.toBlob(
             (blob) => {

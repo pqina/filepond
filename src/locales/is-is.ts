@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'Ýttu til að afturkalla',
     // browse button labels
     browse: 'Velja {{maxFilesUnit}}',
-    browseAndDrop: 'Slepptu {{maxFilesUnit}} hér eða <u>flettu</u>',
+    browseDrop: 'Slepptu {{maxFilesUnit}} hér eða <u>flettu</u>',
 
     loadError: 'Tókst ekki að hlaða skránni.',
 

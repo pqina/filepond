@@ -54,7 +54,7 @@ export const core = {
     assistUndo: 'Geri almak için dokun',
     // browse button labels
     browse: '{{maxFilesUnit}} seç',
-    browseAndDrop: '{{maxFilesUnit}} buraya bırakın veya <u>göz atın</u>',
+    browseDrop: '{{maxFilesUnit}} buraya bırakın veya <u>göz atın</u>',
 
     loadError: 'Dosya yüklenemedi.',
 

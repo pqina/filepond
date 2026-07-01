@@ -1,8 +1,8 @@
 <script lang="ts">
     import type { FilePondEntry, FilePondEntrySource, Needle } from '../../types/index.js';
     import type { Vector } from '../../utils/vector.js';
-    import type { DragEventDetail } from '../attachments/dragarea.js';
-    import type { DropEventDetail } from '../attachments/droparea.js';
+    import type { DragEventDetail } from '../attachments/drag-area.js';
+    import type { DropEventDetail } from '../attachments/drop-area.js';
     import type {
         DragInteraction,
         AnimatedEntry,
@@ -14,8 +14,8 @@
     import type { Bounds } from '../../utils/bounds.js';
 
     import { untrack } from 'svelte';
-    import { dragarea } from '../attachments/dragarea.js';
-    import { droparea } from '../attachments/droparea.js';
+    import { dragArea } from '../attachments/drag-area.js';
+    import { dropArea } from '../attachments/drop-area.js';
     import { arrayInsertAtIndex, arrayMove } from '../../utils/array.js';
     import {
         ORIGIN,
@@ -493,7 +493,7 @@
         dropRootRect = rectFromBounds(bounds);
     }
 
-    // reference to files droparea element
+    // reference to files drop area element
     let root: HTMLElement = $state() as HTMLElement;
 
     // contains drag interaction info, used to derive $dragState
@@ -772,12 +772,12 @@
         dragInteraction = detail;
     }
 
-    /** Handles an item coming from outside of the window being dragged into the droparea */
+    /** Handles an item coming from outside of the window being dragged into the drop area */
     function handleDragItemIn(detail: DropEventDetail) {
         dragInteraction = detail;
     }
 
-    /** Handles an item coming from outside of the window being dragged out of the droparea */
+    /** Handles an item coming from outside of the window being dragged out of the drop area */
     function handleDragItemOut(_: DropEventDetail) {
         dragInteraction = undefined;
     }
@@ -915,6 +915,12 @@
         updateEntryState: (id: Needle, state: { [key: string]: any }) => {
             callback.updateEntry(id, { state });
         },
+        resources: {
+            locale,
+            assets,
+        },
+        propResourceMap,
+        enableAnimations,
     });
 
     // this updates the spring root so when the root position changes on the screen (for example when an element above it is removed, the SpringElements don't animate towards the new position)
@@ -1062,14 +1068,15 @@
     oncontextmenu={handleContextMenu}
 />
 
-<!-- svelte-ignore a11y_no_static_element_interactions we're handling events from children -->
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions we're handling events from children -->
 <div
     class="root"
+    role="group"
     bind:this={root}
     {@attach measurable({
         onmeasure: handleMeasureRoot,
     })}
-    {@attach dragarea({
+    {@attach dragArea({
         disabled: !drag || disabled,
         itemSelector: '[data-draggable]',
         grabTimeout: dragGrabTimeout,
@@ -1078,7 +1085,7 @@
         onitemdrag: handleDragItem,
         onitemdrop: handleDropItem,
     })}
-    {@attach droparea({
+    {@attach dropArea({
         disabled: !drop || disabled,
         onitemdrag: handleDragItem,
         onitemdragin: handleDragItemIn,

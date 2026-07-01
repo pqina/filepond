@@ -54,7 +54,7 @@ export const core = {
     assistUndo: '탭하여 실행 취소',
     // browse button labels
     browse: '{{maxFilesUnit}} 선택',
-    browseAndDrop: '{{maxFilesUnit}}을(를) 여기에 놓거나 <u>찾아보기</u>',
+    browseDrop: '{{maxFilesUnit}}을(를) 여기에 놓거나 <u>찾아보기</u>',
 
     loadError: '파일을 불러올 수 없습니다.',
 

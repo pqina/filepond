@@ -20,6 +20,8 @@ export {
 export { ClipboardSource } from './clipboard-source.js';
 export { DragDropSource } from './drag-drop-source.js';
 export { FileInputSource } from './file-input-source.js';
+export { CameraSource } from './camera-source.js';
+export { URLInputSource } from './url-input-source.js';
 
 // loaders
 export { DataTransferLoader } from './data-transfer-loader.js';
@@ -55,4 +57,6 @@ export { ObjectURLResource } from './object-url-resource.js';
 
 // views
 export { EntryListView } from './entry-list-view.js';
+export { SourceListView } from './source-list-view.js';
+export { SourceDescriptionView } from './source-description-view.js';
 export { ConsoleView } from './console-view.js';

@@ -5,7 +5,7 @@ import { addListener } from '../../utils/dom.js';
 import { debounce } from '../../utils/debounce.js';
 import { getUniqueId } from '../../utils/string.js';
 import { vectorCreate, vectorLengthSquared } from '../../utils/vector.js';
-import { isElement, isIOS } from '../../utils/test.js';
+import { isElement } from '../../utils/test.js';
 import { noop } from '../../utils/placeholder.js';
 
 export interface DragEventDetail {
@@ -31,7 +31,7 @@ interface DragAreaOptions {
     onitemdrop?: (obj: DragEventDetail) => void;
 }
 
-export function dragarea(options: DragAreaOptions = {}): (element: HTMLElement) => void {
+export function dragArea(options: DragAreaOptions = {}): (element: HTMLElement) => void {
     // options
     const {
         disabled = false,
