@@ -130,8 +130,6 @@
             .then((blob) => {
                 const extension = getExtensionFromMimeType(blob.type);
 
-                console.log(filename);
-
                 // turn into File object
                 output = blobToFile(
                     blob,
