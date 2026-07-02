@@ -2,7 +2,6 @@ import { flattenTree } from './tree.js';
 import { isNumber, isFileEntry, isString, isBoolean, isBrowser, isFile } from './test.js';
 import { arrayItemsEqual, arrayRemoveFalsy } from './array.js';
 import {
-    type FilePondDropAreaElement,
     type FilePondDropIndicatorElement,
     type FilePondEntryListElement,
     type FilePondFileEntry,
