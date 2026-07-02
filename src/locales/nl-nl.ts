@@ -11,10 +11,12 @@ export const core = {
     reset: 'Resetten',
     undo: 'Ongedaan maken',
     cancel: 'Annuleren',
+    import: 'Importeren',
     store: 'Opslaan',
     revert: 'Terugzetten',
     busy: 'Bezig',
     loading: 'Laden',
+    close: 'Sluiten',
 
     // units
     unitB: {
@@ -47,6 +49,18 @@ export const core = {
     info: 'Info',
     system: 'Systeem',
 
+    // sources
+    device: 'Apparaat',
+    camera: 'Camera',
+    link: 'Link',
+
+    // capabilities labels
+    descriptionBrowse: '[Selecteer {{maxFilesUnit}}]',
+    descriptionBrowseDrop: 'Sleep {{maxFilesUnit}} hierheen of [blader]',
+    descriptionBrowseDropSelect: 'Sleep {{maxFilesUnit}} hierheen, [blader], of selecteer uit:',
+    descriptionBrowseSelect: '[Blader], of selecteer {{maxFilesUnit}} uit:',
+    descriptionSelect: 'Selecteer {{maxFilesUnit}} uit:',
+
     // file types
     fileMainTypeImage: 'afbeelding',
     fileMainTypeVideo: 'video',
@@ -56,9 +70,6 @@ export const core = {
     // assist
     assistAbort: 'Tik om te annuleren',
     assistUndo: 'Tik om ongedaan te maken',
-    // browse button labels
-    browse: 'Kies {{maxFilesUnit}}',
-    browseDrop: 'Sleep {{maxFilesUnit}} hierheen of <u>blader</u>',
 
     loadError: 'Bestand kon niet worden geladen.',
 

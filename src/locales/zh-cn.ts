@@ -10,10 +10,12 @@ export const core = {
     reset: '重置',
     undo: '撤销',
     cancel: '取消',
+    import: '导入',
     store: '保存',
     revert: '还原',
     busy: '处理中',
     loading: '正在加载',
+    close: '关闭',
 
     // units
     unitB: {
@@ -45,6 +47,17 @@ export const core = {
     info: '信息',
     system: '系统',
 
+    // sources
+    device: '设备',
+    camera: '相机',
+    link: '链接',
+
+    // capabilities labels
+    descriptionBrowse: '[选择{{maxFilesUnit}}]',
+    descriptionBrowseDrop: '将{{maxFilesUnit}}拖放到此处，或[浏览]',
+    descriptionBrowseDropSelect: '将{{maxFilesUnit}}拖放到此处，[浏览]，或从以下选项中选择：',
+    descriptionBrowseSelect: '[浏览]，或从以下选项中选择{{maxFilesUnit}}：',
+    descriptionSelect: '从以下选项中选择{{maxFilesUnit}}：',
     fileMainTypeImage: '图片',
     fileMainTypeVideo: '视频',
     fileMainTypeAudio: '音频',
@@ -52,9 +65,6 @@ export const core = {
 
     assistAbort: '点击取消',
     assistUndo: '点击撤销',
-    // browse button labels
-    browse: '选择{{maxFilesUnit}}',
-    browseDrop: '将{{maxFilesUnit}}拖放到此处，或<u>浏览</u>',
 
     loadError: '无法加载文件。',
 

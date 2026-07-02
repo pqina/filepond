@@ -10,10 +10,12 @@ export const core = {
     reset: 'Réinitialiser',
     undo: 'Annuler',
     cancel: 'Annuler',
+    import: 'Importer',
     store: 'Enregistrer',
     revert: 'Rétablir',
     busy: 'Occupé',
     loading: 'Chargement',
+    close: 'Fermer',
 
     // units
     unitB: {
@@ -45,6 +47,17 @@ export const core = {
     info: 'Info',
     system: 'Système',
 
+    // sources
+    device: 'Appareil',
+    camera: 'Caméra',
+    link: 'Lien',
+
+    // capabilities labels
+    descriptionBrowse: '[Sélectionner {{maxFilesUnit}}]',
+    descriptionBrowseDrop: 'Déposez {{maxFilesUnit}} ici ou [parcourir]',
+    descriptionBrowseDropSelect: 'Déposez {{maxFilesUnit}} ici, [parcourir] ou sélectionnez depuis :',
+    descriptionBrowseSelect: '[Parcourir] ou sélectionnez {{maxFilesUnit}} depuis :',
+    descriptionSelect: 'Sélectionnez {{maxFilesUnit}} depuis :',
     fileMainTypeImage: 'image',
     fileMainTypeVideo: 'vidéo',
     fileMainTypeAudio: 'audio',
@@ -52,9 +65,6 @@ export const core = {
 
     assistAbort: 'Touchez pour annuler',
     assistUndo: 'Touchez pour annuler l’action',
-    // browse button labels
-    browse: 'Choisir {{maxFilesUnit}}',
-    browseDrop: 'Déposez {{maxFilesUnit}} ici ou <u>parcourir</u>',
 
     loadError: 'Le fichier n’a pas pu être chargé.',
 

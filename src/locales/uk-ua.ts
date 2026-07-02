@@ -10,10 +10,12 @@ export const core = {
     reset: 'Скинути',
     undo: 'Повернути',
     cancel: 'Скасувати',
+    import: 'Імпортувати',
     store: 'Зберегти',
     revert: 'Відновити',
     busy: 'Зайнято',
     loading: 'Завантаження',
+    close: 'Закрити',
 
     // units
     unitB: {
@@ -45,6 +47,17 @@ export const core = {
     info: 'Інформація',
     system: 'Система',
 
+    // sources
+    device: 'Пристрій',
+    camera: 'Камера',
+    link: 'Посилання',
+
+    // capabilities labels
+    descriptionBrowse: '[Вибрати {{maxFilesUnit}}]',
+    descriptionBrowseDrop: 'Перетягніть сюди {{maxFilesUnit}} або [Огляд]',
+    descriptionBrowseDropSelect: 'Перетягніть сюди {{maxFilesUnit}}, [Огляд] або виберіть із:',
+    descriptionBrowseSelect: '[Огляд] або виберіть {{maxFilesUnit}} із:',
+    descriptionSelect: 'Виберіть {{maxFilesUnit}} із:',
     fileMainTypeImage: 'зображення',
     fileMainTypeVideo: 'відео',
     fileMainTypeAudio: 'аудіо',
@@ -52,9 +65,6 @@ export const core = {
 
     assistAbort: 'Натисніть, щоб скасувати',
     assistUndo: 'Натисніть, щоб повернути',
-    // browse button labels
-    browse: 'Вибрати {{maxFilesUnit}}',
-    browseDrop: 'Перетягніть сюди {{maxFilesUnit}} або <u>перегляньте</u>',
 
     loadError: 'Не вдалося завантажити файл.',
 

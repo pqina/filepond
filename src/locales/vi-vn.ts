@@ -10,10 +10,12 @@ export const core = {
     reset: 'Đặt lại',
     undo: 'Hoàn tác',
     cancel: 'Hủy bỏ',
+    import: 'Nhập',
     store: 'Lưu',
     revert: 'Khôi phục',
     busy: 'Đang bận',
     loading: 'Đang tải',
+    close: 'Đóng',
 
     // units
     unitB: {
@@ -45,6 +47,17 @@ export const core = {
     info: 'Thông tin',
     system: 'Hệ thống',
 
+    // sources
+    device: 'Thiết bị',
+    camera: 'Máy ảnh',
+    link: 'Liên kết',
+
+    // capabilities labels
+    descriptionBrowse: '[Chọn {{maxFilesUnit}}]',
+    descriptionBrowseDrop: 'Thả {{maxFilesUnit}} vào đây hoặc [duyệt]',
+    descriptionBrowseDropSelect: 'Thả {{maxFilesUnit}} vào đây, [duyệt] hoặc chọn từ:',
+    descriptionBrowseSelect: '[Duyệt] hoặc chọn {{maxFilesUnit}} từ:',
+    descriptionSelect: 'Chọn {{maxFilesUnit}} từ:',
     fileMainTypeImage: 'hình ảnh',
     fileMainTypeVideo: 'video',
     fileMainTypeAudio: 'âm thanh',
@@ -52,9 +65,6 @@ export const core = {
 
     assistAbort: 'Chạm để hủy',
     assistUndo: 'Chạm để hoàn tác',
-    // browse button labels
-    browse: 'Chọn {{maxFilesUnit}}',
-    browseDrop: 'Thả {{maxFilesUnit}} vào đây hoặc <u>duyệt</u>',
 
     loadError: 'Không thể tải tệp.',
 

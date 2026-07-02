@@ -10,10 +10,12 @@ export const core = {
     reset: 'Endurstilla',
     undo: 'Afturkalla',
     cancel: 'Hætta við',
+    import: 'Flytja inn',
     store: 'Vista',
     revert: 'Endurheimta',
     busy: 'Upptekið',
     loading: 'Hleð inn',
+    close: 'Loka',
 
     // units
     unitB: {
@@ -45,6 +47,17 @@ export const core = {
     info: 'Upplýsingar',
     system: 'Kerfi',
 
+    // sources
+    device: 'Tæki',
+    camera: 'Myndavél',
+    link: 'Tengill',
+
+    // capabilities labels
+    descriptionBrowse: '[Velja {{maxFilesUnit}}]',
+    descriptionBrowseDrop: 'Dragðu {{maxFilesUnit}} hingað eða [flettu]',
+    descriptionBrowseDropSelect: 'Dragðu {{maxFilesUnit}} hingað, [flettu] eða veldu úr:',
+    descriptionBrowseSelect: '[Fletta] eða veldu {{maxFilesUnit}} úr:',
+    descriptionSelect: 'Veldu {{maxFilesUnit}} úr:',
     fileMainTypeImage: 'mynd',
     fileMainTypeVideo: 'myndband',
     fileMainTypeAudio: 'hljóð',
@@ -52,9 +65,6 @@ export const core = {
 
     assistAbort: 'Ýttu til að hætta við',
     assistUndo: 'Ýttu til að afturkalla',
-    // browse button labels
-    browse: 'Velja {{maxFilesUnit}}',
-    browseDrop: 'Slepptu {{maxFilesUnit}} hér eða <u>flettu</u>',
 
     loadError: 'Tókst ekki að hlaða skránni.',
 

@@ -10,10 +10,12 @@ export const core = {
     reset: 'Återställ',
     undo: 'Ångra',
     cancel: 'Avbryt',
+    import: 'Importera',
     store: 'Spara',
     revert: 'Återgå',
     busy: 'Upptagen',
     loading: 'Laddar',
+    close: 'Stäng',
 
     // units
     unitB: {
@@ -45,6 +47,17 @@ export const core = {
     info: 'Info',
     system: 'System',
 
+    // sources
+    device: 'Enhet',
+    camera: 'Kamera',
+    link: 'Länk',
+
+    // capabilities labels
+    descriptionBrowse: '[Välj {{maxFilesUnit}}]',
+    descriptionBrowseDrop: 'Släpp {{maxFilesUnit}} här eller [bläddra]',
+    descriptionBrowseDropSelect: 'Släpp {{maxFilesUnit}} här, [bläddra] eller välj från:',
+    descriptionBrowseSelect: '[Bläddra] eller välj {{maxFilesUnit}} från:',
+    descriptionSelect: 'Välj {{maxFilesUnit}} från:',
     fileMainTypeImage: 'bild',
     fileMainTypeVideo: 'video',
     fileMainTypeAudio: 'ljud',
@@ -52,9 +65,6 @@ export const core = {
 
     assistAbort: 'Tryck för att avbryta',
     assistUndo: 'Tryck för att ångra',
-    // browse button labels
-    browse: 'Välj {{maxFilesUnit}}',
-    browseDrop: 'Släpp {{maxFilesUnit}} här eller <u>bläddra</u>',
 
     loadError: 'Det gick inte att ladda filen.',
 

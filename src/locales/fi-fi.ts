@@ -10,10 +10,12 @@ export const core = {
     reset: 'Nollaa',
     undo: 'Kumoa',
     cancel: 'Peruuta',
+    import: 'Tuo',
     store: 'Tallenna',
     revert: 'Palauta',
     busy: 'Varattu',
     loading: 'Ladataan',
+    close: 'Sulje',
 
     // units
     unitB: {
@@ -45,6 +47,18 @@ export const core = {
     info: 'Info',
     system: 'Järjestelmä',
 
+    // sources
+    device: 'Laite',
+    camera: 'Kamera',
+    link: 'Linkki',
+
+    // capabilities labels
+    descriptionBrowse: '[Valitse {{maxFilesUnit}}]',
+    descriptionBrowseDrop: 'Pudota {{maxFilesUnit}} tähän tai [selaa]',
+    descriptionBrowseDropSelect:
+        'Pudota {{maxFilesUnit}} tähän, [selaa] tai valitse näistä lähteistä:',
+    descriptionBrowseSelect: '[Selaa] tai valitse {{maxFilesUnit}} näistä lähteistä:',
+    descriptionSelect: 'Valitse {{maxFilesUnit}} näistä lähteistä:',
     fileMainTypeImage: 'kuva',
     fileMainTypeVideo: 'video',
     fileMainTypeAudio: 'ääni',
@@ -52,9 +66,6 @@ export const core = {
 
     assistAbort: 'Napauta peruuttaaksesi',
     assistUndo: 'Napauta kumotaksesi',
-    // browse button labels
-    browse: 'Valitse {{maxFilesUnit}}',
-    browseDrop: 'Pudota {{maxFilesUnit}} tähän tai <u>selaa</u>',
 
     loadError: 'Tiedostoa ei voitu ladata.',
 

@@ -10,10 +10,12 @@ export const core = {
     reset: 'Nullstill',
     undo: 'Angre',
     cancel: 'Avbryt',
+    import: 'Importer',
     store: 'Lagre',
     revert: 'Tilbakestill',
     busy: 'Opptatt',
     loading: 'Laster',
+    close: 'Lukk',
 
     // units
     unitB: {
@@ -45,6 +47,17 @@ export const core = {
     info: 'Info',
     system: 'System',
 
+    // sources
+    device: 'Enhet',
+    camera: 'Kamera',
+    link: 'Lenke',
+
+    // capabilities labels
+    descriptionBrowse: '[Velg {{maxFilesUnit}}]',
+    descriptionBrowseDrop: 'Slipp {{maxFilesUnit}} her, eller [bla gjennom]',
+    descriptionBrowseDropSelect: 'Slipp {{maxFilesUnit}} her, [bla gjennom], eller velg fra:',
+    descriptionBrowseSelect: '[Bla gjennom], eller velg {{maxFilesUnit}} fra:',
+    descriptionSelect: 'Velg {{maxFilesUnit}} fra:',
     fileMainTypeImage: 'bilde',
     fileMainTypeVideo: 'video',
     fileMainTypeAudio: 'lyd',
@@ -52,9 +65,6 @@ export const core = {
 
     assistAbort: 'Trykk for å avbryte',
     assistUndo: 'Trykk for å angre',
-    // browse button labels
-    browse: 'Velg {{maxFilesUnit}}',
-    browseDrop: 'Slipp {{maxFilesUnit}} her, eller <u>bla gjennom</u>',
 
     loadError: 'Kunne ikke laste inn filen.',
 

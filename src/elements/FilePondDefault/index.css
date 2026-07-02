@@ -71,6 +71,11 @@ file-pond-source-description {
     pointer-events: none;
     font-size: 0.875em;
 
+    /* can be empty in nobrowse mode, need to hide to prevent flex gap stacking */
+    &:empty {
+        display: none;
+    }
+
     /* make the browse button look like a link */
     & button[data-browse] {
         font-size: 1em;

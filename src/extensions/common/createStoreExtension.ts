@@ -32,8 +32,10 @@ type StoreExtensionResolvedOptions = StoreExtensionOptions & {
 type StoreExtensionResolvedProps<Props extends object = StoreExtensionOptions> =
     StoreExtensionResolvedOptions & Required<Props>;
 
-interface StoreExtensionState<Props extends object = StoreExtensionOptions>
-    extends Omit<ExtensionOptions, 'props' | 'didSetProps'> {
+interface StoreExtensionState<Props extends object = StoreExtensionOptions> extends Omit<
+    ExtensionOptions,
+    'props' | 'didSetProps'
+> {
     props: StoreExtensionResolvedProps<Props>;
     didSetProps: (cb: (props: StoreExtensionResolvedProps<Props>) => void) => void;
 }
@@ -55,7 +57,7 @@ interface StoreExtensionFunctions {
 
 export interface StoreExtensionOptions {
     /** If an upload is really fast, will show simulated progress to instill confidence in upload, configure with `PerceivedPerformanceOptions`. By default isn't set, when set to `true` the following settings are used:
-    
+
     ```js
     {
         minDuration: 500,
@@ -789,7 +791,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
             const unsubUpdateEntryData = on('updateEntryData', handleUpdateEntryData);
             const unsubUpdate = on('updateEntry', handleUpdateEntry);
             const unsubRemove = on('removeEntry', handleRemoveEntry);
-            const unsubUpdateEntries = on('updateEntries', debounce(handleUpdateEntries));
+            const unsubUpdateEntries = on('updateEntries', handleUpdateEntries);
 
             return {
                 destroy() {

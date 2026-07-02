@@ -330,7 +330,7 @@ export function setAttributes(element: HTMLElement, attributesToSet: { [key: str
 export function setStringAttribute(
     element: HTMLElement,
     name: string,
-    value: boolean | string | number
+    value: boolean | string | number | undefined | null
 ) {
     if (isString(value) || isNumber(value) || isBoolean(value)) {
         element.setAttribute(name, `${value}`);

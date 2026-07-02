@@ -10,10 +10,12 @@ export const core = {
     reset: 'Sıfırla',
     undo: 'Geri al',
     cancel: 'İptal',
+    import: 'İçe aktar',
     store: 'Kaydet',
     revert: 'Geri yükle',
     busy: 'Meşgul',
     loading: 'Yükleniyor',
+    close: 'Kapat',
 
     // units
     unitB: {
@@ -45,6 +47,17 @@ export const core = {
     info: 'Bilgi',
     system: 'Sistem',
 
+    // sources
+    device: 'Cihaz',
+    camera: 'Kamera',
+    link: 'Bağlantı',
+
+    // capabilities labels
+    descriptionBrowse: '[{{maxFilesUnit}} seç]',
+    descriptionBrowseDrop: '{{maxFilesUnit}} buraya bırakın veya [göz atın]',
+    descriptionBrowseDropSelect: '{{maxFilesUnit}} buraya bırakın, [göz atın] veya şuradan seçin:',
+    descriptionBrowseSelect: '[Göz atın] veya {{maxFilesUnit}} şuradan seçin:',
+    descriptionSelect: '{{maxFilesUnit}} şuradan seçin:',
     fileMainTypeImage: 'görüntü',
     fileMainTypeVideo: 'video',
     fileMainTypeAudio: 'ses',
@@ -52,9 +65,6 @@ export const core = {
 
     assistAbort: 'İptal etmek için dokun',
     assistUndo: 'Geri almak için dokun',
-    // browse button labels
-    browse: '{{maxFilesUnit}} seç',
-    browseDrop: '{{maxFilesUnit}} buraya bırakın veya <u>göz atın</u>',
 
     loadError: 'Dosya yüklenemedi.',
 

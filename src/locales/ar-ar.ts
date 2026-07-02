@@ -10,10 +10,12 @@ export const core = {
     reset: 'إعادة تعيين',
     undo: 'تراجع',
     cancel: 'إلغاء',
+    import: 'استيراد',
     store: 'حفظ',
     revert: 'استرجاع',
     busy: 'مشغول',
     loading: 'جارٍ التحميل',
+    close: 'إغلاق',
 
     // units
     unitB: {
@@ -45,6 +47,17 @@ export const core = {
     info: 'معلومات',
     system: 'النظام',
 
+    // sources
+    device: 'الجهاز',
+    camera: 'الكاميرا',
+    link: 'الرابط',
+
+    // capabilities labels
+    descriptionBrowse: '[اختر {{maxFilesUnit}}]',
+    descriptionBrowseDrop: 'أسقط {{maxFilesUnit}} هنا، أو [تصفح]',
+    descriptionBrowseDropSelect: 'أسقط {{maxFilesUnit}} هنا، [تصفح]، أو اختر من:',
+    descriptionBrowseSelect: '[تصفح]، أو اختر {{maxFilesUnit}} من:',
+    descriptionSelect: 'اختر {{maxFilesUnit}} من:',
     fileMainTypeImage: 'صورة',
     fileMainTypeVideo: 'فيديو',
     fileMainTypeAudio: 'صوت',
@@ -52,9 +65,6 @@ export const core = {
 
     assistAbort: 'اضغط للإلغاء',
     assistUndo: 'اضغط للتراجع',
-    // browse button labels
-    browse: 'اختر {{maxFilesUnit}}',
-    browseDrop: 'أسقط {{maxFilesUnit}} هنا، أو <u>تصفح</u>',
 
     loadError: 'تعذر تحميل الملف.',
 

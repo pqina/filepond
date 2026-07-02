@@ -10,10 +10,12 @@ export const core = {
     reset: 'Επαναφορά',
     undo: 'Αναίρεση',
     cancel: 'Ακύρωση',
+    import: 'Εισαγωγή',
     store: 'Αποθήκευση',
     revert: 'Επαναφορά',
     busy: 'Απασχολημένο',
     loading: 'Φόρτωση',
+    close: 'Κλείσιμο',
 
     // units
     unitB: {
@@ -45,6 +47,17 @@ export const core = {
     info: 'Πληροφορία',
     system: 'Σύστημα',
 
+    // sources
+    device: 'Συσκευή',
+    camera: 'Κάμερα',
+    link: 'Σύνδεσμος',
+
+    // capabilities labels
+    descriptionBrowse: '[Επιλέξτε {{maxFilesUnit}}]',
+    descriptionBrowseDrop: 'Αποθέστε {{maxFilesUnit}} εδώ ή [περιηγηθείτε]',
+    descriptionBrowseDropSelect: 'Αποθέστε {{maxFilesUnit}} εδώ, [περιηγηθείτε] ή επιλέξτε από:',
+    descriptionBrowseSelect: '[Περιηγηθείτε] ή επιλέξτε {{maxFilesUnit}} από:',
+    descriptionSelect: 'Επιλέξτε {{maxFilesUnit}} από:',
     fileMainTypeImage: 'εικόνα',
     fileMainTypeVideo: 'βίντεο',
     fileMainTypeAudio: 'ήχος',
@@ -52,9 +65,6 @@ export const core = {
 
     assistAbort: 'Πατήστε για ακύρωση',
     assistUndo: 'Πατήστε για αναίρεση',
-    // browse button labels
-    browse: 'Επιλέξτε {{maxFilesUnit}}',
-    browseDrop: 'Αποθέστε {{maxFilesUnit}} εδώ ή <u>περιηγηθείτε</u>',
 
     loadError: 'Αποτυχία φόρτωσης αρχείου.',
 

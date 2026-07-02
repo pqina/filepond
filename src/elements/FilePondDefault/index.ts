@@ -27,7 +27,7 @@ import {
     getAttribute,
     setStringAttribute,
 } from '../../utils/dom.js';
-import { isBrowser, isString } from '../../utils/test.js';
+import { isBoolean, isBrowser, isString } from '../../utils/test.js';
 import { assets } from '../../assets/index.js';
 
 // default FilePond styles
@@ -42,6 +42,8 @@ import { createFilePondExtensionSet } from './createFilePondExtensionSet.js';
 
 // This holds the initial options object passed to `defineFilePond`, we store this value so we can assign the initialOptions to FilePond components created _after_ the first `defineFilePond` call.
 let globalInitialOptions: DefineFilePondOptions | undefined;
+
+const AnimationModes: AnimationMode[] = ['auto', 'never', 'always'];
 
 export interface FilePondElementEventMap {
     rectcompute: CustomEvent<Bounds>;
@@ -82,9 +84,23 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
     /** Holds references to event subscriptions so we can more easily unsub */
     #connectedSubs: (() => void)[] = [];
 
+    /** Stores the current animation mode */
+    #animations: AnimationMode = 'auto';
+
+    /** Stores the current nodrop state */
+    #noDrop: boolean = false;
+
+    /** Stores the current attribution state */
+    #noAttribution: boolean = false;
+
     /** Calls a function for each component */
     #eachComponent(cb: (comp: any) => void) {
         Object.values(this.#components).forEach(cb);
+    }
+
+    /** Wraps `createFilePondExtensionSet` so we always set the default extension set */
+    set extensions(value: ExtensionFactory[]) {
+        super.extensions = createFilePondExtensionSet(value);
     }
 
     /** Automatically passes value to child elements, for usage see `FilePondSvelteComponentElement` */
@@ -94,27 +110,61 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
 
     /** Returns the current animation mode */
     get animations(): AnimationMode {
-        return (getAttribute(this, 'animations') ?? 'auto') as AnimationMode;
+        return this.#animations;
     }
 
     /** Setting to toggle animations, automatically passes `animations` setting to child elements, for usage see `FilePondSvelteComponentElement` */
     set animations(value: AnimationMode) {
-        setStringAttribute(this, 'animations', value);
-        this.#eachComponent((element) => (element.animations = value));
+        // invalid mode or no change
+        if (!AnimationModes.includes(value)) {
+            return;
+        }
+        this.#animations = value;
+        this.#syncPropAnimations();
     }
 
-    /** Wraps `createFilePondExtensionSet` so we always set the default extension set */
-    set extensions(value: ExtensionFactory[]) {
-        super.extensions = createFilePondExtensionSet(value);
+    #syncPropAnimations() {
+        if (!this.isConnected) {
+            return;
+        }
+
+        if (this.isConnected && this.getAttribute('animations') !== this.#animations) {
+            setStringAttribute(
+                this,
+                'animations',
+                this.#animations === 'auto' ? undefined : this.#animations
+            );
+        }
+
+        // pass to chidlren
+        this.#eachComponent((element) => (element.animations = this.#animations));
     }
 
     /** Set to `true` to remove drop area */
     set noDrop(value: boolean) {
+        // invalid or no change
+        if (!isBoolean(value)) {
+            return;
+        }
+        this.#noDrop = value;
+        this.#syncPropNoDrop();
+    }
+
+    /** Returns current nodrop state */
+    get noDrop() {
+        return this.#noDrop;
+    }
+
+    #syncPropNoDrop() {
         // toggle attribute
-        setBooleanAttribute(this, 'nodrop', value);
+        if (!this.isConnected) {
+            return;
+        }
+
+        setBooleanAttribute(this, 'nodrop', this.#noDrop);
 
         // remove/add components
-        if (value) {
+        if (this.#noDrop) {
             this.#components.dropIndicator.remove();
         } else {
             this._root.prepend(this.#components.dropIndicator);
@@ -123,14 +173,9 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
         // update entry list state
         Object.assign(this, {
             EntryListView: {
-                drop: !value,
+                drop: !this.#noDrop,
             },
         });
-    }
-
-    /** Returns current nodrop state */
-    get noDrop() {
-        return this.hasAttribute('nodrop');
     }
 
     /**
@@ -144,18 +189,31 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
     ```
     */
     set noAttribution(value: boolean) {
-        if (value) {
-            setBooleanAttribute(this, 'noattribution', true);
-            this.#attributionLink.remove();
-        } else {
-            setBooleanAttribute(this, 'noattribution', false);
-            this._root.append(this.#attributionLink);
+        // invalid or no change
+        if (!isBoolean(value)) {
+            return;
         }
+        this.#noAttribution = value;
+        this.#syncPropNoAttribution();
     }
 
     /** Returns current noattribution state */
     get noAttribution() {
-        return !this.#attributionLink?.parentNode;
+        return this.#noAttribution;
+    }
+
+    #syncPropNoAttribution() {
+        if (!this.isConnected) {
+            return;
+        }
+
+        setBooleanAttribute(this, 'noattribution', this.noAttribution);
+
+        if (this.#noAttribution) {
+            this.#attributionLink.remove();
+        } else {
+            this._root.append(this.#attributionLink);
+        }
     }
 
     /** Sets the locale on parent */
@@ -186,6 +244,8 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
         // toggle nodrop if nobrowse is set because it makes no sense to allow dropping files but not browsing for files
         if (name === 'nobrowse' && isString(value)) {
             this.noDrop = isString(value);
+
+            // handle nobrowse
             super.attributeChangedCallback(name, _, value);
             return;
         }
@@ -324,17 +384,13 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
         const { entryList, sourceList, sourceDescription, frame, dropIndicator } = this.#components;
 
         // re-add sub components
-        if (!this.hasAttribute('nodrop')) {
-            this._root.prepend(dropIndicator);
-        }
-
         this._root.prepend(frame, sourceDescription);
         this._root.append(sourceList, entryList);
 
-        // attribution
-        if (!this.hasAttribute('noattribution')) {
-            this._root.append(this.#attributionLink);
-        }
+        // sync attribute states
+        this.#syncPropNoDrop();
+        this.#syncPropNoAttribution();
+        this.#syncPropAnimations();
 
         // route events
         this.#connectedSubs.push(

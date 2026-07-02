@@ -10,10 +10,12 @@ export const core = {
     reset: 'リセット',
     undo: '元に戻す',
     cancel: 'キャンセル',
+    import: 'インポート',
     store: '保存',
     revert: '戻す',
     busy: '処理中',
     loading: '読み込み中',
+    close: '閉じる',
 
     // units
     unitB: {
@@ -45,6 +47,17 @@ export const core = {
     info: '情報',
     system: 'システム',
 
+    // sources
+    device: 'デバイス',
+    camera: 'カメラ',
+    link: 'リンク',
+
+    // capabilities labels
+    descriptionBrowse: '[{{maxFilesUnit}}を選択]',
+    descriptionBrowseDrop: 'ここに{{maxFilesUnit}}をドロップ、または[参照]',
+    descriptionBrowseDropSelect: 'ここに{{maxFilesUnit}}をドロップ、[参照]、または次から選択:',
+    descriptionBrowseSelect: '[参照]、または次から{{maxFilesUnit}}を選択:',
+    descriptionSelect: '次から{{maxFilesUnit}}を選択:',
     fileMainTypeImage: '画像',
     fileMainTypeVideo: '動画',
     fileMainTypeAudio: '音声',
@@ -52,9 +65,6 @@ export const core = {
 
     assistAbort: 'タップして中止',
     assistUndo: 'タップして元に戻す',
-    // browse button labels
-    browse: '{{maxFilesUnit}}を選択',
-    browseDrop: 'ここに{{maxFilesUnit}}をドロップ、または<u>参照</u>',
 
     loadError: 'ファイルを読み込めませんでした。',
 

@@ -10,10 +10,12 @@ export const core = {
     reset: 'Resetuj',
     undo: 'Cofnij',
     cancel: 'Anuluj',
+    import: 'Importuj',
     store: 'Zapisz',
     revert: 'Przywróć',
     busy: 'Zajęte',
     loading: 'Ładowanie',
+    close: 'Zamknij',
 
     // units
     unitB: {
@@ -45,6 +47,17 @@ export const core = {
     info: 'Informacja',
     system: 'System',
 
+    // sources
+    device: 'Urządzenie',
+    camera: 'Aparat',
+    link: 'Link',
+
+    // capabilities labels
+    descriptionBrowse: '[Wybierz {{maxFilesUnit}}]',
+    descriptionBrowseDrop: 'Upuść tutaj {{maxFilesUnit}} lub [przeglądaj]',
+    descriptionBrowseDropSelect: 'Upuść tutaj {{maxFilesUnit}}, [przeglądaj] lub wybierz z:',
+    descriptionBrowseSelect: '[Przeglądaj] lub wybierz {{maxFilesUnit}} z:',
+    descriptionSelect: 'Wybierz {{maxFilesUnit}} z:',
     fileMainTypeImage: 'obraz',
     fileMainTypeVideo: 'wideo',
     fileMainTypeAudio: 'audio',
@@ -52,9 +65,6 @@ export const core = {
 
     assistAbort: 'Dotknij, aby anulować',
     assistUndo: 'Dotknij, aby cofnąć',
-    // browse button labels
-    browse: 'Wybierz {{maxFilesUnit}}',
-    browseDrop: 'Upuść tutaj {{maxFilesUnit}} lub <u>przeglądaj</u>',
 
     loadError: 'Nie udało się załadować pliku.',
 

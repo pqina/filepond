@@ -1,7 +1,6 @@
 import { afterEach, beforeEach, expect, test } from 'vitest';
-import { page, userEvent } from 'vitest/browser';
+import { page } from 'vitest/browser';
 import { defineFilePond } from '../../src/index';
-import { SimulatedStore } from '../../src/extensions/simulated-store';
 import { generateFile } from '../../src/dev';
 
 let pond;
@@ -28,16 +27,17 @@ test('defines <file-pond> elements', async () => {
 
     const { shadowRoot } = pond;
     expect(shadowRoot).toBeInstanceOf(ShadowRoot);
-    expect(shadowRoot.querySelector('[part="browse-button"]')).toBeInstanceOf(HTMLButtonElement);
-    expect(shadowRoot.querySelector('file-pond-drop-area')).toBeInstanceOf(HTMLElement);
+    expect(shadowRoot.querySelector('file-pond-frame')).toBeInstanceOf(HTMLElement);
     expect(shadowRoot.querySelector('file-pond-drop-indicator')).toBeInstanceOf(HTMLElement);
     expect(shadowRoot.querySelector('file-pond-entry-list')).toBeInstanceOf(HTMLElement);
+    expect(shadowRoot.querySelector('file-pond-source-description')).toBeInstanceOf(HTMLElement);
+    expect(shadowRoot.querySelector('file-pond-source-list')).toBeInstanceOf(HTMLElement);
 });
 
 test('renders entry', async () => {
     pond.entries = [
         {
-            src: generateFile(),
+            src: await generateFile(),
         },
     ];
 
@@ -47,13 +47,13 @@ test('renders entry', async () => {
 test('deletes entry when clicking remove button', async () => {
     pond.entries = [
         {
-            src: generateFile(),
+            src: await generateFile(),
         },
     ];
 
     expect(pond.currentEntries.length).toBe(1);
 
-    await page.getByRole('listitem');
+    // page.getByRole('listitem');
     await page.getByRole('button', { name: 'Remove' }).click();
 
     expect(pond.currentEntries.length).toBe(0);

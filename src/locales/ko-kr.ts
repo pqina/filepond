@@ -10,10 +10,12 @@ export const core = {
     reset: '초기화',
     undo: '실행 취소',
     cancel: '취소',
+    import: '가져오기',
     store: '저장',
     revert: '되돌리기',
     busy: '처리 중',
     loading: '불러오는 중',
+    close: '닫기',
 
     // units
     unitB: {
@@ -45,6 +47,18 @@ export const core = {
     info: '정보',
     system: '시스템',
 
+    // sources
+    device: '기기',
+    camera: '카메라',
+    link: '링크',
+
+    // capabilities labels
+    descriptionBrowse: '[{{maxFilesUnit}} 선택]',
+    descriptionBrowseDrop: '{{maxFilesUnit}}을(를) 여기에 놓거나 [찾아보기]',
+    descriptionBrowseDropSelect:
+        '{{maxFilesUnit}}을(를) 여기에 놓거나, [찾아보기]하거나, 다음에서 선택:',
+    descriptionBrowseSelect: '[찾아보기]하거나, 다음에서 {{maxFilesUnit}} 선택:',
+    descriptionSelect: '다음에서 {{maxFilesUnit}} 선택:',
     fileMainTypeImage: '이미지',
     fileMainTypeVideo: '비디오',
     fileMainTypeAudio: '오디오',
@@ -52,9 +66,6 @@ export const core = {
 
     assistAbort: '탭하여 취소',
     assistUndo: '탭하여 실행 취소',
-    // browse button labels
-    browse: '{{maxFilesUnit}} 선택',
-    browseDrop: '{{maxFilesUnit}}을(를) 여기에 놓거나 <u>찾아보기</u>',
 
     loadError: '파일을 불러올 수 없습니다.',
 

@@ -18,7 +18,7 @@ import {
     addListener,
     createStyleSheet,
 } from '../../utils/dom.js';
-import { isFile, isNumber, isObject, isString } from '../../utils/test.js';
+import { isBoolean, isFile, isNumber, isObject, isString } from '../../utils/test.js';
 import { stringReplaceVariables, statusToLabel, statusCodeToLocaleKey } from '../common/string.js';
 import { toCamelCase } from '../../utils/string.js';
 import { debounce } from '../../utils/debounce.js';
@@ -48,14 +48,15 @@ const VALIDATION_FLAGS_ORDER = [
 
 function isVisibleSlotChild(node: Node) {
     const { nodeType, nodeValue, nodeName } = node;
+
     // is text node, but is empty, don't render
     if (nodeType === 3) {
         return (nodeValue || '').trim().length > 0;
     }
 
-    // is element, return false if is hidden
+    // is element, return false if is hidden or file input
     if (nodeType === 1 && nodeName === 'INPUT') {
-        return (<HTMLInputElement>node).type !== 'hidden';
+        return !/hidden|file/.test((<HTMLInputElement>node).type);
     }
 
     return true;
@@ -153,6 +154,9 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
     /** Browse button, we use a separate browse button so the input doesn't show the "file chosen" or "file name", we'll render our own file list. */
     #browseButtonSelector = '[data-browse]';
+
+    /** No browse state */
+    #noBrowse = false;
 
     /** FilePond extension manager reference */
     #extensionManager: ExtensionManagerInstance;
@@ -257,7 +261,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
             this.#fileInput.multiple = maxFiles !== 1;
 
             // need to update browse button label as it is different when allowing multiple files
-            this.#updateAriaDescription();
+            this.#syncAriaDescription();
 
             // retest validity
             this.checkValidity();
@@ -362,12 +366,27 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
     /** Toggle browse button */
     set noBrowse(value: boolean) {
-        setBooleanAttribute(this, 'nobrowse', !!value);
+        // invalid or no change
+        if (!isBoolean(value)) {
+            return;
+        }
+
+        // store value as boolean
+        this.#noBrowse = !!value;
+        this.#syncPropNoBrowse();
     }
 
     /** Returns the current browse button state */
     get noBrowse() {
-        return this.hasAttribute('nobrowse');
+        return this.#noBrowse;
+    }
+
+    #syncPropNoBrowse() {
+        if (!this.isConnected) {
+            return;
+        }
+
+        setBooleanAttribute(this, 'nobrowse', this.#noBrowse);
     }
 
     /** Min file size setter, accepts a number of bytes or a natural filesize string like 1MB */
@@ -458,7 +477,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         this.#extensionManager.propagateExtensionProperty('locale', value);
 
         // update browse button label
-        this.#updateAriaDescription();
+        this.#syncAriaDescription();
 
         // so validity labels update to new language
         this.checkValidity();
@@ -565,6 +584,9 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         // create slot
         this.#slot = h('slot');
         this.#slot.addEventListener('slotchange', () => {
+            // if a file input is added we need to sync its attributes
+            this.#syncSlottedElements();
+
             // determine if slot has children
             setBooleanAttribute(
                 this.#slot,
@@ -647,14 +669,21 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
             this.checkValidity();
         });
 
-        // update aria label
-        this.#entryTree.on('updateEntries', (_) => {
-            if (!this.locale) {
-                return;
-            }
-
-            this.#updateAriaDescription();
+        this.#extensionManager.on('updateExtensionState', () => {
+            this.checkValidity();
         });
+
+        // update aria label
+        this.#entryTree.on(
+            'updateEntries',
+            debounce(() => {
+                if (!this.locale) {
+                    return;
+                }
+
+                this.#syncAriaDescription();
+            })
+        );
 
         // set default extensions for file input
         this.#extensionManager.extensions = [FileInputSource, ValueCallbackStore];
@@ -662,7 +691,11 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
     // This updates the aria-description attribute.
     // It describes the element similar to how other input elements are described(label_name: field type, role, validation state)
-    #updateAriaDescription() {
+    #syncAriaDescription() {
+        if (!this.isConnected) {
+            return;
+        }
+
         const totalEntries = this.#entryTree.entries.length;
 
         const localeData = {
@@ -733,6 +766,12 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     connectedCallback() {
         // sync slotted children
         this.#syncSlottedElements();
+
+        // sync attributes
+        this.#syncPropNoBrowse();
+
+        // sync aria
+        this.#syncAriaDescription();
 
         /**
          * When the callback store changes we assign the value to the form internals for the custom element
@@ -989,7 +1028,7 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         }
 
         // validity is reflected in browse button description for screenreader users
-        this.#updateAriaDescription();
+        this.#syncAriaDescription();
 
         // return resulting state
         return valid;

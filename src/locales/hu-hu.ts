@@ -10,10 +10,12 @@ export const core = {
     reset: 'Visszaállítás',
     undo: 'Visszavonás',
     cancel: 'Mégse',
+    import: 'Importálás',
     store: 'Mentés',
     revert: 'Visszaállítás',
     busy: 'Foglalt',
     loading: 'Betöltés',
+    close: 'Bezárás',
 
     // units
     unitB: {
@@ -45,6 +47,18 @@ export const core = {
     info: 'Információ',
     system: 'Rendszer',
 
+    // sources
+    device: 'Eszköz',
+    camera: 'Kamera',
+    link: 'Hivatkozás',
+
+    // capabilities labels
+    descriptionBrowse: '[{{maxFilesUnit}} kiválasztása]',
+    descriptionBrowseDrop: 'Húzza ide: {{maxFilesUnit}}, vagy [tallózzon]',
+    descriptionBrowseDropSelect:
+        'Húzza ide: {{maxFilesUnit}}, [tallózzon], vagy válasszon a források közül:',
+    descriptionBrowseSelect: '[Tallózzon], vagy válasszon {{maxFilesUnit}} a források közül:',
+    descriptionSelect: 'Válasszon {{maxFilesUnit}} a források közül:',
     fileMainTypeImage: 'kép',
     fileMainTypeVideo: 'videó',
     fileMainTypeAudio: 'hang',
@@ -52,9 +66,6 @@ export const core = {
 
     assistAbort: 'Koppintson a megszakításhoz',
     assistUndo: 'Koppintson a visszavonáshoz',
-    // browse button labels
-    browse: '{{maxFilesUnit}} kiválasztása',
-    browseDrop: 'Dobja ide: {{maxFilesUnit}}, vagy <u>böngésszen</u>',
 
     loadError: 'A fájl betöltése nem sikerült.',
 

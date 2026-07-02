@@ -10,10 +10,12 @@ export const core = {
     reset: 'রিসেট',
     undo: 'পূর্বাবস্থায় ফেরত',
     cancel: 'বাতিল',
+    import: 'ইমপোর্ট',
     store: 'সংরক্ষণ',
     revert: 'পুনরুদ্ধার',
     busy: 'ব্যস্ত',
     loading: 'লোড হচ্ছে',
+    close: 'বন্ধ করুন',
 
     // units
     unitB: {
@@ -45,6 +47,17 @@ export const core = {
     info: 'তথ্য',
     system: 'সিস্টেম',
 
+    // sources
+    device: 'ডিভাইস',
+    camera: 'ক্যামেরা',
+    link: 'লিঙ্ক',
+
+    // capabilities labels
+    descriptionBrowse: '[{{maxFilesUnit}} বেছে নিন]',
+    descriptionBrowseDrop: '{{maxFilesUnit}} এখানে ছেড়ে দিন, অথবা [ব্রাউজ] করুন',
+    descriptionBrowseDropSelect: '{{maxFilesUnit}} এখানে ছেড়ে দিন, [ব্রাউজ] করুন, অথবা এখান থেকে বেছে নিন:',
+    descriptionBrowseSelect: '[ব্রাউজ] করুন, অথবা এখান থেকে {{maxFilesUnit}} বেছে নিন:',
+    descriptionSelect: 'এখান থেকে {{maxFilesUnit}} বেছে নিন:',
     fileMainTypeImage: 'ছবি',
     fileMainTypeVideo: 'ভিডিও',
     fileMainTypeAudio: 'অডিও',
@@ -52,9 +65,6 @@ export const core = {
 
     assistAbort: 'বাতিল করতে ট্যাপ করুন',
     assistUndo: 'পূর্বাবস্থায় ফেরত যেতে ট্যাপ করুন',
-    // browse button labels
-    browse: '{{maxFilesUnit}} বেছে নিন',
-    browseDrop: '{{maxFilesUnit}} এখানে ছেড়ে দিন, অথবা <u>ব্রাউজ</u> করুন',
 
     loadError: 'ফাইল লোড করা যায়নি।',
 

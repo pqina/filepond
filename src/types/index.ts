@@ -13,7 +13,7 @@ import type { ExtensionManagerContext } from '../core/extensionManager.js';
 import type { FilePondElement } from '../elements/FilePondDefault/index.js';
 import type { FilePondInputElement } from '../elements/FilePondInput/index.js';
 import type { FilePondEntryListElement } from '../elements/FilePondEntryList/index.js';
-import type { FilePondDropAreaElement } from '../elements/FilePondDropArea/index.js';
+import type { FilePondFrameElement } from '../elements/FilePondFrame/index.js';
 import type { FilePondDropIndicatorElement } from '../elements/FilePondDropIndicator/index.js';
 import type { FilePondSvelteComponentElement } from '../elements/FilePondSvelteComponent/index.svelte.js';
 import type { Needle } from '../core/entryTree.js';
@@ -21,7 +21,7 @@ import type { Needle } from '../core/entryTree.js';
 export type { FilePondElementEventMap } from '../elements/FilePondDefault/index.js';
 export type { FilePondInputElementEventMap } from '../elements/FilePondInput/index.js';
 export type { FilePondEntryListElementEventMap } from '../elements/FilePondEntryList/index.js';
-export type { FilePondDropAreaElementEventMap } from '../elements/FilePondDropArea/index.js';
+export type { FilePondFrameElementEventMap } from '../elements/FilePondFrame/index.js';
 export type { FilePondSvelteComponentElementEventMap } from '../elements/FilePondSvelteComponent/index.svelte.js';
 
 export type {
@@ -31,7 +31,7 @@ export type {
     ImageViewOptions,
     AppendEntryVideoViewOptions,
     AppendEntryImageViewOptions,
-} from '../templates/media.js';
+} from '../templates/entry-list/media.js';
 
 export type {
     CreateExtensionManagerOptions,
@@ -82,7 +82,7 @@ export type {
     NodeContext,
     FilePondElement,
     FilePondInputElement,
-    FilePondDropAreaElement,
+    FilePondFrameElement,
     FilePondDropIndicatorElement,
     FilePondEntryListElement,
     FilePondSvelteComponentElement,

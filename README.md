@@ -11,7 +11,7 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 
 TODO:
 
--   [Finish docs](https://v5.filepond.com/)
+- [Finish docs](https://v5.filepond.com/)
 
 If you're trying out v5, please share your feedback on [Discord](https://discord.gg/KTyymsrTrX)
 
@@ -23,12 +23,12 @@ We can install the `filepond` package by running the following command in our te
 npm install filepond@beta
 ```
 
-We wrap an `<input type="file">` with the `<file-pond>` custom element and then register the custom element using the `defineFilePond` function.
+We wrap an `<input type="file">` with the `<file-pond>` custom element and then register the custom element using the `defineFilePond` function. [Getting started](https://v5.filepond.com/docs/start-here/getting-started)
 
 ```html
 <form action="/upload" method="POST">
+    <label for="my-file">Files</label>
     <file-pond>
-        <label for="my-file">Drop files here, or <u>browse</u></label>
         <input id="my-file" type="file" name="files" required />
     </file-pond>
 
@@ -45,27 +45,52 @@ We wrap an `<input type="file">` with the `<file-pond>` custom element and then 
 </script>
 ```
 
-When using a framework like React, Svelte, or Vue we can use the `<file-pond>` custom element as if it were a Component.
+When integrating with a framework like React, Svelte, or Vue, we can use the `<file-pond>` custom element as if it were a Component. [Framework integration](https://v5.filepond.com/docs/start-here/framework-integration)
 
-```jsx
+```tsx
 import { useState } from 'react';
 
-import { defineFilePond } from 'filepond';
+// FilePond imports
+import { defineFilePond, type FilePondEntrySource, type FilePondElement } from 'filepond';
 import { locale } from 'filepond/locales/en-gb.js';
 
+// Optionally import React <file-pond> component types
+import 'filepond/types/react';
+
+// Define <file-pond> element and sets English locale
 defineFilePond({
     locale,
 });
 
 export default function App() {
-    const [myEntries, setMyEntries] = useState([]);
+    // two-way data binding
+    const [entries, setEntries] = useState<FilePondEntrySource[]>([
+        new File(['hello'], 'world.txt', {
+            type: 'text/plain',
+        }),
+    ]);
+
+    // handle form submit
+    function handleSubmit(e: React.SyntheticEvent<HTMLFormElement>) {
+        e.preventDefault();
+
+        console.log('submit', e);
+    }
+
     return (
-        <file-pond entries={myEntries}>
-            <label htmlFor="my-file">
-                Drop files here, or <u>browse</u>
-            </label>
-            <input id="my-file" type="file" name="docs" />
-        </file-pond>
+        <form onSubmit={handleSubmit} method="POST">
+            <label htmlFor="my-files">Documents</label>
+            <file-pond
+                onentrieschange={({ detail: currentEntries }) => {
+                    setEntries(currentEntries);
+                }}
+                entries={entries}
+            >
+                <input id="my-files" name="my-files" type="file" required multiple />
+            </file-pond>
+
+            <button type="submit">Sumbit</button>
+        </form>
     );
 }
 ```

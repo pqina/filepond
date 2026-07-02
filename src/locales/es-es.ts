@@ -10,10 +10,12 @@ export const core = {
     reset: 'Restablecer',
     undo: 'Deshacer',
     cancel: 'Cancelar',
+    import: 'Importar',
     store: 'Guardar',
     revert: 'Revertir',
     busy: 'Ocupado',
     loading: 'Cargando',
+    close: 'Cerrar',
 
     // units
     unitB: {
@@ -45,6 +47,17 @@ export const core = {
     info: 'Info',
     system: 'Sistema',
 
+    // sources
+    device: 'Dispositivo',
+    camera: 'Cámara',
+    link: 'Enlace',
+
+    // capabilities labels
+    descriptionBrowse: '[Seleccionar {{maxFilesUnit}}]',
+    descriptionBrowseDrop: 'Suelta {{maxFilesUnit}} aquí o [explora]',
+    descriptionBrowseDropSelect: 'Suelta {{maxFilesUnit}} aquí, [explora] o selecciona desde:',
+    descriptionBrowseSelect: '[Explora] o selecciona {{maxFilesUnit}} desde:',
+    descriptionSelect: 'Selecciona {{maxFilesUnit}} desde:',
     fileMainTypeImage: 'imagen',
     fileMainTypeVideo: 'video',
     fileMainTypeAudio: 'audio',
@@ -52,9 +65,6 @@ export const core = {
 
     assistAbort: 'Toca para cancelar',
     assistUndo: 'Toca para deshacer',
-    // browse button labels
-    browse: 'Elegir {{maxFilesUnit}}',
-    browseDrop: 'Suelta {{maxFilesUnit}} aquí o <u>explora</u>',
 
     loadError: 'No se pudo cargar el archivo.',
 

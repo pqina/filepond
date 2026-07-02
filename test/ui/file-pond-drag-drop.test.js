@@ -77,7 +77,7 @@ test('adds new entry with drop', async () => {
     dataTransfer.items.add(file);
     const waitForFrame = () => new Promise((resolve) => requestAnimationFrame(resolve));
 
-    const dropArea = pond.shadowRoot.querySelector('file-pond-drop-area');
+    const dropArea = pond.shadowRoot.querySelector('file-pond-frame');
     const dropAreaRect = dropArea.getBoundingClientRect();
     const dropPoint = {
         x: dropAreaRect.x + dropAreaRect.width / 2,

@@ -10,10 +10,12 @@ export const core = {
     reset: 'Nulstil',
     undo: 'Fortryd',
     cancel: 'Annuller',
+    import: 'Importér',
     store: 'Gem',
     revert: 'Gendan',
     busy: 'Optaget',
     loading: 'Indlæser',
+    close: 'Luk',
 
     // units
     unitB: {
@@ -45,6 +47,17 @@ export const core = {
     info: 'Info',
     system: 'System',
 
+    // sources
+    device: 'Enhed',
+    camera: 'Kamera',
+    link: 'Link',
+
+    // capabilities labels
+    descriptionBrowse: '[Vælg {{maxFilesUnit}}]',
+    descriptionBrowseDrop: 'Slip {{maxFilesUnit}} her, eller [gennemse]',
+    descriptionBrowseDropSelect: 'Slip {{maxFilesUnit}} her, [gennemse], eller vælg fra:',
+    descriptionBrowseSelect: '[Gennemse], eller vælg {{maxFilesUnit}} fra:',
+    descriptionSelect: 'Vælg {{maxFilesUnit}} fra:',
     fileMainTypeImage: 'billede',
     fileMainTypeVideo: 'video',
     fileMainTypeAudio: 'lyd',
@@ -52,9 +65,6 @@ export const core = {
 
     assistAbort: 'Tryk for at annullere',
     assistUndo: 'Tryk for at fortryde',
-    // browse button labels
-    browse: 'Vælg {{maxFilesUnit}}',
-    browseDrop: 'Slip {{maxFilesUnit}} her, eller <u>gennemse</u>',
 
     loadError: 'Kunne ikke indlæse filen.',
 

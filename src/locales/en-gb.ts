@@ -43,9 +43,6 @@ export const core = {
     info: 'Info',
     system: 'System',
 
-    // button
-    buttonBrowse: 'Choose {{maxFilesUnit}}',
-
     // sources
     device: 'Device',
     camera: 'Camera',
@@ -55,7 +52,7 @@ export const core = {
     descriptionBrowse: '[Select {{maxFilesUnit}}]',
     descriptionBrowseDrop: 'Drop {{maxFilesUnit}} here, or [browse]',
     descriptionBrowseDropSelect: 'Drop {{maxFilesUnit}} here, [browse], or select from:',
-    descriptionBrowseSelect: 'Select {{maxFilesUnit}} from:',
+    descriptionBrowseSelect: '[Browse], or select {{maxFilesUnit}} from:',
     descriptionSelect: 'Select {{maxFilesUnit}} from:',
 
     // file types (these also match with image/*, video/*, and audio/*)

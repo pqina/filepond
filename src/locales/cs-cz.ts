@@ -10,10 +10,12 @@ export const core = {
     reset: 'Resetovat',
     undo: 'Vrátit',
     cancel: 'Zrušit',
+    import: 'Importovat',
     store: 'Uložit',
     revert: 'Obnovit',
     busy: 'Zaneprázdněno',
     loading: 'Načítání',
+    close: 'Zavřít',
 
     // units
     unitB: {
@@ -45,6 +47,18 @@ export const core = {
     info: 'Informace',
     system: 'Systém',
 
+    // sources
+    device: 'Zařízení',
+    camera: 'Fotoaparát',
+    link: 'Odkaz',
+
+    // capabilities labels
+    descriptionBrowse: '[Vybrat {{maxFilesUnit}}]',
+    descriptionBrowseDrop: 'Přetáhněte sem {{maxFilesUnit}} nebo [Procházet]',
+    descriptionBrowseDropSelect:
+        'Přetáhněte sem {{maxFilesUnit}}, [Procházet] nebo vyberte z těchto zdrojů:',
+    descriptionBrowseSelect: '[Procházet] nebo vyberte {{maxFilesUnit}} z těchto zdrojů:',
+    descriptionSelect: 'Vyberte {{maxFilesUnit}} z těchto zdrojů:',
     fileMainTypeImage: 'obrázek',
     fileMainTypeVideo: 'video',
     fileMainTypeAudio: 'audio',
@@ -52,9 +66,6 @@ export const core = {
 
     assistAbort: 'Klepněte pro zrušení',
     assistUndo: 'Klepněte pro vrácení',
-    // browse button labels
-    browse: 'Vybrat {{maxFilesUnit}}',
-    browseDrop: 'Přetáhněte sem {{maxFilesUnit}} nebo <u>procházejte</u>',
 
     loadError: 'Soubor se nepodařilo načíst.',
 
