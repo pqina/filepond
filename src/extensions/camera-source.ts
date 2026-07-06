@@ -10,7 +10,7 @@ export interface CameraSourceOptions extends SourceExtensionOptions {
     mediaConstraints?: MediaStreamConstraints;
 
     /** Allows renaming the file before it's added to the file list, should return name without extension */
-    filename?: ((blob: File) => string) | string;
+    filename?: ((blob: Blob) => string) | string;
 }
 
 // formats the file names in an iso like date

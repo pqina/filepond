@@ -19,7 +19,7 @@ export interface CameraInputElementOptions {
 export class CameraInputElement extends FilePondSvelteComponentElement {
     declare requestCameraAccess: (constraints?: MediaStreamConstraints) => Promise<boolean>;
     declare oncapture: (output: File) => void;
-    declare filename: (blob: Blob) => string | string | undefined;
+    declare filename: ((blob: Blob) => string) | string | undefined;
 
     /** This makes the element associable with its parent form */
     static formAssociated = true;
