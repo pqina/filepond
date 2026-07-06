@@ -24,7 +24,6 @@ import {
     addListener,
     dispatchCustomEvent,
     setBooleanAttribute,
-    getAttribute,
     setStringAttribute,
 } from '../../utils/dom.js';
 import { isBoolean, isBrowser, isString } from '../../utils/test.js';

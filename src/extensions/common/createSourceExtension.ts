@@ -2,7 +2,9 @@ import type { EntryTreeOn } from '../../core/entryTree.js';
 import type { ExtensionManagerOn } from '../../core/extensionManager.js';
 import type { EntrySource, ExtensionContext, ExtensionOptions } from '../../types/index.js';
 import { addListener, getAsElement, setAttributes } from '../../utils/dom.js';
+import { passthrough } from '../../utils/placeholder.js';
 import { pubsub } from '../../utils/pubsub.js';
+import { isFunction } from '../../utils/test.js';
 import { createExtension, type Extension } from './createExtension.js';
 
 interface SourceExtensionEvents {
@@ -72,6 +74,9 @@ export interface SourceExtensionOptions {
     inputAttributes?: {
         [key: string]: string | boolean | number;
     };
+
+    /** Hook into submit */
+    beforeInsertSource: (options: { src: any }) => EntrySource | false | undefined | null;
 }
 
 export interface CreateSourceExtensionOptions<Props extends object = SourceExtensionOptions> {
@@ -170,7 +175,7 @@ export function createSourceExtension<Props extends object = SourceExtensionOpti
             });
 
             function handleSubmit(e: SubmitEvent & { target: HTMLFormElement }) {
-                const { inputAttributes, insertIndex } = props;
+                const { inputAttributes, insertIndex, beforeInsertSource } = props;
                 const { target: form } = e;
 
                 // get form data
@@ -182,11 +187,20 @@ export function createSourceExtension<Props extends object = SourceExtensionOpti
                 }
 
                 // get form field value
-                const src = fd.get(inputAttributes.name) as EntrySource;
-                if (!src) {
+                const inputSrc = fd.get(inputAttributes.name) as EntrySource;
+                if (!inputSrc) {
                     // don't submit the form
                     e.preventDefault();
                     throw new Error(`No value for input with name "${inputAttributes.name}"`);
+                }
+
+                // allow dev to manipulate result
+                const src = isFunction(beforeInsertSource)
+                    ? beforeInsertSource({ src: inputSrc })
+                    : inputSrc;
+                if (!src) {
+                    e.preventDefault();
+                    return;
                 }
 
                 // add the entry at default insert index

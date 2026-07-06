@@ -16,6 +16,11 @@ export {
     type CreateTransformExtensionOptions,
 } from './common/createTransformExtension.js';
 
+export {
+    createSourceExtension,
+    type CreateSourceExtensionOptions,
+} from './common/createSourceExtension.js';
+
 // sources
 export { ClipboardSource } from './clipboard-source.js';
 export { DragDropSource } from './drag-drop-source.js';
