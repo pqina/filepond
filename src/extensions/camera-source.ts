@@ -1,8 +1,11 @@
 import { defineCustomElement, h } from '../utils/dom.js';
 import { CameraInputElement } from '../elements/FilePondCameraInput/index.js';
-import { createSourceExtension } from './common/createSourceExtension.js';
+import {
+    createSourceExtension,
+    type SourceExtensionOptions,
+} from './common/createSourceExtension.js';
 
-export interface CameraSourceOptions {
+export interface CameraSourceOptions extends SourceExtensionOptions {
     /** Use to adjust camera settings */
     mediaConstraints?: MediaStreamConstraints;
 
@@ -34,8 +37,8 @@ export const CameraSource = createSourceExtension({
         // use date time by default
         filename: () =>
             filenameDateFormatter.format(new Date()).replace(' ', '_').replaceAll(':', '-'),
-    },
-    factory: ({ props }: any, { on, setExtensionSourceState }: any) => {
+    } as CameraSourceOptions,
+    factory: ({ props }, { on, setExtensionSourceState }) => {
         // implement this function to return an input element which can be used for the entry source
         function createSourceElement() {
             defineCustomElement('camera-input', CameraInputElement);
@@ -73,6 +76,7 @@ export const CameraSource = createSourceExtension({
                 });
         }
 
+        // @ts-ignore
         const unsubOpenDialog = on('dialogOpened', handleOpenedDialog);
 
         return {

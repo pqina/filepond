@@ -76,7 +76,7 @@ export interface SourceExtensionOptions {
     };
 
     /** Hook into submit */
-    beforeInsertSource: (options: { src: any }) => EntrySource | false | undefined | null;
+    beforeInsertSource?: (options: { src: any }) => EntrySource | false | undefined | null;
 }
 
 export interface CreateSourceExtensionOptions<Props extends object = SourceExtensionOptions> {

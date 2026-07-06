@@ -1,14 +1,22 @@
 import { h } from '../utils/dom.js';
-import { createSourceExtension } from './common/createSourceExtension.js';
+import {
+    createSourceExtension,
+    type SourceExtensionOptions,
+} from './common/createSourceExtension.js';
+
+export interface URLInputSourceOptions extends SourceExtensionOptions {
+    placeholder?: string;
+}
 
 export const URLInputSource = createSourceExtension({
     name: 'URLInputSource',
     props: {
         sourceIcon: 'link',
-    },
-    factory: () => {
+    } as URLInputSourceOptions,
+    factory: ({ props }) => {
         function createSourceElement() {
-            return h('input', { type: 'url' });
+            const { placeholder } = props;
+            return h('input', { type: 'url', placeholder });
         }
 
         return {
