@@ -14,7 +14,7 @@ export const VIEWPORT_MARGIN = 100;
 const nodeCallbacks = new Map();
 
 /** WindowVisibilityObserver Tests if the window is visible, stops draw loop if it's not */
-let windowVisibilityObserver: { visible: boolean } | null = null;
+let windowVisibilityObserver: { visible: boolean; destroy: () => void } | null = null;
 function createWindowVisibilityObserver() {
     function isVisible() {
         return !document.hidden;
@@ -22,12 +22,16 @@ function createWindowVisibilityObserver() {
 
     windowVisibilityObserver = {
         visible: isVisible(),
+        destroy: () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        },
     };
 
     function handleVisibilityChange() {
         if (windowVisibilityObserver) {
             windowVisibilityObserver.visible = isVisible();
         }
+
         if (isVisible()) {
             start();
         } else {
@@ -41,7 +45,7 @@ function createWindowVisibilityObserver() {
 }
 
 /**
- * Observe nodes being suspended so we can stop measuring them
+ * Observe nodes being ed so we can stop measuring them
  */
 let SuspensionObserver: SuspensionObserver;
 function createSuspensionObserver() {
@@ -280,6 +284,10 @@ export function measurable(
             // stop measure loop if ran out of elements to measure
             if (!elements.length) {
                 stop();
+
+                // detach all events when last element is destroyed
+                windowVisibilityObserver?.destroy();
+                windowVisibilityObserver = null;
             }
         }
         return destroy;

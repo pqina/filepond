@@ -13,7 +13,7 @@
     import type { FilePondEntryListOptions } from '../FilePondEntryList/types.js';
     import type { Bounds } from '../../utils/bounds.js';
 
-    import { untrack } from 'svelte';
+    import { onDestroy, untrack } from 'svelte';
     import { dragArea } from '../attachments/drag-area.js';
     import { dropArea } from '../attachments/drop-area.js';
     import { arrayInsertAtIndex, arrayMove } from '../../utils/array.js';
@@ -34,11 +34,7 @@
     import { noop, passthrough } from '../../utils/placeholder.js';
     import { measurable } from '../attachments/measurable.js';
     import { setBooleanAttribute } from '../../utils/dom.js';
-    import {
-        computeAnimationPreference,
-        getGlobalPreventAnimations,
-        getShouldReduceMotion,
-    } from '../common/animationPreference.svelte.js';
+    import { createAnimationModeObserver } from '../common/animationPreference.svelte.js';
     import { setAppContext } from './contexts/appContext.js';
     import { setDragContext } from './contexts/dragContext.js';
     import { setDropContext } from './contexts/dropContext.js';
@@ -88,17 +84,13 @@
     }: FilePondEntryListOptions = $props();
 
     // update animation preference when changes
-    const globalPreventState = getGlobalPreventAnimations();
-    const reduceMotionState = getShouldReduceMotion();
-    const enableAnimations = $derived(
-        computeAnimationPreference(
-            animations,
-            globalPreventState.current,
-            reduceMotionState.current
-        )
-    );
+    const AnimationModeObserver = createAnimationModeObserver();
+    const enableAnimations = $derived(AnimationModeObserver.current);
+    $effect(() => {
+        AnimationModeObserver.setPreference(animations);
+    });
 
-    // the maximum animations that can run
+    // the maximum number of animations that can run
     const MAX_ANIMATIONS = 50;
 
     // root rect (used by spring root)
@@ -782,6 +774,12 @@
         dragInteraction = undefined;
     }
 
+    /** Handles a drop being canceled */
+    function handleDropItemCancel() {
+        dispatchCustomEvent(root, 'entrydragend');
+        dragInteraction = undefined;
+    }
+
     /** Handles item being dropped */
     function handleDropItem(e: DropEventDetail | DragEventDetail) {
         dispatchCustomEvent(root, 'entrydragend');
@@ -1060,6 +1058,11 @@
         const { key, ...props } = currentAction;
         return stringReplaceVariables(locale[key], props, locale);
     });
+
+    // clean up
+    onDestroy(() => {
+        AnimationModeObserver.destroy();
+    });
 </script>
 
 <svelte:window
@@ -1090,6 +1093,7 @@
         onitemdrag: handleDragItem,
         onitemdragin: handleDragItemIn,
         onitemdragout: handleDragItemOut,
+        onitemdropcancel: handleDropItemCancel,
         onitemdrop: handleDropItem,
     })}
     onkeydown={handleKeyDown}

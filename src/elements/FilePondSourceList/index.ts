@@ -2,7 +2,7 @@ import {
     FilePondSvelteComponentElement,
     type FilePondSvelteComponentOptions,
 } from '../FilePondSvelteComponent/index.svelte.js';
-import type { Locale, TemplateNode } from '../../types/index.js';
+import type { Locale, NodeContext, TemplateNode } from '../../types/index.js';
 import FilePondSourceListApp from './index.svelte';
 import { registerShadowRoot } from '../common/extendStyles.js';
 import defaultStyles from '../styles/defaults.css?inline';
@@ -49,6 +49,9 @@ export interface FilePondSourceListSource {
 }
 
 export interface FilePondSourceListOptions extends Omit<FilePondSvelteComponentOptions, 'root'> {
+    /** Disable buttons */
+    disabled: boolean;
+
     /** Available sources */
     sources: FilePondSourceListSource[];
 
@@ -65,4 +68,11 @@ export interface FilePondSourceListOptions extends Omit<FilePondSvelteComponentO
      * Automatically maps a property name to a resource value in locale and/or assets, defaults to `{ title: 'locale', label: 'locale', icon: 'assets' }` meaning that the value of a `label` property is automatically looked up in the `locale` property
      */
     propResourceMap?: { [componentProperty: string]: string };
+
+    /** Hook to manipulate nodes before rendering */
+    beforeRenderNode?: (
+        node: TemplateNode,
+        context: NodeContext,
+        sharedContext: NodeContext
+    ) => TemplateNode | void | false;
 }

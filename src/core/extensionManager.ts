@@ -199,6 +199,13 @@ export function createExtensionManager(
         return state.extension[name] ?? {};
     }
 
+    function removeExtensionState(name: string) {
+        delete state.extension[name];
+
+        // fire update event
+        pub('updateExtensionState', state.extension);
+    }
+
     function setExtensionStatus(name: string, status: any) {
         setExtensionState(name, { status });
     }
@@ -344,12 +351,15 @@ export function createExtensionManager(
         taskScheduler.abortTasks();
 
         // destroy extensions
-        extensions
-            .map((extension) => extension.instance)
-            .forEach((extensionInstance) => extensionInstance.destroy());
+        extensions.map(unloadExtension);
 
         // clear array
         extensions.length = 0;
+    }
+
+    function unloadExtension(extension: LoadedExtension) {
+        extension.instance.destroy();
+        removeExtensionState(extension.instance.name);
     }
 
     const instance = {
@@ -402,7 +412,7 @@ export function createExtensionManager(
             for (const extension of extensions) {
                 // an existing extension must be unloaded
                 if (!newFlatExtensionFactories.includes(extension.factory)) {
-                    extension.instance.destroy();
+                    unloadExtension(extension);
                     arrayRemoveInPlace(extensions, (ext: LoadedExtension) => ext === extension);
                     continue;
                 }
@@ -489,6 +499,7 @@ export function createExtensionManager(
         const props = { [propertyName]: value };
 
         const extensions = getExtensionInstancesWithProperty(propertyName);
+
         for (const extension of extensions) {
             attemptSetExtensionInstanceProps(extension, props);
         }
@@ -545,8 +556,8 @@ export function createExtensionManager(
     /** Returns the extension instance that exposes this prop */
     function getExtensionInstancesWithProperty(propertyName: string) {
         return extensions.filter((extension) => {
-            const definedProps = extension.instance.getProps();
-            return Object.keys(definedProps).includes(propertyName);
+            const keys = extension.instance.getPropertyKeys();
+            return keys.includes(propertyName);
         });
     }
 

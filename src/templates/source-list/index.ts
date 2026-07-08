@@ -33,13 +33,12 @@ export function createFilePondSourceList() {
                             onclosed,
                         } = props;
 
-                        const { dialog } = context;
+                        const { dialog, disabled } = context;
 
                         // if no onclick supplied we set up our own onclick handler that links up the button with the sources dialog
                         if (!onclick) {
                             command = command || 'show-modal';
                             commandfor = commandfor || dialog;
-
                             onclick = function (e: Event) {
                                 dialog.ontransitionend = function (e: TransitionEvent) {
                                     if (supportsDisplayTransition()) {
@@ -83,6 +82,7 @@ export function createFilePondSourceList() {
                                 label,
                                 title,
                             }),
+                            disabled,
                             part: 'source-button',
                             command,
                             commandfor,

@@ -72,6 +72,9 @@ export interface ExtensionInstance {
     /** Sets new props */
     setProps: (newProps: { [key: string]: any }) => void;
 
+    /** Returns the property keys available on this extension */
+    getPropertyKeys: () => string[];
+
     /** Cleans up the extension */
     destroy: () => void;
 }
@@ -153,7 +156,16 @@ export function createExtension(options: CreateExtensionOptions): Extension {
         }
 
         /** So we can compare new props with old props */
-        let currentProps = { ...props };
+        let currentProps = Object.entries(props).reduce((props: any, [key, value]) => {
+            if (value === undefined) {
+                return props;
+            }
+            props[key] = value;
+            return props;
+        }, {});
+
+        /** So extension manager can know which props are available when propagating props */
+        const propertyKeys = Object.keys(props);
 
         /** So extension can detect prop updates */
         let didSetPropsCallbacks: ((props: any) => void)[] = [];
@@ -213,9 +225,14 @@ export function createExtension(options: CreateExtensionOptions): Extension {
             return { ...currentProps };
         }
 
+        function getPropertyKeys() {
+            return propertyKeys;
+        }
+
         return copyDescriptors(instance, {
             setProps,
             getProps,
+            getPropertyKeys,
             get name() {
                 return name;
             },

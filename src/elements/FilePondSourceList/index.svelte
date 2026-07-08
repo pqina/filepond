@@ -1,10 +1,6 @@
 <script lang="ts">
     import { Spring } from 'svelte/motion';
-    import {
-        computeAnimationPreference,
-        getGlobalPreventAnimations,
-        getShouldReduceMotion,
-    } from '../common/animationPreference.svelte.js';
+    import { createAnimationModeObserver } from '../common/animationPreference.svelte.js';
     import { NodeList } from '../components/NodeList/index.js';
     import type { FilePondSourceListOptions } from './index.js';
     import { withResources } from '../common/string.js';
@@ -15,11 +11,13 @@
     import { rectContainsPoint, rectFromBounds, type Rect } from '../../utils/rect.js';
     import { vectorCreate } from '../../utils/vector.js';
     import { supportsDisplayTransition } from '../../utils/support.js';
-    import { noop } from '../../utils/placeholder.js';
+    import { noop, passthrough } from '../../utils/placeholder.js';
     import { SpringElement } from '../components/SpringElement/index.js';
     import { addListener, dispatchCustomEvent } from '../../utils/dom.js';
+    import { onDestroy } from 'svelte';
 
     let {
+        disabled = false,
         animations = 'auto',
         springDefaults,
         sources = [],
@@ -31,18 +29,15 @@
             icon: 'assets',
         },
         template,
+        beforeRenderNode = passthrough,
     }: FilePondSourceListOptions = $props();
 
     // update animation preference when changes
-    const globalPreventState = getGlobalPreventAnimations();
-    const reduceMotionState = getShouldReduceMotion();
-    const enableAnimations = $derived(
-        computeAnimationPreference(
-            animations,
-            globalPreventState.current,
-            reduceMotionState.current
-        )
-    );
+    const AnimationModeObserver = createAnimationModeObserver();
+    const enableAnimations = $derived(AnimationModeObserver.current);
+    $effect(() => {
+        AnimationModeObserver.setPreference(animations);
+    });
 
     // root element
     let rootRef = $state.raw<HTMLDivElement>();
@@ -229,6 +224,7 @@
 
     /** Source buttons */
     const sourceListContext = $derived({
+        disabled,
         dialog: dialogRef,
         resources: {
             locale,
@@ -238,11 +234,16 @@
         enableAnimations,
         springDefaults,
     });
+
+    onDestroy(() => {
+        AnimationModeObserver.destroy();
+    });
 </script>
 
 <div class="root" bind:this={rootRef}>
     {#if sources.length}
         <dialog
+            part="dialog"
             bind:this={dialogRef}
             closedby="closerequest"
             ontransitionend={supportsDisplayTransition() ? handleDialogTransitionEnd : noop}
@@ -253,15 +254,15 @@
                 onmeasure: handleMeasure,
             })}
         >
-            <form class="dialog-form" method="dialog">
+            <form method="dialog" part="dialog-form">
                 {#if dialogVisible}
-                    <div class="dialog-header">
+                    <div part="dialog-header">
                         <SpringElement
                             class="dialog-title-spring"
                             {enableAnimations}
                             {springDefaults}
                         >
-                            <p class="dialog-title">{title}</p>
+                            <p part="dialog-title">{title}</p>
                         </SpringElement>
                         <SpringElement
                             class="dialog-button-close-spring"
@@ -270,7 +271,7 @@
                         >
                             <Button
                                 {...closeButton}
-                                class="dialog-button-close"
+                                part="dialog-button-close"
                                 command="close"
                                 commandfor={dialogRef}
                             />
@@ -279,7 +280,7 @@
                 {/if}
 
                 <div
-                    class="dialog-content"
+                    part="dialog-content"
                     bind:this={dialogContentRef}
                     {@attach measurable({
                         onmeasure: handleMeasureContent,
@@ -287,7 +288,7 @@
                 ></div>
 
                 {#if dialogVisible}
-                    <div class="dialog-footer">
+                    <div part="dialog-footer">
                         <SpringElement
                             class="dialog-button-cancel-spring"
                             {enableAnimations}
@@ -295,7 +296,7 @@
                         >
                             <Button
                                 {...cancelButton}
-                                class="dialog-button-cancel"
+                                part="dialog-button-cancel"
                                 commandfor={dialogRef}
                                 command="close"
                             />
@@ -305,7 +306,7 @@
                             {enableAnimations}
                             {springDefaults}
                         >
-                            <Button {...importButton} class="dialog-button-import" type="submit" />
+                            <Button {...importButton} part="dialog-button-import" type="submit" />
                         </SpringElement>
                     </div>
                 {/if}
@@ -331,6 +332,12 @@
             {/if}
         </dialog>
 
-        <NodeList nodes={template} context={{ items: sources }} sharedContext={sourceListContext} />
+        <NodeList
+            beforeRenderNode={(node, context, sharedContext) =>
+                beforeRenderNode(node, context, sharedContext)}
+            nodes={template}
+            context={{ items: sources }}
+            sharedContext={sourceListContext}
+        />
     {/if}
 </div>

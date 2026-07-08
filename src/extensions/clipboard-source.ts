@@ -4,6 +4,9 @@ import { createExtension } from './common/createExtension.js';
 export interface ClipboardSourceOptions {
     /** Receives ClipboardEvent can then determine if it should be handled. Defaults to `() => true` */
     shouldHandlePaste: (e: ClipboardEvent) => boolean;
+
+    /** Set to true to temporarily prevent adding of files */
+    preventAddEntries?: boolean;
 }
 
 export const ClipboardSource = createExtension({
@@ -11,13 +14,19 @@ export const ClipboardSource = createExtension({
     type: 'source',
     props: {
         shouldHandlePaste: () => true,
+        preventAddEntries: undefined,
     } as ClipboardSourceOptions,
     factory: ({ props, didSetProps }, { insertEntries, setExtensionState }) => {
         let removePasteListener: () => void;
 
         /** Converts pasted entries into FilePondEntries and adds them to the list */
         function handlePaste(e: ClipboardEvent) {
-            const { shouldHandlePaste } = props;
+            const { shouldHandlePaste, preventAddEntries } = props;
+
+            // currently not allowed to add entries
+            if (preventAddEntries) {
+                return;
+            }
 
             // allow filtering out this paste event
             if (!e.clipboardData || !shouldHandlePaste(e)) {
@@ -58,9 +67,7 @@ export const ClipboardSource = createExtension({
 
         return {
             destroy: () => {
-                if (removePasteListener) {
-                    removePasteListener();
-                }
+                removePasteListener?.();
             },
         };
     },

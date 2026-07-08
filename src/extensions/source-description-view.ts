@@ -17,6 +17,9 @@ export const SourceDescriptionView = createExtension({
 
         // allowed keys, we can extend this list if we want to build more complex labels, this filters out for example the "paste" action
         allowedSourceActions: ['browse', 'drop', 'select'],
+
+        // prevent adding entries
+        preventAddEntries: undefined,
     },
     factory: ({ props, didSetProps }, { on }) => {
         let currentElement: HTMLElement;
@@ -40,7 +43,7 @@ export const SourceDescriptionView = createExtension({
         }
 
         function syncDescription() {
-            const { locale, maxFiles, allowedSourceActions } = props;
+            const { locale, maxFiles, allowedSourceActions, preventAddEntries } = props;
 
             if (!currentElement || !currentSources.length) {
                 return;
@@ -65,7 +68,10 @@ export const SourceDescriptionView = createExtension({
 
             // set visual label
             currentElement.innerHTML = label
-                .replaceAll('[', '<button type="button" data-browse>')
+                .replaceAll(
+                    '[',
+                    `<button type="button" data-browse${preventAddEntries ? ' disabled' : ''}>`
+                )
                 .replaceAll(']', '</button>');
         }
 

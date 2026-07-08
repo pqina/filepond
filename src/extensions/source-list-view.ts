@@ -1,21 +1,34 @@
 import type { ExtensionState, FilePondEntry } from '../types/index.js';
 import { createExtension } from './common/createExtension.js';
 import { addListener } from '../utils/dom.js';
-import type {
-    FilePondSourceListOptions,
-    FilePondSourceListSource,
+import {
+    COMPONENT_PROPS,
+    type FilePondSourceListOptions,
+    type FilePondSourceListSource,
 } from '../elements/FilePondSourceList/index.js';
 
 // the `sources` prop cannot be set directly, it's derived from the loaded extensions
-export interface SourceListViewOptions extends Omit<FilePondSourceListOptions, 'sources'> {}
+export interface SourceListViewOptions extends Omit<FilePondSourceListOptions, 'sources'> {
+    /** Set to true to temporarily prevent adding of files, this will retain the source state on the extension */
+    preventAddEntries?: boolean;
+}
 
 // This is a proxy extension, it facilitates communication between the FilePondSourceList element and the extensions added to FilePond core. It reads the current source extensions, and adds them to the `sources` property which it updates on the target element.
 export const SourceListView = createExtension({
     name: 'SourceListView',
     type: 'view',
     props: {
+        // set default props, we need to do this because extension manager uses it to determine if it can propagate props to this extension
+        ...COMPONENT_PROPS.reduce((defaults: { [key: string]: any }, key) => {
+            defaults[key] = undefined;
+            return defaults;
+        }, {}),
+
         // what element the extension will set the dynamic source list to
         element: undefined,
+
+        // we don't prevent entries by default
+        preventAddEntries: undefined,
 
         // filters the sources, this is used to hide the browse button when no other sources are present
         filterSources: (sources: { type: string }[]) => {
@@ -31,7 +44,11 @@ export const SourceListView = createExtension({
         let unsubConnectListener: any;
 
         didSetProps(
-            ({ element, ...viewProps }: SourceListViewOptions & { element: HTMLElement }) => {
+            ({
+                element,
+                preventAddEntries,
+                ...viewProps
+            }: SourceListViewOptions & { element: HTMLElement }) => {
                 // can't run without an element reference
                 if (!element) {
                     return;
@@ -43,6 +60,7 @@ export const SourceListView = createExtension({
                 // update props on the element
                 Object.assign(currentElement, {
                     ...viewProps,
+                    disabled: preventAddEntries,
                 });
 
                 // reconnect element/app for first time
@@ -57,8 +75,10 @@ export const SourceListView = createExtension({
         );
 
         function connect() {
+            const { filterSources } = props;
+
             // set sources
-            currentElement.sources = currentSources || [];
+            currentElement.sources = filterSources(currentSources || []);
         }
 
         function handleUpdateExtensionStates(detail: { [key: string]: any }) {

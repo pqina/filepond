@@ -71,6 +71,9 @@
         children,
     }: SpringElementOptions = $props();
 
+    /** Destroyed state */
+    let isDestroyed = false;
+
     /** Spring configuration */
     const springedPosition = new Spring(undefined) as Spring<Vector | undefined>;
     // svelte-ignore state_referenced_locally
@@ -659,7 +662,6 @@
     });
 
     //#endregion
-    let isDestroyed = false;
     onDestroy(() => {
         isDestroyed = true;
         removeSpringElement(springElementContext);

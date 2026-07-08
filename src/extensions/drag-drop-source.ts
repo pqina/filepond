@@ -13,51 +13,48 @@ export const DragDropSource = createExtension({
     props: {
         shouldHandleDrop: () => true,
     } as DragDropSourceOptions,
-    factory: ({ didSetProps }, { insertEntries }) => {
+    factory: ({ didSetProps, props }, { insertEntries }) => {
         let removeDropListener: () => void;
-
         let removeDragOverListener: () => void;
 
-        didSetProps(({ shouldHandleDrop }) => {
-            /** This just needs to be prevent default to be able to handle drop */
-            const handleDragOver = (e: DragEvent) => e.preventDefault();
+        /** This just needs to be prevent default to be able to handle drop */
+        function handleDragOver(e: DragEvent) {
+            e.preventDefault();
+        }
 
-            /** Gets the file tree info from the data transfer entries */
-            const handleDrop = async (e: DragEvent) => {
-                // exit if no data transfer
-                if (!e.dataTransfer || !e.target) {
-                    return;
-                }
+        /** Gets the file tree info from the data transfer entries */
+        async function handleDrop(e: DragEvent) {
+            const { shouldHandleDrop } = props;
 
-                // always ignore when hovering over file input elements
-                const targetElement = e.target as HTMLInputElement;
-                if (targetElement.type === 'file') {
-                    return;
-                }
+            // exit if no data transfer
+            if (!e.dataTransfer || !e.target) {
+                return;
+            }
 
-                // allow preventing drop
-                if (!shouldHandleDrop(e)) {
-                    return;
-                }
+            // always ignore when hovering over file input elements
+            const targetElement = e.target as HTMLInputElement;
+            if (targetElement.type === 'file') {
+                return;
+            }
 
-                // prevent handling of drop by browser
-                e.preventDefault();
+            // allow preventing drop
+            if (!shouldHandleDrop(e)) {
+                return;
+            }
 
-                // done loading!
-                insertEntries({
-                    src: e.dataTransfer,
-                    origin: 'drop',
-                } as FilePondEntry);
-            };
+            // prevent handling of drop by browser
+            e.preventDefault();
 
+            // done loading!
+            insertEntries({
+                src: e.dataTransfer,
+                origin: 'drop',
+            } as FilePondEntry);
+        }
+        didSetProps(() => {
             // clean up existing listeners
-            if (removeDropListener) {
-                removeDropListener();
-            }
-
-            if (removeDragOverListener) {
-                removeDragOverListener();
-            }
+            removeDropListener?.();
+            removeDragOverListener?.();
 
             // start listening for drag/drop events on page
             removeDropListener = addListener(document.documentElement, 'drop', handleDrop);
@@ -70,8 +67,8 @@ export const DragDropSource = createExtension({
 
         return {
             destroy: () => {
-                removeDropListener && removeDropListener();
-                removeDragOverListener && removeDragOverListener();
+                removeDropListener?.();
+                removeDragOverListener?.();
             },
         };
     },

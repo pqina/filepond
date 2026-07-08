@@ -19,6 +19,7 @@ interface DropAreaOptions {
     onitemdragin?: (obj: DropEventDetail) => void;
     onitemdragout?: (obj: DropEventDetail) => void;
     onitemdrop?: (obj: DropEventDetail) => void;
+    onitemdropcancel?: () => void;
 }
 
 /** Target element can handle dropping of items */
@@ -162,13 +163,21 @@ export function dropArea(options: DropAreaOptions = {}): (element: HTMLElement) 
         );
 
         const handleDrop = (e: DragEvent) => {
+            // was drop handled by another layer
+            const defaultPrevented = e.defaultPrevented;
+
+            // we're handling it now
             e.preventDefault();
 
             // make sure drag state is updated
             update(e);
 
-            // let others know
-            dispatchEvent('itemdrop', e.dataTransfer);
+            // cancelled by another event handler
+            if (defaultPrevented) {
+                dispatchEvent('itemdropcancel');
+            } else {
+                dispatchEvent('itemdrop', e.dataTransfer);
+            }
 
             // make sure everything is ready for next drag operation
             reset();

@@ -14,6 +14,9 @@ export interface FileInputSourceOptions {
 
     /** Where to add new files, defaults to index `0` */
     insertIndex?: number;
+
+    /** Set to true to temporarily prevent adding of files, this will retain the source state on the extension */
+    preventAddEntries?: boolean;
 }
 
 export const FileInputSource = createExtension({
@@ -23,6 +26,7 @@ export const FileInputSource = createExtension({
         element: undefined,
         resetFilesOnAdd: false,
         insertIndex: 0,
+        preventAddEntries: undefined,
 
         // source label and icon to use
         sourceIcon: 'device',
@@ -85,7 +89,7 @@ export const FileInputSource = createExtension({
             });
         }
 
-        didSetProps(({ element: elementOrQuerySelector }) => {
+        didSetProps(({ element: elementOrQuerySelector, preventAddEntries }) => {
             // exit
             if (!elementOrQuerySelector) {
                 return;
@@ -116,6 +120,9 @@ export const FileInputSource = createExtension({
                 // update element
                 currentElement = element;
             }
+
+            // toggle disabled state
+            currentElement.disabled = preventAddEntries;
 
             // start listening for events
             removeChangeListener = currentElement

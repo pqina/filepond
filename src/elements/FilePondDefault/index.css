@@ -88,7 +88,16 @@ file-pond-source-description {
         cursor: pointer;
         text-decoration: underline;
         text-decoration-color: color-mix(in srgb, currentColor 25%, transparent);
+
+        &:disabled {
+            cursor: default;
+            text-decoration: none;
+        }
     }
+}
+
+file-pond-drop-indicator[indicating] ~ file-pond-entry-list[empty] {
+    margin-top: 0;
 }
 
 file-pond-entry-list {
@@ -271,12 +280,83 @@ file-pond-entry-list {
         pointer-events: none;
         color: light-dark(rgb(84, 84, 84), rgb(170, 170, 170));
     }
-
-    /* & button[part='browse-button'] {
-        pointer-events: none;
-        color: light-dark(rgb(84, 84, 84), rgb(170, 170, 170));
-    } */
 }
+
+/* Attribution link */
+:host a[part='attribution-link'] {
+    --font-size: 0.625;
+    --text-opacity: 0.5;
+    --line-opacity: 0.2;
+    color: rgb(from var(--default-color) r g b / var(--text-opacity));
+    font-size: calc(var(--font-size) * 1em);
+    text-underline-offset: 1px;
+    text-decoration-color: rgb(from var(--default-color) r g b / var(--line-opacity));
+    text-transform: lowercase;
+    transition: color var(--_150ms) ease-in-out;
+    user-select: none;
+    &:hover {
+        --text-opacity: 0.75;
+        --line-opacity: 0.25;
+    }
+}
+
+:host a[part='attribution-link'] {
+    --inset: calc(var(--default-padding) / var(--font-size));
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: 0;
+    line-height: 2;
+    transform: translate(calc(var(--width, 0) * 1px), calc(var(--height, 0) * 1px))
+        translateX(calc(-100% - var(--inset)));
+
+    &:dir(rtl) {
+        left: 0;
+        transform: translate(var(--inset), calc(var(--height, 0) * 1px));
+    }
+}
+
+/* this centers the input description in the frame */
+file-pond-source-description {
+    --width-px: calc(var(--width) * 1px);
+    --center-px: calc((var(--width-px) - (2 * var(--default-padding))) * 0.5);
+    display: inline-block;
+    transform: translateX(calc(var(--center-px) - 50%));
+    align-self: flex-start;
+    text-align: center;
+    padding-top: var(--default-padding);
+    padding-bottom: var(--default-padding);
+    transition: opacity calc(150ms * var(--animate)) ease-in-out;
+
+    & button[data-browse]:focus-visible {
+        border-radius: calc(var(--default-border-radius) * 0.25);
+        outline: var(--outline);
+        outline-offset: calc(0.25 * var(--default-padding));
+    }
+}
+
+file-pond-source-list {
+    display: block;
+    margin: -0.75em 0 0.25em;
+
+    &::part(source-button):focus-visible {
+        border-radius: var(--entry-border-radius);
+        outline: var(--outline);
+    }
+}
+
+/* Safari fix: so fading out dialog still shows on top of list items */
+file-pond-source-list {
+    z-index: 1;
+    &[empty] {
+        display: none;
+    }
+}
+
+:host([dragging]) file-pond-entry-list {
+    z-index: 2;
+}
+/* End Safari fix */
 
 /* Entry layout where media underlays controls
 file-pond-entry-list {
@@ -318,143 +398,3 @@ file-pond-entry-list {
     }
 }
 */
-
-/* Attribution link */
-:host a[part='attribution-link'] {
-    --font-size: 0.625;
-    --text-opacity: 0.5;
-    --line-opacity: 0.2;
-    color: rgb(from var(--default-color) r g b / var(--text-opacity));
-    font-size: calc(var(--font-size) * 1em);
-    text-underline-offset: 1px;
-    text-decoration-color: rgb(from var(--default-color) r g b / var(--line-opacity));
-    text-transform: lowercase;
-    transition: color var(--_150ms) ease-in-out;
-    user-select: none;
-    &:hover {
-        --text-opacity: 0.75;
-        --line-opacity: 0.25;
-    }
-}
-
-:host a[part='attribution-link'] {
-    --inset: calc(var(--default-padding) / var(--font-size));
-    position: absolute;
-    z-index: -1;
-    top: 0;
-    left: 0;
-    line-height: 2;
-    transform: translate(calc(var(--width, 0) * 1px), calc(var(--height, 0) * 1px))
-        translateX(calc(-100% - var(--inset)));
-
-    &:dir(rtl) {
-        left: 0;
-        transform: translate(var(--inset), calc(var(--height, 0) * 1px));
-    }
-}
-
-/*:host(:not([noframe])) button[part='browse-button'] {
-    position: absolute;
-    background: transparent;
-    width: 1px;
-    height: 1px;
-    border: 0;
-    opacity: 0.001;
-}*/
-
-/*
-:host(:not([nodrop])) button[part='browse-button'] {
-    --width-px: calc(var(--width) * 1px);
-    --center-px: calc((var(--width-px) - (2 * var(--default-padding))) * 0.5);
-    display: inline-block;
-    transform: translateX(calc(var(--center-px) - 50%));
-    align-self: flex-start;
-    text-align: center;
-    padding: var(--default-padding);
-    transition: opacity calc(150ms * var(--animate)) ease-in-out;
-    background: transparent;
-    border: none;
-    font-size: 0.875em;
-
-    & u {
-        cursor: pointer;
-        text-decoration-color: color-mix(in srgb, currentColor 25%, transparent);
-    }
-
-    &:focus-visible {
-        border-radius: calc(var(--default-border-radius) - var(--default-padding) * 0.75);
-        outline: var(--outline);
-        outline-offset: calc(-0.875 * var(--default-padding));
-    }
-}
-*/
-
-/* Show focus on drop description */
-
-/*file-pond-source-list {
-    & ul {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: center;
-        gap: var(--default-padding);
-        margin-top: -0.5em;
-        padding-bottom: 1em;
-    }
-
-    & button {
-        border-radius: calc(var(--default-border-radius) * 0.5);
-        padding: calc(var(--default-padding) * 0.5) calc(var(--default-padding) * 0.75);
-        border: var(--default-border);
-        cursor: pointer;
-        background-color: var(--default-background-color);
-        font-size: 0.75em;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.375em;
-        line-height: 1;
-
-    }
-}
-*/
-
-file-pond-source-list {
-    display: block;
-    margin: -0.75em 0 0.25em;
-
-    &::part(source-button):focus-visible {
-        border-radius: var(--entry-border-radius);
-        outline: var(--outline);
-    }
-}
-
-/* this centers the input description in the frame */
-file-pond-source-description {
-    --width-px: calc(var(--width) * 1px);
-    --center-px: calc((var(--width-px) - (2 * var(--default-padding))) * 0.5);
-    display: inline-block;
-    transform: translateX(calc(var(--center-px) - 50%));
-    align-self: flex-start;
-    text-align: center;
-    padding-top: var(--default-padding);
-    padding-bottom: var(--default-padding);
-    transition: opacity calc(150ms * var(--animate)) ease-in-out;
-
-    & button[data-browse]:focus-visible {
-        border-radius: calc(var(--default-border-radius) * 0.25);
-        outline: var(--outline);
-        outline-offset: calc(0.25 * var(--default-padding));
-    }
-}
-
-/* Safari fix: so fading out dialog still shows on top of list items */
-file-pond-source-list {
-    z-index: 1;
-    &[empty] {
-        display: none;
-    }
-}
-
-:host([dragging]) file-pond-entry-list {
-    z-index: 2;
-}
-/* End Safari fix */

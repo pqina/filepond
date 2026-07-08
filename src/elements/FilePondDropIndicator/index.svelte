@@ -10,17 +10,18 @@
     import { type Rect } from '../../utils/rect.js';
     import { dropArea, type DropEventDetail } from '../attachments/drop-area.js';
     import { measurable } from '../attachments/measurable.js';
-    import {
-        computeAnimationPreference,
-        getGlobalPreventAnimations,
-        getShouldReduceMotion,
-    } from '../common/animationPreference.svelte.js';
+    import { createAnimationModeObserver } from '../common/animationPreference.svelte.js';
     import { sizeFromRect } from '../../utils/size.js';
     import { ElementPane } from '../components/ElementPane/index.js';
     import type { FilePondSvelteComponentOptions } from '../FilePondSvelteComponent/index.svelte.js';
     import type { Bounds } from '../../utils/bounds.js';
+    import { onDestroy } from 'svelte';
+    import { dispatchCustomEvent } from '../../utils/dom.js';
 
     let { animations = 'auto', springDefaults }: FilePondSvelteComponentOptions = $props();
+
+    // reference to files drop area element
+    let root: HTMLElement = $state() as HTMLElement;
 
     export function setIndicatorRect(rect: Rect | null) {
         // no rect so let's stop showing the placeholder indicator
@@ -44,15 +45,11 @@
     const IndicatorElasticity = 4;
 
     // update animation preference when changes
-    const globalPreventState = getGlobalPreventAnimations();
-    const reduceMotionState = getShouldReduceMotion();
-    const enableAnimations = $derived(
-        computeAnimationPreference(
-            animations,
-            globalPreventState.current,
-            reduceMotionState.current
-        )
-    );
+    const AnimationModeObserver = createAnimationModeObserver();
+    const enableAnimations = $derived(AnimationModeObserver.current);
+    $effect(() => {
+        AnimationModeObserver.setPreference(animations);
+    });
 
     //
     // geom
@@ -154,6 +151,18 @@
         !!indicatorPositionSpring.current && indicatorOpacitySpring.current > 0
     );
 
+    const isIndicatorVisible = $derived(
+        !!indicatorPositionSpring.current && indicatorOpacitySpring.current > 0.5
+    );
+
+    $effect(() => {
+        if (isIndicatorVisible) {
+            dispatchCustomEvent(root, 'indicatorenter');
+        } else {
+            dispatchCustomEvent(root, 'indicatorleave');
+        }
+    });
+
     function handleMeasure(bounds: Bounds) {
         rootRect = rectFromBounds(bounds);
     }
@@ -179,15 +188,21 @@
             : 0
     );
     const styleTransform = $derived(`translate(${translationX}px,${translationY}px)`);
+
+    onDestroy(() => {
+        AnimationModeObserver.destroy();
+    });
 </script>
 
 <div
     class="root"
+    bind:this={root}
     {@attach measurable({
         onmeasure: handleMeasure,
     })}
     {@attach dropArea({
         onitemdrag: handleDragItem,
+        // we're not interested in the other events
     })}
 >
     {#if shouldRenderIndicator}

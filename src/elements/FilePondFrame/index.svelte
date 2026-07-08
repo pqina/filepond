@@ -1,15 +1,12 @@
 <script lang="ts">
     import { Spring } from 'svelte/motion';
     import { measurable } from '../attachments/measurable.js';
-    import {
-        computeAnimationPreference,
-        getGlobalPreventAnimations,
-        getShouldReduceMotion,
-    } from '../common/animationPreference.svelte.js';
+    import { createAnimationModeObserver } from '../common/animationPreference.svelte.js';
     import { rectFromBounds, type Rect } from '../../utils/rect.js';
     import { ElementPane } from '../components/ElementPane/index.js';
     import type { FilePondSvelteComponentOptions } from '../FilePondSvelteComponent/index.svelte.js';
     import type { Bounds } from '../../utils/bounds.js';
+    import { onDestroy } from 'svelte';
 
     let { animations = 'auto', springDefaults }: FilePondSvelteComponentOptions = $props();
 
@@ -30,15 +27,11 @@
     let rootRect = $state.raw() as Rect;
 
     // update animation preference when changes
-    const globalPreventState = getGlobalPreventAnimations();
-    const reduceMotionState = getShouldReduceMotion();
-    const enableAnimations = $derived(
-        computeAnimationPreference(
-            animations,
-            globalPreventState.current,
-            reduceMotionState.current
-        )
-    );
+    const AnimationModeObserver = createAnimationModeObserver();
+    const enableAnimations = $derived(AnimationModeObserver.current);
+    $effect(() => {
+        AnimationModeObserver.setPreference(animations);
+    });
 
     // update spring
     const rootRectSpring = new Spring<Rect | undefined>(undefined, {
@@ -65,6 +58,10 @@
 
     $effect(() => {
         callbacks.updateRect(rootRectSpring.current);
+    });
+
+    onDestroy(() => {
+        AnimationModeObserver.destroy();
     });
 </script>
 

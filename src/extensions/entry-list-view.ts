@@ -2,16 +2,29 @@ import type { FilePondEntry } from '../types/index.js';
 import type { FilePondEntryListOptions } from '../elements/FilePondEntryList/types.js';
 import { createExtension } from './common/createExtension.js';
 import { addListener } from '../utils/dom.js';
+import { COMPONENT_PROPS } from '../elements/FilePondEntryList/index.js';
 
-export interface EntryListViewOptions extends FilePondEntryListOptions {}
+export interface EntryListViewOptions extends FilePondEntryListOptions {
+    /** Set to true to temporarily prevent dropping of files, this will retain the source state on the extension */
+    preventAddEntries?: boolean;
+}
 
 // This is a proxy extension, it facilitates communication between the FilePondEntryList element and the FilePond core
 export const EntryListView = createExtension({
     name: 'EntryListView',
     type: 'view',
     props: {
+        // set default props, we need to do this because extension manager uses it to determine if it can propagate props to this extension
+        ...COMPONENT_PROPS.reduce((defaults: { [key: string]: any }, key) => {
+            defaults[key] = undefined;
+            return defaults;
+        }, {}),
+
         // element reference
         element: undefined,
+
+        // this toggles drop on the element
+        preventAddEntries: undefined,
     },
     factory: (state, pond) => {
         const { didSetProps } = state;
@@ -34,7 +47,11 @@ export const EntryListView = createExtension({
         let unsubConnectListener: any;
 
         didSetProps(
-            ({ element, ...viewProps }: EntryListViewOptions & { element: HTMLElement }) => {
+            ({
+                element,
+                preventAddEntries,
+                ...viewProps
+            }: EntryListViewOptions & { element: HTMLElement }) => {
                 // can't run without an element reference
                 if (!element) {
                     return;
@@ -44,8 +61,10 @@ export const EntryListView = createExtension({
                 currentElement = element;
 
                 // update props on the element
+                const { drop } = viewProps;
                 Object.assign(currentElement, {
                     ...viewProps,
+                    drop: drop && !preventAddEntries,
                 });
 
                 // reconnect element/app for first time
@@ -58,7 +77,6 @@ export const EntryListView = createExtension({
                 });
 
                 // toggle drop capability if available
-                const { drop = true } = viewProps;
                 setExtensionState({
                     source: drop
                         ? {
@@ -103,21 +121,10 @@ export const EntryListView = createExtension({
 
         return {
             destroy() {
-                if (unsubConnectListener) {
-                    unsubConnectListener();
-                }
-
-                if (unsubUpdateEntries) {
-                    unsubUpdateEntries();
-                }
-
-                if (unsubAddEntry) {
-                    unsubAddEntry();
-                }
-
-                if (unsubRemoveEntry) {
-                    unsubRemoveEntry();
-                }
+                unsubConnectListener?.();
+                unsubUpdateEntries?.();
+                unsubAddEntry?.();
+                unsubRemoveEntry?.();
             },
         };
     },

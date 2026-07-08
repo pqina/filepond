@@ -6,17 +6,14 @@ import { addListener } from '../../utils/dom.js';
 let globalPreventAnimations: { current: boolean | null } = $state({ current: null });
 
 // we track if user is dragging something, if so we still animate while scrolling
+const pointerUnsubs: (() => void)[] = [];
 const activePointers = new Set();
-if (isBrowser()) {
-    function addPointer(e: PointerEvent) {
-        activePointers.add(e.pointerId);
-    }
-    function deletePointer(e: PointerEvent) {
-        activePointers.delete(e.pointerId);
-    }
-    addListener(window, 'pointerdown', addPointer);
-    addListener(window, 'pointerup', deletePointer);
-    addListener(window, 'pointercancel', deletePointer);
+function addPointer(e: PointerEvent) {
+    activePointers.add(e.pointerId);
+}
+
+function deletePointer(e: PointerEvent) {
+    activePointers.delete(e.pointerId);
 }
 
 // this global animation guard halts animations when the window is interacted with
@@ -45,45 +42,89 @@ function handleWindowInteraction() {
 //     }
 // }
 
-// global listeners
+// window resizing
+let unsubResize: () => void;
+
+// media queries
+let reducedMotionMediaQuery: MediaQueryList | null = null;
 let shouldReduceMotion = $state({ current: false });
-if (isBrowser()) {
-    // window.addEventListener('scroll', handleScrollInteraction);
-    window.addEventListener('resize', handleWindowInteraction);
+function handleReduceMotionMediaQueryChange() {
+    if (!reducedMotionMediaQuery) {
+        return;
+    }
+    shouldReduceMotion.current = reducedMotionMediaQuery.matches;
+}
+
+// start listening
+function start() {
+    if (!isBrowser()) {
+        return;
+    }
+
+    // tracking pointers
+    pointerUnsubs.push(
+        addListener(window, 'pointerdown', addPointer),
+        addListener(window, 'pointerup', deletePointer),
+        addListener(window, 'pointercancel', deletePointer)
+    );
 
     // listen for reduce motion changes
-    const reducedMotionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    shouldReduceMotion.current = reducedMotionMediaQuery.matches;
-    reducedMotionMediaQuery.addEventListener('change', () => {
-        shouldReduceMotion.current = reducedMotionMediaQuery.matches;
+    reducedMotionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    reducedMotionMediaQuery.addEventListener('change', handleReduceMotionMediaQueryChange);
+    handleReduceMotionMediaQueryChange();
+
+    // window resizing
+    unsubResize = addListener(window, 'resize', handleWindowInteraction);
+}
+
+// stop listening
+function stop() {
+    pointerUnsubs.forEach((unsub) => unsub());
+    pointerUnsubs.length = 0;
+    unsubResize?.();
+    reducedMotionMediaQuery?.removeEventListener('change', handleReduceMotionMediaQueryChange);
+    reducedMotionMediaQuery = null;
+}
+
+// AnimationModeObserver object
+let activeAnimationModeObservers = 0;
+export function createAnimationModeObserver() {
+    if (activeAnimationModeObservers === 0) {
+        start();
+    }
+
+    activeAnimationModeObservers++;
+    let currentPreference = $state({ current: 'auto' });
+
+    const state = $derived.by(() => {
+        const shouldAnimate = !globalPreventAnimations.current;
+        const mayAnimate = !shouldReduceMotion.current;
+
+        // auto
+        if (currentPreference.current === 'auto') {
+            return { current: mayAnimate && shouldAnimate };
+        }
+        // always
+        else if (currentPreference.current === 'always') {
+            return { current: shouldAnimate };
+        }
+
+        // never
+        return { current: false };
     });
-}
 
-export function getGlobalPreventAnimations() {
-    return globalPreventAnimations;
-}
-
-export function getShouldReduceMotion() {
-    return shouldReduceMotion;
-}
-
-export function computeAnimationPreference(
-    preference: 'auto' | 'always' | 'never' = 'auto',
-    preventGlobal: boolean | null,
-    reduceMotion: boolean
-) {
-    const shouldAnimate = !preventGlobal;
-    const mayAnimate = !reduceMotion;
-
-    // auto
-    if (preference === 'auto') {
-        return mayAnimate && shouldAnimate;
-    }
-    // always
-    else if (preference === 'always') {
-        return shouldAnimate;
-    }
-
-    // never
-    return false;
+    return {
+        get current() {
+            return state.current;
+        },
+        setPreference(value: 'auto' | 'always' | 'never' = 'auto') {
+            currentPreference = { current: value };
+        },
+        destroy() {
+            activeAnimationModeObservers--;
+            if (activeAnimationModeObservers === 0) {
+                stop();
+            }
+        },
+    };
 }

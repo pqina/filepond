@@ -1,4 +1,4 @@
-import type { AnimationMode, Locale } from '../../types/index.js';
+import type { AnimationMode, Extension, Locale } from '../../types/index.js';
 import type { FilePondEntrySource, FilePondEntry } from '../../types/index.js';
 import type { ExtensionFactory } from '../../core/extensionManager.js';
 
@@ -160,6 +160,9 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
     /** FilePond extension manager reference */
     #extensionManager: ExtensionManagerInstance;
+
+    /** Holds the current extension set after someone has called .extensions = [...] */
+    #currentExtensions?: ExtensionFactory[];
 
     /** FilePond core instance reference */
     #entryTree: ReturnType<typeof createEntryTree>;
@@ -490,6 +493,8 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
     /** Sets custom extensions to load */
     set extensions(extensions: ExtensionFactory[]) {
+        // we store these so we can restore them on disconnect/connect
+        this.#currentExtensions = extensions;
         this.#extensionManager.extensions = extensions;
     }
 
@@ -773,6 +778,11 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         // sync aria
         this.#syncAriaDescription();
 
+        // restore extensions
+        if (this.#currentExtensions) {
+            this.#extensionManager.extensions = this.#currentExtensions;
+        }
+
         /**
          * When the callback store changes we assign the value to the form internals for the custom element
          */
@@ -830,6 +840,13 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
             // fire update events
             this.#entryTree.on('updateEntries', () => {
+                // prevent adding more entries when max files limit is reached
+                this.#extensionManager.propagateExtensionProperty(
+                    'preventAddEntries',
+                    this.currentEntries.length === this.maxFiles
+                );
+
+                // fire change event
                 dispatchCustomEvent(this, 'entrieschange', { detail: this.currentEntries });
             })
         );
@@ -840,6 +857,9 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
     /** Called each time the element is removed from the document. */
     disconnectedCallback() {
+        // destroy, we'll recreate it later
+        this.#extensionManager.destroy();
+
         // unsub subscriptions created when connecting to the DOM
         this.#connectedSubs.forEach((unsub) => unsub());
         this.#connectedSubs = [];

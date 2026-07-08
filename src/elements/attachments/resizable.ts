@@ -17,10 +17,11 @@ function createSuspensionObserver() {
 
     // when a node is suspended we check if it contains a measured element, if so, we stop measuring
     SuspensionObserver.on('suspend', (suspendedNode) => {
-        for (const element of nodeCallbacks.values()) {
+        for (const element of nodeCallbacks.keys()) {
             if (!suspendedNode.contains(element)) {
                 continue;
             }
+
             nodeSuspended.set(element, true);
         }
     });

@@ -298,7 +298,17 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
             new Set(['dragging', 'virtualized', 'selected', 'checked'])
         );
 
-        const syncSourceListExportParts = createExportPartsSyncer(entryList);
+        const syncSourceListExportParts = createExportPartsSyncer(
+            sourceList,
+            new Set([
+                'dialog',
+                'dialog-header',
+                'dialog-title',
+                'dialog-form',
+                'dialog-content',
+                'dialog-footer',
+            ])
+        );
 
         // template to use, if it's already supplied we don't have to set it again
         const entryListTemplate =
