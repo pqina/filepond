@@ -9,7 +9,7 @@
         taskId: string;
 
         /** Should we still run task if other tasks are in soft failure mode */
-        taskIgnoreSoftFailure: boolean;
+        taskIgnoreSoftFailure?: boolean;
 
         /** Limit size of image, defaults to `1024 * 1024` */
         maximumPixels?: number;

@@ -7,6 +7,8 @@ const RANDOMISH_SEED = 1;
 
 const generateRandomishNumber = createRandomish(RANDOMISH_SEED);
 
+export { sleep };
+
 // types
 export interface GenerateFileOptions {
     name?: string;

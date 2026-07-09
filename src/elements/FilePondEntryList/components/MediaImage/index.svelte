@@ -34,6 +34,7 @@
 
     interface MediaFile {
         file: File | Blob;
+        isError: boolean | Error,
         isComplete: boolean;
         isPoster: boolean;
     }
@@ -60,6 +61,7 @@
                     // update view with new file
                     currentFile = {
                         file,
+                        isError: false,
                         isComplete: false,
                         isPoster: false,
                     };
@@ -75,6 +77,7 @@
                     file: poster,
                     isComplete: false,
                     isPoster: true,
+                    isError: false
                 };
             }
             // if is a URL to an image
@@ -90,8 +93,10 @@
                         if (!isImageFile(blob)) {
                             throw new Error('Poster is not an image');
                         }
+
                         return {
                             file: blob,
+                            isError: false,
                             isComplete: false,
                             isPoster: true,
                         };
@@ -130,7 +135,7 @@
         });
     });
 
-    function onLoadFile(file: File | Blob) {
+    function onFileLoad(file: File | Blob) {
         currentFiles = currentFiles.map((item) => {
             if (item.file === file) {
                 return {
@@ -142,9 +147,27 @@
         });
     }
 
+    function onFileError(file: File | Blob, error: Error) {
+        // store the error
+        currentFiles = currentFiles.map((item) => {
+            if (item.file === file) {
+                return {
+                    ...item,
+                    isError: error,
+                };
+            }
+            return item;
+        });
+
+        // if all files errored out, we stop loading
+        if (currentFiles.every(file => file.isError)) {
+            handleError(error);
+        }
+    }
+
     // this makes sure last file is active
     const computedFiles = $derived(
-        currentFiles.map(({ file, isPoster, isComplete }, index, arr) => ({
+        currentFiles.map(({ file, isPoster, isComplete, isError }, index, arr) => ({
             // use file as draw key
             key: file,
 
@@ -162,6 +185,9 @@
 
             // is this a poster
             poster: isPoster ? '' : undefined,
+
+            // error state
+            error: isError ? isError : undefined
         }))
     );
 
@@ -227,7 +253,7 @@
                                 mediaReady = true;
 
                                 // set image file `complete` state
-                                onLoadFile(file);
+                                onFileLoad(file);
 
                                 // let MediaPane know that we loaded
                                 onLoadMedia(size);
@@ -239,7 +265,10 @@
                                 // media is now visible
                                 onRenderMedia({ instant: didRestore });
                             }}
-                            onerror={handleError}
+                            onerror={(error) => {
+                                // set image file `error` state
+                                onFileError(file, error);
+                            }}
                         />
                     {/snippet}
                 </MediaPane>
