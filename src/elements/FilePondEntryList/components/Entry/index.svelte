@@ -5,6 +5,7 @@
     import { getSpringElementTreeContext } from '../../contexts/springElementTreeContext.js';
     import { toSpaceSeparatedString } from '../../../common/string.js';
     import { updateDataset } from '../../../../utils/dom.js';
+    import { propsToAttributes } from '../../../common/dom.js';
 
     // props
     const {
@@ -13,7 +14,9 @@
         class: klass = undefined,
         legendId = undefined,
         dataset,
+        ...restProps
     } = $props();
+
 
     let root: HTMLFieldSetElement;
 
@@ -25,6 +28,9 @@
     // combined classes
     const currentClass = $derived(klass);
     const entryClass = $derived(toSpaceSeparatedString('entry', currentClass));
+
+    // assign events
+    const attributes = $derived(propsToAttributes(restProps));
 
     // get spring context
     const springContext = getSpringElementTreeContext();
@@ -44,7 +50,7 @@
     const maskStyle = $derived(`0px ${maskRight}px ${maskBottom}px 0px`);
 </script>
 
-<fieldset class={entryClass} bind:this={root} style:--mask={maskStyle} {part}>
+<fieldset class={entryClass} bind:this={root} style:--mask={maskStyle} {part} {...attributes}>
     <legend class="implicit" id={legendId}>{name}</legend>
     {@render children()}
 </fieldset>

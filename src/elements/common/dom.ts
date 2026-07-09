@@ -3,6 +3,7 @@ import type { Bounds } from '../../utils/bounds.js';
 import type { Rect } from '../../utils/rect.js';
 import { boundsOutsideBounds } from '../../utils/bounds.js';
 import { pubsub } from '../../utils/pubsub.js';
+import { isArray, isBoolean, isFunction, isNull, isNullOrUndefined, isObject } from '../../utils/test.js';
 
 /** Search a list of elements around a position within bounds */
 export function getClosestElement(
@@ -82,4 +83,21 @@ export function getSuspensionObserver() {
         suspensionObserver = createSuspensionObserver();
     }
     return suspensionObserver;
+}
+
+/** filters out non valid attributes */
+export function propsToAttributes(props: { [key:string]: any }) {
+    return Object.entries(props).reduce((events: { [key: string]: any }, [key, value]) => {
+        if (isFunction(value) && !key.startsWith('on')) {
+            return events;
+        }
+        if (isObject(value) || isArray(value) || isBoolean(value)) {
+            return events;
+        }
+        if (isNullOrUndefined(value)) {
+            return events;
+        }
+        events[key] = value;
+        return events;
+    }, {})
 }
