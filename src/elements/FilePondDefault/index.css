@@ -52,7 +52,7 @@
 }
 
 /* gray out elements when disabled */
-:host([disabled]) {
+:host(:disabled) {
     filter: grayscale(100%);
 }
 
@@ -271,14 +271,26 @@ file-pond-entry-list {
     }
 }
 
-:host([disabled]) {
+:host(:disabled) {
     & file-pond-entry-list {
         --entry-overlay-color: rgb(from var(--entry-background-color) r g b / 0.5);
     }
 
-    & p[part='drop-description-element'] {
+    & file-pond-source-description {
         pointer-events: none;
         color: light-dark(rgb(84, 84, 84), rgb(170, 170, 170));
+
+        & [data-browse] {
+            pointer-events: none;
+        }
+    }
+
+    & file-pond-source-list {
+        --btn-color: rgb(from var(--default-color) r g b / 0.5);
+
+        & button {
+            pointer-events: none;
+        }
     }
 }
 
@@ -316,12 +328,16 @@ file-pond-entry-list {
     }
 }
 
-/* this centers the input description in the frame */
+/* this horizontally centers the input description and source list in the frame */
+file-pond-source-list,
 file-pond-source-description {
     --width-px: calc(var(--width) * 1px);
     --center-px: calc((var(--width-px) - (2 * var(--default-padding))) * 0.5);
-    display: inline-block;
     transform: translateX(calc(var(--center-px) - 50%));
+}
+
+file-pond-source-description {
+    display: inline-block;
     align-self: flex-start;
     text-align: center;
     padding-top: var(--default-padding);

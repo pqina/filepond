@@ -1080,7 +1080,6 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
         // copy to internal file input element
         this.#fileInput.disabled = isDisabled;
 
-        // this.#browseButton.disabled = isDisabled;
         // toggle all inner browse buttons
         [...this.querySelectorAll(this.#browseButtonSelector)].forEach(
             (node) => ((<HTMLButtonElement>node).disabled = isDisabled)

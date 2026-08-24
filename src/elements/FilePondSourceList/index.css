@@ -39,6 +39,7 @@ ul {
         gap: 0.375em;
         padding: 0.3125em 0.75em;
         font: inherit;
+        font-weight: 500;
     }
 
     & svg {

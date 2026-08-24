@@ -40,12 +40,12 @@ export class CameraInputElement extends FilePondSvelteComponentElement {
         return this.getAttribute('name') ?? undefined;
     }
 
-    /** Gets camera value */
+    /** Gets value */
     get value(): File | undefined {
         return this.#value;
     }
 
-    /** Sets camera value */
+    /** Sets value */
     set value(value: File | undefined) {
         this.#value = value;
     }
@@ -59,6 +59,7 @@ export class CameraInputElement extends FilePondSvelteComponentElement {
     get validationMessage() {
         return this.#internals.validationMessage;
     }
+
     /** Set field as required */
     set required(value: boolean) {
         setBooleanAttribute(this, 'required', value);

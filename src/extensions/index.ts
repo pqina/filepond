@@ -3,22 +3,26 @@ export { createExtension } from './common/createExtension.js';
 export {
     createValidatorExtension,
     type CreateValidatorExtensionOptions,
+    type ValidatorExtensionOptions,
 } from './common/createValidatorExtension.js';
 
 export {
     createStoreExtension,
     type PerceivedPerformanceOptions,
     type CreateStoreExtensionOptions,
+    type StoreExtensionOptions,
 } from './common/createStoreExtension.js';
 
 export {
     createTransformExtension,
     type CreateTransformExtensionOptions,
+    type TransformExtensionOptions,
 } from './common/createTransformExtension.js';
 
 export {
     createSourceExtension,
     type CreateSourceExtensionOptions,
+    type SourceExtensionOptions,
 } from './common/createSourceExtension.js';
 
 // sources

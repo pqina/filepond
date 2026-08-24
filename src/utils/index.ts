@@ -23,4 +23,13 @@ export {
     updateFileType,
 } from './file.js';
 
-export { h, addListener, getAsElement } from './dom.js';
+export {
+    h,
+    addListener,
+    getAsElement,
+    defineCustomElement,
+    setBooleanAttribute,
+    setStringAttribute,
+    getAttribute,
+    createStyleSheet,
+} from './dom.js';

@@ -35,6 +35,6 @@
 }
 
 /* no text selection when disabled */
-:host([disabled]) {
+:host(:disabled) {
     user-select: none;
 }

@@ -55,7 +55,7 @@ button {
     align-items: center;
     justify-content: center;
 
-    &[disabled] {
+    &:disabled {
         display: none;
     }
 }

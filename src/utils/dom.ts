@@ -96,7 +96,7 @@ export function h<K extends keyof ElementTagNameMap>(
     attributes: {
         [key: string]: ((...args: any[]) => void) | string | boolean | number | HTMLElement;
     } = {},
-    children: (HTMLElement | void | false | null | undefined)[] = []
+    children: (HTMLElement | string | void | false | null | undefined)[] = []
 ): ElementTagNameMap[K] {
     const el = document.createElement(name) as ElementTagNameMap[K];
 
