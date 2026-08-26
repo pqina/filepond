@@ -56,8 +56,8 @@ dialog {
     /* center to viewport */
     margin: auto;
     padding: var(--dialog-padding);
-    background: transparent;
     color: var(--dialog-color);
+    background: transparent;
 
     /* so element-pane shadow isn't clipped */
     overflow: visible;
@@ -90,7 +90,6 @@ dialog {
         height: fit-content;
         max-width: min(40em, 80vw);
         max-height: min(30em, 80vh);
-        min-width: 12em;
     }
 
     /* header */
@@ -177,6 +176,32 @@ dialog {
 
         @starting-style {
             opacity: 0;
+        }
+    }
+
+    /* fade in header/footer */
+    & [part='dialog-header'],
+    & [part='dialog-footer'] {
+        transition:
+            transform var(--dialog-timing) ease-out,
+            opacity var(--dialog-timing) ease-out;
+
+        opacity: 0;
+    }
+
+    & [part='dialog-footer'] {
+        transform: translateY(-10%);
+    }
+
+    & [part='dialog-header'] {
+        transform: translateY(10%);
+    }
+
+    &[data-visible] {
+        & [part='dialog-header'],
+        & [part='dialog-footer'] {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
 }

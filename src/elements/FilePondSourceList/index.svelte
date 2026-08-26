@@ -86,9 +86,9 @@
 
         // we do this so the dialog control springs are reset (for example when previously a bigger dialog was opened it would cause the controls to move from those positions towards the new which looks weird)
         // wrap in request animation frame so the animation lines up correctly, otherwise sometimes the elements flicker into view
-        requestAnimationFrame(() => {
-            dialogVisible = true;
-        });
+        // requestAnimationFrame(() => {
+        //     dialogVisible = true;
+        // });
     }
 
     function handleHideDialog(e: Event) {
@@ -132,6 +132,7 @@
 
     let dialogRect = $state<Rect | null>(null);
     let dialogRectSpring = new Spring<Rect | null>(null);
+    let dialogHeaderFooterOpacity = $state(0);
 
     $effect(() => {
         if (!dialogRect) {
@@ -146,10 +147,24 @@
     });
 
     function handleMeasure(bounds: Bounds) {
-        if (!dialogRef?.open) {
+        if (!dialogRef?.open || !dialogContentRef?.children.length) {
             return;
         }
-        dialogRect = rectFromBounds(bounds);
+
+        const margin = 10;
+
+        const rect = rectFromBounds(bounds);
+        dialogRect = {
+            x: rect.x + margin,
+            y: rect.y + margin,
+            width: rect.width - margin * 2,
+            height: rect.height - margin * 2,
+        };
+
+        requestAnimationFrame(() => {
+            dialogRect = rect;
+            dialogVisible = true;
+        });
     }
 
     /** Content clipping */
@@ -185,9 +200,10 @@
     });
 
     function handleMeasureContent(bounds: Bounds) {
-        if (!dialogRef?.open) {
+        if (!dialogRef?.open || !dialogContentRef?.children.length) {
             return;
         }
+
         contentRect = rectFromBounds(bounds);
     }
 
@@ -222,6 +238,8 @@
         };
     });
 
+    const animateDialogSprings = $derived(enableAnimations && dialogVisible);
+
     /** Source buttons */
     const sourceListContext = $derived({
         disabled,
@@ -253,31 +271,30 @@
             {@attach measurable({
                 onmeasure: handleMeasure,
             })}
+            data-visible={dialogVisible ? '' : undefined}
         >
             <form method="dialog" part="dialog-form">
-                {#if dialogVisible}
-                    <div part="dialog-header">
-                        <SpringElement
-                            class="dialog-title-spring"
-                            {enableAnimations}
-                            {springDefaults}
-                        >
-                            <p part="dialog-title">{title}</p>
-                        </SpringElement>
-                        <SpringElement
-                            class="dialog-button-close-spring"
-                            {enableAnimations}
-                            {springDefaults}
-                        >
-                            <Button
-                                {...closeButton}
-                                part="dialog-button-close"
-                                command="close"
-                                commandfor={dialogRef}
-                            />
-                        </SpringElement>
-                    </div>
-                {/if}
+                <div part="dialog-header">
+                    <SpringElement
+                        enableAnimations={animateDialogSprings}
+                        class="dialog-title-spring"
+                        {springDefaults}
+                    >
+                        <p part="dialog-title">{title}</p>
+                    </SpringElement>
+                    <SpringElement
+                        class="dialog-button-close-spring"
+                        enableAnimations={animateDialogSprings}
+                        {springDefaults}
+                    >
+                        <Button
+                            {...closeButton}
+                            part="dialog-button-close"
+                            command="close"
+                            commandfor={dialogRef}
+                        />
+                    </SpringElement>
+                </div>
 
                 <div
                     part="dialog-content"
@@ -287,29 +304,27 @@
                     })}
                 ></div>
 
-                {#if dialogVisible}
-                    <div part="dialog-footer">
-                        <SpringElement
-                            class="dialog-button-cancel-spring"
-                            {enableAnimations}
-                            {springDefaults}
-                        >
-                            <Button
-                                {...cancelButton}
-                                part="dialog-button-cancel"
-                                commandfor={dialogRef}
-                                command="close"
-                            />
-                        </SpringElement>
-                        <SpringElement
-                            class="dialog-button-import-spring"
-                            {enableAnimations}
-                            {springDefaults}
-                        >
-                            <Button {...importButton} part="dialog-button-import" type="submit" />
-                        </SpringElement>
-                    </div>
-                {/if}
+                <div part="dialog-footer">
+                    <SpringElement
+                        class="dialog-button-cancel-spring"
+                        enableAnimations={animateDialogSprings}
+                        {springDefaults}
+                    >
+                        <Button
+                            {...cancelButton}
+                            part="dialog-button-cancel"
+                            commandfor={dialogRef}
+                            command="close"
+                        />
+                    </SpringElement>
+                    <SpringElement
+                        class="dialog-button-import-spring"
+                        enableAnimations={animateDialogSprings}
+                        {springDefaults}
+                    >
+                        <Button {...importButton} part="dialog-button-import" type="submit" />
+                    </SpringElement>
+                </div>
             </form>
 
             {#if dialogRectSpring.current}
