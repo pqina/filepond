@@ -132,7 +132,6 @@
 
     let dialogRect = $state<Rect | null>(null);
     let dialogRectSpring = new Spring<Rect | null>(null);
-    let dialogHeaderFooterOpacity = $state(0);
 
     $effect(() => {
         if (!dialogRect) {

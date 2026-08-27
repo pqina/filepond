@@ -113,12 +113,15 @@
         "rollup": "^4.53.3",
         "rollup-plugin-cleanup": "^3.2.1",
         "rollup-plugin-license": "^3.6.0",
-        "svelte": "^5.55.7",
+        "svelte": "^5.56.10",
         "svelte-check": "^4.4.8",
         "typescript": "^6.0.3",
         "vite": "^7.3.3",
         "vite-plugin-dts": "^4.5.4",
         "vite-plugin-static-copy": "^3.1.2",
         "vitest": "^4.0.18"
+    },
+    "dependencies": {
+        "filepond-extension-unsplash-source": "file:../extension-unsplash"
     }
 }

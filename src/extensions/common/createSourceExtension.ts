@@ -1,6 +1,12 @@
 import type { EntryTreeOn } from '../../core/entryTree.js';
 import type { ExtensionManagerOn } from '../../core/extensionManager.js';
-import type { EntrySource, ExtensionContext, ExtensionOptions } from '../../types/index.js';
+import type {
+    EntrySource,
+    ExtensionContext,
+    ExtensionOptions,
+    FilePondEntrySource,
+} from '../../types/index.js';
+import { arrayRemoveFalsy } from '../../utils/array.js';
 import { addListener, getAsElement, setAttributes } from '../../utils/dom.js';
 import { passthrough } from '../../utils/placeholder.js';
 import { pubsub } from '../../utils/pubsub.js';
@@ -76,7 +82,7 @@ export interface SourceExtensionOptions {
     };
 
     /** Hook into submit */
-    beforeInsertSource?: (options: { src: any }) => EntrySource | false | undefined | null;
+    beforeInsertSource?: (src: EntrySource, props: any) => EntrySource | false | undefined | null;
 }
 
 export interface CreateSourceExtensionOptions<Props extends object = SourceExtensionOptions> {
@@ -153,7 +159,6 @@ export function createSourceExtension<Props extends object = SourceExtensionOpti
             );
 
             // current element state
-            let currentButtonElement: HTMLButtonElement;
             let currentSourceInput: HTMLElement;
             let currentDialog: HTMLDialogElement | HTMLElement | null;
             let unsubSubmitListener: (() => void) | null;
@@ -187,24 +192,38 @@ export function createSourceExtension<Props extends object = SourceExtensionOpti
                 }
 
                 // get form field value
-                const inputSrc = fd.get(inputAttributes.name) as EntrySource;
-                if (!inputSrc) {
+                const values = fd.getAll(inputAttributes.name) as EntrySource[];
+                if (!values.length) {
                     // don't submit the form
                     e.preventDefault();
-                    throw new Error(`No value for input with name "${inputAttributes.name}"`);
+                    throw new Error(
+                        `No values found for input with name "${inputAttributes.name}"`
+                    );
                 }
 
                 // allow dev to manipulate result
-                const src = isFunction(beforeInsertSource)
-                    ? beforeInsertSource({ src: inputSrc })
-                    : inputSrc;
-                if (!src) {
+                const sources = arrayRemoveFalsy(
+                    values.map((value) => {
+                        if (isFunction(beforeInsertSource)) {
+                            let updatedValue = beforeInsertSource(value, props);
+                            if (!updatedValue) {
+                                return;
+                            } else {
+                                return { src: updatedValue };
+                            }
+                        }
+                        return { src: value };
+                    })
+                ) as FilePondEntrySource[];
+
+                // no sources returned
+                if (!sources.length) {
                     e.preventDefault();
                     return;
                 }
 
-                // add the entry at default insert index
-                insertEntries({ src }, insertIndex);
+                // add the entries at default insert index
+                insertEntries(sources, insertIndex);
             }
 
             function handleOpen(dialog: HTMLDialogElement) {

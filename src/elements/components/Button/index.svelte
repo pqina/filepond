@@ -17,7 +17,7 @@
         class?: string;
 
         /** Type to set on the button element */
-        type?: string;
+        type?: 'button' | 'submit' | 'reset';
 
         /** Label to use */
         label?: string;
@@ -52,6 +52,9 @@
         /** command target */
         commandfor?: string | HTMLElement;
 
+        /** tabindex */
+        tabindex?: number | null | undefined;
+
         /** Children to render in the button */
         children?: Snippet;
     }
@@ -71,6 +74,7 @@
         ariaDescribedby = undefined,
         command = undefined,
         commandfor = undefined,
+        tabindex = undefined,
         autofocus = false,
     }: ButtonOptions = $props();
 
@@ -120,6 +124,7 @@
     {disabled}
     {inert}
     {onclick}
+    {tabindex}
     {command}
     commandfor={isString(commandfor) ? commandfor : undefined}
     aria-describedby={ariaDescribedby}

@@ -16,6 +16,7 @@
     --dialog-background-color: Canvas;
     --dialog-border-radius: var(--default-border-radius);
     --dialog-shadow: 0 3px 6px rgb(0 0 0 / 0.25);
+    --dialog-scrollbar-color: rgb(from var(--default-color) r g b / 0.15) transparent;
 
     /* dialog content styles */
     --input-border: 1px solid rgb(from var(--default-color) r g b / 0.5);
@@ -179,22 +180,28 @@ dialog {
         }
     }
 
-    /* fade in header/footer */
-    & [part='dialog-header'],
-    & [part='dialog-footer'] {
-        transition:
-            transform var(--dialog-timing) ease-out,
-            opacity var(--dialog-timing) ease-out;
+    /* fade in header/content/footer */
+    & [part='dialog-content'] {
+        transition: opacity var(--dialog-timing) calc(var(--dialog-timing) * 0.25) ease-out;
 
         opacity: 0;
     }
 
+    & [part='dialog-header'],
     & [part='dialog-footer'] {
-        transform: translateY(-10%);
+        --dist: 15%;
+        transition:
+            transform var(--dialog-timing) ease-out,
+            opacity var(--dialog-timing) ease-out;
+        opacity: 0;
     }
 
     & [part='dialog-header'] {
-        transform: translateY(10%);
+        transform: translateY(var(--dist));
+    }
+
+    & [part='dialog-footer'] {
+        transform: translateY(calc(var(--dist) * -1));
     }
 
     &[data-visible] {
@@ -202,6 +209,10 @@ dialog {
         & [part='dialog-footer'] {
             opacity: 1;
             transform: translateY(0);
+        }
+
+        & [part='dialog-content'] {
+            opacity: 1;
         }
     }
 }

@@ -56,7 +56,6 @@
                     }
 
                     videoRef.srcObject = stream;
-                    videoRef.play();
 
                     hasUserMedia = true;
 
@@ -106,6 +105,8 @@
             width: videoRef.videoWidth,
             height: videoRef.videoHeight,
         };
+
+        videoRef.play();
     }
 
     // capture photo
@@ -167,8 +168,6 @@
             ? Math.min(cameraRect.width / videoSize.width, cameraRect.height / videoSize.height)
             : 1
     );
-
-    let progressValue = $derived(hasUserMedia ? 1 : Infinity);
 
     // clean up when unmounted
     onMount(() => {
