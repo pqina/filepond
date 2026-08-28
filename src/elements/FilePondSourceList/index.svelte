@@ -1,13 +1,13 @@
 <script lang="ts">
+    import type { FilePondSourceListOptions } from './index.js';
+    import type { Bounds } from '../../utils/bounds.js';
     import { Spring } from 'svelte/motion';
     import { createAnimationModeObserver } from '../common/animationPreference.svelte.js';
     import { NodeList } from '../components/NodeList/index.js';
-    import type { FilePondSourceListOptions } from './index.js';
     import { withResources } from '../common/string.js';
     import { Button } from '../components/Button/index.js';
     import { ElementPane } from '../components/ElementPane/index.js';
     import { measurable } from '../attachments/measurable.js';
-    import type { Bounds } from '../../utils/bounds.js';
     import { rectContainsPoint, rectFromBounds, type Rect } from '../../utils/rect.js';
     import { vectorCreate } from '../../utils/vector.js';
     import { supportsDisplayTransition } from '../../utils/support.js';
@@ -45,6 +45,7 @@
         if (!rootRef) {
             return;
         }
+
         dispatchCustomEvent(rootRef, 'sourceschange', {
             detail: sources.length,
         });
@@ -83,12 +84,6 @@
     function handleShowDialog(e: CommandEvent) {
         // sync title with source
         title = e?.source?.textContent.trim() || '';
-
-        // we do this so the dialog control springs are reset (for example when previously a bigger dialog was opened it would cause the controls to move from those positions towards the new which looks weird)
-        // wrap in request animation frame so the animation lines up correctly, otherwise sometimes the elements flicker into view
-        // requestAnimationFrame(() => {
-        //     dialogVisible = true;
-        // });
     }
 
     function handleHideDialog(e: Event) {
@@ -145,14 +140,19 @@
         Object.assign(dialogRectSpring, springDefaults);
     });
 
-    function handleMeasure(bounds: Bounds) {
+    function handleMeasureDialog(bounds: Bounds) {
         if (!dialogRef?.open || !dialogContentRef?.children.length) {
+            return;
+        }
+
+        const rect = rectFromBounds(bounds);
+        if (dialogVisible) {
+            dialogRect = rect;
             return;
         }
 
         const margin = 10;
 
-        const rect = rectFromBounds(bounds);
         dialogRect = {
             x: rect.x + margin,
             y: rect.y + margin,
@@ -184,7 +184,7 @@
 
     const dialogContentClipPathStyle = $derived.by(() => {
         if (!contentRect || !contentRectSpring.current) {
-            return '0px';
+            return undefined;
         }
 
         const { x, y, width, height } = contentRect;
@@ -194,6 +194,10 @@
         const r = x + width - (xS + widthS);
         const b = y + height - (yS + heightS);
         const l = xS - x;
+
+        if (t === 0 && r === 0 && b === 0 && l === 0) {
+            return undefined;
+        }
 
         return `${t}px ${r}px ${b}px ${l}px`;
     });
@@ -268,7 +272,7 @@
             ontoggle={handleDialogToggle}
             style:--dialog-content-clip-path={dialogContentClipPathStyle}
             {@attach measurable({
-                onmeasure: handleMeasure,
+                onmeasure: handleMeasureDialog,
             })}
             data-visible={dialogVisible ? '' : undefined}
         >

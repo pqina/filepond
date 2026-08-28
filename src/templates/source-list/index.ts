@@ -39,8 +39,13 @@ export function createFilePondSourceList() {
                         if (!onclick) {
                             command = command || 'show-modal';
                             commandfor = commandfor || dialog;
+
                             onclick = function (e: Event) {
                                 dialog.ontransitionend = function (e: TransitionEvent) {
+                                    if (e.target !== dialog) {
+                                        return;
+                                    }
+
                                     if (supportsDisplayTransition()) {
                                         if (!dialog.open && e.propertyName === 'display') {
                                             // dialog now fully faded out

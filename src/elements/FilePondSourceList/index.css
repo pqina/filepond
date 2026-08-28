@@ -131,7 +131,8 @@ dialog {
         display: flex;
         flex-direction: column;
         min-height: 1lh;
-        min-width: 14em;
+        max-width: 100%;
+
         & > * {
             min-height: 0;
         }
@@ -183,7 +184,6 @@ dialog {
     /* fade in header/content/footer */
     & [part='dialog-content'] {
         transition: opacity var(--dialog-timing) calc(var(--dialog-timing) * 0.25) ease-out;
-
         opacity: 0;
     }
 

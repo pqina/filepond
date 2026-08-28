@@ -4,6 +4,8 @@
     flex-direction: column;
     height: 100%;
 
+    --camera-border-radius: calc(var(--default-border-radius, 0) * 0.25);
+
     --btn-border-width: 0;
     --btn-border-radius: calc(var(--default-border-radius, 0) * 0.5);
     --btn-background-color: var(--default-background-color);
@@ -34,7 +36,12 @@ video {
 
     /* scale */
     transform-origin: center center;
-    transform: translate(var(--translate-x, 0), var(--translate-y, 0)) scale(var(--scalar, 1));
+    transform: translate(var(--translate-x, 0), var(--translate-y, 0)) scale(var(--scalar, 1))
+        scaleX(var(--flip, 1));
+}
+
+video {
+    --flip: -1;
 }
 
 canvas {
@@ -131,6 +138,7 @@ button.reset {
     background-color: black;
     overflow: hidden;
     position: relative;
+    border-radius: var(--camera-border-radius);
 
     &[data-state~='preview'],
     &[data-state~='processing'] {

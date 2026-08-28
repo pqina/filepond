@@ -126,7 +126,10 @@
         }
 
         // draw the image to the canvas so user can see the preview
-        ctx.drawImage(videoRef, 0, 0);
+        ctx.save();
+        ctx.scale(-1, 1);
+        ctx.drawImage(videoRef, previewRef.width * -1, 0);
+        ctx.restore();
         canvasToBlob(previewRef, { ...blobOptions })
             .then((blob) => {
                 const extension = getExtensionFromMimeType(blob.type);
@@ -147,7 +150,11 @@
     }
 
     let cameraRect = $state<Rect | null>(null);
-    function handleMeasure(bounds: Bounds) {
+    function handleMeasureCamera(bounds: Bounds) {
+        if (!videoSize) {
+            return;
+        }
+
         cameraRect = rectFromBounds(bounds);
     }
 
@@ -192,7 +199,7 @@
     style:--translate-y={`${cameraTranslation.y}px`}
     style:--progress-opacity={hasUserMedia ? 0 : 1}
     {@attach measurable({
-        onmeasure: handleMeasure,
+        onmeasure: handleMeasureCamera,
     })}
 >
     {#if statusMessage}
