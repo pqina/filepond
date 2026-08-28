@@ -120,8 +120,5 @@
         "vite-plugin-dts": "^4.5.4",
         "vite-plugin-static-copy": "^3.1.2",
         "vitest": "^4.0.18"
-    },
-    "dependencies": {
-        "filepond-extension-unsplash-source": "file:../extension-unsplash"
     }
 }
