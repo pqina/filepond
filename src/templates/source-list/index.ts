@@ -21,6 +21,7 @@ export function createFilePondSourceList() {
                     component: Button,
                     props: (props: any, context: NodeContext) => {
                         let {
+                            disabled,
                             icon,
                             label,
                             title,
@@ -33,7 +34,7 @@ export function createFilePondSourceList() {
                             onclosed,
                         } = props;
 
-                        const { dialog, disabled } = context;
+                        const { dialog } = context;
 
                         // if no onclick supplied we set up our own onclick handler that links up the button with the sources dialog
                         if (!onclick) {

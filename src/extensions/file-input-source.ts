@@ -31,6 +31,9 @@ export const FileInputSource = createExtension({
         // source label and icon to use
         sourceIcon: 'device',
         sourceLabel: undefined,
+
+        // is disabled
+        disabled: undefined,
     } as FileInputSourceOptions,
     factory: ({ didSetProps, props }, { insertEntries, removeEntries, setExtensionState }) => {
         /* Unsubscribe from input events */
@@ -70,7 +73,7 @@ export const FileInputSource = createExtension({
         }
 
         function syncExtensionState() {
-            const { sourceLabel: label, sourceIcon: icon } = props;
+            const { sourceLabel: label, sourceIcon: icon, disabled } = props;
 
             // we use data-readonly as readonly is not available on file input
             const canBrowse = !currentElement.hasAttribute('data-readonly');
@@ -81,6 +84,7 @@ export const FileInputSource = createExtension({
                           type: 'browse',
                           label,
                           icon,
+                          disabled,
                           onclick: () => {
                               currentElement.click();
                           },

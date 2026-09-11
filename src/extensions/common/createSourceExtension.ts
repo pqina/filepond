@@ -5,10 +5,10 @@ import type {
     ExtensionContext,
     ExtensionOptions,
     FilePondEntrySource,
+    Locale,
 } from '../../types/index.js';
 import { arrayRemoveFalsy } from '../../utils/array.js';
-import { addListener, getAsElement, setAttributes } from '../../utils/dom.js';
-import { passthrough } from '../../utils/placeholder.js';
+import { addListener, setAttributes } from '../../utils/dom.js';
 import { pubsub } from '../../utils/pubsub.js';
 import { isFunction } from '../../utils/test.js';
 import { createExtension, type Extension } from './createExtension.js';
@@ -58,6 +58,12 @@ interface SourceExtensionFunctions {
 }
 
 export interface SourceExtensionOptions {
+    /** Locale to use */
+    locale?: Locale;
+
+    /** Is this source disabled */
+    disabled?: boolean;
+
     /** Where to add new files, defaults to index `0` */
     insertIndex?: number;
 
@@ -122,6 +128,9 @@ export function createSourceExtension<Props extends object = SourceExtensionOpti
                 autocomplete: 'off',
             },
 
+            // disabled state
+            disabled: undefined,
+
             // overwrite with custom props
             ...sourceProps,
         },
@@ -164,7 +173,7 @@ export function createSourceExtension<Props extends object = SourceExtensionOpti
             let unsubSubmitListener: (() => void) | null;
 
             // set button
-            didSetProps(({ sourceIcon: icon, sourceLabel: label, sourceType: type }) => {
+            didSetProps(({ sourceIcon: icon, sourceLabel: label, sourceType: type, disabled }) => {
                 // This enables the source button and requests using the icon and label in assets
                 setExtensionState({
                     // is adds source button
@@ -172,6 +181,7 @@ export function createSourceExtension<Props extends object = SourceExtensionOpti
                         type,
                         label,
                         icon,
+                        disabled,
                         onopen: handleOpen,
                         onopened: handleOpened,
                         onclosed: handleClosed,

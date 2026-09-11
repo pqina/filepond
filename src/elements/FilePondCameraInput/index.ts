@@ -4,6 +4,7 @@ import { registerShadowRoot } from '../common/extendStyles.js';
 import defaultStyles from '../styles/defaults.css?inline';
 import styles from './index.css?inline';
 import { getAttribute, setBooleanAttribute, setStringAttribute } from '../../utils/dom.js';
+import type { Locale } from '../../types/index.js';
 
 export interface CameraInputElementOptions {
     oncapture?: (output: File) => void;
@@ -14,6 +15,7 @@ export interface CameraInputElementOptions {
         type?: string;
         quality?: number;
     };
+    locale?: Locale;
 }
 
 export class CameraInputElement extends FilePondSvelteComponentElement {

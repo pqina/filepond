@@ -2,10 +2,10 @@ import { mount, unmount, type Component } from 'svelte';
 import { HTMLElementSafe } from '../../common/ssr.js';
 import { addListener, createStyleSheet, dispatchCustomEvent } from '../../utils/dom.js';
 import { arrayRemoveFalsy } from '../../utils/array.js';
-import type { AnimationMode, SpringOptions } from '../../types/index.js';
+import type { AnimationMode, Locale, SpringOptions } from '../../types/index.js';
 
 const ObservedAttributes = ['animations'];
-const SharedProperties = ['animations', 'springDefaults'];
+const SharedProperties = ['locale', 'animations', 'springDefaults'];
 
 export interface FilePondSvelteComponentElementEventMap {
     connected: CustomEvent<null>;
@@ -27,6 +27,9 @@ export interface FilePondSvelteComponentOptions {
     /** The component root element */
     root: HTMLElement;
 
+    /** Optional labels */
+    locale?: Locale;
+
     /** Control animations */
     animations?: AnimationMode;
 
@@ -44,6 +47,10 @@ export class FilePondSvelteComponentElement
     extends HTMLElementSafe
     implements FilePondSvelteElementEventHandler
 {
+    declare springDefaults?: SpringOptions;
+    declare animations?: AnimationMode;
+    declare locale?: Locale;
+
     #root: ShadowRoot;
     #app: any;
     #props: any;
@@ -96,6 +103,7 @@ export class FilePondSvelteComponentElement
         this.#props = $state({
             root: this,
             springDefaults: undefined,
+            locale: undefined,
             animations: this.getAttribute('animations') || undefined,
         });
 

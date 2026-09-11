@@ -284,14 +284,6 @@ file-pond-entry-list {
             pointer-events: none;
         }
     }
-
-    & file-pond-source-list {
-        --btn-color: rgb(from var(--default-color) r g b / 0.5);
-
-        & button {
-            pointer-events: none;
-        }
-    }
 }
 
 /* Attribution link */

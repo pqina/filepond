@@ -34,6 +34,9 @@ export const CameraSource = createSourceExtension({
         sourceIconError: 'cameraOff',
         sourceType: 'select',
 
+        // locale to use in camera input
+        locale: undefined,
+
         // use date time by default
         filename: () =>
             filenameDateFormatter.format(new Date()).replace(' ', '_').replaceAll(':', '-'),
@@ -47,7 +50,7 @@ export const CameraSource = createSourceExtension({
 
         // we need to ask permission to access the camera feed
         function handleOpenedDialog(dialog: HTMLDialogElement) {
-            const { sourceIcon, sourceIconError, mediaConstraints, filename } = props;
+            const { sourceIcon, sourceIconError, mediaConstraints, filename, locale } = props;
 
             const cameraInput = dialog.querySelector('camera-input') as
                 | CameraInputElement
@@ -57,6 +60,7 @@ export const CameraSource = createSourceExtension({
                 return;
             }
 
+            cameraInput.locale = locale;
             cameraInput.filename = filename;
             cameraInput
                 .requestCameraAccess(mediaConstraints)

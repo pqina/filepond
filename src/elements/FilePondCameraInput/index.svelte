@@ -1,17 +1,18 @@
 <script lang="ts">
     import type { CameraInputElementOptions } from './index.js';
+    import type { Bounds } from '../../utils/bounds.js';
+    import type { Size } from '../../utils/size.js';
     import { onMount } from 'svelte';
     import { blobToFile, getExtensionFromMimeType } from '../../utils/file.js';
     import { measurable } from '../attachments/measurable.js';
     import { rectFromBounds, type Rect } from '../../utils/rect.js';
-    import type { Bounds } from '../../utils/bounds.js';
-    import type { Size } from '../../utils/size.js';
     import { ProgressIndicator } from '../components/ProgressIndicator/index.js';
     import { canvasToBlob } from '../../utils/canvasToBlob.js';
     import { isFunction } from '../../utils/test.js';
 
     // props
     let {
+        locale,
         onreset,
         oncapture,
         onerror,
@@ -176,6 +177,12 @@
             : 1
     );
 
+    // returns the label or the key
+    function getLabelByKey(key: string): string {
+        // @ts-ignore
+        return locale ? locale[key] || key : key;
+    }
+
     // clean up when unmounted
     onMount(() => {
         return () => {
@@ -224,15 +231,20 @@
     {#if hasUserMedia}
         <!-- Capture buttons -->
         <div class="camera-footer">
-            <button class="capture" type="button" disabled={!!output} onclick={handleCapture}
-                >Capture</button
+            <button
+                title={getLabelByKey('capture')}
+                class="capture"
+                type="button"
+                disabled={!!output}
+                onclick={handleCapture}>{getLabelByKey('capture')}</button
             >
             <button
                 class="reset"
                 type="button"
                 disabled={!output}
                 onclick={handleReset}
-                aria-label="Reset"
+                title={getLabelByKey('reset')}
+                aria-label={getLabelByKey('reset')}
             >
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
