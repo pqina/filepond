@@ -47,11 +47,6 @@ export const core = {
     info: 'Thông tin',
     system: 'Hệ thống',
 
-    // sources
-    device: 'Thiết bị',
-    camera: 'Máy ảnh',
-    link: 'Liên kết',
-
     // capabilities labels
     descriptionBrowse: '[Chọn {{maxFilesUnit}}]',
     descriptionBrowseDrop: 'Thả {{maxFilesUnit}} vào đây hoặc [duyệt]',
@@ -135,9 +130,9 @@ export const transform = {
 
 export const validationFileMimeType = {
     validationFileMimeTypeMismatch: {
-        template: 'Loại tệp không được phép. {{details}}.',
+        template: 'Loại tệp không được phép. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Tệp phải thuộc loại {{accept}}',
@@ -150,9 +145,9 @@ export const validationFileMimeType = {
 
 export const validationFileExtension = {
     validationFileExtensionMismatch: {
-        template: 'Phần mở rộng không được phép. {{details}}.',
+        template: 'Phần mở rộng không được phép. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Tệp phải có phần mở rộng {{accept}}',
@@ -225,10 +220,31 @@ export const validation = {
     ...validationListCount,
 };
 
+export const sourceDevice = {
+    device: 'Thiết bị',
+};
+
+export const sourceLink = {
+    link: 'Liên kết',
+};
+
+export const sourceCamera = {
+    camera: 'Máy ảnh',
+    capture: 'Chụp',
+    record: 'Ghi',
+};
+
+export const source = {
+    ...sourceDevice,
+    ...sourceLink,
+    ...sourceCamera,
+};
+
 export const locale = {
     ...core,
     ...store,
     ...media,
     ...validation,
     ...transform,
+    ...source,
 };

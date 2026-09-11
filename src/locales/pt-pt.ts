@@ -47,11 +47,6 @@ export const core = {
     info: 'Info',
     system: 'Sistema',
 
-    // sources
-    device: 'Dispositivo',
-    camera: 'Câmara',
-    link: 'Ligação',
-
     // capabilities labels
     descriptionBrowse: '[Selecionar {{maxFilesUnit}}]',
     descriptionBrowseDrop: 'Largue {{maxFilesUnit}} aqui ou [procure]',
@@ -135,9 +130,9 @@ export const transform = {
 
 export const validationFileMimeType = {
     validationFileMimeTypeMismatch: {
-        template: 'Este tipo de ficheiro não é permitido. {{details}}.',
+        template: 'Este tipo de ficheiro não é permitido. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'O ficheiro tem de ser do tipo {{accept}}',
@@ -150,9 +145,9 @@ export const validationFileMimeType = {
 
 export const validationFileExtension = {
     validationFileExtensionMismatch: {
-        template: 'Esta extensão de ficheiro não é permitida. {{details}}.',
+        template: 'Esta extensão de ficheiro não é permitida. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'O ficheiro tem de ter a extensão {{accept}}',
@@ -228,10 +223,31 @@ export const validation = {
     ...validationListCount,
 };
 
+export const sourceDevice = {
+    device: 'Dispositivo',
+};
+
+export const sourceLink = {
+    link: 'Ligação',
+};
+
+export const sourceCamera = {
+    camera: 'Câmara',
+    capture: 'Capturar',
+    record: 'Gravar',
+};
+
+export const source = {
+    ...sourceDevice,
+    ...sourceLink,
+    ...sourceCamera,
+};
+
 export const locale = {
     ...core,
     ...store,
     ...media,
     ...validation,
     ...transform,
+    ...source,
 };

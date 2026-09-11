@@ -47,11 +47,6 @@ export const core = {
     info: 'Info',
     system: 'Järjestelmä',
 
-    // sources
-    device: 'Laite',
-    camera: 'Kamera',
-    link: 'Linkki',
-
     // capabilities labels
     descriptionBrowse: '[Valitse {{maxFilesUnit}}]',
     descriptionBrowseDrop: 'Pudota {{maxFilesUnit}} tähän tai [selaa]',
@@ -136,9 +131,9 @@ export const transform = {
 
 export const validationFileMimeType = {
     validationFileMimeTypeMismatch: {
-        template: 'Tämä tiedostotyyppi ei ole sallittu. {{details}}.',
+        template: 'Tämä tiedostotyyppi ei ole sallittu. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Tiedoston on oltava tyyppiä {{accept}}',
@@ -151,9 +146,9 @@ export const validationFileMimeType = {
 
 export const validationFileExtension = {
     validationFileExtensionMismatch: {
-        template: 'Tämä tiedostopääte ei ole sallittu. {{details}}.',
+        template: 'Tämä tiedostopääte ei ole sallittu. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Tiedostolla on oltava pääte {{accept}}',
@@ -226,10 +221,31 @@ export const validation = {
     ...validationListCount,
 };
 
+export const sourceDevice = {
+    device: 'Laite',
+};
+
+export const sourceLink = {
+    link: 'Linkki',
+};
+
+export const sourceCamera = {
+    camera: 'Kamera',
+    capture: 'Kaappaa',
+    record: 'Nauhoita',
+};
+
+export const source = {
+    ...sourceDevice,
+    ...sourceLink,
+    ...sourceCamera,
+};
+
 export const locale = {
     ...core,
     ...store,
     ...media,
     ...validation,
     ...transform,
+    ...source,
 };

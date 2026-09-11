@@ -47,11 +47,6 @@ export const core = {
     info: 'Upplýsingar',
     system: 'Kerfi',
 
-    // sources
-    device: 'Tæki',
-    camera: 'Myndavél',
-    link: 'Tengill',
-
     // capabilities labels
     descriptionBrowse: '[Velja {{maxFilesUnit}}]',
     descriptionBrowseDrop: 'Dragðu {{maxFilesUnit}} hingað eða [flettu]',
@@ -135,9 +130,9 @@ export const transform = {
 
 export const validationFileMimeType = {
     validationFileMimeTypeMismatch: {
-        template: 'Þessi skráategund er ekki leyfð. {{details}}.',
+        template: 'Þessi skráategund er ekki leyfð. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Skráin verður að vera af gerðinni {{accept}}',
@@ -150,9 +145,9 @@ export const validationFileMimeType = {
 
 export const validationFileExtension = {
     validationFileExtensionMismatch: {
-        template: 'Þessi skráarending er ekki leyfð. {{details}}.',
+        template: 'Þessi skráarending er ekki leyfð. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Skráin þarf að hafa endinguna {{accept}}',
@@ -225,10 +220,31 @@ export const validation = {
     ...validationListCount,
 };
 
+export const sourceDevice = {
+    device: 'Tæki',
+};
+
+export const sourceLink = {
+    link: 'Tengill',
+};
+
+export const sourceCamera = {
+    camera: 'Myndavél',
+    capture: 'Taka mynd',
+    record: 'Taka upp',
+};
+
+export const source = {
+    ...sourceDevice,
+    ...sourceLink,
+    ...sourceCamera,
+};
+
 export const locale = {
     ...core,
     ...store,
     ...media,
     ...validation,
     ...transform,
+    ...source,
 };

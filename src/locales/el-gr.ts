@@ -47,11 +47,6 @@ export const core = {
     info: 'Πληροφορία',
     system: 'Σύστημα',
 
-    // sources
-    device: 'Συσκευή',
-    camera: 'Κάμερα',
-    link: 'Σύνδεσμος',
-
     // capabilities labels
     descriptionBrowse: '[Επιλέξτε {{maxFilesUnit}}]',
     descriptionBrowseDrop: 'Αποθέστε {{maxFilesUnit}} εδώ ή [περιηγηθείτε]',
@@ -135,9 +130,9 @@ export const transform = {
 
 export const validationFileMimeType = {
     validationFileMimeTypeMismatch: {
-        template: 'Αυτός ο τύπος αρχείου δεν επιτρέπεται. {{details}}.',
+        template: 'Αυτός ο τύπος αρχείου δεν επιτρέπεται. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Το αρχείο πρέπει να είναι τύπου {{accept}}',
@@ -150,9 +145,9 @@ export const validationFileMimeType = {
 
 export const validationFileExtension = {
     validationFileExtensionMismatch: {
-        template: 'Αυτή η επέκταση αρχείου δεν επιτρέπεται. {{details}}.',
+        template: 'Αυτή η επέκταση αρχείου δεν επιτρέπεται. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Το αρχείο πρέπει να έχει επέκταση {{accept}}',
@@ -226,10 +221,31 @@ export const validation = {
     ...validationListCount,
 };
 
+export const sourceDevice = {
+    device: 'Συσκευή',
+};
+
+export const sourceLink = {
+    link: 'Σύνδεσμος',
+};
+
+export const sourceCamera = {
+    camera: 'Κάμερα',
+    capture: 'Λήψη',
+    record: 'Εγγραφή',
+};
+
+export const source = {
+    ...sourceDevice,
+    ...sourceLink,
+    ...sourceCamera,
+};
+
 export const locale = {
     ...core,
     ...store,
     ...media,
     ...validation,
     ...transform,
+    ...source,
 };

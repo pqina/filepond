@@ -47,11 +47,6 @@ export const core = {
     info: '信息',
     system: '系统',
 
-    // sources
-    device: '设备',
-    camera: '相机',
-    link: '链接',
-
     // capabilities labels
     descriptionBrowse: '[选择{{maxFilesUnit}}]',
     descriptionBrowseDrop: '将{{maxFilesUnit}}拖放到此处，或[浏览]',
@@ -133,9 +128,9 @@ export const transform = {
 
 export const validationFileMimeType = {
     validationFileMimeTypeMismatch: {
-        template: '不允许此文件类型。{{details}}。',
+        template: '不允许此文件类型。{{accepted}}。',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: '文件类型必须为 {{accept}}',
@@ -148,9 +143,9 @@ export const validationFileMimeType = {
 
 export const validationFileExtension = {
     validationFileExtensionMismatch: {
-        template: '不允许此文件扩展名。{{details}}。',
+        template: '不允许此文件扩展名。{{accepted}}。',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: '文件扩展名必须为 {{accept}}',
@@ -220,10 +215,31 @@ export const validation = {
     ...validationListCount,
 };
 
+export const sourceDevice = {
+    device: '设备',
+};
+
+export const sourceLink = {
+    link: '链接',
+};
+
+export const sourceCamera = {
+    camera: '相机',
+    capture: '捕获',
+    record: '录制',
+};
+
+export const source = {
+    ...sourceDevice,
+    ...sourceLink,
+    ...sourceCamera,
+};
+
 export const locale = {
     ...core,
     ...store,
     ...media,
     ...validation,
     ...transform,
+    ...source,
 };

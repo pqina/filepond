@@ -47,11 +47,6 @@ export const core = {
     info: '정보',
     system: '시스템',
 
-    // sources
-    device: '기기',
-    camera: '카메라',
-    link: '링크',
-
     // capabilities labels
     descriptionBrowse: '[{{maxFilesUnit}} 선택]',
     descriptionBrowseDrop: '{{maxFilesUnit}}을(를) 여기에 놓거나 [찾아보기]',
@@ -135,9 +130,9 @@ export const transform = {
 
 export const validationFileMimeType = {
     validationFileMimeTypeMismatch: {
-        template: '이 파일 형식은 허용되지 않습니다. {{details}}.',
+        template: '이 파일 형식은 허용되지 않습니다. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: '파일 형식은 {{accept}}이어야 합니다',
@@ -150,9 +145,9 @@ export const validationFileMimeType = {
 
 export const validationFileExtension = {
     validationFileExtensionMismatch: {
-        template: '이 파일 확장자는 허용되지 않습니다. {{details}}.',
+        template: '이 파일 확장자는 허용되지 않습니다. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: '파일은 {{accept}} 확장자여야 합니다',
@@ -228,10 +223,31 @@ export const validation = {
     ...validationListCount,
 };
 
+export const sourceDevice = {
+    device: '기기',
+};
+
+export const sourceLink = {
+    link: '링크',
+};
+
+export const sourceCamera = {
+    camera: '카메라',
+    capture: '캡처',
+    record: '녹화',
+};
+
+export const source = {
+    ...sourceDevice,
+    ...sourceLink,
+    ...sourceCamera,
+};
+
 export const locale = {
     ...core,
     ...store,
     ...media,
     ...validation,
     ...transform,
+    ...source,
 };

@@ -47,11 +47,6 @@ export const core = {
     info: 'Információ',
     system: 'Rendszer',
 
-    // sources
-    device: 'Eszköz',
-    camera: 'Kamera',
-    link: 'Hivatkozás',
-
     // capabilities labels
     descriptionBrowse: '[{{maxFilesUnit}} kiválasztása]',
     descriptionBrowseDrop: 'Húzza ide: {{maxFilesUnit}}, vagy [tallózzon]',
@@ -137,9 +132,9 @@ export const transform = {
 
 export const validationFileMimeType = {
     validationFileMimeTypeMismatch: {
-        template: 'Ez a fájltípus nem engedélyezett. {{details}}.',
+        template: 'Ez a fájltípus nem engedélyezett. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'A fájlnak {{accept}} típusúnak kell lennie',
@@ -152,9 +147,9 @@ export const validationFileMimeType = {
 
 export const validationFileExtension = {
     validationFileExtensionMismatch: {
-        template: 'Ez a fájlkiterjesztés nem engedélyezett. {{details}}.',
+        template: 'Ez a fájlkiterjesztés nem engedélyezett. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'A fájlnak {{accept}} kiterjesztéssel kell rendelkeznie',
@@ -227,10 +222,31 @@ export const validation = {
     ...validationListCount,
 };
 
+export const sourceDevice = {
+    device: 'Eszköz',
+};
+
+export const sourceLink = {
+    link: 'Hivatkozás',
+};
+
+export const sourceCamera = {
+    camera: 'Kamera',
+    capture: 'Rögzítés',
+    record: 'Felvétel',
+};
+
+export const source = {
+    ...sourceDevice,
+    ...sourceLink,
+    ...sourceCamera,
+};
+
 export const locale = {
     ...core,
     ...store,
     ...media,
     ...validation,
     ...transform,
+    ...source,
 };

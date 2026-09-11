@@ -47,11 +47,6 @@ export const core = {
     info: 'Informace',
     system: 'Systém',
 
-    // sources
-    device: 'Zařízení',
-    camera: 'Fotoaparát',
-    link: 'Odkaz',
-
     // capabilities labels
     descriptionBrowse: '[Vybrat {{maxFilesUnit}}]',
     descriptionBrowseDrop: 'Přetáhněte sem {{maxFilesUnit}} nebo [Procházet]',
@@ -136,9 +131,9 @@ export const transform = {
 
 export const validationFileMimeType = {
     validationFileMimeTypeMismatch: {
-        template: 'Tento typ souboru není povolen. {{details}}.',
+        template: 'Tento typ souboru není povolen. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Soubor musí být typu {{accept}}',
@@ -151,9 +146,9 @@ export const validationFileMimeType = {
 
 export const validationFileExtension = {
     validationFileExtensionMismatch: {
-        template: 'Tato přípona není povolena. {{details}}.',
+        template: 'Tato přípona není povolena. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Soubor musí mít příponu {{accept}}',
@@ -226,10 +221,31 @@ export const validation = {
     ...validationListCount,
 };
 
+export const sourceDevice = {
+    device: 'Zařízení',
+};
+
+export const sourceLink = {
+    link: 'Odkaz',
+};
+
+export const sourceCamera = {
+    camera: 'Fotoaparát',
+    capture: 'Zachytit',
+    record: 'Nahrát',
+};
+
+export const source = {
+    ...sourceDevice,
+    ...sourceLink,
+    ...sourceCamera,
+};
+
 export const locale = {
     ...core,
     ...store,
     ...media,
     ...validation,
     ...transform,
+    ...source,
 };

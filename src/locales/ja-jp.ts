@@ -47,11 +47,6 @@ export const core = {
     info: '情報',
     system: 'システム',
 
-    // sources
-    device: 'デバイス',
-    camera: 'カメラ',
-    link: 'リンク',
-
     // capabilities labels
     descriptionBrowse: '[{{maxFilesUnit}}を選択]',
     descriptionBrowseDrop: 'ここに{{maxFilesUnit}}をドロップ、または[参照]',
@@ -134,9 +129,9 @@ export const transform = {
 
 export const validationFileMimeType = {
     validationFileMimeTypeMismatch: {
-        template: 'このファイル形式は許可されていません。{{details}}。',
+        template: 'このファイル形式は許可されていません。{{accepted}}。',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'ファイル形式は {{accept}} である必要があります',
@@ -149,9 +144,9 @@ export const validationFileMimeType = {
 
 export const validationFileExtension = {
     validationFileExtensionMismatch: {
-        template: 'このファイル拡張子は許可されていません。{{details}}。',
+        template: 'このファイル拡張子は許可されていません。{{accepted}}。',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'ファイル拡張子は {{accept}} である必要があります',
@@ -227,10 +222,31 @@ export const validation = {
     ...validationListCount,
 };
 
+export const sourceDevice = {
+    device: 'デバイス',
+};
+
+export const sourceLink = {
+    link: 'リンク',
+};
+
+export const sourceCamera = {
+    camera: 'カメラ',
+    capture: 'キャプチャ',
+    record: '録画',
+};
+
+export const source = {
+    ...sourceDevice,
+    ...sourceLink,
+    ...sourceCamera,
+};
+
 export const locale = {
     ...core,
     ...store,
     ...media,
     ...validation,
     ...transform,
+    ...source,
 };

@@ -49,11 +49,6 @@ export const core = {
     info: 'Info',
     system: 'Systeem',
 
-    // sources
-    device: 'Apparaat',
-    camera: 'Camera',
-    link: 'Link',
-
     // capabilities labels
     descriptionBrowse: '[Selecteer {{maxFilesUnit}}]',
     descriptionBrowseDrop: 'Sleep {{maxFilesUnit}} hierheen of [blader]',
@@ -145,9 +140,9 @@ export const transform = {
 
 export const validationFileMimeType = {
     validationFileMimeTypeMismatch: {
-        template: 'Dit bestandstype is niet toegestaan. {{details}}.',
+        template: 'Dit bestandstype is niet toegestaan. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Bestand moet van het type {{accept}} zijn',
@@ -160,9 +155,9 @@ export const validationFileMimeType = {
 
 export const validationFileExtension = {
     validationFileExtensionMismatch: {
-        template: 'Deze bestandsextensie is niet toegestaan. {{details}}.',
+        template: 'Deze bestandsextensie is niet toegestaan. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Bestand moet de {{accept}} extensie hebben',
@@ -238,10 +233,31 @@ export const validation = {
     ...validationListCount,
 };
 
+export const sourceDevice = {
+    device: 'Apparaat',
+};
+
+export const sourceLink = {
+    link: 'Link',
+};
+
+export const sourceCamera = {
+    camera: 'Camera',
+    capture: 'Vastleggen',
+    record: 'Opnemen',
+};
+
+export const source = {
+    ...sourceDevice,
+    ...sourceLink,
+    ...sourceCamera,
+};
+
 export const locale = {
     ...core,
     ...store,
     ...media,
     ...validation,
     ...transform,
+    ...source,
 };

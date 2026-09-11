@@ -43,11 +43,6 @@ export const core = {
     info: 'Info',
     system: 'System',
 
-    // sources
-    device: 'Device',
-    camera: 'Camera',
-    link: 'Link',
-
     // capabilities labels
     descriptionBrowse: '[Select {{maxFilesUnit}}]',
     descriptionBrowseDrop: 'Drop {{maxFilesUnit}} here, or [browse]',
@@ -221,10 +216,31 @@ export const validation = {
     ...validationListCount,
 };
 
+export const sourceDevice = {
+    device: 'Device',
+};
+
+export const sourceLink = {
+    link: 'Link',
+};
+
+export const sourceCamera = {
+    camera: 'Camera',
+    capture: 'Capture',
+    record: 'Record',
+};
+
+export const source = {
+    ...sourceDevice,
+    ...sourceLink,
+    ...sourceCamera,
+};
+
 export const locale = {
     ...core,
     ...store,
     ...media,
     ...validation,
     ...transform,
+    ...source,
 };

@@ -47,11 +47,6 @@ export const core = {
     info: 'Info',
     system: 'System',
 
-    // sources
-    device: 'Enhet',
-    camera: 'Kamera',
-    link: 'Lenke',
-
     // capabilities labels
     descriptionBrowse: '[Velg {{maxFilesUnit}}]',
     descriptionBrowseDrop: 'Slipp {{maxFilesUnit}} her, eller [bla gjennom]',
@@ -134,9 +129,9 @@ export const transform = {
 
 export const validationFileMimeType = {
     validationFileMimeTypeMismatch: {
-        template: 'Denne filtypen er ikke tillatt. {{details}}.',
+        template: 'Denne filtypen er ikke tillatt. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Filen må være av typen {{accept}}',
@@ -149,9 +144,9 @@ export const validationFileMimeType = {
 
 export const validationFileExtension = {
     validationFileExtensionMismatch: {
-        template: 'Denne filendelsen er ikke tillatt. {{details}}.',
+        template: 'Denne filendelsen er ikke tillatt. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Filen må ha endelsen {{accept}}',
@@ -227,10 +222,31 @@ export const validation = {
     ...validationListCount,
 };
 
+export const sourceDevice = {
+    device: 'Enhet',
+};
+
+export const sourceLink = {
+    link: 'Lenke',
+};
+
+export const sourceCamera = {
+    camera: 'Kamera',
+    capture: 'Ta bilde',
+    record: 'Ta opp',
+};
+
+export const source = {
+    ...sourceDevice,
+    ...sourceLink,
+    ...sourceCamera,
+};
+
 export const locale = {
     ...core,
     ...store,
     ...media,
     ...validation,
     ...transform,
+    ...source,
 };

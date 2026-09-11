@@ -47,11 +47,6 @@ export const core = {
     info: 'Bilgi',
     system: 'Sistem',
 
-    // sources
-    device: 'Cihaz',
-    camera: 'Kamera',
-    link: 'Bağlantı',
-
     // capabilities labels
     descriptionBrowse: '[{{maxFilesUnit}} seç]',
     descriptionBrowseDrop: '{{maxFilesUnit}} buraya bırakın veya [göz atın]',
@@ -135,9 +130,9 @@ export const transform = {
 
 export const validationFileMimeType = {
     validationFileMimeTypeMismatch: {
-        template: 'Bu dosya türüne izin verilmiyor. {{details}}.',
+        template: 'Bu dosya türüne izin verilmiyor. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Dosya türü {{accept}} olmalıdır',
@@ -150,9 +145,9 @@ export const validationFileMimeType = {
 
 export const validationFileExtension = {
     validationFileExtensionMismatch: {
-        template: 'Bu dosya uzantısına izin verilmiyor. {{details}}.',
+        template: 'Bu dosya uzantısına izin verilmiyor. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Dosya uzantısı {{accept}} olmalıdır',
@@ -225,10 +220,31 @@ export const validation = {
     ...validationListCount,
 };
 
+export const sourceDevice = {
+    device: 'Cihaz',
+};
+
+export const sourceLink = {
+    link: 'Bağlantı',
+};
+
+export const sourceCamera = {
+    camera: 'Kamera',
+    capture: 'Yakala',
+    record: 'Kayda al',
+};
+
+export const source = {
+    ...sourceDevice,
+    ...sourceLink,
+    ...sourceCamera,
+};
+
 export const locale = {
     ...core,
     ...store,
     ...media,
     ...validation,
     ...transform,
+    ...source,
 };

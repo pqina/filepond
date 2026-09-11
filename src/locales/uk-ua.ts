@@ -47,11 +47,6 @@ export const core = {
     info: 'Інформація',
     system: 'Система',
 
-    // sources
-    device: 'Пристрій',
-    camera: 'Камера',
-    link: 'Посилання',
-
     // capabilities labels
     descriptionBrowse: '[Вибрати {{maxFilesUnit}}]',
     descriptionBrowseDrop: 'Перетягніть сюди {{maxFilesUnit}} або [Огляд]',
@@ -135,9 +130,9 @@ export const transform = {
 
 export const validationFileMimeType = {
     validationFileMimeTypeMismatch: {
-        template: 'Цей тип файлу не дозволено. {{details}}.',
+        template: 'Цей тип файлу не дозволено. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Файл повинен бути типу {{accept}}',
@@ -150,9 +145,9 @@ export const validationFileMimeType = {
 
 export const validationFileExtension = {
     validationFileExtensionMismatch: {
-        template: 'Це розширення файлу не дозволено. {{details}}.',
+        template: 'Це розширення файлу не дозволено. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'Файл повинен мати розширення {{accept}}',
@@ -227,10 +222,31 @@ export const validation = {
     ...validationListCount,
 };
 
+export const sourceDevice = {
+    device: 'Пристрій',
+};
+
+export const sourceLink = {
+    link: 'Посилання',
+};
+
+export const sourceCamera = {
+    camera: 'Камера',
+    capture: 'Захопити',
+    record: 'Записати',
+};
+
+export const source = {
+    ...sourceDevice,
+    ...sourceLink,
+    ...sourceCamera,
+};
+
 export const locale = {
     ...core,
     ...store,
     ...media,
     ...validation,
     ...transform,
+    ...source,
 };

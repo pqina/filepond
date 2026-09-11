@@ -47,11 +47,6 @@ export const core = {
     info: 'معلومات',
     system: 'النظام',
 
-    // sources
-    device: 'الجهاز',
-    camera: 'الكاميرا',
-    link: 'الرابط',
-
     // capabilities labels
     descriptionBrowse: '[اختر {{maxFilesUnit}}]',
     descriptionBrowseDrop: 'أسقط {{maxFilesUnit}} هنا، أو [تصفح]',
@@ -135,9 +130,9 @@ export const transform = {
 
 export const validationFileMimeType = {
     validationFileMimeTypeMismatch: {
-        template: 'نوع الملف غير مسموح. {{details}}.',
+        template: 'نوع الملف غير مسموح. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'يجب أن يكون الملف من النوع {{accept}}',
@@ -150,9 +145,9 @@ export const validationFileMimeType = {
 
 export const validationFileExtension = {
     validationFileExtensionMismatch: {
-        template: 'امتداد الملف غير مسموح. {{details}}.',
+        template: 'امتداد الملف غير مسموح. {{accepted}}.',
         variables: {
-            details: {
+            accepted: {
                 context: 'count',
                 map: {
                     1: 'يجب أن يكون للملف الامتداد {{accept}}',
@@ -221,10 +216,31 @@ export const validation = {
     ...validationListCount,
 };
 
+export const sourceDevice = {
+    device: 'الجهاز',
+};
+
+export const sourceLink = {
+    link: 'الرابط',
+};
+
+export const sourceCamera = {
+    camera: 'الكاميرا',
+    capture: 'التقاط',
+    record: 'تسجيل',
+};
+
+export const source = {
+    ...sourceDevice,
+    ...sourceLink,
+    ...sourceCamera,
+};
+
 export const locale = {
     ...core,
     ...store,
     ...media,
     ...validation,
     ...transform,
+    ...source,
 };
