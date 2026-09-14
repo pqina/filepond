@@ -2,23 +2,20 @@
     import type { CameraInputElementOptions } from './index.js';
     import type { Bounds } from '../../utils/bounds.js';
     import type { Size } from '../../utils/size.js';
-    import { onMount } from 'svelte';
+    import { onDestroy } from 'svelte';
     import { blobToFile, getExtensionFromMimeType } from '../../utils/file.js';
     import { measurable } from '../attachments/measurable.js';
     import { rectFromBounds, type Rect } from '../../utils/rect.js';
     import { ProgressIndicator } from '../components/ProgressIndicator/index.js';
     import { canvasToBlob } from '../../utils/canvasToBlob.js';
     import { isFunction } from '../../utils/test.js';
+    import { dispatchCustomEvent } from '../../utils/dom.js';
 
     // props
-    let {
-        locale,
-        onreset,
-        oncapture,
-        onerror,
-        blobOptions,
-        filename = 'Untitled',
-    }: CameraInputElementOptions = $props();
+    let { locale, blobOptions, filename = 'Untitled' }: CameraInputElementOptions = $props();
+
+    // reference to files drop area element
+    let root: HTMLElement = $state() as HTMLElement;
 
     // state
     let output: File | null = $state(null);
@@ -93,7 +90,8 @@
         cameraState = cameraState.filter((state) => state !== 'preview');
 
         output = null;
-        onreset?.();
+        // onreset?.();
+        dispatchCustomEvent(root, 'reset');
     }
 
     let videoSize = $state<Size | null>(null);
@@ -140,13 +138,14 @@
                     blob,
                     `${isFunction(filename) ? filename(blob) : filename}${extension}`
                 );
-                oncapture?.(output);
+                dispatchCustomEvent(root, 'capture', { detail: output });
 
                 // done processing
                 cameraState = ['ready', 'preview'];
             })
             .catch((err) => {
-                onerror?.(err);
+                // onerror?.(err);
+                dispatchCustomEvent(root, 'error', { detail: err });
             });
     }
 
@@ -184,21 +183,28 @@
     }
 
     // clean up when unmounted
-    onMount(() => {
-        return () => {
-            if (!videoRef) {
-                return;
-            }
+    onDestroy(() => {
+        console.log('onDestroy');
 
-            // clean up
-            videoRef.pause();
-            videoRef.srcObject = null;
-        };
+        if (!videoRef) {
+            return;
+        }
+
+        // stop stream
+        const stream = videoRef.srcObject as MediaStream | null;
+        stream?.getTracks().forEach((track) => {
+            track.stop();
+        });
+
+        // clean up
+        videoRef.pause();
+        videoRef.srcObject = null;
     });
 </script>
 
 <!-- The camera input control -->
 <div
+    bind:this={root}
     class="camera"
     data-state={cameraState.join(' ')}
     style:--scalar={cameraScalar}

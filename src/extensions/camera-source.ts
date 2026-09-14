@@ -42,10 +42,23 @@ export const CameraSource = createSourceExtension({
             filenameDateFormatter.format(new Date()).replace(' ', '_').replaceAll(':', '-'),
     } as CameraSourceOptions,
     factory: ({ props }, { on, setExtensionSourceState }) => {
-        // implement this function to return an input element which can be used for the entry source
-        function createSourceElement() {
+        function createSourceTemplate(inputAttributes: {
+            [key: string]: string | number | boolean;
+        }) {
+            // define custom element
             defineCustomElement('camera-input', CameraInputElement);
-            return h('camera-input');
+
+            // return template
+            return [
+                {
+                    key: 'camera-input',
+                    tag: 'camera-input',
+                    attrs: {
+                        part: 'camera-input',
+                        ...inputAttributes,
+                    },
+                },
+            ];
         }
 
         // we need to ask permission to access the camera feed
@@ -84,7 +97,7 @@ export const CameraSource = createSourceExtension({
         const unsubOpenDialog = on('dialogOpened', handleOpenedDialog);
 
         return {
-            createSourceElement,
+            createSourceTemplate,
             destroy() {
                 unsubOpenDialog();
             },

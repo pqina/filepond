@@ -14,13 +14,25 @@ export const URLInputSource = createSourceExtension({
         sourceIcon: 'link',
     } as URLInputSourceOptions,
     factory: ({ props }) => {
-        function createSourceElement() {
+        function createSourceTemplate(inputAttributes: {
+            [key: string]: string | number | boolean;
+        }) {
             const { placeholder } = props;
-            return h('input', { type: 'url', placeholder });
+            return [
+                {
+                    key: 'url-input',
+                    tag: 'input',
+                    attrs: {
+                        ...inputAttributes,
+                        type: 'url',
+                        placeholder,
+                    },
+                },
+            ];
         }
 
         return {
-            createSourceElement,
+            createSourceTemplate,
         };
     },
 });

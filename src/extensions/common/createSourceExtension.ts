@@ -6,6 +6,7 @@ import type {
     ExtensionOptions,
     FilePondEntrySource,
     Locale,
+    TemplateNode,
 } from '../../types/index.js';
 import { arrayRemoveFalsy } from '../../utils/array.js';
 import { addListener, setAttributes } from '../../utils/dom.js';
@@ -49,11 +50,13 @@ type SourceFactory<Props extends object = SourceExtensionOptions> = (
     }
 ) => SourceExtensionFunctions;
 
-export type SourceExtensionCreateSourceElementFunction = () => HTMLElement;
+export type SourceExtensionCreateSourceTemplateFunction = (inputAttributes: {
+    [key: string]: string | boolean | number;
+}) => TemplateNode[];
 export type SourceExtensionDestroyFunction = () => void;
 
 interface SourceExtensionFunctions {
-    createSourceElement: SourceExtensionCreateSourceElementFunction;
+    createSourceTemplate: SourceExtensionCreateSourceTemplateFunction;
     destroy?: SourceExtensionDestroyFunction;
 }
 
@@ -111,6 +114,9 @@ export function createSourceExtension<Props extends object = SourceExtensionOpti
         name: extensionName,
         type: 'source',
         props: {
+            // disabled state
+            disabled: undefined,
+
             // by default insert to top of list
             insertIndex: 0,
 
@@ -124,12 +130,9 @@ export function createSourceExtension<Props extends object = SourceExtensionOpti
             inputAttributes: {
                 name: 'value',
                 required: true,
-                autofocus: '',
+                autofocus: true,
                 autocomplete: 'off',
             },
-
-            // disabled state
-            disabled: undefined,
 
             // overwrite with custom props
             ...sourceProps,
@@ -141,7 +144,7 @@ export function createSourceExtension<Props extends object = SourceExtensionOpti
 
             const { setExtensionState, getExtensionState, insertEntries } = pond;
 
-            const { createSourceElement, destroy } = sourceFactory(
+            const { createSourceTemplate, destroy } = sourceFactory(
                 state as SourceExtensionState<Props>,
                 {
                     ...pond,
@@ -168,7 +171,7 @@ export function createSourceExtension<Props extends object = SourceExtensionOpti
             );
 
             // current element state
-            let currentSourceInput: HTMLElement;
+            let currentTemplate: TemplateNode[];
             let currentDialog: HTMLDialogElement | HTMLElement | null;
             let unsubSubmitListener: (() => void) | null;
 
@@ -243,13 +246,10 @@ export function createSourceExtension<Props extends object = SourceExtensionOpti
                 currentDialog = dialog;
 
                 // create element
-                currentSourceInput = currentSourceInput || createSourceElement();
+                currentTemplate = currentTemplate || createSourceTemplate(inputAttributes);
 
-                // set default attributes
-                setAttributes(currentSourceInput, inputAttributes);
-
-                // create interface
-                currentDialog.append(currentSourceInput);
+                // @ts-ignore
+                currentDialog.setTemplate(currentTemplate);
 
                 // when the element was appended
                 pub('dialogOpen', dialog);
@@ -274,8 +274,8 @@ export function createSourceExtension<Props extends object = SourceExtensionOpti
                 // we've got the value, let's reset the form
                 currentDialog?.querySelector('form')?.reset();
 
-                // remove dialog contents
-                currentSourceInput.remove();
+                // @ts-ignore reset template
+                currentDialog.setTemplate(null);
 
                 // reset target
                 currentDialog = null;

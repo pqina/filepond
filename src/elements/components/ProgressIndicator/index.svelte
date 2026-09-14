@@ -220,6 +220,7 @@
         root ? getComputedStyle(root) : undefined
     ) as CSSStyleDeclaration;
     const didComputeStyle = $derived(!!computedStyle);
+
     const size = $derived(
         didComputeStyle ? parseFloat(computedStyle.getPropertyValue('height')) : undefined
     );
@@ -229,6 +230,7 @@
     const strokeWidth = $derived(
         didComputeStyle ? parseFloat(computedStyle.getPropertyValue('--_stroke-width')) : undefined
     );
+
     const strokeCenterOffset = $derived(
         isNumber(size) && isNumber(borderRadius)
             ? calculateRectStrokeCenterOffset(size, borderRadius)

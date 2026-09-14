@@ -3,7 +3,15 @@ import type { Bounds } from '../../utils/bounds.js';
 import type { Rect } from '../../utils/rect.js';
 import { boundsOutsideBounds } from '../../utils/bounds.js';
 import { pubsub } from '../../utils/pubsub.js';
-import { isArray, isBoolean, isFunction, isNull, isNullOrUndefined, isObject } from '../../utils/test.js';
+import {
+    isArray,
+    isBoolean,
+    isFunction,
+    isNull,
+    isNullOrUndefined,
+    isObject,
+    isString,
+} from '../../utils/test.js';
 
 /** Search a list of elements around a position within bounds */
 export function getClosestElement(
@@ -86,7 +94,7 @@ export function getSuspensionObserver() {
 }
 
 /** filters out non valid attributes */
-export function propsToAttributes(props: { [key:string]: any }) {
+export function propsToAttributes(props: { [key: string]: any }) {
     return Object.entries(props).reduce((events: { [key: string]: any }, [key, value]) => {
         if (isFunction(value) && !key.startsWith('on')) {
             return events;
@@ -99,5 +107,27 @@ export function propsToAttributes(props: { [key:string]: any }) {
         }
         events[key] = value;
         return events;
-    }, {})
+    }, {});
 }
+
+/** tests if passed name is a void tag */
+export function isVoidElementTag(name: string) {
+    return isString(name) && VoidTags.has(name.toLowerCase());
+}
+
+const VoidTags = new Set([
+    'area',
+    'base',
+    'br',
+    'col',
+    'command',
+    'embed',
+    'hr',
+    'img',
+    'input',
+    'keygen',
+    'param',
+    'source',
+    'track',
+    'wbr',
+]);

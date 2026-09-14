@@ -59,6 +59,12 @@ export default defineConfig(({ command }) => ({
 
             // root
             { find: 'filepond', replacement: resolve(__dirname, srcDir + '/index.js') },
+
+            // local extensions
+            {
+                find: 'filepond-extension-unsplash-source',
+                replacement: resolve(__dirname, '../extension-unsplash/dist/index.mjs'),
+            },
         ],
     },
 

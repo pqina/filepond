@@ -11,30 +11,31 @@ const registeredShadowRoots: {
 }[] = [];
 
 // we track if we're already about to sync styles, if so, we don't run this code multiple times
-let syncStylesQueued = false;
+// let syncStylesQueued = false;
+// style sync is queueing is disalbed because it would cause problems when camera input read computed styles before its stylesheet was loaded, need to revisit
 
 function syncStyles() {
-    if (syncStylesQueued) {
-        return;
+    // if (syncStylesQueued) {
+    //     return;
+    // }
+
+    // syncStylesQueued = true;
+    // queueMicrotask(sync);
+
+    // function sync() {
+    for (const { shadowRoot, styleSheet: shadowRootStyles } of registeredShadowRoots) {
+        // merge shadowroot stylesheet with component stylesheets
+        shadowRoot.adoptedStyleSheets.push(
+            // my styles
+            shadowRootStyles,
+
+            // additional styles received from components
+            ...styleSheets
+        );
     }
 
-    syncStylesQueued = true;
-    queueMicrotask(sync);
-
-    function sync() {
-        for (const { shadowRoot, styleSheet: shadowRootStyles } of registeredShadowRoots) {
-            // merge shadowroot stylesheet with component stylesheets
-            shadowRoot.adoptedStyleSheets.push(
-                // my styles
-                shadowRootStyles,
-
-                // additional styles received from components
-                ...styleSheets
-            );
-        }
-
-        syncStylesQueued = false;
-    }
+    // syncStylesQueued = false;
+    // }
 }
 
 export function extendShadowRootStyles(text: string) {

@@ -7,9 +7,6 @@ import { getAttribute, setBooleanAttribute, setStringAttribute } from '../../uti
 import type { Locale } from '../../types/index.js';
 
 export interface CameraInputElementOptions {
-    oncapture?: (output: File) => void;
-    onreset?: () => void;
-    onerror?: (error: Error) => void;
     filename?: ((blob: Blob) => string) | string | undefined;
     blobOptions?: {
         type?: string;
@@ -75,7 +72,7 @@ export class CameraInputElement extends FilePondSvelteComponentElement {
     constructor() {
         super(CameraInputApp, {
             styles: [styles],
-            properties: ['filename', 'oncapture', 'onreset'],
+            properties: ['filename'],
             methods: ['requestCameraAccess'],
         });
 
@@ -88,20 +85,21 @@ export class CameraInputElement extends FilePondSvelteComponentElement {
     connectedCallback() {
         super.connectedCallback();
 
-        // handle capture
-        this.oncapture = (output: File) => {
+        this.addListener('capture', (e) => {
+            const output = e.detail;
+
             this.#value = output;
             this.#internals.setFormValue(output);
 
             this.checkValidity();
-        };
+        });
 
-        this.onreset = () => {
+        this.addListener('reset', (e) => {
             this.#value = undefined;
             this.#internals.setFormValue(null);
 
             this.checkValidity();
-        };
+        });
 
         this.tabIndex = -1;
 

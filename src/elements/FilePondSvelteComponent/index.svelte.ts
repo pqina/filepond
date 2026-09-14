@@ -176,6 +176,7 @@ export class FilePondSvelteComponentElement
 
     disconnectedCallback() {
         this.#listeners.forEach((unsub) => unsub());
+
         unmount(this.#app);
         this.#app = null;
 

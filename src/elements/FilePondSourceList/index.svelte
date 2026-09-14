@@ -15,6 +15,7 @@
     import { SpringElement } from '../components/SpringElement/index.js';
     import { addListener, dispatchCustomEvent } from '../../utils/dom.js';
     import { onDestroy } from 'svelte';
+    import type { TemplateNode } from '../common/nodeTree.js';
 
     let {
         disabled = false,
@@ -38,6 +39,8 @@
     $effect(() => {
         AnimationModeObserver.setPreference(animations);
     });
+
+    $inspect(enableAnimations);
 
     // root element
     let rootRef = $state.raw<HTMLDivElement>();
@@ -210,11 +213,7 @@
         contentRect = rectFromBounds(bounds);
     }
 
-    /** Adding content */
-    function handleAppendContent(...args: HTMLElement[]) {
-        // move to dialog content element
-        dialogContentRef?.append(...args);
-
+    function prepareDialogContent() {
         // automatically focus first autofocusable element
         const focusableElement: HTMLInputElement | HTMLButtonElement | null | undefined =
             dialogContentRef?.querySelector('[autofocus]');
@@ -226,13 +225,18 @@
         });
     }
 
+    let dialogContentTemplate = $state(<TemplateNode[]>[]);
+
     // set up dialog
     $effect(() => {
         if (!dialogRef) {
             return;
         }
 
-        dialogRef.append = handleAppendContent;
+        // @ts-ignore
+        dialogRef.setTemplate = function (template: TemplateNode[]) {
+            dialogContentTemplate = template;
+        };
 
         // typescript throws an error when we set this using oncommand
         const unsubCommandListener = addListener(dialogRef, 'command', handleDialogCommand);
@@ -256,6 +260,42 @@
         springDefaults,
     });
 
+    const sourceDialogContext = $derived({
+        resources: {
+            locale,
+            assets,
+        },
+        propResourceMap,
+        get enabledAnimations() {
+            return enableAnimations;
+        },
+        springDefaults,
+    });
+
+    const dialogContentObserver = new MutationObserver((entries) => {
+        for (const entry of entries) {
+            const [addedNode] = entry.addedNodes;
+            if (!addedNode || addedNode.nodeType !== Node.ELEMENT_NODE) {
+                continue;
+            }
+            prepareDialogContent();
+        }
+    });
+
+    $effect(() => {
+        if (!dialogContentRef) {
+            return;
+        }
+
+        dialogContentObserver.observe(dialogContentRef, {
+            childList: true,
+        });
+
+        return () => {
+            dialogContentObserver.disconnect();
+        };
+    });
+
     onDestroy(() => {
         AnimationModeObserver.destroy();
     });
@@ -271,10 +311,10 @@
             onclick={handleDialogTap}
             ontoggle={handleDialogToggle}
             style:--dialog-content-clip-path={dialogContentClipPathStyle}
+            data-visible={dialogVisible ? '' : undefined}
             {@attach measurable({
                 onmeasure: handleMeasureDialog,
             })}
-            data-visible={dialogVisible ? '' : undefined}
         >
             <form method="dialog" part="dialog-form">
                 <div part="dialog-header">
@@ -305,7 +345,17 @@
                     {@attach measurable({
                         onmeasure: handleMeasureContent,
                     })}
-                ></div>
+                >
+                    <NodeList
+                        beforeRenderNode={(node, context, sharedContext) =>
+                            beforeRenderNode(node, context, sharedContext)}
+                        nodes={dialogContentTemplate}
+                        context={{
+                            // TODO: pass select items count here or use "change" event and read out total selected items?
+                        }}
+                        sharedContext={sourceDialogContext}
+                    />
+                </div>
 
                 <div part="dialog-footer">
                     <SpringElement

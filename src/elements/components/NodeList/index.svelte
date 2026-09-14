@@ -23,7 +23,7 @@
     import { Spring } from 'svelte/motion';
     import { arrayWrap } from '../../../utils/array.js';
     import NodeList from './index.svelte';
-    import { getSuspensionObserver } from '../../common/dom.js';
+    import { getSuspensionObserver, isVoidElementTag } from '../../common/dom.js';
 
     let {
         nodes,
@@ -395,39 +395,57 @@
             {/snippet}
         </Component>
     {:else if tag}
-        <svelte:element
-            this={tag}
-            {...attrs}
-            {...routes}
-            bind:this={
-                noop,
-                function (ref) {
-                    refs[key] = ref;
+        {#if isVoidElementTag(tag)}
+            <svelte:element
+                this={tag}
+                {...attrs}
+                {...routes}
+                bind:this={
+                    noop,
+                    function (ref) {
+                        // @ts-ignore
+                        attrs?.onconnected?.(ref);
+                        refs[key] = ref;
+                    }
                 }
-            }
-        >
-            {#if item}
-                {#each context.items as itemContext}
+            />
+        {:else}
+            <svelte:element
+                this={tag}
+                {...attrs}
+                {...routes}
+                bind:this={
+                    noop,
+                    function (ref) {
+                        // @ts-ignore
+                        attrs?.onconnected?.(ref);
+                        refs[key] = ref;
+                    }
+                }
+            >
+                {#if item}
+                    {#each context.items as itemContext}
+                        <NodeList
+                            nodes={item}
+                            context={itemContext}
+                            routes={contextRoutes}
+                            {sharedContext}
+                            {beforeSetProps}
+                            {beforeRenderNode}
+                        />
+                    {/each}
+                {:else if content}
                     <NodeList
-                        nodes={item}
-                        context={itemContext}
+                        nodes={content}
+                        {context}
                         routes={contextRoutes}
                         {sharedContext}
                         {beforeSetProps}
                         {beforeRenderNode}
                     />
-                {/each}
-            {:else if content}
-                <NodeList
-                    nodes={content}
-                    {context}
-                    routes={contextRoutes}
-                    {sharedContext}
-                    {beforeSetProps}
-                    {beforeRenderNode}
-                />
-            {/if}
-        </svelte:element>
+                {/if}
+            </svelte:element>
+        {/if}
     {:else if content}
         {content}
     {/if}
