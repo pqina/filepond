@@ -28,8 +28,9 @@ export const sendRequest = (data, url, options) => {
         ...options
     };
 
-    // encode url
-    url = encodeURI(url);
+    // encode url, but keep characters that are already percent-encoded (for
+    // example in a pre-signed url), encodeURI would turn %2F into %252F
+    url = encodeURI(url).replace(/%25([0-9A-Fa-f]{2})/g, '%$1');
 
     // if method is GET, add any received data to url
     
