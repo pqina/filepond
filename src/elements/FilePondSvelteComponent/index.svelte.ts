@@ -1,4 +1,4 @@
-import { flushSync, mount, tick, unmount, type Component } from 'svelte';
+import { mount, unmount, type Component } from 'svelte';
 import { HTMLElementSafe } from '../../common/ssr.js';
 import { addListener, createStyleSheet, dispatchCustomEvent } from '../../utils/dom.js';
 import { arrayRemoveFalsy } from '../../utils/array.js';

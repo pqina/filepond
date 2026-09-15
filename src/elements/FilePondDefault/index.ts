@@ -35,7 +35,7 @@ import { isBoolean, isBrowser, isString } from '../../utils/test.js';
 import { assets } from '../../assets/index.js';
 
 // default FilePond styles
-import defaultStyles from './index.css?inline';
+import styles from './index.css?inline';
 
 // templates
 import { createFilePondEntryList } from '../../templates/entry-list/index.js';
@@ -46,8 +46,6 @@ import { createFilePondExtensionSet } from './createFilePondExtensionSet.js';
 
 // This holds the initial options object passed to `defineFilePond`, we store this value so we can assign the initialOptions to FilePond components created _after_ the first `defineFilePond` call.
 let globalInitialOptions: DefineFilePondOptions | undefined;
-
-const AnimationModes: AnimationMode[] = ['auto', 'never', 'always'];
 
 export interface FilePondElementEventMap {
     rectcompute: CustomEvent<Bounds>;
@@ -269,7 +267,7 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
 
     constructor() {
         super({
-            styles: [defaultStyles],
+            styles: [styles],
         });
 
         // create parts

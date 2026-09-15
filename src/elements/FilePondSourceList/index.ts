@@ -23,11 +23,11 @@ export const COMPONENT_PROPS = [
 export class FilePondSourceListElement extends FilePondSvelteComponentElement {
     constructor() {
         super(FilePondSourceListApp, {
-            styles: [styles],
+            styles: [defaultStyles],
             properties: COMPONENT_PROPS,
         });
 
-        registerShadowRoot(this._root, defaultStyles + styles);
+        registerShadowRoot(this._root, 'source-list', styles);
     }
 
     connectedCallback() {

@@ -2,28 +2,17 @@ import { isBrowser } from '../../utils/test.js';
 import { createStyleSheet } from '../../utils/dom.js';
 
 // stylesheets to adopt by the file-pond-item custom element
-const styleSheets: CSSStyleSheet[] = [];
+const styleSheets: { styleSheet: CSSStyleSheet; rootKeys: string[] }[] = [];
 
 // file pond items shadow roots
 const registeredShadowRoots: {
+    key: string;
     shadowRoot: ShadowRoot;
     styleSheet: CSSStyleSheet;
 }[] = [];
 
-// we track if we're already about to sync styles, if so, we don't run this code multiple times
-// let syncStylesQueued = false;
-// style sync is queueing is disalbed because it would cause problems when camera input read computed styles before its stylesheet was loaded, need to revisit
-
 function syncStyles() {
-    // if (syncStylesQueued) {
-    //     return;
-    // }
-
-    // syncStylesQueued = true;
-    // queueMicrotask(sync);
-
-    // function sync() {
-    for (const { shadowRoot, styleSheet: shadowRootStyles } of registeredShadowRoots) {
+    for (const { shadowRoot, styleSheet: shadowRootStyles, key } of registeredShadowRoots) {
         // merge shadowroot stylesheet with component stylesheets
         shadowRoot.adoptedStyleSheets.push(
             // my styles
@@ -31,23 +20,22 @@ function syncStyles() {
 
             // additional styles received from components
             ...styleSheets
+                .filter((sheet) => !sheet.rootKeys.length || sheet.rootKeys.includes(key))
+                .map((sheet) => sheet.styleSheet)
         );
     }
-
-    // syncStylesQueued = false;
-    // }
 }
 
-export function extendShadowRootStyles(text: string) {
+export function extendShadowRootStyles(text: string, ...rootKeys: string[]) {
     if (!isBrowser()) {
         return;
     }
-    styleSheets.push(createStyleSheet(text));
+    styleSheets.push({ styleSheet: createStyleSheet(text), rootKeys });
     syncStyles();
 }
 
-export function registerShadowRoot(shadowRoot: ShadowRoot, rootStyles: string) {
+export function registerShadowRoot(shadowRoot: ShadowRoot, key: string, rootStyles: string) {
     const styleSheet = createStyleSheet(rootStyles);
-    registeredShadowRoots.push({ shadowRoot, styleSheet });
+    registeredShadowRoots.push({ key, shadowRoot, styleSheet });
     syncStyles();
 }

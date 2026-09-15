@@ -39,8 +39,6 @@
         shouldReduceMotion(motionStateObserver.current, reducedMotionPreference)
     );
 
-    $inspect('FilePondSourceList.$props()', { reducedMotionPreference });
-
     let dialogContentNodes = $state(<{ nodes: TemplateNode[]; data: NodeData }>{});
 
     let dialogImportCount = $state(0);

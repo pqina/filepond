@@ -26,10 +26,10 @@ import { dispatchCustomEvent } from '../../utils/dom.js';
 import { Status } from '../../common/status.js';
 import { HTMLElementSafe } from '../../common/ssr.js';
 import { arrayRemoveFalsy } from '../../utils/array.js';
-import defaultStyles from './index.css?inline';
 import { createFilePondEntryTree } from './createFilePondEntryTree.js';
 import { FileInputSource } from '../../extensions/file-input-source.js';
 import { ValueCallbackStore } from '../../extensions/value-callback-store.js';
+import defaultStyles from './index.css?inline';
 
 // validity flag order - https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals/setValidity#flags
 const VALIDATION_FLAGS_ORDER = [

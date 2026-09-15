@@ -191,10 +191,11 @@ export class FilePondEntryListElement
             properties: COMPONENT_PROPS,
             methods: COMPONENT_METHODS,
             events: COMPONENT_EVENTS,
+            styles: [defaultStyles],
         });
 
         // so can receive component styles
-        registerShadowRoot(this._root, defaultStyles + styles);
+        registerShadowRoot(this._root, 'entry-list', styles);
     }
 
     connectedCallback() {
