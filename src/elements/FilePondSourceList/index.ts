@@ -5,9 +5,9 @@ import {
 import type { Locale, NodeContext, TemplateNode } from '../../types/index.js';
 import FilePondSourceListApp from './index.svelte';
 import { registerShadowRoot } from '../common/extendStyles.js';
+import { setBooleanAttribute } from '../../utils/dom.js';
 import defaultStyles from '../styles/defaults.css?inline';
 import styles from './index.css?inline';
-import { setBooleanAttribute } from '../../utils/dom.js';
 
 // Props to create getters and setters for, the defaults for these props are set in the FilePondEntryList component
 export const COMPONENT_PROPS = [
