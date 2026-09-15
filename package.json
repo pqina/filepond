@@ -101,6 +101,7 @@
     "devDependencies": {
         "@rollup/plugin-terser": "^0.4.4",
         "@sveltejs/vite-plugin-svelte": "^6.2.4",
+        "@types/node": "^26.5.1",
         "@typescript-eslint/types": "^8.48.1",
         "@vitest/browser-playwright": "^4.0.18",
         "eslint-plugin-svelte": "^2.46.1",

@@ -17,48 +17,54 @@ export default defineConfig(({ command }) => ({
         cspNonce: '1234',
     },
     root: command === 'serve' ? './dev' : './',
+
+    optimizeDeps: {
+        // This package aliases to local source; it isn't a dependency to pre-bundle.
+        exclude: ['filepond'],
+    },
+
     resolve: {
         // modules
         alias: [
             // locales
             {
                 find: /^filepond\/locales\/(.*)\.js$/,
-                replacement: resolve(__dirname, srcDir + '/locales/$1.js'),
+                replacement: resolve(__dirname, srcDir + '/locales/$1.ts'),
             },
             {
-                find: 'filepond/locales',
-                replacement: resolve(__dirname, srcDir + '/locales/index.js'),
+                find: /^filepond\/locales$/,
+                replacement: resolve(__dirname, srcDir + '/locales/index.ts'),
             },
 
             // assets
             {
-                find: 'filepond/assets',
-                replacement: resolve(__dirname, srcDir + '/assets/index.js'),
+                find: /^filepond\/assets$/,
+                replacement: resolve(__dirname, srcDir + '/assets/index.ts'),
             },
 
             // extensions
             {
-                find: 'filepond/extensions',
-                replacement: resolve(__dirname, srcDir + '/extensions/index.js'),
+                find: /^filepond\/extensions$/,
+                replacement: resolve(__dirname, srcDir + '/extensions/index.ts'),
             },
 
             // utils
             {
-                find: 'filepond/utils',
-                replacement: resolve(__dirname, srcDir + '/utils/index.js'),
+                find: /^filepond\/utils$/,
+                replacement: resolve(__dirname, srcDir + '/utils/index.ts'),
             },
 
             // templates
             {
-                find: 'filepond/templates',
-                replacement: resolve(__dirname, srcDir + '/templates/index.js'),
+                find: /^filepond\/templates$/,
+                replacement: resolve(__dirname, srcDir + '/templates/index.ts'),
             },
 
             // dev helpers
-            { find: 'filepond/dev', replacement: resolve(__dirname, srcDir + '/dev/index.js') },
+            { find: /^filepond\/dev$/, replacement: resolve(__dirname, srcDir + '/dev/index.ts') },
 
             // root
-            { find: 'filepond', replacement: resolve(__dirname, srcDir + '/index.js') },
+            { find: /^filepond$/, replacement: resolve(__dirname, srcDir + '/index.ts') },
 
             // local extensions
             {
@@ -70,6 +76,7 @@ export default defineConfig(({ command }) => ({
 
     plugins: [
         svelte({
+            configFile: false,
             compilerOptions: {
                 discloseVersion: false,
             },
