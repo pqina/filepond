@@ -1,11 +1,17 @@
-import { mount, unmount, type Component } from 'svelte';
+import { flushSync, mount, tick, unmount, type Component } from 'svelte';
 import { HTMLElementSafe } from '../../common/ssr.js';
 import { addListener, createStyleSheet, dispatchCustomEvent } from '../../utils/dom.js';
 import { arrayRemoveFalsy } from '../../utils/array.js';
-import type { AnimationMode, Locale, SpringOptions } from '../../types/index.js';
+import type {
+    AnimationMode,
+    Locale,
+    ReducedMotionPreference,
+    SpringOptions,
+} from '../../types/index.js';
 
-const ObservedAttributes = ['animations'];
-const SharedProperties = ['locale', 'animations', 'springDefaults'];
+export const COMPONENT_PROPS = ['locale', 'reducedMotionPreference', 'springOptions'];
+
+const ObservedAttributes = ['reduced-motion'];
 
 export interface FilePondSvelteComponentElementEventMap {
     connected: CustomEvent<null>;
@@ -30,11 +36,11 @@ export interface FilePondSvelteComponentOptions {
     /** Optional labels */
     locale?: Locale;
 
-    /** Control animations */
-    animations?: AnimationMode;
+    /** Should we use motion or not */
+    reducedMotionPreference?: ReducedMotionPreference;
 
     /** Generic Spring configuration to use */
-    springDefaults?: SpringOptions;
+    springOptions?: SpringOptions;
 }
 
 /**
@@ -47,8 +53,8 @@ export class FilePondSvelteComponentElement
     extends HTMLElementSafe
     implements FilePondSvelteElementEventHandler
 {
-    declare springDefaults?: SpringOptions;
-    declare animations?: AnimationMode;
+    declare springOptions?: SpringOptions;
+    declare reducedMotionPreference?: AnimationMode;
     declare locale?: Locale;
 
     #root: ShadowRoot;
@@ -74,6 +80,12 @@ export class FilePondSvelteComponentElement
     }
 
     attributeChangedCallback(name: string, _: string, value: string) {
+        if (name === 'reduced-motion') {
+            this.#props.reducedMotionPreference = value;
+            return;
+        }
+
+        // assign directly to #props
         Object.assign(this.#props, {
             [name]: value,
         });
@@ -102,17 +114,18 @@ export class FilePondSvelteComponentElement
         // so we can reference it elsewhere in this class (for internal svelte reason we can't assign directly to this.#props with $state)
         this.#props = $state({
             root: this,
-            springDefaults: undefined,
+            springOptions: undefined,
             locale: undefined,
-            animations: this.getAttribute('animations') || undefined,
+            reducedMotionPreference: this.getAttribute('reduced-motion') || 'auto',
         });
 
-        [...new Set([...SharedProperties, ...properties])].forEach((key) => {
+        [...new Set([...COMPONENT_PROPS, ...properties])].forEach((key) => {
             Object.defineProperty(this, key, {
                 get() {
                     return this.#props[key];
                 },
                 set(value) {
+                    // console.log(this.tagName, key, value);
                     this.#props[key] = value;
                 },
             });
@@ -150,6 +163,10 @@ export class FilePondSvelteComponentElement
     }
 
     connectedCallback() {
+        if (this.#app) {
+            return;
+        }
+
         this.#app = mount(this.#Component, {
             target: this.#root,
             props: this.#props,
@@ -162,7 +179,6 @@ export class FilePondSvelteComponentElement
                     detail: e.detail,
                 });
             });
-
             this.#listeners.push(unsub);
         });
 
@@ -176,9 +192,12 @@ export class FilePondSvelteComponentElement
 
     disconnectedCallback() {
         this.#listeners.forEach((unsub) => unsub());
+        this.#listeners.length = 0;
 
-        unmount(this.#app);
-        this.#app = null;
+        if (this.#app) {
+            unmount(this.#app);
+            this.#app = null;
+        }
 
         this.dispatchEvent(new CustomEvent('disconnected'));
     }

@@ -1,21 +1,29 @@
 export { default as NodeList } from './index.svelte';
 
-import {
-    type TemplateNode,
-    type NodeContext,
-    type ComponentNode,
-    type ElementNode,
+import type { SpringOptions } from '../../../types/index.js';
+import type {
+    TemplateNode,
+    NodeContext,
+    NodeData,
+    ComponentNode,
+    ElementNode,
 } from '../../common/nodeTree.js';
 
 export interface NodeListOptions {
+    /** reduceMotion in node list itself */
+    reduceMotion: boolean;
+
+    /** Default spring options to use */
+    springOptions: SpringOptions | undefined;
+
     /** The nodes to render */
     nodes: TemplateNode[];
 
     /** The context available to the current items as received by the parent */
-    context?: NodeContext;
+    data?: NodeData;
 
     /** Context shared by all nodes */
-    sharedContext?: NodeContext;
+    context?: NodeContext;
 
     /** Routes between nodes */
     routes?: { [key: string]: { [event: string]: () => void } };
@@ -26,7 +34,7 @@ export interface NodeListOptions {
     /** Allows node manipulation before rendering */
     beforeRenderNode?: (
         node: ComponentNode | ElementNode,
-        context: NodeContext,
-        sharedContext: NodeContext
+        data: NodeContext,
+        context: NodeContext
     ) => TemplateNode | false | void;
 }

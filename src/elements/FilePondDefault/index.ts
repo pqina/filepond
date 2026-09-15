@@ -1,5 +1,10 @@
 import type { ExtensionFactory } from '../../core/extensionManager.ts';
-import type { AnimationMode, Locale, SpringOptions } from '../../types/index.js';
+import type {
+    AnimationMode,
+    Locale,
+    ReducedMotionPreference,
+    SpringOptions,
+} from '../../types/index.js';
 import type { Bounds } from '../../utils/bounds.js';
 import type { Rect } from '../../utils/rect.js';
 import { FilePondInputElement } from '../FilePondInput/index.js';
@@ -84,7 +89,7 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
     #connectedSubs: (() => void)[] = [];
 
     /** Stores the current animation mode */
-    #animations: AnimationMode = 'auto';
+    #reducedMotionPreference: ReducedMotionPreference = 'auto';
 
     /** Stores the current nodrop state */
     #noDrop: boolean = false;
@@ -103,40 +108,45 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
     }
 
     /** Automatically passes value to child elements, for usage see `FilePondSvelteComponentElement` */
-    set springDefaults(value: SpringOptions) {
-        this.#eachComponent((element) => (element.springDefaults = value));
+    set springOptions(value: SpringOptions) {
+        this.#eachComponent((element) => (element.springOptions = value));
     }
 
     /** Returns the current animation mode */
-    get animations(): AnimationMode {
-        return this.#animations;
+    get reducedMotionPreference(): ReducedMotionPreference {
+        return this.#reducedMotionPreference;
     }
 
-    /** Setting to toggle animations, automatically passes `animations` setting to child elements, for usage see `FilePondSvelteComponentElement` */
-    set animations(value: AnimationMode) {
+    /** Setting to toggle motion, automatically passes `reducedMotionPreference` setting to child elements, for usage see `FilePondSvelteComponentElement` */
+    set reducedMotionPreference(value: ReducedMotionPreference) {
         // invalid mode or no change
-        if (!AnimationModes.includes(value)) {
+        if (!['', 'on', 'off', 'auto'].includes(value)) {
             return;
         }
-        this.#animations = value;
-        this.#syncPropAnimations();
+        this.#reducedMotionPreference = value === '' ? 'on' : value;
+        this.#syncPropReducedMotionPreference();
     }
 
-    #syncPropAnimations() {
+    #syncPropReducedMotionPreference() {
         if (!this.isConnected) {
             return;
         }
 
-        if (this.isConnected && this.getAttribute('animations') !== this.#animations) {
+        if (
+            this.isConnected &&
+            this.getAttribute('reduced-motion') !== this.#reducedMotionPreference
+        ) {
             setStringAttribute(
                 this,
-                'animations',
-                this.#animations === 'auto' ? undefined : this.#animations
+                'reduced-motion',
+                this.#reducedMotionPreference === 'auto' ? undefined : this.#reducedMotionPreference
             );
         }
 
         // pass to chidlren
-        this.#eachComponent((element) => (element.animations = this.#animations));
+        this.#eachComponent(
+            (element) => (element.reducedMotionPreference = this.#reducedMotionPreference)
+        );
     }
 
     /** Set to `true` to remove drop area */
@@ -224,7 +234,7 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
     }
 
     static get observedAttributes() {
-        return [...super.observedAttributes, 'animations', 'noattribution', 'nodrop'];
+        return [...super.observedAttributes, 'reduced-motion', 'noattribution', 'nodrop'];
     }
 
     attributeChangedCallback(name: string, _: string, value: string | boolean) {
@@ -250,8 +260,8 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
         }
 
         // toggle animations
-        if (name === 'animations') {
-            this.animations = value as AnimationMode;
+        if (name === 'reduced-motion') {
+            this.reducedMotionPreference = value as ReducedMotionPreference;
         }
 
         super.attributeChangedCallback(name, _, value);
@@ -320,10 +330,10 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
             extensions: this.extensions,
 
             // default spring values
-            springDefaults: getDefaultSpringOptions(),
+            springOptions: getDefaultSpringOptions(),
 
             // default animation state
-            animations: 'auto',
+            reducedMotionPreference: 'auto',
 
             // show progress indicator for data transfers
             DataTransferLoader: {
@@ -372,7 +382,7 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
                     return node;
                 },
 
-                // animations
+                // entry animation
                 entryAnimationProps: getDefaultEntryAnimationProps(),
                 entryAnimationOriginMap: getDefaultEntryAnimationOriginMap(),
             } as EntryListViewOptions,
@@ -399,7 +409,7 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
         // sync attribute states
         this.#syncPropNoDrop();
         this.#syncPropNoAttribution();
-        this.#syncPropAnimations();
+        this.#syncPropReducedMotionPreference();
 
         // route events
         this.#connectedSubs.push(
@@ -489,7 +499,7 @@ export interface DefineFilePondOptions {
     extensions?: ExtensionFactory[];
 
     /** Initial Spring configuration */
-    springDefaults?: SpringOptions;
+    springOptions?: SpringOptions;
 
     /** Location of web workers */
     workersURL?: URL;

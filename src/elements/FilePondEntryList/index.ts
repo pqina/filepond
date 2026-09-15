@@ -38,7 +38,6 @@ interface FilePondEntryListElementEvents {
 export const COMPONENT_PROPS = [
     'disabled',
     'assets',
-    'locale',
     'template',
     'propResourceMap',
     'drag',
@@ -48,11 +47,9 @@ export const COMPONENT_PROPS = [
     'drop',
     'dropRoot',
     'dropPadding',
-    'animations',
     'entryAnimationProps',
     'entryAnimationOriginMap',
     'entryAnimationStaggerInterval',
-    'springDefaults',
     'byteUnits',
     'beforeRenderNode',
 ];
@@ -83,8 +80,8 @@ export interface FilePondEntryListElement {
     /** Hook to manipulate nodes before rendering */
     beforeRenderNode?: (
         node: TemplateNode,
-        context: NodeContext,
-        sharedContext: NodeContext
+        data: NodeContext,
+        context: NodeContext
     ) => TemplateNode | void | false;
 
     /** Toggle drop functionality on/off */

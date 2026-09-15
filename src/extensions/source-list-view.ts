@@ -1,4 +1,3 @@
-import type { ExtensionState, FilePondEntry } from '../types/index.js';
 import { createExtension } from './common/createExtension.js';
 import { addListener } from '../utils/dom.js';
 import {

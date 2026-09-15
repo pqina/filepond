@@ -90,8 +90,8 @@ export interface FilePondEntryListOptions extends Omit<FilePondSvelteComponentOp
     /** Hook to manipulate nodes before rendering */
     beforeRenderNode?: (
         node: TemplateNode,
-        context: NodeContext,
-        sharedContext: NodeContext
+        data: NodeContext,
+        context: NodeContext
     ) => TemplateNode | void | false;
 
     /** Toggle drop functionality on/off */

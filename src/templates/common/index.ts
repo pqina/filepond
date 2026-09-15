@@ -1,8 +1,8 @@
 import {
     withNodeTree,
     type NodeTree,
-    type NodeContext,
     type TemplateNode,
+    type NodeData,
 } from '../../elements/common/nodeTree.js';
 import type { ComponentNode, FilePondEntry } from '../../types/index.js';
 import type {
@@ -24,10 +24,7 @@ import { Button } from '../../elements/components/Button/index.js';
 import { ElementPane } from '../../elements/components/ElementPane/index.js';
 import { Entry } from '../../elements/FilePondEntryList/components/Entry/index.js';
 import { hasOwnProp } from '../../utils/object.js';
-import {
-    SpringElement,
-    type SpringElementOptions,
-} from '../../elements/components/SpringElement/index.js';
+import { SpringElement } from '../../elements/components/SpringElement/index.js';
 
 export function getEntryExtensionsAsArray(entry: FilePondEntry): ExtensionState[] {
     if (!entry || !entry.extensionState) {
@@ -95,10 +92,10 @@ export function createDefaultSpringElement(options: Omit<ComponentNode, 'compone
     return {
         ...options,
         component: SpringElement,
-        props: ({ enableAnimations, springDefaults }: NodeContext) => {
+        props: ({ reduceMotion, springOptions }: NodeData) => {
             return {
-                springDefaults,
-                enableAnimations,
+                springOptions,
+                reduceMotion,
                 ...options.props,
             };
         },
@@ -110,7 +107,7 @@ export function createSpringPane(options: { key: string; class: string; part?: s
     return {
         key,
         component: ElementPane,
-        props: ({ visualRect }: NodeContext) => {
+        props: ({ visualRect }: NodeData) => {
             return {
                 part,
                 class: klass,
@@ -158,7 +155,7 @@ export function getAsButtonProps(props: { icon: string; label: string; title: st
     };
 }
 
-function createNodeTreeWithTest(test: (context: NodeContext) => boolean): NodeTree {
+function createNodeTreeWithTest(test: (data: NodeData) => boolean): NodeTree {
     return withNodeTree({
         if: {
             test,
@@ -226,31 +223,31 @@ export function createEntryMatcher(matches: string | string[] | RegExp): (entry:
 
 export function whenEntryIs(matches: string | string[] | RegExp | ((entry: Entry) => boolean)) {
     const matchEntry = isFunction(matches) ? matches : createEntryMatcher(matches);
-    return createNodeTreeWithTest(({ entry }: NodeContext) => matchEntry(entry));
+    return createNodeTreeWithTest(({ entry }: NodeData) => matchEntry(entry));
 }
 
 export function whenEntryHasExtensionProp(props: string | string[]) {
     const matches = arrayWrap(props);
-    return createNodeTreeWithTest(({ entry }: NodeContext) =>
+    return createNodeTreeWithTest(({ entry }: NodeData) =>
         matches.some((prop) => hasExtensionWithProp(entry, prop))
     );
 }
 
 export function whenEntryHasAction(actions: string | string[]) {
     const matches = arrayWrap(actions);
-    return createNodeTreeWithTest(({ entry }: NodeContext) =>
+    return createNodeTreeWithTest(({ entry }: NodeData) =>
         matches.some((action) => hasExtensionWithAction(entry, action))
     );
 }
 
 export function whenEntryHasStatus(...status: ExtensionStatusType[]) {
-    return createNodeTreeWithTest(({ entry }: NodeContext) =>
+    return createNodeTreeWithTest(({ entry }: NodeData) =>
         hasExtensionWithStatusType(entry, status)
     );
 }
 
 export function whenEntryNotHasStatus(...status: ExtensionStatusType[]) {
     return createNodeTreeWithTest(
-        ({ entry }: NodeContext) => !hasExtensionWithStatusType(entry, status)
+        ({ entry }: NodeData) => !hasExtensionWithStatusType(entry, status)
     );
 }

@@ -15,11 +15,7 @@ import {
 import { RangeInput } from '../../elements/components/RangeInput/index.js';
 import { supportsRequestFullscreen } from '../../utils/support.js';
 import { toTime } from '../../utils/date.js';
-import {
-    type NodeContext,
-    type TemplateNode,
-    withNodeTree,
-} from '../../elements/common/nodeTree.js';
+import { type NodeData, type TemplateNode, withNodeTree } from '../../elements/common/nodeTree.js';
 import { boolToAttributeValue } from '../../utils/dom.js';
 import { MediaVideo } from '../../elements/FilePondEntryList/components/MediaVideo/index.js';
 import { MediaTimeIndicator } from '../../elements/FilePondEntryList/components/MediaTimeIndicator/index.js';
@@ -64,7 +60,7 @@ export function createEditMediaButton(options?: { action?: string }) {
     return {
         key: 'button-media-edit',
         component: EntryActivityIndicator,
-        props: ({ id, entry }: NodeContext, { updateEntryState }: EntryListFunctions) => ({
+        props: ({ id, entry }: NodeData, { updateEntryState }: EntryListFunctions) => ({
             buttonPart: 'media-button',
             states: [
                 {
@@ -111,7 +107,7 @@ export function createEditMediaButton(options?: { action?: string }) {
 export function createResetMediaButton(options?: { action?: string }) {
     const { action = 'editMedia' } = options ?? {};
     return createButton('button-media-reset', {
-        props: ({ id, entry }: NodeContext, { updateEntryState }: EntryListFunctions) => ({
+        props: ({ id, entry }: NodeData, { updateEntryState }: EntryListFunctions) => ({
             part: 'media-button',
             disabled:
                 hasExtensionWithStatusCode(entry, [
@@ -132,7 +128,7 @@ function createMediaSpringPane(key: string) {
     return {
         key,
         component: ElementPane,
-        spring: ({ visualRect }: NodeContext) => {
+        spring: ({ visualRect }: NodeData) => {
             return {
                 opacity: {
                     value: visualRect.height > 0 ? 1 : 0,
@@ -144,7 +140,7 @@ function createMediaSpringPane(key: string) {
                 },
             };
         },
-        props: ({ visualRect, opacity }: NodeContext) => {
+        props: ({ visualRect, opacity }: NodeData) => {
             return {
                 part: 'media-pane',
                 class: 'media-pane',
@@ -186,7 +182,7 @@ export function createImageView(options?: ImageViewOptions) {
     });
 }
 
-function getMediaContextReference({ entry }: NodeContext): NodeContext {
+function getMediaContextReference({ entry }: NodeData): NodeData {
     const { media, video } = entry.extensionState.EntryListView || {};
     return {
         media,
@@ -277,14 +273,14 @@ export function createMediaControls(options?: {
         'entry-media-controls' + (justifyContent ? ` justify-content-${justifyContent}` : '');
     return withNodeTree({
         if: {
-            test: ({ entry }: NodeContext) => {
+            test: ({ entry }: NodeData) => {
                 const { media } = getMediaContextReference({ entry });
                 return media && media.isReady;
             },
             then: {
                 key,
                 tag: 'element-stack',
-                context: getMediaContextReference,
+                data: getMediaContextReference,
                 attrs: ({ media, video }) => {
                     return {
                         class: klass,
@@ -304,7 +300,7 @@ export function createTogglePlaybackButton() {
         props: {
             class: 'toggle-playback',
         },
-        children: createButton('toggle-playback', ({ video }: NodeContext) => ({
+        children: createButton('toggle-playback', ({ video }: NodeData) => ({
             part: 'media-button',
             icon: video?.isPaused ? 'mediaPlay' : 'mediaPause',
         })),
@@ -317,7 +313,7 @@ export function createToggleAudioButton() {
         props: {
             class: 'toggle-audio',
         },
-        children: createButton('toggle-audio', ({ video }: NodeContext) => {
+        children: createButton('toggle-audio', ({ video }: NodeData) => {
             return {
                 part: 'media-button',
                 icon: video?.isMute ? 'mediaSilent' : video?.isMuted ? 'mediaUnmute' : 'mediaMute',
@@ -356,7 +352,7 @@ export function createMediaScrubber() {
             {
                 key: 'media-scrubber',
                 component: RangeInput,
-                props: ({ video }: NodeContext) => ({
+                props: ({ video }: NodeData) => ({
                     part: 'media-scrubber',
                     step: video?.framesPerSecond,
                     value: video?.time,
@@ -372,10 +368,10 @@ export function createMediaScrubberTitle() {
     return {
         key: 'media-scrubber-title',
         tag: 'time',
-        context: ({ hoverValue }: NodeContext) => ({
+        data: ({ hoverValue }: NodeData) => ({
             time: toTime(hoverValue),
         }),
-        attrs: ({ time }: NodeContext) => ({
+        attrs: ({ time }: NodeData) => ({
             datetime: time,
         }),
         children: `{{time}}`,
@@ -391,7 +387,7 @@ export function createMediaTimeIndicator() {
         children: {
             key: 'media-time-indicator',
             component: MediaTimeIndicator,
-            props: ({ video }: NodeContext) => ({
+            props: ({ video }: NodeData) => ({
                 timeISO: video?.timeISO,
                 timeLabel: video?.timeLabel,
                 durationISO: video?.durationISO,

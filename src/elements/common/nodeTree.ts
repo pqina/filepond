@@ -1,6 +1,6 @@
 // TODO: fix @ts-ignore
 
-import type { SpringOptions } from '../../types/index.js';
+import type { Locale, SpringOptions } from '../../types/index.js';
 import { arrayInsertAtIndex, arrayRemoveFalsy, arrayWrap } from '../../utils/array.js';
 import { isArray, isFunction } from '../../utils/test.js';
 import { hasOwnProp } from '../../utils/object.js';
@@ -8,14 +8,30 @@ import { hasOwnProp } from '../../utils/object.js';
 /**
  * A collection of context information passed to this node
  */
-export type NodeContext = { [key: string]: any };
+export type NodeContext = {
+    [key: string]: any;
+    reduceMotion?: boolean;
+    resources?: NodeResources;
+    propResourceMap?: NodePropResourceMap;
+};
+
+export type NodePropResourceMap = {
+    [componentProperty: string]: string;
+};
+
+export type NodeResources = {
+    locale: Locale;
+    assets: { [key: string]: string };
+};
+
+export type NodeData = { [key: string]: any };
 
 export interface BaseNode {
     /** Unique key for this node */
     key?: string;
 
-    /** Select props from context and add to context for this node */
-    context?: (context: NodeContext) => NodeContext;
+    /** Select props from adta and add to data for this node */
+    data?: (data: NodeData) => NodeData;
 
     /** Routes to listen to */
     routes?: { [event: string]: string };
@@ -73,11 +89,11 @@ export interface ComponentNode extends BaseNode {
 
 export interface SwitchNode {
     if: {
-        test: (context: NodeContext) => boolean;
+        test: (data: NodeData) => boolean;
         then: TemplateNode | TemplateNode[];
     };
     elseif?: {
-        test: (context: NodeContext) => boolean;
+        test: (data: NodeData) => boolean;
         then: TemplateNode | TemplateNode[];
     };
     else?: TemplateNode | TemplateNode[];

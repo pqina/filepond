@@ -27,7 +27,7 @@ export const DataURLStore = createStoreExtension({
                 return;
             }
 
-            // encode in separate thread so doesn't block UI animations
+            // encode in separate thread so doesn't block UI
             const res = (await thread(createThreadWorker(workersURL, readFile), [entry.file], {
                 signal,
                 onprogress,

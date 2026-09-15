@@ -36,8 +36,8 @@
     import type { SpringElementOptions } from './index.js';
 
     let {
-        enableAnimations = true,
-        springDefaults = undefined,
+        reduceMotion = true,
+        springOptions = undefined,
 
         tag = 'div',
         part = undefined,
@@ -98,7 +98,7 @@
 
     $effect(() => {
         Object.assign(springedPosition, {
-            ...springDefaults,
+            ...springOptions,
             ...computedTranslationSpringOptions.current,
             precision: 0.0001,
         });
@@ -106,7 +106,7 @@
 
     $effect(() => {
         Object.assign(springedScale, {
-            ...springDefaults,
+            ...springOptions,
             ...computedScaleSpringOptions.current,
             precision: 0.0001,
         });
@@ -114,7 +114,7 @@
 
     $effect(() => {
         Object.assign(springedOpacity, {
-            ...springDefaults,
+            ...springOptions,
             ...computedOpacitySpringOptions.current,
             precision: 0.01,
         });
@@ -162,11 +162,11 @@
     const position = $derived(rootRelativeRect ? vectorFromRect(rootRelativeRect) : undefined);
     const size = $derived(rootRelativeRect ? sizeFromRect(rootRelativeRect) : undefined);
 
-    /** @ts-ignore Automatically calculate spring animations for size state */
+    /** @ts-ignore Automatically calculate springs for size state */
     const springedSize = new Spring(undefined) as Spring<Size>;
 
     $effect(() => {
-        Object.assign(springedSize, springDefaults);
+        Object.assign(springedSize, springOptions);
     });
 
     let sizePrev: Size | null;
@@ -179,7 +179,7 @@
             return;
         }
 
-        springedSize.set(size, { instant: !enableAnimations });
+        springedSize.set(size, { instant: reduceMotion });
         sizePrev = { ...size };
     });
 
@@ -306,7 +306,7 @@
 
     /** Updates spring config to disable animation */
     const springUpdateConfig = $derived({
-        instant: !enableAnimations,
+        instant: reduceMotion,
     });
 
     // this animates the element to new positions

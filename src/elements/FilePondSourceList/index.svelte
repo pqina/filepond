@@ -2,9 +2,8 @@
     import type { FilePondSourceListOptions } from './index.js';
     import type { Bounds } from '../../utils/bounds.js';
     import { Spring } from 'svelte/motion';
-    import { createAnimationModeObserver } from '../common/animationPreference.svelte.js';
     import { NodeList } from '../components/NodeList/index.js';
-    import { withResources } from '../common/string.js';
+    import { stringReplaceVariables, withResources } from '../common/string.js';
     import { Button } from '../components/Button/index.js';
     import { ElementPane } from '../components/ElementPane/index.js';
     import { measurable } from '../attachments/measurable.js';
@@ -15,12 +14,13 @@
     import { SpringElement } from '../components/SpringElement/index.js';
     import { addListener, dispatchCustomEvent } from '../../utils/dom.js';
     import { onDestroy } from 'svelte';
-    import type { TemplateNode } from '../common/nodeTree.js';
+    import type { NodeData, TemplateNode } from '../common/nodeTree.js';
+    import { createMotionStateObserver, shouldReduceMotion } from '../common/motionState.svelte.js';
 
     let {
         disabled = false,
-        animations = 'auto',
-        springDefaults,
+        springOptions,
+        reducedMotionPreference,
         sources = [],
         assets = {},
         locale = {},
@@ -33,14 +33,17 @@
         beforeRenderNode = passthrough,
     }: FilePondSourceListOptions = $props();
 
-    // update animation preference when changes
-    const AnimationModeObserver = createAnimationModeObserver();
-    const enableAnimations = $derived(AnimationModeObserver.current);
-    $effect(() => {
-        AnimationModeObserver.setPreference(animations);
-    });
+    // update motion preference
+    const motionStateObserver = createMotionStateObserver();
+    const reduceMotion = $derived(
+        shouldReduceMotion(motionStateObserver.current, reducedMotionPreference)
+    );
 
-    $inspect(enableAnimations);
+    $inspect('FilePondSourceList.$props()', { reducedMotionPreference });
+
+    let dialogContentNodes = $state(<{ nodes: TemplateNode[]; data: NodeData }>{});
+
+    let dialogImportCount = $state(0);
 
     // root element
     let rootRef = $state.raw<HTMLDivElement>();
@@ -66,9 +69,9 @@
     const cancelButton = $derived(
         withResources({ label: 'cancel' }, propResourceMap, { locale, assets })
     );
-    const importButton = $derived(
-        withResources({ label: 'import' }, propResourceMap, { locale, assets })
-    );
+    const importButton = $derived({
+        label: stringReplaceVariables(locale.import, { importCount: dialogImportCount }, locale),
+    });
 
     // when a button is clicked we copy the button label to the dialog title
     let title: string = $state.raw('');
@@ -136,11 +139,11 @@
             return;
         }
 
-        dialogRectSpring.set(dialogRect, { instant: !enableAnimations });
+        dialogRectSpring.set(dialogRect, { instant: reduceMotion });
     });
 
     $effect(() => {
-        Object.assign(dialogRectSpring, springDefaults);
+        Object.assign(dialogRectSpring, springOptions);
     });
 
     function handleMeasureDialog(bounds: Bounds) {
@@ -178,11 +181,11 @@
             return;
         }
 
-        contentRectSpring.set(contentRect, { instant: !enableAnimations });
+        contentRectSpring.set(contentRect, { instant: reduceMotion });
     });
 
     $effect(() => {
-        Object.assign(contentRectSpring, springDefaults);
+        Object.assign(contentRectSpring, springOptions);
     });
 
     const dialogContentClipPathStyle = $derived.by(() => {
@@ -225,18 +228,22 @@
         });
     }
 
-    let dialogContentTemplate = $state(<TemplateNode[]>[]);
+    function setDialogContentTemplate(nodes: TemplateNode[], data: NodeData) {
+        dialogContentNodes = {
+            data,
+            nodes,
+        };
+    }
+
+    function setDialogImportButtonCount(count: number) {
+        dialogImportCount = count;
+    }
 
     // set up dialog
     $effect(() => {
         if (!dialogRef) {
             return;
         }
-
-        // @ts-ignore
-        dialogRef.setTemplate = function (template: TemplateNode[]) {
-            dialogContentTemplate = template;
-        };
 
         // typescript throws an error when we set this using oncommand
         const unsubCommandListener = addListener(dialogRef, 'command', handleDialogCommand);
@@ -245,32 +252,7 @@
         };
     });
 
-    const animateDialogSprings = $derived(enableAnimations && dialogVisible);
-
-    /** Source buttons */
-    const sourceListContext = $derived({
-        disabled,
-        dialog: dialogRef,
-        resources: {
-            locale,
-            assets,
-        },
-        propResourceMap,
-        enableAnimations,
-        springDefaults,
-    });
-
-    const sourceDialogContext = $derived({
-        resources: {
-            locale,
-            assets,
-        },
-        propResourceMap,
-        get enabledAnimations() {
-            return enableAnimations;
-        },
-        springDefaults,
-    });
+    const preventSpringMotion = $derived(reduceMotion || !dialogVisible);
 
     const dialogContentObserver = new MutationObserver((entries) => {
         for (const entry of entries) {
@@ -297,7 +279,7 @@
     });
 
     onDestroy(() => {
-        AnimationModeObserver.destroy();
+        motionStateObserver.destroy();
     });
 </script>
 
@@ -319,16 +301,16 @@
             <form method="dialog" part="dialog-form">
                 <div part="dialog-header">
                     <SpringElement
-                        enableAnimations={animateDialogSprings}
+                        reduceMotion={preventSpringMotion}
                         class="dialog-title-spring"
-                        {springDefaults}
+                        {springOptions}
                     >
                         <p part="dialog-title">{title}</p>
                     </SpringElement>
                     <SpringElement
                         class="dialog-button-close-spring"
-                        enableAnimations={animateDialogSprings}
-                        {springDefaults}
+                        reduceMotion={preventSpringMotion}
+                        {springOptions}
                     >
                         <Button
                             {...closeButton}
@@ -346,22 +328,40 @@
                         onmeasure: handleMeasureContent,
                     })}
                 >
+                    <!-- nodes={dialogContentTemplate} -->
+                    <!-- data={{
+                        // TODO: pass select items count here or use "change" event and read out total selected items?
+                    }} -->
                     <NodeList
-                        beforeRenderNode={(node, context, sharedContext) =>
-                            beforeRenderNode(node, context, sharedContext)}
-                        nodes={dialogContentTemplate}
+                        {reduceMotion}
+                        {springOptions}
+                        {...dialogContentNodes}
                         context={{
-                            // TODO: pass select items count here or use "change" event and read out total selected items?
+                            resources: {
+                                locale,
+                                assets,
+                            },
+                            propResourceMap,
                         }}
-                        sharedContext={sourceDialogContext}
+                        beforeRenderNode={(node, data, context) =>
+                            beforeRenderNode(node, data, context)}
+                        beforeSetProps={(props) => {
+                            return {
+                                ...props,
+
+                                // local props potentially needed by children
+                                reduceMotion,
+                                springOptions,
+                            };
+                        }}
                     />
                 </div>
 
                 <div part="dialog-footer">
                     <SpringElement
                         class="dialog-button-cancel-spring"
-                        enableAnimations={animateDialogSprings}
-                        {springDefaults}
+                        reduceMotion={preventSpringMotion}
+                        {springOptions}
                     >
                         <Button
                             {...cancelButton}
@@ -372,8 +372,8 @@
                     </SpringElement>
                     <SpringElement
                         class="dialog-button-import-spring"
-                        enableAnimations={animateDialogSprings}
-                        {springDefaults}
+                        reduceMotion={preventSpringMotion}
+                        {springOptions}
                     >
                         <Button {...importButton} part="dialog-button-import" type="submit" />
                     </SpringElement>
@@ -401,11 +401,22 @@
         </dialog>
 
         <NodeList
-            beforeRenderNode={(node, context, sharedContext) =>
-                beforeRenderNode(node, context, sharedContext)}
+            {reduceMotion}
+            {springOptions}
             nodes={template}
-            context={{ items: sources }}
-            sharedContext={sourceListContext}
+            data={{ items: sources }}
+            context={{
+                disabled,
+                dialog: dialogRef,
+                setDialogContentTemplate,
+                setDialogImportButtonCount,
+                resources: {
+                    locale,
+                    assets,
+                },
+                propResourceMap,
+            }}
+            beforeRenderNode={(node, data, context) => beforeRenderNode(node, data, context)}
         />
     {/if}
 </div>

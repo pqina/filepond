@@ -49,8 +49,8 @@ export interface SpringElementOptions {
     /** Set to `true` if can't be interacted with */
     inert?: boolean | null;
 
-    enableAnimations?: boolean;
-    springDefaults?: SpringOptions;
+    reduceMotion?: boolean;
+    springOptions?: SpringOptions;
     scaleSpringOptions?: SpringOptions;
     opacitySpringOptions?: SpringOptions;
     translationSpringOptions?: SpringOptions;

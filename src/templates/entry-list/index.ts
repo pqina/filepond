@@ -1,5 +1,5 @@
 import type { EntryListFunctions, TemplateNode } from '../../types/index.js';
-import { withNodeTree, type NodeContext } from '../../elements/common/nodeTree.js';
+import { withNodeTree, type NodeData } from '../../elements/common/nodeTree.js';
 
 import { isDataTransferEntry, isFileEntry, isNumber, isString } from '../../utils/test.js';
 import { bytesToNaturalFileSize } from '../../utils/file.js';
@@ -29,13 +29,13 @@ export function createFilePondEntryList(): TemplateNode[] {
         {
             key: 'entry-list',
             component: EntryList,
-            props: ({ entries }: NodeContext) => ({
+            props: ({ entries }: NodeData) => ({
                 part: 'entry-list',
                 entries,
             }),
             item: {
                 if: {
-                    test: ({ isPlaceholder }: NodeContext) => isPlaceholder,
+                    test: ({ isPlaceholder }: NodeData) => isPlaceholder,
                     then: {
                         component: EntryListItemPlaceholder,
                         props: ({ onmeasureitem }) => ({
@@ -59,7 +59,7 @@ export function createFilePondEntryList(): TemplateNode[] {
                         translation,
                         springAnimation,
                         onmeasureitem,
-                    }: NodeContext) => {
+                    }: NodeData) => {
                         // select entry list parameters to pass to entry item
                         return {
                             part: isDataTransferEntry(entry)
@@ -103,11 +103,11 @@ export function createFilePondEntry(): TemplateNode {
             createEntryLoadState(),
             {
                 if: {
-                    test: ({ entry }: NodeContext) => isDataTransferEntry(entry),
+                    test: ({ entry }: NodeData) => isDataTransferEntry(entry),
                     then: createEntryDataTransferInfo(),
                 },
                 elseif: {
-                    test: ({ entry }: NodeContext) => isFileEntry(entry),
+                    test: ({ entry }: NodeData) => isFileEntry(entry),
                     then: createEntryInfo(),
                 },
             },
@@ -184,7 +184,7 @@ export function createEntryDataTransferInfo() {
                 layout: 'col',
             },
         },
-        context: ({ entry }: NodeContext) => {
+        data: ({ entry }: NodeData) => {
             const status = getExtensionStatusWithCode(entry, 'LOAD_BUSY');
 
             // adds { processed, total } object to scope
@@ -218,7 +218,7 @@ export function createEntryStatus() {
     return {
         key: 'entry-status',
         component: EntryStatus,
-        props: ({ ariaId }: NodeContext) => ({
+        props: ({ ariaId }: NodeData) => ({
             part: 'entry-status',
             class: 'entry-status',
             id: `${ariaId}-status`,
@@ -233,7 +233,7 @@ export function createFileLoadInfo() {
         attrs: {
             layout: 'col',
         },
-        context: ({ entry }: NodeContext) => {
+        data: ({ entry }: NodeData) => {
             const isWaiting = hasExtensionWithStatusCode(entry, [
                 'LOAD_QUEUED',
                 'LOAD_BUSY',
@@ -254,7 +254,7 @@ export function createFileLoadInfo() {
             {
                 key: 'file-info-main',
                 component: ElementSkeleton,
-                props: ({ isWaiting, isFrozen }: NodeContext) => {
+                props: ({ isWaiting, isFrozen }: NodeData) => {
                     return {
                         class: 'entry-info-main',
                         part: 'entry-info-main',
@@ -267,7 +267,7 @@ export function createFileLoadInfo() {
             {
                 key: 'file-info-sub',
                 component: ElementSkeleton,
-                props: ({ isWaiting, isFrozen }: NodeContext) => {
+                props: ({ isWaiting, isFrozen }: NodeData) => {
                     return {
                         class: 'entry-info-sub',
                         part: 'entry-info-sub',
@@ -275,7 +275,7 @@ export function createFileLoadInfo() {
                         isFrozen,
                     };
                 },
-                context: ({ entry, byteUnits }: NodeContext) => {
+                data: ({ entry, byteUnits }: NodeData) => {
                     if (!isNumber(entry.size)) {
                         return {};
                     }
@@ -298,7 +298,7 @@ export function createFileLoadInfo() {
     };
 }
 
-const createFileStoreMainAttributes = ({ ariaId }: NodeContext) => ({
+const createFileStoreMainAttributes = ({ ariaId }: NodeData) => ({
     id: `${ariaId}-store-info`,
     class: 'entry-info-main',
 });
@@ -316,7 +316,7 @@ export function createFileStoreInfo() {
             fn: fade,
             duration: 150,
             easing: quadInOut,
-            when: ({ entry }: NodeContext) => {
+            when: ({ entry }: NodeData) => {
                 return hasExtensionWithStatusCode(entry, [
                     'STORE_QUEUED',
                     'STORE_BUSY',
@@ -340,7 +340,7 @@ export function createFileStoreInfo() {
                     key: 'file-store-busy-info-main',
                     tag: 'div',
                     attrs: createFileStoreMainAttributes,
-                    spring: ({ entry }: NodeContext) => {
+                    spring: ({ entry }: NodeData) => {
                         const { progress } = getExtensionStatusWithCode(entry, 'STORE_BUSY') ?? {};
                         return {
                             progress: {
@@ -370,7 +370,7 @@ export function createEntryLoadState() {
         key: 'entry-load-state',
         component: EntryActivityIndicator,
         props: (
-            { id, ariaId, entry }: NodeContext,
+            { id, ariaId, entry }: NodeData,
             { updateEntryState, removeEntries }: EntryListFunctions
         ) => ({
             class: 'entry-load-state',
@@ -416,7 +416,7 @@ export function createEntryStoreState() {
     return {
         key: 'entry-store-state',
         component: EntryActivityIndicator,
-        props: ({ id, ariaId, entry }: NodeContext, { updateEntryState }: EntryListFunctions) => ({
+        props: ({ id, ariaId, entry }: NodeData, { updateEntryState }: EntryListFunctions) => ({
             class: 'entry-store-state',
             part: 'entry-store-state',
             buttonPart: 'entry-button',
@@ -524,7 +524,7 @@ export function createEntryCheckbox(options?: EntryCheckboxOptions): TemplateNod
     return {
         key,
         component: BooleanInput,
-        props: ({ id, entry }: NodeContext, { updateEntryState }: EntryListFunctions) => ({
+        props: ({ id, entry }: NodeData, { updateEntryState }: EntryListFunctions) => ({
             class: key,
             part: key,
             icon: 'check',
@@ -552,13 +552,13 @@ export function createFileRenameInput(options?: FileRenameInputOptions): Templat
     const { key = 'file-rename', extensionAction = 'renameFile' } = options ?? {};
     return {
         if: {
-            test: ({ entry }: NodeContext) => {
+            test: ({ entry }: NodeData) => {
                 return isString(entry.name) && hasExtensionWithAction(entry, extensionAction);
             },
             then: {
                 key,
                 component: FilenameInput,
-                props: ({ id, entry }: NodeContext, { updateEntryState }: EntryListFunctions) => ({
+                props: ({ id, entry }: NodeData, { updateEntryState }: EntryListFunctions) => ({
                     disabled: hasExtensionWithStatusCode(entry, ['STORE_QUEUED', 'STORE_BUSY']),
                     value: entry.name,
                     onconfirm: (value: string) => {
@@ -582,14 +582,14 @@ export function appendEntryCheckbox(template: TemplateNode[]) {
         .remove('entry-store-state')
         .replace('entry-load-state', createEntryCheckbox())
         .update('entry-list-item', (node: any) => {
-            const existingProps = node.props as (context: NodeContext) => { [key: string]: any };
-            node.props = (context: NodeContext) => {
-                const computedProps = existingProps(context);
+            const existingProps = node.props as (data: NodeData) => { [key: string]: any };
+            node.props = (data: NodeData) => {
+                const computedProps = existingProps(data);
                 return {
                     ...computedProps,
                     part: toSpaceSeparatedString(
                         computedProps.part,
-                        context.entry.state.checked ? 'selected' : undefined
+                        data.entry.state.checked ? 'selected' : undefined
                     ),
                 };
             };

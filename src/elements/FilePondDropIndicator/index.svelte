@@ -10,15 +10,15 @@
     import { type Rect } from '../../utils/rect.js';
     import { dropArea, type DropEventDetail } from '../attachments/drop-area.js';
     import { measurable } from '../attachments/measurable.js';
-    import { createAnimationModeObserver } from '../common/animationPreference.svelte.js';
     import { sizeFromRect } from '../../utils/size.js';
     import { ElementPane } from '../components/ElementPane/index.js';
     import type { FilePondSvelteComponentOptions } from '../FilePondSvelteComponent/index.svelte.js';
     import type { Bounds } from '../../utils/bounds.js';
     import { onDestroy } from 'svelte';
     import { dispatchCustomEvent } from '../../utils/dom.js';
+    import { createMotionStateObserver, shouldReduceMotion } from '../common/motionState.svelte.js';
 
-    let { animations = 'auto', springDefaults }: FilePondSvelteComponentOptions = $props();
+    let { reducedMotionPreference, springOptions }: FilePondSvelteComponentOptions = $props();
 
     // reference to files drop area element
     let root: HTMLElement = $state() as HTMLElement;
@@ -44,12 +44,11 @@
     const IndicatorSize = { width: 64, height: 64 };
     const IndicatorElasticity = 4;
 
-    // update animation preference when changes
-    const AnimationModeObserver = createAnimationModeObserver();
-    const enableAnimations = $derived(AnimationModeObserver.current);
-    $effect(() => {
-        AnimationModeObserver.setPreference(animations);
-    });
+    // update motion preference
+    const motionStateObserver = createMotionStateObserver();
+    const reduceMotion = $derived(
+        shouldReduceMotion(motionStateObserver.current, reducedMotionPreference)
+    );
 
     //
     // geom
@@ -73,7 +72,7 @@
             return undefined;
         }
 
-        if (!enableAnimations) {
+        if (reduceMotion) {
             return placeholderCenterRelativeToRoot;
         }
 
@@ -89,10 +88,10 @@
     //
     const indicatorPositionSpring = new Spring(undefined) as Spring<Vector | undefined>;
     $effect(() => {
-        if (!springDefaults) {
+        if (!springOptions) {
             return;
         }
-        Object.assign(indicatorPositionSpring, springDefaults);
+        Object.assign(indicatorPositionSpring, springOptions);
     });
 
     let didNotHaveCoordinates = false;
@@ -103,7 +102,7 @@
         }
 
         indicatorPositionSpring.set(indicatorPosition, {
-            instant: !enableAnimations || didNotHaveCoordinates,
+            instant: reduceMotion || didNotHaveCoordinates,
         });
 
         didNotHaveCoordinates = false;
@@ -111,15 +110,15 @@
 
     const indicatorOpacitySpring = new Spring(1);
     $effect(() => {
-        if (!springDefaults) {
+        if (!springOptions) {
             return;
         }
-        Object.assign(indicatorOpacitySpring, springDefaults);
+        Object.assign(indicatorOpacitySpring, springOptions);
     });
 
     $effect(() => {
         if (!hasCoordinates) {
-            indicatorOpacitySpring.set(0, { instant: !enableAnimations });
+            indicatorOpacitySpring.set(0, { instant: reduceMotion });
             return;
         }
 
@@ -128,21 +127,21 @@
 
     const indicatorSizeSpring = new Spring(IndicatorSize);
     $effect(() => {
-        if (!springDefaults) {
+        if (!springOptions) {
             return;
         }
-        Object.assign(indicatorSizeSpring, springDefaults);
+        Object.assign(indicatorSizeSpring, springOptions);
     });
 
     $effect(() => {
         if (indicatorOpacitySpring.current <= 0) {
-            indicatorSizeSpring.set(IndicatorSize, { instant: !enableAnimations });
+            indicatorSizeSpring.set(IndicatorSize, { instant: reduceMotion });
             return;
         }
 
         if (hasCoordinates) {
             indicatorSizeSpring.set(sizeFromRect(placeholderRect as Rect), {
-                instant: !enableAnimations,
+                instant: reduceMotion,
             });
         }
     });
@@ -190,7 +189,7 @@
     const styleTransform = $derived(`translate(${translationX}px,${translationY}px)`);
 
     onDestroy(() => {
-        AnimationModeObserver.destroy();
+        motionStateObserver.destroy();
     });
 </script>
 

@@ -7,7 +7,6 @@ import {
     type FilePondFileEntry,
 } from '../types/index.js';
 import { FilePondSourceListElement } from '../elements/FilePondSourceList/index.js';
-import type { CameraInputElement } from '../elements/FilePondCameraInput/index.js';
 import type { FilePondFrameElement } from '../elements/FilePondFrame/index.js';
 
 export function dispatchCustomEvent(element: HTMLElement, type: string, options?: CustomEventInit) {
@@ -85,7 +84,6 @@ type CustomElementTagNameMap = {
     'file-pond-source-list': FilePondSourceListElement;
     'file-pond-drop-indicator': FilePondDropIndicatorElement;
     'file-pond-frame': FilePondFrameElement;
-    'camera-input': CameraInputElement;
 };
 
 type ElementTagNameMap = HTMLElementTagNameMap & CustomElementTagNameMap;
@@ -134,6 +132,20 @@ export function h<K extends keyof ElementTagNameMap>(
     el.append(...(arrayRemoveFalsy(children) as HTMLElement[]));
 
     return el;
+}
+
+/** Resets a file input value */
+export function resetFileInput(element: HTMLInputElement) {
+    element.files = new DataTransfer().files;
+}
+
+/** Converts an array of files to a FileList */
+export function filesToFileList(files: File[]) {
+    const dataTransfer = new DataTransfer();
+    files.forEach((file) => {
+        dataTransfer.items.add(file);
+    });
+    return dataTransfer.files;
 }
 
 /** Sets a list of files/directories to a file input element, return `true` if value was updated */

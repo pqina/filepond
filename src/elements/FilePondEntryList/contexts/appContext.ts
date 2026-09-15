@@ -4,7 +4,7 @@ import type { Rect } from '../../../utils/rect.js';
 import type { AnimatedEntry, AppCallbacks } from '../types.js';
 
 export interface AppContext extends AppCallbacks {
-    readonly enableAnimations: boolean;
+    readonly reduceMotion: boolean;
     readonly enableDrag: boolean;
     readonly locale: Locale;
     readonly assets: { [key: string]: string };
@@ -12,7 +12,7 @@ export interface AppContext extends AppCallbacks {
         locale: Locale;
         assets: { [key: string]: string };
     };
-    readonly springDefaults: SpringOptions | undefined;
+    readonly springOptions: SpringOptions | undefined;
     readonly propResourceMap: {
         [componentProperty: string]: string;
     };

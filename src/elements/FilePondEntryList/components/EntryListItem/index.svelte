@@ -54,8 +54,7 @@
     });
 
     // get app context map
-    const appContext = getAppContext();
-    const { locale, enableAnimations, springDefaults } = $derived(getAppContext());
+    const { locale, reduceMotion, springOptions } = $derived(getAppContext());
 
     /** Window width used to calculate if element is visible or not */
     let windowWidth = $state.raw() as number;
@@ -164,8 +163,8 @@
     onroot={handleRootDefined}
     onchangerendercontent={handleChangeRenderContent}
     onelementmeasure={onmeasureitem}
-    {enableAnimations}
-    {springDefaults}
+    {reduceMotion}
+    {springOptions}
 >
     {@render children({ id: entry.id, entry })}
 </SpringElement>

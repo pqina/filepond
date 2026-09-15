@@ -34,7 +34,6 @@
     import { noop, passthrough } from '../../utils/placeholder.js';
     import { measurable } from '../attachments/measurable.js';
     import { setBooleanAttribute } from '../../utils/dom.js';
-    import { createAnimationModeObserver } from '../common/animationPreference.svelte.js';
     import { setAppContext } from './contexts/appContext.js';
     import { setDragContext } from './contexts/dragContext.js';
     import { setDropContext } from './contexts/dropContext.js';
@@ -56,6 +55,7 @@
         isTabKeyboardEvent,
     } from '../../utils/keyboard.js';
     import { stringReplaceVariables } from '../common/string.js';
+    import { createMotionStateObserver, shouldReduceMotion } from '../common/motionState.svelte.js';
 
     let {
         disabled = false,
@@ -74,21 +74,20 @@
         drop = true,
         dropRoot = undefined,
         dropPadding = 20,
-        animations = 'auto',
         entryAnimationOriginMap = {},
         entryAnimationProps = {},
         entryAnimationStaggerInterval = 50,
         beforeRenderNode = passthrough,
         byteUnits = undefined,
-        springDefaults,
+        reducedMotionPreference,
+        springOptions,
     }: FilePondEntryListOptions = $props();
 
-    // update animation preference when changes
-    const AnimationModeObserver = createAnimationModeObserver();
-    const enableAnimations = $derived(AnimationModeObserver.current);
-    $effect(() => {
-        AnimationModeObserver.setPreference(animations);
-    });
+    // update motion preference
+    const motionStateObserver = createMotionStateObserver();
+    const reduceMotion = $derived(
+        shouldReduceMotion(motionStateObserver.current, reducedMotionPreference)
+    );
 
     // the maximum number of animations that can run
     const MAX_ANIMATIONS = 50;
@@ -294,7 +293,7 @@
         const { stagger, oncomplete, retain = false } = options ?? {};
 
         // don't run animations, this means animation completes instantly
-        if (!enableAnimations) {
+        if (reduceMotion) {
             if (oncomplete) {
                 oncomplete();
             }
@@ -424,8 +423,8 @@
 
     /* Application context */
     setAppContext({
-        get enableAnimations() {
-            return enableAnimations;
+        get reduceMotion() {
+            return reduceMotion;
         },
         get enableDrag() {
             return drag;
@@ -442,8 +441,8 @@
                 assets,
             };
         },
-        get springDefaults() {
-            return springDefaults;
+        get springOptions() {
+            return springOptions;
         },
         get propResourceMap() {
             return propResourceMap;
@@ -906,6 +905,7 @@
         setBooleanAttribute(root, 'data-disabled', disabled);
     });
 
+    // this is additional context information available to nodes in the NodeTree
     const entryListContext = $derived({
         insertEntries: callback.insertEntries,
         removeEntries: callback.removeEntries,
@@ -918,7 +918,6 @@
             assets,
         },
         propResourceMap,
-        enableAnimations,
     });
 
     // this updates the spring root so when the root position changes on the screen (for example when an element above it is removed, the SpringElements don't animate towards the new position)
@@ -1061,7 +1060,7 @@
 
     // clean up
     onDestroy(() => {
-        AnimationModeObserver.destroy();
+        motionStateObserver.destroy();
     });
 </script>
 
@@ -1100,17 +1099,22 @@
     onkeyup={handleKeyUp}
 >
     <NodeList
+        {reduceMotion}
+        {springOptions}
         nodes={template}
-        context={{ entries: computedEntries }}
-        sharedContext={entryListContext}
-        beforeRenderNode={(node, context, sharedContext) =>
-            beforeRenderNode(node, context, sharedContext)}
-        beforeSetProps={(props) => ({
-            ...props,
-            byteUnits,
-            enableAnimations,
-            springDefaults,
-        })}
+        data={{ entries: computedEntries }}
+        context={entryListContext}
+        beforeRenderNode={(node, data, context) => beforeRenderNode(node, data, context)}
+        beforeSetProps={(props) => {
+            return {
+                ...props,
+
+                // these props are passed to components in addition to the default component props
+                byteUnits,
+                reduceMotion,
+                springOptions,
+            };
+        }}
     />
     <div role="status" aria-live="polite" class="implicit">{ariaStatus}</div>
 </div>

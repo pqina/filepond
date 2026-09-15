@@ -26,8 +26,8 @@
         /** The part name to assign to buttons inside this component */
         buttonPart?: string;
 
-        /** Context for the local nodelist */
-        nodeContext: Omit<NodeListOptions, 'nodes'>;
+        /** Context for the local nodelists */
+        subNodeListProps: Omit<NodeListOptions, 'nodes'>;
     }
 
     let {
@@ -35,14 +35,14 @@
         part = undefined,
         buttonPart = undefined,
         states = [],
-        nodeContext,
+        subNodeListProps,
     }: EntryActivityIndicatorOptions = $props();
 
     // root element so we can determine if children have focus
     let root: HTMLElement;
 
     // get locale and assets
-    const { locale, enableAnimations, springDefaults } = $derived(getAppContext());
+    const { locale, reduceMotion, springOptions } = $derived(getAppContext());
 
     // get store
     const entryContext = getEntryContext();
@@ -137,7 +137,7 @@
     const currentProgressIndicatorControlOpacity = new Spring(0);
     $effect(() => {
         currentProgressIndicatorControlOpacity.set(currentProgressIndicatorControl ? 1 : 0, {
-            instant: !enableAnimations,
+            instant: reduceMotion,
         });
     });
 
@@ -297,17 +297,17 @@
     subattrs={{ layout: 'pile' }}
     onroot={(el) => (root = el)}
     {part}
-    {enableAnimations}
-    {springDefaults}
+    {reduceMotion}
+    {springOptions}
 >
     {#if buttonsTemplate.length}
-        <NodeList nodes={buttonsTemplate} {...nodeContext}></NodeList>
+        <NodeList {...subNodeListProps} nodes={buttonsTemplate}></NodeList>
     {/if}<!-- no return here as we use element-pile:empty in css -->{#if currentProgressIndicatorControlOpacity.current > 0}
         <div
             style:opacity={currentProgressIndicatorControlOpacity.current}
             part={`${buttonPart}-pile`}
         >
-            <ProgressIndicator {...lastProgressIndicatorControlState} {enableAnimations} />
+            <ProgressIndicator {...lastProgressIndicatorControlState} {reduceMotion} />
         </div>
     {/if}
 </SpringElement>

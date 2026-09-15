@@ -47,7 +47,7 @@
 }
 
 /* apply "never" animation state */
-:host([animations='never']) {
+:host([reduced-motion='on']) {
     --animate: 0;
 }
 

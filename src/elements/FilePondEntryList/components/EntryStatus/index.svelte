@@ -21,7 +21,7 @@
     }: EntryStatusOptions = $props();
 
     // get app context data
-    const { assets, locale, enableAnimations, springDefaults } = $derived(getAppContext());
+    const { assets, locale, reduceMotion, springOptions } = $derived(getAppContext());
 
     const entryContext = getEntryContext();
 
@@ -81,8 +81,8 @@
                     class="entry-status-message"
                     subclass="entry-status-message-content"
                     dataset={{ type }}
-                    {enableAnimations}
-                    {springDefaults}
+                    {reduceMotion}
+                    {springOptions}
                 >
                     {#snippet children({ visualRect })}
                         {#if icon}{@html icon}{/if}

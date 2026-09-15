@@ -1,7 +1,7 @@
 import { Button } from '../../elements/components/Button/index.js';
-import type { NodeContext } from '../../types/index.js';
 import { supportsDisplayTransition } from '../../utils/support.js';
-import { createButton, getAsButtonProps } from '../common/index.js';
+import { getAsButtonProps } from '../common/index.js';
+import type { NodeContext } from '../../types/index.js';
 
 export function createFilePondSourceList() {
     return [
@@ -50,7 +50,7 @@ export function createFilePondSourceList() {
                                     if (supportsDisplayTransition()) {
                                         if (!dialog.open && e.propertyName === 'display') {
                                             // dialog now fully faded out
-                                            onclosed?.(dialog);
+                                            onclosed?.(context);
                                             return;
                                         }
                                     }
@@ -61,7 +61,7 @@ export function createFilePondSourceList() {
                                         dialog.open
                                     ) {
                                         // dialog now fully faded in
-                                        onopened?.(dialog);
+                                        onopened?.(context);
                                         return;
                                     }
                                 };
@@ -69,13 +69,13 @@ export function createFilePondSourceList() {
                                 dialog.ontoggle = function () {
                                     if (dialog.open) {
                                         // dialog now fading in
-                                        onopen?.(dialog);
+                                        onopen?.(context);
                                     } else {
                                         // dialog now fading out
-                                        onclose?.(dialog);
+                                        onclose?.(context);
 
                                         if (!supportsDisplayTransition()) {
-                                            onclosed?.(dialog);
+                                            onclosed?.(context);
                                         }
                                     }
                                 };

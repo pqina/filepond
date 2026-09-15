@@ -73,7 +73,7 @@
     const mediaScalar = new Spring(mediaInitialScalar, revealConfig);
 
     // context variables
-    const { springDefaults, enableAnimations } = $derived(getAppContext());
+    const { springOptions, reduceMotion } = $derived(getAppContext());
     const springContext = getSpringElementTreeContext();
     const { currentScale } = $derived(springContext);
 
@@ -83,14 +83,14 @@
     // @ts-ignore
     const mediaPaneCurrentRect: Spring<Rect> = new Spring(undefined);
     $effect(() => {
-        if (!springDefaults) {
+        if (!springOptions) {
             return;
         }
-        Object.assign(mediaPaneCurrentRect, springDefaults);
+        Object.assign(mediaPaneCurrentRect, springOptions);
     });
 
     const springUpdateConfig = $derived({
-        instant: !enableAnimations,
+        instant: reduceMotion,
     });
 
     // adjust page offset for parralax effect

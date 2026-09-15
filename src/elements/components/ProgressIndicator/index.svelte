@@ -33,8 +33,7 @@
 
         /** Used to limit the number of decimals, defaults to 3 */
         precision?: number;
-
-        enableAnimations?: boolean;
+        reduceMotion?: boolean;
 
         oncomplete?: () => void;
         onchange?: (value: number) => void;
@@ -50,7 +49,7 @@
         oncomplete = undefined,
         onchange = undefined,
         precision = 3,
-        enableAnimations = true,
+        reduceMotion = false,
     }: ProgressIndicatorOptions = $props();
 
     /** Gets the rotation in radians from a transformation matrix */
@@ -76,7 +75,7 @@
     // reference to the active SVG page
     let animatedPath: SVGGeometryElement | undefined = $state.raw(undefined);
 
-    // animation stores
+    // spring stores
     const progressIndiactorSpringOptions = { stiffness: 0.1, damping: 0.7, precision: 0.001 };
     const easedValue = new Spring(undefined, { precision: 0.01 }) as Spring<number | undefined>;
     const easedOffset = new Spring(0, progressIndiactorSpringOptions) as Spring<number>;
@@ -84,7 +83,7 @@
     // to determine if we switched from determinate to indeterminate or vice versa
     let wasDeterminate: boolean | undefined = $state.raw(undefined);
 
-    // used for syncing rotation with animation state
+    // used for syncing rotation with spring
     let spinner: HTMLElement | undefined = $state.raw(undefined);
 
     // calculate current value
@@ -93,7 +92,7 @@
     const isDeterminate = $derived(hasValue && value !== Infinity);
 
     $effect(() => {
-        easedValue.set(isDeterminate ? value : 0.5, { instant: !enableAnimations });
+        easedValue.set(isDeterminate ? value : 0.5, { instant: reduceMotion });
     });
 
     // change event
@@ -112,7 +111,7 @@
             return;
         }
 
-        // current transform matrix (at animation stop time)
+        // current transform matrix (at CSS animation stop time)
         const transformMatrix = getComputedStyle(spinnerElement).getPropertyValue('transform');
 
         // get offset from matrix so we can animate to the animation end state
@@ -135,7 +134,7 @@
 
         // this animates the offset to the 0 position
         easedOffset.set(target, {
-            instant: !enableAnimations,
+            instant: reduceMotion,
         });
     }
 
@@ -154,7 +153,7 @@
 
         // this animates the offset to the 0 position
         easedOffset.set(target, {
-            instant: !enableAnimations,
+            instant: reduceMotion,
         });
     }
 

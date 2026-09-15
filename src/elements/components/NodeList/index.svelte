@@ -9,9 +9,11 @@
         isComponentNode,
         isElementNode,
         type ElementNode,
+        type NodeData,
+        type NodeResources,
+        type NodePropResourceMap,
     } from '../../common/nodeTree.js';
     import { type Component, untrack } from 'svelte';
-    import { type Locale } from '../../../types/index.js';
     import { type NodeListOptions } from './index.js';
     import { isFunction, isString } from '../../../utils/test.js';
     import { stringReplaceVariables, withResources } from '../../common/string.js';
@@ -27,23 +29,25 @@
 
     let {
         nodes,
-        context: treeContext = {},
-        sharedContext = {},
-        routes: contextRoutes = {},
+        data = {},
+        context = {},
+        routes: currentRoutes = {},
         beforeSetProps = passthrough,
         beforeRenderNode = passthrough,
+        reduceMotion = false,
+        springOptions,
     }: NodeListOptions = $props();
 
     // reference to node instance (element or component)
     const refs: { [node: string]: any } = $state.raw({});
 
+    /** The currently computed context (+springs) for the nodes at this level */
     const springState: {
         [key: string]: {
             transform: (...args: any[]) => number;
             spring: Spring<any>;
         };
     } = $state({});
-
     const springValues = $derived.by(() => {
         return springState
             ? Object.entries(springState).reduce((current, [key, { spring, transform }]) => {
@@ -53,80 +57,78 @@
               }, {})
             : null;
     });
-
-    /** The currently computed context (+springs) for the nodes at this level */
-    const computedTreeContext = $derived.by(() => {
+    const springedNodeData = $derived.by(() => {
         if (springValues === null) {
-            return treeContext;
+            return data;
         }
 
         return {
-            ...treeContext,
+            ...data,
             ...springValues,
         };
     });
 
     /** Apply context to data */
     function computeObjectWithContext(
-        obj:
-            | string
-            | { [key: string]: any }
-            | ((context: NodeContext, sharedContext: NodeContext) => any),
-        context: NodeContext
+        obj: string | { [key: string]: any } | ((dat: NodeData, ctx: NodeContext) => any),
+        dat: NodeData,
+        ctx: NodeContext
     ) {
-        return obj && isFunction(obj) ? obj(context, sharedContext) : obj;
+        return obj && isFunction(obj) ? obj(dat, ctx) : obj;
     }
 
     function computeObjectWithResources(
-        obj: { [key: string]: any } | ((context: NodeContext) => any) | undefined,
-        context: NodeContext,
-        resources: {
-            locale: Locale;
-            assets: {
-                [key: string]: string;
-            };
-        }
+        obj: { [key: string]: any } | ((dat: NodeContext) => any) | undefined,
+        dat: NodeContext,
+        ctx: NodeContext
     ) {
         if (!obj) {
             return;
         }
 
-        const computedObject = computeObjectWithContext(obj, context);
+        if (!isResourceMap(ctx.propResourceMap) || !isResources(ctx.resources)) {
+            return;
+        }
 
-        return withResources(computedObject, sharedContext.propResourceMap, resources);
+        const computedObject = computeObjectWithContext(obj, dat, ctx);
+
+        return withResources(computedObject, ctx.propResourceMap, ctx.resources);
     }
 
-    function computeStringWithResources(
-        str: string,
-        context: NodeContext,
-        resources: {
-            locale: Locale;
-            assets: {
-                [key: string]: string;
-            };
+    function isResources(value: any): value is NodeResources {
+        return !!value;
+    }
+
+    function isResourceMap(value: any): value is NodePropResourceMap {
+        return !!value;
+    }
+
+    function computeStringWithResources(str: string, dat: NodeData, ctx: NodeContext) {
+        if (!isResourceMap(ctx.propResourceMap) || !isResources(ctx.resources)) {
+            return str;
         }
-    ) {
+
         // auto replace props (label, icon, title) in string with locale values
-        let { label } = withResources({ label: str }, sharedContext.propResourceMap, resources);
+        let { label } = withResources({ label: str }, ctx.propResourceMap, ctx.resources);
 
         // test if we have to replace variables
         if (label.includes('{{')) {
-            const resultingContext = context
-                ? computeObjectWithContext(context, { ...computedTreeContext })
-                : computedTreeContext;
+            const resultingData = dat
+                ? computeObjectWithContext(dat, { ...springedNodeData }, ctx)
+                : springedNodeData;
 
-            return stringReplaceVariables(label, resultingContext, resources.locale);
+            return stringReplaceVariables(label, resultingData, ctx.resources.locale);
         }
 
         return label;
     }
 
-    function computeSwitchNode(node: SwitchNode, context: NodeContext) {
-        if (isFunction(node.if.test) && node.if.test(context)) {
+    function computeSwitchNode(node: SwitchNode, dat: NodeData) {
+        if (isFunction(node.if.test) && node.if.test(dat)) {
             return arrayWrap(node.if.then);
         }
 
-        if (node.elseif && isFunction(node.elseif.test) && node.elseif.test(context)) {
+        if (node.elseif && isFunction(node.elseif.test) && node.elseif.test(dat)) {
             return arrayWrap(node.elseif.then);
         }
 
@@ -137,11 +139,11 @@
         return [];
     }
 
-    function computeSwitchNodes(node: SwitchNode, context: NodeContext) {
+    function computeSwitchNodes(node: SwitchNode, dat: NodeData) {
         let outputNodes: TemplateNode[] = [];
-        for (const computedNode of computeSwitchNode(node, context)) {
+        for (const computedNode of computeSwitchNode(node, dat)) {
             if (isSwitchNode(computedNode)) {
-                outputNodes.push(...computeSwitchNodes(computedNode, context));
+                outputNodes.push(...computeSwitchNodes(computedNode, dat));
             } else {
                 outputNodes.push(computedNode);
             }
@@ -161,7 +163,7 @@
 
             // handle switches
             if (isSwitchNode(node)) {
-                const nodes = computeSwitchNodes(node, treeContext);
+                const nodes = computeSwitchNodes(node, data);
                 preparedNodes.push(...nodes);
                 continue;
             }
@@ -191,14 +193,14 @@
 
                 // handle springed context data
                 if (!isSwitchNode(node) && isFunction(node.spring)) {
-                    const springEntries = Object.entries(node.spring(treeContext));
+                    const springEntries = Object.entries(node.spring(data));
                     untrack(() => {
                         springEntries.forEach(
                             ([propertyName, { value, config, transform = passthrough }]) => {
                                 // update value spring
                                 if (springState[propertyName]) {
                                     springState[propertyName].spring.set(value, {
-                                        instant: !sharedContext.enableAnimations,
+                                        instant: reduceMotion,
                                     });
                                 }
 
@@ -206,7 +208,7 @@
                                 else {
                                     springState[propertyName] = {
                                         transform,
-                                        spring: new Spring(value, config),
+                                        spring: new Spring(value, config || springOptions),
                                     };
                                 }
                             }
@@ -219,14 +221,14 @@
                     routes: nodeRoutes,
                     children,
                     transition,
-                    context: nodeContext,
+                    data: bareNodeData,
                 } = node as ComponentNode | ElementNode;
 
                 // merge routes
                 if (nodeRoutes) {
                     untrack(() => {
                         Object.assign(
-                            contextRoutes,
+                            currentRoutes,
                             Object.entries(nodeRoutes).reduce(
                                 (prev: any, [origin, target]: [string, string]) => {
                                     const [dispatcherkey, eventType] = origin.split(':');
@@ -250,34 +252,30 @@
                 // determine routes
                 let computedRoutes = {};
                 untrack(() => {
-                    if (key && contextRoutes?.[key]) {
-                        Object.assign(contextRoutes[key], {
+                    if (key && currentRoutes?.[key]) {
+                        Object.assign(currentRoutes[key], {
                             getRoot() {
                                 return refs[key];
                             },
                         });
 
                         computedRoutes = {
-                            ...contextRoutes[key],
+                            ...currentRoutes[key],
                         };
                     }
                 });
 
-                const computedNodeContext = nodeContext
-                    ? computeObjectWithContext(nodeContext, computedTreeContext)
-                    : computedTreeContext;
+                const mergedNodeData = bareNodeData
+                    ? computeObjectWithContext(bareNodeData, springedNodeData, context)
+                    : springedNodeData;
 
-                const mergedNodeContext = {
-                    ...computedTreeContext,
-                    ...computedNodeContext,
+                const computedNodeData = {
+                    ...springedNodeData,
+                    ...mergedNodeData,
                 };
 
                 const content = isString(children)
-                    ? computeStringWithResources(
-                          children,
-                          mergedNodeContext,
-                          sharedContext.resources
-                      )
+                    ? computeStringWithResources(children, computedNodeData, context)
                     : children;
 
                 if (isComponentNode(node)) {
@@ -287,20 +285,16 @@
                             key: getNodeKey(key, index),
                             component,
                             props: beforeSetProps(
-                                computeObjectWithResources(
-                                    props,
-                                    mergedNodeContext,
-                                    sharedContext.resources
-                                )
+                                computeObjectWithResources(props, computedNodeData, context)
                             ),
                             item,
                             children: content,
-                            context: mergedNodeContext,
-                            transition,
+                            data: computedNodeData,
                             routes: computedRoutes,
+                            transition,
                         },
-                        treeContext,
-                        sharedContext
+                        data,
+                        context
                     );
                 }
 
@@ -310,19 +304,15 @@
                         {
                             key: getNodeKey(key, index),
                             tag,
-                            attrs: computeObjectWithResources(
-                                attrs,
-                                mergedNodeContext,
-                                sharedContext.resources
-                            ),
+                            attrs: computeObjectWithResources(attrs, computedNodeData, context),
                             item,
                             children: content,
-                            context: mergedNodeContext,
-                            transition,
+                            data: computedNodeData,
                             routes: computedRoutes,
+                            transition,
                         },
-                        treeContext,
-                        sharedContext
+                        data,
+                        context
                     );
                 }
             })
@@ -333,9 +323,9 @@
     const SuspensionObserver = getSuspensionObserver();
 </script>
 
-{#each computedNodes as { key, tag, attrs, component, props, children, context, routes, item, transition } (key)}
+{#each computedNodes as { key, tag, attrs, component, props, children, data, routes, item, transition } (key)}
     {#if transition}
-        {#if transition?.when(context)}
+        {#if transition?.when(data)}
             <svelte:element
                 this={'div'}
                 transition:transition.fn={transition}
@@ -343,11 +333,11 @@
                     SuspensionObserver.suspend(e.currentTarget);
                 }}
             >
-                {@render node(key, tag, attrs, component, props, children, context, routes, item)}
+                {@render node(key, tag, attrs, component, props, children, data, routes, item)}
             </svelte:element>
         {/if}
     {:else}
-        {@render node(key, tag, attrs, component, props, children, context, routes, item)}
+        {@render node(key, tag, attrs, component, props, children, data, routes, item)}
     {/if}
 {/each}
 
@@ -358,7 +348,7 @@
     Component: Component,
     props: { [key: string]: any },
     content: TemplateNode[],
-    context: NodeContext,
+    data: NodeData,
     routes: { [key: string]: string },
     item: any
 )}
@@ -366,16 +356,18 @@
         <Component
             {...props}
             {...routes}
-            nodeContext={{
+            subNodeListProps={{
+                /* for when a component renders a NodeList */
+                data,
                 context,
-                routes: contextRoutes,
-                sharedContext,
+                routes: currentRoutes,
                 beforeSetProps,
                 beforeRenderNode,
             }}
             bind:this={
                 noop,
                 function (ref) {
+                    props?.onmount?.(ref);
                     refs[key] = ref;
                 }
             }
@@ -383,12 +375,12 @@
             {#snippet children(childrenProps: any)}
                 <!-- if we'er rendering an item, we only pass children props for now -->
                 <NodeList
+                    {reduceMotion}
+                    {springOptions}
                     nodes={item ? [item] : content}
-                    context={beforeSetProps(
-                        item ? childrenProps : { ...context, ...childrenProps }
-                    )}
-                    routes={item ? {} : contextRoutes}
-                    {sharedContext}
+                    data={beforeSetProps(item ? childrenProps : { ...data, ...childrenProps })}
+                    routes={item ? {} : currentRoutes}
+                    {context}
                     {beforeSetProps}
                     {beforeRenderNode}
                 />
@@ -424,22 +416,26 @@
                 }
             >
                 {#if item}
-                    {#each context.items as itemContext}
+                    {#each data.items as itemData}
                         <NodeList
+                            {reduceMotion}
+                            {springOptions}
                             nodes={item}
-                            context={itemContext}
-                            routes={contextRoutes}
-                            {sharedContext}
+                            data={itemData}
+                            routes={currentRoutes}
+                            {context}
                             {beforeSetProps}
                             {beforeRenderNode}
                         />
                     {/each}
                 {:else if content}
                     <NodeList
+                        {reduceMotion}
+                        {springOptions}
                         nodes={content}
+                        {data}
+                        routes={currentRoutes}
                         {context}
-                        routes={contextRoutes}
-                        {sharedContext}
                         {beforeSetProps}
                         {beforeRenderNode}
                     />

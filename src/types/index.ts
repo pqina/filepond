@@ -286,3 +286,5 @@ export interface EntryAnimation {
  * The animation mode of the interface. Defaults to `'auto'`, set to `'always'` to force animation, even if users prefers no animation, set to `'never'` to never animate the user interface.
  */
 export type AnimationMode = 'auto' | 'always' | 'never';
+
+export type ReducedMotionPreference = 'auto' | 'on' | '' | 'off';

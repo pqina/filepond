@@ -1,4 +1,4 @@
-import type { AnimationMode, Extension, Locale } from '../../types/index.js';
+import type { Locale } from '../../types/index.js';
 import type { FilePondEntrySource, FilePondEntry } from '../../types/index.js';
 import type { ExtensionFactory } from '../../core/extensionManager.js';
 
@@ -30,7 +30,6 @@ import defaultStyles from './index.css?inline';
 import { createFilePondEntryTree } from './createFilePondEntryTree.js';
 import { FileInputSource } from '../../extensions/file-input-source.js';
 import { ValueCallbackStore } from '../../extensions/value-callback-store.js';
-import { sizeIsEmpty } from '../../utils/size.js';
 
 // validity flag order - https://developer.mozilla.org/en-US/docs/Web/API/ElementInternals/setValidity#flags
 const VALIDATION_FLAGS_ORDER = [

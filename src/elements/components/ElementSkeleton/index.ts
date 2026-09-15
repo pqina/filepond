@@ -1,6 +1,6 @@
 export { default as ElementSkeleton } from './index.svelte';
 
-// used to auto-offset skeleton pulse animation
+// used to auto-offset skeleton pulse motion
 let instanceCounter = 0;
 export function getSkeletonInstanceIndex() {
     return instanceCounter++;

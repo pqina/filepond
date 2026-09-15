@@ -13,11 +13,8 @@ import { setBooleanAttribute } from '../../utils/dom.js';
 export const COMPONENT_PROPS = [
     'disabled',
     'assets',
-    'locale',
     'template',
     'propResourceMap',
-    'animations',
-    'springDefaults',
     'beforeRenderNode',
     'sources',
     'propResourceMap',
@@ -35,7 +32,6 @@ export class FilePondSourceListElement extends FilePondSvelteComponentElement {
 
     connectedCallback() {
         super.connectedCallback();
-
         this.addListener('sourceschange', (e) => {
             setBooleanAttribute(this, 'empty', e.detail === 0);
         });
@@ -72,7 +68,7 @@ export interface FilePondSourceListOptions extends Omit<FilePondSvelteComponentO
     /** Hook to manipulate nodes before rendering */
     beforeRenderNode?: (
         node: TemplateNode,
-        context: NodeContext,
-        sharedContext: NodeContext
+        data: NodeContext,
+        context: NodeContext
     ) => TemplateNode | void | false;
 }

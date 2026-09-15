@@ -17,7 +17,7 @@
          */
         isWaiting?: boolean;
 
-        /** Let's the skeleton know that an error occured, we freeze the animation */
+        /** Let's the skeleton know that an error occured, we freeze the skeleton pulse */
         isFrozen?: boolean;
 
         /** Skeleton children */
@@ -32,13 +32,13 @@
         children,
     }: SkeletonOptions = $props();
 
-    // this offsets the animation so you get a "wave" effect when more skeleton loaders are visible
+    // this offsets the animated pulse so you get a "wave" effect when more skeleton loaders are visible
     const offset = getSkeletonInstanceIndex();
 
     // reference to root node
     let root = $state.raw() as HTMLElement;
 
-    // should render skeleton animation
+    // should render skeleton visuals?
     let shouldRender = $state(true);
 
     // current state

@@ -1,9 +1,9 @@
-import { defineCustomElement, h } from '../utils/dom.js';
-import { CameraInputElement } from '../elements/FilePondCameraInput/index.js';
 import {
     createSourceExtension,
     type SourceExtensionOptions,
 } from './common/createSourceExtension.js';
+import { CameraInput } from '../elements/components/CameraInput/index.js';
+import type { NodeContext, NodeData } from '../elements/common/nodeTree.js';
 
 export interface CameraSourceOptions extends SourceExtensionOptions {
     /** Use to adjust camera settings */
@@ -34,73 +34,74 @@ export const CameraSource = createSourceExtension({
         sourceIconError: 'cameraOff',
         sourceType: 'select',
 
-        // locale to use in camera input
-        locale: undefined,
-
         // use date time by default
         filename: () =>
             filenameDateFormatter.format(new Date()).replace(' ', '_').replaceAll(':', '-'),
     } as CameraSourceOptions,
-    factory: ({ props }, { on, setExtensionSourceState }) => {
+    factory: ({ props }, { setExtensionSourceState }) => {
+        /**
+         * Called in onmount to request camera access
+         * @param cameraInput
+         */
+        function requestCameraAccess(cameraInput: ReturnType<typeof CameraInput>) {
+            const { mediaConstraints } = props;
+            cameraInput
+                .requestCameraAccess(mediaConstraints)
+                .then(handleCameraOkay)
+                .catch(handleCamerError);
+        }
+
+        function handleCameraOkay() {
+            const { sourceIcon } = props;
+
+            // all good, reset error state
+            setExtensionSourceState({
+                icon: sourceIcon,
+                title: undefined,
+            });
+        }
+
+        /**
+         * This shows camera error icon in button
+         * @param err
+         */
+        function handleCamerError(err: Error) {
+            // something went wrong
+            const { sourceIconError } = props;
+
+            setExtensionSourceState({
+                icon: sourceIconError,
+                title: err.message,
+            });
+        }
+
+        // creates the template to render when dialog is opened
         function createSourceTemplate(inputAttributes: {
             [key: string]: string | number | boolean;
         }) {
-            // define custom element
-            defineCustomElement('camera-input', CameraInputElement);
-
-            // return template
             return [
                 {
                     key: 'camera-input',
-                    tag: 'camera-input',
-                    attrs: {
-                        part: 'camera-input',
-                        ...inputAttributes,
+                    component: CameraInput,
+                    props: ({ filename }: NodeData, context: NodeContext) => {
+                        // update labels when locale changes
+                        const { capture, reset } = context.resources?.locale || {};
+
+                        return {
+                            ...inputAttributes,
+                            filename,
+                            labelReset: reset,
+                            labelCapture: capture,
+                            onmount: requestCameraAccess,
+                            onerror: handleCamerError,
+                        };
                     },
                 },
             ];
         }
 
-        // we need to ask permission to access the camera feed
-        function handleOpenedDialog(dialog: HTMLDialogElement) {
-            const { sourceIcon, sourceIconError, mediaConstraints, filename, locale } = props;
-
-            const cameraInput = dialog.querySelector('camera-input') as
-                | CameraInputElement
-                | undefined;
-
-            if (!cameraInput) {
-                return;
-            }
-
-            cameraInput.locale = locale;
-            cameraInput.filename = filename;
-            cameraInput
-                .requestCameraAccess(mediaConstraints)
-                .then(() => {
-                    // all good, reset error state
-                    setExtensionSourceState({
-                        icon: sourceIcon,
-                        title: undefined,
-                    });
-                })
-                .catch((err) => {
-                    // error state
-                    setExtensionSourceState({
-                        icon: sourceIconError,
-                        title: err.message,
-                    });
-                });
-        }
-
-        // @ts-ignore
-        const unsubOpenDialog = on('dialogOpened', handleOpenedDialog);
-
         return {
             createSourceTemplate,
-            destroy() {
-                unsubOpenDialog();
-            },
         };
     },
 });

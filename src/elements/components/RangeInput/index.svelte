@@ -35,12 +35,9 @@
         /** Progress slider children */
         children: Snippet<[{ hoverValue: number }]>;
 
-        enableAnimations?: boolean;
-
-        springDefaults?: SpringOptions;
-
+        reduceMotion?: boolean;
+        springOptions?: SpringOptions;
         oninput?: (detail: number) => void;
-
         onhover?: (detail: number) => void;
     }
 
@@ -55,17 +52,17 @@
         onhover = noop,
         precision = 2,
         children,
-        enableAnimations = true,
-        springDefaults,
+        reduceMotion = true,
+        springOptions,
     }: RangeInputOptions = $props();
 
     // @ts-ignore so we can animate back pane
     const animatedWidth: Spring<number | undefined> = new Spring(undefined);
     $effect(() => {
-        if (!springDefaults) {
+        if (!springOptions) {
             return;
         }
-        Object.assign(animatedWidth, springDefaults);
+        Object.assign(animatedWidth, springOptions);
     });
 
     /** The iInput[type="range"] element */
@@ -98,7 +95,7 @@
     function handleResizeRoot(size: Size) {
         rootWidth = size.width;
         animatedWidth.set(rootWidth, {
-            instant: !enableAnimations,
+            instant: reduceMotion,
         });
     }
 

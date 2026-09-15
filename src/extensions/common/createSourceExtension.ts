@@ -1,5 +1,6 @@
 import type { EntryTreeOn } from '../../core/entryTree.js';
 import type { ExtensionManagerOn } from '../../core/extensionManager.js';
+import type { NodeData } from '../../elements/common/nodeTree.js';
 import type {
     EntrySource,
     ExtensionContext,
@@ -172,8 +173,14 @@ export function createSourceExtension<Props extends object = SourceExtensionOpti
 
             // current element state
             let currentTemplate: TemplateNode[];
-            let currentDialog: HTMLDialogElement | HTMLElement | null;
             let unsubSubmitListener: (() => void) | null;
+            let unsubChangeListener: (() => void) | null;
+
+            interface DialogContext {
+                dialog: HTMLDialogElement;
+                setDialogContentTemplate: (template: TemplateNode[], data: NodeData) => void;
+                setDialogImportButtonCount: (count: number) => void;
+            }
 
             // set button
             didSetProps(({ sourceIcon: icon, sourceLabel: label, sourceType: type, disabled }) => {
@@ -239,46 +246,81 @@ export function createSourceExtension<Props extends object = SourceExtensionOpti
                 insertEntries(sources, insertIndex);
             }
 
-            function handleOpen(dialog: HTMLDialogElement) {
+            function handleOpen({
+                dialog,
+                setDialogContentTemplate,
+                setDialogImportButtonCount,
+            }: DialogContext) {
                 const { inputAttributes } = props;
-
-                // remember dialog target or use current target if defined
-                currentDialog = dialog;
 
                 // create element
                 currentTemplate = currentTemplate || createSourceTemplate(inputAttributes);
 
-                // @ts-ignore
-                currentDialog.setTemplate(currentTemplate);
+                // use this template as content
+                setDialogContentTemplate(currentTemplate, props);
 
                 // when the element was appended
                 pub('dialogOpen', dialog);
 
                 // handle form submit so we can add data
-                unsubSubmitListener = addListener(currentDialog, 'submit', handleSubmit);
+                unsubSubmitListener = addListener(dialog, 'submit', handleSubmit);
+
+                // handle form change event so we can update import button counter
+                unsubChangeListener = addListener(
+                    dialog,
+                    'change',
+                    (e: Event & { target: HTMLInputElement }) => {
+                        const { target } = e;
+                        const { name, validity, value } = target;
+
+                        // we're only interested in the output field
+                        if (name !== inputAttributes.name) {
+                            return;
+                        }
+
+                        // 0 selected by default, this hides the counter
+                        let count = 0;
+
+                        if (validity.valid) {
+                            // @ts-ignore
+                            if (value instanceof FormData) {
+                                count = value.getAll(name).length;
+                            } else {
+                                count = 1;
+                            }
+                        }
+
+                        setDialogImportButtonCount(count);
+                    }
+                );
             }
 
-            function handleOpened(dialog: HTMLDialogElement) {
+            function handleOpened({ dialog }: DialogContext) {
                 // when the element was appended
                 pub('dialogOpened', dialog);
             }
 
-            function handleClosed() {
+            function handleClosed({
+                dialog,
+                setDialogContentTemplate,
+                setDialogImportButtonCount,
+            }: DialogContext) {
                 // right before dialog is cleaned up
-                pub('dialogClosed', currentDialog);
+                pub('dialogClosed', dialog);
 
-                // clean up submit listener
+                // clean up listeners
                 unsubSubmitListener?.();
                 unsubSubmitListener = null;
 
+                unsubChangeListener?.();
+                unsubChangeListener = null;
+
                 // we've got the value, let's reset the form
-                currentDialog?.querySelector('form')?.reset();
+                dialog?.querySelector('form')?.reset();
 
                 // @ts-ignore reset template
-                currentDialog.setTemplate(null);
-
-                // reset target
-                currentDialog = null;
+                setDialogContentTemplate(null);
+                setDialogImportButtonCount(0);
             }
 
             return {

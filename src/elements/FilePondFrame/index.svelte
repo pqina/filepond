@@ -1,14 +1,14 @@
 <script lang="ts">
     import { Spring } from 'svelte/motion';
     import { measurable } from '../attachments/measurable.js';
-    import { createAnimationModeObserver } from '../common/animationPreference.svelte.js';
     import { rectFromBounds, type Rect } from '../../utils/rect.js';
     import { ElementPane } from '../components/ElementPane/index.js';
     import type { FilePondSvelteComponentOptions } from '../FilePondSvelteComponent/index.svelte.js';
     import type { Bounds } from '../../utils/bounds.js';
     import { onDestroy } from 'svelte';
+    import { createMotionStateObserver, shouldReduceMotion } from '../common/motionState.svelte.js';
 
-    let { animations = 'auto', springDefaults }: FilePondSvelteComponentOptions = $props();
+    let { reducedMotionPreference, springOptions }: FilePondSvelteComponentOptions = $props();
 
     const callbacks = {
         updateRect: (rect: Rect) => {},
@@ -26,26 +26,25 @@
     // is a state so it triggers pane redraw
     let rootRect = $state.raw() as Rect;
 
-    // update animation preference when changes
-    const AnimationModeObserver = createAnimationModeObserver();
-    const enableAnimations = $derived(AnimationModeObserver.current);
-    $effect(() => {
-        AnimationModeObserver.setPreference(animations);
-    });
+    // update motion preference
+    const motionStateObserver = createMotionStateObserver();
+    const reduceMotion = $derived(
+        shouldReduceMotion(motionStateObserver.current, reducedMotionPreference)
+    );
 
     // update spring
     const rootRectSpring = new Spring<Rect | undefined>(undefined, {
         precision: 1,
     }) as Spring<Rect>;
     $effect(() => {
-        if (!springDefaults) {
+        if (!springOptions) {
             return;
         }
 
-        Object.assign(rootRectSpring, springDefaults);
+        Object.assign(rootRectSpring, springOptions);
     });
     $effect(() => {
-        rootRectSpring.set(rootRect, { instant: !enableAnimations });
+        rootRectSpring.set(rootRect, { instant: reduceMotion });
     });
 
     function handleMeasure(bounds: Bounds) {
@@ -61,7 +60,7 @@
     });
 
     onDestroy(() => {
-        AnimationModeObserver.destroy();
+        motionStateObserver.destroy();
     });
 </script>
 

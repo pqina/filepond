@@ -5,7 +5,19 @@ export const core = {
     reset: 'Reset',
     undo: 'Undo',
     cancel: 'Cancel',
-    import: 'Import',
+    import: {
+        template: 'Import{{amount}}',
+        variables: {
+            amount: {
+                context: 'importCount',
+                map: {
+                    0: '',
+                    else: ' {{importCount}}',
+                },
+            },
+        },
+    },
+
     store: 'Store',
     revert: 'Revert',
     busy: 'Busy',
