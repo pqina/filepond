@@ -10,7 +10,18 @@ export const core = {
     reset: 'Nulstil',
     undo: 'Fortryd',
     cancel: 'Annuller',
-    import: 'Importér',
+    import: {
+        template: 'Importér{{amount}}',
+        variables: {
+            amount: {
+                context: 'importCount',
+                map: {
+                    0: '',
+                    else: ' {{importCount}}',
+                },
+            },
+        },
+    },
     store: 'Gem',
     revert: 'Gendan',
     busy: 'Optaget',

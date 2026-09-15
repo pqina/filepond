@@ -10,7 +10,18 @@ export const core = {
     reset: 'リセット',
     undo: '元に戻す',
     cancel: 'キャンセル',
-    import: 'インポート',
+    import: {
+        template: 'インポート{{amount}}',
+        variables: {
+            amount: {
+                context: 'importCount',
+                map: {
+                    0: '',
+                    else: ' {{importCount}}',
+                },
+            },
+        },
+    },
     store: '保存',
     revert: '戻す',
     busy: '処理中',

@@ -10,7 +10,18 @@ export const core = {
     reset: 'Nullstill',
     undo: 'Angre',
     cancel: 'Avbryt',
-    import: 'Importer',
+    import: {
+        template: 'Importer{{amount}}',
+        variables: {
+            amount: {
+                context: 'importCount',
+                map: {
+                    0: '',
+                    else: ' {{importCount}}',
+                },
+            },
+        },
+    },
     store: 'Lagre',
     revert: 'Tilbakestill',
     busy: 'Opptatt',

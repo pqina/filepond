@@ -10,7 +10,18 @@ export const core = {
     reset: 'Nollaa',
     undo: 'Kumoa',
     cancel: 'Peruuta',
-    import: 'Tuo',
+    import: {
+        template: 'Tuo{{amount}}',
+        variables: {
+            amount: {
+                context: 'importCount',
+                map: {
+                    0: '',
+                    else: ' {{importCount}}',
+                },
+            },
+        },
+    },
     store: 'Tallenna',
     revert: 'Palauta',
     busy: 'Varattu',

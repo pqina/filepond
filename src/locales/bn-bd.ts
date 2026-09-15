@@ -10,7 +10,18 @@ export const core = {
     reset: 'রিসেট',
     undo: 'পূর্বাবস্থায় ফেরত',
     cancel: 'বাতিল',
-    import: 'ইমপোর্ট',
+    import: {
+        template: 'ইমপোর্ট{{amount}}',
+        variables: {
+            amount: {
+                context: 'importCount',
+                map: {
+                    0: '',
+                    else: ' {{importCount}}',
+                },
+            },
+        },
+    },
     store: 'সংরক্ষণ',
     revert: 'পুনরুদ্ধার',
     busy: 'ব্যস্ত',
@@ -50,7 +61,8 @@ export const core = {
     // capabilities labels
     descriptionBrowse: '[{{maxFilesUnit}} বেছে নিন]',
     descriptionBrowseDrop: '{{maxFilesUnit}} এখানে ছেড়ে দিন, অথবা [ব্রাউজ] করুন',
-    descriptionBrowseDropSelect: '{{maxFilesUnit}} এখানে ছেড়ে দিন, [ব্রাউজ] করুন, অথবা এখান থেকে বেছে নিন:',
+    descriptionBrowseDropSelect:
+        '{{maxFilesUnit}} এখানে ছেড়ে দিন, [ব্রাউজ] করুন, অথবা এখান থেকে বেছে নিন:',
     descriptionBrowseSelect: '[ব্রাউজ] করুন, অথবা এখান থেকে {{maxFilesUnit}} বেছে নিন:',
     descriptionSelect: 'এখান থেকে {{maxFilesUnit}} বেছে নিন:',
     fileMainTypeImage: 'ছবি',

@@ -10,7 +10,18 @@ export const core = {
     reset: 'Visszaállítás',
     undo: 'Visszavonás',
     cancel: 'Mégse',
-    import: 'Importálás',
+    import: {
+        template: 'Importálás{{amount}}',
+        variables: {
+            amount: {
+                context: 'importCount',
+                map: {
+                    0: '',
+                    else: ' {{importCount}}',
+                },
+            },
+        },
+    },
     store: 'Mentés',
     revert: 'Visszaállítás',
     busy: 'Foglalt',

@@ -10,7 +10,18 @@ export const core = {
     reset: 'Đặt lại',
     undo: 'Hoàn tác',
     cancel: 'Hủy bỏ',
-    import: 'Nhập',
+    import: {
+        template: 'Nhập{{amount}}',
+        variables: {
+            amount: {
+                context: 'importCount',
+                map: {
+                    0: '',
+                    else: ' {{importCount}}',
+                },
+            },
+        },
+    },
     store: 'Lưu',
     revert: 'Khôi phục',
     busy: 'Đang bận',

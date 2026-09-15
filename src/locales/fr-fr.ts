@@ -10,7 +10,18 @@ export const core = {
     reset: 'Réinitialiser',
     undo: 'Annuler',
     cancel: 'Annuler',
-    import: 'Importer',
+    import: {
+        template: 'Importer{{amount}}',
+        variables: {
+            amount: {
+                context: 'importCount',
+                map: {
+                    0: '',
+                    else: ' {{importCount}}',
+                },
+            },
+        },
+    },
     store: 'Enregistrer',
     revert: 'Rétablir',
     busy: 'Occupé',
@@ -50,7 +61,8 @@ export const core = {
     // capabilities labels
     descriptionBrowse: '[Sélectionner {{maxFilesUnit}}]',
     descriptionBrowseDrop: 'Déposez {{maxFilesUnit}} ici ou [parcourir]',
-    descriptionBrowseDropSelect: 'Déposez {{maxFilesUnit}} ici, [parcourir] ou sélectionnez depuis :',
+    descriptionBrowseDropSelect:
+        'Déposez {{maxFilesUnit}} ici, [parcourir] ou sélectionnez depuis :',
     descriptionBrowseSelect: '[Parcourir] ou sélectionnez {{maxFilesUnit}} depuis :',
     descriptionSelect: 'Sélectionnez {{maxFilesUnit}} depuis :',
     fileMainTypeImage: 'image',
