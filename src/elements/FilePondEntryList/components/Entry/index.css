@@ -69,7 +69,8 @@
 .entry-front {
     z-index: 1;
     --transition-duration: var(--_100ms);
-    --transition: border var(--transition-duration) ease-in-out,
+    --transition:
+        border var(--transition-duration) ease-in-out,
         background-color var(--transition-duration) ease-in-out;
     --border-top: var(--entry-border-top);
     --border-right: var(--entry-border-right);
