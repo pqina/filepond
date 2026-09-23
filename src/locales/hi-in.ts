@@ -10,18 +10,7 @@ export const core = {
     reset: 'रीसेट करें',
     undo: 'पूर्ववत करें',
     cancel: 'रद्द करें',
-    import: {
-        template: 'आयात करें{{amount}}',
-        variables: {
-            amount: {
-                context: 'importCount',
-                map: {
-                    0: '',
-                    else: ' {{importCount}}',
-                },
-            },
-        },
-    },
+    import: 'आयात करें',
     store: 'सहेजें',
     revert: 'वापस लें',
     busy: 'प्रक्रिया में',

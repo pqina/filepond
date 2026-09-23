@@ -34,7 +34,7 @@
 
     interface MediaFile {
         file: File | Blob;
-        isError: boolean | Error,
+        isError: boolean | Error;
         isComplete: boolean;
         isPoster: boolean;
     }
@@ -77,7 +77,7 @@
                     file: poster,
                     isComplete: false,
                     isPoster: true,
-                    isError: false
+                    isError: false,
                 };
             }
             // if is a URL to an image
@@ -160,7 +160,7 @@
         });
 
         // if all files errored out, we stop loading
-        if (currentFiles.every(file => file.isError)) {
+        if (currentFiles.every((file) => file.isError)) {
             handleError(error);
         }
     }
@@ -187,7 +187,7 @@
             poster: isPoster ? '' : undefined,
 
             // error state
-            error: isError ? isError : undefined
+            error: isError ? isError : undefined,
         }))
     );
 
@@ -216,14 +216,14 @@
 
     // add media state to extension so can be used by UI
     $effect(() => {
-        const mediaState = {
+        const media = {
             isReady: mediaReady,
             isVisible: mediaVisible,
         };
 
         untrack(() => {
             setEntryExtensionState(entryContext.current, {
-                media: mediaState,
+                media,
             });
         });
     });

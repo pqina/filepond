@@ -7,6 +7,8 @@ import type {
     NodeData,
     ComponentNode,
     ElementNode,
+    NodePropResourceMap,
+    NodeResources,
 } from '../../common/nodeTree.js';
 
 export interface NodeListOptions {
@@ -15,6 +17,12 @@ export interface NodeListOptions {
 
     /** Default spring options to use */
     springOptions: SpringOptions | undefined;
+
+    /** Resources available */
+    resources: NodeResources;
+
+    /** Automatically maps a property name to a resource value in locale and/or assets, defaults to `{ title: 'locale', label: 'locale', icon: 'assets' }` meaning that the value of a `label` property is automatically looked up in the `locale` property */
+    propResourceMap: NodePropResourceMap;
 
     /** The nodes to render */
     nodes: TemplateNode[];
@@ -28,13 +36,19 @@ export interface NodeListOptions {
     /** Routes between nodes */
     routes?: { [key: string]: { [event: string]: () => void } };
 
-    /** Allows manipulating the component props */
-    beforeSetProps?: (node: { [key: string]: any }) => { [key: string]: any };
-
     /** Allows node manipulation before rendering */
     beforeRenderNode?: (
         node: ComponentNode | ElementNode,
         data: NodeContext,
         context: NodeContext
-    ) => TemplateNode | false | void;
+    ) => void | false | ComponentNode | ElementNode;
 }
+
+export type NodeOptions = Omit<NodeListOptions, 'nodes' | 'routes'> & {
+    index: number;
+    node: any;
+    scope: {
+        refs: Record<string, any>;
+        readonly routes: any;
+    };
+};

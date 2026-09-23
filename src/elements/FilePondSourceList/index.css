@@ -156,6 +156,23 @@ dialog {
         --btn-color: var(--default-accent-color-text);
         --btn-background-color: var(--default-accent-color);
         font-weight: 600;
+
+        &:not([data-counter='0'])::after {
+            display: inline-block;
+            font-style: normal;
+            background: rgba(255, 255, 255, 0.25);
+            color: currentColor;
+            box-sizing: border-box;
+            min-width: 1.5em;
+            height: 1.5em;
+            padding: 0 0.25em;
+            margin-left: 0.875em;
+            margin-right: -0.875em;
+            line-height: 1.5;
+            font-size: 0.75em;
+            border-radius: 0.25em;
+            content: attr(data-counter);
+        }
     }
 
     /* backdrop styles */

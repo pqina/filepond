@@ -31,12 +31,16 @@
     }
 
     let {
-        class: klass = undefined,
-        part = undefined,
-        buttonPart = undefined,
+        class: klassProp = undefined,
+        part: partProp = undefined,
+        buttonPart: buttonPartProp = undefined,
         states = [],
         subNodeListProps,
     }: EntryActivityIndicatorOptions = $props();
+
+    const klass = $derived(klassProp);
+    const part = $derived(partProp);
+    const buttonPart = $derived(buttonPartProp);
 
     // root element so we can determine if children have focus
     let root: HTMLElement;
@@ -96,7 +100,7 @@
         // should update value?
         (prev: any, curr: any) => {
             if (prev && curr) {
-                return !isObjectValuesEqual(prev, curr);
+                return !isObjectValuesEqual(prev.props, curr.props);
             }
             return prev !== curr;
         },
@@ -257,6 +261,7 @@
         }
         return [
             {
+                key: 'entry-activity-indicator-buttons',
                 tag: 'element-stack',
                 attrs: {
                     layout: 'pile',
@@ -301,7 +306,17 @@
     {springOptions}
 >
     {#if buttonsTemplate.length}
-        <NodeList {...subNodeListProps} nodes={buttonsTemplate}></NodeList>
+        <NodeList
+            springOptions={subNodeListProps.springOptions}
+            reduceMotion={subNodeListProps.reduceMotion}
+            routes={subNodeListProps.routes}
+            resources={subNodeListProps.resources}
+            propResourceMap={subNodeListProps.propResourceMap}
+            data={subNodeListProps.data}
+            context={subNodeListProps.context}
+            beforeRenderNode={subNodeListProps.beforeRenderNode}
+            nodes={buttonsTemplate}
+        />
     {/if}<!-- no return here as we use element-pile:empty in css -->{#if currentProgressIndicatorControlOpacity.current > 0}
         <div
             style:opacity={currentProgressIndicatorControlOpacity.current}

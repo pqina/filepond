@@ -10,18 +10,7 @@ export const core = {
     reset: 'Réinitialiser',
     undo: 'Annuler',
     cancel: 'Annuler',
-    import: {
-        template: 'Importer{{amount}}',
-        variables: {
-            amount: {
-                context: 'importCount',
-                map: {
-                    0: '',
-                    else: ' {{importCount}}',
-                },
-            },
-        },
-    },
+    import: 'Importer',
     store: 'Enregistrer',
     revert: 'Rétablir',
     busy: 'Occupé',

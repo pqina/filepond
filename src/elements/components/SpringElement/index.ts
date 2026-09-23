@@ -73,13 +73,16 @@ export interface SpringElementOptions {
     /** Called before rendering content */
     shouldRenderContent?: (rect: Rect) => boolean;
 
+    /** Called before passing data to content */
+    beforeRenderContent?: (state: { visualRect: Rect }) => { visualRect: Rect } | undefined;
+
     /** Spring element children */
     children: Snippet<
         [
             {
-                currentSize: Size;
-                targetRect: Rect;
-                clientRect: Rect | null;
+                // currentSize: Size;
+                // targetRect: Rect;
+                // clientRect: Rect | null;
                 visualRect: Rect | null;
             },
         ]

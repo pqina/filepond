@@ -1,10 +1,5 @@
 import type { ExtensionFactory } from '../../core/extensionManager.ts';
-import type {
-    AnimationMode,
-    Locale,
-    ReducedMotionPreference,
-    SpringOptions,
-} from '../../types/index.js';
+import type { Locale, ReducedMotionPreference, SpringOptions } from '../../types/index.js';
 import type { Bounds } from '../../utils/bounds.js';
 import type { Rect } from '../../utils/rect.js';
 import { FilePondInputElement } from '../FilePondInput/index.js';

@@ -26,10 +26,10 @@ export const ConsoleView = createExtension({
         clearBeforeLog: false,
         debounce: true,
     } as ConsoleViewOptions,
-    factory: ({ props, extensionName }, pond) => {
-        // shortcuts to filepond internal methods
-        const { on, insertEntries, updateEntry, removeEntries } = pond;
-
+    factory: (
+        { props, extensionName },
+        { on, insertEntries, updateEntry, removeEntries, getEntries }
+    ) => {
         /** Clean an object for use with structuredCLone */
         function cleanStructuredClone(obj: any, seen = new WeakSet()): any {
             // ignore simple values
@@ -216,10 +216,12 @@ export const ConsoleView = createExtension({
 
         let frame: number;
 
-        function handleUpdateEntries(entries: FilePondEntry[]) {
+        function handleUpdate() {
             const { debounce, clearBeforeLog } = props;
 
-            const logEntriesUpdate = () => {
+            const logUpdate = () => {
+                const entries = getEntries();
+
                 // clears console before logging updating
                 if (clearBeforeLog) {
                     clear();
@@ -235,9 +237,9 @@ export const ConsoleView = createExtension({
             cancelAnimationFrame(frame);
 
             if (debounce) {
-                frame = requestAnimationFrame(logEntriesUpdate);
+                frame = requestAnimationFrame(logUpdate);
             } else {
-                logEntriesUpdate();
+                logUpdate();
             }
         }
 
@@ -266,7 +268,7 @@ export const ConsoleView = createExtension({
             pondCounter++;
         }
 
-        const unsubUpdate = on('updateEntries', handleUpdateEntries);
+        const unsubUpdate = on('updateEntries', handleUpdate);
 
         return {
             destroy: () => {

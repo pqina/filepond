@@ -10,18 +10,7 @@ export const core = {
     reset: 'Sıfırla',
     undo: 'Geri al',
     cancel: 'İptal',
-    import: {
-        template: 'İçe aktar{{amount}}',
-        variables: {
-            amount: {
-                context: 'importCount',
-                map: {
-                    0: '',
-                    else: ' {{importCount}}',
-                },
-            },
-        },
-    },
+    import: 'İçe aktar',
     store: 'Kaydet',
     revert: 'Geri yükle',
     busy: 'Meşgul',

@@ -5,6 +5,7 @@
     import { updateDataset, updateStyles } from '../../../utils/dom.js';
     import { noop } from '../../../utils/placeholder.js';
     import { isElement, isString } from '../../../utils/test.js';
+    import { svgElement } from '../../attachments/svg-element.js';
 
     interface ButtonOptions {
         /** Onclick handler */
@@ -64,7 +65,7 @@
         type = 'button',
         onclick = noop,
         part = undefined,
-        icon = undefined,
+        icon: iconSVG = undefined,
         label = undefined,
         title = undefined,
         disabled = false,
@@ -79,8 +80,8 @@
     }: ButtonOptions = $props();
 
     // svg to use for icon
-    const svg = $derived(
-        icon ? (icon.startsWith('<svg') ? icon : createDefaultIcon(icon)) : undefined
+    const icon = $derived(
+        iconSVG ? (iconSVG.startsWith('<svg') ? iconSVG : createDefaultIcon(iconSVG)) : undefined
     );
 
     let root: HTMLButtonElement;
@@ -130,6 +131,6 @@
     aria-describedby={ariaDescribedby}
     title={title?.length ? title : undefined}
 >
-    {#if svg}<span class="icon">{@html svg}</span>{/if}
+    {#if icon}<span class="icon" {@attach svgElement({ svg: icon })}></span>{/if}
     {#if label?.length}<span class="label">{label}</span>{/if}
 </button>

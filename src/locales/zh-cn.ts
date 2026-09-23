@@ -10,18 +10,7 @@ export const core = {
     reset: '重置',
     undo: '撤销',
     cancel: '取消',
-    import: {
-        template: '导入{{amount}}',
-        variables: {
-            amount: {
-                context: 'importCount',
-                map: {
-                    0: '',
-                    else: ' {{importCount}}',
-                },
-            },
-        },
-    },
+    import: '导入',
     store: '保存',
     revert: '还原',
     busy: '处理中',

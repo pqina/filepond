@@ -33,12 +33,18 @@ export function createFilePondEntryList(): TemplateNode[] {
                 part: 'entry-list',
                 entries,
             }),
+            childData: ({ byteUnits, springOptions, reduceMotion }) => {
+                // prevent `entries` from being passed to children
+                return { byteUnits, springOptions, reduceMotion };
+            },
             item: {
                 if: {
                     test: ({ isPlaceholder }: NodeData) => isPlaceholder,
                     then: {
                         component: EntryListItemPlaceholder,
-                        props: ({ onmeasureitem }) => ({
+                        props: ({ id, index, onmeasureitem }) => ({
+                            id,
+                            index,
                             part: 'entry-list-item-placeholder',
                             onmeasureitem,
                         }),
@@ -47,33 +53,39 @@ export function createFilePondEntryList(): TemplateNode[] {
                 else: {
                     key: 'entry-list-item',
                     component: EntryListItem,
+                    childData: ({ ariaId, byteUnits, springOptions, reduceMotion }) => ({
+                        ariaId,
+                        byteUnits,
+                        springOptions,
+                        reduceMotion,
+                    }),
                     props: ({
+                        id,
+                        index,
                         entry,
                         ariaId,
-                        spring,
                         isDetached,
                         isRemoving,
                         isDraggable,
                         isDragging,
                         isLastDraggedItem,
                         translation,
-                        springAnimation,
                         onmeasureitem,
                     }: NodeData) => {
                         // select entry list parameters to pass to entry item
                         return {
+                            id,
+                            index,
                             part: isDataTransferEntry(entry)
                                 ? 'entry-list-item data-transfer-item'
                                 : 'entry-list-item file-item',
                             class: 'entry-list-item',
                             entry,
-                            spring,
                             isDetached,
                             isRemoving,
                             isDraggable,
                             isDragging,
                             isLastDraggedItem,
-                            springAnimation,
                             translation,
                             onmeasureitem,
                             ariaDescribedby: toSpaceSeparatedString(
@@ -97,6 +109,16 @@ export function createFilePondEntry(): TemplateNode {
             return {
                 legendId: `${ariaId}-name`,
                 part: isDataTransferEntry(entry) ? 'entry entry-data-transfer' : 'entry',
+            };
+        },
+        childData: ({ id, ariaId, entry, byteUnits, springOptions, reduceMotion }) => {
+            return {
+                id,
+                ariaId,
+                entry,
+                byteUnits,
+                springOptions,
+                reduceMotion,
             };
         },
         children: [
@@ -184,10 +206,10 @@ export function createEntryDataTransferInfo() {
                 layout: 'col',
             },
         },
-        data: ({ entry }: NodeData) => {
+        // adds { processed, total } object to scope for children
+        childData: ({ entry }: NodeData) => {
             const status = getExtensionStatusWithCode(entry, 'LOAD_BUSY');
 
-            // adds { processed, total } object to scope
             return {
                 processedFiles: status?.values?.processed,
                 totalFiles: status?.values?.total,
@@ -233,7 +255,8 @@ export function createFileLoadInfo() {
         attrs: {
             layout: 'col',
         },
-        data: ({ entry }: NodeData) => {
+        // adds { isWaiting, isFrozen } props to data for children
+        childData: ({ entry }: NodeData) => {
             const isWaiting = hasExtensionWithStatusCode(entry, [
                 'LOAD_QUEUED',
                 'LOAD_BUSY',
@@ -246,6 +269,8 @@ export function createFileLoadInfo() {
             ]);
 
             return {
+                name: entry.name,
+                size: entry.size,
                 isWaiting,
                 isFrozen,
             };
@@ -262,7 +287,7 @@ export function createFileLoadInfo() {
                         isFrozen,
                     };
                 },
-                children: `{{entry.name}}`,
+                children: `{{name}}`,
             },
             {
                 key: 'file-info-sub',
@@ -275,24 +300,25 @@ export function createFileLoadInfo() {
                         isFrozen,
                     };
                 },
-                data: ({ entry, byteUnits }: NodeData) => {
-                    if (!isNumber(entry.size)) {
+
+                // adds { size, sizeUnit } props to data for children
+                childData: ({ size, byteUnits, isWaiting, isFrozen }: NodeData) => {
+                    if (!isNumber(size)) {
                         return {};
                     }
 
-                    const naturalFileSize = cache(bytesToNaturalFileSize, [
-                        entry.size,
-                        { byteUnits },
-                    ]);
+                    const naturalFileSize = cache(bytesToNaturalFileSize, [size, { byteUnits }]);
 
                     const [fileSize, fileSizeUnit] = naturalFileSize.split(' ');
 
                     return {
-                        size: fileSize,
+                        sizeNatural: fileSize,
                         sizeUnit: `unit${fileSizeUnit}`,
+                        isWaiting,
+                        isFrozen,
                     };
                 },
-                children: `{{size}} {{sizeUnit}}`,
+                children: `{{sizeNatural}} {{sizeUnit}}`,
             },
         ],
     };
@@ -583,13 +609,13 @@ export function appendEntryCheckbox(template: TemplateNode[]) {
         .replace('entry-load-state', createEntryCheckbox())
         .update('entry-list-item', (node: any) => {
             const existingProps = node.props as (data: NodeData) => { [key: string]: any };
-            node.props = (data: NodeData) => {
-                const computedProps = existingProps(data);
+            node.props = (dat: NodeData) => {
+                const computedProps = existingProps(dat);
                 return {
                     ...computedProps,
                     part: toSpaceSeparatedString(
                         computedProps.part,
-                        data.entry.state.checked ? 'selected' : undefined
+                        dat.entry.state.checked ? 'selected' : undefined
                     ),
                 };
             };

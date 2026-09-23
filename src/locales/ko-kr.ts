@@ -10,18 +10,7 @@ export const core = {
     reset: '초기화',
     undo: '실행 취소',
     cancel: '취소',
-    import: {
-        template: '가져오기{{amount}}',
-        variables: {
-            amount: {
-                context: 'importCount',
-                map: {
-                    0: '',
-                    else: ' {{importCount}}',
-                },
-            },
-        },
-    },
+    import: '가져오기',
     store: '저장',
     revert: '되돌리기',
     busy: '처리 중',

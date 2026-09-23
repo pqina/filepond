@@ -6,22 +6,30 @@
     import { onDestroy } from 'svelte';
 
     interface EntryItemPlaceholderOptions {
+        id: string;
+        index: number;
+        onmeasureitem?: (id: string, index: number, rect?: Rect) => void;
         tag?: string;
         part?: string;
         class?: string;
-        onmeasureitem: (rect?: Rect) => void;
     }
 
     let {
-        tag = 'li',
+        id,
+        index,
         part,
+        tag = 'li',
         class: klass,
         onmeasureitem = noop,
     }: EntryItemPlaceholderOptions = $props();
 
+    function handleMeasureElement(bounds: Bounds) {
+        onmeasureitem(id, index, rectFromBounds(bounds));
+    }
+
     onDestroy(() => {
         // clear rect!
-        onmeasureitem();
+        onmeasureitem(id, index, undefined);
     });
 </script>
 
@@ -30,6 +38,6 @@
     class={klass}
     {part}
     {@attach measurable({
-        onmeasure: (bounds: Bounds) => onmeasureitem(rectFromBounds(bounds)),
+        onmeasure: handleMeasureElement,
     })}
 ></svelte:element>

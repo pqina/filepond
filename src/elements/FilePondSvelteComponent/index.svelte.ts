@@ -112,7 +112,7 @@ export class FilePondSvelteComponentElement
         this.#root.adoptedStyleSheets = arrayRemoveFalsy(styles).map(createStyleSheet);
 
         // so we can reference it elsewhere in this class (for internal svelte reason we can't assign directly to this.#props with $state)
-        this.#props = $state({
+        this.#props = $state.raw({
             root: this,
             springOptions: undefined,
             locale: undefined,
@@ -125,7 +125,6 @@ export class FilePondSvelteComponentElement
                     return this.#props[key];
                 },
                 set(value) {
-                    // console.log(this.tagName, key, value);
                     this.#props[key] = value;
                 },
             });

@@ -68,6 +68,8 @@
         onspringcomplete = noop,
         onchangerendercontent = undefined,
         shouldRenderContent = undefined,
+        beforeRenderContent = () => ({}),
+
         children,
     }: SpringElementOptions = $props();
 
@@ -661,6 +663,24 @@
         onroot?.(root);
     });
 
+    const childVisualRect = $derived(
+        // TODO: this is probably incorrect, the visual rect isn't always available, and the springed size isn't scaled to parent
+        visualAbsoluteRect !== null
+            ? {
+                  ...visualAbsoluteRect,
+                  ...springedSize.current,
+              }
+            : {
+                  ...springedSize.current,
+              }
+    );
+
+    const childData = $derived.by(() => {
+        return beforeRenderContent({
+            visualRect: childVisualRect,
+        });
+    });
+
     //#endregion
     onDestroy(() => {
         isDestroyed = true;
@@ -700,22 +720,7 @@
                 {...subattrs}
                 {@attach measurable({ onmeasure: handleMeasureContext })}
             >
-                {@render children({
-                    currentSize: springedSize.current,
-                    targetRect: rootRelativeRect,
-                    clientRect: visualAbsoluteRect,
-                    //@ts-ignore
-                    visualRect:
-                        // TODO: this is probably incorrect, the visual rect isn't always available, and the springed size isn't scaled to parent
-                        visualAbsoluteRect !== null
-                            ? {
-                                  ...visualAbsoluteRect,
-                                  ...springedSize.current,
-                              }
-                            : {
-                                  ...springedSize.current,
-                              },
-                })}
+                {@render children(childData)}
             </svelte:element>
         {/if}
     </svelte:element>

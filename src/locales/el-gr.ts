@@ -10,18 +10,7 @@ export const core = {
     reset: 'Επαναφορά',
     undo: 'Αναίρεση',
     cancel: 'Ακύρωση',
-    import: {
-        template: 'Εισαγωγή{{amount}}',
-        variables: {
-            amount: {
-                context: 'importCount',
-                map: {
-                    0: '',
-                    else: ' {{importCount}}',
-                },
-            },
-        },
-    },
+    import: 'Εισαγωγή',
     store: 'Αποθήκευση',
     revert: 'Επαναφορά',
     busy: 'Απασχολημένο',

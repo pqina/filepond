@@ -9,8 +9,10 @@ import type { FilePondEntry } from '../../types/index.js';
 type ValidatorExtensionResolvedProps<Props extends object = ValidatorExtensionOptions> =
     ValidatorExtensionOptions & Required<Props>;
 
-interface ValidatorExtensionState<Props extends object = ValidatorExtensionOptions>
-    extends Omit<ExtensionOptions, 'props' | 'didSetProps'> {
+interface ValidatorExtensionState<Props extends object = ValidatorExtensionOptions> extends Omit<
+    ExtensionOptions,
+    'props' | 'didSetProps'
+> {
     props: ValidatorExtensionResolvedProps<Props>;
     didSetProps: (cb: (props: ValidatorExtensionResolvedProps<Props>) => void) => void;
 }

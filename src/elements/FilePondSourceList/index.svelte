@@ -67,9 +67,9 @@
     const cancelButton = $derived(
         withResources({ label: 'cancel' }, propResourceMap, { locale, assets })
     );
-    const importButton = $derived({
-        label: stringReplaceVariables(locale.import, { importCount: dialogImportCount }, locale),
-    });
+    const importButton = $derived(
+        withResources({ label: 'import' }, propResourceMap, { locale, assets })
+    );
 
     // when a button is clicked we copy the button label to the dialog title
     let title: string = $state.raw('');
@@ -228,7 +228,13 @@
 
     function setDialogContentTemplate(nodes: TemplateNode[], data: NodeData) {
         dialogContentNodes = {
-            data,
+            data: {
+                ...data,
+
+                // local props potentially needed by children
+                reduceMotion,
+                springOptions,
+            },
             nodes,
         };
     }
@@ -326,32 +332,16 @@
                         onmeasure: handleMeasureContent,
                     })}
                 >
-                    <!-- nodes={dialogContentTemplate} -->
-                    <!-- data={{
-                        // TODO: pass select items count here or use "change" event and read out total selected items?
-                    }} -->
                     <NodeList
                         {reduceMotion}
                         {springOptions}
+                        resources={{
+                            locale,
+                            assets,
+                        }}
+                        {propResourceMap}
                         {...dialogContentNodes}
-                        context={{
-                            resources: {
-                                locale,
-                                assets,
-                            },
-                            propResourceMap,
-                        }}
-                        beforeRenderNode={(node, data, context) =>
-                            beforeRenderNode(node, data, context)}
-                        beforeSetProps={(props) => {
-                            return {
-                                ...props,
-
-                                // local props potentially needed by children
-                                reduceMotion,
-                                springOptions,
-                            };
-                        }}
+                        {beforeRenderNode}
                     />
                 </div>
 
@@ -373,7 +363,12 @@
                         reduceMotion={preventSpringMotion}
                         {springOptions}
                     >
-                        <Button {...importButton} part="dialog-button-import" type="submit" />
+                        <Button
+                            {...importButton}
+                            dataset={{ counter: dialogImportCount }}
+                            part="dialog-button-import"
+                            type="submit"
+                        />
                     </SpringElement>
                 </div>
             </form>
@@ -401,6 +396,11 @@
         <NodeList
             {reduceMotion}
             {springOptions}
+            resources={{
+                locale,
+                assets,
+            }}
+            {propResourceMap}
             nodes={template}
             data={{ items: sources }}
             context={{
@@ -408,13 +408,8 @@
                 dialog: dialogRef,
                 setDialogContentTemplate,
                 setDialogImportButtonCount,
-                resources: {
-                    locale,
-                    assets,
-                },
-                propResourceMap,
             }}
-            beforeRenderNode={(node, data, context) => beforeRenderNode(node, data, context)}
+            {beforeRenderNode}
         />
     {/if}
 </div>

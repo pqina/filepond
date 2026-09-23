@@ -10,18 +10,7 @@ export const core = {
     reset: 'Endurstilla',
     undo: 'Afturkalla',
     cancel: 'Hætta við',
-    import: {
-        template: 'Flytja inn{{amount}}',
-        variables: {
-            amount: {
-                context: 'importCount',
-                map: {
-                    0: '',
-                    else: ' {{importCount}}',
-                },
-            },
-        },
-    },
+    import: 'Flytja inn',
     store: 'Vista',
     revert: 'Endurheimta',
     busy: 'Upptekið',

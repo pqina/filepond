@@ -400,6 +400,85 @@
         }
     }
 
+    const EMPTY_SPRING_ANIMATION = {
+        onspringcancel: noop,
+        onspringcomplete: noop,
+    };
+
+    function getEntryAnimationProps(
+        entry: FilePondEntry
+        // animationPropsConfig: any
+    ): EntrySpringAnimation {
+        // is there an animation we need to run for this element
+        const { animation, delayed, oncancel, oncomplete } = animatedEntries[entry.id] ?? {};
+
+        if (!entryAnimationProps[animation]) {
+            return EMPTY_SPRING_ANIMATION;
+        }
+
+        const {
+            scale,
+            opacity,
+            translation,
+            opacityFrom,
+            scaleFrom,
+            translationFrom,
+            translationSpringOptions,
+            scaleSpringOptions,
+            opacitySpringOptions,
+        } = entryAnimationProps[animation];
+
+        // base spring
+        const spring: EntrySpringAnimation = {
+            scale: undefined,
+            opacity: undefined,
+            translation: undefined,
+            translationSpringOptions,
+            scaleSpringOptions,
+            opacitySpringOptions,
+            onspringcancel() {
+                oncancel();
+            },
+            onspringcomplete({ opacity: currentOpacity, scale: currentScale }) {
+                const didCompleteOpacity = isNumber(spring.opacity)
+                    ? spring.opacity === currentOpacity
+                    : true;
+
+                // we check opacity first, if we're animating to 0 we're done when we've reached it, this makes the UI a bit more snappy
+                if (didCompleteOpacity && spring.opacity === 0) {
+                    oncomplete();
+                    return;
+                }
+
+                const didCompleteScale = isNumber(spring.scale)
+                    ? spring.scale === currentScale
+                    : true;
+
+                if (didCompleteOpacity && didCompleteScale) {
+                    oncomplete();
+                }
+            },
+        };
+
+        if (delayed) {
+            return Object.assign(spring, {
+                opacityFrom,
+                scaleFrom,
+                translationFrom,
+                onspringcomplete: noop,
+            });
+        }
+
+        return Object.assign(spring, {
+            opacityFrom,
+            scaleFrom,
+            translationFrom,
+            scale,
+            opacity,
+            translation,
+        });
+    }
+
     function getEntryByAnimation(animation: string): FilePondEntry | null {
         for (const entryAnimation of Object.values(animatedEntries)) {
             if (animation === entryAnimation.animation) {
@@ -456,6 +535,10 @@
         get entryAnimationProps() {
             return entryAnimationProps;
         },
+
+        EMPTY_SPRING_ANIMATION,
+
+        getEntryAnimationProps,
 
         // so others can know of the placeholder rectangle location
         updateEntryPlaceholderRect: updateEntryPlaceholderRect,
@@ -706,7 +789,6 @@
         // we need to remember the drag index for when we move outside the list and we no longer want to update it but do want to remember the index of the element we've dragged outside
         lastDragIndex = targetIndex;
 
-        // new dragState
         dragState = {
             id,
             index: targetIndex,
@@ -906,19 +988,17 @@
     });
 
     // this is additional context information available to nodes in the NodeTree
-    const entryListContext = $derived({
-        insertEntries: callback.insertEntries,
-        removeEntries: callback.removeEntries,
-        updateEntry: callback.updateEntry,
+    const entryListContext = {
+        insertEntries: (
+            entry: FilePondEntrySource | FilePondEntrySource[],
+            index?: number | number[]
+        ) => callback.insertEntries(entry, index),
+        removeEntries: (...needles: Needle[]) => callback.removeEntries(...needles),
+        updateEntry: (needle: Needle, ...props: any[]) => callback.updateEntry(needle, ...props),
         updateEntryState: (id: Needle, state: { [key: string]: any }) => {
             callback.updateEntry(id, { state });
         },
-        resources: {
-            locale,
-            assets,
-        },
-        propResourceMap,
-    });
+    };
 
     // this updates the spring root so when the root position changes on the screen (for example when an element above it is removed, the SpringElements don't animate towards the new position)
     function handleMeasureRoot(bounds: Bounds) {
@@ -1101,20 +1181,20 @@
     <NodeList
         {reduceMotion}
         {springOptions}
-        nodes={template}
-        data={{ entries: computedEntries }}
-        context={entryListContext}
-        beforeRenderNode={(node, data, context) => beforeRenderNode(node, data, context)}
-        beforeSetProps={(props) => {
-            return {
-                ...props,
-
-                // these props are passed to components in addition to the default component props
-                byteUnits,
-                reduceMotion,
-                springOptions,
-            };
+        resources={{
+            locale,
+            assets,
         }}
+        {propResourceMap}
+        nodes={template}
+        data={{
+            entries: computedEntries,
+            byteUnits,
+            reduceMotion,
+            springOptions,
+        }}
+        context={entryListContext}
+        {beforeRenderNode}
     />
     <div role="status" aria-live="polite" class="implicit">{ariaStatus}</div>
 </div>

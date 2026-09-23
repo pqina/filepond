@@ -261,6 +261,7 @@ export const URLLoader = createExtension({
                     },
                     entry,
                 });
+
                 const dataRequest = await xhr(resolvedRequest.url, {
                     ...resolvedRequest.options,
                     responseType: 'arraybuffer',

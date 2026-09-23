@@ -339,13 +339,15 @@ export function createEntryTree(options: CreateEntryTreeOptions): EntryTreeInsta
         if (isUndefined(index)) {
             return;
         }
+
+        // start updating
         const [entry, didUpdateFileData] = updateSingleEntryWithProps(
             parent.entries[index],
             ...sanitizedProps
         );
 
         // update entry in parent array
-        parent.entries = parent.entries.toSpliced(index, 1, entry);
+        parent.entries = parent.entries.toSpliced(index, 1, { ...entry });
 
         // did update entry data
         let didCallUpdateEntry = false;

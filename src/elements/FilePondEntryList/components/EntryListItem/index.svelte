@@ -1,6 +1,6 @@
 <script lang="ts">
-    import { type FilePondEntry } from '../../../../types/index.js';
-    import { type Snippet } from 'svelte';
+    import { type FilePondEntry, type SpringOptions } from '../../../../types/index.js';
+    import { untrack, type Snippet } from 'svelte';
     import type { Vector } from '../../../../utils/vector.js';
     import { type Rect, rectCreate, rectIntersectWithRect } from '../../../../utils/rect.js';
     import { setEntryContext } from '../../contexts/entryContext.js';
@@ -8,6 +8,22 @@
     import { toSpaceSeparatedString } from '../../../common/string.js';
     import { getAppContext } from '../../contexts/appContext.js';
     import { VIEWPORT_MARGIN } from '../../../attachments/measurable.js';
+    import { noop } from '../../../../utils/placeholder.js';
+    import { isNumber } from '../../../../utils/test.js';
+
+    interface EntrySpringAnimation {
+        opacityFrom?: number;
+        opacity?: number;
+        opacitySpringOptions?: SpringOptions;
+        scaleFrom?: number;
+        scale?: number;
+        scaleSpringOptions?: SpringOptions;
+        translationFrom?: Vector;
+        translation?: Vector;
+        translationSpringOptions?: SpringOptions;
+        onspringcancel?: () => void;
+        onspringcomplete?: (spring: { opacity: number; scale: number }) => void;
+    }
 
     interface EntryItemOptions {
         tag?: string;
@@ -18,30 +34,72 @@
         isDraggable?: boolean;
         isDragging?: boolean;
         isLastDraggedItem?: boolean;
-        translation?: Vector;
+        translation?: Vector | undefined;
         springAnimation?: any;
-        onmeasureitem: (rect: Rect) => void;
+        onmeasureitem: (id: string, index: number, rect: Rect) => void;
         entry: FilePondEntry;
         ariaDescribedby: string;
         children: Snippet<[{ id: string; entry: FilePondEntry }]>;
     }
 
     let {
+        id,
+        index,
         tag = 'li',
         part,
         class: klass,
-        isDetached = false,
-        isRemoving = false,
-        isDraggable = true,
-        isDragging = false,
-        isLastDraggedItem = false,
+        isDetached: isDetachedProp = false,
+        isRemoving: isRemovingProp = false,
+        isDraggable: isDraggableProp = true,
+        isDragging: isDraggingProp = false,
+        isLastDraggedItem: isLastDraggedItemProp = false,
         translation,
-        springAnimation,
         onmeasureitem,
-        entry,
-        ariaDescribedby,
+        entry: entryProp,
+        ariaDescribedby: ariaDescribedbyProp,
         children,
     }: EntryItemOptions = $props();
+
+    // optimise calls, as NodeList spreads option on this component this makes sure it doesn't run too many updates
+    const isLastDraggedItem = $derived(isLastDraggedItemProp);
+    const isDragging = $derived(isDraggingProp);
+    const isDetached = $derived(isDetachedProp);
+    const isRemoving = $derived(isRemovingProp);
+    const isDraggable = $derived(isDraggableProp);
+    const ariaDescribedby = $derived(ariaDescribedbyProp);
+    const entry = $derived(entryProp);
+
+    // run entry animations
+    const appContext = getAppContext();
+    const { getEntryAnimationProps, EMPTY_SPRING_ANIMATION } = appContext;
+
+    const springAnimation = $derived.by(() => {
+        const entryAnimation = getEntryAnimationProps(entry);
+
+        if (entryAnimation !== EMPTY_SPRING_ANIMATION) {
+            untrack(() => {
+                translation = translation || entryAnimation.translation;
+            });
+
+            const {
+                // not interested in these props
+                translation: ignoredTranslation,
+                onspringcancel: ignoredSpringCancel,
+
+                // capture rest of props
+                ...animatedProps
+            } = entryAnimation;
+
+            // @ts-ignore
+            return animatedProps;
+        }
+
+        return EMPTY_SPRING_ANIMATION;
+    });
+
+    function handleElementMeasure(rect: Rect) {
+        onmeasureitem(id, index, rect);
+    }
 
     // set context so children can all access current entry
     setEntryContext({
@@ -52,6 +110,9 @@
             return `entry-${entry.id}`;
         },
     });
+
+    // props distributed to subtree
+    const childProps = $derived({ id: entry.id, entry });
 
     // get app context map
     const { locale, reduceMotion, springOptions } = $derived(getAppContext());
@@ -162,9 +223,9 @@
     shouldRenderContent={(rect) => shouldRenderContent(rect, isDetached)}
     onroot={handleRootDefined}
     onchangerendercontent={handleChangeRenderContent}
-    onelementmeasure={onmeasureitem}
+    onelementmeasure={handleElementMeasure}
     {reduceMotion}
     {springOptions}
 >
-    {@render children({ id: entry.id, entry })}
+    {@render children(childProps)}
 </SpringElement>

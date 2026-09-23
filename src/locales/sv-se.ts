@@ -10,18 +10,7 @@ export const core = {
     reset: 'Återställ',
     undo: 'Ångra',
     cancel: 'Avbryt',
-    import: {
-        template: 'Importera{{amount}}',
-        variables: {
-            amount: {
-                context: 'importCount',
-                map: {
-                    0: '',
-                    else: ' {{importCount}}',
-                },
-            },
-        },
-    },
+    import: 'Importera',
     store: 'Spara',
     revert: 'Återgå',
     busy: 'Upptagen',

@@ -30,8 +30,8 @@ export interface BaseNode {
     /** Unique key for this node */
     key?: string;
 
-    /** Select props from adta and add to data for this node */
-    data?: (data: NodeData) => NodeData;
+    /** Select props from data and add to data for child nodes */
+    childData?: (data: NodeData) => NodeData;
 
     /** Routes to listen to */
     routes?: { [event: string]: string };
@@ -77,6 +77,11 @@ export interface ElementNode extends BaseNode {
 
     /** Attributes to add to the HTML element */
     attrs?: { [key: string]: any } | ((context: NodeContext) => { [key: string]: any });
+}
+
+export interface TextNode {
+    key: number;
+    children: string;
 }
 
 export interface ComponentNode extends BaseNode {

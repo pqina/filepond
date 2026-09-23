@@ -2,6 +2,7 @@ import { arrayRemoveInPlace } from '../utils/array.js';
 import { didAbort } from '../utils/abort.js';
 import { pubsub } from '../utils/pubsub.js';
 import { isFunction, isString } from '../utils/test.js';
+import { yieldScheduler } from '../common/yield.js';
 
 export interface CreateTaskSchedulerOptions {
     log?: (tasks: TaskSchedulerTask[]) => void;
@@ -235,7 +236,8 @@ export function createTaskScheduler(options: CreateTaskSchedulerOptions) {
         return false;
     }
 
-    function requestNextTask() {
+    async function requestNextTask() {
+        // lets pick up next task
         queueMicrotask(processNextTask);
     }
 

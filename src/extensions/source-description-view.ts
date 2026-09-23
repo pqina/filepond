@@ -24,6 +24,7 @@ export const SourceDescriptionView = createExtension({
     factory: ({ props, didSetProps }, { on }) => {
         let currentElement: HTMLElement;
         let currentSources: string[] = [];
+        let currentDescription: string;
 
         didSetProps(({ element: elementOrQuerySelector }) => {
             // exit
@@ -66,13 +67,23 @@ export const SourceDescriptionView = createExtension({
                   ) || ''
                 : descriptionLocaleKey;
 
-            // set visual label
-            currentElement.innerHTML = label
+            const newDescription = label
                 .replaceAll(
                     '[',
                     `<button type="button" data-browse${preventAddEntries ? ' disabled' : ''}>`
                 )
                 .replaceAll(']', '</button>');
+
+            // only update innerHTML if description changed (this could be more optimal but good enough for now)
+            if (currentDescription === newDescription) {
+                return;
+            }
+
+            // remember
+            currentDescription = newDescription;
+
+            // set visual label
+            currentElement.innerHTML = currentDescription;
         }
 
         function handleUpdateExtensionStates(detail: { [key: string]: any }) {

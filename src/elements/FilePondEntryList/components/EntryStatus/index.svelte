@@ -7,6 +7,8 @@
     import { getEntryContext } from '../../contexts/entryContext.js';
     import { SpringElement } from '../../../components/SpringElement/index.js';
     import { ElementPane } from '../../../components/ElementPane/index.js';
+    import { svgElement } from '../../../attachments/svg-element.js';
+    import { passthrough } from '../../../../utils/placeholder.js';
 
     interface EntryStatusOptions {
         id?: string;
@@ -15,10 +17,14 @@
     }
 
     let {
-        class: klass = undefined,
-        part = undefined,
-        id = undefined,
+        class: klassProp = undefined,
+        part: partProp = undefined,
+        id: idProp = undefined,
     }: EntryStatusOptions = $props();
+
+    const id = $derived(idProp);
+    const klass = $derived(klassProp);
+    const part = $derived(partProp);
 
     // get app context data
     const { assets, locale, reduceMotion, springOptions } = $derived(getAppContext());
@@ -81,11 +87,13 @@
                     class="entry-status-message"
                     subclass="entry-status-message-content"
                     dataset={{ type }}
+                    beforeRenderContent={passthrough}
                     {reduceMotion}
                     {springOptions}
                 >
                     {#snippet children({ visualRect })}
-                        {#if icon}{@html icon}{/if}
+                        {#if icon}<span class="icon" {@attach svgElement({ svg: icon })}
+                            ></span>{/if}
                         <span>{text}</span>
                         {#if visualRect}
                             <ElementPane width={visualRect.width} height={visualRect.height} />

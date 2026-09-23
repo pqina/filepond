@@ -38,6 +38,7 @@
     import { type Size } from '../../../../../utils/size.js';
     import { transformImage } from '../../../../../workers/transformImage.js';
     import type { TaskFnOptions } from '../../../../../core/taskScheduler.js';
+    import { yieldScheduler } from '../../../../../common/yield.js';
 
     let {
         file,
@@ -125,6 +126,9 @@
                 }
             )) as ImageBitmap;
 
+            // wait for room on main thread
+            await yieldScheduler();
+
             // now render bitmap
             canvas.width = width;
             canvas.height = height;
@@ -154,6 +158,9 @@
     async function drawImageInMainThread() {
         // we did already request to display this image
         didRequestDisplayImage = true;
+
+        // give room on main thread
+        await yieldScheduler();
 
         // create image
         image = new Image();

@@ -10,18 +10,7 @@ export const core = {
     reset: 'إعادة تعيين',
     undo: 'تراجع',
     cancel: 'إلغاء',
-    import: {
-        template: 'استيراد{{amount}}',
-        variables: {
-            amount: {
-                context: 'importCount',
-                map: {
-                    0: '',
-                    else: ' {{importCount}}',
-                },
-            },
-        },
-    },
+    import: 'استيراد',
     store: 'حفظ',
     revert: 'استرجاع',
     busy: 'مشغول',

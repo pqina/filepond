@@ -10,18 +10,7 @@ export const core = {
     reset: 'রিসেট',
     undo: 'পূর্বাবস্থায় ফেরত',
     cancel: 'বাতিল',
-    import: {
-        template: 'ইমপোর্ট{{amount}}',
-        variables: {
-            amount: {
-                context: 'importCount',
-                map: {
-                    0: '',
-                    else: ' {{importCount}}',
-                },
-            },
-        },
-    },
+    import: 'ইমপোর্ট',
     store: 'সংরক্ষণ',
     revert: 'পুনরুদ্ধার',
     busy: 'ব্যস্ত',

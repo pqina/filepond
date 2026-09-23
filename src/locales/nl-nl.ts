@@ -11,18 +11,7 @@ export const core = {
     reset: 'Resetten',
     undo: 'Ongedaan maken',
     cancel: 'Annuleren',
-    import: {
-        template: 'Importeren{{amount}}',
-        variables: {
-            amount: {
-                context: 'importCount',
-                map: {
-                    0: '',
-                    else: ' {{importCount}}',
-                },
-            },
-        },
-    },
+    import: 'Importeren',
     store: 'Opslaan',
     revert: 'Terugzetten',
     busy: 'Bezig',

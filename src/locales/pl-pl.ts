@@ -10,18 +10,7 @@ export const core = {
     reset: 'Resetuj',
     undo: 'Cofnij',
     cancel: 'Anuluj',
-    import: {
-        template: 'Importuj{{amount}}',
-        variables: {
-            amount: {
-                context: 'importCount',
-                map: {
-                    0: '',
-                    else: ' {{importCount}}',
-                },
-            },
-        },
-    },
+    import: 'Importuj',
     store: 'Zapisz',
     revert: 'Przywróć',
     busy: 'Zajęte',

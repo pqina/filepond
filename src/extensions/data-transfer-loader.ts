@@ -15,7 +15,7 @@ import { createPerceivedPerformanceProxy } from '../common/perceivedPerformanceP
 
 export interface DataTransferLoaderOptions {
     /** Should we show the progress indicator for a minimum amount of time, configure with `PerceivedPerformanceOptions`. By default isn't set, when set to `true` the following settings are used:
-    
+
     ```js
     {
         minDuration: 500,
@@ -96,6 +96,8 @@ export const DataTransferLoader = createExtension({
                 code: 'LOAD_BUSY',
                 progress: Infinity,
             });
+
+            // this code has to run sync after the DropEvent as otherwise the DataTransfer items list is empty
 
             let entries;
             try {

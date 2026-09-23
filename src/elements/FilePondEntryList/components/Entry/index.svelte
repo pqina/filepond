@@ -8,17 +8,19 @@
     import { propsToAttributes } from '../../../common/dom.js';
 
     // props
-    const {
+    let {
         children,
-        part = undefined,
-        class: klass = undefined,
+        part: partProp = undefined,
+        class: klassProp = undefined,
         legendId = undefined,
         dataset,
         ...restProps
     } = $props();
 
-
     let root: HTMLFieldSetElement;
+
+    const klass = $derived(klassProp);
+    const part = $derived(partProp);
 
     // so we can update root dataset
     $effect(() => {

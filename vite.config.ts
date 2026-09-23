@@ -23,6 +23,14 @@ export default defineConfig(({ command }) => ({
         exclude: ['filepond'],
     },
 
+    server: {
+        headers: {
+            // For high precision perf now
+            'Cross-Origin-Opener-Policy': 'same-origin',
+            'Cross-Origin-Embedder-Policy': 'credentialless',
+        },
+    },
+
     resolve: {
         // modules
         alias: [
@@ -79,6 +87,9 @@ export default defineConfig(({ command }) => ({
             configFile: false,
             compilerOptions: {
                 discloseVersion: false,
+                // experimental: {
+                //     async: true,
+                // },
             },
         }),
         preventConsoleUsage(),

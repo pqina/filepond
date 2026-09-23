@@ -10,18 +10,7 @@ export const core = {
     reset: 'Resetovat',
     undo: 'Vrátit',
     cancel: 'Zrušit',
-    import: {
-        template: 'Importovat{{amount}}',
-        variables: {
-            amount: {
-                context: 'importCount',
-                map: {
-                    0: '',
-                    else: ' {{importCount}}',
-                },
-            },
-        },
-    },
+    import: 'Importovat',
     store: 'Uložit',
     revert: 'Obnovit',
     busy: 'Zaneprázdněno',

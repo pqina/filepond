@@ -8,7 +8,7 @@ import { isString } from './test.js';
 function () {
     self.onmessage = function (message) {
         (${fn.toString()}).apply(
-            null, 
+            null,
             message.data.concat([
                 function (err, response, transferList = []) {
                     const message = { content: response, error: err };
