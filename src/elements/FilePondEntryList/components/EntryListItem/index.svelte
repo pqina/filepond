@@ -213,22 +213,6 @@
             : undefined
     );
 
-    // is a virtual item
-    let isVirtual: boolean = $state(false);
-
-    const parts = $derived(
-        toSpaceSeparatedString(
-            part,
-            isVirtual ? 'virtualized' : undefined,
-            isDragging ? 'dragging' : undefined
-        )
-    );
-
-    // toggles
-    function handleChangeRenderContent(shouldRenderChildren: boolean) {
-        isVirtual = !shouldRenderChildren;
-    }
-
     /** This prevents rendering items that fall outside of the viewport */
     function shouldRenderContent(
         rect: Rect | undefined,
@@ -251,8 +235,14 @@
         springElementRect = rect;
     }
 
-    const shouldRenderChildren = $derived(
-        shouldRenderContent(springElementRect, viewportRect, isDetached)
+    const isVirtual = $derived(!shouldRenderContent(springElementRect, viewportRect, isDetached));
+
+    const parts = $derived(
+        toSpaceSeparatedString(
+            part,
+            isVirtual ? 'virtualized' : undefined,
+            isDragging ? 'dragging' : undefined
+        )
     );
 
     const dataset = $derived({
@@ -313,9 +303,8 @@
     inert={isRemoving}
     {...springAnimation}
     {translation}
-    {shouldRenderChildren}
+    shouldRenderChildren={!isVirtual}
     onroot={handleRootDefined}
-    onchangerendercontent={handleChangeRenderContent}
     onelementmeasure={handleElementMeasure}
     onmeasureabsoluterect={handleElementMeasureRect}
     {reduceMotion}

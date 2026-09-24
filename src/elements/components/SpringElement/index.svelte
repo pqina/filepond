@@ -34,7 +34,6 @@
     import { gate } from '../../common/store.svelte.js';
     import { roundPrecision } from '../../../utils/math.js';
     import type { SpringElementOptions } from './index.js';
-    import { EMPTY_OBJECT } from '../../../utils/object.js';
 
     let {
         reduceMotion = true,
@@ -70,7 +69,6 @@
         onmeasure = undefined,
         onmeasureabsoluterect = undefined,
         onspringcomplete = noop,
-        onchangerendercontent = undefined,
         beforeRenderChildren = undefined,
 
         children,
@@ -132,11 +130,11 @@
     let rootAbsoluteRect: Rect | null = $state.raw(null);
 
     $effect(() => {
-        onmeasureabsoluterect?.(rootAbsoluteRect);
-    });
+        if (!rootAbsoluteRect) {
+            return;
+        }
 
-    $effect(() => {
-        onchangerendercontent?.(shouldRenderChildren);
+        onmeasureabsoluterect?.(rootAbsoluteRect);
     });
 
     /** Visual element absolute rectangle */
