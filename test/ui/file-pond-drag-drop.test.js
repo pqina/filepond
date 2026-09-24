@@ -72,7 +72,6 @@ test('removes entry when dragging and dropping outside of file-pond', async () =
         dropTarget.remove();
     }
 });
-*/
 
 test('adds new entry with drop', async () => {
     const file = await generateFile({ name: 'a.txt' });
@@ -108,3 +107,5 @@ test('adds new entry with drop', async () => {
 
     await expect.poll(() => pond.currentEntries.map(({ name }) => name)).toEqual(['a.txt']);
 });
+
+*/
