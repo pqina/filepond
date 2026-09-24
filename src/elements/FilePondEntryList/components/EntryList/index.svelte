@@ -144,6 +144,7 @@
     }
 
     /** Retains the last drag translation so we can use it when shattering items */
+    // svelte-ignore non_reactive_update
     let lastDragTranslation: Vector | null = null;
 
     const computedDragTranslation = $derived.by(() => {
@@ -232,118 +233,6 @@
             entryStateCache.set(entry, entryState);
 
             return entryState;
-
-            // update measure callbacks
-            // const measureCallback = entryMeasureMap.get(entry);
-            // console.log(measureCallback);
-            // if (!measureCallback || measureCallback.index !== index) {
-            //     entryMeasureMap.set(entry, {
-            //         index,
-            //         fn: (rect?: Rect) => {
-            //             if (entry.id === dragStateId) {
-            //                 updateEntryPlaceholderRect(rect);
-            //             } else if (rect) {
-            //                 updateElementRects(entry.id, index, rect);
-            //             }
-            //         },
-            //     });
-            // }
-
-            // const isDragging = index === dragStateIndex;
-            // const isTranslating = dragState?.translation;
-            // const isRemoving = !!isRetainedEntry(id);
-            // const isPlaceholder = id === dragStateId;
-            // const isLastDraggedItem = lastDraggedItemId === id;
-            // const didDissolve = isRemoving && dropState?.remove && id === dropState?.id;
-            // const isDetached = (isDragging && dragStateIsOutside) || didDissolve;
-
-            // let translation;
-
-            // get stored index and rect for this entry
-            // let { rect: elementRect } = elementRects.get(id) ?? {};
-
-            // if we have a rect and are dragging this item calculate element translation
-            /*
-            const hasElementRect = elementRect !== undefined;
-            const hasElementStartRect = elementDragStartRect !== undefined;
-            let dragTranslation: Vector | undefined = undefined;
-
-            if (
-                isDragging &&
-                isTranslating &&
-                !isPlaceholder &&
-                hasElementRect &&
-                hasElementStartRect
-            ) {
-                // busy with, elementRect changes when dragging
-                dragTranslation = getEntryTranslation(
-                    elementDragStartRect as Rect,
-                    elementRect,
-                    dragState.offset as Vector,
-                    dragState.translation as Vector
-                );
-
-                // adjust for parent offset
-                dragTranslation = vectorAdd(dragTranslation, dragState.parentTranslation as Vector);
-
-                // we retain last translation so dissolving element stays in place
-                lastDragTranslation = { ...dragTranslation };
-            }
-
-            // is dissolving so fix translation
-            else if (didDissolve && lastDragTranslation) {
-                dragTranslation = { ...lastDragTranslation };
-            }
-             */
-
-            // we need to know the size of the item so we can keep it the same size when it's detached, additionally this allows us to pad the end of the list so it doesn't affect the scroll of the parent
-            // if (isDetached) {
-            //     detachedItemSize = sizeFromRect(elementRect as Rect);
-            // }
-
-            // get animation if visible
-            // const animation = getEntryAnimationProps(entry, entryAnimationProps);
-
-            // // let translation = dragTranslation;
-            // let springAnimation = EMPTY_SPRING_ANIMATION;
-            // if (animation !== EMPTY_SPRING_ANIMATION) {
-            //     // translation = animation.translation ?? dragTranslation;
-            //     translation = animation.translation;
-            //     const {
-            //         // filter out
-            //         translation: ignoredTranslation,
-            //         onspringcancel: ignoredSpringCancel,
-
-            //         // capture rest of props
-            //         ...animatedProps
-            //     } = animation;
-            //     // @ts-ignore
-            //     springAnimation = animatedProps;
-            // }
-
-            // const res = {
-            //     id,
-            //     ariaId: `entry-${id}`,
-            //     entry,
-            //     // isPlaceholder,
-            //     // isLastDraggedItem,
-            //     // isRemoving,
-            //     // isDetached,
-            //     // isDragging,
-            //     // springAnimation,
-            //     // translation,
-            //     // onmeasureitem(rect?: Rect) {
-            //     //     if (isPlaceholder) {
-            //     //         updateEntryPlaceholderRect(rect);
-            //     //     } else if (rect) {
-            //     //         updateElementRects(id, index, rect);
-            //     //     }
-            //     // },
-            // };
-
-            // entryStateCache.set(entry, res);
-
-            // return res;
         });
 
         return {

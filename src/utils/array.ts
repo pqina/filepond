@@ -1,3 +1,5 @@
+export const EMPTY_ARRAY = Object.freeze([]);
+
 export enum SortOrder {
     ASCENDING,
     DESCENDING,

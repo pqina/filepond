@@ -200,7 +200,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
              */
             async function taskStoreEntry(entry: FilePondFileEntry, { signal }: TaskFnOptions) {
                 // store file
-                setEntryExtensionStatus(entry, {
+                entry = setEntryExtensionStatus(entry, {
                     type: Status.System,
                     code: 'STORE_BUSY',
                     progress: Infinity,
@@ -222,7 +222,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                     const { valueKey } = props;
 
                     const response = await storeFn(entry, {
-                        onprogress: createProgressHandler(entry),
+                        onprogress: createProgressHandler(entry, { code: 'STORE_BUSY' }),
                         signal,
                     });
 
@@ -288,7 +288,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                     return;
                 }
 
-                setEntryExtensionStatus(entry, {
+                entry = setEntryExtensionStatus(entry, {
                     type: Status.System,
                     code: 'STORE_RESTORE_BUSY',
                     progress: Infinity,
@@ -301,7 +301,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                 // try to restore
                 try {
                     let response = await restoreEntry(value, entry, {
-                        onprogress: createProgressHandler(entry),
+                        onprogress: createProgressHandler(entry, { code: 'STORE_RESTORE_BUSY' }),
                         signal,
                     });
 
@@ -365,7 +365,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                     }
 
                     // set base state
-                    setEntryExtensionStatus(entry, {
+                    entry = setEntryExtensionStatus(entry, {
                         type: Status.System,
                         code: 'STORE_RELEASE_BUSY',
                         progress: Infinity,
@@ -383,7 +383,9 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                     // we can restore, if not a file, let's restore file before release
                     if (restoreEntry && !isFile(entry.file) && !removeOnRelease) {
                         let response = await restoreEntry(value, entry, {
-                            onprogress: createProgressHandler(entry),
+                            onprogress: createProgressHandler(entry, {
+                                code: 'STORE_RELEASE_BUSY',
+                            }),
                             signal,
                         });
 

@@ -10,9 +10,6 @@ import { hasOwnProp } from '../../utils/object.js';
  */
 export type NodeContext = {
     [key: string]: any;
-    reduceMotion?: boolean;
-    resources?: NodeResources;
-    propResourceMap?: NodePropResourceMap;
 };
 
 export type NodePropResourceMap = {
@@ -31,7 +28,7 @@ export interface BaseNode {
     key?: string;
 
     /** Select props from data and add to data for child nodes */
-    childData?: (data: NodeData) => NodeData;
+    data?: false | ((currentData?: NodeData, currentContext?: NodeContext) => NodeData);
 
     /** Routes to listen to */
     routes?: { [event: string]: string };
@@ -44,24 +41,15 @@ export interface BaseNode {
         ) => { duration: number; easing: (t: number) => number; tick: (t: number) => void };
         duration?: number;
         easing?: (t: number) => number;
-        when: (context: NodeContext) => boolean;
+        when: (currentData: NodeData) => boolean;
     };
 
     /**
      * Automatically create springs for props, returned properties are added to context for this node
      */
-    spring?: (context: NodeContext) => {
+    spring?: (currentData: NodeData) => {
         /** Property name to expose on context */
-        [propertyName: string]: {
-            /** Value to set */
-            value: number | null | undefined;
-
-            /** Transform to apply to spring output */
-            transform?: (value: number) => number;
-
-            /** Spring configuration to use */
-            config?: SpringOptions;
-        };
+        [propertyName: string]: NodeSpringProperty;
     };
 
     /** Children of this node. Falsy children are automatically filtered out */
@@ -69,6 +57,17 @@ export interface BaseNode {
 
     /** Single item node description to use for list based nodes */
     item?: TemplateNode;
+}
+
+export interface NodeSpringProperty {
+    /** Value to set */
+    value: number | null | undefined;
+
+    /** Transform to apply to spring output */
+    transform?: (value: number) => number;
+
+    /** Spring configuration to use */
+    config?: SpringOptions;
 }
 
 export interface ElementNode extends BaseNode {
@@ -79,8 +78,8 @@ export interface ElementNode extends BaseNode {
     attrs?: { [key: string]: any } | ((context: NodeContext) => { [key: string]: any });
 }
 
-export interface TextNode {
-    key: number;
+export interface TextNode extends BaseNode {
+    key: string;
     children: string;
 }
 
@@ -94,11 +93,11 @@ export interface ComponentNode extends BaseNode {
 
 export interface SwitchNode {
     if: {
-        test: (data: NodeData) => boolean;
+        test: (currentData: NodeData, context: NodeContext) => boolean;
         then: TemplateNode | TemplateNode[];
     };
     elseif?: {
-        test: (data: NodeData) => boolean;
+        test: (currentData: NodeData, context: NodeContext) => boolean;
         then: TemplateNode | TemplateNode[];
     };
     else?: TemplateNode | TemplateNode[];
@@ -328,5 +327,9 @@ export function isComponentNode(value: unknown): value is ComponentNode {
 }
 
 export function isElementNode(value: unknown): value is ElementNode {
-    return !!(value && !hasOwnProp(value, 'component'));
+    return !!(value && hasOwnProp(value, 'tag'));
+}
+
+export function isTextNode(value: unknown): value is TextNode {
+    return !isElementNode(value) && !isComponentNode(value) && !isSwitchNode(value);
 }

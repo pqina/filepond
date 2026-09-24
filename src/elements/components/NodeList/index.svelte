@@ -5,6 +5,7 @@
         isTemplateNode,
         type SwitchNode,
         type NodeData,
+        type NodeContext,
     } from '../../common/nodeTree.js';
     import type { NodeListOptions } from './index.js';
     import { isFunction, isString } from '../../../utils/test.js';
@@ -12,9 +13,7 @@
     import { arrayRemoveFalsy, arrayWrap } from '../../../utils/array.js';
     import Node from './Node.svelte';
     import { yieldScheduler } from '../../../common/yield.js';
-
-    // for when no data
-    const EMPTY_OBJECT = Object.freeze({});
+    import { EMPTY_OBJECT } from '../../../utils/object.js';
 
     let {
         nodes,
@@ -33,18 +32,19 @@
 
     // Shared by siblings so routes can resolve other nodes' instances.
     const scope = {
+        // svelte-ignore state_referenced_locally
         refs,
         get routes(): any {
             return currentRoutes;
         },
     };
 
-    function computeSwitchNode(node: SwitchNode, dat: NodeData | undefined) {
-        if (isFunction(node.if.test) && node.if.test(dat || EMPTY_OBJECT)) {
+    function computeSwitchNode(node: SwitchNode, currentData: NodeData, context: NodeContext) {
+        if (isFunction(node.if.test) && node.if.test(currentData, context)) {
             return arrayWrap(node.if.then);
         }
 
-        if (node.elseif && isFunction(node.elseif.test) && node.elseif.test(dat || EMPTY_OBJECT)) {
+        if (node.elseif && isFunction(node.elseif.test) && node.elseif.test(currentData, context)) {
             return arrayWrap(node.elseif.then);
         }
 
@@ -55,12 +55,16 @@
         return [];
     }
 
-    function computeSwitchNodes(node: SwitchNode, dat: NodeData | undefined): any[] {
+    function computeSwitchNodes(
+        node: SwitchNode,
+        currentData: NodeData,
+        context: NodeContext
+    ): any[] {
         const outputNodes: any[] = [];
 
-        for (const computedNode of computeSwitchNode(node, dat)) {
+        for (const computedNode of computeSwitchNode(node, currentData, context)) {
             if (isSwitchNode(computedNode)) {
-                outputNodes.push(...computeSwitchNodes(computedNode, dat));
+                outputNodes.push(...computeSwitchNodes(computedNode, currentData, context));
             } else {
                 outputNodes.push(computedNode);
             }
@@ -83,7 +87,7 @@
             }
 
             if (isSwitchNode(node)) {
-                preparedNodes.push(...computeSwitchNodes(node, data));
+                preparedNodes.push(...computeSwitchNodes(node, data || EMPTY_OBJECT, context));
             } else {
                 preparedNodes.push(node);
             }
@@ -124,7 +128,18 @@
             }
         });
 
-        return arrayRemoveFalsy(preparedNodes);
+        return arrayRemoveFalsy(preparedNodes).map((node, index) => {
+            // turn strings into text nodes
+            if (isString(node)) {
+                return {
+                    key: `${index}`,
+                    data,
+                    children: node,
+                };
+            }
+
+            return node;
+        });
     });
 </script>
 

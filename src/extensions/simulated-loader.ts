@@ -138,13 +138,13 @@ export const SimulatedLoader = createExtension({
                 errorDelay,
             } = props;
 
-            setEntryExtensionStatus(entry, {
+            entry = setEntryExtensionStatus(entry, {
                 type: Status.System,
                 code: 'LOAD_BUSY',
                 progress: Infinity,
             });
 
-            const onprogress = createProgressHandler(entry);
+            const onprogress = createProgressHandler(entry, { code: 'LOAD_BUSY' });
             let intervalId: ReturnType<typeof setInterval> | undefined;
             let rejectLoad: ((reason?: unknown) => void) | undefined;
             let didAbortLoad = false;
@@ -159,7 +159,7 @@ export const SimulatedLoader = createExtension({
 
                 log && logState(['did abort load data', entry.id]);
 
-                updateEntry(entry, {
+                entry = <FilePondFileEntry>updateEntry(entry, {
                     state: {
                         [actionLoad]: false,
                         [actionAbort]: false,
@@ -191,7 +191,7 @@ export const SimulatedLoader = createExtension({
 
                 const error = 'Simulated error';
 
-                setEntryExtensionStatus(entry, {
+                entry = setEntryExtensionStatus(entry, {
                     type: Status.Error,
                     code: 'LOAD_ERROR',
                     values: { error },
@@ -262,7 +262,7 @@ export const SimulatedLoader = createExtension({
                     signal.removeEventListener('abort', abort);
 
                     // update in one go
-                    updateEntry(entry, {
+                    entry = updateEntry(entry, {
                         file,
                         state: {
                             load: false,

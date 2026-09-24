@@ -107,6 +107,9 @@ export function createSpringPane(options: { key: string; class: string; part?: s
     return {
         key,
         component: ElementPane,
+        data: ({ visualRect }: NodeData) => {
+            return { visualRect };
+        },
         props: ({ visualRect }: NodeData) => {
             return {
                 part,

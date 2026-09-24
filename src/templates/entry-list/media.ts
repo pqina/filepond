@@ -130,9 +130,10 @@ function createMediaSpringPane(key: string) {
         key,
         component: ElementPane,
         spring: ({ visualRect }: NodeData) => {
+            // note that the spring is initialised with an empty data object {}
             return {
                 opacity: {
-                    value: visualRect.height > 0 ? 1 : 0,
+                    value: visualRect?.height > 0 ? 1 : 0,
                     config: {
                         stiffness: 0.02,
                         damping: 0.85,
@@ -161,15 +162,15 @@ export function createImageView(options?: ImageViewOptions) {
         props: {
             class: 'entry-media',
             part: 'entry-media',
+
+            // propagate visualRect
             beforeRenderContent: passthrough,
-        },
-        childData: ({ springOptions, reduceMotion }) => {
-            return { springOptions, reduceMotion };
         },
         children: [
             {
                 key: 'entry-image',
                 component: MediaImage,
+                data: false,
                 props: options,
             },
             {
@@ -240,6 +241,8 @@ export function createMediaControlGroup(options?: {
             props: {
                 subtag: 'element-stack',
                 class: klass,
+
+                // pass visualRect to children
                 beforeRenderContent: passthrough,
             },
             children: [
@@ -260,6 +263,9 @@ export function createMediaControl(options?: { key?: string }) {
             props: {
                 subtag: 'element-stack',
                 class: 'media-control',
+
+                // pass visualRect to children
+                beforeRenderContent: passthrough,
             },
             children: [
                 createSpringPane({
@@ -287,8 +293,11 @@ export function createMediaControls(options?: {
             then: {
                 key,
                 tag: 'element-stack',
-                attrs: (data) => {
-                    const { media, video } = getMediaContextReference(data);
+                data: (currentData: NodeData) => {
+                    return { ...currentData, ...getMediaContextReference(currentData) };
+                },
+                attrs: (data: NodeData) => {
+                    const { media, video } = data;
                     return {
                         class: klass,
                         part: 'media-controls',
@@ -307,9 +316,6 @@ export function createTogglePlaybackButton() {
         props: {
             class: 'toggle-playback',
         },
-        childData: (data) => {
-            return getMediaContextReference(data);
-        },
         children: createButton('toggle-playback', ({ video }: NodeData) => ({
             part: 'media-button',
             icon: video?.isPaused ? 'mediaPlay' : 'mediaPause',
@@ -322,9 +328,6 @@ export function createToggleAudioButton() {
         key: 'toggle-audio-spring',
         props: {
             class: 'toggle-audio',
-        },
-        childData: (data) => {
-            return getMediaContextReference(data);
         },
         children: createButton('toggle-audio', ({ video }: NodeData) => {
             return {
@@ -346,9 +349,6 @@ export function createToggleFullscreenButton() {
                 props: {
                     class: 'toggle-fullscreen',
                 },
-                childData: (data) => {
-                    return getMediaContextReference(data);
-                },
                 children: createButton('toggle-fullscreen', {
                     part: 'media-button',
                     icon: 'mediaFullscreen',
@@ -364,13 +364,13 @@ export function createMediaScrubber() {
         props: {
             class: 'media-scrubber',
         },
-        childData: (data) => {
-            return getMediaContextReference(data);
-        },
         children: [
             {
                 key: 'media-scrubber',
                 component: RangeInput,
+                data: ({ video }) => {
+                    return { video };
+                },
                 props: ({ video }: NodeData) => {
                     return {
                         part: 'media-scrubber',
@@ -389,7 +389,7 @@ export function createMediaScrubberTitle() {
     return {
         key: 'media-scrubber-title',
         tag: 'time',
-        childData: ({ hoverValue }: NodeData) => ({
+        data: ({ hoverValue }: NodeData) => ({
             time: toTime(hoverValue),
         }),
         attrs: ({ time }: NodeData) => ({
@@ -405,12 +405,12 @@ export function createMediaTimeIndicator() {
         props: {
             class: 'media-time-indicator',
         },
-        childData: (data) => {
-            return getMediaContextReference(data);
-        },
         children: {
             key: 'media-time-indicator',
             component: TimeIndicator,
+            data: ({ video }) => {
+                return { video };
+            },
             props: ({ video }: NodeData) => ({
                 timeISO: video?.timeISO,
                 timeLabel: video?.timeLabel,

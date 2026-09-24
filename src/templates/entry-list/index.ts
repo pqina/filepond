@@ -1,4 +1,4 @@
-import type { EntryListFunctions, TemplateNode } from '../../types/index.js';
+import type { EntryListFunctions, NodeContext, TemplateNode } from '../../types/index.js';
 import { withNodeTree, type NodeData } from '../../elements/common/nodeTree.js';
 
 import { isDataTransferEntry, isFileEntry, isNumber, isString } from '../../utils/test.js';
@@ -23,6 +23,7 @@ import { EntryListItem } from '../../elements/FilePondEntryList/components/Entry
 import { Entry } from '../../elements/FilePondEntryList/components/Entry/index.js';
 import { EntryListItemPlaceholder } from '../../elements/FilePondEntryList/components/EntryListItemPlaceholder/index.js';
 import { toSpaceSeparatedString } from '../../elements/common/string.js';
+import { EMPTY_OBJECT } from '../../utils/object.js';
 
 export function createFilePondEntryList(): TemplateNode[] {
     return [
@@ -33,10 +34,6 @@ export function createFilePondEntryList(): TemplateNode[] {
                 part: 'entry-list',
                 entries,
             }),
-            childData: ({ byteUnits, springOptions, reduceMotion }) => {
-                // prevent `entries` from being passed to children
-                return { byteUnits, springOptions, reduceMotion };
-            },
             item: {
                 if: {
                     test: ({ isPlaceholder }: NodeData) => isPlaceholder,
@@ -53,12 +50,6 @@ export function createFilePondEntryList(): TemplateNode[] {
                 else: {
                     key: 'entry-list-item',
                     component: EntryListItem,
-                    childData: ({ ariaId, byteUnits, springOptions, reduceMotion }) => ({
-                        ariaId,
-                        byteUnits,
-                        springOptions,
-                        reduceMotion,
-                    }),
                     props: ({
                         id,
                         index,
@@ -111,14 +102,11 @@ export function createFilePondEntry(): TemplateNode {
                 part: isDataTransferEntry(entry) ? 'entry entry-data-transfer' : 'entry',
             };
         },
-        childData: ({ id, ariaId, entry, byteUnits, springOptions, reduceMotion }) => {
+        data: ({ id, ariaId, entry }: NodeData = EMPTY_OBJECT) => {
             return {
                 id,
                 ariaId,
                 entry,
-                byteUnits,
-                springOptions,
-                reduceMotion,
             };
         },
         children: [
@@ -206,10 +194,9 @@ export function createEntryDataTransferInfo() {
                 layout: 'col',
             },
         },
-        // adds { processed, total } object to scope for children
-        childData: ({ entry }: NodeData) => {
+        // adds { processedFiles, totalFiles } values to dataset
+        data: ({ entry }: NodeData = EMPTY_OBJECT) => {
             const status = getExtensionStatusWithCode(entry, 'LOAD_BUSY');
-
             return {
                 processedFiles: status?.values?.processed,
                 totalFiles: status?.values?.total,
@@ -252,11 +239,10 @@ export function createFileLoadInfo() {
     return {
         key: 'file-info',
         tag: 'element-stack',
-        attrs: {
-            layout: 'col',
-        },
-        // adds { isWaiting, isFrozen } props to data for children
-        childData: ({ entry }: NodeData) => {
+        // adds { isWaiting, isFrozen } props to dataset
+        data: (data: NodeData = EMPTY_OBJECT) => {
+            const { entry } = data;
+
             const isWaiting = hasExtensionWithStatusCode(entry, [
                 'LOAD_QUEUED',
                 'LOAD_BUSY',
@@ -275,6 +261,9 @@ export function createFileLoadInfo() {
                 isFrozen,
             };
         },
+        attrs: {
+            layout: 'col',
+        },
         children: [
             {
                 key: 'file-info-main',
@@ -292,19 +281,14 @@ export function createFileLoadInfo() {
             {
                 key: 'file-info-sub',
                 component: ElementSkeleton,
-                props: ({ isWaiting, isFrozen }: NodeData) => {
-                    return {
-                        class: 'entry-info-sub',
-                        part: 'entry-info-sub',
-                        isWaiting,
-                        isFrozen,
-                    };
-                },
 
-                // adds { size, sizeUnit } props to data for children
-                childData: ({ size, byteUnits, isWaiting, isFrozen }: NodeData) => {
+                // adds { size, sizeUnit } props to dataset and retains { isWaiting, isFrozen }
+                data: (
+                    { size, isWaiting, isFrozen }: NodeData = EMPTY_OBJECT,
+                    { byteUnits }: NodeContext = EMPTY_OBJECT
+                ) => {
                     if (!isNumber(size)) {
-                        return {};
+                        return EMPTY_OBJECT;
                     }
 
                     const naturalFileSize = cache(bytesToNaturalFileSize, [size, { byteUnits }]);
@@ -318,6 +302,16 @@ export function createFileLoadInfo() {
                         isFrozen,
                     };
                 },
+
+                props: ({ isWaiting, isFrozen }: NodeData) => {
+                    return {
+                        class: 'entry-info-sub',
+                        part: 'entry-info-sub',
+                        isWaiting,
+                        isFrozen,
+                    };
+                },
+
                 children: `{{sizeNatural}} {{sizeUnit}}`,
             },
         ],
@@ -365,9 +359,15 @@ export function createFileStoreInfo() {
                 main: {
                     key: 'file-store-busy-info-main',
                     tag: 'div',
-                    attrs: createFileStoreMainAttributes,
-                    spring: ({ entry }: NodeData) => {
+                    data: ({ entry }: NodeData = EMPTY_OBJECT) => {
+                        // select data for spring
                         const { progress } = getExtensionStatusWithCode(entry, 'STORE_BUSY') ?? {};
+                        return {
+                            progress,
+                        };
+                    },
+                    spring: ({ progress }: NodeData) => {
+                        // note that the spring is initialised with an empty data object {}
                         return {
                             progress: {
                                 value: progress === Infinity ? 0 : progress,
@@ -375,6 +375,7 @@ export function createFileStoreInfo() {
                             },
                         };
                     },
+                    attrs: createFileStoreMainAttributes,
                     children: 'storeStorageProgress',
                 },
             }),
@@ -608,14 +609,14 @@ export function appendEntryCheckbox(template: TemplateNode[]) {
         .remove('entry-store-state')
         .replace('entry-load-state', createEntryCheckbox())
         .update('entry-list-item', (node: any) => {
-            const existingProps = node.props as (data: NodeData) => { [key: string]: any };
-            node.props = (dat: NodeData) => {
-                const computedProps = existingProps(dat);
+            const existingProps = <(currentData: NodeData) => { [key: string]: any }>node.props;
+            node.props = (currentData: NodeData) => {
+                const computedProps = existingProps(currentData);
                 return {
                     ...computedProps,
                     part: toSpaceSeparatedString(
                         computedProps.part,
-                        dat.entry.state.checked ? 'selected' : undefined
+                        currentData.entry.state.checked ? 'selected' : undefined
                     ),
                 };
             };

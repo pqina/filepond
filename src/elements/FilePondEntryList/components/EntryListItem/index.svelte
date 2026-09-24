@@ -26,6 +26,8 @@
     }
 
     interface EntryItemOptions {
+        id: string;
+        index: number;
         tag?: string;
         part?: string;
         class?: string;
@@ -70,38 +72,114 @@
     const entry = $derived(entryProp);
 
     // run entry animations
-    const appContext = getAppContext();
-    const { getEntryAnimationProps, EMPTY_SPRING_ANIMATION } = appContext;
+    const { animatedEntries, entryAnimationProps } = $derived(getAppContext());
 
-    const springAnimation = $derived.by(() => {
-        const entryAnimation = getEntryAnimationProps(entry);
+    export const EMPTY_ENTRY_ANIMATION = Object.freeze({
+        onspringcancel: noop,
+        onspringcomplete: noop,
+    });
 
-        if (entryAnimation !== EMPTY_SPRING_ANIMATION) {
-            untrack(() => {
-                translation = translation || entryAnimation.translation;
-            });
+    function getEntryAnimationProps(entry: FilePondEntry): EntrySpringAnimation {
+        // is there an animation we need to run for this element
+        const { animation, delayed, oncancel, oncomplete } = animatedEntries[entry.id] ?? {};
 
-            const {
-                // not interested in these props
-                translation: ignoredTranslation,
-                onspringcancel: ignoredSpringCancel,
-
-                // capture rest of props
-                ...animatedProps
-            } = entryAnimation;
-
-            // @ts-ignore
-            return animatedProps;
+        if (!entryAnimationProps[animation]) {
+            return EMPTY_ENTRY_ANIMATION;
         }
 
-        return EMPTY_SPRING_ANIMATION;
+        const {
+            scale,
+            opacity,
+            translation,
+            opacityFrom,
+            scaleFrom,
+            translationFrom,
+            translationSpringOptions,
+            scaleSpringOptions,
+            opacitySpringOptions,
+        } = entryAnimationProps[animation];
+
+        // base spring
+        const spring: EntrySpringAnimation = {
+            scale: undefined,
+            opacity: undefined,
+            translation: undefined,
+            translationSpringOptions,
+            scaleSpringOptions,
+            opacitySpringOptions,
+            onspringcancel() {
+                oncancel();
+            },
+            onspringcomplete({ opacity: currentOpacity, scale: currentScale }) {
+                const didCompleteOpacity = isNumber(spring.opacity)
+                    ? spring.opacity === currentOpacity
+                    : true;
+
+                // we check opacity first, if we're animating to 0 we're done when we've reached it, this makes the UI a bit more snappy
+                if (didCompleteOpacity && spring.opacity === 0) {
+                    oncomplete();
+                    return;
+                }
+
+                const didCompleteScale = isNumber(spring.scale)
+                    ? spring.scale === currentScale
+                    : true;
+
+                if (didCompleteOpacity && didCompleteScale) {
+                    oncomplete();
+                }
+            },
+        };
+
+        if (delayed) {
+            return Object.assign(spring, {
+                opacityFrom,
+                scaleFrom,
+                translationFrom,
+                onspringcomplete: noop,
+            });
+        }
+
+        return Object.assign(spring, {
+            opacityFrom,
+            scaleFrom,
+            translationFrom,
+            scale,
+            opacity,
+            translation,
+        });
+    }
+
+    const springAnimation: EntrySpringAnimation = $derived.by(() => {
+        const entryAnimation = getEntryAnimationProps(entry);
+
+        // just idling
+        if (entryAnimation === EMPTY_ENTRY_ANIMATION) {
+            return;
+        }
+
+        untrack(() => {
+            translation = translation || entryAnimation.translation;
+        });
+
+        const {
+            // not interested in these props
+            translation: ignoredTranslation,
+            onspringcancel: ignoredSpringCancel,
+
+            // capture rest of props
+            ...animatedProps
+        } = entryAnimation;
+
+        // @ts-ignore
+        return animatedProps;
     });
 
     function handleElementMeasure(rect: Rect) {
         onmeasureitem(id, index, rect);
     }
 
-    // set context so children can all access current entry
+    // set context so entry list child components can always access the current entry
     setEntryContext({
         get current() {
             return entry;
@@ -111,7 +189,7 @@
         },
     });
 
-    // props distributed to subtree
+    // props distributed to subtree so we can use the entry in the subtree
     const childProps = $derived({ id: entry.id, entry });
 
     // get app context map
@@ -185,7 +263,7 @@
             ? {
                   tabindex: 0,
                   role: 'listitem',
-                  'aria-roledescription': locale.ariaItemRoleDescription,
+                  'aria-roledescription': locale.ariaItemRoleDescription as string,
                   'aria-describedby': ariaDescribedby,
               }
             : {

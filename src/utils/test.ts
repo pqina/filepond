@@ -81,6 +81,13 @@ export function isObject(value: unknown): value is object {
     return (value && typeof value === 'object' && !Array.isArray(value)) as boolean;
 }
 
+/** Tests if a value is a plain object */
+export function isPlainObject(value: unknown): value is Record<string, unknown> {
+    if (value === null || typeof value !== 'object') return false;
+    const prototype = Object.getPrototypeOf(value);
+    return prototype === Object.prototype || prototype === null;
+}
+
 /** Tests if value is an object or an array */
 export function isObjectOrArray(value: unknown): value is object {
     return (value && typeof value === 'object') as boolean;

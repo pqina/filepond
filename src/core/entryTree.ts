@@ -1,7 +1,7 @@
 import type { FilePondEntry, FilePondDirectoryEntry, FilePondEntrySource } from '../types/index.js';
 
 import { eachTree, filterTree, findTree, mapTree, sortTree } from '../utils/tree.js';
-import { deepAssign, deepOverlap } from '../utils/object.js';
+import { deepOverlap, deepMerge } from '../utils/object.js';
 import { pubsub } from '../utils/pubsub.js';
 import { arrayRemoveFalsy, arrayWrap } from '../utils/array.js';
 import {
@@ -89,7 +89,7 @@ export interface EntryTreeInstance {
         | void;
 
     sortEntries(fn: (a: FilePondEntry, b: FilePondEntry) => 1 | -1 | 0): void;
-    updateEntry(needle: Needle, ...props: any[]): void;
+    updateEntry(needle: Needle, ...props: any[]): FilePondEntry | void;
     replaceEntry(needle: Needle, ...entries: FilePondEntrySource[]): void;
     moveEntry(needle: Needle, index: number | number[]): void;
 
@@ -312,13 +312,13 @@ export function createEntryTree(options: CreateEntryTreeOptions): EntryTreeInsta
             }
 
             // update the entry with the entry props
-            deepAssign(entry, props);
+            entry = <FilePondEntry>deepMerge(entry, props);
         }
 
         return [entry, didUpdateData];
     }
 
-    function updateEntry(needle: Needle, ...props: any[]) {
+    function updateEntry(needle: Needle, ...props: any[]): FilePondEntry | void {
         // get path to entry
         const path = getEntryIndexPathByNeedle(needle);
         if (!path) {
@@ -347,7 +347,7 @@ export function createEntryTree(options: CreateEntryTreeOptions): EntryTreeInsta
         );
 
         // update entry in parent array
-        parent.entries = parent.entries.toSpliced(index, 1, { ...entry });
+        parent.entries = parent.entries.toSpliced(index, 1, entry);
 
         // did update entry data
         let didCallUpdateEntry = false;
@@ -364,6 +364,8 @@ export function createEntryTree(options: CreateEntryTreeOptions): EntryTreeInsta
         if (!willCallUpdateEntries) {
             didUpdateEntries();
         }
+
+        return entry;
     }
 
     function insertEntries(

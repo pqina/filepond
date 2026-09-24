@@ -235,7 +235,7 @@ export const URLLoader = createExtension({
         async function taskUrlToFile(entry: FilePondFileEntry, { signal }: TaskFnOptions) {
             const { src } = entry;
 
-            setEntryExtensionStatus(entry, {
+            entry = setEntryExtensionStatus(entry, {
                 type: Status.System,
                 code: 'LOAD_BUSY',
                 progress: Infinity,
@@ -268,7 +268,7 @@ export const URLLoader = createExtension({
                     signal,
                     useWebWorkers,
                     workersURL,
-                    onprogress: createProgressHandler(entry),
+                    onprogress: createProgressHandler(entry, { code: 'LOAD_BUSY' }),
                 });
 
                 // get the blob object

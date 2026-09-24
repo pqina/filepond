@@ -38,7 +38,7 @@ export const BlobLoader = createExtension({
         /** Converts item to Blob */
         function taskConvertBlobToFile(entry: FilePondFileEntry) {
             // let's start
-            setEntryExtensionStatus(entry, {
+            entry = setEntryExtensionStatus(entry, {
                 type: Status.System,
                 code: 'LOAD_BUSY',
                 progress: Infinity,

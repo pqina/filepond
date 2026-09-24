@@ -400,85 +400,6 @@
         }
     }
 
-    const EMPTY_SPRING_ANIMATION = {
-        onspringcancel: noop,
-        onspringcomplete: noop,
-    };
-
-    function getEntryAnimationProps(
-        entry: FilePondEntry
-        // animationPropsConfig: any
-    ): EntrySpringAnimation {
-        // is there an animation we need to run for this element
-        const { animation, delayed, oncancel, oncomplete } = animatedEntries[entry.id] ?? {};
-
-        if (!entryAnimationProps[animation]) {
-            return EMPTY_SPRING_ANIMATION;
-        }
-
-        const {
-            scale,
-            opacity,
-            translation,
-            opacityFrom,
-            scaleFrom,
-            translationFrom,
-            translationSpringOptions,
-            scaleSpringOptions,
-            opacitySpringOptions,
-        } = entryAnimationProps[animation];
-
-        // base spring
-        const spring: EntrySpringAnimation = {
-            scale: undefined,
-            opacity: undefined,
-            translation: undefined,
-            translationSpringOptions,
-            scaleSpringOptions,
-            opacitySpringOptions,
-            onspringcancel() {
-                oncancel();
-            },
-            onspringcomplete({ opacity: currentOpacity, scale: currentScale }) {
-                const didCompleteOpacity = isNumber(spring.opacity)
-                    ? spring.opacity === currentOpacity
-                    : true;
-
-                // we check opacity first, if we're animating to 0 we're done when we've reached it, this makes the UI a bit more snappy
-                if (didCompleteOpacity && spring.opacity === 0) {
-                    oncomplete();
-                    return;
-                }
-
-                const didCompleteScale = isNumber(spring.scale)
-                    ? spring.scale === currentScale
-                    : true;
-
-                if (didCompleteOpacity && didCompleteScale) {
-                    oncomplete();
-                }
-            },
-        };
-
-        if (delayed) {
-            return Object.assign(spring, {
-                opacityFrom,
-                scaleFrom,
-                translationFrom,
-                onspringcomplete: noop,
-            });
-        }
-
-        return Object.assign(spring, {
-            opacityFrom,
-            scaleFrom,
-            translationFrom,
-            scale,
-            opacity,
-            translation,
-        });
-    }
-
     function getEntryByAnimation(animation: string): FilePondEntry | null {
         for (const entryAnimation of Object.values(animatedEntries)) {
             if (animation === entryAnimation.animation) {
@@ -535,10 +456,6 @@
         get entryAnimationProps() {
             return entryAnimationProps;
         },
-
-        EMPTY_SPRING_ANIMATION,
-
-        getEntryAnimationProps,
 
         // so others can know of the placeholder rectangle location
         updateEntryPlaceholderRect: updateEntryPlaceholderRect,
@@ -1189,11 +1106,15 @@
         nodes={template}
         data={{
             entries: computedEntries,
+        }}
+        context={{
+            ...entryListContext,
+
+            // configuration props that should be available to all children and that aren't updated often can be put in context instead of data
             byteUnits,
             reduceMotion,
             springOptions,
         }}
-        context={entryListContext}
         {beforeRenderNode}
     />
     <div role="status" aria-live="polite" class="implicit">{ariaStatus}</div>

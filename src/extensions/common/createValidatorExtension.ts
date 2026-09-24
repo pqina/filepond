@@ -131,7 +131,7 @@ export function createValidatorExtension<Props extends object = ValidatorExtensi
 
             /** Validates the passed entry */
             async function taskValidate(entry: FilePondEntry): Promise<false | void> {
-                setEntryExtensionStatus(entry, {
+                entry = setEntryExtensionStatus(entry, {
                     type: Status.System,
                     code: 'VALIDATION_BUSY',
                     progress: Infinity,

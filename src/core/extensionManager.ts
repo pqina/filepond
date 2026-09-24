@@ -61,7 +61,7 @@ export interface ExtensionManagerContext {
         | void;
 
     /** Update a specific entry */
-    updateEntry: (needle: Needle, ...props: any[]) => void;
+    updateEntry: (needle: Needle, ...props: any[]) => FilePondEntry | void;
 
     /** Replace an entry with one ore more entries */
     replaceEntry: (needle: Needle, ...entries: FilePondEntry[]) => void;

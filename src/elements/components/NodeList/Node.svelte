@@ -1,78 +1,28 @@
 <script lang="ts">
-    import { tick, untrack } from 'svelte';
+    import { untrack } from 'svelte';
     import { Spring } from 'svelte/motion';
     import {
         isComponentNode,
-        isElementNode,
+        isTextNode,
         type NodeData,
         type NodeContext,
         type NodeResources,
         type NodePropResourceMap,
-        type ElementNode,
-        type ComponentNode,
         type TextNode,
+        type ComponentNode,
+        type ElementNode,
+        type TemplateNode,
     } from '../../common/nodeTree.js';
     import type { NodeOptions } from './index.js';
     import { isFunction, isString } from '../../../utils/test.js';
     import { noop, passthrough } from '../../../utils/placeholder.js';
     import { stringReplaceVariables, withResources } from '../../common/string.js';
     import { getSuspensionObserver, isVoidElementTag } from '../../common/dom.js';
+    import { EMPTY_OBJECT, isObjectValuesEqual } from '../../../utils/object.js';
     import NodeList from './index.svelte';
-    import { isObjectValuesEqual } from '../../../utils/object.js';
+    import { EMPTY_ARRAY } from '../../../utils/array.js';
 
-    let {
-        index,
-        node,
-        scope,
-        data,
-        context = {},
-        beforeRenderNode = passthrough,
-        reduceMotion = false,
-        springOptions,
-        propResourceMap,
-        resources,
-    }: NodeOptions = $props();
-
-    // handles node suspesion
-    const SuspensionObserver = getSuspensionObserver();
-
-    // determine if we should run spring logic
-    const hasSprings = untrack(() => !!node?.spring);
-
-    const springState: Record<
-        string,
-        {
-            transform: (...args: any[]) => number;
-            spring: Spring<any>;
-        }
-    > | null = $state(hasSprings ? {} : null);
-
-    const springValues = $derived.by(() => {
-        if (!springState) {
-            return;
-        }
-
-        const values: Record<string, any> = {};
-
-        for (const [key, { spring, transform }] of Object.entries(springState)) {
-            values[key] = transform(spring.current);
-        }
-
-        return values;
-    });
-
-    const springedNodeData = $derived.by(() => {
-        if (!springValues) {
-            return;
-        }
-
-        return {
-            ...data,
-            ...springValues,
-        };
-    });
-
-    function computeObjectWithContext(obj: any, dat: NodeData | undefined, ctx: NodeContext) {
+    function computeObjectWithContext(obj: any, dat?: NodeData, ctx?: NodeContext) {
         if (isFunction(obj)) {
             return obj(dat, ctx);
         }
@@ -83,7 +33,7 @@
     function computeObjectWithResources(
         obj: any,
         dat: NodeData | undefined,
-        ctx: NodeContext,
+        ctx: NodeContext | undefined,
         nodeResources: NodeResources,
         resourceMap: NodePropResourceMap
     ) {
@@ -111,14 +61,42 @@
         return stringReplaceVariables(label, dat, nodeResources.locale);
     }
 
-    let previousData: NodeData | undefined = {};
+    let {
+        index,
+        node,
+
+        // data related
+        data,
+        context,
+
+        // routes related
+        scope,
+
+        // hooks
+        beforeRenderNode = passthrough,
+
+        // these props are for animations in the NodeList itself
+        reduceMotion = false,
+        springOptions,
+
+        // these props are needed so the NodeList can automatically apply locale
+        propResourceMap,
+        resources,
+    }: NodeOptions = $props();
+
+    // handles node suspesion
+    const SuspensionObserver = getSuspensionObserver();
+
+    // don't update data if not needed
+    let previousData: NodeData | undefined;
     const currentData = $derived.by(() => {
-        if (hasSprings) {
-            return springedNodeData;
+        // no data to deal with
+        if (!data) {
+            return;
         }
 
         // this is a very cheap check if these objects are different (doesn't deep compare, doesn't compare object values)
-        if (isObjectValuesEqual(data, previousData)) {
+        if (previousData && isObjectValuesEqual(data, previousData)) {
             return previousData;
         }
 
@@ -126,77 +104,143 @@
         return previousData;
     });
 
-    let previousSelectedChildData = {};
-    const selectedChildData = $derived.by(() => {
-        if (isString(node)) {
-            return undefined;
+    // don't update selected data if not needed
+    let previousSelectedData: NodeData | undefined;
+    const selectedData = $derived.by(() => {
+        if (isString(node) || !currentData) {
+            return;
         }
 
         // if we're not going to select data we just pass all of it
-        if (!node.childData) {
+        if (!node.data) {
+            // remove data
+            if (node.data === false) {
+                return;
+            }
+            // pass all data
             return currentData;
         }
 
+        // select the new data for this node and its subtree
+        const newlySelectedData = isFunction(node.data)
+            ? node.data(currentData, context)
+            : { ...currentData, ...(<{ [key: string]: any }>node.data) };
+
         // this is a very cheap check if these objects are different (doesn't deep compare, doesn't compare object values)
-        const newlySelectedChildData = node.childData(currentData);
-        if (isObjectValuesEqual(newlySelectedChildData, previousSelectedChildData)) {
-            return previousSelectedChildData;
+        if (previousSelectedData && isObjectValuesEqual(newlySelectedData, previousSelectedData)) {
+            return previousSelectedData;
         }
 
-        previousSelectedChildData = newlySelectedChildData;
-        return previousSelectedChildData;
+        previousSelectedData = newlySelectedData;
+        return previousSelectedData;
     });
 
-    const EMPTY_OBJECT = Object.freeze({});
+    // determine if we should run Spring related logic (this is not reactive, so springs cannot be defined dynamically)
+    const hasSprings = untrack(() => !!node?.spring);
+
+    interface NodeSpring {
+        transform: (...args: any[]) => number;
+        spring: Spring<any>;
+    }
+
+    // the current string state, these are the acive springs and their transforms per key, like: { progress: { spring: Spring, transform: (v) => v } }
+    const currentSprings: Record<string, NodeSpring> | null = $state.raw(
+        hasSprings
+            ? untrack(() => {
+                  // we create Springs
+                  const res: any = {};
+                  const springs = isFunction(node.spring)
+                      ? Object.entries(node.spring(EMPTY_OBJECT))
+                      : EMPTY_ARRAY;
+                  for (const [propertyName, springConfig] of springs) {
+                      const { value = null, config, transform = passthrough } = springConfig;
+                      res[propertyName] = {
+                          transform,
+                          spring: new Spring(value, config || springOptions),
+                      };
+                  }
+                  return res;
+              })
+            : null
+    );
+
+    // update springs
+    $effect(() => {
+        if (!hasSprings || !selectedData || !currentSprings) {
+            return;
+        }
+
+        const springEntries = isFunction(node.spring)
+            ? Object.entries(node.spring(selectedData))
+            : EMPTY_ARRAY;
+
+        untrack(() => {
+            if (!currentSprings) {
+                return;
+            }
+
+            // update the springs
+            for (const [propertyName, { value }] of springEntries) {
+                currentSprings[propertyName].spring.set(value, {
+                    instant: reduceMotion,
+                });
+            }
+        });
+    });
+
+    // the current spring values, this observes all the springs and then creates an object like: { progress: currentValue }
+    let previousSpringData = {};
+    const springsData = $derived.by(() => {
+        if (!currentSprings) {
+            return;
+        }
+
+        const currentSpringValues: Record<string, any> = {};
+
+        for (const [key, { spring, transform }] of Object.entries(currentSprings)) {
+            currentSpringValues[key] = transform(spring.current);
+        }
+
+        if (isObjectValuesEqual(currentSpringValues, previousSpringData)) {
+            return previousSpringData;
+        }
+
+        previousSpringData = currentSpringValues;
+        return currentSpringValues;
+    });
+
+    // final data to use
+    let previousNodeData = {};
+    const nodeDate = $derived.by(() => {
+        if (!hasSprings) {
+            return selectedData;
+        }
+        const newNodeData = { ...selectedData, ...springsData };
+        if (isObjectValuesEqual(newNodeData, previousNodeData)) {
+            return previousNodeData;
+        }
+        previousNodeData = newNodeData;
+        return previousNodeData;
+    });
 
     const computedNode = $derived.by(() => {
-        // console.log('computing node', node.key);
-
-        if (isString(node)) {
-            return {
-                key: index,
-                children: node,
-            };
-        }
-
-        // compute node springs if needed
-        if (isFunction(node.spring)) {
-            const springEntries = Object.entries(node.spring(data || EMPTY_OBJECT));
-
-            untrack(() => {
-                if (!springState) {
-                    return;
-                }
-
-                for (const [propertyName, springEntry] of springEntries) {
-                    const {
-                        value,
-                        config,
-                        transform = passthrough,
-                    } = springEntry as {
-                        value: any;
-                        config?: any;
-                        transform?: (...args: any[]) => number;
-                    };
-
-                    if (springState[propertyName]) {
-                        springState[propertyName].spring.set(value, {
-                            instant: reduceMotion,
-                        });
-                    } else {
-                        springState[propertyName] = {
-                            transform,
-                            spring: new Spring(value, config || springOptions),
-                        };
-                    }
-                }
-            });
-        }
-
         // compute key
         const key = `${node.key ?? index}`;
 
         const { children, transition } = node;
+
+        // turn string into a text node
+        if (isTextNode(node)) {
+            return {
+                // no need for other props as text nodes are just strings
+                children: computeStringWithResources(
+                    node.children,
+                    nodeDate,
+                    resources,
+                    propResourceMap
+                ),
+            } as TextNode;
+        }
 
         // copmute node routes
         let computedRoutes: any;
@@ -216,15 +260,7 @@
             }
         });
 
-        const content = isString(children)
-            ? computeStringWithResources(children, selectedChildData, resources, propResourceMap)
-            : children;
-
         if (isComponentNode(node)) {
-            if (key === 'toggle-playback') {
-                console.log(currentData, selectedChildData);
-            }
-
             const { component, item, props } = node;
 
             return beforeRenderNode(
@@ -233,61 +269,65 @@
                     component,
                     props: computeObjectWithResources(
                         props,
-                        currentData,
+                        nodeDate,
                         context,
                         resources,
                         propResourceMap
                     ),
                     item,
-                    children: content,
-                    data: selectedChildData,
+                    children: children,
+                    data: nodeDate,
                     routes: computedRoutes,
                     transition,
                 } as any,
-                currentData || EMPTY_OBJECT,
+                nodeDate,
                 context
-            );
+            ) as ComponentNode;
         }
 
-        if (isElementNode(node)) {
-            const { attrs, item, tag } = node;
+        // is element node
+        const { attrs, item, tag } = node;
 
-            return beforeRenderNode(
-                {
-                    key,
-                    tag,
-                    attrs: computeObjectWithResources(
-                        attrs,
-                        currentData,
-                        context,
-                        resources,
-                        propResourceMap
-                    ),
-                    item,
-                    children: content,
-                    data: selectedChildData,
-                    routes: computedRoutes,
-                    transition,
-                } as any,
-                currentData || EMPTY_OBJECT,
-                context
-            );
-        }
+        return beforeRenderNode(
+            {
+                key,
+                tag,
+                attrs: computeObjectWithResources(
+                    attrs,
+                    nodeDate,
+                    context,
+                    resources,
+                    propResourceMap
+                ),
+                item,
+                children: children,
+                data: nodeDate,
+                routes: computedRoutes,
+                transition,
+            } as any,
+            nodeDate,
+            context
+        ) as ElementNode;
     });
 
-    // @ts-ignore
-    const computedChildren = $derived(computedNode?.children);
+    const computedChildren = $derived(computedNode.children as (string | TemplateNode)[]);
 
-    // @ts-ignore
-    const computedData = $derived(computedNode?.data);
+    const computedData = $derived(computedNode.data as NodeData);
+
+    const computedTransition = $derived(computedNode.transition);
+
+    // just for quick testing
+    // $effect(() => {
+    //     console.log(computedNode.key, computedData);
+    // });
 </script>
 
 {#if computedNode}
-    {#if computedNode.transition}
-        {#if computedNode.transition.when(computedNode.data)}
+    {#if computedTransition && computedData}
+        {#if computedTransition.when(computedData)}
             <svelte:element
                 this={'div'}
-                transition:computedNode.transition.fn={computedNode.transition}
+                transition:computedTransition.fn={computedTransition}
                 onoutrostart={(event) => {
                     SuspensionObserver.suspend(event.currentTarget);
                 }}
@@ -326,6 +366,7 @@
         >
             {#snippet children(childData: NodeData)}
                 {#if n.item}
+                    <!-- when we're rendering an item we don't pass the parent data array, we only use the data that is passed to the item that is being rendered, this ensures the data object doesn't get too big and is scoped per branch of the tree -->
                     <NodeList
                         {reduceMotion}
                         {springOptions}
@@ -338,6 +379,7 @@
                         routes={undefined}
                     />
                 {:else}
+                    <!-- when we're rendering a child we merge the current computed data with the child data, the child node can then further narrow the available data, this for example allows springs to pass the current visualRect -->
                     <NodeList
                         {reduceMotion}
                         {springOptions}
@@ -408,7 +450,7 @@
                 {/if}
             </svelte:element>
         {/if}
-    {:else if computedChildren}
+    {:else}
         {computedChildren}
     {/if}
 {/snippet}

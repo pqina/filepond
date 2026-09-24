@@ -34,8 +34,10 @@ type TransformExtensionResolvedOptions = TransformExtensionOptions & {
 type TransformExtensionResolvedProps<Props extends object = TransformExtensionOptions> =
     TransformExtensionResolvedOptions & Required<Props>;
 
-interface TransformExtensionState<Props extends object = TransformExtensionOptions>
-    extends Omit<ExtensionOptions, 'props' | 'didSetProps'> {
+interface TransformExtensionState<Props extends object = TransformExtensionOptions> extends Omit<
+    ExtensionOptions,
+    'props' | 'didSetProps'
+> {
     props: TransformExtensionResolvedProps<Props>;
     didSetProps: (cb: (props: TransformExtensionResolvedProps<Props>) => void) => void;
 }
@@ -157,7 +159,7 @@ export function createTransformExtension<Props extends object = TransformExtensi
 
                 // run before transform
                 if (isFunction(prepareTransformEntry)) {
-                    setEntryExtensionStatus(entry, {
+                    entry = setEntryExtensionStatus(entry, {
                         type: Status.System,
                         code: 'TRANSFORM_PREPARE',
                         progress: Infinity,
@@ -166,7 +168,7 @@ export function createTransformExtension<Props extends object = TransformExtensi
                     try {
                         await prepareTransformEntry(entry, {
                             signal,
-                            onprogress: createProgressHandler(entry),
+                            onprogress: createProgressHandler(entry, { code: 'TRANSFORM_PREPARE' }),
                         });
                     } catch (error) {
                         if (didAbort(signal, error)) {
@@ -188,7 +190,7 @@ export function createTransformExtension<Props extends object = TransformExtensi
                 }
 
                 // editing state
-                setEntryExtensionStatus(entry, {
+                entry = setEntryExtensionStatus(entry, {
                     type: Status.System,
                     code: 'TRANSFORM_BUSY',
                     progress: Infinity,
@@ -199,7 +201,7 @@ export function createTransformExtension<Props extends object = TransformExtensi
                 try {
                     transformResult = await transformEntry(entry, {
                         signal,
-                        onprogress: createProgressHandler(entry),
+                        onprogress: createProgressHandler(entry, { code: 'TRANSFORM_BUSY' }),
                     });
                 } catch (error) {
                     if (didAbort(signal, error)) {

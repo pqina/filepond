@@ -3,7 +3,7 @@
     import type { Bounds } from '../../utils/bounds.js';
     import { Spring } from 'svelte/motion';
     import { NodeList } from '../components/NodeList/index.js';
-    import { stringReplaceVariables, withResources } from '../common/string.js';
+    import { withResources } from '../common/string.js';
     import { Button } from '../components/Button/index.js';
     import { ElementPane } from '../components/ElementPane/index.js';
     import { measurable } from '../attachments/measurable.js';
@@ -228,13 +228,7 @@
 
     function setDialogContentTemplate(nodes: TemplateNode[], data: NodeData) {
         dialogContentNodes = {
-            data: {
-                ...data,
-
-                // local props potentially needed by children
-                reduceMotion,
-                springOptions,
-            },
+            data,
             nodes,
         };
     }
@@ -333,6 +327,11 @@
                     })}
                 >
                     <NodeList
+                        {...dialogContentNodes}
+                        context={{
+                            reduceMotion,
+                            springOptions,
+                        }}
                         {reduceMotion}
                         {springOptions}
                         resources={{
@@ -340,7 +339,6 @@
                             assets,
                         }}
                         {propResourceMap}
-                        {...dialogContentNodes}
                         {beforeRenderNode}
                     />
                 </div>
@@ -406,6 +404,8 @@
             context={{
                 disabled,
                 dialog: dialogRef,
+                reduceMotion,
+                springOptions,
                 setDialogContentTemplate,
                 setDialogImportButtonCount,
             }}

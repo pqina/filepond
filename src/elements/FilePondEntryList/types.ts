@@ -133,7 +133,7 @@ export interface FilePondEntryListOptions extends Omit<FilePondSvelteComponentOp
     /** The locale resource props to use for text, defaults to `{}` */
     locale?: Locale;
 
-    /** The data format to use in the templates */
+    /** The data format to use in the templates, defaults to `'mega'` */
     byteUnits?: 'mega' | 'mebi';
 
     /**

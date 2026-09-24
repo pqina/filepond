@@ -9,6 +9,7 @@ import type {
     ElementNode,
     NodePropResourceMap,
     NodeResources,
+    TextNode,
 } from '../../common/nodeTree.js';
 
 export interface NodeListOptions {
@@ -25,7 +26,7 @@ export interface NodeListOptions {
     propResourceMap: NodePropResourceMap;
 
     /** The nodes to render */
-    nodes: TemplateNode[];
+    nodes: (string | TemplateNode)[];
 
     /** The context available to the current items as received by the parent */
     data?: NodeData;
@@ -38,15 +39,15 @@ export interface NodeListOptions {
 
     /** Allows node manipulation before rendering */
     beforeRenderNode?: (
-        node: ComponentNode | ElementNode,
-        data: NodeContext,
-        context: NodeContext
+        node: ComponentNode | ElementNode | TextNode,
+        data?: NodeData,
+        context?: NodeContext
     ) => void | false | ComponentNode | ElementNode;
 }
 
 export type NodeOptions = Omit<NodeListOptions, 'nodes' | 'routes'> & {
     index: number;
-    node: any;
+    node: ComponentNode | ElementNode | TextNode;
     scope: {
         refs: Record<string, any>;
         readonly routes: any;

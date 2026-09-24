@@ -56,7 +56,7 @@ export const CanvasLoader = createExtension({
         /** Converts HTMLCanvasElement to Blob */
         async function taskConvertCanvasToBlob(entry: FilePondFileEntry) {
             // let's start
-            setEntryExtensionStatus(entry, {
+            entry = setEntryExtensionStatus(entry, {
                 type: Status.System,
                 code: 'LOAD_BUSY',
                 progress: Infinity,
@@ -74,7 +74,7 @@ export const CanvasLoader = createExtension({
                 const file = blobToFile(blob, getFilename(entry, blob, props));
 
                 // update file prop
-                updateEntry(entry, { file });
+                entry = <FilePondFileEntry>updateEntry(entry, { file });
             } catch (error) {
                 setEntryExtensionStatus(entry, {
                     type: Status.Error,

@@ -2,12 +2,19 @@ import {
     FilePondSvelteComponentElement,
     type FilePondSvelteComponentOptions,
 } from '../FilePondSvelteComponent/index.svelte.js';
-import type { Locale, NodeContext, TemplateNode } from '../../types/index.js';
+import type {
+    ComponentNode,
+    ElementNode,
+    Locale,
+    NodeContext,
+    TemplateNode,
+} from '../../types/index.js';
 import FilePondSourceListApp from './index.svelte';
 import { registerShadowRoot } from '../common/extendStyles.js';
 import { setBooleanAttribute } from '../../utils/dom.js';
 import defaultStyles from '../styles/defaults.css?inline';
 import styles from './index.css?inline';
+import type { NodeData, TextNode } from '../common/nodeTree.js';
 
 // Props to create getters and setters for, the defaults for these props are set in the FilePondEntryList component
 export const COMPONENT_PROPS = [
@@ -67,8 +74,8 @@ export interface FilePondSourceListOptions extends Omit<FilePondSvelteComponentO
 
     /** Hook to manipulate nodes before rendering */
     beforeRenderNode?: (
-        node: TemplateNode,
-        data: NodeContext,
+        node: ComponentNode | ElementNode | TextNode,
+        data: NodeData,
         context: NodeContext
-    ) => TemplateNode | void | false;
+    ) => ComponentNode | ElementNode | TextNode | void | false;
 }

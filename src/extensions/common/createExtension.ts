@@ -4,6 +4,7 @@ import { isObject, isString } from '../../utils/test.js';
 
 import type { ExtensionManagerContext } from '../../core/extensionManager.js';
 import type { FilePondEntry, Progress } from '../../types/index.js';
+import { Status } from '../../common/status.js';
 
 type EmptyObject = Record<PropertyKey, never>;
 
@@ -23,6 +24,7 @@ export type ExtensionStatusType = 'error' | 'warning' | 'success' | 'info' | 'sy
 export interface ExtensionStatus {
     /** Type of status */
     type: ExtensionStatusType;
+
     /** The current status code */
     code: string;
 
@@ -49,12 +51,15 @@ export interface ExtensionOptions {
 export interface ExtensionContext extends ExtensionManagerContext {
     // update entry extension state
     getEntryExtensionState: (entry: FilePondEntry) => { [key: string]: any };
-    setEntryExtensionState: (entry: FilePondEntry, state: { [key: string]: any }) => void;
+    setEntryExtensionState: <T extends FilePondEntry>(entry: T, state: { [key: string]: any }) => T;
     getEntryExtensionStatus: (entry: FilePondEntry) => ExtensionStatus | EmptyObject;
-    setEntryExtensionStatus: (entry: FilePondEntry, status: ExtensionStatus) => void;
+    setEntryExtensionStatus: <T extends FilePondEntry>(entry: T, status: ExtensionStatus) => T;
 
     // helper
-    createProgressHandler: (entry: FilePondEntry) => (e: Progress) => void;
+    createProgressHandler: (
+        entry: FilePondEntry,
+        status: { code: string; type?: ExtensionStatusType }
+    ) => (e: Progress) => void;
 }
 
 export type ExtensionFactoryFunction = (
@@ -122,16 +127,22 @@ export function createExtension(options: CreateExtensionOptions): Extension {
         }
 
         /** Updates item state */
-        function setEntryExtensionState(entry: FilePondEntry, state: ExtensionState) {
-            pond.updateEntry(entry, {
+        function setEntryExtensionState<T extends FilePondEntry>(
+            entry: T,
+            state: ExtensionState
+        ): T {
+            return pond.updateEntry(entry, {
                 extensionState: {
                     [name]: state,
                 },
             });
         }
 
-        function setEntryExtensionStatus(entry: FilePondEntry, status: ExtensionStatus) {
-            setEntryExtensionState(entry, { status });
+        function setEntryExtensionStatus<T extends FilePondEntry>(
+            entry: T,
+            status: ExtensionStatus
+        ): T {
+            return setEntryExtensionState(entry, { status });
         }
 
         function getEntryExtensionStatus(entry: FilePondEntry): ExtensionStatus | EmptyObject {
@@ -139,15 +150,16 @@ export function createExtension(options: CreateExtensionOptions): Extension {
         }
 
         /** Creates a progress handler function */
-        function createProgressHandler(entry: FilePondEntry): (progress: Progress) => void {
-            const status = getEntryExtensionStatus(entry);
-
-            // we use status code and type when the handler is created, alternatively can pass custom status
-            const { type, code } = status ?? getEntryExtensionStatus(entry);
+        function createProgressHandler(
+            entry: FilePondEntry,
+            status: { code: string; type?: ExtensionStatusType }
+        ): (progress: Progress) => void {
+            // type and code are stable
+            const { type = Status.System, code } = status;
 
             // return handler
             return ({ lengthComputable, loaded, total }) => {
-                setEntryExtensionStatus(entry, {
+                entry = setEntryExtensionStatus(entry, {
                     type,
                     code,
                     progress: lengthComputable ? loaded / total : Infinity,

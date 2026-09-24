@@ -79,6 +79,10 @@ export default defineConfig(({ command }) => ({
                 find: 'filepond-extension-unsplash-source',
                 replacement: resolve(__dirname, '../extension-unsplash/dist/index.mjs'),
             },
+            {
+                find: 'filepond-extension-pintura-transform',
+                replacement: resolve(__dirname, '../extension-pintura/dist/index.mjs'),
+            },
         ],
     },
 

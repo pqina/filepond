@@ -91,7 +91,7 @@ export const DataTransferLoader = createExtension({
             const { mode } = props;
 
             // now busy loading
-            setEntryExtensionStatus(entry, {
+            entry = setEntryExtensionStatus(entry, {
                 type: Status.System,
                 code: 'LOAD_BUSY',
                 progress: Infinity,
@@ -116,7 +116,7 @@ export const DataTransferLoader = createExtension({
                     const rawEntries = await readEntries(entry.src, {
                         signal,
                         onprogress: ({ loaded, total }) => {
-                            setEntryExtensionStatus(entry, {
+                            entry = setEntryExtensionStatus(entry, {
                                 type: Status.System,
                                 code: 'LOAD_BUSY',
                                 progress: loaded / total,
@@ -166,7 +166,7 @@ export const DataTransferLoader = createExtension({
             }
 
             // done!
-            setEntryExtensionStatus(entry, {
+            entry = setEntryExtensionStatus(entry, {
                 type: Status.Success,
                 code: 'LOAD_COMPLETE',
             });

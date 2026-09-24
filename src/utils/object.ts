@@ -1,4 +1,14 @@
-import { isArray, isBlobOrFile, isFunction, isObject, isObjectOrArray } from './test.js';
+import {
+    isArray,
+    isBlobOrFile,
+    isFunction,
+    isObject,
+    isObjectOrArray,
+    isPlainObject,
+} from './test.js';
+
+// for when no data
+export const EMPTY_OBJECT = Object.freeze({});
 
 /**
  * Test if object "a" property values are equal to object "b" property values, doesn't deep compare,
@@ -21,25 +31,20 @@ export function isObjectValuesEqual(a: any, b: any) {
     return true;
 }
 
-/** Merges source into target */
-export function deepAssign(
-    target: { [key: string]: any },
-    ...sources: { [key: string]: any }[]
-): { [key: string]: any } {
-    sources.forEach((source) => {
-        for (const [key, value] of Object.entries(source)) {
-            if (isObject(value)) {
-                if (!isObject(target[key]) || isBlobOrFile(value)) {
-                    target[key] = value;
-                } else {
-                    deepAssign(target[key], value);
-                }
-            } else {
-                Object.assign(target, { [key]: value });
-            }
-        }
-    });
-    return target;
+/** Merges source into target, creating new objects */
+export function deepMerge(b: { [key: string]: any }, a: { [key: string]: any }) {
+    const result = { ...b };
+
+    for (const key of Object.keys(a)) {
+        const source = a[key];
+        const target = Object.hasOwn(b, key) ? b[key] : undefined;
+
+        result[key] = isPlainObject(source)
+            ? deepMerge(isPlainObject(target) ? target : {}, source)
+            : source;
+    }
+
+    return result;
 }
 
 /** Tests if properties and values described in obj are same in target */
