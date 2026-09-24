@@ -49,6 +49,8 @@ import type {
     ElementNode,
     ComponentNode,
     SwitchNode,
+    TextNode,
+    NodeData,
 } from '../elements/common/nodeTree.js';
 
 import type { Vector } from '../utils/vector.js';
@@ -75,11 +77,13 @@ export type {
 export type {
     Needle,
     TemplateNode,
+    TextNode,
     ElementNode,
     SwitchNode,
     BaseNode,
     ComponentNode,
     NodeContext,
+    NodeData,
     FilePondElement,
     FilePondInputElement,
     FilePondFrameElement,

@@ -150,7 +150,7 @@
         });
     }
 
-    const springAnimation: EntrySpringAnimation = $derived.by(() => {
+    const springAnimation = $derived.by(() => {
         const entryAnimation = getEntryAnimationProps(entry);
 
         // just idling
@@ -230,7 +230,11 @@
     }
 
     /** This prevents rendering items that fall outside of the viewport */
-    function shouldRenderContent(rect: Rect, isDetached: boolean) {
+    function shouldRenderContent(
+        rect: Rect | undefined,
+        viewportRect: Rect | undefined,
+        isDetached: boolean
+    ) {
         // no rectangles so we need to assume the content is visible
         // if the element is detached the rectangle will be positioned absolute (and as it's translated it will fall outside of the viewport) so we need to still render its contents
         if (!rect || !viewportRect || isDetached) {
@@ -239,6 +243,17 @@
 
         return rectIntersectWithRect(rect, viewportRect);
     }
+
+    // the current spring rect
+    let springElementRect = $state.raw() as Rect;
+
+    function handleElementMeasureRect(rect: Rect) {
+        springElementRect = rect;
+    }
+
+    const shouldRenderChildren = $derived(
+        shouldRenderContent(springElementRect, viewportRect, isDetached)
+    );
 
     const dataset = $derived({
         // Makes it possible to drag this item
@@ -298,10 +313,11 @@
     inert={isRemoving}
     {...springAnimation}
     {translation}
-    shouldRenderContent={(rect) => shouldRenderContent(rect, isDetached)}
+    {shouldRenderChildren}
     onroot={handleRootDefined}
     onchangerendercontent={handleChangeRenderContent}
     onelementmeasure={handleElementMeasure}
+    onmeasureabsoluterect={handleElementMeasureRect}
     {reduceMotion}
     {springOptions}
 >

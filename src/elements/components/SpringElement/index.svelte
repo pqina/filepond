@@ -34,6 +34,7 @@
     import { gate } from '../../common/store.svelte.js';
     import { roundPrecision } from '../../../utils/math.js';
     import type { SpringElementOptions } from './index.js';
+    import { EMPTY_OBJECT } from '../../../utils/object.js';
 
     let {
         reduceMotion = true,
@@ -62,13 +63,15 @@
         translationFrom = undefined,
         translationSpringOptions = undefined,
 
+        shouldRenderChildren = true,
+
         onroot = undefined,
         onelementmeasure = undefined,
         onmeasure = undefined,
+        onmeasureabsoluterect = undefined,
         onspringcomplete = noop,
         onchangerendercontent = undefined,
-        shouldRenderContent = undefined,
-        beforeRenderContent = () => ({}),
+        beforeRenderChildren = undefined,
 
         children,
     }: SpringElementOptions = $props();
@@ -127,26 +130,9 @@
 
     /** Root element absolute rectangle (relative to the document root) */
     let rootAbsoluteRect: Rect | null = $state.raw(null);
-    let rootAbsoluteRectPrev: Rect | null = null;
-    let shouldRenderChildrenPrev: boolean = true;
 
-    const shouldRenderChildren = $derived.by(() => {
-        if (!shouldRenderContent) {
-            return true;
-        }
-
-        if (
-            rootAbsoluteRect &&
-            rootAbsoluteRectPrev &&
-            rectEqual(rootAbsoluteRect, rootAbsoluteRectPrev)
-        ) {
-            return shouldRenderChildrenPrev;
-        }
-
-        rootAbsoluteRectPrev = { ...rootAbsoluteRect } as Rect;
-        shouldRenderChildrenPrev = !!(rootAbsoluteRect && shouldRenderContent(rootAbsoluteRect));
-
-        return shouldRenderChildrenPrev;
+    $effect(() => {
+        onmeasureabsoluterect?.(rootAbsoluteRect);
     });
 
     $effect(() => {
@@ -667,6 +653,7 @@
         // TODO: this is probably incorrect, the visual rect isn't always available, and the springed size isn't scaled to parent
         visualAbsoluteRect !== null
             ? {
+                  // @ts-ignore
                   ...visualAbsoluteRect,
                   ...springedSize.current,
               }
@@ -676,7 +663,7 @@
     );
 
     const childData = $derived.by(() => {
-        return beforeRenderContent({
+        return beforeRenderChildren?.({
             visualRect: childVisualRect,
         });
     });

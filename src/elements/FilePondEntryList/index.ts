@@ -10,9 +10,13 @@ import type {
     FilePondEntrySource,
     Locale,
     Needle,
+    NodeData,
     NodeContext,
     SpringOptions,
+    ComponentNode,
+    ElementNode,
     TemplateNode,
+    TextNode,
 } from '../../types/index.js';
 import type { Rect } from '../../utils/rect.js';
 
@@ -79,10 +83,10 @@ export interface FilePondEntryListElement {
 
     /** Hook to manipulate nodes before rendering */
     beforeRenderNode?: (
-        node: TemplateNode,
-        data: NodeContext,
-        context: NodeContext
-    ) => TemplateNode | void | false;
+        node: ComponentNode | ElementNode | TextNode,
+        data?: NodeData,
+        context?: NodeContext
+    ) => ComponentNode | ElementNode | TextNode | void | false;
 
     /** Toggle drop functionality on/off */
     drop?: boolean;

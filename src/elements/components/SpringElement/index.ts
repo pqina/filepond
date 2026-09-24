@@ -49,6 +49,9 @@ export interface SpringElementOptions {
     /** Set to `true` if can't be interacted with */
     inert?: boolean | null;
 
+    /** Set to false to virtualize children */
+    shouldRenderChildren?: boolean;
+
     reduceMotion?: boolean;
     springOptions?: SpringOptions;
     scaleSpringOptions?: SpringOptions;
@@ -64,6 +67,9 @@ export interface SpringElementOptions {
     /** Called on root element measure */
     onmeasure?: (bounds: Bounds) => void;
 
+    /** Called when computed element absolute rect */
+    onmeasureabsoluterect?: (rect: Rect) => void;
+
     /** Called when spring animation ends */
     onspringcomplete?: (state: { opacity: number; scale: number }) => void;
 
@@ -74,17 +80,18 @@ export interface SpringElementOptions {
     shouldRenderContent?: (rect: Rect) => boolean;
 
     /** Called before passing data to content */
-    beforeRenderContent?: (state: { visualRect: Rect }) => { visualRect: Rect } | undefined;
+    beforeRenderChildren?: (state: { visualRect: Rect }) => { visualRect: Rect } | undefined;
 
     /** Spring element children */
     children: Snippet<
         [
-            {
-                // currentSize: Size;
-                // targetRect: Rect;
-                // clientRect: Rect | null;
-                visualRect: Rect | null;
-            },
+            | {
+                  // currentSize: Size;
+                  // targetRect: Rect;
+                  // clientRect: Rect | null;
+                  visualRect: Rect | null;
+              }
+            | undefined,
         ]
     >;
 }

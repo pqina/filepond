@@ -75,7 +75,7 @@ export interface FilePondSourceListOptions extends Omit<FilePondSvelteComponentO
     /** Hook to manipulate nodes before rendering */
     beforeRenderNode?: (
         node: ComponentNode | ElementNode | TextNode,
-        data: NodeData,
-        context: NodeContext
+        data?: NodeData,
+        context?: NodeContext
     ) => ComponentNode | ElementNode | TextNode | void | false;
 }

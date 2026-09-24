@@ -164,7 +164,7 @@ export function createImageView(options?: ImageViewOptions) {
             part: 'entry-media',
 
             // propagate visualRect
-            beforeRenderContent: passthrough,
+            beforeRenderChildren: passthrough,
         },
         children: [
             {
@@ -203,7 +203,7 @@ export function createVideoView(options?: VideoViewOptions) {
         props: {
             class: 'entry-media',
             part: 'entry-media',
-            beforeRenderContent: passthrough,
+            beforeRenderChildren: passthrough,
         },
         children: [
             {
@@ -243,7 +243,7 @@ export function createMediaControlGroup(options?: {
                 class: klass,
 
                 // pass visualRect to children
-                beforeRenderContent: passthrough,
+                beforeRenderChildren: passthrough,
             },
             children: [
                 createSpringPane({
@@ -265,7 +265,7 @@ export function createMediaControl(options?: { key?: string }) {
                 class: 'media-control',
 
                 // pass visualRect to children
-                beforeRenderContent: passthrough,
+                beforeRenderChildren: passthrough,
             },
             children: [
                 createSpringPane({

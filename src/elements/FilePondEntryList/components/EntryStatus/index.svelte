@@ -87,7 +87,7 @@
                     class="entry-status-message"
                     subclass="entry-status-message-content"
                     dataset={{ type }}
-                    beforeRenderContent={passthrough}
+                    beforeRenderChildren={passthrough}
                     {reduceMotion}
                     {springOptions}
                 >

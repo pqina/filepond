@@ -6,8 +6,11 @@ import type {
     NodeContext,
     EntryAnimation,
     Locale,
+    ComponentNode,
+    ElementNode,
 } from '../../types/index.js';
 import type { Vector } from '../../utils/vector.js';
+import type { NodeData, TextNode } from '../common/nodeTree.js';
 import type { FilePondSvelteComponentOptions } from '../FilePondSvelteComponent/index.svelte.js';
 
 /** Internal interface for animating entries */
@@ -89,10 +92,10 @@ export interface FilePondEntryListOptions extends Omit<FilePondSvelteComponentOp
 
     /** Hook to manipulate nodes before rendering */
     beforeRenderNode?: (
-        node: TemplateNode,
-        data: NodeContext,
-        context: NodeContext
-    ) => TemplateNode | void | false;
+        node: ComponentNode | ElementNode | TextNode,
+        data?: NodeData,
+        context?: NodeContext
+    ) => ComponentNode | ElementNode | TextNode | void | false;
 
     /** Toggle drop functionality on/off */
     drop?: boolean;
