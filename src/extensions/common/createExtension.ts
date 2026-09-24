@@ -135,7 +135,7 @@ export function createExtension(options: CreateExtensionOptions): Extension {
                 extensionState: {
                     [name]: state,
                 },
-            });
+            }) as T;
         }
 
         function setEntryExtensionStatus<T extends FilePondEntry>(

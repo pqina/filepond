@@ -23,7 +23,7 @@ import { arrayWrap } from '../../utils/array.js';
 import { Button } from '../../elements/components/Button/index.js';
 import { ElementPane } from '../../elements/components/ElementPane/index.js';
 import { Entry } from '../../elements/FilePondEntryList/components/Entry/index.js';
-import { hasOwnProp } from '../../utils/object.js';
+import { EMPTY_OBJECT, hasOwnProp } from '../../utils/object.js';
 import { SpringElement } from '../../elements/components/SpringElement/index.js';
 
 export function getEntryExtensionsAsArray(entry: FilePondEntry): ExtensionState[] {
@@ -107,7 +107,7 @@ export function createSpringPane(options: { key: string; class: string; part?: s
     return {
         key,
         component: ElementPane,
-        data: ({ visualRect }: NodeData) => {
+        data: ({ visualRect }: NodeData = EMPTY_OBJECT) => {
             return { visualRect };
         },
         props: ({ visualRect }: NodeData) => {

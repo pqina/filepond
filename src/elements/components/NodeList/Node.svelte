@@ -315,11 +315,6 @@
     const computedData = $derived(computedNode.data as NodeData);
 
     const computedTransition = $derived(computedNode.transition);
-
-    // just for quick testing
-    // $effect(() => {
-    //     console.log(computedNode.key, computedData);
-    // });
 </script>
 
 {#if computedNode}

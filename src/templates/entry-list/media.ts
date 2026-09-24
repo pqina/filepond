@@ -26,6 +26,7 @@ import {
 import { ElementPane } from '../../elements/components/ElementPane/index.js';
 import { TimeIndicator } from '../../elements/components/TimeIndicator/index.js';
 import { passthrough } from '../../utils/placeholder.js';
+import { EMPTY_OBJECT } from '../../utils/object.js';
 
 type RetainOmit<T, K extends keyof T> = {
     [P in keyof T as P extends K ? never : P]: T[P];
@@ -293,7 +294,7 @@ export function createMediaControls(options?: {
             then: {
                 key,
                 tag: 'element-stack',
-                data: (currentData: NodeData) => {
+                data: (currentData: NodeData = EMPTY_OBJECT) => {
                     return { ...currentData, ...getMediaContextReference(currentData) };
                 },
                 attrs: (data: NodeData) => {
@@ -368,7 +369,7 @@ export function createMediaScrubber() {
             {
                 key: 'media-scrubber',
                 component: RangeInput,
-                data: ({ video }) => {
+                data: ({ video } = EMPTY_OBJECT) => {
                     return { video };
                 },
                 props: ({ video }: NodeData) => {
@@ -408,7 +409,7 @@ export function createMediaTimeIndicator() {
         children: {
             key: 'media-time-indicator',
             component: TimeIndicator,
-            data: ({ video }) => {
+            data: ({ video } = EMPTY_OBJECT) => {
                 return { video };
             },
             props: ({ video }: NodeData) => ({

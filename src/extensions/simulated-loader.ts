@@ -275,7 +275,7 @@ export const SimulatedLoader = createExtension({
                                 },
                             },
                         },
-                    });
+                    }) as FilePondFileEntry;
 
                     log && logState(['did load data', entry.id]);
 
