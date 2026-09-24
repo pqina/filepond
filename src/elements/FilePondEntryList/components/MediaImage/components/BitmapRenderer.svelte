@@ -1,5 +1,17 @@
 <script lang="ts">
+    import { onDestroy, onMount } from 'svelte';
+    import { isFirefox } from '../../../../../utils/test.js';
+    import { didAbort } from '../../../../../utils/abort.js';
+    import { createObjectURL } from '../../../../../utils/objectURL.js';
+    import { getImageSize } from '../../../../../utils/media.js';
+    import { getAppContext } from '../../../contexts/appContext.js';
+    import { setBitmapCacheItem, getBitmapCacheItem } from './BitmapRendererCache.js';
+    import { createThreadWorker, thread } from '../../../../../utils/thread.js';
+    import { transformImage } from '../../../../../workers/transformImage.js';
+    import { yieldScheduler } from '../../../../../common/yield.js';
     import { type MediaResizeQuality } from '../index.js';
+    import { type Size } from '../../../../../utils/size.js';
+    import { type TaskFnOptions } from '../../../../../core/taskScheduler.js';
 
     interface BitmapRendererOptions {
         /** Image file to render */
@@ -26,19 +38,6 @@
         onrender?: (options: { didRestore: boolean }) => void;
         onerror?: (error: Error) => void;
     }
-
-    import { onDestroy, onMount } from 'svelte';
-    import { isFirefox } from '../../../../../utils/test.js';
-    import { didAbort } from '../../../../../utils/abort.js';
-    import { createObjectURL } from '../../../../../utils/objectURL.js';
-    import { getImageSize } from '../../../../../utils/media.js';
-    import { getAppContext } from '../../../contexts/appContext.js';
-    import { setBitmapCacheItem, getBitmapCacheItem } from './BitmapRendererCache.js';
-    import { createThreadWorker, thread } from '../../../../../utils/thread.js';
-    import { type Size } from '../../../../../utils/size.js';
-    import { transformImage } from '../../../../../workers/transformImage.js';
-    import type { TaskFnOptions } from '../../../../../core/taskScheduler.js';
-    import { yieldScheduler } from '../../../../../common/yield.js';
 
     let {
         file,
@@ -126,6 +125,9 @@
                 }
             )) as ImageBitmap;
 
+            // did we abort already
+            signal.throwIfAborted();
+
             // wait for room on main thread
             await yieldScheduler();
 
@@ -143,9 +145,7 @@
             // reveal image
             didRender = true;
         } catch (error) {
-            if (didAbort(signal, error)) {
-                throw error;
-            }
+            signal.throwIfAborted();
 
             onerror?.(error as Error);
         }
@@ -188,7 +188,7 @@
     const taskDrawImage = isFirefox() || !isBitmap() ? drawImageInMainThread : drawImageInWorker;
 
     /** Need to read the image size so we can scale the media container */
-    async function taskLoadImageSize() {
+    async function taskLoadImageSize(_: any, { signal }: TaskFnOptions) {
         // we did load this image
         didRequestImageSize = true;
 
@@ -196,10 +196,16 @@
         try {
             size = (await getImageSize(file)) as Size;
         } catch (error) {
+            // did abort
+            signal.throwIfAborted();
+
             // show in console for debugging
             onerror?.(error as Error);
             throw error;
         }
+
+        // did abort
+        signal.throwIfAborted();
 
         // calculated image scalar
         let imageScalar = 1;
