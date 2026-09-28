@@ -438,6 +438,7 @@
     // we need to know if a parent rectangle has been defined, else we wait with adding elements until it is
     const parentAbsoluteRect = $derived.by(() => {
         const currentRect = springElementContext.parent?.currentRect;
+
         if (!currentRect) {
             return rectCreate();
         }
@@ -685,10 +686,10 @@
         style:opacity={shouldRenderChildren ? undefined : opacityFrom}
         {...attrs}
         {inert}
-        {@attach measurable({
-            disabled: !canMeasure,
-            onmeasure: handleMeasure,
-        })}
+        {@attach canMeasure &&
+            measurable({
+                onmeasure: handleMeasure,
+            })}
     >
         {#if shouldRenderChildren}
             <svelte:element
