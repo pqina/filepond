@@ -222,7 +222,7 @@
         // no rectangles so we need to assume the content is visible
         // if the element is detached the rectangle will be positioned absolute (and as it's translated it will fall outside of the viewport) so we need to still render its contents
         if (!rect || !viewportRect || isDetached) {
-            return true;
+            return false;
         }
 
         return rectIntersectWithRect(rect, viewportRect);
