@@ -15,7 +15,12 @@ import {
 import { RangeInput } from '../../elements/components/RangeInput/index.js';
 import { supportsRequestFullscreen } from '../../utils/support.js';
 import { toTime } from '../../utils/date.js';
-import { type NodeData, type TemplateNode, withNodeTree } from '../../elements/common/nodeTree.js';
+import {
+    type NodeContext,
+    type NodeData,
+    type TemplateNode,
+    withNodeTree,
+} from '../../elements/common/nodeTree.js';
 import { boolToAttributeValue } from '../../utils/dom.js';
 import { MediaVideo } from '../../elements/FilePondEntryList/components/MediaVideo/index.js';
 import { EntryActivityIndicator } from '../../elements/FilePondEntryList/components/EntryActivityIndicator/index.js';
@@ -126,12 +131,12 @@ export function createResetMediaButton(options?: { action?: string }) {
     });
 }
 
-function createMediaSpringPane(key: string) {
+function createMediaSpringPane(key: string): TemplateNode {
     return {
         key,
         component: ElementPane,
-        data: (data: NodeData) => {
-            return data ? { ...data, ...getMediaContextReference(data) } : undefined;
+        data: (currentData: NodeData | undefined): NodeData => {
+            return currentData ? { ...currentData, ...getMediaContextReference(currentData) } : {};
         },
         spring: ({ visualRect, media }: NodeData) => {
             // note that the spring is initialised with an empty data object {}
