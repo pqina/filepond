@@ -407,27 +407,25 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
         // route events
         this.#connectedSubs.push(
             // did compute target rect
-            addListener(frame, 'rectcompute', (e: CustomEvent) => {
-                if (!e.detail) {
-                    return;
-                }
+            addListener(frame, 'rectcompute', (e: CustomEvent & { detail: Rect }) => {
                 const computedRect = e.detail;
+
+                // we use this so label and attribution link can hide until rect has been computed
+                this._root.dataset.rect = '';
+
+                // rect computed
                 dispatchCustomEvent(this, 'rectcompute', { detail: computedRect });
             }),
 
             // did update visual rect
-            addListener(frame, 'rectchange', (e: CustomEvent) => {
-                if (!e.detail) {
-                    return;
-                }
-
+            addListener(frame, 'rectchange', (e: CustomEvent & { detail: Rect }) => {
                 const animatedRect = e.detail;
 
-                // we use this information to center the label with transforms
+                // we use this information to center the label and attribution link using transforms
                 this._root.style.setProperty('--width', animatedRect.width);
                 this._root.style.setProperty('--height', animatedRect.height);
 
-                // did compute rect
+                // rect changed
                 dispatchCustomEvent(this, 'rectchange', { detail: animatedRect });
             }),
 

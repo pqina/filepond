@@ -44,6 +44,44 @@
         flex-direction: column;
         gap: var(--default-padding);
     }
+
+    /* Attribution link */
+    & :not([data-rect]) a[part='attribution-link'] {
+        visibility: hidden;
+    }
+
+    & a[part='attribution-link'] {
+        --font-size: 0.625;
+        --text-opacity: 0.5;
+        --line-opacity: 0.2;
+        color: rgb(from var(--default-color) r g b / var(--text-opacity));
+        font-size: calc(var(--font-size) * 1em);
+        text-underline-offset: 1px;
+        text-decoration-color: rgb(from var(--default-color) r g b / var(--line-opacity));
+        text-transform: lowercase;
+        transition: color calc(150ms * var(--animate)) ease-in-out;
+        user-select: none;
+        &:hover {
+            --text-opacity: 0.75;
+            --line-opacity: 0.25;
+        }
+    }
+
+    & a[part='attribution-link'] {
+        --inset: calc(var(--default-padding) / var(--font-size));
+        position: absolute;
+        z-index: -1;
+        top: 0;
+        left: 0;
+        line-height: 2;
+        transform: translate(calc(var(--width, 0) * 1px), calc(var(--height, 0) * 1px))
+            translateX(calc(-100% - var(--inset)));
+
+        &:dir(rtl) {
+            left: 0;
+            transform: translate(var(--inset), calc(var(--height, 0) * 1px));
+        }
+    }
 }
 
 /* apply "never" animation state */
@@ -286,40 +324,6 @@ file-pond-entry-list {
     }
 }
 
-/* Attribution link */
-:host a[part='attribution-link'] {
-    --font-size: 0.625;
-    --text-opacity: 0.5;
-    --line-opacity: 0.2;
-    color: rgb(from var(--default-color) r g b / var(--text-opacity));
-    font-size: calc(var(--font-size) * 1em);
-    text-underline-offset: 1px;
-    text-decoration-color: rgb(from var(--default-color) r g b / var(--line-opacity));
-    text-transform: lowercase;
-    transition: color var(--_150ms) ease-in-out;
-    user-select: none;
-    &:hover {
-        --text-opacity: 0.75;
-        --line-opacity: 0.25;
-    }
-}
-
-:host a[part='attribution-link'] {
-    --inset: calc(var(--default-padding) / var(--font-size));
-    position: absolute;
-    z-index: -1;
-    top: 0;
-    left: 0;
-    line-height: 2;
-    transform: translate(calc(var(--width, 0) * 1px), calc(var(--height, 0) * 1px))
-        translateX(calc(-100% - var(--inset)));
-
-    &:dir(rtl) {
-        left: 0;
-        transform: translate(var(--inset), calc(var(--height, 0) * 1px));
-    }
-}
-
 /* this horizontally centers the input description and source list in the frame */
 file-pond-source-list,
 file-pond-source-description {
@@ -341,6 +345,10 @@ file-pond-source-description {
         outline: var(--outline);
         outline-offset: calc(0.25 * var(--default-padding));
     }
+}
+
+:host :not([data-rect]) file-pond-source-description {
+    visibility: hidden;
 }
 
 file-pond-source-list {

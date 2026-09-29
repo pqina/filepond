@@ -44,11 +44,11 @@
 
     /* skeleton sizing */
     --skeleton-width: 8em;
-    --skeleton-max-width: 100%;
+    --skeleton-max-width: 75%;
 }
 
 .entry-info-sub {
-    --skeleton-max-width: 50%;
+    --skeleton-max-width: 25%;
     font-size: var(--font-size-xs);
     font-weight: 400;
     color: color-mix(in srgb, currentColor 50%, transparent);

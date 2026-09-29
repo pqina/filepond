@@ -119,7 +119,13 @@ function createIntersectionObserver() {
             }
 
             // We use InteractionObserver to measure the first position of the node
-            updateNodeBounds(node, r.top, r.right, r.bottom, r.left);
+            const bounds = updateNodeBounds(node, r.top, r.right, r.bottom, r.left);
+
+            // we measure this node sync
+            nodeCallbacks.get(node).onmeasuresync?.(bounds);
+
+            // queue first measurement of this node to after tick call
+            addedNodes.push(node);
 
             // Keep watching this node in requestAnimationFrame loop
             elements.push(node);
@@ -146,18 +152,19 @@ function createIntersectionObserver() {
 const boundsTest = boundsCreate();
 
 // Stores all nodes and their current rectangles
-const nodeBounds = new Map();
-const nodeVisibility = new Map();
-const nodeSuspended = new Set();
+const nodeBounds: Map<Element, Bounds> = new Map();
+const nodeVisibility: Map<Element, boolean> = new Map();
+const nodeSuspended: Set<Element> = new Set();
+const addedNodes: Element[] = [];
 
 /** Updates the bounds property */
-const updateNodeBounds = (
+function updateNodeBounds(
     node: Element,
     top: number,
     right: number,
     bottom: number,
     left: number
-) => {
+): void | Bounds {
     // could've been deregistered before this call, or was suspended before this call
     if (!nodeCallbacks.has(node) || nodeSuspended.has(node)) {
         return;
@@ -168,8 +175,8 @@ const updateNodeBounds = (
         nodeBounds.set(node, boundsCreate());
     }
 
-    // Get current node bounds
-    const bounds = nodeBounds.get(node);
+    // Get current node bounds (there's always bounds as we've just initialised them)
+    const bounds = nodeBounds.get(node) as Bounds;
 
     // Update test bounds so we can compare new bounds (saves us from creating another object)
     boundsUpdate(boundsTest, top, right, bottom, left);
@@ -182,17 +189,20 @@ const updateNodeBounds = (
     // Update existing bounds with new bounds
     boundsUpdateWithBounds(bounds, boundsTest);
 
-    // new bounds
-    nodeCallbacks.get(node)(bounds);
-
     // return new bounds
     return bounds;
-};
+}
 
-const measureClientRect = (node: Element) => {
+function measureClientRect(node: Element) {
     const clientRect = node.getBoundingClientRect();
-    updateNodeBounds(node, clientRect.top, clientRect.right, clientRect.bottom, clientRect.left);
-};
+    return updateNodeBounds(
+        node,
+        clientRect.top,
+        clientRect.right,
+        clientRect.bottom,
+        clientRect.left
+    );
+}
 
 /** Holds all the elements to measure using requestAnimationFrame */
 const elements: Element[] = [];
@@ -201,7 +211,21 @@ const elements: Element[] = [];
 let frame: number | null = null;
 function tick() {
     // measure rectangles
-    elements.forEach(measureClientRect);
+    const updatedNodes = elements.filter((node) => {
+        return measureClientRect(node);
+    });
+
+    // now everything is measured we run onmeasure callback
+    updatedNodes.forEach((node) => {
+        nodeCallbacks.get(node)?.onmeasure?.(nodeBounds.get(node));
+    });
+
+    addedNodes.forEach((node) => {
+        nodeCallbacks.get(node)?.onmeasure?.(nodeBounds.get(node));
+    });
+
+    // reset added nodes
+    addedNodes.length = 0;
 
     // wait for next frame
     frame = requestAnimationFrame(tick);
@@ -234,16 +258,14 @@ function stop() {
 
 /** Measure the position and size of an html element. */
 export function measurable(
-    options: { disabled?: boolean; onmeasure?: (bounds: Bounds) => void } = {}
+    options: {
+        onmeasure?: (bounds: Bounds) => void;
+        onmeasuresync?: (bounds: Bounds) => void;
+    } = {}
 ): { (element: HTMLElement): () => void } {
-    const { disabled, onmeasure = noop } = options;
+    const { onmeasure, onmeasuresync } = options;
 
     return (node) => {
-        // stop here
-        if (disabled) {
-            return () => undefined;
-        }
-
         // Create single intersection observer
         if (!intersectionObserver) {
             createIntersectionObserver();
@@ -260,7 +282,7 @@ export function measurable(
         }
 
         // register node
-        nodeCallbacks.set(node, onmeasure);
+        nodeCallbacks.set(node, { onmeasure, onmeasuresync });
 
         // Start observing this node, will get also get its initial position
         intersectionObserver?.observe(node);

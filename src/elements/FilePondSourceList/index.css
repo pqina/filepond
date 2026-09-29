@@ -207,25 +207,24 @@ dialog {
     & [part='dialog-header'],
     & [part='dialog-footer'] {
         --dist: 15%;
-        transition:
-            transform var(--dialog-timing) ease-out,
-            opacity var(--dialog-timing) ease-out;
+        --transform: calc((1 - var(--dialog-transition)) * var(--dist));
+        transition: opacity var(--dialog-timing) ease-out;
         opacity: 0;
     }
 
     & [part='dialog-header'] {
-        transform: translateY(var(--dist));
+        transform: translateY(var(--transform));
     }
 
     & [part='dialog-footer'] {
-        transform: translateY(calc(var(--dist) * -1));
+        transform: translateY(calc(var(--transform) * -1));
     }
 
     &[data-visible] {
         & [part='dialog-header'],
         & [part='dialog-footer'] {
             opacity: 1;
-            transform: translateY(0);
+            /*transform: translateY(0);*/
         }
 
         & [part='dialog-content'] {

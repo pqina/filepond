@@ -48,12 +48,14 @@
     });
 
     function handleMeasure(bounds: Bounds) {
-        rootRect = rectFromBounds(bounds);
-    }
+        const rect = rectFromBounds(bounds);
 
-    $effect(() => {
-        callbacks.computeRect(rootRect);
-    });
+        // new root rect
+        callbacks.computeRect(rect);
+
+        // update so animation can start
+        rootRect = rect;
+    }
 
     $effect(() => {
         callbacks.updateRect(rootRectSpring.current);
@@ -64,12 +66,7 @@
     });
 </script>
 
-<div
-    class="root"
-    {@attach measurable({
-        onmeasure: handleMeasure,
-    })}
->
+<div class="root" {@attach measurable({ onmeasure: handleMeasure })}>
     {#if rootRectSpring.current}
         <ElementPane width={rootRectSpring.current.width} height={rootRectSpring.current.height}
         ></ElementPane>

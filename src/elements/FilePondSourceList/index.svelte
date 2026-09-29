@@ -126,6 +126,8 @@
         contentRect = null;
         contentRectSpring.set(null, { instant: true });
 
+        dialogSpring.set(0, { instant: true });
+
         dialogVisible = false;
     }
 
@@ -170,6 +172,13 @@
         });
     }
 
+    /** Dialog header/footer CSS animation spring */
+    let dialogSpring = new Spring<number>(0);
+
+    $effect(() => {
+        Object.assign(dialogSpring, springOptions);
+    });
+
     /** Content clipping */
     let contentRect = $state<Rect | null>(null);
     let contentRectSpring = new Spring<Rect | null>(null);
@@ -180,6 +189,8 @@
         }
 
         contentRectSpring.set(contentRect, { instant: reduceMotion });
+
+        dialogSpring.set(1, { instant: reduceMotion });
     });
 
     $effect(() => {
@@ -291,6 +302,7 @@
             onclick={handleDialogTap}
             ontoggle={handleDialogToggle}
             style:--dialog-content-clip-path={dialogContentClipPathStyle}
+            style:--dialog-transition={dialogSpring.current}
             data-visible={dialogVisible ? '' : undefined}
             {@attach measurable({
                 onmeasure: handleMeasureDialog,

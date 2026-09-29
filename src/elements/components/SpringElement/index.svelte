@@ -686,10 +686,7 @@
         style:opacity={shouldRenderChildren ? undefined : opacityFrom}
         {...attrs}
         {inert}
-        {@attach canMeasure &&
-            measurable({
-                onmeasure: handleMeasure,
-            })}
+        {@attach canMeasure && measurable({ onmeasure: handleMeasure })}
     >
         {#if shouldRenderChildren}
             <svelte:element
