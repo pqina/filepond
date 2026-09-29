@@ -128,10 +128,6 @@ export class FilePondSvelteComponentElement
                     return this.#props[name];
                 },
                 set(value) {
-                    // console.log(this.nodeName, key, value);
-
-                    // console.log(this.#props);
-
                     this.#props[name] = value;
                     // = {
                     //     ...this.#props,
