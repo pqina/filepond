@@ -252,7 +252,7 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
             return;
         }
 
-        // toggle animations
+        // toggle motion
         if (name === 'reduced-motion') {
             this.reducedMotionPreference = value as ReducedMotionPreference;
         }

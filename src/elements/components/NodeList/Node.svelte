@@ -180,9 +180,9 @@
             }
 
             // update the springs
-            for (const [propertyName, { value }] of springEntries) {
+            for (const [propertyName, { value, instant = false }] of springEntries) {
                 currentSprings[propertyName].spring.set(value, {
-                    instant: reduceMotion,
+                    instant: reduceMotion || instant,
                 });
             }
         });

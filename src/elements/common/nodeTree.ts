@@ -68,6 +68,9 @@ export interface NodeSpringProperty {
 
     /** Spring configuration to use */
     config?: SpringOptions;
+
+    /** Move to spring end state */
+    instant?: boolean;
 }
 
 export interface ElementNode extends BaseNode {

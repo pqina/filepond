@@ -108,8 +108,10 @@ type Partial<T> = {
 export type SpringOptions = {
     /** Controls how strongly the spring moves toward its target. Value between `0` and `1`, higher values result in more tight springs. */
     stiffness: number;
+
     /** Controls how quickly the spring loses energy. Value between `0` and `1`, higher values result in spring animations that settle more quickly. */
     damping: number;
+
     /** Controls when the spring is considered settled. Lower means more precise. Defaults to `0.01`. */
     precision?: number;
 };

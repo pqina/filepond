@@ -86,9 +86,11 @@ export class FilePondSvelteComponentElement
         }
 
         // assign directly to #props
-        Object.assign(this.#props, {
-            [name]: value,
-        });
+        this.#props[name] = value;
+        // this.#props = {
+        //     ...this.#props,
+        //     [name]: value,
+        // };
     }
 
     constructor(
@@ -112,20 +114,29 @@ export class FilePondSvelteComponentElement
         this.#root.adoptedStyleSheets = arrayRemoveFalsy(styles).map(createStyleSheet);
 
         // so we can reference it elsewhere in this class (for internal svelte reason we can't assign directly to this.#props with $state)
-        this.#props = $state.raw({
+        this.#props = $state({
+            // this cannot be a $state.raw because then the Svelte component doesn't respond to prop updates
             root: this,
             springOptions: undefined,
             locale: undefined,
             reducedMotionPreference: this.getAttribute('reduced-motion') || 'auto',
         });
 
-        [...new Set([...COMPONENT_PROPS, ...properties])].forEach((key) => {
-            Object.defineProperty(this, key, {
+        [...new Set([...COMPONENT_PROPS, ...properties])].forEach((name) => {
+            Object.defineProperty(this, name, {
                 get() {
-                    return this.#props[key];
+                    return this.#props[name];
                 },
                 set(value) {
-                    this.#props[key] = value;
+                    // console.log(this.nodeName, key, value);
+
+                    // console.log(this.#props);
+
+                    this.#props[name] = value;
+                    // = {
+                    //     ...this.#props,
+                    //     [key]: value,
+                    // };
                 },
             });
         });
@@ -166,11 +177,13 @@ export class FilePondSvelteComponentElement
             return;
         }
 
+        // mount the Svelte app
         this.#app = mount(this.#Component, {
             target: this.#root,
             props: this.#props,
         });
 
+        // setup events
         this.#events.forEach((type) => {
             const unsub = addListener(this._root.children[0], type, (e) => {
                 dispatchCustomEvent(this, type, {
@@ -181,6 +194,7 @@ export class FilePondSvelteComponentElement
             this.#listeners.push(unsub);
         });
 
+        // handle queued function calls
         this.#queue.forEach(([key, args]) => {
             this.#app[key](...args);
         });

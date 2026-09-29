@@ -214,9 +214,13 @@
     // not yet rendering media
     let mediaVisible = $state(false);
 
+    // not yet rendering media
+    let mediaCached = $state(false);
+
     // add media state to extension so can be used by UI
     $effect(() => {
         const media = {
+            isCached: mediaCached,
             isReady: mediaReady,
             isVisible: mediaVisible,
         };
@@ -246,7 +250,9 @@
                             {resizeQuality}
                             {maximumPixels}
                             taskId={entryContext.current.id}
-                            oninit={() => {
+                            oninit={({ willRestore }) => {
+                                mediaCached = willRestore;
+
                                 onInitMedia();
                             }}
                             onload={(size: Size) => {

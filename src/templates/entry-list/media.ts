@@ -130,13 +130,17 @@ function createMediaSpringPane(key: string) {
     return {
         key,
         component: ElementPane,
-        spring: ({ visualRect }: NodeData) => {
+        data: (data: NodeData) => {
+            return data ? { ...data, ...getMediaContextReference(data) } : undefined;
+        },
+        spring: ({ visualRect, media }: NodeData) => {
             // note that the spring is initialised with an empty data object {}
             return {
                 opacity: {
+                    instant: media?.isCached,
                     value: visualRect?.height > 0 ? 1 : 0,
                     config: {
-                        stiffness: 0.02,
+                        stiffness: 0.1,
                         damping: 0.85,
                         precision: 0.1,
                     },

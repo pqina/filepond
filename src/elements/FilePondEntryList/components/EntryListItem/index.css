@@ -41,5 +41,12 @@
     /* Virtual list item */
     &:empty {
         min-height: var(--entry-min-height);
+
+        /* we show item after 50ms, this prevents a flickering of virtual items while loading */
+        opacity: 1;
+        transition: opacity 50ms steps(1, jump-end);
+        @starting-style {
+            opacity: 0;
+        }
     }
 }

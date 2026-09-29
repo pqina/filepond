@@ -1,7 +1,6 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
     import { isFirefox } from '../../../../../utils/test.js';
-    import { didAbort } from '../../../../../utils/abort.js';
     import { createObjectURL } from '../../../../../utils/objectURL.js';
     import { getImageSize } from '../../../../../utils/media.js';
     import { getAppContext } from '../../../contexts/appContext.js';
@@ -33,7 +32,7 @@
         workersURL?: URL;
 
         /** Event handlers */
-        oninit?: () => void;
+        oninit?: (options: { willRestore: boolean }) => void;
         onload?: (size: { width: number; height: number }) => void;
         onrender?: (options: { didRestore: boolean }) => void;
         onerror?: (error: Error) => void;
@@ -262,7 +261,7 @@
 
     // replace canvas if we have a cached canvas
     onMount(() => {
-        oninit?.();
+        oninit?.({ willRestore: !!cachedCanvas });
 
         if (!cachedSize) {
             return;
