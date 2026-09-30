@@ -42,7 +42,7 @@
     &:empty {
         min-height: var(--entry-min-height);
 
-        /* we show item after 50ms, this prevents a flickering of virtual items while loading */
+        /* TODO: this is a bit hacky, we show item after 50ms, this prevents a flickering of virtual items while loading (issue: first shows virtual item, then nothing, then actual item) */
         opacity: 1;
         transition: opacity 50ms steps(1, jump-end);
         @starting-style {

@@ -39,6 +39,7 @@
         reduceMotion = true,
         springOptions = undefined,
 
+        id = undefined,
         tag = 'div',
         part = undefined,
         class: klass = undefined,
@@ -445,8 +446,6 @@
         return currentRect;
     }) as Rect;
 
-    let hasParentCalculatedRect = $derived(!!parentAbsoluteRect);
-
     const hasChildSprings = $derived(springElementContext.childSpringCount > 0);
 
     // we need to wait till current rectangle is defined, when it is, we mark the element as ready so parents can start measuring
@@ -571,6 +570,8 @@
         visualAbsoluteRectCenter = rectCenter(visualAbsoluteRect);
     }
 
+    const hasVisualAbsoluteRect = $derived(!!visualAbsoluteRect);
+
     //#region calculate styles
 
     const isTransforming = $derived.by(() => {
@@ -674,37 +675,37 @@
     });
 </script>
 
-<!-- If there's a parent rectangle we wait until it's set, it's important the parent rectangle is added first for the rectangles and measurements to all correctly update in order -->
-{#if hasParentCalculatedRect}
-    <svelte:element
-        this={tag}
-        bind:this={root}
-        class={klass}
-        {part}
-        style:contain={'layout'}
-        style:height={shouldRenderChildren ? undefined : `${virtualSize?.height}px`}
-        style:opacity={shouldRenderChildren ? undefined : opacityFrom}
-        {...attrs}
-        {inert}
-        {@attach canMeasure && measurable({ onmeasure: handleMeasure })}
-    >
-        {#if shouldRenderChildren}
-            <svelte:element
-                this={subtag}
-                class={subclass}
-                style:position={stylePosition}
-                style:left={styleLeft}
-                style:top={styleTop}
-                style:transformOrigin={styleTransformOrigin}
-                style:transform={styleTransform}
-                style:opacity={styleOpacity}
-                style:height={'100%'}
-                style:max-height={'inherit'}
-                {...subattrs}
-                {@attach measurable({ onmeasure: handleMeasureContext })}
-            >
-                {@render children(childData)}
-            </svelte:element>
-        {/if}
-    </svelte:element>
-{/if}
+<svelte:element
+    this={tag}
+    {id}
+    bind:this={root}
+    class={klass}
+    {part}
+    style:contain={'layout'}
+    style:height={shouldRenderChildren ? undefined : `${virtualSize?.height}px`}
+    style:opacity={shouldRenderChildren ? undefined : opacityFrom}
+    {...attrs}
+    {inert}
+    {@attach canMeasure && measurable({ onmeasure: handleMeasure })}
+>
+    {#if shouldRenderChildren}
+        <!-- we have to set the min-height otherwize a virtualized item has 0 height and that impacts rendering of subsequent items in a list -->
+        <svelte:element
+            this={subtag}
+            class={subclass}
+            style:position={stylePosition}
+            style:left={styleLeft}
+            style:top={styleTop}
+            style:transformOrigin={styleTransformOrigin}
+            style:transform={styleTransform}
+            style:opacity={styleOpacity}
+            style:height={'100%'}
+            style:min-height={!hasVisualAbsoluteRect ? `${virtualSize?.height}px` : undefined}
+            style:max-height={'inherit'}
+            {...subattrs}
+            {@attach measurable({ onmeasure: handleMeasureContext })}
+        >
+            {@render children(childData)}
+        </svelte:element>
+    {/if}
+</svelte:element>

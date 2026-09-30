@@ -299,6 +299,7 @@
 <svelte:window bind:innerWidth={windowWidth} bind:innerHeight={windowHeight} />
 
 <SpringElement
+    {id}
     {tag}
     part={parts}
     {dataset}
