@@ -320,7 +320,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                         },
                         extensionState: {
                             [extensionName]: {
-                                // need to re-evaluate if we can store this file
+                                // we can store this entry
                                 canStore: true,
 
                                 // done!
@@ -352,7 +352,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                 }
             }
 
-            /** Restores an entry to a File by value */
+            /** Releases a stored entry */
             async function taskReleaseEntry(entry: FilePondFileEntry, { signal }: TaskFnOptions) {
                 const { valueKey, actionLoad, actionStore, shouldStore } = props;
 
@@ -395,6 +395,27 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                         });
                     }
 
+                    // object to update the entry with when released
+                    const entryReleaseSuccessState = {
+                        state: {
+                            [valueKey]: null,
+                            [actionLoad]: null,
+                        },
+                        extensionState: {
+                            [extensionName]: {
+                                // we can store this entry
+                                canStore: true,
+                                status: {
+                                    type: Status.System,
+                                    code: removeOnRelease
+                                        ? // as we're removing immidiately after this action this retains the loading indicator preventing the upload arrow from showing
+                                          'STORE_RELEASE_BUSY'
+                                        : 'STORE_RELEASE_COMPLETE',
+                                },
+                            },
+                        },
+                    };
+
                     // found custom undo function to release entry data
                     if (releaseEntry) {
                         // now release uploaded file from storage
@@ -402,45 +423,19 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                             signal,
                         });
 
-                        // didn't fail
                         if (success !== false) {
-                            updateEntry(entry, {
-                                state: {
-                                    [valueKey]: null,
-                                    [actionLoad]: null,
-                                },
-                                extensionState: {
-                                    [extensionName]: {
-                                        canStore: true,
-                                        status: {
-                                            type: Status.System,
-                                            code: 'STORE_RELEASE_COMPLETE',
-                                        },
-                                    },
-                                },
-                            });
+                            updateEntry(entry, entryReleaseSuccessState);
                         }
-                    } else {
-                        // no custom function to release entry data, let's just update state instead
-                        updateEntry(entry, {
-                            state: {
-                                [valueKey]: null,
-                                [actionLoad]: null,
-                            },
-                            extensionState: {
-                                [extensionName]: {
-                                    status: {
-                                        type: Status.System,
-                                        code: 'STORE_RELEASE_COMPLETE',
-                                    },
-                                },
-                            },
-                        });
+                    }
+                    // no custom function to release entry data, always succeeds
+                    else {
+                        updateEntry(entry, entryReleaseSuccessState);
                     }
 
                     // should remove on release
                     if (removeOnRelease) {
                         removeEntries(entry);
+                        return;
                     }
                 } catch (error) {
                     if (didAbort(signal, error)) {
