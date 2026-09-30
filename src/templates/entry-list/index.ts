@@ -411,7 +411,9 @@ export function createEntryLoadState() {
                         title: 'abort',
                         icon: 'remove',
                         disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
-                        onclick: () => updateEntryState(id, { abort: true }),
+                        onclick: () => {
+                            updateEntryState(id, { abort: true });
+                        },
                         ariaDescribedby: `${ariaId}-name`,
                     }),
                 },
@@ -427,7 +429,9 @@ export function createEntryLoadState() {
                     button: createButton('button-entry-remove', {
                         icon: 'remove',
                         disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
-                        onclick: () => removeEntries(id),
+                        onclick: () => {
+                            removeEntries(id);
+                        },
                         ariaDescribedby: toSpaceSeparatedString(
                             `${ariaId}-name`,
                             `${ariaId}-status`
@@ -464,10 +468,11 @@ export function createEntryStoreState() {
                             idle: 'translateY(0)',
                             outro: 'translateY(-0.125em)',
                         }),
-                        onclick: () =>
+                        onclick: () => {
                             updateEntryState(id, {
                                 store: true,
-                            }),
+                            });
+                        },
                         ariaDescribedby: `${ariaId}-name`,
                     }),
                 },
@@ -496,10 +501,11 @@ export function createEntryStoreState() {
                     button: createButton('button-store-busy', {
                         icon: 'abort',
                         disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
-                        onclick: () =>
+                        onclick: () => {
                             updateEntryState(id, {
                                 abort: true,
-                            }),
+                            });
+                        },
                         ariaDescribedby: `${ariaId}-name`,
                     }),
                 },
@@ -513,10 +519,11 @@ export function createEntryStoreState() {
                             outro: 'rotaetZ(-45deg)',
                         }),
                         disabled: hasExtensionWithStatusCode(entry, ['TRANSFORM_BUSY']),
-                        onclick: () =>
+                        onclick: () => {
                             updateEntryState(id, {
                                 store: false,
-                            }),
+                            });
+                        },
                         ariaDescribedby: toSpaceSeparatedString(
                             `${ariaId}-name`,
                             `${ariaId}-status`,
