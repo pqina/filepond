@@ -1,3 +1,4 @@
+import { arrayRemoveInPlace } from '../../utils/array.js';
 import type { Bounds } from '../../utils/bounds.js';
 import {
     boundsCreate,
@@ -121,10 +122,10 @@ function createIntersectionObserver() {
             // We use InteractionObserver to measure the first position of the node
             const bounds = updateNodeBounds(node, r.top, r.right, r.bottom, r.left);
 
-            // we measure this node sync
+            // we've measured this node in sync
             nodeCallbacks.get(node).onmeasuresync?.(bounds);
 
-            // queue first measurement of this node to after tick call
+            // so there's also an async measurement
             addedNodes.push(node);
 
             // Keep watching this node in requestAnimationFrame loop
@@ -298,6 +299,11 @@ export function measurable(
 
             // stop observing
             intersectionObserver?.unobserve(node);
+
+            // if was just added we need to remove
+            arrayRemoveInPlace(addedNodes, (item) => item === node);
+
+            // remove from all maps and sets
             nodeSuspended.delete(node);
             nodeVisibility.delete(node);
             nodeBounds.delete(node);
