@@ -28,7 +28,6 @@
     }
 
     onDestroy(() => {
-        // clear rect!
         onmeasureitem(id, index, undefined);
     });
 </script>
