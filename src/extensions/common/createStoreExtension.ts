@@ -407,10 +407,7 @@ export function createStoreExtension<Props extends object = StoreExtensionOption
                                 canStore: true,
                                 status: {
                                     type: Status.System,
-                                    code: removeOnRelease
-                                        ? // as we're removing immidiately after this action this retains the loading indicator preventing the upload arrow from showing
-                                          'STORE_RELEASE_BUSY'
-                                        : 'STORE_RELEASE_COMPLETE',
+                                    code: 'STORE_RELEASE_COMPLETE',
                                 },
                             },
                         },
