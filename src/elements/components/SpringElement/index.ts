@@ -6,25 +6,28 @@ import type { Size } from '../../../utils/size.js';
 export { default as SpringElement } from './index.svelte';
 
 export interface SpringElementOptions {
-    /** Defaults to 'div' */
+    /** Defaults to `undefined` */
+    id?: string;
+
+    /** Defaults to `'div'` */
     tag?: string;
 
-    /** Defaults to 'div' */
+    /** Defaults to `'div'`` */
     subtag?: string;
 
     /** Part to assign to root element */
     part?: string;
 
-    /** Defaults to {} */
+    /** Defaults to `{}` */
     attrs?: { [key: string]: string | boolean | number | undefined };
 
-    /** Defaults to {} */
+    /** Defaults to `{}` */
     subattrs?: { [key: string]: string | boolean | number | undefined };
 
-    /** Defaults to {} */
+    /** Defaults to `{}` */
     dataset?: { [key: string]: string | boolean | number | undefined };
 
-    /** Defaults to {} */
+    /** Defaults to `{}` */
     styles?: { [key: string]: string | number };
 
     /** Class to use on outer element */
@@ -61,11 +64,14 @@ export interface SpringElementOptions {
     /** Called when root element created */
     onroot?: (root: HTMLElement) => void;
 
-    /** Called on element measure */
-    onelementmeasure?: (rect: Rect) => void;
-
     /** Called on root element measure */
     onmeasure?: (bounds: Bounds) => void;
+
+    /** Called on root element sync measure */
+    onmeasuresync?: (bounds: Bounds) => void;
+
+    /** Called on element measure */
+    onelementmeasure?: (rect: Rect) => void;
 
     /** Called when computed element absolute rect */
     onmeasureabsoluterect?: (rect: Rect) => void;
