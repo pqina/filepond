@@ -10,7 +10,7 @@ import { noop } from '../../utils/placeholder.js';
 
 export interface DragEventDetail {
     id: string;
-    element: HTMLElement;
+    element: HTMLElement | undefined;
     translation: Vector;
     offset: Vector;
     startPosition: Vector;

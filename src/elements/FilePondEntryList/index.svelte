@@ -778,11 +778,16 @@
         dragInteraction = undefined;
     }
 
+    /** Returns true if we can accept this drop */
+    function willAcceptDrop(e: DropEventDetail) {
+        return !!dragState;
+    }
+
     /** Handles item being dropped */
     function handleDropItem(e: DropEventDetail | DragEventDetail) {
         dispatchCustomEvent(root, 'entrydragend');
 
-        // no valid drag interaction
+        // no valid drag interaction (for example when dropped outside of droparea)
         if (!dragState) {
             return;
         }
@@ -795,7 +800,7 @@
 
         // if is transferring data
         if (hasOwnProp(e, 'dataTransfer')) {
-            const dataTransfer = (e as DropEventDetail).dataTransfer;
+            const dataTransfer = (e as DropEventDetail).dataTransfer as DataTransfer;
 
             // can't handle non-files
             if (!dataTransfer.types.includes('Files')) {
@@ -1086,6 +1091,7 @@
     })}
     {@attach dropArea({
         disabled: !drop || disabled,
+        willAcceptDrop,
         onitemdrag: handleDragItem,
         onitemdragin: handleDragItemIn,
         onitemdragout: handleDragItemOut,

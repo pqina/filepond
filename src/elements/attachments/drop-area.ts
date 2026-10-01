@@ -10,11 +10,12 @@ import { isObjectValuesEqual } from '../../utils/object.js';
 import { noop } from '../../utils/placeholder.js';
 
 export interface DropEventDetail extends DragEventDetail {
-    dataTransfer: DataTransfer;
+    dataTransfer: DataTransfer | null;
 }
 
 interface DropAreaOptions {
     disabled?: boolean;
+    willAcceptDrop?: (obj: DropEventDetail) => boolean;
     onitemdrag?: (obj: DropEventDetail) => void;
     onitemdragin?: (obj: DropEventDetail) => void;
     onitemdragout?: (obj: DropEventDetail) => void;
@@ -24,7 +25,7 @@ interface DropAreaOptions {
 
 /** Target element can handle dropping of items */
 export function dropArea(options: DropAreaOptions = {}): (element: HTMLElement) => () => void {
-    const { disabled } = options;
+    const { disabled, willAcceptDrop } = options;
 
     return (element) => {
         // state
@@ -72,22 +73,27 @@ export function dropArea(options: DropAreaOptions = {}): (element: HTMLElement) 
             };
         };
 
+        function createDropEventDetail(dataTransfer: DataTransfer | null = null): DropEventDetail {
+            return {
+                id: id as string,
+                element: undefined,
+                translation: { ...translation } as Vector,
+                offset: vectorCreate(0, 0),
+                startPosition: { ...startPosition } as Vector,
+                viewPosition: { ...viewPosition } as Vector,
+                vector: { ...vector } as Vector,
+                dataTransfer,
+            };
+        }
+
         /** Dispatch events on main element */
         const dispatchEvent = (type: string, dataTransfer?: DataTransfer | null) => {
             if (disabled) {
                 return;
             }
 
-            const detail = {
-                id,
-                element: undefined,
-                translation: { ...translation },
-                offset: vectorCreate(0, 0),
-                startPosition: { ...startPosition },
-                viewPosition: { ...viewPosition },
-                vector: { ...vector },
-                dataTransfer,
-            };
+            // event details
+            const detail = createDropEventDetail(dataTransfer);
 
             // @ts-ignore call handler (if defined)
             (options[`on${type}`] ?? noop)(detail);
@@ -166,11 +172,13 @@ export function dropArea(options: DropAreaOptions = {}): (element: HTMLElement) 
             // was drop handled by another layer
             const defaultPrevented = e.defaultPrevented;
 
-            // we're handling it now
-            e.preventDefault();
-
             // make sure drag state is updated
             update(e);
+
+            // if should accept drop we prevent the default browser action
+            if (willAcceptDrop?.(createDropEventDetail(e.dataTransfer))) {
+                e.preventDefault();
+            }
 
             // cancelled by another event handler
             if (defaultPrevented) {
