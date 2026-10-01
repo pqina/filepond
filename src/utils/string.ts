@@ -42,3 +42,8 @@ export function getRuntimeDefaultLocale() {
     }
     return runtimeDefaultLocale;
 }
+
+/** Tests a string against an array of patterns, returns true if a match is found */
+export function stringMatchesAny(str: string, patterns: RegExp[] | readonly never[]) {
+    return patterns.find((regex) => regex.test(str));
+}

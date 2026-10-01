@@ -22,6 +22,8 @@ import {
 } from '../../utils/test.js';
 import { copyFilePropsToObject } from '../../utils/file.js';
 import { getFilenameFromURL } from '../../utils/url.js';
+import { stringMatchesAny } from '../../utils/string.js';
+import { EMPTY_ARRAY } from '../../utils/array.js';
 
 type PartialFilePondEntry = (
     | Partial<FilePondDirectoryEntry>
@@ -32,23 +34,28 @@ type PartialFilePondEntry = (
 export type CreateFilePondEntryTreeOptions = Omit<
     CreateEntryTreeOptions,
     'beforeOnboardEntry' | 'beforeUpdateEntryWithProps'
->;
+> & {
+    getIgnoredEntryPatterns?: () => RegExp[] | readonly never[];
+};
 
 export function createFilePondEntryTree(options?: CreateFilePondEntryTreeOptions) {
-    const { beforeInsertEntries } = options || {};
+    const { beforeInsertEntries, getIgnoredEntryPatterns = () => EMPTY_ARRAY } = options || {};
+
     return createEntryTree({
         // allows limiting the total entries added
         beforeInsertEntries,
 
         // formats the entry so all entries in the dataset follow the same data structure
         beforeOnboardEntry(entry) {
+            const onboardingOptions = { ignoredEntryPatterns: getIgnoredEntryPatterns() };
+
             // filter invalid entries
-            if (!shouldAddEntry(entry)) {
+            if (!shouldAddEntry(entry, onboardingOptions)) {
                 return false;
             }
 
             // sanitize and filter
-            return formatEntry(entry);
+            return formatEntry(entry, onboardingOptions);
         },
 
         // makes modifications to the props the entry is updated with
@@ -86,27 +93,28 @@ function isEntrySrc(entry: FilePondEntrySource) {
 }
 
 /** If no name, that's fine, if does have a file name ignore if is a hidden file */
-function shouldAddEntry(entry: FilePondEntrySource) {
+function shouldAddEntry(
+    entry: FilePondEntrySource,
+    options: { ignoredEntryPatterns: RegExp[] | readonly never[] }
+) {
+    const { ignoredEntryPatterns = EMPTY_ARRAY } = options || {};
     if (isString(entry) || isFileEntry(entry)) {
         const name = isString(entry)
             ? (getFilenameFromURL(entry) ?? '')
             : (entry.name ?? (isFile(entry?.src) ? entry.src.name : ''));
 
-        return ![
-            /\.git/,
-            /thumbs\.db/,
-            /\.DS_Store/,
-            /desktop\.ini/,
-            /^__MACOSX/,
-            /node_modules/,
-        ].find((regex) => regex.test(name));
+        // don't add ignored files
+        return !stringMatchesAny(name, ignoredEntryPatterns);
     }
 
     return true;
 }
 
 /** Formats the entry so it conforms to the FilePondEntry type and is ready to be added to the list */
-function formatEntry(entry: FilePondEntrySource): FilePondEntry {
+function formatEntry(
+    entry: FilePondEntrySource,
+    options: { ignoredEntryPatterns: RegExp[] | readonly never[] }
+): FilePondEntry {
     // test if entry is source object if so, we need to set that as the src
     const partialEntry: PartialFilePondEntry = isEntrySrc(entry) ? { src: entry } : { ...entry };
 
@@ -129,7 +137,9 @@ function formatEntry(entry: FilePondEntrySource): FilePondEntry {
     // if not is a file, it's a directory, let's format subentries
     if (isDirectoryEntry(partialEntry)) {
         const { entries } = partialEntry;
-        partialEntry.entries = entries.filter(shouldAddEntry).map(formatEntry);
+        partialEntry.entries = entries
+            .filter((entry) => shouldAddEntry(entry, options))
+            .map((entry) => formatEntry(entry, options));
         return partialEntry as FilePondDirectoryEntry;
     }
 

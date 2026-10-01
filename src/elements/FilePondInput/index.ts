@@ -18,14 +18,22 @@ import {
     addListener,
     createStyleSheet,
 } from '../../utils/dom.js';
-import { isBoolean, isFile, isNumber, isObject, isString } from '../../utils/test.js';
+import {
+    isArray,
+    isBoolean,
+    isFile,
+    isNumber,
+    isObject,
+    isRegExp,
+    isString,
+} from '../../utils/test.js';
 import { stringReplaceVariables, statusToLabel, statusCodeToLocaleKey } from '../common/string.js';
 import { toCamelCase } from '../../utils/string.js';
 import { debounce } from '../../utils/debounce.js';
 import { dispatchCustomEvent } from '../../utils/dom.js';
 import { Status } from '../../common/status.js';
 import { HTMLElementSafe } from '../../common/ssr.js';
-import { arrayRemoveFalsy } from '../../utils/array.js';
+import { arrayRemoveFalsy, EMPTY_ARRAY } from '../../utils/array.js';
 import { createFilePondEntryTree } from './createFilePondEntryTree.js';
 import { FileInputSource } from '../../extensions/file-input-source.js';
 import { ValueCallbackStore } from '../../extensions/value-callback-store.js';
@@ -168,6 +176,9 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
     /** Locale object reference */
     #locale: undefined | Locale = undefined;
+
+    /** File patterns to ignore */
+    #ignoredEntryPatterns: RegExp[] | readonly never[] = EMPTY_ARRAY;
 
     /** Holds Names of extensions we've currently set up proxies for */
     #extensionProxies: string[] = [];
@@ -364,6 +375,12 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
     /** Returns the current value of accept */
     get accept(): string {
         return getAttribute(this, 'accept') as string;
+    }
+
+    /** Ignored files */
+    set ignoredEntryPatterns(value: RegExp[]) {
+        this.#ignoredEntryPatterns = isArray(value) ? value.filter(isRegExp) : EMPTY_ARRAY;
+        this.#extensionManager.propagateExtensionProperty('ignoredEntryPatterns', value);
     }
 
     /** Toggle browse button */
@@ -615,6 +632,9 @@ export class FilePondInputElement extends HTMLElementSafe implements FilePondInp
 
         // manages all the entries
         this.#entryTree = createFilePondEntryTree({
+            // files to ignore
+            getIgnoredEntryPatterns: () => this.#ignoredEntryPatterns,
+
             // handles one or multiple files state
             beforeInsertEntries: (
                 entriesToInsert: FilePondEntry[],

@@ -38,6 +38,7 @@ import { createFilePondSourceList } from '../../templates/source-list/index.js';
 
 // extensions
 import { createFilePondExtensionSet } from './createFilePondExtensionSet.js';
+import type { SourceListViewOptions } from '../../extensions/source-list-view.js';
 
 // This holds the initial options object passed to `defineFilePond`, we store this value so we can assign the initialOptions to FilePond components created _after_ the first `defineFilePond` call.
 let globalInitialOptions: DefineFilePondOptions | undefined;
@@ -64,6 +65,17 @@ function createExportPartsSyncer(element: HTMLElement, exportparts: Set<string> 
         element.setAttribute('exportparts', parts.replace(/ /g, ','));
     };
 }
+
+/** Ignore these files and directories */
+export const IGNORED_ENTRY_PATTERNS = [
+    // macOS hidden files
+    /^\.(DS_Store|Trashes|Spotlight)/,
+    /^__MACOSX/,
+    // Windows hidden files
+    /^(desktop\.ini|Thumbs\.db)$/,
+    // basic files and folders in project dirs
+    /^\.(git|env|idea|vscode)/,
+];
 
 /**
  * FilePondElement
@@ -328,6 +340,9 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
             // default animation state
             reducedMotionPreference: 'auto',
 
+            // ignored file entry patterns
+            ignoredEntryPatterns: IGNORED_ENTRY_PATTERNS,
+
             // show progress indicator for data transfers
             DataTransferLoader: {
                 perceivedPerformance: true,
@@ -339,7 +354,7 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
             },
 
             // set up source list view extension
-            SourceListView: {
+            SourceListView: <SourceListViewOptions>{
                 element: this.#components.sourceList,
 
                 // the nodes to render
@@ -356,7 +371,7 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
             },
 
             // set up entry list view extension
-            EntryListView: {
+            EntryListView: <EntryListViewOptions>{
                 // the element that the item list will be appended to
                 element: this.#components.entryList,
 
@@ -378,7 +393,7 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
                 // entry animation
                 entryAnimationProps: getDefaultEntryAnimationProps(),
                 entryAnimationOriginMap: getDefaultEntryAnimationOriginMap(),
-            } as EntryListViewOptions,
+            },
         });
 
         // optionally insert link to filepond.com
@@ -491,6 +506,9 @@ export interface DefineFilePondOptions {
 
     /** Initial Spring configuration */
     springOptions?: SpringOptions;
+
+    /** Files and Directories to ignore */
+    ignoredEntryPatterns?: RegExp[];
 
     /** Location of web workers */
     workersURL?: URL;

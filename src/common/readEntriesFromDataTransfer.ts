@@ -1,7 +1,7 @@
 import type { FilePondEntry, FilePondFileEntry } from '../types/index.js';
-import { arrayRemoveFalsy } from '../utils/array.js';
-
+import { arrayRemoveFalsy, EMPTY_ARRAY } from '../utils/array.js';
 import { noop } from '../utils/placeholder.js';
+import { stringMatchesAny } from '../utils/string.js';
 import { isFileSystemDirectoryEntry, isFileSystemFileEntry, isFunction } from '../utils/test.js';
 import { eachTree, mapTreeAsync } from '../utils/tree.js';
 import { idleCallbackPromise } from '../utils/window.js';
@@ -21,6 +21,7 @@ export function getDataTransferRoot(dataTransfer: DataTransfer): void | null | F
 export async function readEntriesFromDataTransfer(
     dataTransfer: DataTransfer,
     options: {
+        ignoredEntryPatterns?: RegExp[];
         onprogress: (progress: { loaded: number; total: number }) => void;
         signal?: AbortSignal;
     }
@@ -85,12 +86,13 @@ export async function readEntriesFromDataTransfer(
 async function entriesToArray(
     entries: (FileSystemEntry | null)[],
     options: {
+        ignoredEntryPatterns?: RegExp[];
         entryToFile?: (entry: FilePondFileEntry) => any;
         onprocessentry?: (entry: FileSystemEntry) => void;
         signal?: AbortSignal;
     }
 ): Promise<((() => Promise<File & { path?: string }>) | FilePondEntry)[]> {
-    const { signal } = options ?? {};
+    const { signal, ignoredEntryPatterns = EMPTY_ARRAY } = options ?? {};
 
     let entriesArray: ((() => Promise<File & { path?: string }>) | FilePondEntry)[] = [];
 
@@ -106,11 +108,17 @@ async function entriesToArray(
         }
 
         let item;
-        if (isFileSystemDirectoryEntry(entry)) {
+        if (
+            isFileSystemDirectoryEntry(entry) &&
+            !stringMatchesAny(entry.name, ignoredEntryPatterns)
+        ) {
             item = {
                 name: entry.name,
                 path: entry.fullPath,
-                entries: await entriesToArray(await readDirectory(entry), options),
+                entries: await entriesToArray(
+                    await readDirectory(entry, { ignoredEntryPatterns }),
+                    options
+                ),
             };
         } else if (isFileSystemFileEntry(entry)) {
             item = async () => {
@@ -150,7 +158,11 @@ export function getAsFile(item: DataTransferItem): File | null {
     return item.getAsFile();
 }
 
-export async function readDirectory(entry: FileSystemDirectoryEntry): Promise<FileSystemEntry[]> {
+export async function readDirectory(
+    entry: FileSystemDirectoryEntry,
+    options: { ignoredEntryPatterns: RegExp[] | readonly never[] }
+): Promise<FileSystemEntry[]> {
+    const { ignoredEntryPatterns = EMPTY_ARRAY } = options;
     const dirReader = entry.createReader();
     const entries = [];
 
@@ -164,6 +176,12 @@ export async function readDirectory(entry: FileSystemDirectoryEntry): Promise<Fi
         }
 
         for (const entry of results) {
+            // skip ignored files
+            if (stringMatchesAny(entry.name, ignoredEntryPatterns)) {
+                continue;
+            }
+
+            // let's add
             entries.push(entry);
         }
     }
@@ -190,7 +208,12 @@ export function shouldLoadWithIdleCallback(dataTransfer: DataTransfer) {
     return entries.some(isFileSystemDirectoryEntry) || entries.length > 10;
 }
 
-export async function dataTransferToFiles(dataTransfer: DataTransfer): Promise<(File | null)[]> {
+export async function dataTransferToFiles(
+    dataTransfer: DataTransfer,
+    options: { ignoredEntryPatterns: RegExp[] }
+): Promise<(File | null)[]> {
+    const { ignoredEntryPatterns = EMPTY_ARRAY } = options || {};
+
     // we need to know how many entries are in the DataTransfer, if it's just a couple files we don't show the loading indicator
     let entries = dataTransferItemsToEntries(dataTransfer.items);
 
@@ -203,6 +226,11 @@ export async function dataTransferToFiles(dataTransfer: DataTransfer): Promise<(
     const promises = [];
     for (const entry of entries) {
         if (isFileSystemFileEntry(entry)) {
+            // skip ignored files
+            if (stringMatchesAny(entry.name, ignoredEntryPatterns)) {
+                continue;
+            }
+
             promises.push(getFileFromEntry(entry));
         }
     }

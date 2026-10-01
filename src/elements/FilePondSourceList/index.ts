@@ -53,7 +53,7 @@ export interface FilePondSourceListSource {
 
 export interface FilePondSourceListOptions extends Omit<FilePondSvelteComponentOptions, 'root'> {
     /** Disable buttons */
-    disabled: boolean;
+    disabled?: boolean;
 
     /** Available sources */
     sources: FilePondSourceListSource[];

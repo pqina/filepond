@@ -12,6 +12,7 @@ import {
 } from '../common/readEntriesFromDataTransfer.js';
 import { flattenTree } from '../utils/tree.js';
 import { createPerceivedPerformanceProxy } from '../common/perceivedPerformanceProxy.js';
+import { EMPTY_ARRAY } from '../utils/array.js';
 
 export interface DataTransferLoaderOptions {
     /** Should we show the progress indicator for a minimum amount of time, configure with `PerceivedPerformanceOptions`. By default isn't set, when set to `true` the following settings are used:
@@ -33,6 +34,9 @@ export interface DataTransferLoaderOptions {
     /** Action to run to trigger the abort operation, defaults to `'abort'` */
     actionAbort?: string;
 
+    /** Entry patterns to ignore when loading a DataTranfer */
+    ignoredEntryPatterns?: RegExp[] | readonly never[];
+
     /**
      * How we deal with directory structures, defaults to `'flatten'`. Currently doesn't support other values.
      */
@@ -46,6 +50,7 @@ export const DataTransferLoader = createExtension({
         actionLoad: 'load',
         actionAbort: 'abort',
         mode: 'flatten',
+        ignoredEntryPatterns: EMPTY_ARRAY,
     } as DataTransferLoaderOptions,
     factory: (state, pond) => {
         const { props, didSetProps } = state;
@@ -88,7 +93,7 @@ export const DataTransferLoader = createExtension({
             entry: FilePondFileEntry,
             { signal }: { signal: AbortSignal }
         ) {
-            const { mode } = props;
+            const { mode, ignoredEntryPatterns } = props;
 
             // now busy loading
             entry = setEntryExtensionStatus(entry, {
@@ -97,7 +102,7 @@ export const DataTransferLoader = createExtension({
                 progress: Infinity,
             });
 
-            // this code has to run sync after the DropEvent as otherwise the DataTransfer items list is empty
+            // IMPORTANT: this code has to run sync after the DropEvent as otherwise the DataTransfer items list is empty
 
             let entries;
             try {
@@ -105,12 +110,26 @@ export const DataTransferLoader = createExtension({
                     const shouldUsePerceivedPerformance =
                         perceivedPerformanceConfig && !document.hidden;
 
+                    // adds the ignored entry patterns option to the data transfer reader as it's not set by the perceived perf proxy
+                    const readEntriesWithOptions = function (
+                        dataTransfer: DataTransfer,
+                        options: {
+                            onprogress: (progress: { loaded: number; total: number }) => void;
+                            signal?: AbortSignal;
+                        }
+                    ) {
+                        return readEntriesFromDataTransfer(dataTransfer, {
+                            ...options,
+                            ignoredEntryPatterns,
+                        });
+                    };
+
                     // determine if we should use perceived performance
                     const readEntries = shouldUsePerceivedPerformance
-                        ? createPerceivedPerformanceProxy(readEntriesFromDataTransfer, {
+                        ? createPerceivedPerformanceProxy(readEntriesWithOptions, {
                               ...perceivedPerformanceConfig,
                           })
-                        : readEntriesFromDataTransfer;
+                        : readEntriesWithOptions;
 
                     // @ts-ignore
                     const rawEntries = await readEntries(entry.src, {
@@ -141,13 +160,15 @@ export const DataTransferLoader = createExtension({
                             });
                     }
                 } else {
-                    entries = (await dataTransferToFiles(entry.src as DataTransfer)).map(
-                        (file) => ({
-                            src: file,
-                            origin: entry.origin,
-                            containerId: entry.id,
+                    entries = (
+                        await dataTransferToFiles(entry.src as DataTransfer, {
+                            ignoredEntryPatterns,
                         })
-                    );
+                    ).map((file) => ({
+                        src: file,
+                        origin: entry.origin,
+                        containerId: entry.id,
+                    }));
                 }
             } catch (error) {
                 if (didAbort(signal, error)) {
