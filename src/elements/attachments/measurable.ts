@@ -73,20 +73,25 @@ let intersectionObserver: {
     unobserve: (target: Element) => void;
 } | null = null;
 function createIntersectionObserver() {
-    const intersectionObserverOptions = {
+    const intersectionObserverOptions: IntersectionObserverInit = {
         // viewport
         root: null,
         // we're interested in elements near the viewport
         // rootMargin: `0px 0px 0px 0px`,
         rootMargin: `${VIEWPORT_MARGIN}px 0px 0px ${VIEWPORT_MARGIN}px`,
         // if one pixel is visible we detect it
-        threshold: 1,
+        threshold: 0,
     };
     const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry) => {
             const r = entry.boundingClientRect;
 
             const node = entry.target;
+
+            // node was removed
+            if (!nodeCallbacks.has(node)) {
+                return;
+            }
 
             // we're probably moving this node (for example when dropping an item and the placeholder moves around) and it just temporarily has no dimensions (it'll regain those before the frame is done, not 100% sure how that works), so let's ignore this update. This prevents items from flickering in and out of view
             if (
@@ -234,13 +239,13 @@ function tick() {
 
 // Start measuring on next frame, we set up a single measure loop, the loop will check if there's still elements that need to be measured, else it will stop running
 function start() {
-    // Can't start
-    if (!windowVisibilityObserver?.visible || !intersectionObserver?.visible) {
+    // Already started
+    if (frame !== null) {
         return;
     }
 
-    // Already started
-    if (frame !== null) {
+    // Can't start
+    if (!windowVisibilityObserver?.visible || !intersectionObserver?.visible) {
         return;
     }
 
