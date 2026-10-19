@@ -287,6 +287,9 @@
             return;
         }
 
+        // refocus after keyboard sort moves (and blurs) this element
+        index;
+
         element.focus({
             preventScroll: true,
 
