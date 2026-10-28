@@ -74,7 +74,7 @@ test('keeps the moved item focused when sorting with the keyboard', async () => 
     await userEvent.keyboard('{ArrowDown}');
 
     await expect.poll(() => pond.currentEntries[1]?.name).toBe('First.txt');
-    await expect.element(movedItem).toHaveFocus();
+    await expect.poll(() => movedItem.element().matches(':focus')).toBe(true);
 });
 
 test('deletes entry when clicking remove button', async () => {
