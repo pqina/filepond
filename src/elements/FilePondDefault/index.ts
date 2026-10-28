@@ -181,7 +181,8 @@ export class FilePondElement extends FilePondInputElement implements FilePondEle
         if (this.#noDrop) {
             this.#components.dropIndicator.remove();
         } else {
-            this._root.prepend(this.#components.dropIndicator);
+            this.#components.frame.after(this.#components.dropIndicator);
+            // this._root.prepend();
         }
 
         // update entry list state
