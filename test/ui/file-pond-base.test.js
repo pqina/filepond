@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, expect, test } from 'vitest';
-import { page } from 'vitest/browser';
+import { page, userEvent } from 'vitest/browser';
 import { defineFilePond } from '../../src/index';
 import { generateFile } from '../../src/dev';
 
@@ -42,6 +42,39 @@ test('renders entry', async () => {
     ];
 
     await expect.element(page.getByRole('listitem')).toBeVisible();
+});
+
+test('moves an item when sorting with the keyboard', async () => {
+    pond.entries = [
+        { src: await generateFile({ name: 'First.txt' }) },
+        { src: await generateFile({ name: 'Second.txt' }) },
+    ];
+
+    const firstItem = page.getByRole('listitem').filter({ hasText: 'First.txt' });
+    await expect.element(firstItem).toBeVisible();
+    firstItem.element().focus();
+    await userEvent.keyboard('{Space}');
+    await userEvent.keyboard('{ArrowDown}');
+
+    await expect
+        .poll(() => pond.currentEntries.map((entry) => entry.name))
+        .toEqual(['Second.txt', 'First.txt']);
+});
+
+test('keeps the moved item focused when sorting with the keyboard', async () => {
+    pond.entries = [
+        { src: await generateFile({ name: 'First.txt' }) },
+        { src: await generateFile({ name: 'Second.txt' }) },
+    ];
+
+    const movedItem = page.getByRole('listitem').filter({ hasText: 'First.txt' });
+    await expect.element(movedItem).toBeVisible();
+    movedItem.element().focus();
+    await userEvent.keyboard('{Space}');
+    await userEvent.keyboard('{ArrowDown}');
+
+    await expect.poll(() => pond.currentEntries[1]?.name).toBe('First.txt');
+    await expect.element(movedItem).toHaveFocus();
 });
 
 test('deletes entry when clicking remove button', async () => {

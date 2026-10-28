@@ -13,7 +13,7 @@
     import type { FilePondEntryListOptions } from '../FilePondEntryList/types.js';
     import type { Bounds } from '../../utils/bounds.js';
 
-    import { onDestroy, untrack } from 'svelte';
+    import { onDestroy, tick, untrack } from 'svelte';
     import { dragArea } from '../attachments/drag-area.js';
     import { dropArea } from '../attachments/drop-area.js';
     import { arrayInsertAtIndex, arrayMove } from '../../utils/array.js';
@@ -632,6 +632,15 @@
                         position: targetIndex + 1,
                         total: children.length,
                     };
+                });
+
+                tick().then(() => {
+                    if (!element.isConnected) {
+                        return;
+                    }
+
+                    // restore focus after moving the element in the DOm
+                    element.focus({ preventScroll: true });
                 });
             } else {
                 index = currentIndex;
