@@ -1,5 +1,5 @@
 /*!
- * FilePond 4.32.12
+ * FilePond 4.32.13
  * Licensed under MIT, https://opensource.org/licenses/MIT/
  * Please visit https://pqina.nl/filepond/ for details.
  */
@@ -7932,6 +7932,8 @@ const itemProcessed = ({ root, action }) => {
     // will also notify the user when FilePond is not being used, as the user might be occupied with other activities while uploading a file
 
     const item = root.query('GET_ITEM', action.id);
+    if (!item) return;
+
     const filename = item.filename;
     const label = root.query('GET_LABEL_FILE_PROCESSING_COMPLETE');
 
@@ -7940,6 +7942,8 @@ const itemProcessed = ({ root, action }) => {
 
 const itemProcessedUndo = ({ root, action }) => {
     const item = root.query('GET_ITEM', action.id);
+    if (!item) return;
+
     const filename = item.filename;
     const label = root.query('GET_LABEL_FILE_PROCESSING_ABORTED');
 
@@ -7948,6 +7952,8 @@ const itemProcessedUndo = ({ root, action }) => {
 
 const itemError = ({ root, action }) => {
     const item = root.query('GET_ITEM', action.id);
+    if (!item) return;
+
     const filename = item.filename;
 
     // will also notify the user when FilePond is not being used, as the user might be occupied with other activities while uploading a file
