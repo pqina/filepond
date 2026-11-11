@@ -10,7 +10,7 @@ export default {
     labelFileProcessingAborted: 'Opplasting avbrutt',
     labelFileProcessingError: 'Feil under opplasting',
     labelFileProcessingRevertError: 'Feil under reversering',
-    labelFileRemoveError: 'Feil under flytting',
+    labelFileRemoveError: 'Feil under fjerning',
     labelTapToCancel: 'klikk for å avbryte',
     labelTapToRetry: 'klikk for å prøve på nytt',
     labelTapToUndo: 'klikk for å angre',
