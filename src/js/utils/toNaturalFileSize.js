@@ -36,6 +36,6 @@ const removeDecimalsWhenZero = (value, decimalCount, separator) => {
     return value
         .toFixed(decimalCount)
         .split('.')
-        .filter(part => part !== '0')
+        .filter(part => !/^0+$/.test(part))
         .join(separator);
 };
