@@ -39,6 +39,18 @@ describe('parse filename', () => {
             value: `Content-Disposition: attachment; filename="file name.jpg"; filename*=UTF-8''file%20name.jpg`,
             expected: 'file name.jpg',
         },
+        {
+            value: `Content-Disposition: attachment; filename="100%.jpg"`,
+            expected: '100%.jpg',
+        },
+        {
+            value: `Content-Disposition: attachment; filename="100%.jpg"; filename*=UTF-8''100%.jpg`,
+            expected: '100%.jpg',
+        },
+        {
+            value: `Content-Disposition: attachment; filename="100%25.jpg"`,
+            expected: '100%.jpg',
+        },
     ].forEach(header => {
         test(`Can parse: "${header.value}"`, () => {
             const name = getFileNameFromHeader(header.value);
