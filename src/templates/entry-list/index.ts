@@ -255,6 +255,8 @@ export function createFileLoadInfo() {
             ]);
 
             return {
+                // this is so entry is accessible in file info (for file rename purposes)
+                entry,
                 name: entry.name,
                 size: entry.size,
                 isWaiting,
@@ -587,7 +589,7 @@ export function createFileRenameInput(options?: FileRenameInputOptions): Templat
     return {
         if: {
             test: ({ entry }: NodeData) => {
-                return isString(entry.name) && hasExtensionWithAction(entry, extensionAction);
+                return isString(entry?.name) && hasExtensionWithAction(entry, extensionAction);
             },
             then: {
                 key,

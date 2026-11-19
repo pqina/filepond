@@ -1,5 +1,5 @@
 import { Button } from '../../elements/components/Button/index.js';
-import { supportsDisplayTransition } from '../../utils/support.js';
+import { supportsDialogCloseTransition, supportsDisplayTransition } from '../../utils/support.js';
 import { getAsButtonProps } from '../common/index.js';
 import type { NodeContext } from '../../types/index.js';
 
@@ -47,7 +47,7 @@ export function createFilePondSourceList() {
                                         return;
                                     }
 
-                                    if (supportsDisplayTransition()) {
+                                    if (supportsDialogCloseTransition()) {
                                         if (!dialog.open && e.propertyName === 'display') {
                                             // dialog now fully faded out
                                             onclosed?.(context);
@@ -74,7 +74,7 @@ export function createFilePondSourceList() {
                                         // dialog now fading out
                                         onclose?.(context);
 
-                                        if (!supportsDisplayTransition()) {
+                                        if (!supportsDialogCloseTransition()) {
                                             onclosed?.(context);
                                         }
                                     }

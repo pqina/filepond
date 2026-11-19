@@ -128,6 +128,11 @@ camera-input {
         &:hover {
             --ring-color: #fff;
         }
+
+        &:focus-visible {
+            outline: none;
+            --ring-color: var(--default-accent-color);
+        }
     }
 
     & button.reset {

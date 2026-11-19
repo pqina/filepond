@@ -12,7 +12,7 @@ import type {
 import { arrayRemoveFalsy } from '../../utils/array.js';
 import { addListener, setAttributes } from '../../utils/dom.js';
 import { pubsub } from '../../utils/pubsub.js';
-import { isFunction } from '../../utils/test.js';
+import { isFunction, isObject } from '../../utils/test.js';
 import { createExtension, type Extension } from './createExtension.js';
 
 interface SourceExtensionEvents {
@@ -229,7 +229,10 @@ export function createSourceExtension<Props extends object = SourceExtensionOpti
                             if (!updatedValue) {
                                 return;
                             } else {
-                                return { src: updatedValue };
+                                // is an entry sourc
+                                return isObject(updatedValue) && 'src' in updatedValue
+                                    ? updatedValue
+                                    : { src: updatedValue };
                             }
                         }
                         return { src: value };

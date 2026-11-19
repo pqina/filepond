@@ -1,4 +1,4 @@
-import { createTest } from './test.js';
+import { createTest, isSafari } from './test.js';
 
 /** Tests if canvas 2d context roundRect method is supported */
 export const supportsCanvasRoundRect = createTest(() => {
@@ -43,4 +43,9 @@ export const supportsDisplayTransition = createTest(() => {
     const res = cs.display !== 'none';
     div.remove();
     return res;
+});
+
+/** This is a temporary fix around the issue where Safari <=27.2 can't transition the <dialog> close state */
+export const supportsDialogCloseTransition = createTest(() => {
+    return supportsDisplayTransition() && !isSafari();
 });

@@ -1,6 +1,7 @@
 <script lang="ts">
     import type { FilePondSourceListOptions } from './index.js';
     import type { Bounds } from '../../utils/bounds.js';
+    import type { NodeData, TemplateNode } from '../common/nodeTree.js';
     import { Spring } from 'svelte/motion';
     import { NodeList } from '../components/NodeList/index.js';
     import { withResources } from '../common/string.js';
@@ -9,12 +10,11 @@
     import { measurable } from '../attachments/measurable.js';
     import { rectContainsPoint, rectFromBounds, type Rect } from '../../utils/rect.js';
     import { vectorCreate } from '../../utils/vector.js';
-    import { supportsDisplayTransition } from '../../utils/support.js';
+    import { supportsDialogCloseTransition } from '../../utils/support.js';
     import { noop, passthrough } from '../../utils/placeholder.js';
     import { SpringElement } from '../components/SpringElement/index.js';
     import { addListener, dispatchCustomEvent } from '../../utils/dom.js';
     import { onDestroy } from 'svelte';
-    import type { NodeData, TemplateNode } from '../common/nodeTree.js';
     import { createMotionStateObserver, shouldReduceMotion } from '../common/motionState.svelte.js';
 
     let {
@@ -91,7 +91,7 @@
     }
 
     function handleHideDialog(e: Event) {
-        if (!supportsDisplayTransition()) {
+        if (!supportsDialogCloseTransition()) {
             resetRects();
         }
     }
@@ -263,14 +263,27 @@
 
     const preventSpringMotion = $derived(reduceMotion || !dialogVisible);
 
-    const dialogContentObserver = new MutationObserver((entries) => {
-        for (const entry of entries) {
-            const [addedNode] = entry.addedNodes;
-            if (!addedNode || addedNode.nodeType !== Node.ELEMENT_NODE) {
-                continue;
+    const dialogContentObserver = new MutationObserver((records) => {
+        let shouldPrepareDialogContent = false;
+
+        for (const record of records) {
+            for (const addedNode of record.addedNodes) {
+                if (addedNode.nodeType !== Node.ELEMENT_NODE) {
+                    continue;
+                }
+
+                shouldPrepareDialogContent = true;
+                if (shouldPrepareDialogContent) {
+                    break;
+                }
             }
-            prepareDialogContent();
         }
+
+        if (!shouldPrepareDialogContent) {
+            return;
+        }
+
+        prepareDialogContent();
     });
 
     $effect(() => {
@@ -298,7 +311,7 @@
             part="dialog"
             bind:this={dialogRef}
             closedby="closerequest"
-            ontransitionend={supportsDisplayTransition() ? handleDialogTransitionEnd : noop}
+            ontransitionend={supportsDialogCloseTransition() ? handleDialogTransitionEnd : noop}
             onclick={handleDialogTap}
             ontoggle={handleDialogToggle}
             style:--dialog-content-clip-path={dialogContentClipPathStyle}
