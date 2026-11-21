@@ -827,8 +827,12 @@ export const actions = (dispatch, query, state) => ({
             }
 
             // All items processed? No errors?
+            // local files are already on the server and stay idle, so they count as processed
             const allItemsProcessed =
-                query('GET_ITEMS_BY_STATUS', ItemStatus.PROCESSING_COMPLETE).length ===
+                query('GET_ITEMS_BY_STATUS', ItemStatus.PROCESSING_COMPLETE).length +
+                    query('GET_ITEMS_BY_STATUS', ItemStatus.IDLE).filter(
+                        item => item.origin === FileOrigin.LOCAL
+                    ).length ===
                 state.items.length;
             if (allItemsProcessed) {
                 dispatch('DID_COMPLETE_ITEM_PROCESSING_ALL');

@@ -1,7 +1,7 @@
 import mockConsole from "jest-mock-console";
 
 import './windowMatchMedia.mock';
-import { create, OptionTypes, FileStatus } from '../index.js';
+import { create, OptionTypes, FileStatus, FileOrigin } from '../index.js';
 
 describe('adding files', () => {
     const data = 'data:text/plain;base64,SGVsbG8sIFdvcmxkIQ==';
@@ -143,5 +143,31 @@ describe('adding files', () => {
             done();
         };
         pond.files = [data, data];
+    });
+
+    test('onprocessfiles with a local file already in the list', done => {
+        createPond({
+            allowMultiple: true,
+            server: {
+                load: (source, load) => {
+                    load(new Blob(['Hello, World!'], { type: 'text/plain' }));
+                },
+                process: (fieldName, file, metadata, load) => {
+                    setTimeout(() => load(Date.now()), 50);
+                },
+            },
+        });
+        pond.onprocessfiles = () => {
+            const items = pond.getFiles();
+            expect(items.length).toBe(2);
+            const local = items.find(item => item.origin === FileOrigin.LOCAL);
+            const input = items.find(item => item.origin === FileOrigin.INPUT);
+            expect(local.status).toBe(FileStatus.IDLE);
+            expect(input.status).toBe(FileStatus.PROCESSING_COMPLETE);
+            done();
+        };
+        pond
+            .addFile('existing-file-id', { type: 'local' })
+            .then(() => pond.addFile(data));
     });
 });
