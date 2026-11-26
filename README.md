@@ -7,23 +7,15 @@
 
 A JavaScript library that can upload anything you throw at it, optimizes images for faster uploads, and offers a great, accessible, silky smooth user experience.
 
-**This is the v5 beta branch. [Take me to the v4 branch](https://github.com/pqina/filepond)**
-
-TODO:
-
-- [Finish docs](https://v5.filepond.com/)
-
-If you're trying out v5, please share your feedback on [Discord](https://discord.gg/KTyymsrTrX)
-
 ## Install
 
 We can install the `filepond` package by running the following command in our terminal:
 
 ```
-npm install filepond@beta
+npm install filepond
 ```
 
-We wrap an `<input type="file">` with the `<file-pond>` custom element and then register the custom element using the `defineFilePond` function. [Getting started](https://v5.filepond.com/docs/start-here/getting-started)
+We wrap an `<input type="file">` with the `<file-pond>` custom element and then register the custom element using the `defineFilePond` function. [Getting started](https://filepond.com/docs/start-here/getting-started)
 
 ```html
 <form action="/upload" method="POST">
@@ -45,7 +37,7 @@ We wrap an `<input type="file">` with the `<file-pond>` custom element and then 
 </script>
 ```
 
-When integrating with a framework like React, Svelte, or Vue, we can use the `<file-pond>` custom element as if it were a Component. [Framework integration](https://v5.filepond.com/docs/start-here/framework-integration)
+When integrating with a framework like React, Svelte, Vue, or Angular we can use the `<file-pond>` custom element as if it were a Component. [Framework integration](https://filepond.com/docs/start-here/framework-integration)
 
 ```tsx
 import { useState } from 'react';
