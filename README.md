@@ -41,7 +41,11 @@ Wrap an `<input type="file">` with the `<file-pond>` custom element and then reg
 </script>
 ```
 
-When integrating with a framework like React, Svelte, Vue, or Angular we can use the `<file-pond>` custom element as if it were a Component. [Framework integration](https://filepond.com/docs/start-here/framework-integration)
+## Integrating FilePond With a Framework
+
+When integrating with a framework like React, Svelte, Vue, or Angular we can use the `<file-pond>` custom element as if it were a Component.
+
+[Framework integration](https://filepond.com/docs/start-here/framework-integration)
 
 ```tsx
 import { useState } from 'react';
