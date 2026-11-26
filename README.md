@@ -2,6 +2,8 @@
 
 A JavaScript library that can upload anything you throw at it, optimizes images for faster uploads, and offers a great, accessible, silky smooth user experience.
 
+**[Switch to FilePond v5 branch](https://github.com/pqina/filepond/tree/v5)**
+
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/pqina/filepond/blob/master/LICENSE)
 [![npm version](https://badge.fury.io/js/filepond.svg)](https://www.npmjs.com/package/filepond)
 ![npm](https://img.shields.io/npm/dt/filepond)
@@ -9,8 +11,6 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 [![Discord](https://img.shields.io/discord/1422126182924554291?label=discord)](https://discord.gg/KTyymsrTrX)
 
 FilePond adapters are available for **[React](https://github.com/pqina/react-filepond)**, **[Vue](https://github.com/pqina/vue-filepond)**, **[Angular](https://github.com/pqina/ngx-filepond)**, **[Svelte](https://github.com/pqina/svelte-filepond)**, and **[jQuery](https://github.com/pqina/jquery-filepond)**
-
-[FilePond v5 Alpha version now available for testing](https://github.com/pqina/filepond/tree/v5)
 
 [Documentation](https://pqina.nl/filepond/docs) • [Discord](https://discord.gg/KTyymsrTrX) • [Examples](#live-demos)
 
