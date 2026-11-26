@@ -29,8 +29,20 @@ describe('getFilenameFromResponseHeaders', function () {
             expectedFilename: 'file name.jpg',
         },
         {
+            headerValue: `attachment; filename=file%20name.jpg`,
+            expectedFilename: 'file name.jpg',
+        },
+        {
+            headerValue: `attachment; filename=file%name.jpg`,
+            expectedFilename: 'file%name.jpg',
+        },
+        {
             headerValue: `attachment; filename*=UTF-8''file%20name.jpg`,
             expectedFilename: 'file name.jpg',
+        },
+        {
+            headerValue: `attachment; filename*=UTF-8''file%name.jpg`,
+            expectedFilename: 'file%name.jpg',
         },
         {
             headerValue: `attachment; filename=filename.jpg; filename*=UTF-8''filename.jpg`,
@@ -39,6 +51,10 @@ describe('getFilenameFromResponseHeaders', function () {
         {
             headerValue: `attachment; filename="filename.jpg"; filename*=UTF-8''filename.jpg`,
             expectedFilename: 'filename.jpg',
+        },
+        {
+            headerValue: `attachment; filename="file%name.jpg"; filename*=UTF-8''file%name.jpg`,
+            expectedFilename: 'file%name.jpg',
         },
         {
             headerValue: `attachment; filename="file name.jpg"; filename*=UTF-8''file%20name.jpg`,

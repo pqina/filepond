@@ -156,6 +156,14 @@ export function getFilenameFromResponseHeaders(headers: { [key: string]: string 
     return getFilenameFromContentDispositionHeader(contentDisposition);
 }
 
+function getFilenameFromURI(uri: string) {
+    try {
+        return decodeURI(uri);
+    } catch (err) {
+        return uri;
+    }
+}
+
 export function getFilenameFromContentDispositionHeader(header: string): string | null {
     if (!header.toLowerCase().startsWith('attachment')) {
         return null;
@@ -167,7 +175,7 @@ export function getFilenameFromContentDispositionHeader(header: string): string 
         .map((name) => name.trim().replace(/^["']|[;"']{0,2}$/g, ''))
         .filter((name) => name.length);
 
-    return matches.length ? decodeURI(matches[matches.length - 1]) : null;
+    return matches.length ? getFilenameFromURI(matches[matches.length - 1]) : null;
 }
 
 export function getResponseHeaderValue(name: string, headers: string): undefined | string {
