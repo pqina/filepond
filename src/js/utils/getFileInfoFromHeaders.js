@@ -1,3 +1,12 @@
+// filenames can contain a literal % that is not part of an escape sequence
+const decodeFilename = name => {
+    try {
+        return decodeURI(name);
+    } catch (e) {
+        return name;
+    }
+};
+
 export const getFileNameFromHeader = header => {
 
     // test if is content disposition header, if not exit
@@ -9,7 +18,7 @@ export const getFileNameFromHeader = header => {
         .map(name => name.trim().replace(/^["']|[;"']{0,2}$/g, ''))
         .filter(name => name.length)
     
-    return matches.length ? decodeURI(matches[matches.length-1]) : null;
+    return matches.length ? decodeFilename(matches[matches.length-1]) : null;
 }
 
 const getFileSizeFromHeader = header => {
