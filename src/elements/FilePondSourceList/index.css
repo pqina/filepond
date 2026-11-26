@@ -1,28 +1,32 @@
+/*
+
+// source and dialog button styles
+--btn-color: var(--default-color);
+--btn-background-color: color-mix(in srgb, CanvasText 10%, Canvas 100%);
+--btn-border-radius: calc(var(--default-border-radius, 0) * 0.25);
+--btn-border-width: 0;
+
+//dialog styles
+--dialog-timing: var(--_250ms);
+--dialog-content-timing: var(--_250ms);
+--dialog-content-delay: var(--_100ms);
+--dialog-padding: var(--default-padding, 0);
+--dialog-color: var(--default-color);
+--dialog-background-color: Canvas;
+--dialog-border-radius: var(--default-border-radius);
+--dialog-shadow: 0 3px 6px rgb(0 0 0 / 0.25);
+--dialog-scrollbar-color: rgb(from var(--default-color) r g b / 0.15) transparent;
+
+// dialog content styles
+--input-border: 1px solid rgb(from var(--default-color) r g b / 0.5);
+--input-border-radius: calc(var(--default-border-radius, 0) * 0.25);
+--input-color: var(--default-color);
+--input-background-color: Canvas;
+
+*/
+
 :host {
     isolation: isolate;
-
-    /* source and dialog button styles */
-    --btn-color: var(--default-color);
-    --btn-background-color: color-mix(in srgb, CanvasText 10%, Canvas 100%);
-    --btn-border-radius: calc(var(--default-border-radius, 0) * 0.25);
-    --btn-border-width: 0;
-
-    /* dialog styles */
-    --dialog-timing: var(--_250ms);
-    --dialog-content-timing: var(--_250ms);
-    --dialog-content-delay: var(--_100ms);
-    --dialog-padding: var(--default-padding, 0);
-    --dialog-color: var(--default-color);
-    --dialog-background-color: Canvas;
-    --dialog-border-radius: var(--default-border-radius);
-    --dialog-shadow: 0 3px 6px rgb(0 0 0 / 0.25);
-    --dialog-scrollbar-color: rgb(from var(--default-color) r g b / 0.15) transparent;
-
-    /* dialog content styles */
-    --input-border: 1px solid rgb(from var(--default-color) r g b / 0.5);
-    --input-border-radius: calc(var(--default-border-radius, 0) * 0.25);
-    --input-color: var(--default-color);
-    --input-background-color: Canvas;
 }
 
 /* sources list */
@@ -53,8 +57,8 @@ dialog {
     /* these two styles fix safari repositioning on fade out */
     position: fixed;
     inset: 0;
-    padding: var(--dialog-padding);
-    color: var(--dialog-color);
+    padding: var(--dialog-padding, 1rem);
+    color: var(--dialog-color, CanvasText);
     background: transparent;
 
     /* horizontally center */
@@ -79,7 +83,7 @@ dialog {
 
     & element-pane {
         --border-radius: var(--dialog-border-radius);
-        --background-color: var(--dialog-background-color);
+        --background-color: var(--dialog-background-color, Canvas);
         --box-shadow: var(--dialog-shadow);
     }
 
@@ -230,7 +234,6 @@ dialog {
         & [part='dialog-header'],
         & [part='dialog-footer'] {
             opacity: 1;
-            /*transform: translateY(0);*/
         }
 
         & [part='dialog-content'] {
@@ -266,10 +269,10 @@ div[part='dialog-footer'] {
         max-width: 100%;
         padding: 0.125em 0;
         text-indent: 0.25em;
-        color: var(--input-color);
-        background-color: var(--input-background-color);
+        color: var(--input-color, CanvasText);
+        background-color: var(--input-background-color, Canvas);
         font-size: var(--font-size-l);
-        border: var(--input-border);
+        border: var(--input-border, 1px solid CanvasText);
         border-radius: var(--input-border-radius);
 
         &:focus-visible {

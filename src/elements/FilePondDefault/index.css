@@ -356,6 +356,29 @@ file-pond-source-list {
     display: block;
     margin: -0.75em 0 0.25em;
 
+    /* source and dialog button styles */
+    --btn-color: var(--default-color);
+    --btn-background-color: color-mix(in srgb, CanvasText 10%, Canvas 100%);
+    --btn-border-radius: calc(var(--default-border-radius, 0) * 0.25);
+    --btn-border-width: 0;
+
+    /* dialog styles */
+    --dialog-timing: var(--_250ms);
+    --dialog-content-timing: var(--_250ms);
+    --dialog-content-delay: var(--_100ms);
+    --dialog-padding: var(--default-padding, 0);
+    --dialog-color: var(--default-color);
+    --dialog-background-color: Canvas;
+    --dialog-border-radius: var(--default-border-radius);
+    --dialog-shadow: 0 3px 6px rgb(0 0 0 / 0.25);
+    --dialog-scrollbar-color: rgb(from var(--default-color) r g b / 0.15) transparent;
+
+    /* dialog content styles */
+    --input-border: 1px solid rgb(from var(--default-color) r g b / 0.5);
+    --input-border-radius: calc(var(--default-border-radius, 0) * 0.25);
+    --input-color: var(--default-color);
+    --input-background-color: Canvas;
+
     &::part(source-button):focus-visible {
         border-radius: var(--entry-border-radius);
         outline: var(--outline);

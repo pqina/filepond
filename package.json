@@ -1,7 +1,4 @@
 {
-    "publishConfig": {
-        "tag": "beta"
-    },
     "name": "filepond",
     "version": "5.0.0-beta.78",
     "description": "FilePond, where files go to stretch their bits.",
@@ -18,7 +15,7 @@
         "types": "rm -rf ./types && tsc -p ./tsconfig.build.json && cp src/types/*.d.ts types && echo 'import \"./custom-element.js\";\nimport \"./default-extensions.js\";' >> types/index.d.ts && cp -rf ./integrations ./types/integrations && echo \"export {};\" > ./esm/noop.js",
         "cdn": "rm -rf ./cdn && rollup -c rollup.config.js",
         "dev-cdn": "npx ws --stack lws-redirect lws-static --redirect 'http://localhost:8000/cdn-redirect/ -> http://localhost:8000/cdn/'",
-        "prepublishOnly": "npm run build && node prepublish.js"
+        "prepublishOnly": "npm run build"
     },
     "files": [
         "./esm",
