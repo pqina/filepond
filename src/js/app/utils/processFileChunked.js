@@ -163,6 +163,39 @@ export const processFileChunked = (
         chunk.status = ChunkStatus.PROCESSING;
         chunk.progress = null;
 
+        // Read the chunk into memory before sending it. Safari can stall when an XHR body
+        // is a slice of a file-backed Blob (a picked File): the chunk is sent and the server
+        // responds, but the response never finishes loading, so the upload freezes after
+        // the first chunk. A memory-backed Blob does not have this problem.
+        readChunkData(chunk.data).then(
+            data => {
+                // aborted while reading, report it the same way an aborted request would
+                if (state.aborted) {
+                    chunk.status = ChunkStatus.QUEUED;
+                    abort();
+                    return;
+                }
+                sendChunk(chunk, data);
+            },
+            err => {
+                chunk.status = ChunkStatus.ERROR;
+                chunk.error = (err && err.message) || 'Unable to read file';
+                if (!retryProcessChunk(chunk)) {
+                    error(createResponse('error', 0, chunk.error, ''));
+                }
+            }
+        );
+    };
+
+    const readChunkData = data =>
+        new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(new Blob([reader.result], { type: data.type }));
+            reader.onerror = () => reject(reader.error);
+            reader.readAsArrayBuffer(data);
+        });
+
+    const sendChunk = (chunk, data) => {
         // allow parsing of formdata
         const ondata = chunkServer.ondata || (fd => fd);
         const onerror = chunkServer.onerror || (res => null);
@@ -182,7 +215,7 @@ export const processFileChunked = (
                       'Upload-Name': file.name,
                   };
 
-        const request = (chunk.request = sendRequest(ondata(chunk.data), requestUrl, {
+        const request = (chunk.request = sendRequest(ondata(data), requestUrl, {
             ...chunkServer,
             headers,
         }));
