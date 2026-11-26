@@ -7,7 +7,7 @@
 
 A JavaScript library that can upload anything you throw at it, optimizes images for faster uploads, and offers a great, accessible, silky smooth user experience.
 
-## Install
+## Installing FilePond
 
 We can install the `filepond` package by running the following command in our terminal:
 
@@ -15,7 +15,11 @@ We can install the `filepond` package by running the following command in our te
 npm install filepond
 ```
 
-We wrap an `<input type="file">` with the `<file-pond>` custom element and then register the custom element using the `defineFilePond` function. [Getting started](https://filepond.com/docs/start-here/getting-started)
+## Quick Start
+
+Wrap an `<input type="file">` with the `<file-pond>` custom element and then register the custom element using the `defineFilePond` function.
+
+[Getting started](https://filepond.com/docs/start-here/getting-started)
 
 ```html
 <form action="/upload" method="POST">
