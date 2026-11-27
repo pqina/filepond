@@ -20,7 +20,8 @@
     "files": [
         "./esm",
         "./cdn",
-        "./types"
+        "./types",
+        "./dist"
     ],
     "browser": "./cdn/index.js",
     "module": "./esm/index.js",

@@ -1,7 +1,7 @@
 # [<img src="https://github.com/pqina/filepond-github-assets/blob/master/logo.svg" height="44" alt="FilePond"/>](https://filepond.com)
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/pqina/filepond/blob/v/LICENSE)
-[![npm version](https://badge.fury.io/js/filepond.svg)](https://www.npmjs.com/package/filepond)
+[![npm version](https://badge.fury.io/js/filepond.svg?v5)](https://www.npmjs.com/package/filepond)
 ![npm](https://img.shields.io/npm/dt/filepond)
 [![Discord](https://img.shields.io/discord/1422126182924554291?label=discord)](https://discord.gg/KTyymsrTrX)
 
@@ -9,7 +9,7 @@ A JavaScript library that can upload anything you throw at it, optimizes images 
 
 ## Installing FilePond
 
-We can install the `filepond` package by running the following command in our terminal:
+Install the `filepond` package by running the following command in our terminal:
 
 ```
 npm install filepond

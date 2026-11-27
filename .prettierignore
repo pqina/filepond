@@ -1,3 +1,4 @@
 esm/**/*
 cdn/**/*
 types/**/*
+dist/*
