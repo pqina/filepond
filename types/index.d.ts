@@ -331,7 +331,7 @@ export interface FilePondServerConfigProps {
      * See: https://pqina.nl/filepond/docs/patterns/api/filepond-object/#setting-initial-files
      * @default []
      */
-    files?: Array<FilePondInitialFile | ActualFileObject | Blob | string>;
+    files?: Array<FilePondInitialFile | FilePondFile | ActualFileObject | Blob | string>;
 }
 
 export interface FilePondDragDropProps {
